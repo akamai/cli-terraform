@@ -65,21 +65,20 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 			default: 
                 		if key == "name" { name = keyVal }
 			}
-                	propertyBody += tab4 + key + " = "
                 	if varType.Kind() == reflect.String {
-                        	propertyBody += "\"" + keyVal + "\"\n"
+                        	propertyBody += tab4 + key + " = \"" + keyVal + "\"\n"
                 	} else {
-                        	propertyBody += keyVal + "\n"
+                        	propertyBody += tab4 + key + " = " + keyVal + "\n"
                 	}
         	}
-        	propString += "\"" + name + "\" {"
+        	propString += "\"" + name + "\" {\n"
         	propString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
         	propString += propertyBody
 		propString += dependsClauseP1 + resourceDomainName + "\""
 		// process dc dependencies (only one type in 1.4 schema)
 		for _, dcDep := range pImportList[name] {
 			propString += ",\n"
-			propString += datacenterResource + "." + dcImportList[dcDep]
+			propString += tab8 + "\"" + datacenterResource + "." + dcImportList[dcDep] + "\""
 		}
 		propString += "\n"
 		propString += tab4 + "]\n"
@@ -104,16 +103,16 @@ func processHttpHeaders(headers []*gtm.HttpHeader) string {
                         key := convertKey(varName)
                         keyVal := fmt.Sprint(varValue)
                         if varType.Kind() == reflect.String {
-                                headerString += tab12 + "\"" + key + "\" = \"" + keyVal + "\"\n"
+                                headerString += tab12 + key + " = \"" + keyVal + "\"\n"
                         } else {
-                                headerString += tab12 + "\"" + key + "\" = " + keyVal + "\n"
+                                headerString += tab12 + key + " = " + keyVal + "\n"
                         }
                 }
 		if ii < len(headers)-1 {
-			headerString += tab8 + "},\n" + tab8 + "{\n"
+			headerString += tab12 + "},\n" + tab12 + "{\n"
 		} else {
-			headerString += tab8 + "}\n"
-                        headerString += tab4 + "]"
+                        headerString += tab12 + "}\n"
+			headerString += tab8 + "]"
 		}
 	}		
 	return headerString
@@ -135,9 +134,9 @@ func processTrafficTargets(targets []*gtm.TrafficTarget) string {
 				keyVal = processStringList(target.Servers)
 			}
                         if varType.Kind() == reflect.String {
-                                targetString += tab8 + "\"" + key + "\" = \"" + keyVal + "\"\n"
+                                targetString += tab8 + key + " = \"" + keyVal + "\"\n"
                         } else {
-                                targetString += tab8 + "\"" + key + "\" = " + keyVal + "\n"
+                                targetString += tab8 + key + " = " + keyVal + "\n"
                         }
                 }
                 if ii < len(targets)-1 {
@@ -155,7 +154,7 @@ func processLivenessTests(tests []*gtm.LivenessTest) string {
 
         testsString := "[]\n"			// assume MT
         for ii, test := range tests {
-                testsString := "[{\n"			// at least one
+                testsString = "[{\n"			// at least one
                 testElems := reflect.ValueOf(test).Elem()
                 for i := 0; i < testElems.NumField(); i++ {
                         varName := testElems.Type().Field(i).Name
@@ -170,9 +169,9 @@ func processLivenessTests(tests []*gtm.LivenessTest) string {
                                 keyVal = processHttpHeaders(varValue.([]*gtm.HttpHeader))
                         }
                         if varType.Kind() == reflect.String {
-                                testsString += tab8 + "\"" + key + "\" = \"" + keyVal + "\""
+                                testsString += tab8 + key + "  = \"" + keyVal + "\"\n"
                         } else {
-                                testsString += tab8 + "\"" + key + "\" = " + keyVal
+                                testsString += tab8 + key + " = " + keyVal + "\n"
                         }
                 }
                 if ii < len(tests)-1 {
@@ -202,9 +201,9 @@ func processStaticRRSets(rrsets []*gtm.StaticRRSet) string {
                                 keyVal = processStringList(set.Rdata)
                         }       
                         if varType.Kind() == reflect.String {
-                                setString += tab8 + "\"" + key + "\" = \"" + keyVal + "\"\n"
+                                setString += tab8 + key + " = \"" + keyVal + "\"\n"
                         } else {
-                                setString += tab8 + "\"" + key + "\" = " + keyVal + "\n"
+                                setString += tab8 + key + " = " + keyVal + "\n"
                         }       
                 }
                 if ii < len(rrsets)-1 {

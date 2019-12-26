@@ -206,6 +206,7 @@ func cmdCreateDomain(c *cli.Context) error {
 		importList, err := retrieveImportList()
 		if err != nil {
 			akamai.StopSpinnerFail()
+			fmt.Println(err.Error())
                         return cli.NewExitError(color.RedString("Failed to read json domain definition"), 1)
 		}
 		// build tf file

@@ -64,14 +64,14 @@ func processResources(resources []*gtm.Resource, rImportList map[string][]int, d
                         	resourceBody += keyVal + "\n"
                 	}
         	}
-        	rString += "\"" + name + "\" {"
+        	rString += "\"" + name + "\" {\n"
         	rString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
         	rString += resourceBody
 		rString += dependsClauseP1 + resourceDomainName + "\""
                 // process dc dependencies (only one type in 1.4 schema)
                 for _, dcDep := range rImportList[name] {
                         rString += ",\n"
-                        rString += tab8 + datacenterResource + "." + dcIL[dcDep]
+                        rString += tab8 + "\"" + datacenterResource + "." + dcIL[dcDep] + "\""
                 }
 		rString += "\n"
 		rString += tab4 + "]\n"
@@ -95,19 +95,18 @@ func processResourceInstances(instances []*gtm.ResourceInstance) string {
                         varValue := instElems.Field(i).Interface()
                         key := convertKey(varName)
                         keyVal := fmt.Sprint(varValue)
-                        if varName == "LoadServers" {
-                                keyVal = processStringList(instance.LoadServers)
+                        if varName == "LoadObject" {
+                                keyVal = processLoadObject(&instance.LoadObject)
+				instanceString += keyVal + "\n"
+				continue
                         }
-			if varType.Kind() == reflect.Struct {
-				fmt.Println(varName + " is a STRUCT!")
-			}
                         if varType.Kind() == reflect.String {
-                                instanceString += tab8 + "\"" + key + "\" = \"" + keyVal + "\"\n"
+                                instanceString += tab8 + key + " = \"" + keyVal + "\"\n"
                         } else {
-                                instanceString += tab8 + "\"" + key + "\" = " + keyVal + "\n"
+                                instanceString += tab8 + key + " = " + keyVal + "\n"
                         }
                 }
-                if ii < len(instances) {
+                if ii < len(instances)-1 {
                         instanceString += tab8 + "},\n" + tab8 + "{\n"
                 } else {
                         instanceString += tab8 + "}\n"
@@ -117,4 +116,7 @@ func processResourceInstances(instances []*gtm.ResourceInstance) string {
         return instanceString
 
 }
+
+
+
 

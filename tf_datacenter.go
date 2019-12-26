@@ -79,7 +79,7 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
                         	datacenterBody += keyVal + "\n"
                 	}
         	}
-        	dcString += "\"" + name + "\" {"
+        	dcString += "\"" + name + "\" {\n"
         	dcString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
         	dcString += datacenterBody
 		dcString += dependsClauseP1 + resourceDomainName + "\"\n"

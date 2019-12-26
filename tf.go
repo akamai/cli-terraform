@@ -18,6 +18,7 @@ import (
 	"strings"
 	"unicode"
 	"reflect"
+	"strconv"
 	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
 	"fmt"
 
@@ -50,19 +51,16 @@ provider "akamai" {
 }
 
 resource "akamai_gtm_domain" `)
-var gtmDomainConfigP2 = fmt.Sprintf(`
-    contract = "${var.contractid}"
+var gtmDomainConfigP2 = fmt.Sprintf(`    contract = "${var.contractid}"
     group = "${var.groupid}"
     comment =  "Domain import"
 `)
 
 // misc
-var gtmRConfigP2 = fmt.Sprintf(`
-    domain = "${akamai_gtm_domain.`)
+var gtmRConfigP2 = fmt.Sprintf(`    domain = "${akamai_gtm_domain.`)
 
-var dependsClauseP1 = fmt.Sprintf(`
-    depends_on = [
-         "akamai_gtm_domain.`)
+var dependsClauseP1 = fmt.Sprintf(`    depends_on = [
+        "akamai_gtm_domain.`)
 
 // process domain 
 func processDomain(domain *gtm.Domain, resourceDomainName string) (string) {
@@ -101,16 +99,33 @@ func processDomain(domain *gtm.Domain, resourceDomainName string) (string) {
 func processStringList(sl []string) string {
 
 	keyVal := "[" + strings.Join(sl, " ") + "]"
-	keyVal = strings.ReplaceAll(keyVal, " ", "\", \"")
-        keyVal = strings.Replace(keyVal, "[", "[\"", 1)
-        keyVal = strings.Replace(keyVal, "]", "\"]", 1)
+	if len(sl) > 0 {
+		keyVal = strings.ReplaceAll(keyVal, " ", "\", \"")
+        	keyVal = strings.Replace(keyVal, "[", "[\"", 1)
+        	keyVal = strings.Replace(keyVal, "]", "\"]", 1)
+	}
 	return keyVal
 
 }
 
-func processNumList(sl string) string {
+func processNumList(sl []int64) string {
 
-        return "[ " + strings.ReplaceAll(sl, " ", ", ") + " ]"
+	switch len(sl) {
+	case 0:
+		return "[]"
+	case 1:
+		return "[" + strconv.FormatInt(sl[0], 10) + "]"
+	default:
+		keyVal := "["
+		for i, ival := range sl {
+			keyVal += strconv.FormatInt(ival, 10)
+			if i != len(sl)-1 {
+				keyVal += ", "
+			}
+		}
+		keyVal += "]"
+        	return keyVal
+	}
 
 }
 
