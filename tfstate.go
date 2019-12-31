@@ -15,46 +15,47 @@
 package main
 
 import (
-	"io/ioutil"
-	"path/filepath"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 type tfStateStruct struct {
-	Version 		int		`json:"version"`
-	Terraform_version	string		`json:"terraform_version"`
-	Serial			int		`json:"serial"`
-	Lineage			string		`json:"lineage"`
-	Outputs			interface{}	`json:"outputs,omitempty"`
-	Resources		[]*Resource	`json:"resources"`
+	Version           int         `json:"version"`
+	Terraform_version string      `json:"terraform_version"`
+	Serial            int         `json:"serial"`
+	Lineage           string      `json:"lineage"`
+	Outputs           interface{} `json:"outputs,omitempty"`
+	Resources         []*Resource `json:"resources"`
 }
 
 type Resource struct {
-	Mode			string          `json:"mode"`
-	Type			string          `json:"type"`
-	Name			string          `json:"name"`
-	Provider		string          `json:"provider"`
-	Instances		[]interface{}   `json:"instances,omitempty"`
+	Mode      string        `json:"mode"`
+	Type      string        `json:"type"`
+	Name      string        `json:"name"`
+	Provider  string        `json:"provider"`
+	Instances []interface{} `json:"instances,omitempty"`
 }
 
-var tfState *tfStateStruct = nil
+var tfState *tfStateStruct
 
 func readTfState() error {
 	// tfWorkPath global var
-        tfStateFilename := filepath.Join(tfWorkPath, "terraform.tfstate")
-        if _, err := os.Stat(tfStateFilename); err != nil {
-                return err
-        }
-        stateData, err := ioutil.ReadFile(tfStateFilename)
-        if err != nil {
-                return err
-        }
-        tfState := &tfStateStruct{}
-        err = json.Unmarshal(stateData, tfState)
-        if err != nil {
-                return err
-        }
+	tfStateFilename := filepath.Join(tfWorkPath, "terraform.tfstate")
+	if _, err := os.Stat(tfStateFilename); err != nil {
+		return err
+	}
+	stateData, err := ioutil.ReadFile(tfStateFilename)
+	if err != nil {
+		return err
+	}
+	tfState = &tfStateStruct{}
+	err = json.Unmarshal(stateData, tfState)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -68,10 +69,11 @@ func checkForResource(rtype string, name string) bool {
 			return false
 		}
 	}
+	fmt.Println("tfstate: ", tfState)
 	for _, r := range tfState.Resources {
 		if r.Type == rtype && r.Name == name {
 			return true
-		}	
+		}
 	}
 
 	return false

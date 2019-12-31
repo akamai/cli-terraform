@@ -19,11 +19,10 @@ import (
 	//"path/filepath"
 	//"encoding/json"
 	//"os"
-	"strconv"
-	"reflect"
-	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
 	"fmt"
-
+	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
+	"reflect"
+	"strconv"
 )
 
 // datacenter
@@ -31,33 +30,35 @@ var gtmDatacenterConfigP1 = fmt.Sprintf(`
 resource "akamai_gtm_datacenter" `)
 
 // Process datacenter resources
-func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]string, resourceDomainName string) (string) {
+func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]string, resourceDomainName string) string {
 
 	datacentersString := ""
 	for _, datacenter := range datacenters {
 		if _, ok := dcImportList[datacenter.DatacenterId]; !ok {
 			continue
 		}
-        	datacenterBody := ""
-        	name := ""
+		datacenterBody := ""
+		name := ""
 		dcid := 0
-        	dcString := gtmDatacenterConfigP1
-        	dcElems := reflect.ValueOf(datacenter).Elem()
-        	for i := 0; i < dcElems.NumField(); i++ {
-                	varName := dcElems.Type().Field(i).Name
-                	varType := dcElems.Type().Field(i).Type
-                	varValue := dcElems.Field(i).Interface()
-                	key := convertKey(varName)
-                	if key == "" {
+		dcString := gtmDatacenterConfigP1
+		dcElems := reflect.ValueOf(datacenter).Elem()
+		for i := 0; i < dcElems.NumField(); i++ {
+			varName := dcElems.Type().Field(i).Name
+			varType := dcElems.Type().Field(i).Type
+			varValue := dcElems.Field(i).Interface()
+			key := convertKey(varName)
+			if key == "" {
 				continue
 			}
 			if varName == "DatacenterId" {
 				dcid = varValue.(int)
-                        	continue
-                	}
-                	keyVal := fmt.Sprint(varValue)
-                	if key == "nickname" { name = keyVal }
-                	if varName == "DefaultLoadObject" {
+				continue
+			}
+			keyVal := fmt.Sprint(varValue)
+			if key == "nickname" {
+				name = keyVal
+			}
+			if varName == "DefaultLoadObject" {
 				dlo := "["
 				dloBody := processLoadObject(varValue.(*gtm.LoadObject))
 				if dloBody == "" {
@@ -65,33 +66,33 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
 				} else {
 					dlo += "{\n"
 					dlo += dloBody
-					dlo += tab4 + "}]" 
+					dlo += tab4 + "}]"
 				}
 				keyVal = dlo
-               	 	}
+			}
 			if keyVal == "" && varType.Kind() == reflect.String {
 				continue
 			}
-                	datacenterBody += tab4 + key + " = "
-                	if varType.Kind() == reflect.String {
-                        	datacenterBody += "\"" + keyVal + "\"\n"
-                	} else {
-                        	datacenterBody += keyVal + "\n"
-                	}
-        	}
-        	dcString += "\"" + name + "\" {\n"
-        	dcString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
-        	dcString += datacenterBody
+			datacenterBody += tab4 + key + " = "
+			if varType.Kind() == reflect.String {
+				datacenterBody += "\"" + keyVal + "\"\n"
+			} else {
+				datacenterBody += keyVal + "\n"
+			}
+		}
+		dcString += "\"" + name + "\" {\n"
+		dcString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
+		dcString += datacenterBody
 		dcString += dependsClauseP1 + resourceDomainName + "\"\n"
 		dcString += tab4 + "]\n"
-        	dcString += "}\n"
+		dcString += "}\n"
 		if dcid == defaultDC {
-			continue	// don't include default DC
+			continue // don't include default DC
 		}
 		datacentersString += dcString
 	}
 
-        return datacentersString
+	return datacentersString
 
 }
 
@@ -104,8 +105,7 @@ func processLoadObject(lo *gtm.LoadObject) string {
 	if len(lo.LoadServers) < 1 {
 		lsList = "[]"
 	}
-	loBody += tab8 + "load_servers = " + lsList + "\n" 
+	loBody += tab8 + "load_servers = " + lsList + "\n"
 	return loBody
 
 }
-

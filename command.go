@@ -32,51 +32,31 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 		Action:      cmdCreateDomain,
 		Flags: []cli.Flag{
 			cli.StringFlag{
-				Name:  "statepath",
-				Usage: "Full path to terraform.tfstate file. Default: current directory",
+				Name:  "tfworkpath",
+				Usage: "file path location for palcement of created and/or modified artifacts. Default: current directory",
 			},
-                        cli.StringFlag{
-                                Name:  "configpath",
-                                Usage: "Path to create config file, <domain>.tf. Default: current directory",
-                        },
-                        cli.StringFlag{
-                                Name:  "importlistpath",
-                                Usage: "Path to output list of resoures to be imported, <domain>_import.list. Default: current directory",
-                        },
-                        cli.StringFlag{
-                                Name:  "tfworkpath",
-                                Usage: "Path to output list of resoures to be imported, <domain>_import.list. Default: current directory",
-                        },
-                        cli.StringSliceFlag{
-                                Name:  "property",
-                                Usage: "Specific property and dependent resources to import. Multiple proeprty flags may be specified",
-                        },
 			cli.BoolTFlag{
-				Name:  "importlist",
-				Usage: "Create import list",
+				Name:  "resources",
+				Usage: "Create json formatted resource import list file, <domain>_resources.json. Used as input by createconfig.",
 			},
 			cli.BoolFlag{
 				Name:  "createconfig",
-				Usage: "Create terrform configuration and import commnad script",
+				Usage: "Create terrform configuration, <domain>.tf, and import command script, <domain>_import.script files",
 			},
-                        cli.BoolFlag{
-                                Name:  "importconfig",
-                                Usage: "Import terrform configuration",
-                        },
-/*
-			cli.BoolFlag{
-				Name:  "verbose",
-				Usage: "Display verbose result status.",
-			},
-			cli.BoolFlag{
-				Name:  "json",
-				Usage: "Return status in JSON format.",
-			},
-*/
-			cli.BoolFlag{
-				Name:  "complete",
-				Usage: "Wait up to 5 minutes for change completion",
-			},
+			/*
+					cli.BoolFlag{
+						Name:  "verbose",
+						Usage: "Display verbose result status.",
+					},
+					cli.BoolFlag{
+						Name:  "json",
+						Usage: "Return status in JSON format.",
+					},
+				cli.BoolFlag{
+					Name:  "complete",
+					Usage: "Wait up to 5 minutes for change completion",
+				},
+			*/
 		},
 		BashComplete: akamai.DefaultAutoComplete,
 	})

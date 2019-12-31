@@ -19,104 +19,101 @@ import (
 	//"path/filepath"
 	//"encoding/json"
 	//"os"
-	"reflect"
-	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
 	"fmt"
-
+	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
+	"reflect"
 )
 
-// resource config 
+// resource config
 var gtmResourceConfigP1 = fmt.Sprintf(`
 resource "akamai_gtm_resource" `)
 
 // Process resource resources
-func processResources(resources []*gtm.Resource, rImportList map[string][]int, dcIL map[int]string, resourceDomainName string) (string) {
+func processResources(resources []*gtm.Resource, rImportList map[string][]int, dcIL map[int]string, resourceDomainName string) string {
 
 	resourcesString := ""
 	for _, resource := range resources {
 		if _, ok := rImportList[resource.Name]; !ok {
 			continue
 		}
-        	resourceBody := ""
-        	name := ""
-        	rString := gtmResourceConfigP1
-        	rElems := reflect.ValueOf(resource).Elem()
-        	for i := 0; i < rElems.NumField(); i++ {
-                	varName := rElems.Type().Field(i).Name
-                	varType := rElems.Type().Field(i).Type
-                	varValue := rElems.Field(i).Interface()
-                	key := convertKey(varName)
-                	if key == "" {
+		resourceBody := ""
+		name := ""
+		rString := gtmResourceConfigP1
+		rElems := reflect.ValueOf(resource).Elem()
+		for i := 0; i < rElems.NumField(); i++ {
+			varName := rElems.Type().Field(i).Name
+			varType := rElems.Type().Field(i).Type
+			varValue := rElems.Field(i).Interface()
+			key := convertKey(varName)
+			if key == "" {
 				continue
 			}
-                	keyVal := fmt.Sprint(varValue)
-                	if key == "name" { name = keyVal }
-                	if varName == "ResourceInstances" {
+			keyVal := fmt.Sprint(varValue)
+			if key == "name" {
+				name = keyVal
+			}
+			if varName == "ResourceInstances" {
 				keyVal = processResourceInstances(varValue.([]*gtm.ResourceInstance))
-               	 	}
+			}
 			if keyVal == "" && varType.Kind() == reflect.String {
 				continue
 			}
-                	resourceBody += tab4 + key + " = "
-                	if varType.Kind() == reflect.String {
-                        	resourceBody += "\"" + keyVal + "\"\n"
-                	} else {
-                        	resourceBody += keyVal + "\n"
-                	}
-        	}
-        	rString += "\"" + name + "\" {\n"
-        	rString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
-        	rString += resourceBody
+			resourceBody += tab4 + key + " = "
+			if varType.Kind() == reflect.String {
+				resourceBody += "\"" + keyVal + "\"\n"
+			} else {
+				resourceBody += keyVal + "\n"
+			}
+		}
+		rString += "\"" + name + "\" {\n"
+		rString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
+		rString += resourceBody
 		rString += dependsClauseP1 + resourceDomainName + "\""
-                // process dc dependencies (only one type in 1.4 schema)
-                for _, dcDep := range rImportList[name] {
-                        rString += ",\n"
-                        rString += tab8 + "\"" + datacenterResource + "." + dcIL[dcDep] + "\""
-                }
+		// process dc dependencies (only one type in 1.4 schema)
+		for _, dcDep := range rImportList[name] {
+			rString += ",\n"
+			rString += tab8 + "\"" + datacenterResource + "." + dcIL[dcDep] + "\""
+		}
 		rString += "\n"
 		rString += tab4 + "]\n"
-        	rString += "}\n"
+		rString += "}\n"
 		resourcesString += rString
 	}
 
-        return resourcesString
+	return resourcesString
 
 }
 
 func processResourceInstances(instances []*gtm.ResourceInstance) string {
 
-        instanceString := "[]\n"                  // assume MT
-        for ii, instance := range instances {
-                instanceString = "[{\n"           // at least one
-                instElems := reflect.ValueOf(instance).Elem()
-                for i := 0; i < instElems.NumField(); i++ {
-                        varName := instElems.Type().Field(i).Name
-                        varType := instElems.Type().Field(i).Type
-                        varValue := instElems.Field(i).Interface()
-                        key := convertKey(varName)
-                        keyVal := fmt.Sprint(varValue)
-                        if varName == "LoadObject" {
-                                keyVal = processLoadObject(&instance.LoadObject)
+	instanceString := "[]\n" // assume MT
+	for ii, instance := range instances {
+		instanceString = "[{\n" // at least one
+		instElems := reflect.ValueOf(instance).Elem()
+		for i := 0; i < instElems.NumField(); i++ {
+			varName := instElems.Type().Field(i).Name
+			varType := instElems.Type().Field(i).Type
+			varValue := instElems.Field(i).Interface()
+			key := convertKey(varName)
+			keyVal := fmt.Sprint(varValue)
+			if varName == "LoadObject" {
+				keyVal = processLoadObject(&instance.LoadObject)
 				instanceString += keyVal + "\n"
 				continue
-                        }
-                        if varType.Kind() == reflect.String {
-                                instanceString += tab8 + key + " = \"" + keyVal + "\"\n"
-                        } else {
-                                instanceString += tab8 + key + " = " + keyVal + "\n"
-                        }
-                }
-                if ii < len(instances)-1 {
-                        instanceString += tab8 + "},\n" + tab8 + "{\n"
-                } else {
-                        instanceString += tab8 + "}\n"
-                        instanceString += tab4 + "]"
-                }
-        }
-        return instanceString
+			}
+			if varType.Kind() == reflect.String {
+				instanceString += tab8 + key + " = \"" + keyVal + "\"\n"
+			} else {
+				instanceString += tab8 + key + " = " + keyVal + "\n"
+			}
+		}
+		if ii < len(instances)-1 {
+			instanceString += tab8 + "},\n" + tab8 + "{\n"
+		} else {
+			instanceString += tab8 + "}\n"
+			instanceString += tab4 + "]"
+		}
+	}
+	return instanceString
 
 }
-
-
-
-

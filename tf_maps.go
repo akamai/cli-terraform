@@ -15,268 +15,274 @@
 package main
 
 import (
-	"strings"
-	"reflect"
-	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
 	"fmt"
+	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
+	"reflect"
+	"strings"
 )
 
-// cidr config 
+// cidr config
 var gtmCidrmapConfigP1 = fmt.Sprintf(`
 resource "akamai_gtm_cidrmap" `)
 
-// geo config    
+// geo config
 var gtmGeomapConfigP1 = fmt.Sprintf(`
 resource "akamai_gtm_geomap" `)
 
-// as config    
+// as config
 var gtmAsmapConfigP1 = fmt.Sprintf(`
 resource "akamai_gtm_asmap" `)
 
 // Process resource cidrmap
-func processCidrmaps(cidrmaps []*gtm.CidrMap, cidrImportList map[string][]int, dcIL map[int]string, resourceDomainName string) (string) {
+func processCidrmaps(cidrmaps []*gtm.CidrMap, cidrImportList map[string][]int, dcIL map[int]string, resourceDomainName string) string {
 
 	mapsString := ""
 	for _, cmap := range cidrmaps {
 		if _, ok := cidrImportList[cmap.Name]; !ok {
 			continue
 		}
-        	mapBody := ""
-        	name := ""
-        	mString := gtmCidrmapConfigP1
-        	mElems := reflect.ValueOf(cmap).Elem()
-        	for i := 0; i < mElems.NumField(); i++ {
-                	varName := mElems.Type().Field(i).Name
-                	varType := mElems.Type().Field(i).Type
-                	varValue := mElems.Field(i).Interface()
-                	key := convertKey(varName)
-                	if key == "" {
+		mapBody := ""
+		name := ""
+		mString := gtmCidrmapConfigP1
+		mElems := reflect.ValueOf(cmap).Elem()
+		for i := 0; i < mElems.NumField(); i++ {
+			varName := mElems.Type().Field(i).Name
+			varType := mElems.Type().Field(i).Type
+			varValue := mElems.Field(i).Interface()
+			key := convertKey(varName)
+			if key == "" {
 				continue
 			}
-                	keyVal := fmt.Sprint(varValue)
-                	if key == "name" { name = keyVal }
+			keyVal := fmt.Sprint(varValue)
+			if key == "name" {
+				name = keyVal
+			}
 			switch varName {
 			case "DefaultDatacenter":
 				keyVal = processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
-                	case "Assignments":
+			case "Assignments":
 				keyVal = processCidrAssignments(varValue.([]*gtm.CidrAssignment))
-               	 	}
+			}
 			if keyVal == "" && varType.Kind() == reflect.String {
 				continue
 			}
-                	mapBody += tab4 + key + " = "
-                	if varType.Kind() == reflect.String {
-                        	mapBody += "\"" + keyVal + "\"\n"
-                	} else {
-                        	mapBody += keyVal + "\n"
-                	}
-        	}
-        	mString += "\"" + name + "\" {\n"
-        	mString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
-        	mString += mapBody
+			mapBody += tab4 + key + " = "
+			if varType.Kind() == reflect.String {
+				mapBody += "\"" + keyVal + "\"\n"
+			} else {
+				mapBody += keyVal + "\n"
+			}
+		}
+		mString += "\"" + name + "\" {\n"
+		mString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
+		mString += mapBody
 		mString += dependsClauseP1 + resourceDomainName + "\""
-                // process dc dependencies (only one type in 1.4 schema)
-                for _, dcDep := range cidrImportList[name] {
-                        mString += ",\n"
-                        mString += datacenterResource + "." + dcIL[dcDep]
-                }
+		// process dc dependencies (only one type in 1.4 schema)
+		for _, dcDep := range cidrImportList[name] {
+			mString += ",\n"
+			mString += datacenterResource + "." + dcIL[dcDep]
+		}
 		mString += "\n"
 		mString += tab4 + "]\n"
-        	mString += "}\n"
+		mString += "}\n"
 		mapsString += mString
 	}
 
-        return mapsString
+	return mapsString
 
 }
 
 // Process resource geomap
-func processGeomaps(geomaps []*gtm.GeoMap, geoImportList map[string][]int, dcIL map[int]string, resourceDomainName string) (string) {
+func processGeomaps(geomaps []*gtm.GeoMap, geoImportList map[string][]int, dcIL map[int]string, resourceDomainName string) string {
 
-        mapsString := ""
-        for _, gmap := range geomaps {
-                if _, ok := geoImportList[gmap.Name]; !ok {
-                        continue
-                }
-                mapBody := ""
-                name := ""
-                mString := gtmGeomapConfigP1
-                mElems := reflect.ValueOf(gmap).Elem()
-                for i := 0; i < mElems.NumField(); i++ {
-                        varName := mElems.Type().Field(i).Name
-                        varType := mElems.Type().Field(i).Type
-                        varValue := mElems.Field(i).Interface()
-                        key := convertKey(varName)
-                        if key == "" {
-                                continue
-                        }
-                        keyVal := fmt.Sprint(varValue)
-                        if key == "name" { name = keyVal }
-                        switch varName {
-                        case "DefaultDatacenter":
-                                keyVal = processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
-                        case "Assignments":
-                                keyVal = processGeoAssignments(varValue.([]*gtm.GeoAssignment))
-                        }
-                        if keyVal == "" && varType.Kind() == reflect.String {
-                                continue
-                        }
-                        mapBody += tab4 + key + " = "
-                        if varType.Kind() == reflect.String {
-                                mapBody += "\"" + keyVal + "\"\n"
-                        } else {
-                                mapBody += keyVal + "\n"
-                        }
-                }
-                mString += "\"" + name + "\" {\n"
-                mString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
-                mString += mapBody
-                mString += dependsClauseP1 + resourceDomainName + "\""
-                // process dc dependencies (only one type in 1.4 schema)
-                for _, dcDep := range geoImportList[name] {
-                        mString += ",\n"
-                        mString += datacenterResource + "." + dcIL[dcDep]
-                }
-                mString += "\n"
-                mString += tab4 + "]\n"
-                mString += "}\n"
-                mapsString += mString
-        }
+	mapsString := ""
+	for _, gmap := range geomaps {
+		if _, ok := geoImportList[gmap.Name]; !ok {
+			continue
+		}
+		mapBody := ""
+		name := ""
+		mString := gtmGeomapConfigP1
+		mElems := reflect.ValueOf(gmap).Elem()
+		for i := 0; i < mElems.NumField(); i++ {
+			varName := mElems.Type().Field(i).Name
+			varType := mElems.Type().Field(i).Type
+			varValue := mElems.Field(i).Interface()
+			key := convertKey(varName)
+			if key == "" {
+				continue
+			}
+			keyVal := fmt.Sprint(varValue)
+			if key == "name" {
+				name = keyVal
+			}
+			switch varName {
+			case "DefaultDatacenter":
+				keyVal = processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
+			case "Assignments":
+				keyVal = processGeoAssignments(varValue.([]*gtm.GeoAssignment))
+			}
+			if keyVal == "" && varType.Kind() == reflect.String {
+				continue
+			}
+			mapBody += tab4 + key + " = "
+			if varType.Kind() == reflect.String {
+				mapBody += "\"" + keyVal + "\"\n"
+			} else {
+				mapBody += keyVal + "\n"
+			}
+		}
+		mString += "\"" + name + "\" {\n"
+		mString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
+		mString += mapBody
+		mString += dependsClauseP1 + resourceDomainName + "\""
+		// process dc dependencies (only one type in 1.4 schema)
+		for _, dcDep := range geoImportList[name] {
+			mString += ",\n"
+			mString += datacenterResource + "." + dcIL[dcDep]
+		}
+		mString += "\n"
+		mString += tab4 + "]\n"
+		mString += "}\n"
+		mapsString += mString
+	}
 
-        return mapsString
+	return mapsString
 
 }
 
 // Process resource asmap
-func processAsmaps(asmaps []*gtm.AsMap, asImportList map[string][]int, dcIL map[int]string, resourceDomainName string) (string) {
+func processAsmaps(asmaps []*gtm.AsMap, asImportList map[string][]int, dcIL map[int]string, resourceDomainName string) string {
 
-        mapsString := ""
-        for _, amap := range asmaps {
-                if _, ok := asImportList[amap.Name]; !ok {
-                        continue
-                }
-                mapBody := ""
-                name := ""
-                mString := gtmAsmapConfigP1
-                mElems := reflect.ValueOf(amap).Elem()
-                for i := 0; i < mElems.NumField(); i++ {
-                        varName := mElems.Type().Field(i).Name
-                        varType := mElems.Type().Field(i).Type
-                        varValue := mElems.Field(i).Interface()
-                        key := convertKey(varName)
-                        if key == "" {
-                                continue
-                        }
-                        keyVal := fmt.Sprint(varValue)
-                        if key == "name" { name = keyVal }
-                        switch varName {
-                        case "DefaultDatacenter":
-                                keyVal = processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
-                        case "Assignments":
-                                keyVal = processAsAssignments(varValue.([]*gtm.AsAssignment))
-                        }
-                        if keyVal == "" && varType.Kind() == reflect.String {
-                                continue
-                        }
-                        mapBody += tab4 + key + " = "
-                        if varType.Kind() == reflect.String {
-                                mapBody += "\"" + keyVal + "\"\n"
-                        } else {
-                                mapBody += keyVal + "\n"
-                        }
-                }
-                mString += "\"" + name + "\" {\n"
-                mString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
-                mString += mapBody
-                mString += dependsClauseP1 + resourceDomainName + "\""
-                // process dc dependencies (only one type in 1.4 schema)
-                for _, dcDep := range asImportList[name] {
-                        mString += ",\n"
-                        mString += datacenterResource + "." + dcIL[dcDep]
-                }
-                mString += "\n"
-                mString += tab4 + "]\n"
-                mString += "}\n"
-                mapsString += mString
-        }
+	mapsString := ""
+	for _, amap := range asmaps {
+		if _, ok := asImportList[amap.Name]; !ok {
+			continue
+		}
+		mapBody := ""
+		name := ""
+		mString := gtmAsmapConfigP1
+		mElems := reflect.ValueOf(amap).Elem()
+		for i := 0; i < mElems.NumField(); i++ {
+			varName := mElems.Type().Field(i).Name
+			varType := mElems.Type().Field(i).Type
+			varValue := mElems.Field(i).Interface()
+			key := convertKey(varName)
+			if key == "" {
+				continue
+			}
+			keyVal := fmt.Sprint(varValue)
+			if key == "name" {
+				name = keyVal
+			}
+			switch varName {
+			case "DefaultDatacenter":
+				keyVal = processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
+			case "Assignments":
+				keyVal = processAsAssignments(varValue.([]*gtm.AsAssignment))
+			}
+			if keyVal == "" && varType.Kind() == reflect.String {
+				continue
+			}
+			mapBody += tab4 + key + " = "
+			if varType.Kind() == reflect.String {
+				mapBody += "\"" + keyVal + "\"\n"
+			} else {
+				mapBody += keyVal + "\n"
+			}
+		}
+		mString += "\"" + name + "\" {\n"
+		mString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
+		mString += mapBody
+		mString += dependsClauseP1 + resourceDomainName + "\""
+		// process dc dependencies (only one type in 1.4 schema)
+		for _, dcDep := range asImportList[name] {
+			mString += ",\n"
+			mString += datacenterResource + "." + dcIL[dcDep]
+		}
+		mString += "\n"
+		mString += tab4 + "]\n"
+		mString += "}\n"
+		mapsString += mString
+	}
 
-        return mapsString
+	return mapsString
 
 }
 
 func processDefaultDatacenter(ddc *gtm.DatacenterBase, structreq bool) string {
 
 	ddcString := ""
-        if structreq {
-		ddcString += "[{\n" 
-	}       
-        ddcElems := reflect.ValueOf(ddc).Elem()
-        for i := 0; i < ddcElems.NumField(); i++ {
-                varName := ddcElems.Type().Field(i).Name
-                varType := ddcElems.Type().Field(i).Type
-                varValue := ddcElems.Field(i).Interface()
-                key := convertKey(varName)
-                keyVal := fmt.Sprint(varValue)
-                if varType.Kind() == reflect.String {
-                        ddcString += tab8 + key + " = \"" + keyVal + "\"\n"
-                } else {
-                        ddcString += tab8 + key + " = " + keyVal + "\n"
-                }
-        }
 	if structreq {
-        	ddcString += tab4 + "}]"
-	} else {
-		ddcString = strings.TrimSuffix(ddcString, "\n")	// remove trailing new line
+		ddcString += "[{\n"
 	}
-        return ddcString
+	ddcElems := reflect.ValueOf(ddc).Elem()
+	for i := 0; i < ddcElems.NumField(); i++ {
+		varName := ddcElems.Type().Field(i).Name
+		varType := ddcElems.Type().Field(i).Type
+		varValue := ddcElems.Field(i).Interface()
+		key := convertKey(varName)
+		keyVal := fmt.Sprint(varValue)
+		if varType.Kind() == reflect.String {
+			ddcString += tab8 + key + " = \"" + keyVal + "\"\n"
+		} else {
+			ddcString += tab8 + key + " = " + keyVal + "\n"
+		}
+	}
+	if structreq {
+		ddcString += tab4 + "}]"
+	} else {
+		ddcString = strings.TrimSuffix(ddcString, "\n") // remove trailing new line
+	}
+	return ddcString
 
 }
 
 func processCidrAssignments(assigns []*gtm.CidrAssignment) string {
 
-        assignString := "[]"                  // assume MT
-        for ii, assign := range assigns {
-                assignString = "[{\n"           // at least one
-                aElems := reflect.ValueOf(assign).Elem()
+	assignString := "[]" // assume MT
+	for ii, assign := range assigns {
+		assignString = "[{\n" // at least one
+		aElems := reflect.ValueOf(assign).Elem()
 		assignString += processAssignmentsBase(aElems, "Blocks", (ii < len(assigns)-1))
-        }
-        return assignString
+	}
+	return assignString
 
-} 
+}
 
 func processGeoAssignments(assigns []*gtm.GeoAssignment) string {
 
-        assignString := "[]"                  // assume MT
-        for ii, assign := range assigns {
-                assignString = "[{\n"           // at least one
-                aElems := reflect.ValueOf(assign).Elem()
-                assignString += processAssignmentsBase(aElems, "Countries", (ii < len(assigns)-1))
-        }
-        return assignString
+	assignString := "[]" // assume MT
+	for ii, assign := range assigns {
+		assignString = "[{\n" // at least one
+		aElems := reflect.ValueOf(assign).Elem()
+		assignString += processAssignmentsBase(aElems, "Countries", (ii < len(assigns)-1))
+	}
+	return assignString
 
 }
 
 func processAsAssignments(assigns []*gtm.AsAssignment) string {
 
-        assignString := "[]"                  // assume MT
-        for ii, assign := range assigns {
-                assignString = "[{\n"           // at least one
-                aElems := reflect.ValueOf(assign).Elem()
-                assignString += processAssignmentsBase(aElems, "AsNumbers", (ii < len(assigns)-1))
-        }
-        return assignString
+	assignString := "[]" // assume MT
+	for ii, assign := range assigns {
+		assignString = "[{\n" // at least one
+		aElems := reflect.ValueOf(assign).Elem()
+		assignString += processAssignmentsBase(aElems, "AsNumbers", (ii < len(assigns)-1))
+	}
+	return assignString
 
 }
 
 func processAssignmentsBase(elem reflect.Value, assignKey string, last bool) string {
 
 	assignStr := ""
-        for i := 0; i < elem.NumField(); i++ {
-                varName := elem.Type().Field(i).Name
-                varType := elem.Type().Field(i).Type
-                varValue := elem.Field(i).Interface()
-                key := convertKey(varName)
-                keyVal := fmt.Sprint(varValue)
+	for i := 0; i < elem.NumField(); i++ {
+		varName := elem.Type().Field(i).Name
+		varType := elem.Type().Field(i).Type
+		varValue := elem.Field(i).Interface()
+		key := convertKey(varName)
+		keyVal := fmt.Sprint(varValue)
 		if varName == "DatacenterBase" {
 			dcb := varValue.(gtm.DatacenterBase)
 			keyVal = processDefaultDatacenter(&dcb, false)
@@ -286,24 +292,22 @@ func processAssignmentsBase(elem reflect.Value, assignKey string, last bool) str
 				if assignKey == "AsNumbers" {
 					keyVal = processNumList(varValue.([]int64))
 				} else {
-                        		keyVal = processStringList(varValue.([]string))
+					keyVal = processStringList(varValue.([]string))
 				}
-                	}
-                	if varType.Kind() == reflect.String {
-                        	assignStr += tab8 + key + " = \"" + keyVal + "\"\n"
-                	} else {
-                        	assignStr += tab8 + key + " = " + keyVal + "\n"
-                	}
+			}
+			if varType.Kind() == reflect.String {
+				assignStr += tab8 + key + " = \"" + keyVal + "\"\n"
+			} else {
+				assignStr += tab8 + key + " = " + keyVal + "\n"
+			}
 		}
 	}
-        if last {
-                assignStr += tab8 + "},\n" + tab8 + "{\n"
-        } else {
-                assignStr += tab8 + "}\n"
-                assignStr += tab4 + "]"
-        }      
+	if last {
+		assignStr += tab8 + "},\n" + tab8 + "{\n"
+	} else {
+		assignStr += tab8 + "}\n"
+		assignStr += tab4 + "]"
+	}
 	return assignStr
 
 }
-
-

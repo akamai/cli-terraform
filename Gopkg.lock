@@ -2,18 +2,17 @@
 
 
 [[projects]]
-  digest = "1:cb95f9716fe1d0b7adf150c5f6e7185d32e0b730ffbb38e118e3674803de4280"
+  digest = "1:b622db258a8bc72d5119265a16c051cafca3aa32b45a1c4ca0f708b52a78801d"
   name = "github.com/akamai/AkamaiOPEN-edgegrid-golang"
   packages = [
     "client-v1",
-    "configgtm-v1_3",
+    "configgtm-v1_4",
     "edgegrid",
     "jsonhooks-v1",
-    "reportsgtm-v1",
   ]
   pruneopts = "UT"
-  revision = "92c9549843bc6117cfbfb27755344c9551628819"
-  version = "v0.9.3"
+  revision = "04ee806b884d4e224ee228950cf38d1501d9b1ef"
+  version = "v0.9.4"
 
 [[projects]]
   branch = "master"
@@ -48,12 +47,12 @@
   version = "v1.7.0"
 
 [[projects]]
-  digest = "1:591460fbfc463bda7071ac906bed19cbf64cffd5fcb80a6d1490e87b9dfad942"
+  digest = "1:c4b5592c342f273e18de68e16957f536f6648f2e90c9d7ece653ac90c22079a9"
   name = "github.com/go-ini/ini"
   packages = ["."]
   pruneopts = "UT"
-  revision = "87e589f4917038ae250cff2446db7573f47e97ca"
-  version = "v1.51.0"
+  revision = "94291fffe2b14f4632ec0e67c1bfecfc1287a168"
+  version = "v1.51.1"
 
 [[projects]]
   digest = "1:582b704bebaa06b48c29b0cec224a6058a09c86883aaddabde889cd1a5f73e1b"
@@ -80,20 +79,12 @@
   version = "v0.0.9"
 
 [[projects]]
-  digest = "1:d62282425ffb75047679d7e2c3b980eea7f82c05ef5fb9142ee617ebac6e7432"
+  digest = "1:29895093e370d9da5fd1c9ab12a5855ccb568f28766e0c3ff159c4b0f09aa127"
   name = "github.com/mattn/go-isatty"
   packages = ["."]
   pruneopts = "UT"
-  revision = "88ba11cfdc67c7588b30042edf244b2875f892b6"
-  version = "v0.0.10"
-
-[[projects]]
-  digest = "1:8b9352f5af622f234923139000732eb2fb32574949fa84d60a21c70e5dd7d3e6"
-  name = "github.com/mattn/go-runewidth"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "f93a0d58d5fd95e53f82782d07bb0c79d23e1290"
-  version = "v0.0.6"
+  revision = "31745d66dd679ac0ac4f8d3ecff168fce6170c6a"
+  version = "v0.0.11"
 
 [[projects]]
   digest = "1:5d231480e1c64a726869bc4142d270184c419749d34f167646baa21008eb0a79"
@@ -102,14 +93,6 @@
   pruneopts = "UT"
   revision = "af06845cf3004701891bf4fdb884bfe4920b3727"
   version = "v1.1.0"
-
-[[projects]]
-  digest = "1:94ac61005d8a6d448d3dfbfa6bcc1bffe4c36b26bd5e8ba714c21bb241c1c9b8"
-  name = "github.com/olekukonko/tablewriter"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "1ab4b831fd5f2aad691b6870d22fff83e43e6343"
-  version = "v0.0.3"
 
 [[projects]]
   digest = "1:2ee0f15eb0fb04f918db7c2dcf39745f40d69f798ef171610a730e8a56aaa4fd"
@@ -155,11 +138,9 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_3",
-    "github.com/akamai/AkamaiOPEN-edgegrid-golang/reportsgtm-v1",
+    "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4",
     "github.com/akamai/cli-common-golang",
     "github.com/fatih/color",
-    "github.com/olekukonko/tablewriter",
     "github.com/urfave/cli",
   ]
   solver-name = "gps-cdcl"
