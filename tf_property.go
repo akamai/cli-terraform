@@ -44,12 +44,9 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 			varName := propElems.Type().Field(i).Name
 			varType := propElems.Type().Field(i).Type
 			varValue := propElems.Field(i).Interface()
-			key := convertKey(varName)
-			if key == "" {
-				continue
-			}
 			keyVal := fmt.Sprint(varValue)
-			if keyVal == "" && varType.Kind() == reflect.String {
+			key := convertKey(varName, keyVal, varType.Kind())
+			if key == "" {
 				continue
 			}
 			switch varName {
@@ -93,16 +90,18 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 
 func processHttpHeaders(headers []*gtm.HttpHeader) string {
 
-	headerString := "[]\n" // assume MT
+	if len(headers) == 0 {
+		return "[]"
+	}
+	headerString := "[{\n"
 	for ii, header := range headers {
-		headerString = "[{\n" // at least one
 		headElems := reflect.ValueOf(header).Elem()
 		for i := 0; i < headElems.NumField(); i++ {
 			varName := headElems.Type().Field(i).Name
 			varType := headElems.Type().Field(i).Type
 			varValue := headElems.Field(i).Interface()
-			key := convertKey(varName)
 			keyVal := fmt.Sprint(varValue)
+			key := convertKey(varName, keyVal, varType.Kind())
 			if varType.Kind() == reflect.String {
 				headerString += tab12 + key + " = \"" + keyVal + "\"\n"
 			} else {
@@ -113,24 +112,26 @@ func processHttpHeaders(headers []*gtm.HttpHeader) string {
 			headerString += tab12 + "},\n" + tab12 + "{\n"
 		} else {
 			headerString += tab12 + "}\n"
-			headerString += tab8 + "]"
 		}
 	}
+	headerString += tab8 + "]"
 	return headerString
 }
 
 func processTrafficTargets(targets []*gtm.TrafficTarget) string {
 
-	targetString := "[]\n" // assume MT
+	if len(targets) == 0 {
+		return "[]"
+	}
+	targetString := "[{\n"
 	for ii, target := range targets {
-		targetString = "[{\n" // at least one
 		targElems := reflect.ValueOf(target).Elem()
 		for i := 0; i < targElems.NumField(); i++ {
 			varName := targElems.Type().Field(i).Name
 			varType := targElems.Type().Field(i).Type
 			varValue := targElems.Field(i).Interface()
-			key := convertKey(varName)
 			keyVal := fmt.Sprint(varValue)
+			key := convertKey(varName, keyVal, varType.Kind())
 			if varName == "Servers" {
 				keyVal = processStringList(target.Servers)
 			}
@@ -144,28 +145,30 @@ func processTrafficTargets(targets []*gtm.TrafficTarget) string {
 			targetString += tab8 + "},\n" + tab8 + "{\n"
 		} else {
 			targetString += tab8 + "}\n"
-			targetString += tab4 + "]"
 		}
 	}
+	targetString += tab4 + "]"
 	return targetString
 
 }
 
 func processLivenessTests(tests []*gtm.LivenessTest) string {
 
-	testsString := "[]\n" // assume MT
+	if len(tests) == 0 {
+		return "[]"
+	}
+	testsString := "[{\n"
 	for ii, test := range tests {
-		testsString = "[{\n" // at least one
 		testElems := reflect.ValueOf(test).Elem()
 		for i := 0; i < testElems.NumField(); i++ {
 			varName := testElems.Type().Field(i).Name
 			varType := testElems.Type().Field(i).Type
 			varValue := testElems.Field(i).Interface()
-			key := convertKey(varName)
+			keyVal := fmt.Sprint(varValue)
+			key := convertKey(varName, keyVal, varType.Kind())
 			if key == "" {
 				continue
 			}
-			keyVal := fmt.Sprint(varValue)
 			if varName == "HttpHeaders" {
 				keyVal = processHttpHeaders(varValue.([]*gtm.HttpHeader))
 			}
@@ -179,25 +182,27 @@ func processLivenessTests(tests []*gtm.LivenessTest) string {
 			testsString += tab8 + "},\n" + tab8 + "{\n"
 		} else {
 			testsString += tab8 + "}\n"
-			testsString += tab4 + "]"
 		}
 	}
+	testsString += tab4 + "]"
 	return testsString
 
 }
 
 func processStaticRRSets(rrsets []*gtm.StaticRRSet) string {
 
-	setString := "[]\n" // assume MT
+	if len(rrsets) == 0 {
+		return "[]"
+	}
+	setString := "[{\n"
 	for ii, set := range rrsets {
-		setString = "[{\n" // at least one
 		setElems := reflect.ValueOf(set).Elem()
 		for i := 0; i < setElems.NumField(); i++ {
 			varName := setElems.Type().Field(i).Name
 			varType := setElems.Type().Field(i).Type
 			varValue := setElems.Field(i).Interface()
-			key := convertKey(varName)
 			keyVal := fmt.Sprint(varValue)
+			key := convertKey(varName, keyVal, varType.Kind())
 			if varName == "Rdata" {
 				keyVal = processStringList(set.Rdata)
 			}
@@ -211,9 +216,9 @@ func processStaticRRSets(rrsets []*gtm.StaticRRSet) string {
 			setString += tab8 + "},\n" + tab8 + "{\n"
 		} else {
 			setString += tab8 + "}\n"
-			setString += tab4 + "]"
 		}
 	}
+	setString += tab4 + "]"
 	return setString
 
 }

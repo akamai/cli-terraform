@@ -19,7 +19,6 @@ import (
 	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
 	"reflect"
 	"strconv"
-	"strings"
 	"unicode"
 )
 
@@ -33,11 +32,15 @@ var ignoredKeys map[string]int = map[string]int{"AsMaps": 0, "Resources": 0, "Pr
 	"WeightedHashBitsForIPv4": 0, "WeightedHashBitsForIPv6": 0}
 
 var mappedKeys map[string]string = map[string]string{"DynamicTTL": "dynamic_ttl", "StaticTTL": "static_ttl", "StaticRRSets": "static_rr_sets",
-	"TTL": "ttl", "DatacenterId": "datacenter_id"}
+	"TTL": "ttl", "DatacenterId": "datacenter_id", "HandoutCName": "handout_cname"}
 
 var intNullableKeys map[string]int = map[string]int{"UpperBound": 0, "DefaultTimeOutPenalty": 0, "CloneOf": 0, "Latitude": 0, "Longitude": 0,
 	"DefaultErrorPenalty": 0, "DefaultTimeoutPenalty": 0, "HealthThreshold": 0,
 	"HealthMultiplier": 0, "HealthMax": 0}
+
+var stringNotNullableKeys map[string]int = map[string]int{"Nickname": 0, "Name": 0, "Value": 0, "LoadObject": 0, "HandoutCName": 0, "Type": 0, "TestObject": 0,
+	"RequestString": 0, "ResponseString": 0, "TestObjectProtocol": 0, "TestObjectPassword": 0, "SslClientPrivateKey": 0, "SslClientCertificate": 0,
+	"HostHeader": 0, "TestObjectUsername": 0, "ResourceType": 0}
 
 var tab4 = "    "
 var tab8 = "        "
@@ -70,11 +73,11 @@ func processDomain(domain *gtm.Domain, resourceDomainName string) string {
 		varName := domElems.Type().Field(i).Name
 		varType := domElems.Type().Field(i).Type
 		varValue := domElems.Field(i).Interface()
-		key := convertKey(varName)
+		keyVal := fmt.Sprint(varValue)
+		key := convertKey(varName, keyVal, varType.Kind())
 		if key == "" {
 			continue
 		}
-		keyVal := fmt.Sprint(varValue)
 		if varName == "EmailNotificationList" {
 			keyVal = processStringList(domain.EmailNotificationList)
 		}
@@ -96,13 +99,22 @@ func processDomain(domain *gtm.Domain, resourceDomainName string) string {
 
 func processStringList(sl []string) string {
 
-	keyVal := "[" + strings.Join(sl, " ") + "]"
-	if len(sl) > 0 {
-		keyVal = strings.ReplaceAll(keyVal, " ", "\", \"")
-		keyVal = strings.Replace(keyVal, "[", "[\"", 1)
-		keyVal = strings.Replace(keyVal, "]", "\"]", 1)
+	switch len(sl) {
+	case 0:
+		return "[]"
+	case 1:
+		return "[\"" + sl[0] + "\"]"
+	default:
+		keyVal := "["
+		for i, sval := range sl {
+			keyVal += "\"" + sval + "\""
+			if i != len(sl)-1 {
+				keyVal += ", "
+			}
+		}
+		keyVal += "]"
+		return keyVal
 	}
-	return keyVal
 
 }
 
@@ -127,7 +139,7 @@ func processNumList(sl []int64) string {
 
 }
 
-func convertKey(inKey string) string {
+func convertKey(inKey string, keyVal string, keyKind reflect.Kind) string {
 
 	if _, ok := ignoredKeys[inKey]; ok {
 		return ""
@@ -135,9 +147,15 @@ func convertKey(inKey string) string {
 	if _, ok := intNullableKeys[inKey]; ok {
 		return ""
 	}
+	if keyKind == reflect.String && keyVal == "" {
+		if _, ok := stringNotNullableKeys[inKey]; !ok {
+			return ""
+		}
+	}
 	if val, ok := mappedKeys[inKey]; ok {
 		return val
 	}
+
 	outKey := ""
 	for i, char := range inKey {
 		if unicode.IsUpper(char) {

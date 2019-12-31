@@ -41,6 +41,7 @@ type Resource struct {
 
 var tfState *tfStateStruct
 
+// Utility method to read in tfstate content
 func readTfState() error {
 	// tfWorkPath global var
 	tfStateFilename := filepath.Join(tfWorkPath, "terraform.tfstate")
@@ -69,7 +70,6 @@ func checkForResource(rtype string, name string) bool {
 			return false
 		}
 	}
-	fmt.Println("tfstate: ", tfState)
 	for _, r := range tfState.Resources {
 		if r.Type == rtype && r.Name == name {
 			return true

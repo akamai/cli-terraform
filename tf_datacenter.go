@@ -46,7 +46,8 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
 			varName := dcElems.Type().Field(i).Name
 			varType := dcElems.Type().Field(i).Type
 			varValue := dcElems.Field(i).Interface()
-			key := convertKey(varName)
+			keyVal := fmt.Sprint(varValue)
+			key := convertKey(varName, keyVal, varType.Kind())
 			if key == "" {
 				continue
 			}
@@ -54,7 +55,6 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
 				dcid = varValue.(int)
 				continue
 			}
-			keyVal := fmt.Sprint(varValue)
 			if key == "nickname" {
 				name = keyVal
 			}
@@ -69,9 +69,6 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
 					dlo += tab4 + "}]"
 				}
 				keyVal = dlo
-			}
-			if keyVal == "" && varType.Kind() == reflect.String {
-				continue
 			}
 			datacenterBody += tab4 + key + " = "
 			if varType.Kind() == reflect.String {

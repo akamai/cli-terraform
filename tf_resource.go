@@ -44,19 +44,16 @@ func processResources(resources []*gtm.Resource, rImportList map[string][]int, d
 			varName := rElems.Type().Field(i).Name
 			varType := rElems.Type().Field(i).Type
 			varValue := rElems.Field(i).Interface()
-			key := convertKey(varName)
+			keyVal := fmt.Sprint(varValue)
+			key := convertKey(varName, keyVal, varType.Kind())
 			if key == "" {
 				continue
 			}
-			keyVal := fmt.Sprint(varValue)
 			if key == "name" {
 				name = keyVal
 			}
 			if varName == "ResourceInstances" {
 				keyVal = processResourceInstances(varValue.([]*gtm.ResourceInstance))
-			}
-			if keyVal == "" && varType.Kind() == reflect.String {
-				continue
 			}
 			resourceBody += tab4 + key + " = "
 			if varType.Kind() == reflect.String {
@@ -86,19 +83,21 @@ func processResources(resources []*gtm.Resource, rImportList map[string][]int, d
 
 func processResourceInstances(instances []*gtm.ResourceInstance) string {
 
-	instanceString := "[]\n" // assume MT
+	if len(instances) == 0 {
+		return "[]"
+	}
+	instanceString := "[{\n" // assume MT
 	for ii, instance := range instances {
-		instanceString = "[{\n" // at least one
 		instElems := reflect.ValueOf(instance).Elem()
 		for i := 0; i < instElems.NumField(); i++ {
 			varName := instElems.Type().Field(i).Name
 			varType := instElems.Type().Field(i).Type
 			varValue := instElems.Field(i).Interface()
-			key := convertKey(varName)
 			keyVal := fmt.Sprint(varValue)
+			key := convertKey(varName, keyVal, varType.Kind())
 			if varName == "LoadObject" {
 				keyVal = processLoadObject(&instance.LoadObject)
-				instanceString += keyVal + "\n"
+				instanceString += keyVal
 				continue
 			}
 			if varType.Kind() == reflect.String {
@@ -111,9 +110,9 @@ func processResourceInstances(instances []*gtm.ResourceInstance) string {
 			instanceString += tab8 + "},\n" + tab8 + "{\n"
 		} else {
 			instanceString += tab8 + "}\n"
-			instanceString += tab4 + "]"
 		}
 	}
+	instanceString += tab4 + "]"
 	return instanceString
 
 }
