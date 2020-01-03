@@ -58,6 +58,17 @@ var createConfig = false
 var domainName string
 var fullImportList *importListStruct
 
+var gtmvarsContent = fmt.Sprint(`variable "gtmsection" {
+  default = "default"
+}
+variable "contractid" {
+  default = ""
+}
+variable "groupid" {
+  default = ""
+}
+`)
+
 // command function create-domain
 func cmdCreateDomain(c *cli.Context) error {
 
@@ -228,6 +239,21 @@ func cmdCreateDomain(c *cli.Context) error {
 			return cli.NewExitError(color.RedString("Failed to save domain configuration file."), 1)
 		}
 		domainTFfileHandle.Sync()
+
+		// Need create gtmvars.tf dependency
+		gtmvarsFilename := filepath.Join(tfWorkPath, "gtmvars.tf")
+		gtmvarsHandle, err := os.Create(gtmvarsFilename)
+		if err != nil {
+			akamai.StopSpinnerFail()
+			return cli.NewExitError(color.RedString("Unable to create gtmvars config file"), 1)
+		}
+		defer gtmvarsHandle.Close()
+		_, err = gtmvarsHandle.WriteString(gtmvarsContent)
+		if err != nil {
+			akamai.StopSpinnerFail()
+			return cli.NewExitError(color.RedString("Unable to write gtmvars config file"), 1)
+		}
+		gtmvarsHandle.Sync()
 
 		// build import script
 		importScriptFilename := filepath.Join(tfWorkPath, resourceDomainName+"_resource_import.script")
