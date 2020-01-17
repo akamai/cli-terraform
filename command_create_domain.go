@@ -69,6 +69,36 @@ variable "groupid" {
 }
 `)
 
+var nullFieldMap = &configgtm.NullFieldMapStruct{}
+
+// retrieve Null Values for Domain
+func getDomainNullValues() configgtm.NullPerObjectAttributeStruct {
+
+        return nullFieldMap.Domain
+
+}
+
+// retrieve Null Values for Object Type
+func getNullValuesList(objType string) map[string]configgtm.NullPerObjectAttributeStruct {
+
+	switch objType {
+	case "Properties":
+		return nullFieldMap.Properties
+        case "Datacenters":
+                return nullFieldMap.Datacenters
+        case "Resources":
+                return nullFieldMap.Resources
+        case "CidrMaps":
+                return nullFieldMap.CidrMaps
+        case "GeoMaps":
+                return nullFieldMap.GeoMaps
+        case "AsMaps":
+                return nullFieldMap.AsMaps
+	}
+	
+	return map[string]configgtm.NullPerObjectAttributeStruct{}
+}
+
 // command function create-domain
 func cmdCreateDomain(c *cli.Context) error {
 
@@ -221,6 +251,12 @@ func cmdCreateDomain(c *cli.Context) error {
 			return cli.NewExitError(color.RedString("Failed to open/create config file."), 1)
 		}
 		defer domainTFfileHandle.Close()
+                //initialize Null Fields Struct
+                nullFieldMap, err = domain.NullFieldMap()
+                if err != nil {
+                        akamai.StopSpinnerFail()
+                        return cli.NewExitError(color.RedString("Failed to initialize Domain null fields map"), 1)
+                }
 		// build tf file
 		if len(tfConfig) == 0 {
 			// if tf pre existed, domain has to exist by definition

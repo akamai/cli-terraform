@@ -32,11 +32,21 @@ resource "akamai_gtm_datacenter" `)
 // Process datacenter resources
 func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]string, resourceDomainName string) string {
 
+        // Get Null values list
+        var coreFieldsNullMap map[string]string
+        nullFieldsMap := getNullValuesList("Datacenters")
+
 	datacentersString := ""
 	for _, datacenter := range datacenters {
 		if _, ok := dcImportList[datacenter.DatacenterId]; !ok {
 			continue
 		}
+                // Retrieve Core null fields map
+                if dcNullFieldObjectMap, ok := nullFieldsMap[strconv.Itoa(datacenter.DatacenterId)]; ok {
+                        coreFieldsNullMap = dcNullFieldObjectMap.CoreObjectFields
+                } else {
+                        coreFieldsNullMap = map[string]string{}
+                }
 		datacenterBody := ""
 		name := ""
 		dcid := 0
@@ -46,6 +56,9 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
 			varName := dcElems.Type().Field(i).Name
 			varType := dcElems.Type().Field(i).Type
 			varValue := dcElems.Field(i).Interface()
+                        if _, ok := coreFieldsNullMap[varName]; ok {
+                                continue
+                        }
 			keyVal := fmt.Sprint(varValue)
 			key := convertKey(varName, keyVal, varType.Kind())
 			if key == "" {
@@ -59,16 +72,13 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
 				name = keyVal
 			}
 			if varName == "DefaultLoadObject" {
-				dlo := "["
-				dloBody := processLoadObject(varValue.(*gtm.LoadObject))
-				if dloBody == "" {
-					dlo += "]"
-				} else {
-					dlo += "{\n"
-					dlo += dloBody
-					dlo += tab4 + "}]"
+				if varValue.(*gtm.LoadObject) == nil {
+					continue
 				}
-				keyVal = dlo
+				datacenterBody += tab4 + key + " {\n"
+				datacenterBody += processLoadObject(varValue.(*gtm.LoadObject))
+				datacenterBody += tab4 + "}\n"
+				continue
 			}
 			datacenterBody += tab4 + key + " = "
 			if varType.Kind() == reflect.String {

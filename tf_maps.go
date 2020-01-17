@@ -59,9 +59,13 @@ func processCidrmaps(cidrmaps []*gtm.CidrMap, cidrImportList map[string][]int, d
 			}
 			switch varName {
 			case "DefaultDatacenter":
-				keyVal = processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
-			case "Assignments":
-				keyVal = processCidrAssignments(varValue.([]*gtm.CidrAssignment))
+                                mapBody += tab4 + key + " {\n"
+                                mapBody += processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
+                                mapBody += tab4 + "}\n"
+                                continue
+                        case "Assignments":
+                                mapBody += processCidrAssignments(varValue.([]*gtm.CidrAssignment))
+                                continue
 			}
 			mapBody += tab4 + key + " = "
 			if varType.Kind() == reflect.String {
@@ -115,9 +119,13 @@ func processGeomaps(geomaps []*gtm.GeoMap, geoImportList map[string][]int, dcIL 
 			}
 			switch varName {
 			case "DefaultDatacenter":
-				keyVal = processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
-			case "Assignments":
-				keyVal = processGeoAssignments(varValue.([]*gtm.GeoAssignment))
+                                mapBody += tab4 + key + " {\n"
+                                mapBody += processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
+                                mapBody += tab4 + "}\n"
+                                continue
+                        case "Assignments":
+				mapBody += processGeoAssignments(varValue.([]*gtm.GeoAssignment))
+				continue
 			}
 			mapBody += tab4 + key + " = "
 			if varType.Kind() == reflect.String {
@@ -171,9 +179,13 @@ func processAsmaps(asmaps []*gtm.AsMap, asImportList map[string][]int, dcIL map[
 			}
 			switch varName {
 			case "DefaultDatacenter":
-				keyVal = processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
+				mapBody += tab4 + key + " {\n"
+				mapBody += processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
+				mapBody += tab4 + "}\n"
+				continue
 			case "Assignments":
-				keyVal = processAsAssignments(varValue.([]*gtm.AsAssignment))
+				mapBody += processAsAssignments(varValue.([]*gtm.AsAssignment))
+				continue
 			}
 			mapBody += tab4 + key + " = "
 			if varType.Kind() == reflect.String {
@@ -204,9 +216,6 @@ func processAsmaps(asmaps []*gtm.AsMap, asImportList map[string][]int, dcIL map[
 func processDefaultDatacenter(ddc *gtm.DatacenterBase, structreq bool) string {
 
 	ddcString := ""
-	if structreq {
-		ddcString += "[{\n"
-	}
 	ddcElems := reflect.ValueOf(ddc).Elem()
 	for i := 0; i < ddcElems.NumField(); i++ {
 		varName := ddcElems.Type().Field(i).Name
@@ -220,11 +229,10 @@ func processDefaultDatacenter(ddc *gtm.DatacenterBase, structreq bool) string {
 			ddcString += tab8 + key + " = " + keyVal + "\n"
 		}
 	}
-	if structreq {
-		ddcString += tab4 + "}]"
-	} else {
+	if !structreq {
 		ddcString = strings.TrimSuffix(ddcString, "\n") // remove trailing new line
 	}
+
 	return ddcString
 
 }
@@ -232,14 +240,14 @@ func processDefaultDatacenter(ddc *gtm.DatacenterBase, structreq bool) string {
 func processCidrAssignments(assigns []*gtm.CidrAssignment) string {
 
 	if len(assigns) == 0 {
-		return "[]"
+		return ""
 	}
-	assignString := "[{\n" // assume MT
-	for ii, assign := range assigns {
+	assignString := "" 
+	for _, assign := range assigns {
 		aElems := reflect.ValueOf(assign).Elem()
-		assignString += processAssignmentsBase(aElems, "Blocks", (ii < len(assigns)-1))
+		assignString += processAssignmentsBase(aElems, "Blocks")
 	}
-	assignString += tab4 + "]"
+	
 	return assignString
 
 }
@@ -247,14 +255,14 @@ func processCidrAssignments(assigns []*gtm.CidrAssignment) string {
 func processGeoAssignments(assigns []*gtm.GeoAssignment) string {
 
 	if len(assigns) == 0 {
-		return "[]"
+		return ""
 	}
-	assignString := "[{\n" // assume MT
-	for ii, assign := range assigns {
+	assignString := "" 
+	for _, assign := range assigns {
 		aElems := reflect.ValueOf(assign).Elem()
-		assignString += processAssignmentsBase(aElems, "Countries", (ii < len(assigns)-1))
+		assignString += processAssignmentsBase(aElems, "Countries")
 	}
-	assignString += tab4 + "]"
+	
 	return assignString
 
 }
@@ -262,21 +270,21 @@ func processGeoAssignments(assigns []*gtm.GeoAssignment) string {
 func processAsAssignments(assigns []*gtm.AsAssignment) string {
 
 	if len(assigns) == 0 {
-		return "[]"
+		return ""
 	}
-	assignString := "[{\n" // assume MT
-	for ii, assign := range assigns {
+	assignString := "" 
+	for _, assign := range assigns {
 		aElems := reflect.ValueOf(assign).Elem()
-		assignString += processAssignmentsBase(aElems, "AsNumbers", (ii < len(assigns)-1))
+		assignString += processAssignmentsBase(aElems, "AsNumbers")
 	}
-	assignString += tab4 + "]"
+
 	return assignString
 
 }
 
-func processAssignmentsBase(elem reflect.Value, assignKey string, last bool) string {
+func processAssignmentsBase(elem reflect.Value, assignKey string) string {
 
-	assignStr := ""
+	assignStr := tab4 + "assignment {\n"
 	for i := 0; i < elem.NumField(); i++ {
 		varName := elem.Type().Field(i).Name
 		varType := elem.Type().Field(i).Type
@@ -302,11 +310,8 @@ func processAssignmentsBase(elem reflect.Value, assignKey string, last bool) str
 			}
 		}
 	}
-	if last {
-		assignStr += tab8 + "},\n" + tab8 + "{\n"
-	} else {
-		assignStr += tab8 + "}\n"
-	}
+	assignStr += tab4 + "}\n"
+
 	return assignStr
 
 }

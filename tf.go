@@ -32,15 +32,8 @@ var ignoredKeys map[string]int = map[string]int{"AsMaps": 0, "Resources": 0, "Pr
 	"WeightedHashBitsForIPv4": 0, "WeightedHashBitsForIPv6": 0}
 
 var mappedKeys map[string]string = map[string]string{"DynamicTTL": "dynamic_ttl", "StaticTTL": "static_ttl", "StaticRRSets": "static_rr_sets",
-	"TTL": "ttl", "DatacenterId": "datacenter_id", "HandoutCName": "handout_cname"}
-
-var intNullableKeys map[string]int = map[string]int{"UpperBound": 0, "DefaultTimeOutPenalty": 0, "CloneOf": 0, "Latitude": 0, "Longitude": 0,
-	"DefaultErrorPenalty": 0, "DefaultTimeoutPenalty": 0, "HealthThreshold": 0,
-	"HealthMultiplier": 0, "HealthMax": 0}
-
-var stringNotNullableKeys map[string]int = map[string]int{"Nickname": 0, "Name": 0, "Value": 0, "LoadObject": 0, "HandoutCName": 0, "Type": 0, "TestObject": 0,
-	"RequestString": 0, "ResponseString": 0, "TestObjectProtocol": 0, "TestObjectPassword": 0, "SslClientPrivateKey": 0, "SslClientCertificate": 0,
-	"HostHeader": 0, "TestObjectUsername": 0, "ResourceType": 0}
+	"TTL": "ttl", "DatacenterId": "datacenter_id", "HandoutCName": "handout_cname", "StickinessBonusPercentage": "stickiness_bonus_percentage",
+	"CName": "cname"}
 
 var tab4 = "    "
 var tab8 = "        "
@@ -66,18 +59,29 @@ var dependsClauseP1 = fmt.Sprintf(`    depends_on = [
 // process domain
 func processDomain(domain *gtm.Domain, resourceDomainName string) string {
 
+	var nullFieldsMap gtm.NullPerObjectAttributeStruct
+	coreFieldsNullMap := getDomainNullValues().CoreObjectFields
+	
 	domainBody := ""
 	domainString := gtmHeaderConfig
+
+	fmt.Println("Domain Null Map: ", nullFieldsMap)
+	fmt.Println("Domain Null Core Map: ",coreFieldsNullMap)
+
 	domElems := reflect.ValueOf(domain).Elem()
 	for i := 0; i < domElems.NumField(); i++ {
 		varName := domElems.Type().Field(i).Name
 		varType := domElems.Type().Field(i).Type
 		varValue := domElems.Field(i).Interface()
-		keyVal := fmt.Sprint(varValue)
-		key := convertKey(varName, keyVal, varType.Kind())
-		if key == "" {
-			continue
-		}
+                // Skip if field is null
+                if _, ok := coreFieldsNullMap[varName]; ok {
+                        continue
+                }
+                keyVal := fmt.Sprint(varValue)
+                key := convertKey(varName, keyVal, varType.Kind())
+                if key == "" {
+                        continue
+                }
 		if varName == "EmailNotificationList" {
 			keyVal = processStringList(domain.EmailNotificationList)
 		}
@@ -143,14 +147,6 @@ func convertKey(inKey string, keyVal string, keyKind reflect.Kind) string {
 
 	if _, ok := ignoredKeys[inKey]; ok {
 		return ""
-	}
-	if _, ok := intNullableKeys[inKey]; ok {
-		return ""
-	}
-	if keyKind == reflect.String && keyVal == "" {
-		if _, ok := stringNotNullableKeys[inKey]; !ok {
-			return ""
-		}
 	}
 	if val, ok := mappedKeys[inKey]; ok {
 		return val

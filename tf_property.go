@@ -15,13 +15,10 @@
 package main
 
 import (
-	//"io/ioutil"
-	//"path/filepath"
-	//"encoding/json"
-	//"os"
 	"fmt"
 	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
 	"reflect"
+	"strconv"
 )
 
 // property
@@ -31,11 +28,25 @@ resource "akamai_gtm_property" `)
 // Process property resources
 func processProperties(properties []*gtm.Property, pImportList map[string][]int, dcImportList map[int]string, resourceDomainName string) string {
 
+	// Get Null values list
+        var coreFieldsNullMap map[string]string
+	var childFieldsNullMap  map[string]interface{}
+
+        nullFieldsMap := getNullValuesList("Properties")       
+
 	propertiesString := ""
 	for _, property := range properties {
 		if _, ok := pImportList[property.Name]; !ok {
 			continue
 		}
+		// Retrieve Core null fields map
+		if propNullFieldObjectMap, ok := nullFieldsMap[property.Name]; ok {
+			coreFieldsNullMap = propNullFieldObjectMap.CoreObjectFields
+			childFieldsNullMap = propNullFieldObjectMap.ChildObjectFields
+		} else {
+			coreFieldsNullMap = map[string]string{}
+			childFieldsNullMap = map[string]interface{}{}
+		} 
 		propertyBody := ""
 		name := ""
 		propString := gtmPropertyConfigP1
@@ -44,6 +55,9 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 			varName := propElems.Type().Field(i).Name
 			varType := propElems.Type().Field(i).Type
 			varValue := propElems.Field(i).Interface()
+ 			if _, ok := coreFieldsNullMap[varName]; ok {
+				continue
+			}
 			keyVal := fmt.Sprint(varValue)
 			key := convertKey(varName, keyVal, varType.Kind())
 			if key == "" {
@@ -51,22 +65,31 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 			}
 			switch varName {
 			case "LivenessTests":
-				keyVal = processLivenessTests(varValue.([]*gtm.LivenessTest))
+                                if _, ok := childFieldsNullMap[varName]; !ok {
+                                        continue
+                                }
+				propertyBody += processLivenessTests(varValue.([]*gtm.LivenessTest), childFieldsNullMap[varName].(map[string]gtm.NullPerObjectAttributeStruct))
 			case "TrafficTargets":
-				keyVal = processTrafficTargets(varValue.([]*gtm.TrafficTarget))
+                                if _, ok := childFieldsNullMap[varName]; !ok {
+                                        continue
+                                }
+				propertyBody += processTrafficTargets(varValue.([]*gtm.TrafficTarget), childFieldsNullMap[varName].(map[string]gtm.NullPerObjectAttributeStruct))
 			case "StaticRRSets":
-				keyVal = processStaticRRSets(varValue.([]*gtm.StaticRRSet))
+				if _, ok := childFieldsNullMap[varName]; !ok {
+					continue
+				}
+				propertyBody += processStaticRRSets(varValue.([]*gtm.StaticRRSet), childFieldsNullMap[varName].(map[string]gtm.NullPerObjectAttributeStruct))
 			case "MxRecords":
 				continue // deprecated in schema 1.4+
 			default:
 				if key == "name" {
 					name = keyVal
 				}
-			}
-			if varType.Kind() == reflect.String {
-				propertyBody += tab4 + key + " = \"" + keyVal + "\"\n"
-			} else {
-				propertyBody += tab4 + key + " = " + keyVal + "\n"
+				if varType.Kind() == reflect.String {
+					propertyBody += tab4 + key + " = \"" + keyVal + "\"\n"
+				} else {
+					propertyBody += tab4 + key + " = " + keyVal + "\n"
+				}
 			}
 		}
 		propString += "\"" + name + "\" {\n"
@@ -91,10 +114,11 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 func processHttpHeaders(headers []*gtm.HttpHeader) string {
 
 	if len(headers) == 0 {
-		return "[]"
+		return ""
 	}
-	headerString := "[{\n"
-	for ii, header := range headers {
+	headerString := ""
+	for _, header := range headers {
+		headerString += tab8 + "http_header {\n"
 		headElems := reflect.ValueOf(header).Elem()
 		for i := 0; i < headElems.NumField(); i++ {
 			varName := headElems.Type().Field(i).Name
@@ -108,29 +132,31 @@ func processHttpHeaders(headers []*gtm.HttpHeader) string {
 				headerString += tab12 + key + " = " + keyVal + "\n"
 			}
 		}
-		if ii < len(headers)-1 {
-			headerString += tab12 + "},\n" + tab12 + "{\n"
-		} else {
-			headerString += tab12 + "}\n"
-		}
+		headerString += tab8 + "}\n"
 	}
-	headerString += tab8 + "]"
+
 	return headerString
 }
 
-func processTrafficTargets(targets []*gtm.TrafficTarget) string {
+func processTrafficTargets(targets []*gtm.TrafficTarget, childObjectList map[string]gtm.NullPerObjectAttributeStruct) string {
 
 	if len(targets) == 0 {
-		return "[]"
+		return ""
 	}
-	targetString := "[{\n"
-	for ii, target := range targets {
+	targetString := ""
+	for _, target := range targets {
+		targetName := strconv.Itoa(target.DatacenterId)
+		trgNullFields := childObjectList[targetName]
+		targetString += tab4 + "traffic_target {\n"
 		targElems := reflect.ValueOf(target).Elem()
 		for i := 0; i < targElems.NumField(); i++ {
 			varName := targElems.Type().Field(i).Name
 			varType := targElems.Type().Field(i).Type
 			varValue := targElems.Field(i).Interface()
 			keyVal := fmt.Sprint(varValue)
+			if _, ok := trgNullFields.CoreObjectFields[varName]; ok {
+                                continue
+                        }
 			key := convertKey(varName, keyVal, varType.Kind())
 			if varName == "Servers" {
 				keyVal = processStringList(target.Servers)
@@ -141,36 +167,38 @@ func processTrafficTargets(targets []*gtm.TrafficTarget) string {
 				targetString += tab8 + key + " = " + keyVal + "\n"
 			}
 		}
-		if ii < len(targets)-1 {
-			targetString += tab8 + "},\n" + tab8 + "{\n"
-		} else {
-			targetString += tab8 + "}\n"
-		}
+		targetString += tab4 + "}\n"
 	}
-	targetString += tab4 + "]"
+
 	return targetString
 
 }
 
-func processLivenessTests(tests []*gtm.LivenessTest) string {
+func processLivenessTests(tests []*gtm.LivenessTest, childObjectList map[string]gtm.NullPerObjectAttributeStruct) string {
 
 	if len(tests) == 0 {
-		return "[]"
+		return ""
 	}
-	testsString := "[{\n"
-	for ii, test := range tests {
+	testsString := ""
+	for _, test := range tests {
+		liveNullFields := childObjectList[test.Name]
+		testsString += tab4 + "liveness_test {\n"
 		testElems := reflect.ValueOf(test).Elem()
 		for i := 0; i < testElems.NumField(); i++ {
 			varName := testElems.Type().Field(i).Name
 			varType := testElems.Type().Field(i).Type
 			varValue := testElems.Field(i).Interface()
+                        if _, ok := liveNullFields.CoreObjectFields[varName]; ok {
+                                continue
+                        }
 			keyVal := fmt.Sprint(varValue)
 			key := convertKey(varName, keyVal, varType.Kind())
 			if key == "" {
 				continue
 			}
 			if varName == "HttpHeaders" {
-				keyVal = processHttpHeaders(varValue.([]*gtm.HttpHeader))
+				testsString += processHttpHeaders(varValue.([]*gtm.HttpHeader))
+				continue
 			}
 			if varType.Kind() == reflect.String {
 				testsString += tab8 + key + "  = \"" + keyVal + "\"\n"
@@ -178,25 +206,24 @@ func processLivenessTests(tests []*gtm.LivenessTest) string {
 				testsString += tab8 + key + " = " + keyVal + "\n"
 			}
 		}
-		if ii < len(tests)-1 {
-			testsString += tab8 + "},\n" + tab8 + "{\n"
-		} else {
-			testsString += tab8 + "}\n"
-		}
+
+		testsString += tab4 + "}\n"
 	}
-	testsString += tab4 + "]"
 	return testsString
 
 }
 
-func processStaticRRSets(rrsets []*gtm.StaticRRSet) string {
+func processStaticRRSets(rrsets []*gtm.StaticRRSet, childObjectList map[string]gtm.NullPerObjectAttributeStruct) string {
 
 	if len(rrsets) == 0 {
-		return "[]"
+		return ""
 	}
-	setString := "[{\n"
-	for ii, set := range rrsets {
-		setElems := reflect.ValueOf(set).Elem()
+	setString := ""
+	for _, rrset := range rrsets {
+		// There are no default null values or children in rrset as of the 1.4 schema
+		//rrsetNullFields := childObjectList[rrset.Name]
+		setString += tab4 + "static_rr_set {\n"
+		setElems := reflect.ValueOf(rrset).Elem()
 		for i := 0; i < setElems.NumField(); i++ {
 			varName := setElems.Type().Field(i).Name
 			varType := setElems.Type().Field(i).Type
@@ -204,7 +231,7 @@ func processStaticRRSets(rrsets []*gtm.StaticRRSet) string {
 			keyVal := fmt.Sprint(varValue)
 			key := convertKey(varName, keyVal, varType.Kind())
 			if varName == "Rdata" {
-				keyVal = processStringList(set.Rdata)
+				keyVal = processStringList(rrset.Rdata)
 			}
 			if varType.Kind() == reflect.String {
 				setString += tab8 + key + " = \"" + keyVal + "\"\n"
@@ -212,13 +239,9 @@ func processStaticRRSets(rrsets []*gtm.StaticRRSet) string {
 				setString += tab8 + key + " = " + keyVal + "\n"
 			}
 		}
-		if ii < len(rrsets)-1 {
-			setString += tab8 + "},\n" + tab8 + "{\n"
-		} else {
-			setString += tab8 + "}\n"
-		}
+
+		setString += tab4 + "}\n"
 	}
-	setString += tab4 + "]"
 	return setString
 
 }

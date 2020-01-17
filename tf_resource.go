@@ -31,11 +31,21 @@ resource "akamai_gtm_resource" `)
 // Process resource resources
 func processResources(resources []*gtm.Resource, rImportList map[string][]int, dcIL map[int]string, resourceDomainName string) string {
 
+        // Get Null values list
+        var coreFieldsNullMap map[string]string
+        nullFieldsMap := getNullValuesList("Resources")
+
 	resourcesString := ""
 	for _, resource := range resources {
 		if _, ok := rImportList[resource.Name]; !ok {
 			continue
 		}
+                // Retrieve Core null fields map
+                if rsrcNullFieldObjectMap, ok := nullFieldsMap[resource.Name]; ok {
+                        coreFieldsNullMap = rsrcNullFieldObjectMap.CoreObjectFields
+                } else {
+                        coreFieldsNullMap = map[string]string{}
+                }
 		resourceBody := ""
 		name := ""
 		rString := gtmResourceConfigP1
@@ -44,6 +54,9 @@ func processResources(resources []*gtm.Resource, rImportList map[string][]int, d
 			varName := rElems.Type().Field(i).Name
 			varType := rElems.Type().Field(i).Type
 			varValue := rElems.Field(i).Interface()
+                        if _, ok := coreFieldsNullMap[varName]; ok {
+                                continue
+                        }
 			keyVal := fmt.Sprint(varValue)
 			key := convertKey(varName, keyVal, varType.Kind())
 			if key == "" {
@@ -54,6 +67,7 @@ func processResources(resources []*gtm.Resource, rImportList map[string][]int, d
 			}
 			if varName == "ResourceInstances" {
 				keyVal = processResourceInstances(varValue.([]*gtm.ResourceInstance))
+				continue
 			}
 			resourceBody += tab4 + key + " = "
 			if varType.Kind() == reflect.String {
@@ -84,10 +98,11 @@ func processResources(resources []*gtm.Resource, rImportList map[string][]int, d
 func processResourceInstances(instances []*gtm.ResourceInstance) string {
 
 	if len(instances) == 0 {
-		return "[]"
+		return ""
 	}
-	instanceString := "[{\n" // assume MT
-	for ii, instance := range instances {
+	instanceString := "" 
+	for _, instance := range instances {
+		instanceString += tab4 + "resource_instance {\n"
 		instElems := reflect.ValueOf(instance).Elem()
 		for i := 0; i < instElems.NumField(); i++ {
 			varName := instElems.Type().Field(i).Name
@@ -106,13 +121,9 @@ func processResourceInstances(instances []*gtm.ResourceInstance) string {
 				instanceString += tab8 + key + " = " + keyVal + "\n"
 			}
 		}
-		if ii < len(instances)-1 {
-			instanceString += tab8 + "},\n" + tab8 + "{\n"
-		} else {
-			instanceString += tab8 + "}\n"
-		}
+		instanceString += tab4 + "}\n"
 	}
-	instanceString += tab4 + "]"
+
 	return instanceString
 
 }
