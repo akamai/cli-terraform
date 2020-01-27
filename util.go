@@ -22,7 +22,7 @@ import (
 func setHelpTemplates() {
 	cli.AppHelpTemplate =
 		color.YellowString("Usage: \n") +
-			`{{if or (or (eq .HelpName "akamai-gtm update-datacenter") (eq .HelpName "akamai gtm update-datacenter")) (or (eq .HelpName "akamai-gtm update-property") (eq .HelpName "akamai gtm update-property")) (or (eq .HelpName "akamai-gtm query-status") (eq .HelpName "akamai gtm query-status"))}}` +
+			`{{if or (or (eq .HelpName "akamai-terraform-gtm create-domain") (eq .HelpName "akamai terraform-gtm create-domain"))}}` +
 			color.BlueString(`	{{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}}{{if .ArgsUsage}} {{.ArgsUsage}}{{end}}{{end}}`) +
 			`{{else}}` +
 			color.BlueString(`	{{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}}{{if .VisibleFlags}}{{range .VisibleFlags}} [--{{.Name}}]{{end}}{{end}}{{if .ArgsUsage}} {{.ArgsUsage}}{{end}}{{if .Commands}} <command> [sub-command]{{end}}{{end}}`) +
@@ -42,7 +42,7 @@ func setHelpTemplates() {
 			"\n\n{{end}}" +
 
 			"{{if .VisibleCommands}}" +
-			`{{if or (or (eq .HelpName "akamai-gtm update-datacenter") (eq .HelpName "akamai gtm update-datacenter")) (or (eq .HelpName "akamai-gtm update-property") (eq .HelpName "akamai gtm update-property")) (or (eq .HelpName "akamai-gtm query-status") (eq .HelpName "akamai gtm query-status"))}}` +
+			`{{if or (or (eq .HelpName "akamai-terraform-gtm create-domain") (eq .HelpName "akamai terraform-gtm create-domain"))}}` +
 			`{{else}}` +
 			color.YellowString("Built-In Commands:\n") +
 			`{{end}}` +

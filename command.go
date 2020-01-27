@@ -18,8 +18,6 @@ import (
 	//"errors"
 	akamai "github.com/akamai/cli-common-golang"
 	"github.com/urfave/cli"
-	//"strconv"
-	//"strings"
 )
 
 var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
@@ -33,7 +31,7 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "tfworkpath",
-				Usage: "file path location for palcement of created and/or modified artifacts. Default: current directory",
+				Usage: "file path location for placement of created and/or modified artifacts. Default: current directory",
 			},
 			cli.BoolTFlag{
 				Name:  "resources",
@@ -41,22 +39,8 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 			},
 			cli.BoolFlag{
 				Name:  "createconfig",
-				Usage: "Create terrform configuration, <domain>.tf, and import command script, <domain>_import.script files",
+				Usage: "Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files",
 			},
-			/*
-					cli.BoolFlag{
-						Name:  "verbose",
-						Usage: "Display verbose result status.",
-					},
-					cli.BoolFlag{
-						Name:  "json",
-						Usage: "Return status in JSON format.",
-					},
-				cli.BoolFlag{
-					Name:  "complete",
-					Usage: "Wait up to 5 minutes for change completion",
-				},
-			*/
 		},
 		BashComplete: akamai.DefaultAutoComplete,
 	})

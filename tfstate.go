@@ -26,7 +26,7 @@ type tfStateStruct struct {
 	Terraform_version string      `json:"terraform_version"`
 	Serial            int         `json:"serial"`
 	Lineage           string      `json:"lineage"`
-	Outputs           interface{} `json:"outputs,omitempty"`
+	Outputs           interface{} `json:"outputs"`
 	Resources         []*Resource `json:"resources"`
 }
 
@@ -35,7 +35,7 @@ type Resource struct {
 	Type      string        `json:"type"`
 	Name      string        `json:"name"`
 	Provider  string        `json:"provider"`
-	Instances []interface{} `json:"instances,omitempty"`
+	Instances []interface{} `json:"instances"`
 }
 
 var tfState *tfStateStruct

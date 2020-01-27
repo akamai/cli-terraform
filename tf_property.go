@@ -29,10 +29,10 @@ resource "akamai_gtm_property" `)
 func processProperties(properties []*gtm.Property, pImportList map[string][]int, dcImportList map[int]string, resourceDomainName string) string {
 
 	// Get Null values list
-        var coreFieldsNullMap map[string]string
-	var childFieldsNullMap  map[string]interface{}
+	var coreFieldsNullMap map[string]string
+	var childFieldsNullMap map[string]interface{}
 
-        nullFieldsMap := getNullValuesList("Properties")       
+	nullFieldsMap := getNullValuesList("Properties")
 
 	propertiesString := ""
 	for _, property := range properties {
@@ -46,7 +46,7 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 		} else {
 			coreFieldsNullMap = map[string]string{}
 			childFieldsNullMap = map[string]interface{}{}
-		} 
+		}
 		propertyBody := ""
 		name := ""
 		propString := gtmPropertyConfigP1
@@ -55,7 +55,7 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 			varName := propElems.Type().Field(i).Name
 			varType := propElems.Type().Field(i).Type
 			varValue := propElems.Field(i).Interface()
- 			if _, ok := coreFieldsNullMap[varName]; ok {
+			if _, ok := coreFieldsNullMap[varName]; ok {
 				continue
 			}
 			keyVal := fmt.Sprint(varValue)
@@ -65,14 +65,14 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 			}
 			switch varName {
 			case "LivenessTests":
-                                if _, ok := childFieldsNullMap[varName]; !ok {
-                                        continue
-                                }
+				if _, ok := childFieldsNullMap[varName]; !ok {
+					continue
+				}
 				propertyBody += processLivenessTests(varValue.([]*gtm.LivenessTest), childFieldsNullMap[varName].(map[string]gtm.NullPerObjectAttributeStruct))
 			case "TrafficTargets":
-                                if _, ok := childFieldsNullMap[varName]; !ok {
-                                        continue
-                                }
+				if _, ok := childFieldsNullMap[varName]; !ok {
+					continue
+				}
 				propertyBody += processTrafficTargets(varValue.([]*gtm.TrafficTarget), childFieldsNullMap[varName].(map[string]gtm.NullPerObjectAttributeStruct))
 			case "StaticRRSets":
 				if _, ok := childFieldsNullMap[varName]; !ok {
@@ -93,13 +93,13 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 			}
 		}
 		propString += "\"" + name + "\" {\n"
-		propString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
+		propString += gtmRConfigP2 + resourceDomainName + ".name\n"
 		propString += propertyBody
-		propString += dependsClauseP1 + resourceDomainName + "\""
+		propString += dependsClauseP1 + resourceDomainName
 		// process dc dependencies (only one type in 1.4 schema)
 		for _, dcDep := range pImportList[name] {
 			propString += ",\n"
-			propString += tab8 + "\"" + datacenterResource + "." + dcImportList[dcDep] + "\""
+			propString += tab8 + datacenterResource + "." + dcImportList[dcDep]
 		}
 		propString += "\n"
 		propString += tab4 + "]\n"
@@ -155,8 +155,8 @@ func processTrafficTargets(targets []*gtm.TrafficTarget, childObjectList map[str
 			varValue := targElems.Field(i).Interface()
 			keyVal := fmt.Sprint(varValue)
 			if _, ok := trgNullFields.CoreObjectFields[varName]; ok {
-                                continue
-                        }
+				continue
+			}
 			key := convertKey(varName, keyVal, varType.Kind())
 			if varName == "Servers" {
 				keyVal = processStringList(target.Servers)
@@ -188,9 +188,9 @@ func processLivenessTests(tests []*gtm.LivenessTest, childObjectList map[string]
 			varName := testElems.Type().Field(i).Name
 			varType := testElems.Type().Field(i).Type
 			varValue := testElems.Field(i).Interface()
-                        if _, ok := liveNullFields.CoreObjectFields[varName]; ok {
-                                continue
-                        }
+			if _, ok := liveNullFields.CoreObjectFields[varName]; ok {
+				continue
+			}
 			keyVal := fmt.Sprint(varValue)
 			key := convertKey(varName, keyVal, varType.Kind())
 			if key == "" {

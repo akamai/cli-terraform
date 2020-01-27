@@ -59,13 +59,13 @@ func processCidrmaps(cidrmaps []*gtm.CidrMap, cidrImportList map[string][]int, d
 			}
 			switch varName {
 			case "DefaultDatacenter":
-                                mapBody += tab4 + key + " {\n"
-                                mapBody += processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
-                                mapBody += tab4 + "}\n"
-                                continue
-                        case "Assignments":
-                                mapBody += processCidrAssignments(varValue.([]*gtm.CidrAssignment))
-                                continue
+				mapBody += tab4 + key + " {\n"
+				mapBody += processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
+				mapBody += tab4 + "}\n"
+				continue
+			case "Assignments":
+				mapBody += processCidrAssignments(varValue.([]*gtm.CidrAssignment))
+				continue
 			}
 			mapBody += tab4 + key + " = "
 			if varType.Kind() == reflect.String {
@@ -75,13 +75,13 @@ func processCidrmaps(cidrmaps []*gtm.CidrMap, cidrImportList map[string][]int, d
 			}
 		}
 		mString += "\"" + name + "\" {\n"
-		mString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
+		mString += gtmRConfigP2 + resourceDomainName + ".name\n"
 		mString += mapBody
-		mString += dependsClauseP1 + resourceDomainName + "\""
+		mString += dependsClauseP1 + resourceDomainName
 		// process dc dependencies (only one type in 1.4 schema)
 		for _, dcDep := range cidrImportList[name] {
 			mString += ",\n"
-			mString += tab8 + "\"" + datacenterResource + "." + dcIL[dcDep] + "\""
+			mString += tab8 + datacenterResource + "." + dcIL[dcDep]
 		}
 		mString += "\n"
 		mString += tab4 + "]\n"
@@ -119,11 +119,11 @@ func processGeomaps(geomaps []*gtm.GeoMap, geoImportList map[string][]int, dcIL 
 			}
 			switch varName {
 			case "DefaultDatacenter":
-                                mapBody += tab4 + key + " {\n"
-                                mapBody += processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
-                                mapBody += tab4 + "}\n"
-                                continue
-                        case "Assignments":
+				mapBody += tab4 + key + " {\n"
+				mapBody += processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
+				mapBody += tab4 + "}\n"
+				continue
+			case "Assignments":
 				mapBody += processGeoAssignments(varValue.([]*gtm.GeoAssignment))
 				continue
 			}
@@ -135,13 +135,13 @@ func processGeomaps(geomaps []*gtm.GeoMap, geoImportList map[string][]int, dcIL 
 			}
 		}
 		mString += "\"" + name + "\" {\n"
-		mString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
+		mString += gtmRConfigP2 + resourceDomainName + ".name\n"
 		mString += mapBody
-		mString += dependsClauseP1 + resourceDomainName + "\""
+		mString += dependsClauseP1 + resourceDomainName
 		// process dc dependencies (only one type in 1.4 schema)
 		for _, dcDep := range geoImportList[name] {
 			mString += ",\n"
-			mString += tab8 + "\"" + datacenterResource + "." + dcIL[dcDep] + "\""
+			mString += tab8 + datacenterResource + "." + dcIL[dcDep]
 		}
 		mString += "\n"
 		mString += tab4 + "]\n"
@@ -195,13 +195,13 @@ func processAsmaps(asmaps []*gtm.AsMap, asImportList map[string][]int, dcIL map[
 			}
 		}
 		mString += "\"" + name + "\" {\n"
-		mString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
+		mString += gtmRConfigP2 + resourceDomainName + ".name\n"
 		mString += mapBody
-		mString += dependsClauseP1 + resourceDomainName + "\""
+		mString += dependsClauseP1 + resourceDomainName
 		// process dc dependencies (only one type in 1.4 schema)
 		for _, dcDep := range asImportList[name] {
 			mString += ",\n"
-			mString += tab8 + "\"" + datacenterResource + "." + dcIL[dcDep] + "\""
+			mString += tab8 + datacenterResource + "." + dcIL[dcDep]
 		}
 		mString += "\n"
 		mString += tab4 + "]\n"
@@ -242,12 +242,12 @@ func processCidrAssignments(assigns []*gtm.CidrAssignment) string {
 	if len(assigns) == 0 {
 		return ""
 	}
-	assignString := "" 
+	assignString := ""
 	for _, assign := range assigns {
 		aElems := reflect.ValueOf(assign).Elem()
 		assignString += processAssignmentsBase(aElems, "Blocks")
 	}
-	
+
 	return assignString
 
 }
@@ -257,12 +257,12 @@ func processGeoAssignments(assigns []*gtm.GeoAssignment) string {
 	if len(assigns) == 0 {
 		return ""
 	}
-	assignString := "" 
+	assignString := ""
 	for _, assign := range assigns {
 		aElems := reflect.ValueOf(assign).Elem()
 		assignString += processAssignmentsBase(aElems, "Countries")
 	}
-	
+
 	return assignString
 
 }
@@ -272,7 +272,7 @@ func processAsAssignments(assigns []*gtm.AsAssignment) string {
 	if len(assigns) == 0 {
 		return ""
 	}
-	assignString := "" 
+	assignString := ""
 	for _, assign := range assigns {
 		aElems := reflect.ValueOf(assign).Elem()
 		assignString += processAssignmentsBase(aElems, "AsNumbers")

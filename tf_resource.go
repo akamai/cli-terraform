@@ -15,10 +15,6 @@
 package main
 
 import (
-	//"io/ioutil"
-	//"path/filepath"
-	//"encoding/json"
-	//"os"
 	"fmt"
 	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
 	"reflect"
@@ -31,21 +27,21 @@ resource "akamai_gtm_resource" `)
 // Process resource resources
 func processResources(resources []*gtm.Resource, rImportList map[string][]int, dcIL map[int]string, resourceDomainName string) string {
 
-        // Get Null values list
-        var coreFieldsNullMap map[string]string
-        nullFieldsMap := getNullValuesList("Resources")
+	// Get Null values list
+	var coreFieldsNullMap map[string]string
+	nullFieldsMap := getNullValuesList("Resources")
 
 	resourcesString := ""
 	for _, resource := range resources {
 		if _, ok := rImportList[resource.Name]; !ok {
 			continue
 		}
-                // Retrieve Core null fields map
-                if rsrcNullFieldObjectMap, ok := nullFieldsMap[resource.Name]; ok {
-                        coreFieldsNullMap = rsrcNullFieldObjectMap.CoreObjectFields
-                } else {
-                        coreFieldsNullMap = map[string]string{}
-                }
+		// Retrieve Core null fields map
+		if rsrcNullFieldObjectMap, ok := nullFieldsMap[resource.Name]; ok {
+			coreFieldsNullMap = rsrcNullFieldObjectMap.CoreObjectFields
+		} else {
+			coreFieldsNullMap = map[string]string{}
+		}
 		resourceBody := ""
 		name := ""
 		rString := gtmResourceConfigP1
@@ -54,9 +50,9 @@ func processResources(resources []*gtm.Resource, rImportList map[string][]int, d
 			varName := rElems.Type().Field(i).Name
 			varType := rElems.Type().Field(i).Type
 			varValue := rElems.Field(i).Interface()
-                        if _, ok := coreFieldsNullMap[varName]; ok {
-                                continue
-                        }
+			if _, ok := coreFieldsNullMap[varName]; ok {
+				continue
+			}
 			keyVal := fmt.Sprint(varValue)
 			key := convertKey(varName, keyVal, varType.Kind())
 			if key == "" {
@@ -66,7 +62,7 @@ func processResources(resources []*gtm.Resource, rImportList map[string][]int, d
 				name = keyVal
 			}
 			if varName == "ResourceInstances" {
-				keyVal = processResourceInstances(varValue.([]*gtm.ResourceInstance))
+				resourceBody += processResourceInstances(varValue.([]*gtm.ResourceInstance))
 				continue
 			}
 			resourceBody += tab4 + key + " = "
@@ -77,13 +73,13 @@ func processResources(resources []*gtm.Resource, rImportList map[string][]int, d
 			}
 		}
 		rString += "\"" + name + "\" {\n"
-		rString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
+		rString += gtmRConfigP2 + resourceDomainName + ".name\n"
 		rString += resourceBody
-		rString += dependsClauseP1 + resourceDomainName + "\""
+		rString += dependsClauseP1 + resourceDomainName
 		// process dc dependencies (only one type in 1.4 schema)
 		for _, dcDep := range rImportList[name] {
 			rString += ",\n"
-			rString += tab8 + "\"" + datacenterResource + "." + dcIL[dcDep] + "\""
+			rString += tab8 + datacenterResource + "." + dcIL[dcDep]
 		}
 		rString += "\n"
 		rString += tab4 + "]\n"
@@ -100,7 +96,7 @@ func processResourceInstances(instances []*gtm.ResourceInstance) string {
 	if len(instances) == 0 {
 		return ""
 	}
-	instanceString := "" 
+	instanceString := ""
 	for _, instance := range instances {
 		instanceString += tab4 + "resource_instance {\n"
 		instElems := reflect.ValueOf(instance).Elem()

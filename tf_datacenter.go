@@ -15,10 +15,6 @@
 package main
 
 import (
-	//"io/ioutil"
-	//"path/filepath"
-	//"encoding/json"
-	//"os"
 	"fmt"
 	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
 	"reflect"
@@ -32,21 +28,21 @@ resource "akamai_gtm_datacenter" `)
 // Process datacenter resources
 func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]string, resourceDomainName string) string {
 
-        // Get Null values list
-        var coreFieldsNullMap map[string]string
-        nullFieldsMap := getNullValuesList("Datacenters")
+	// Get Null values list
+	var coreFieldsNullMap map[string]string
+	nullFieldsMap := getNullValuesList("Datacenters")
 
 	datacentersString := ""
 	for _, datacenter := range datacenters {
 		if _, ok := dcImportList[datacenter.DatacenterId]; !ok {
 			continue
 		}
-                // Retrieve Core null fields map
-                if dcNullFieldObjectMap, ok := nullFieldsMap[strconv.Itoa(datacenter.DatacenterId)]; ok {
-                        coreFieldsNullMap = dcNullFieldObjectMap.CoreObjectFields
-                } else {
-                        coreFieldsNullMap = map[string]string{}
-                }
+		// Retrieve Core null fields map
+		if dcNullFieldObjectMap, ok := nullFieldsMap[strconv.Itoa(datacenter.DatacenterId)]; ok {
+			coreFieldsNullMap = dcNullFieldObjectMap.CoreObjectFields
+		} else {
+			coreFieldsNullMap = map[string]string{}
+		}
 		datacenterBody := ""
 		name := ""
 		dcid := 0
@@ -56,9 +52,9 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
 			varName := dcElems.Type().Field(i).Name
 			varType := dcElems.Type().Field(i).Type
 			varValue := dcElems.Field(i).Interface()
-                        if _, ok := coreFieldsNullMap[varName]; ok {
-                                continue
-                        }
+			if _, ok := coreFieldsNullMap[varName]; ok {
+				continue
+			}
 			keyVal := fmt.Sprint(varValue)
 			key := convertKey(varName, keyVal, varType.Kind())
 			if key == "" {
@@ -75,6 +71,11 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
 				if varValue.(*gtm.LoadObject) == nil {
 					continue
 				}
+				loadObject := varValue.(*gtm.LoadObject)
+				// hack. If all load object fields are defaults, assume its MT
+				if len(loadObject.LoadServers) == 0 && loadObject.LoadObject == "" && loadObject.LoadObjectPort == 0 {
+					continue
+				}
 				datacenterBody += tab4 + key + " {\n"
 				datacenterBody += processLoadObject(varValue.(*gtm.LoadObject))
 				datacenterBody += tab4 + "}\n"
@@ -88,9 +89,9 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
 			}
 		}
 		dcString += "\"" + name + "\" {\n"
-		dcString += gtmRConfigP2 + resourceDomainName + ".name}\"\n"
+		dcString += gtmRConfigP2 + resourceDomainName + ".name\n"
 		dcString += datacenterBody
-		dcString += dependsClauseP1 + resourceDomainName + "\"\n"
+		dcString += dependsClauseP1 + resourceDomainName + "\n"
 		dcString += tab4 + "]\n"
 		dcString += "}\n"
 		if dcid == defaultDC {

@@ -1,6 +1,6 @@
 # Akamai CLI for Global Traffic Management (GTM) Terraform Provider
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/akamai/cli-terraform-gtm)](https://goreportcard.com/report/github.com/akamai/cli-gtm) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fakamai%2Fcli-gtm.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fakamai%2Fcli-gtm?ref=badge_shield)
+[![Go Report Card](https://goreportcard.com/badge/github.com/akamai/cli-terraform-gtm)](https://goreportcard.com/report/github.com/akamai/cli-terraform-gtm) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform-gtm.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform-gtm?ref=badge_shield)
 
 An [Akamai CLI](https://developer.akamai.com/cli) package for managing Terraform GTM Domain configurations and associated objects.
 
@@ -68,4 +68,4 @@ $ akamai terraform-gtm create-domain example.akadns.net --createconfig
 
 This package is licensed under the Apache 2.0 License. See [LICENSE](LICENSE) for details.
 
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fakamai%2Fcli-gtm.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fakamai%2Fcli-gtm?ref=badge_large)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform-gtm.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform-gtm?ref=badge_large)

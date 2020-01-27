@@ -1,4 +1,4 @@
-// Copyright 2019. Akamai Technologies, Inc
+// Copyright 2020. Akamai Technologies, Inc
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ var createConfig = false
 var domainName string
 var fullImportList *importListStruct
 
+// text for gtmvars.tf construction
 var gtmvarsContent = fmt.Sprint(`variable "gtmsection" {
   default = "default"
 }
@@ -74,7 +75,7 @@ var nullFieldMap = &configgtm.NullFieldMapStruct{}
 // retrieve Null Values for Domain
 func getDomainNullValues() configgtm.NullPerObjectAttributeStruct {
 
-        return nullFieldMap.Domain
+	return nullFieldMap.Domain
 
 }
 
@@ -84,18 +85,18 @@ func getNullValuesList(objType string) map[string]configgtm.NullPerObjectAttribu
 	switch objType {
 	case "Properties":
 		return nullFieldMap.Properties
-        case "Datacenters":
-                return nullFieldMap.Datacenters
-        case "Resources":
-                return nullFieldMap.Resources
-        case "CidrMaps":
-                return nullFieldMap.CidrMaps
-        case "GeoMaps":
-                return nullFieldMap.GeoMaps
-        case "AsMaps":
-                return nullFieldMap.AsMaps
+	case "Datacenters":
+		return nullFieldMap.Datacenters
+	case "Resources":
+		return nullFieldMap.Resources
+	case "CidrMaps":
+		return nullFieldMap.CidrMaps
+	case "GeoMaps":
+		return nullFieldMap.GeoMaps
+	case "AsMaps":
+		return nullFieldMap.AsMaps
 	}
-	
+	// unknown
 	return map[string]configgtm.NullPerObjectAttributeStruct{}
 }
 
@@ -124,21 +125,17 @@ func cmdCreateDomain(c *cli.Context) error {
 	if c.IsSet("createconfig") {
 		createConfig = true
 	}
-	/*
-		if c.IsSet("verbose") {
-			verboseStatus = true
-		}
-		if c.IsSet("complete") {
-			pComplete = true
-		}
-	*/
 
+	akamai.StartSpinner(
+		"Fetching domain entity ...",
+		fmt.Sprintf("Fetching domain entity ...... [%s]", color.GreenString("OK")))
 	domain, err := configgtm.GetDomain(domainName)
 	if err != nil {
 		akamai.StopSpinnerFail()
 		fmt.Println("Error: " + err.Error())
 		return cli.NewExitError(color.RedString("Domain retrieval failed"), 1)
 	}
+	fmt.Sprintf("Inventorying domain objects ...")
 	// Inventory datacenters
 	datacenters := make(map[int]string)
 	for _, dc := range domain.Datacenters {
@@ -198,6 +195,7 @@ func cmdCreateDomain(c *cli.Context) error {
 	resourceDomainName := strings.TrimSuffix(domainName, ".akadns.net")
 
 	if createImportList {
+		fmt.Sprintf("Creating Resources list file...")
 		// pathname and exists?
 		if stat, err := os.Stat(tfWorkPath); err == nil && stat.IsDir() {
 			importListFilename := createImportListFilename(resourceDomainName)
@@ -244,6 +242,7 @@ func cmdCreateDomain(c *cli.Context) error {
 			akamai.StopSpinnerFail()
 			return cli.NewExitError(color.RedString("Failed to read json resources file"), 1)
 		}
+		fmt.Sprintf("Creating domain configuration file ...")
 		// see if configuration file already exists and exclude any resources already represented.
 		domainTFfileHandle, tfConfig, configImportList, err := reconcileResourceTargets(importList, resourceDomainName)
 		if err != nil {
@@ -251,12 +250,12 @@ func cmdCreateDomain(c *cli.Context) error {
 			return cli.NewExitError(color.RedString("Failed to open/create config file."), 1)
 		}
 		defer domainTFfileHandle.Close()
-                //initialize Null Fields Struct
-                nullFieldMap, err = domain.NullFieldMap()
-                if err != nil {
-                        akamai.StopSpinnerFail()
-                        return cli.NewExitError(color.RedString("Failed to initialize Domain null fields map"), 1)
-                }
+		//initialize Null Fields Struct
+		nullFieldMap, err = domain.NullFieldMap()
+		if err != nil {
+			akamai.StopSpinnerFail()
+			return cli.NewExitError(color.RedString("Failed to initialize Domain null fields map"), 1)
+		}
 		// build tf file
 		if len(tfConfig) == 0 {
 			// if tf pre existed, domain has to exist by definition
@@ -291,12 +290,11 @@ func cmdCreateDomain(c *cli.Context) error {
 		}
 		gtmvarsHandle.Sync()
 
-		// build import script
+		fmt.Sprintf("Creating domain import script file...")
 		importScriptFilename := filepath.Join(tfWorkPath, resourceDomainName+"_resource_import.script")
 		if _, err := os.Stat(importScriptFilename); err == nil {
 			// File exists. Bail
-			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Import script file already exists"), 1)
+			akamai.StopSpinnerOk()
 		}
 		scriptContent, err := buildImportScript(configImportList, resourceDomainName)
 		if err != nil {
@@ -477,8 +475,6 @@ func reconcileResourceTargets(importList *importListStruct, domainName string) (
 			delete(importList.Asmaps, name)
 		}
 	}
-	//DEBUG
-	fmt.Printf("Resulting Import List: %v", importList)
 	return tfHandle, tfConfig, importList, err
 
 }

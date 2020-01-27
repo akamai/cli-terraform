@@ -22,6 +22,7 @@ import (
 	"unicode"
 )
 
+// Keys that can be ignored, e.g. lists, read-only, don't want
 var ignoredKeys map[string]int = map[string]int{"AsMaps": 0, "Resources": 0, "Properties": 0, "Datacenters": 0, "CidrMaps": 0, "GeographicMaps": 0,
 	"Links": 0, "Status": 0, "DefaultUnreachableThreshold": 0, "MinPingableRegionFraction": 0,
 	"ServermonitorLivenessCount": 0, "RoundRobinPrefix": 0, "ServermonitorLoadCount": 0,
@@ -31,6 +32,7 @@ var ignoredKeys map[string]int = map[string]int{"AsMaps": 0, "Resources": 0, "Pr
 	"PingPacketSize": 0, "ScorePenalty": 0, "LastModified": 0, "LastModifiedBy": 0, "ModificationComments": 0,
 	"WeightedHashBitsForIPv4": 0, "WeightedHashBitsForIPv6": 0}
 
+// initialized with key names that don't follow mapping pattern. populated in convert key for secondary encounters
 var mappedKeys map[string]string = map[string]string{"DynamicTTL": "dynamic_ttl", "StaticTTL": "static_ttl", "StaticRRSets": "static_rr_sets",
 	"TTL": "ttl", "DatacenterId": "datacenter_id", "HandoutCName": "handout_cname", "StickinessBonusPercentage": "stickiness_bonus_percentage",
 	"CName": "cname"}
@@ -41,47 +43,43 @@ var tab12 = "            "
 
 // header, domain
 var gtmHeaderConfig = fmt.Sprintf(`provider "akamai" {
-  gtm_section = "${var.gtmsection}"
+  gtm_section = var.gtmsection
 }
 
 resource "akamai_gtm_domain" `)
-var gtmDomainConfigP2 = fmt.Sprintf(`    contract = "${var.contractid}"
-    group = "${var.groupid}"
+var gtmDomainConfigP2 = fmt.Sprintf(`    contract = var.contractid
+    group = var.groupid
     comment =  "Domain import"
 `)
 
 // misc
-var gtmRConfigP2 = fmt.Sprintf(`    domain = "${akamai_gtm_domain.`)
+var gtmRConfigP2 = fmt.Sprintf(`    domain = akamai_gtm_domain.`)
 
 var dependsClauseP1 = fmt.Sprintf(`    depends_on = [
-        "akamai_gtm_domain.`)
+        akamai_gtm_domain.`)
 
 // process domain
 func processDomain(domain *gtm.Domain, resourceDomainName string) string {
 
-	var nullFieldsMap gtm.NullPerObjectAttributeStruct
 	coreFieldsNullMap := getDomainNullValues().CoreObjectFields
-	
+
 	domainBody := ""
 	domainString := gtmHeaderConfig
-
-	fmt.Println("Domain Null Map: ", nullFieldsMap)
-	fmt.Println("Domain Null Core Map: ",coreFieldsNullMap)
 
 	domElems := reflect.ValueOf(domain).Elem()
 	for i := 0; i < domElems.NumField(); i++ {
 		varName := domElems.Type().Field(i).Name
 		varType := domElems.Type().Field(i).Type
 		varValue := domElems.Field(i).Interface()
-                // Skip if field is null
-                if _, ok := coreFieldsNullMap[varName]; ok {
-                        continue
-                }
-                keyVal := fmt.Sprint(varValue)
-                key := convertKey(varName, keyVal, varType.Kind())
-                if key == "" {
-                        continue
-                }
+		// Skip if field is null
+		if _, ok := coreFieldsNullMap[varName]; ok {
+			continue
+		}
+		keyVal := fmt.Sprint(varValue)
+		key := convertKey(varName, keyVal, varType.Kind())
+		if key == "" {
+			continue
+		}
 		if varName == "EmailNotificationList" {
 			keyVal = processStringList(domain.EmailNotificationList)
 		}
@@ -101,6 +99,7 @@ func processDomain(domain *gtm.Domain, resourceDomainName string) string {
 
 }
 
+// utility method to process string lists
 func processStringList(sl []string) string {
 
 	switch len(sl) {
@@ -122,6 +121,7 @@ func processStringList(sl []string) string {
 
 }
 
+// utility method to process int64 lists
 func processNumList(sl []int64) string {
 
 	switch len(sl) {
@@ -143,6 +143,7 @@ func processNumList(sl []int64) string {
 
 }
 
+// utility method to convert camelCased struct field names to provider field naming convention
 func convertKey(inKey string, keyVal string, keyKind reflect.Kind) string {
 
 	if _, ok := ignoredKeys[inKey]; ok {
