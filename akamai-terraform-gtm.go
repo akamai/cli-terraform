@@ -24,11 +24,11 @@ var (
 
 func main() {
 	akamai.CreateApp(
-		"gtm",
+		"terraform-gtm",
 		"A CLI for GTM",
 		"Manage GTM Domains and assoc objects",
 		VERSION,
-		"gtm",
+		"terraform-gtm",
 		commandLocator,
 	)
 
