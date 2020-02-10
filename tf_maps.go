@@ -74,14 +74,14 @@ func processCidrmaps(cidrmaps []*gtm.CidrMap, cidrImportList map[string][]int, d
 				mapBody += keyVal + "\n"
 			}
 		}
-		mString += "\"" + name + "\" {\n"
+		mString += "\"" + normalizeResourceName(name) + "\" {\n"
 		mString += gtmRConfigP2 + resourceDomainName + ".name\n"
 		mString += mapBody
 		mString += dependsClauseP1 + resourceDomainName
 		// process dc dependencies (only one type in 1.4 schema)
 		for _, dcDep := range cidrImportList[name] {
 			mString += ",\n"
-			mString += tab8 + datacenterResource + "." + dcIL[dcDep]
+			mString += tab8 + datacenterResource + "." + normalizeResourceName(dcIL[dcDep])
 		}
 		mString += "\n"
 		mString += tab4 + "]\n"
@@ -134,14 +134,14 @@ func processGeomaps(geomaps []*gtm.GeoMap, geoImportList map[string][]int, dcIL 
 				mapBody += keyVal + "\n"
 			}
 		}
-		mString += "\"" + name + "\" {\n"
+		mString += "\"" + normalizeResourceName(name) + "\" {\n"
 		mString += gtmRConfigP2 + resourceDomainName + ".name\n"
 		mString += mapBody
 		mString += dependsClauseP1 + resourceDomainName
 		// process dc dependencies (only one type in 1.4 schema)
 		for _, dcDep := range geoImportList[name] {
 			mString += ",\n"
-			mString += tab8 + datacenterResource + "." + dcIL[dcDep]
+			mString += tab8 + datacenterResource + "." + normalizeResourceName(dcIL[dcDep])
 		}
 		mString += "\n"
 		mString += tab4 + "]\n"
@@ -194,14 +194,14 @@ func processAsmaps(asmaps []*gtm.AsMap, asImportList map[string][]int, dcIL map[
 				mapBody += keyVal + "\n"
 			}
 		}
-		mString += "\"" + name + "\" {\n"
+		mString += "\"" + normalizeResourceName(name) + "\" {\n"
 		mString += gtmRConfigP2 + resourceDomainName + ".name\n"
 		mString += mapBody
 		mString += dependsClauseP1 + resourceDomainName
 		// process dc dependencies (only one type in 1.4 schema)
 		for _, dcDep := range asImportList[name] {
 			mString += ",\n"
-			mString += tab8 + datacenterResource + "." + dcIL[dcDep]
+			mString += tab8 + datacenterResource + "." + normalizeResourceName(dcIL[dcDep])
 		}
 		mString += "\n"
 		mString += tab4 + "]\n"

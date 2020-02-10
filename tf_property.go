@@ -92,14 +92,14 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 				}
 			}
 		}
-		propString += "\"" + name + "\" {\n"
+		propString += "\"" + normalizeResourceName(name) + "\" {\n"
 		propString += gtmRConfigP2 + resourceDomainName + ".name\n"
 		propString += propertyBody
 		propString += dependsClauseP1 + resourceDomainName
 		// process dc dependencies (only one type in 1.4 schema)
 		for _, dcDep := range pImportList[name] {
 			propString += ",\n"
-			propString += tab8 + datacenterResource + "." + dcImportList[dcDep]
+			propString += tab8 + datacenterResource + "." + normalizeResourceName(dcImportList[dcDep])
 		}
 		propString += "\n"
 		propString += tab4 + "]\n"

@@ -72,14 +72,14 @@ func processResources(resources []*gtm.Resource, rImportList map[string][]int, d
 				resourceBody += keyVal + "\n"
 			}
 		}
-		rString += "\"" + name + "\" {\n"
+		rString += "\"" + normalizeResourceName(name) + "\" {\n"
 		rString += gtmRConfigP2 + resourceDomainName + ".name\n"
 		rString += resourceBody
 		rString += dependsClauseP1 + resourceDomainName
 		// process dc dependencies (only one type in 1.4 schema)
 		for _, dcDep := range rImportList[name] {
 			rString += ",\n"
-			rString += tab8 + datacenterResource + "." + dcIL[dcDep]
+			rString += tab8 + datacenterResource + "." + normalizeResourceName(dcIL[dcDep])
 		}
 		rString += "\n"
 		rString += tab4 + "]\n"
