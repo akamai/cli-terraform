@@ -60,11 +60,11 @@ func processCidrmaps(cidrmaps []*gtm.CidrMap, cidrImportList map[string][]int, d
 			switch varName {
 			case "DefaultDatacenter":
 				mapBody += tab4 + key + " {\n"
-				mapBody += processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
+				mapBody += processDefaultDatacenter(varValue.(*gtm.DatacenterBase), dcIL, true)
 				mapBody += tab4 + "}\n"
 				continue
 			case "Assignments":
-				mapBody += processCidrAssignments(varValue.([]*gtm.CidrAssignment))
+				mapBody += processCidrAssignments(varValue.([]*gtm.CidrAssignment), dcIL)
 				continue
 			}
 			mapBody += tab4 + key + " = "
@@ -120,11 +120,11 @@ func processGeomaps(geomaps []*gtm.GeoMap, geoImportList map[string][]int, dcIL 
 			switch varName {
 			case "DefaultDatacenter":
 				mapBody += tab4 + key + " {\n"
-				mapBody += processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
+				mapBody += processDefaultDatacenter(varValue.(*gtm.DatacenterBase), dcIL, true)
 				mapBody += tab4 + "}\n"
 				continue
 			case "Assignments":
-				mapBody += processGeoAssignments(varValue.([]*gtm.GeoAssignment))
+				mapBody += processGeoAssignments(varValue.([]*gtm.GeoAssignment), dcIL)
 				continue
 			}
 			mapBody += tab4 + key + " = "
@@ -180,11 +180,11 @@ func processAsmaps(asmaps []*gtm.AsMap, asImportList map[string][]int, dcIL map[
 			switch varName {
 			case "DefaultDatacenter":
 				mapBody += tab4 + key + " {\n"
-				mapBody += processDefaultDatacenter(varValue.(*gtm.DatacenterBase), true)
+				mapBody += processDefaultDatacenter(varValue.(*gtm.DatacenterBase), dcIL, true)
 				mapBody += tab4 + "}\n"
 				continue
 			case "Assignments":
-				mapBody += processAsAssignments(varValue.([]*gtm.AsAssignment))
+				mapBody += processAsAssignments(varValue.([]*gtm.AsAssignment), dcIL)
 				continue
 			}
 			mapBody += tab4 + key + " = "
@@ -213,7 +213,7 @@ func processAsmaps(asmaps []*gtm.AsMap, asImportList map[string][]int, dcIL map[
 
 }
 
-func processDefaultDatacenter(ddc *gtm.DatacenterBase, structreq bool) string {
+func processDefaultDatacenter(ddc *gtm.DatacenterBase, dcIDs map[int]string, structreq bool) string {
 
 	ddcString := ""
 	ddcElems := reflect.ValueOf(ddc).Elem()
@@ -226,7 +226,12 @@ func processDefaultDatacenter(ddc *gtm.DatacenterBase, structreq bool) string {
 		if varType.Kind() == reflect.String {
 			ddcString += tab8 + key + " = \"" + keyVal + "\"\n"
 		} else {
-			ddcString += tab8 + key + " = " + keyVal + "\n"
+			if varName != "DatacenterId" || (structreq && keyVal == "5400") {
+				// Special handling. If we are here for a default dc object, we don't have a resource configured.
+				ddcString += tab8 + key + " = " + keyVal + "\n"
+			} else {
+				ddcString += tab8 + key + " = " + datacenterResource + "." + normalizeResourceName(dcIDs[varValue.(int)]) + ".datacenter_id\n"
+			}
 		}
 	}
 	if !structreq {
@@ -237,7 +242,7 @@ func processDefaultDatacenter(ddc *gtm.DatacenterBase, structreq bool) string {
 
 }
 
-func processCidrAssignments(assigns []*gtm.CidrAssignment) string {
+func processCidrAssignments(assigns []*gtm.CidrAssignment, dcIDs map[int]string) string {
 
 	if len(assigns) == 0 {
 		return ""
@@ -245,14 +250,14 @@ func processCidrAssignments(assigns []*gtm.CidrAssignment) string {
 	assignString := ""
 	for _, assign := range assigns {
 		aElems := reflect.ValueOf(assign).Elem()
-		assignString += processAssignmentsBase(aElems, "Blocks")
+		assignString += processAssignmentsBase(aElems, "Blocks", dcIDs)
 	}
 
 	return assignString
 
 }
 
-func processGeoAssignments(assigns []*gtm.GeoAssignment) string {
+func processGeoAssignments(assigns []*gtm.GeoAssignment, dcIDs map[int]string) string {
 
 	if len(assigns) == 0 {
 		return ""
@@ -260,14 +265,14 @@ func processGeoAssignments(assigns []*gtm.GeoAssignment) string {
 	assignString := ""
 	for _, assign := range assigns {
 		aElems := reflect.ValueOf(assign).Elem()
-		assignString += processAssignmentsBase(aElems, "Countries")
+		assignString += processAssignmentsBase(aElems, "Countries", dcIDs)
 	}
 
 	return assignString
 
 }
 
-func processAsAssignments(assigns []*gtm.AsAssignment) string {
+func processAsAssignments(assigns []*gtm.AsAssignment, dcIDs map[int]string) string {
 
 	if len(assigns) == 0 {
 		return ""
@@ -275,14 +280,14 @@ func processAsAssignments(assigns []*gtm.AsAssignment) string {
 	assignString := ""
 	for _, assign := range assigns {
 		aElems := reflect.ValueOf(assign).Elem()
-		assignString += processAssignmentsBase(aElems, "AsNumbers")
+		assignString += processAssignmentsBase(aElems, "AsNumbers", dcIDs)
 	}
 
 	return assignString
 
 }
 
-func processAssignmentsBase(elem reflect.Value, assignKey string) string {
+func processAssignmentsBase(elem reflect.Value, assignKey string, dcIDs map[int]string) string {
 
 	assignStr := tab4 + "assignment {\n"
 	for i := 0; i < elem.NumField(); i++ {
@@ -293,7 +298,7 @@ func processAssignmentsBase(elem reflect.Value, assignKey string) string {
 		key := convertKey(varName, keyVal, varType.Kind())
 		if varName == "DatacenterBase" {
 			dcb := varValue.(gtm.DatacenterBase)
-			keyVal = processDefaultDatacenter(&dcb, false)
+			keyVal = processDefaultDatacenter(&dcb, dcIDs, false)
 			assignStr += keyVal + "\n"
 		} else {
 			if varName == assignKey {

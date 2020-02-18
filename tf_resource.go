@@ -62,7 +62,7 @@ func processResources(resources []*gtm.Resource, rImportList map[string][]int, d
 				name = keyVal
 			}
 			if varName == "ResourceInstances" {
-				resourceBody += processResourceInstances(varValue.([]*gtm.ResourceInstance))
+				resourceBody += processResourceInstances(varValue.([]*gtm.ResourceInstance), dcIL)
 				continue
 			}
 			resourceBody += tab4 + key + " = "
@@ -91,7 +91,7 @@ func processResources(resources []*gtm.Resource, rImportList map[string][]int, d
 
 }
 
-func processResourceInstances(instances []*gtm.ResourceInstance) string {
+func processResourceInstances(instances []*gtm.ResourceInstance, dcIDs map[int]string) string {
 
 	if len(instances) == 0 {
 		return ""
@@ -114,7 +114,12 @@ func processResourceInstances(instances []*gtm.ResourceInstance) string {
 			if varType.Kind() == reflect.String {
 				instanceString += tab8 + key + " = \"" + keyVal + "\"\n"
 			} else {
-				instanceString += tab8 + key + " = " + keyVal + "\n"
+				// check for datacenter_id
+				if varName == "DatacenterId" {
+					instanceString += tab8 + key + " = " + datacenterResource + "." + normalizeResourceName(dcIDs[varValue.(int)]) + ".datacenter_id\n"
+				} else {
+					instanceString += tab8 + key + " = " + keyVal + "\n"
+				}
 			}
 		}
 		instanceString += tab4 + "}\n"

@@ -18,9 +18,9 @@ import (
 	"fmt"
 	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
 	"reflect"
+	"regexp"
 	"strconv"
 	"unicode"
-	"regexp"
 )
 
 // Keys that can be ignored, e.g. lists, read-only, don't want
@@ -31,7 +31,7 @@ var ignoredKeys map[string]int = map[string]int{"AsMaps": 0, "Resources": 0, "Pr
 	"MaxResources": 0, "MaxTestTimeout": 0, "DefaultHealthMultiplier": 0, "ServermonitorPool": 0,
 	"MinTTL": 0, "DefaultMaxUnreachablePenalty": 0, "DefaultHealthThreshold": 0, "MinTestInterval": 0,
 	"PingPacketSize": 0, "ScorePenalty": 0, "LastModified": 0, "LastModifiedBy": 0, "ModificationComments": 0,
-	"WeightedHashBitsForIPv4": 0, "WeightedHashBitsForIPv6": 0}
+	"WeightedHashBitsForIPv4": 0, "WeightedHashBitsForIPv6": 0, "Virtual": 0}
 
 // initialized with key names that don't follow mapping pattern. populated in convert key for secondary encounters
 var mappedKeys map[string]string = map[string]string{"DynamicTTL": "dynamic_ttl", "StaticTTL": "static_ttl", "StaticRRSets": "static_rr_sets",
@@ -170,27 +170,26 @@ func convertKey(inKey string, keyVal string, keyKind reflect.Kind) string {
 
 }
 
-// Utility function to normalize resource names. A name must start with a letter or 
+// Utility function to normalize resource names. A name must start with a letter or
 // underscore and may contain only letters, digits, underscores, and dashes.
 func normalizeResourceName(inKey string) string {
 
-        outKey := ""
+	outKey := ""
 	re := regexp.MustCompile("^[a-zA-Z0-9_-]*$")
-        for i, char := range inKey {
+	for i, char := range inKey {
 		schar := string(char)
 		if i == 0 {
 			fc := regexp.MustCompile("^[a-zA-Z_]*$")
 			if !fc.MatchString(schar) {
 				outKey += "_"
 			}
-		}	
-                if re.MatchString(schar) {
-                        outKey += schar
-                } else {
-                        outKey += "_"
-                }
-        }
-        return outKey
+		}
+		if re.MatchString(schar) {
+			outKey += schar
+		} else {
+			outKey += "_"
+		}
+	}
+	return outKey
 
 }
-

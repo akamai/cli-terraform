@@ -2,7 +2,7 @@
 
 
 [[projects]]
-  digest = "1:3bd2d3f90fae186460328ea5102ee6544136cb081aaa7007bd9236447d528c85"
+  digest = "1:142b53ace66a8235bcc38b53cfe118233820eb59435117eec237e095be712147"
   name = "github.com/akamai/AkamaiOPEN-edgegrid-golang"
   packages = [
     "client-v1",
@@ -11,8 +11,8 @@
     "jsonhooks-v1",
   ]
   pruneopts = "UT"
-  revision = "5358e982fa3f7e9638f1eaaaa9d70ab2bf7a2680"
-  version = "v0.9.6"
+  revision = "fd2a4de8100d90f143b411ad88837dc56dde81f9"
+  version = "v0.9.8"
 
 [[projects]]
   branch = "master"
@@ -45,14 +45,6 @@
   pruneopts = "UT"
   revision = "5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4"
   version = "v1.7.0"
-
-[[projects]]
-  digest = "1:c4b5592c342f273e18de68e16957f536f6648f2e90c9d7ece653ac90c22079a9"
-  name = "github.com/go-ini/ini"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "94291fffe2b14f4632ec0e67c1bfecfc1287a168"
-  version = "v1.51.1"
 
 [[projects]]
   digest = "1:582b704bebaa06b48c29b0cec224a6058a09c86883aaddabde889cd1a5f73e1b"
@@ -125,6 +117,14 @@
   packages = ["unix"]
   pruneopts = "UT"
   revision = "98c5dad5d1a0e8a73845ecc8897d0bd56586511d"
+
+[[projects]]
+  digest = "1:ef4bd1cd2563d93d3f48352fc24d499a4a2b54c11932814173653ece7db13800"
+  name = "gopkg.in/ini.v1"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "32cf4f7e9c77f151e18b53067b55549b4d1d411d"
+  version = "v1.52.0"
 
 [solve-meta]
   analyzer-name = "dep"
