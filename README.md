@@ -42,8 +42,9 @@ Description:
    Manage Terraform GTM Domain configurations and assoc objects
 
 Global Flags:
-   --edgerc value  Location of the credentials file (default: "/home/elynes/.edgerc") [$AKAMAI_EDGERC]
-   --section value     Section of the credentials file (default: "gtm") [$AKAMAI_EDGERC_SECTION]
+   --tfworkpath value      file path location for placement of created and/or modified artifacts. Default: current directory
+   --resources             Create json formatted resource import list file, <domain>_resources.json. Used as input by createconfig.
+   --createconfig          Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files
 
 Built-In Commands:
   create-domain
@@ -63,7 +64,9 @@ $ akamai terraform-gtm create-domain example.akadns.net --resources
 $ akamai terraform-gtm create-domain example.akadns.net --createconfig
 ```
 
-
+Notes:
+1. Mapping GTM entity names to TF resource names may require normalization. Invalid TF resource name characters will be replaced by underscores, '_' in config generation.
+ 
 ## License
 
 This package is licensed under the Apache 2.0 License. See [LICENSE](LICENSE) for details.
