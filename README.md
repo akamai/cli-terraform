@@ -60,7 +60,7 @@ $ akamai terraform-gtm create-domain example.akadns.net --resources
 
 ### Generate Terraform GTM Domain configuration file <domain>.tf, vars config file, gtmvars.tf, and import script, <domain>_resource_import.script
 
-``
+```
 $ akamai terraform-gtm create-domain example.akadns.net --createconfig
 ```
 
