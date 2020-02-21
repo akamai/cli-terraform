@@ -73,7 +73,7 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 				if _, ok := childFieldsNullMap[varName]; !ok {
 					continue
 				}
-				propertyBody += processTrafficTargets(varValue.([]*gtm.TrafficTarget), childFieldsNullMap[varName].(map[string]gtm.NullPerObjectAttributeStruct))
+				propertyBody += processTrafficTargets(varValue.([]*gtm.TrafficTarget), childFieldsNullMap[varName].(map[string]gtm.NullPerObjectAttributeStruct), dcImportList)
 			case "StaticRRSets":
 				if _, ok := childFieldsNullMap[varName]; !ok {
 					continue
@@ -92,14 +92,14 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 				}
 			}
 		}
-		propString += "\"" + name + "\" {\n"
+		propString += "\"" + normalizeResourceName(name) + "\" {\n"
 		propString += gtmRConfigP2 + resourceDomainName + ".name\n"
 		propString += propertyBody
 		propString += dependsClauseP1 + resourceDomainName
 		// process dc dependencies (only one type in 1.4 schema)
 		for _, dcDep := range pImportList[name] {
 			propString += ",\n"
-			propString += tab8 + datacenterResource + "." + dcImportList[dcDep]
+			propString += tab8 + datacenterResource + "." + normalizeResourceName(dcImportList[dcDep])
 		}
 		propString += "\n"
 		propString += tab4 + "]\n"
@@ -138,7 +138,7 @@ func processHttpHeaders(headers []*gtm.HttpHeader) string {
 	return headerString
 }
 
-func processTrafficTargets(targets []*gtm.TrafficTarget, childObjectList map[string]gtm.NullPerObjectAttributeStruct) string {
+func processTrafficTargets(targets []*gtm.TrafficTarget, childObjectList map[string]gtm.NullPerObjectAttributeStruct, dcIL map[int]string) string {
 
 	if len(targets) == 0 {
 		return ""
@@ -164,7 +164,11 @@ func processTrafficTargets(targets []*gtm.TrafficTarget, childObjectList map[str
 			if varType.Kind() == reflect.String {
 				targetString += tab8 + key + " = \"" + keyVal + "\"\n"
 			} else {
-				targetString += tab8 + key + " = " + keyVal + "\n"
+				if varName == "DatacenterId" {
+					targetString += tab8 + key + " = " + datacenterResource + "." + normalizeResourceName(dcIL[varValue.(int)]) + ".datacenter_id\n"
+				} else {
+					targetString += tab8 + key + " = " + keyVal + "\n"
+				}
 			}
 		}
 		targetString += tab4 + "}\n"

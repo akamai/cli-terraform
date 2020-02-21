@@ -5,7 +5,7 @@
   "commands": [
     {
       "name": "terraform-gtm",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "description": "Manage Terraform GTM Domain configurations",
       "bin": "https://github.com/akamai/cli-terraform-gtm/releases/download/{{.Version}}/akamai-{{.Name}}-{{.Version}}-{{.OS}}{{.Arch}}{{.BinSuffix}}",
       "auto-complete": true
