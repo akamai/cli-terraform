@@ -19,14 +19,14 @@ import (
 )
 
 var (
-	VERSION = "0.0.3"
+	VERSION = "0.1.0"
 )
 
 func main() {
 	akamai.CreateApp(
 		"terraform-gtm",
-		"A CLI for GTM",
-		"Manage GTM Domains and assoc objects",
+		"A CLI for Terraform GTM",
+		"Manage GTM Domains and assoc objects with Terraform",
 		VERSION,
 		"terraform-gtm",
 		commandLocator,

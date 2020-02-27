@@ -20,7 +20,7 @@ for your system, or by cloning this repository and compiling it yourself.
 
 ### Compiling from Source
 
-If you want to compile it from source, you will need Go 1.7 or later, and the [Dep](https://golang.github.io/dep/) package manager installed:
+If you want to compile it from source, you will need Go 1.8 or later, and the [Dep](https://golang.github.io/dep/) package manager installed:
 
 1. Fetch the package:  
   `go get github.com/akamai/cli-terraform-gtm`
