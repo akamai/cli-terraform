@@ -37,9 +37,40 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 				Name:  "resources",
 				Usage: "Create json formatted resource import list file, <domain>_resources.json. Used as input by createconfig.",
 			},
-			cli.BoolFlag{
+			cli.BoolTFlag{
 				Name:  "createconfig",
 				Usage: "Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files",
+			},
+		},
+		BashComplete: akamai.DefaultAutoComplete,
+	})
+
+	commands = append(commands, cli.Command{
+		Name:        "create-zone",
+		Description: "Create Terraform Zone Resources",
+		ArgsUsage:   "[zone]",
+		Action:      cmdCreateZone,
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "tfworkpath",
+				Usage: "file path location for placement of created and/or modified artifacts. Default: current directory",
+			},
+			cli.BoolTFlag{
+				Name:  "resources",
+				Usage: "Create json formatted resource import list file, <zone>_resources.json. Used as input by createconfig.",
+			},
+			cli.BoolTFlag{
+				Name:  "createconfig",
+				Usage: "Create Terraform configuration (<zone>.tf), gtmvars.tf, and import command script (<zone>_import.script) files",
+			},
+			cli.BoolTFlag{
+				Name:  "segmentconfig",
+				Usage: "Group and segment records by name into separate config files.",
+			},
+
+			cli.StringSliceFlag{
+				Name:  "recordname",
+				Usage: "Used in resources gathering to filter recordsets. Multiple recordname flags may be specified.",
 			},
 		},
 		BashComplete: akamai.DefaultAutoComplete,

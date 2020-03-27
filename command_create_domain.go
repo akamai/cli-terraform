@@ -119,6 +119,7 @@ func cmdCreateDomain(c *cli.Context) error {
 	if c.IsSet("tfworkpath") {
 		tfWorkPath = c.String("tfworkpath")
 	}
+	tfWorkPath = filepath.FromSlash(tfWorkPath)
 	if c.IsSet("resources") {
 		createImportList = true
 	}
@@ -318,13 +319,13 @@ func cmdCreateDomain(c *cli.Context) error {
 	return nil
 }
 
-func retrieveImportList(rscDomName string) (*importListStruct, error) {
+func retrieveImportList(rscName string) (*importListStruct, error) {
 
 	// check if createImportList set. If so, already have ....
 	if createImportList {
 		return fullImportList, nil
 	}
-	importListFilename := createImportListFilename(rscDomName)
+	importListFilename := createImportListFilename(rscName)
 	if _, err := os.Stat(importListFilename); err != nil {
 		return nil, err
 	}
@@ -342,17 +343,17 @@ func retrieveImportList(rscDomName string) (*importListStruct, error) {
 
 }
 
-// Utility method to create full domain import list file path
-func createImportListFilename(resourceDomainName string) string {
+// Utility method to create full import list file path
+func createImportListFilename(resourceName string) string {
 
-	return filepath.Join(tfWorkPath, resourceDomainName+"_resources.json")
+	return filepath.Join(tfWorkPath, resourceName+"_resources.json")
 
 }
 
-// Utility method to create full domain tf file path
-func createDomainTFFilename(resourceDomainName string) string {
+// Utility method to create full tf file path
+func createTFFilename(resourceName string) string {
 
-	return filepath.Join(tfWorkPath, resourceDomainName+".tf")
+	return filepath.Join(tfWorkPath, resourceName+".tf")
 
 }
 
@@ -442,13 +443,13 @@ func buildImportScript(importList *importListStruct, resourceDomainName string) 
 func reconcileResourceTargets(importList *importListStruct, domainName string) (*os.File, string, *importListStruct, error) {
 
 	var tfScratchLen int64
-	tfFilename := createDomainTFFilename(domainName)
+	tfFilename := createTFFilename(domainName)
 	if tfInfo, err := os.Stat(tfFilename); err != nil && os.IsExist(err) {
 		tfScratchLen = tfInfo.Size()
 	}
 	tfScratch := make([]byte, tfScratchLen)
 	var tfHandle *os.File
-	tfHandle, err := os.OpenFile(createDomainTFFilename(domainName), os.O_CREATE|os.O_RDWR, 0644)
+	tfHandle, err := os.OpenFile(tfFilename, os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil && err != io.EOF {
 		fmt.Println(err.Error())
 		return nil, "", importList, err

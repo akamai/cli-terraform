@@ -1,8 +1,8 @@
-# Akamai CLI for Global Traffic Management (GTM) Terraform Provider
+# Akamai CLI for Akamai Terraform Provider
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/akamai/cli-terraform-gtm)](https://goreportcard.com/report/github.com/akamai/cli-terraform-gtm) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform-gtm.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform-gtm?ref=badge_shield)
+[![Go Report Card](https://goreportcard.com/badge/github.com/akamai/cli-terraform)](https://goreportcard.com/report/github.com/akamai/cli-terraform) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform?ref=badge_shield)
 
-An [Akamai CLI](https://developer.akamai.com/cli) package for managing Terraform GTM Domain configurations and associated objects.
+An [Akamai CLI](https://developer.akamai.com/cli) package for administering and managing Akamai Terraform configurations
 
 ## Getting Started
 
@@ -11,11 +11,11 @@ An [Akamai CLI](https://developer.akamai.com/cli) package for managing Terraform
 To install this package, use Akamai CLI:
 
 ```sh
-$ akamai install terraform-gtm
+$ akamai install terraform
 ```
 
 You may also use this as a stand-alone command by downloading the
-[latest release binary](https://github.com/akamai/cli-terraform-gtm/releases)
+[latest release binary](https://github.com/akamai/cli-terraform/releases)
 for your system, or by cloning this repository and compiling it yourself.
 
 ### Compiling from Source
@@ -23,20 +23,20 @@ for your system, or by cloning this repository and compiling it yourself.
 If you want to compile it from source, you will need Go 1.8 or later, and the [Dep](https://golang.github.io/dep/) package manager installed:
 
 1. Fetch the package:  
-  `go get github.com/akamai/cli-terraform-gtm`
+  `go get github.com/akamai/cli-terraform`
 2. Change to the package directory:  
-  `cd $GOPATH/src/github.com/akamai/cli-terraform-gtm`
+  `cd $GOPATH/src/github.com/akamai/cli-terraform`
 3. Install dependencies using `dep`:  
   `dep ensure`
 4. Compile the binary:
-  - Linux/macOS/*nix: `go build -o akamai-terraform-gtm`
-  - Windows: `go build -o akamai-terraform-gtm.exe`
-5. Move the binary (`akamai-terraform-gtm` or `akamai-terraform-gtm.exe`) in to your `PATH`
+  - Linux/macOS/*nix: `go build -o akamai-terraform`
+  - Windows: `go build -o akamai-terraform.exe`
+5. Move the binary (`akamai-terraform` or `akamai-terraform.exe`) in to your `PATH`
 
 ## Usage
 
 ```
-  akamai-terraform-gtm [--edgerc] [--section] <command> [sub-command]
+  akamai-terraform [--edgerc] [--section] <command> [sub-command]
 
 Description:
    Manage Terraform GTM Domain configurations and assoc objects
@@ -55,13 +55,13 @@ Built-In Commands:
 ### Create list of all domain objects. Written in json format to <domain>_resources.json
 
 ```
-$ akamai terraform-gtm create-domain example.akadns.net --resources
+$ akamai terraform create-domain example.akadns.net --resources
 ```
 
 ### Generate Terraform GTM Domain configuration file <domain>.tf, vars config file, gtmvars.tf, and import script, <domain>_resource_import.script
 
 ```
-$ akamai terraform-gtm create-domain example.akadns.net --createconfig
+$ akamai terraform create-domain example.akadns.net --createconfig
 ```
 
 Notes:
@@ -71,4 +71,4 @@ Notes:
 
 This package is licensed under the Apache 2.0 License. See [LICENSE](LICENSE) for details.
 
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform-gtm.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform-gtm?ref=badge_large)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform?ref=badge_large)
