@@ -136,67 +136,65 @@ func cmdCreateDomain(c *cli.Context) error {
 		fmt.Println("Error: " + err.Error())
 		return cli.NewExitError(color.RedString("Domain retrieval failed"), 1)
 	}
-	fmt.Sprintf("Inventorying domain objects ...")
-	// Inventory datacenters
-	datacenters := make(map[int]string)
-	for _, dc := range domain.Datacenters {
-		// special case. ignore 5400
-		if dc.DatacenterId == defaultDC {
-			continue
-		}
-		datacenters[dc.DatacenterId] = dc.Nickname
-	}
-	// inventory properties and targets
-	propTargets := make(map[string][]int)
-	for _, p := range domain.Properties {
-		targets := make([]int, 0)
-		for _, tt := range p.TrafficTargets {
-			targets = append(targets, tt.DatacenterId)
-		}
-		propTargets[p.Name] = targets
-	}
-	// inventory Resources
-	resources := make(map[string][]int)
-	for _, r := range domain.Resources {
-		targets := make([]int, 0)
-		for _, ri := range r.ResourceInstances {
-			targets = append(targets, ri.DatacenterId)
-		}
-		resources[r.Name] = targets
-	}
-	// inventory CidrMaps
-	cidrmaps := make(map[string][]int)
-	for _, c := range domain.CidrMaps {
-		targets := make([]int, 0)
-		for _, a := range c.Assignments {
-			targets = append(targets, a.DatacenterId)
-		}
-		cidrmaps[c.Name] = targets
-	}
-	// inventory GeoMaps
-	geomaps := make(map[string][]int)
-	for _, g := range domain.GeographicMaps {
-		targets := make([]int, 0)
-		for _, a := range g.Assignments {
-			targets = append(targets, a.DatacenterId)
-		}
-		geomaps[g.Name] = targets
-	}
-	// inventory ASMaps
-	asmaps := make(map[string][]int)
-	for _, as := range domain.AsMaps {
-		targets := make([]int, 0)
-		for _, a := range as.Assignments {
-			targets = append(targets, a.DatacenterId)
-		}
-		asmaps[as.Name] = targets
-	}
-
 	// use domain name sans suffix for domain resource name
 	resourceDomainName := normalizeResourceName(strings.TrimSuffix(domainName, ".akadns.net"))
-
 	if createImportList {
-		fmt.Sprintf("Creating Resources list file...")
+		fmt.Println("Inventorying domain objects ...")
+		// Inventory datacenters
+		datacenters := make(map[int]string)
+		for _, dc := range domain.Datacenters {
+			// special case. ignore 5400
+			if dc.DatacenterId == defaultDC {
+				continue
+			}
+			datacenters[dc.DatacenterId] = dc.Nickname
+		}
+		// inventory properties and targets
+		propTargets := make(map[string][]int)
+		for _, p := range domain.Properties {
+			targets := make([]int, 0)
+			for _, tt := range p.TrafficTargets {
+				targets = append(targets, tt.DatacenterId)
+			}
+			propTargets[p.Name] = targets
+		}
+		// inventory Resources
+		resources := make(map[string][]int)
+		for _, r := range domain.Resources {
+			targets := make([]int, 0)
+			for _, ri := range r.ResourceInstances {
+				targets = append(targets, ri.DatacenterId)
+			}
+			resources[r.Name] = targets
+		}
+		// inventory CidrMaps
+		cidrmaps := make(map[string][]int)
+		for _, c := range domain.CidrMaps {
+			targets := make([]int, 0)
+			for _, a := range c.Assignments {
+				targets = append(targets, a.DatacenterId)
+			}
+			cidrmaps[c.Name] = targets
+		}
+		// inventory GeoMaps
+		geomaps := make(map[string][]int)
+		for _, g := range domain.GeographicMaps {
+			targets := make([]int, 0)
+			for _, a := range g.Assignments {
+				targets = append(targets, a.DatacenterId)
+			}
+			geomaps[g.Name] = targets
+		}
+		// inventory ASMaps
+		asmaps := make(map[string][]int)
+		for _, as := range domain.AsMaps {
+			targets := make([]int, 0)
+			for _, a := range as.Assignments {
+				targets = append(targets, a.DatacenterId)
+			}
+			asmaps[as.Name] = targets
+		}
+		fmt.Println("Creating Resources list file...")
 		// pathname and exists?
 		if stat, err := os.Stat(tfWorkPath); err == nil && stat.IsDir() {
 			importListFilename := createImportListFilename(resourceDomainName)
@@ -243,7 +241,7 @@ func cmdCreateDomain(c *cli.Context) error {
 			akamai.StopSpinnerFail()
 			return cli.NewExitError(color.RedString("Failed to read json resources file"), 1)
 		}
-		fmt.Sprintf("Creating domain configuration file ...")
+		fmt.Println("Creating domain configuration file ...")
 		// see if configuration file already exists and exclude any resources already represented.
 		domainTFfileHandle, tfConfig, configImportList, err := reconcileResourceTargets(importList, resourceDomainName)
 		if err != nil {
@@ -291,7 +289,7 @@ func cmdCreateDomain(c *cli.Context) error {
 		}
 		gtmvarsHandle.Sync()
 
-		fmt.Sprintf("Creating domain import script file...")
+		fmt.Println("Creating domain import script file...")
 		importScriptFilename := filepath.Join(tfWorkPath, resourceDomainName+"_resource_import.script")
 		if _, err := os.Stat(importScriptFilename); err == nil {
 			// File exists. Bail

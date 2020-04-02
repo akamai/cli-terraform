@@ -17,11 +17,16 @@ package main
 import (
 	"fmt"
 	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/configdns-v2"
+	"github.com/shirou/gopsutil/mem"
 	"sort"
-	"strings"
-	//"net"
 	"strconv"
-	"sysinfo"
+	"strings"
+)
+
+const (
+	MinUint uint = 0
+	MaxUint      = ^MinUint
+	MaxInt       = int(MaxUint >> 1)
 )
 
 // module preamble
@@ -46,82 +51,101 @@ var dnsRConfigP2 = fmt.Sprintf(`    zone = local.zone
 `)
 
 // Process recordset resources
-func processRecordsets(importStruct *zoneImportListStruct, resourceZoneName string, modsegment bool) error {
+func processRecordsets(importStruct *zoneImportListStruct, resourceZoneName string, zoneTypeMap map[string]map[string]bool, modsegment bool) error {
 
-	// Debug
-	sysinfo := sysinfo.Get()
-	fmt.Println("Free MEMORY: ", sysinfo.FreeRam)
-	fmt.Println("Free SWAP: ", sysinfo.FreeSwap)
+	var totalRecordsets int = 0
+	// total desired recordsets
+	for _, typeMap := range importStruct.Recordsets {
+		totalRecordsets += len(typeMap)
+	}
 
-	pagesize := 4
-	for zname, zntypes := range importStruct.Recordsets {
-		if len(zntypes) == 0 {
-			continue
+	v, _ := mem.VirtualMemory()
+	maxPageSize := (v.Free / 2) / 512 // use max half of free memory. Assume avg recordset size is 512 bytes
+	if maxPageSize > uint64(MaxInt/512) {
+		maxPageSize = uint64(MaxInt / 512)
+	}
+	pagesize := int(maxPageSize)
+	if totalRecordsets < int(maxPageSize) {
+		pagesize = totalRecordsets
+	}
+	pagesize = 1
+
+	// get recordsets
+	queryArgs := dns.RecordsetQueryArgs{PageSize: pagesize, SortBy: "name, type", Page: 1}
+	nameRecordSetsResp, err := dns.GetRecordsets(importStruct.Zone, queryArgs)
+	if err != nil {
+		return fmt.Errorf("Failed to read record set. %s", err.Error())
+	}
+	for {
+		for _, rs := range nameRecordSetsResp.Recordsets {
+			//for each record set ...
+			if _, ok := zoneTypeMap[rs.Name]; !ok {
+				continue
+			}
+			if !zoneTypeMap[rs.Name][rs.Type] {
+				continue
+			}
+			recordFields := parseRData(rs.Type, rs.Rdata) //returns map[string]interface{}
+			// required fields
+			recordFields["name"] = rs.Name
+			//recordFields["active"] = true                   // how set?
+			recordFields["recordtype"] = rs.Type
+			recordFields["ttl"] = rs.TTL
+			recordBody := ""
+			rString := dnsRecordsetConfigP1
+			for fname, fval := range recordFields {
+				recordBody += tab4 + fname + " = "
+				switch fval.(type) {
+				case string:
+					recordBody += "\"" + fmt.Sprint(fval) + "\"\n"
+
+				case []string:
+					// target
+					listString := ""
+					if len(fval.([]string)) > 0 {
+						listString += "["
+						for _, str := range fval.([]string) {
+							listString += str + ", "
+						}
+						listString = strings.TrimRight(listString, ", ")
+						listString += "]"
+					} else {
+						listString += "[]"
+					}
+					recordBody += fmt.Sprint(listString) + "\n"
+
+				default:
+					recordBody += fmt.Sprint(fval) + "\n"
+				}
+			}
+			rString += "\"" + createRecordsetNormalName(resourceZoneName, rs.Name, rs.Type) + "\" {\n"
+			rString += dnsRConfigP2
+			rString += recordBody
+			rString += "}\n"
+			if modsegment {
+				// process as module
+				modName := createRecordsetNormalName(resourceZoneName, rs.Name, rs.Type)
+				tfModule := dnsModuleConfig1 + modName
+				tfModule += dnsModuleConfig2 + createNamedModulePath(modName)
+				tfModule += dnsModuleConfig3
+				tfModule += "}\n"
+				appendRootModuleTF(tfModule)
+				modstring := dnsRecConfigP1
+				modstring += dnsModZoneConfigP1 + "var.zonename\n" + "}\n"
+				modstring += rString
+				createModuleTF(modName, modstring)
+			} else {
+				// add to toplevel TF
+				appendRootModuleTF(rString)
+			}
 		}
-		// for each name, get recordsets
-		queryArgs := dns.RecordsetQueryArgs{Search: zname, PageSize: pagesize, SortBy: "name, type", Page: 1}
-		nameRecordSetsResp, err := dns.GetRecordsets(importStruct.Zone, queryArgs)
+		if nameRecordSetsResp.Metadata.Page == nameRecordSetsResp.Metadata.LastPage || nameRecordSetsResp.Metadata.LastPage == 0 {
+			break
+		}
+		queryArgs.Page += 1
+		nameRecordSetsResp, err = dns.GetRecordsets(importStruct.Zone, queryArgs)
 		if err != nil {
 			return fmt.Errorf("Failed to read record set. %s", err.Error())
-		}
-		typeNames := strings.Join(zntypes, " ")
-		for {
-			for _, rs := range nameRecordSetsResp.Recordsets {
-				//for each record set ...
-				if !strings.Contains(typeNames, rs.Type) {
-					// type not in chosen set
-					continue
-				}
-				recordFields := parseRData(rs.Type, rs.Rdata) //returns map[string]interface{}
-				// required fields
-				recordFields["name"] = zname
-				//recordFields["active"] = true                   // how set?
-				recordFields["recordtype"] = rs.Type
-				recordFields["ttl"] = rs.TTL
-				recordBody := ""
-				rString := dnsRecordsetConfigP1
-				for fname, fval := range recordFields {
-					recordBody += tab4 + fname + " = "
-					switch fval.(type) {
-					case string:
-						recordBody += "\"" + fmt.Sprint(fval) + "\"\n"
-
-					case []string:
-						recordBody += fmt.Sprint(fval) + "\n"
-
-					default:
-						recordBody += fmt.Sprint(fval) + "\n"
-					}
-				}
-				rString += "\"" + createRecordsetNormalName(resourceZoneName, zname, rs.Type) + "\" {\n"
-				rString += dnsRConfigP2
-				rString += recordBody
-				rString += "}\n"
-				if modsegment {
-					// process as module
-					modName := createRecordsetNormalName(resourceZoneName, zname, rs.Type)
-					tfModule := dnsModuleConfig1 + modName
-					tfModule += dnsModuleConfig2 + createNamedModulePath(modName)
-					tfModule += dnsModuleConfig3
-					tfModule += "}\n"
-					appendRootModuleTF(tfModule)
-					modstring := dnsRecConfigP1
-					modstring += dnsModZoneConfigP1 + "var.zonename\n" + "}\n"
-					modstring += rString
-					createModuleTF(modName, modstring)
-				} else {
-					// add to toplevel TF
-					appendRootModuleTF(rString)
-				}
-			}
-			if nameRecordSetsResp.Metadata.Page == nameRecordSetsResp.Metadata.LastPage || nameRecordSetsResp.Metadata.LastPage == 0 {
-				break
-			}
-			queryArgs.Page += 1
-			nameRecordSetsResp, err = dns.GetRecordsets(importStruct.Zone, queryArgs)
-			if err != nil {
-				return fmt.Errorf("Failed to read record set. %s", err.Error())
-			}
 		}
 	}
 
@@ -150,34 +174,12 @@ func parseRData(rtype string, rdata []string) map[string]interface{} {
 	newrdata := make([]string, 0, len(rdata))
 
 	switch rtype {
-	/*
-	        //  all just place rdata in target. use default case.
-		case "A":
-		case "AAAA":
-			//for _, i := range rdata {
-			//	addr := net.ParseIP(rdataFields) // FIX [0])
-			//	newrdata = append(newrdata, dns.FullIPv6(addr))
-			//}
-			//fieldMap["target"] =  newrdata
-		case "CNAME":
-		case "LOC":
-	                //for _, i := range rdata {
-			//	newrdata = append(newrdata, dns.PadCoordinates(rdataFields))
-			//}
-			//fieldMap["target"] = newrdata
-
-			fieldMap["target"] = sort.Strings(rdata)
-		case "NS":
-		case "PTR":
-		case "SPF":
-		case "TXT":
-	*/
 	case "AFSDB":
 		parts := strings.Split(rdata[0], " ")
 		fieldMap["subtype"], _ = strconv.Atoi(parts[0])
 		for _, rcontent := range rdata {
 			parts := strings.Split(rcontent, " ")
-			newrdata = append(newrdata, parts[1])
+			newrdata = append(newrdata, "\""+parts[1]+"\"")
 		}
 		fieldMap["target"] = newrdata
 
@@ -220,7 +222,7 @@ func parseRData(rtype string, rdata []string) map[string]interface{} {
 		}
 		for _, rcontent := range rdata {
 			parts := strings.Split(rcontent, " ")
-			newrdata = append(newrdata, parts[1])
+			newrdata = append(newrdata, "\""+parts[1]+"\"")
 		}
 		sort.Strings(newrdata)
 		fieldMap["target"] = newrdata
@@ -291,7 +293,7 @@ func parseRData(rtype string, rdata []string) map[string]interface{} {
 		// populate target
 		for _, rcontent := range rdata {
 			parts := strings.Split(rcontent, " ")
-			newrdata = append(newrdata, parts[3])
+			newrdata = append(newrdata, "\""+parts[3]+"\"")
 		}
 		fieldMap["target"] = newrdata
 
@@ -326,7 +328,10 @@ func parseRData(rtype string, rdata []string) map[string]interface{} {
 		fieldMap["dns_name"] = parts[1]
 
 	default:
-		fieldMap["target"] = rdata
+		for _, rcontent := range rdata {
+			newrdata = append(newrdata, "\""+rcontent+"\"")
+		}
+		fieldMap["target"] = newrdata
 	}
 
 	return fieldMap

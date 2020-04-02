@@ -30,10 +30,10 @@ import (
 
 // Terraform resource names
 var zoneResource = "akamai_dns_zone"
-var recordsetResource = "akamai_dns_recordset"
+var recordsetResource = "akamai_dns_record"
 
 // type to organize types by name
-type Types []string // list of Name Types
+type Types []string // list of Name Types.
 
 // Import List Struct
 type zoneImportListStruct struct {
@@ -47,6 +47,7 @@ type zoneImportListStruct struct {
 var recordNames []string
 var modSegment = false
 var zoneName string
+var zoneObject configdns.ZoneResponse
 
 var fullZoneImportList *zoneImportListStruct
 
@@ -109,43 +110,40 @@ func cmdCreateZone(c *cli.Context) error {
 	}
 
 	akamai.StartSpinner(
-		"Fetching zone entity ...",
-		fmt.Sprintf("Fetching zone entity ...... [%s]", color.GreenString("OK")))
-	zoneObj, err := configdns.GetZone(zoneName)
+		"Processing zone entity ...",
+		fmt.Sprintf("Processinging zone entity ...... [%s]", color.GreenString("OK")))
+	zoneObject, err := configdns.GetZone(zoneName)
 	if err != nil {
 		akamai.StopSpinnerFail()
 		fmt.Println("Error: " + err.Error())
 		return cli.NewExitError(color.RedString("Zone retrieval failed"), 1)
 	}
-	fmt.Sprintf("Inventorying zone recordsets ...")
-	recordsets := make(map[string]Types)
-	// Retrieve all zone names
-	fmt.Sprintf("Gathering zone Recordsets...")
-	if len(recordNames) == 0 {
-		recordsetNames, err := configdns.GetZoneNames(zoneName)
-		if err != nil {
-			akamai.StopSpinnerFail()
-			fmt.Println("Error: " + err.Error())
-			return cli.NewExitError(color.RedString("Zone Name retrieval failed"), 1)
-		}
-		recordNames = recordsetNames.Names
-	}
-	for _, zname := range recordNames {
-		nameTypesResp, err := configdns.GetZoneNameTypes(zname, zoneName)
-		if err != nil {
-			akamai.StopSpinnerFail()
-			fmt.Println("Error: " + err.Error())
-			return cli.NewExitError(color.RedString("Zone Name types retrieval failed"), 1)
-		}
-		if len(nameTypesResp.Types) == 0 {
-			continue
-		}
-		recordsets[zname] = nameTypesResp.Types
-	}
 	// normalize zone name for zone resource name
 	resourceZoneName := normalizeResourceName(zoneName)
 	if createImportList {
-		fmt.Sprintf("Creating Zone Resources list file...")
+		fmt.Println("Inventorying zone and recordsets ...")
+		recordsets := make(map[string]Types)
+		// Retrieve all zone names
+		fmt.Println("Gathering zone Recordsets...")
+		if len(recordNames) == 0 {
+			recordsetNames, err := configdns.GetZoneNames(zoneName)
+			if err != nil {
+				akamai.StopSpinnerFail()
+				fmt.Println("Error: " + err.Error())
+				return cli.NewExitError(color.RedString("Zone Name retrieval failed"), 1)
+			}
+			recordNames = recordsetNames.Names
+		}
+		for _, zname := range recordNames {
+			nameTypesResp, err := configdns.GetZoneNameTypes(zname, zoneName)
+			if err != nil {
+				akamai.StopSpinnerFail()
+				fmt.Println("Error: " + err.Error())
+				return cli.NewExitError(color.RedString("Zone Name types retrieval failed"), 1)
+			}
+			recordsets[zname] = nameTypesResp.Types
+		}
+		fmt.Println("Creating Zone Resources list file...")
 		// pathname and exists?
 		if stat, err := os.Stat(tfWorkPath); err == nil && stat.IsDir() {
 			importListFilename := createImportListFilename(resourceZoneName)
@@ -195,10 +193,11 @@ func cmdCreateZone(c *cli.Context) error {
 				return cli.NewExitError(color.RedString("Failed to create modules folder."), 1)
 			}
 		}
-		fmt.Sprintf("Creating zone configuration file ...")
+		fmt.Println("Creating zone configuration file ...")
 		// see if configuration file already exists and exclude any resources already represented.
 		var configImportList *zoneImportListStruct
-		zoneTFfileHandle, zonetfConfig, configImportList, err = reconcileZoneResourceTargets(zoneImportList, resourceZoneName)
+		var zoneTypeMap map[string]map[string]bool
+		zoneTFfileHandle, zonetfConfig, configImportList, zoneTypeMap, err = reconcileZoneResourceTargets(zoneImportList, resourceZoneName)
 		if err != nil {
 			akamai.StopSpinnerFail()
 			return cli.NewExitError(color.RedString("Failed to open/create zone config file."), 1)
@@ -220,7 +219,7 @@ func cmdCreateZone(c *cli.Context) error {
 			}
 		} else {
 			// if tf pre existed, zone has to exist by definition
-			zonetfConfig, err = processZone(zoneObj, resourceZoneName, modSegment)
+			zonetfConfig, err = processZone(zoneObject, resourceZoneName, modSegment)
 			if err != nil {
 				akamai.StopSpinnerFail()
 				fmt.Println(err.Error())
@@ -228,7 +227,7 @@ func cmdCreateZone(c *cli.Context) error {
 			}
 		}
 		// process Recordsets.
-		err = processRecordsets(configImportList, resourceZoneName, modSegment)
+		err = processRecordsets(configImportList, resourceZoneName, zoneTypeMap, modSegment)
 		if err != nil {
 			akamai.StopSpinnerFail()
 			return cli.NewExitError(color.RedString("Failed to process recordsets."), 1)
@@ -369,7 +368,7 @@ func buildZoneImportScript(zoneImportList *zoneImportListStruct, resourceName st
 		for _, tname := range typeList {
 			normalName := createRecordsetNormalName(resourceName, zname, tname)
 			if !checkForResource(recordsetResource, normalName) {
-				import_file += import_prefix + recordsetResource + "." + normalName + " " + zoneImportList.Zone + ":" + zname + ":" + tname + "\n"
+				import_file += import_prefix + recordsetResource + "." + normalName + " " + zoneImportList.Zone + "-" + zname + "-" + tname + "\n"
 			}
 		}
 	}
@@ -379,51 +378,56 @@ func buildZoneImportScript(zoneImportList *zoneImportListStruct, resourceName st
 }
 
 // remove any resources already present in existing zone tf configuration
-func reconcileZoneResourceTargets(zoneImportList *zoneImportListStruct, zoneName string) (*os.File, string, *zoneImportListStruct, error) {
+func reconcileZoneResourceTargets(zoneImportList *zoneImportListStruct, zoneName string) (*os.File, string, *zoneImportListStruct, map[string]map[string]bool, error) {
 
-	var tfScratchLen int64
+	zoneTypeMap := make(map[string]map[string]bool)
+	// populate zoneTypeMap
+
 	tfFilename := createTFFilename(zoneName)
-	if tfInfo, err := os.Stat(tfFilename); err != nil && os.IsExist(err) {
-		tfScratchLen = tfInfo.Size()
-	}
-	tfScratch := make([]byte, tfScratchLen)
 	var tfHandle *os.File
 	tfHandle, err := os.OpenFile(tfFilename, os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil && err != io.EOF {
 		fmt.Println(err.Error())
-		return nil, "", zoneImportList, err
+		return nil, "", zoneImportList, zoneTypeMap, err
 	}
-	if tfScratchLen == 0 {
-		return tfHandle, "", zoneImportList, nil
+	tfInfo, err := os.Stat(tfFilename)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, "", zoneImportList, zoneTypeMap, err
 	}
+	tfScratch := make([]byte, tfInfo.Size())
 	charsRead, err := tfHandle.Read(tfScratch)
 	if err != nil && err != io.EOF {
 		fmt.Println(err.Error())
-		return nil, "", zoneImportList, err
+		return nil, "", zoneImportList, zoneTypeMap, err
 	}
 	_, err = tfHandle.Seek(0, 0)
 	if err != nil {
 		fmt.Println(err.Error())
-		return nil, "", zoneImportList, err
+		return nil, "", zoneImportList, zoneTypeMap, err
 	}
-	if charsRead == 0 {
-		return tfHandle, "", zoneImportList, err
+	tfConfig := ""
+	if charsRead > 0 {
+		tfConfig = fmt.Sprintf("%s", tfScratch[0:charsRead-1])
 	}
-	tfConfig := fmt.Sprintf("%s", tfScratch[0:charsRead-1])
 	// need walk thru each resource type
-
 	for zname, typeList := range zoneImportList.Recordsets {
-		revisedList := make(Types, 0, len(typeList))
+		typeMap := make(map[string]bool)
+		revisedTypeList := make([]string, 0, len(typeList))
 		for _, ntype := range typeList {
 			normalName := createRecordsetNormalName(zoneName, zname, ntype)
 			if !strings.Contains(tfConfig, "\""+normalName+"\"") {
-				fmt.Println("Recordset resource " + normalName + " not found in existing tf file")
-				revisedList = append(revisedList, ntype)
+				typeMap[ntype] = true
+				revisedTypeList = append(revisedTypeList, ntype)
+			} else {
+				fmt.Println("Recordset resource " + normalName + " found in existing tf file")
 			}
 		}
-		zoneImportList.Recordsets[zname] = revisedList
+		zoneImportList.Recordsets[zname] = revisedTypeList
+		zoneTypeMap[zname] = typeMap
 	}
-	return tfHandle, tfConfig, zoneImportList, err
+
+	return tfHandle, tfConfig, zoneImportList, zoneTypeMap, err
 
 }
 
