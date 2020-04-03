@@ -26,6 +26,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	// debug
+	"github.com/shirou/gopsutil/mem"
 )
 
 // Terraform resource names
@@ -121,6 +124,24 @@ func cmdCreateZone(c *cli.Context) error {
 	// normalize zone name for zone resource name
 	resourceZoneName := normalizeResourceName(zoneName)
 	if createImportList {
+
+		//DEBUG
+
+		v, _ := mem.VirtualMemory()
+		fmt.Println("Memory BEFORE: ", v.Free)
+		queryArgs := configdns.RecordsetQueryArgs{SortBy: "name,type", ShowAll: true}
+		nameRecordSetsResp, err := configdns.GetRecordsets(zoneName, queryArgs)
+		if err != nil {
+			fmt.Println("ERROR: ", err.Error())
+			return err
+		}
+		fmt.Println("Total records: ", nameRecordSetsResp.Metadata.TotalElements)
+		v, _ = mem.VirtualMemory()
+		fmt.Println("Memory AFTER: ", v.Free)
+
+		return nil
+		// END DEBUG
+
 		fmt.Println("Inventorying zone and recordsets ...")
 		recordsets := make(map[string]Types)
 		// Retrieve all zone names
@@ -357,6 +378,8 @@ func buildZoneImportScript(zoneImportList *zoneImportListStruct, resourceName st
 	// build import script
 	var import_prefix = "terraform import "
 	var import_file = ""
+	// Init TF
+	import_file += "terraform init\n"
 	// zone
 	if !checkForResource(zoneResource, resourceName) {
 		// Assuming a zone name cannot contain spaces ....
@@ -368,7 +391,7 @@ func buildZoneImportScript(zoneImportList *zoneImportListStruct, resourceName st
 		for _, tname := range typeList {
 			normalName := createRecordsetNormalName(resourceName, zname, tname)
 			if !checkForResource(recordsetResource, normalName) {
-				import_file += import_prefix + recordsetResource + "." + normalName + " " + zoneImportList.Zone + "-" + zname + "-" + tname + "\n"
+				import_file += import_prefix + recordsetResource + "." + normalName + " " + zoneImportList.Zone + ":" + zname + ":" + tname + "\n"
 			}
 		}
 	}

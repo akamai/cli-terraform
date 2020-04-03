@@ -226,11 +226,15 @@ func processDefaultDatacenter(ddc *gtm.DatacenterBase, dcIDs map[int]string, str
 		if varType.Kind() == reflect.String {
 			ddcString += tab8 + key + " = \"" + keyVal + "\"\n"
 		} else {
-			if varName != "DatacenterId" || (structreq && keyVal == "5400") {
+			if varName != "DatacenterId" {
 				// Special handling. If we are here for a default dc object, we don't have a resource configured.
 				ddcString += tab8 + key + " = " + keyVal + "\n"
 			} else {
-				ddcString += tab8 + key + " = " + datacenterResource + "." + normalizeResourceName(dcIDs[varValue.(int)]) + ".datacenter_id\n"
+				if structreq && keyVal == "5400" {
+					ddcString += tab8 + key + " = " + defaultDatacenterDataSource + "." + "default_datacenter_5400.datacenter_id\n"
+				} else {
+					ddcString += tab8 + key + " = " + datacenterResource + "." + normalizeResourceName(dcIDs[varValue.(int)]) + ".datacenter_id\n"
+				}
 			}
 		}
 	}

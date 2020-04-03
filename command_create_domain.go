@@ -29,11 +29,12 @@ import (
 	"strings"
 )
 
-var defaultDC = 5400
+var defaultDCs = []int{5400, 5401, 5402}
 
 // Terraform resource names
 var domainResource = "akamai_gtm_domain"
 var datacenterResource = "akamai_gtm_datacenter"
+var defaultDatacenterDataSource = "akamai_gtm_default_datacenter"
 var propertyResource = "akamai_gtm_property"
 var resourceResource = "akamai_gtm_resource"
 var asResource = "akamai_gtm_asmap"
@@ -143,10 +144,7 @@ func cmdCreateDomain(c *cli.Context) error {
 		// Inventory datacenters
 		datacenters := make(map[int]string)
 		for _, dc := range domain.Datacenters {
-			// special case. ignore 5400
-			if dc.DatacenterId == defaultDC {
-				continue
-			}
+			// include Default DCs. Special handling elsewhere.
 			datacenters[dc.DatacenterId] = dc.Nickname
 		}
 		// inventory properties and targets
@@ -360,6 +358,8 @@ func buildImportScript(importList *importListStruct, resourceDomainName string) 
 	// build import script
 	var import_prefix = "terraform import "
 	var import_file = ""
+	// Init TF
+	import_file += "terraform init\n"
 	// domain
 	if !checkForResource(domainResource, resourceDomainName) {
 		// Assuming a domain name cannot contain spaces ....
@@ -368,6 +368,16 @@ func buildImportScript(importList *importListStruct, resourceDomainName string) 
 	// datacenters
 	for id, nickname := range importList.Datacenters {
 		normalName := normalizeResourceName(nickname)
+		// default datacenters special case.
+		ddcfound := false
+		for _, ddc := range defaultDCs {
+			if id == ddc {
+				ddcfound = true
+			}
+		}
+		if ddcfound {
+			continue
+		}
 		if !checkForResource(datacenterResource, normalName) {
 			import_file += import_prefix + datacenterResource + "." + normalName + " " + importList.Domain + ":" + strconv.Itoa(id) + "\n"
 		}

@@ -21,6 +21,10 @@ import (
 	"strconv"
 )
 
+// default datacenter
+var gtmDefaultDatacenterConfigP1 = fmt.Sprintf(`
+data "akamai_gtm_default_datacenter" `)
+
 // datacenter
 var gtmDatacenterConfigP1 = fmt.Sprintf(`
 resource "akamai_gtm_datacenter" `)
@@ -37,6 +41,12 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
 		if _, ok := dcImportList[datacenter.DatacenterId]; !ok {
 			continue
 		}
+		ddcFlag := false // ddc?
+		for _, ddc := range defaultDCs {
+			if datacenter.DatacenterId == ddc {
+				ddcFlag = true
+			}
+		}
 		// Retrieve Core null fields map
 		if dcNullFieldObjectMap, ok := nullFieldsMap[strconv.Itoa(datacenter.DatacenterId)]; ok {
 			coreFieldsNullMap = dcNullFieldObjectMap.CoreObjectFields
@@ -45,58 +55,58 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
 		}
 		datacenterBody := ""
 		name := ""
-		dcid := 0
 		dcString := gtmDatacenterConfigP1
-		dcElems := reflect.ValueOf(datacenter).Elem()
-		for i := 0; i < dcElems.NumField(); i++ {
-			varName := dcElems.Type().Field(i).Name
-			varType := dcElems.Type().Field(i).Type
-			varValue := dcElems.Field(i).Interface()
-			if _, ok := coreFieldsNullMap[varName]; ok {
-				continue
-			}
-			keyVal := fmt.Sprint(varValue)
-			key := convertKey(varName, keyVal, varType.Kind())
-			if key == "" {
-				continue
-			}
-			if varName == "DatacenterId" {
-				dcid = varValue.(int)
-				continue
-			}
-			if key == "nickname" {
-				name = keyVal
-			}
-			if varName == "DefaultLoadObject" {
-				if varValue.(*gtm.LoadObject) == nil {
+		if ddcFlag {
+			dcString = gtmDefaultDatacenterConfigP1
+			name = "default_datacenter_" + strconv.Itoa(datacenter.DatacenterId)
+			datacenterBody += tab4 + "datacenter = " + strconv.Itoa(datacenter.DatacenterId) + "\n"
+		} else {
+			dcElems := reflect.ValueOf(datacenter).Elem()
+			for i := 0; i < dcElems.NumField(); i++ {
+				varName := dcElems.Type().Field(i).Name
+				varType := dcElems.Type().Field(i).Type
+				varValue := dcElems.Field(i).Interface()
+				if _, ok := coreFieldsNullMap[varName]; ok {
 					continue
 				}
-				loadObject := varValue.(*gtm.LoadObject)
-				// hack. If all load object fields are defaults, assume its MT
-				if len(loadObject.LoadServers) == 0 && loadObject.LoadObject == "" && loadObject.LoadObjectPort == 0 {
+				keyVal := fmt.Sprint(varValue)
+				key := convertKey(varName, keyVal, varType.Kind())
+				if key == "" {
 					continue
 				}
-				datacenterBody += tab4 + key + " {\n"
-				datacenterBody += processLoadObject(varValue.(*gtm.LoadObject))
-				datacenterBody += tab4 + "}\n"
-				continue
-			}
-			datacenterBody += tab4 + key + " = "
-			if varType.Kind() == reflect.String {
-				datacenterBody += "\"" + keyVal + "\"\n"
-			} else {
-				datacenterBody += keyVal + "\n"
+				if key == "nickname" {
+					name = keyVal
+				}
+				if varName == "DefaultLoadObject" {
+					if varValue.(*gtm.LoadObject) == nil {
+						continue
+					}
+					loadObject := varValue.(*gtm.LoadObject)
+					// hack. If all load object fields are defaults, assume its MT
+					if len(loadObject.LoadServers) == 0 && loadObject.LoadObject == "" && loadObject.LoadObjectPort == 0 {
+						continue
+					}
+					datacenterBody += tab4 + key + " {\n"
+					datacenterBody += processLoadObject(varValue.(*gtm.LoadObject))
+					datacenterBody += tab4 + "}\n"
+					continue
+				}
+				datacenterBody += tab4 + key + " = "
+				if varType.Kind() == reflect.String {
+					datacenterBody += "\"" + keyVal + "\"\n"
+				} else {
+					datacenterBody += keyVal + "\n"
+				}
 			}
 		}
 		dcString += "\"" + normalizeResourceName(name) + "\" {\n"
 		dcString += gtmRConfigP2 + resourceDomainName + ".name\n"
 		dcString += datacenterBody
-		dcString += dependsClauseP1 + resourceDomainName + "\n"
-		dcString += tab4 + "]\n"
-		dcString += "}\n"
-		if dcid == defaultDC {
-			continue // don't include default DC
+		if !ddcFlag {
+			dcString += dependsClauseP1 + resourceDomainName + "\n"
+			dcString += tab4 + "]\n"
 		}
+		dcString += "}\n"
 		datacentersString += dcString
 	}
 
