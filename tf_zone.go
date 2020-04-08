@@ -89,7 +89,7 @@ func processZone(zone *dns.ZoneResponse, resourceZoneName string, modSegment boo
 			keyVal = processTsigKey(varValue.(*dns.TSIGKey))
 		}
 		zoneBody += tab4 + key + " = "
-		if varType.Kind() == reflect.String {
+		if varName != "Zone" && varType.Kind() == reflect.String {
 			zoneBody += "\"" + keyVal + "\"\n"
 		} else {
 			zoneBody += keyVal + "\n"

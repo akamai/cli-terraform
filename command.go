@@ -39,7 +39,7 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 			},
 			cli.BoolTFlag{
 				Name:  "createconfig",
-				Usage: "Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files",
+				Usage: "Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files using resources json",
 			},
 		},
 		BashComplete: akamai.DefaultAutoComplete,
@@ -61,16 +61,27 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 			},
 			cli.BoolTFlag{
 				Name:  "createconfig",
-				Usage: "Create Terraform configuration (<zone>.tf), gtmvars.tf, and import command script (<zone>_import.script) files",
+				Usage: "Create Terraform configuration (<zone>.tf), dnsvars.tf from generated resources file. Saves zone config for import.",
+			},
+			cli.BoolTFlag{
+				Name:  "importscript",
+				Usage: "Create import script for generated Terraform configuration script (<zone>_import.script) files",
 			},
 			cli.BoolTFlag{
 				Name:  "segmentconfig",
-				Usage: "Group and segment records by name into separate config files.",
+				Usage: "Directive for createconfig. Group and segment records by name into separate config files.",
 			},
-
+			cli.BoolTFlag{
+				Name:  "configonly",
+				Usage: "Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Saves zone config for importscript. Ignores any existing resource json file.",
+			},
+			cli.BoolTFlag{
+				Name:  "namesonly",
+				Usage: "Directive for both resource gathering and config generation. All record set types assumed.",
+			},
 			cli.StringSliceFlag{
 				Name:  "recordname",
-				Usage: "Used in resources gathering to filter recordsets. Multiple recordname flags may be specified.",
+				Usage: "Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.",
 			},
 		},
 		BashComplete: akamai.DefaultAutoComplete,

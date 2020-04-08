@@ -26,9 +26,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	// debug
-	"github.com/shirou/gopsutil/mem"
 )
 
 // Terraform resource names
@@ -48,11 +45,21 @@ type zoneImportListStruct struct {
 //var createImportList = false
 //var createConfig = false
 var recordNames []string
-var modSegment = false
+var importScript = false
+
+type fetchConfigStruct struct {
+	ConfigOnly bool
+	ModSegment bool
+	NamesOnly  bool
+}
+
+var fetchConfig = fetchConfigStruct{ConfigOnly: false, ModSegment: false, NamesOnly: false}
+
 var zoneName string
 var zoneObject configdns.ZoneResponse
 
 var fullZoneImportList *zoneImportListStruct
+var fullZoneConfigMap map[string]Types
 
 // work defs
 var moduleFolder = "modules"
@@ -105,11 +112,21 @@ func cmdCreateZone(c *cli.Context) error {
 	if c.IsSet("createconfig") {
 		createConfig = true
 	}
+	if c.IsSet("configonly") {
+		fetchConfig.ConfigOnly = true
+	}
+	if c.IsSet("namesonly") {
+		fetchConfig.NamesOnly = true
+	}
 	if c.IsSet("recordname") {
 		recordNames = c.StringSlice("recordname")
 	}
 	if c.IsSet("segmentconfig") {
-		modSegment = true
+		fetchConfig.ModSegment = true
+	}
+	if c.IsSet("importscript") {
+		fmt.Println("importscript true")
+		importScript = true
 	}
 
 	akamai.StartSpinner(
@@ -125,23 +142,6 @@ func cmdCreateZone(c *cli.Context) error {
 	resourceZoneName := normalizeResourceName(zoneName)
 	if createImportList {
 
-		//DEBUG
-
-		v, _ := mem.VirtualMemory()
-		fmt.Println("Memory BEFORE: ", v.Free)
-		queryArgs := configdns.RecordsetQueryArgs{SortBy: "name,type", ShowAll: true}
-		nameRecordSetsResp, err := configdns.GetRecordsets(zoneName, queryArgs)
-		if err != nil {
-			fmt.Println("ERROR: ", err.Error())
-			return err
-		}
-		fmt.Println("Total records: ", nameRecordSetsResp.Metadata.TotalElements)
-		v, _ = mem.VirtualMemory()
-		fmt.Println("Memory AFTER: ", v.Free)
-
-		return nil
-		// END DEBUG
-
 		fmt.Println("Inventorying zone and recordsets ...")
 		recordsets := make(map[string]Types)
 		// Retrieve all zone names
@@ -156,13 +156,17 @@ func cmdCreateZone(c *cli.Context) error {
 			recordNames = recordsetNames.Names
 		}
 		for _, zname := range recordNames {
-			nameTypesResp, err := configdns.GetZoneNameTypes(zname, zoneName)
-			if err != nil {
-				akamai.StopSpinnerFail()
-				fmt.Println("Error: " + err.Error())
-				return cli.NewExitError(color.RedString("Zone Name types retrieval failed"), 1)
+			if fetchConfig.NamesOnly {
+				recordsets[zname] = make([]string, 0, 0)
+			} else {
+				nameTypesResp, err := configdns.GetZoneNameTypes(zname, zoneName)
+				if err != nil {
+					akamai.StopSpinnerFail()
+					fmt.Println("Error: " + err.Error())
+					return cli.NewExitError(color.RedString("Zone Name types retrieval failed"), 1)
+				}
+				recordsets[zname] = nameTypesResp.Types
 			}
-			recordsets[zname] = nameTypesResp.Types
 		}
 		fmt.Println("Creating Zone Resources list file...")
 		// pathname and exists?
@@ -207,7 +211,7 @@ func cmdCreateZone(c *cli.Context) error {
 			return cli.NewExitError(color.RedString("Failed to read json zone resources file"), 1)
 		}
 		// if segmenting recordsets by name, make sure module folder exists
-		if modSegment {
+		if fetchConfig.ModSegment {
 			modulePath = filepath.Join(tfWorkPath, moduleFolder)
 			if !createDirectory(modulePath) {
 				akamai.StopSpinnerFail()
@@ -228,38 +232,57 @@ func cmdCreateZone(c *cli.Context) error {
 		// build tf file if none
 		if len(zonetfConfig) > 0 {
 			if strings.Contains(zonetfConfig, "module") && strings.Contains(zonetfConfig, "zonename") {
-				if !modSegment {
+				if !fetchConfig.ModSegment {
 					// already have a top level zone config and its modularized!
 					akamai.StopSpinnerFail()
 					return cli.NewExitError(color.RedString("Failed. Existing zone config is modularized"), 1)
 				}
-			} else if modSegment {
+			} else if fetchConfig.ModSegment {
 				// already have a top level zone config and its not mudularized!
 				akamai.StopSpinnerFail()
 				return cli.NewExitError(color.RedString("Failed. Existing zone config is not modularized"), 1)
 			}
 		} else {
 			// if tf pre existed, zone has to exist by definition
-			zonetfConfig, err = processZone(zoneObject, resourceZoneName, modSegment)
+			zonetfConfig, err = processZone(zoneObject, resourceZoneName, fetchConfig.ModSegment)
 			if err != nil {
 				akamai.StopSpinnerFail()
 				fmt.Println(err.Error())
 				return cli.NewExitError(color.RedString("Failed. Couldn't initialize zone config"), 1)
 			}
 		}
+		err = appendRootModuleTF(zonetfConfig)
+		if err != nil {
+			akamai.StopSpinnerFail()
+			fmt.Println(err.Error())
+			return cli.NewExitError(color.RedString("Failed. Couldn't write to zone config"), 1)
+		}
+
 		// process Recordsets.
-		err = processRecordsets(configImportList, resourceZoneName, zoneTypeMap, modSegment)
+		fullZoneConfigMap, err = processRecordsets(configImportList.Zone, resourceZoneName, zoneTypeMap, fetchConfig)
 		if err != nil {
 			akamai.StopSpinnerFail()
 			return cli.NewExitError(color.RedString("Failed to process recordsets."), 1)
 		}
-		// save top level Zone TF config
-		_, err = zoneTFfileHandle.Write([]byte(zonetfConfig))
+		// Save config map for import script generation
+		resourceConfigFilename := createResourceConfigFilename(resourceZoneName)
+		json, err := json.MarshalIndent(&fullZoneConfigMap, "", "  ")
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Failed to save zone configuration file."), 1)
+			return cli.NewExitError(color.RedString("Unable to generate json formatted zone config"), 1)
 		}
-		zoneTFfileHandle.Sync()
+		f, err := os.Create(resourceConfigFilename)
+		if err != nil {
+			akamai.StopSpinnerFail()
+			return cli.NewExitError(color.RedString("Unable to create resource config file"), 1)
+		}
+		defer f.Close()
+		_, err = f.WriteString(string(json))
+		if err != nil {
+			akamai.StopSpinnerFail()
+			return cli.NewExitError(color.RedString("Unable to write zone resource config file"), 1)
+		}
+		f.Sync()
 
 		// Need create dnsvars.tf dependency
 		dnsvarsFilename := filepath.Join(tfWorkPath, "dnsvars.tf")
@@ -278,14 +301,18 @@ func cmdCreateZone(c *cli.Context) error {
 			return cli.NewExitError(color.RedString("Unable to write gtmvars config file"), 1)
 		}
 		dnsvarsHandle.Sync()
+	}
 
-		fmt.Sprintf("Creating zone import script file...")
+	if importScript {
+		fmt.Println("Creating zone import script file...")
+		fullZoneConfigMap, err = retrieveZoneResourceConfig(resourceZoneName)
 		importScriptFilename := filepath.Join(tfWorkPath, resourceZoneName+"_resource_import.script")
 		if _, err := os.Stat(importScriptFilename); err == nil {
 			// File exists. Bail
 			akamai.StopSpinnerOk()
 		}
-		scriptContent, err := buildZoneImportScript(configImportList, resourceZoneName)
+		scriptContent, err := buildZoneImportScript(zoneName, fullZoneConfigMap, resourceZoneName)
+
 		if err != nil {
 			akamai.StopSpinnerFail()
 			return cli.NewExitError(color.RedString("Import script content generation failed"), 1)
@@ -308,9 +335,22 @@ func cmdCreateZone(c *cli.Context) error {
 }
 
 // Flush string to root module TF file
-func appendRootModuleTF(configText string) {
+func appendRootModuleTF(configText string) error {
 
-	zonetfConfig += configText
+	// save top level Zone TF config
+	_, err := zoneTFfileHandle.Write([]byte(configText))
+	if err != nil {
+		return fmt.Errorf("Failed to save zone configuration file.")
+	}
+	zoneTFfileHandle.Sync()
+
+	return nil
+}
+
+// Utility method to create full resource config file path
+func createResourceConfigFilename(resourceName string) string {
+
+	return filepath.Join(tfWorkPath, resourceName+"_zoneconfig.json")
 
 }
 
@@ -373,7 +413,7 @@ func createDirectory(dirName string) bool {
 	return false
 }
 
-func buildZoneImportScript(zoneImportList *zoneImportListStruct, resourceName string) (string, error) {
+func buildZoneImportScript(zone string, zoneConfigMap map[string]Types, resourceName string) (string, error) {
 
 	// build import script
 	var import_prefix = "terraform import "
@@ -383,15 +423,15 @@ func buildZoneImportScript(zoneImportList *zoneImportListStruct, resourceName st
 	// zone
 	if !checkForResource(zoneResource, resourceName) {
 		// Assuming a zone name cannot contain spaces ....
-		import_file += import_prefix + zoneResource + "." + resourceName + " " + zoneImportList.Zone + "\n"
+		import_file += import_prefix + zoneResource + "." + resourceName + " " + zone + "\n"
 	}
 	// recordsets
-	for zname, typeList := range zoneImportList.Recordsets {
+	for zname, typeList := range zoneConfigMap {
 		// per zone name
 		for _, tname := range typeList {
 			normalName := createRecordsetNormalName(resourceName, zname, tname)
 			if !checkForResource(recordsetResource, normalName) {
-				import_file += import_prefix + recordsetResource + "." + normalName + " " + zoneImportList.Zone + ":" + zname + ":" + tname + "\n"
+				import_file += import_prefix + recordsetResource + "." + normalName + " " + zone + "#" + zname + "#" + tname + "\n"
 			}
 		}
 	}
@@ -460,6 +500,11 @@ func retrieveZoneImportList(rscName string) (*zoneImportListStruct, error) {
 	if createImportList {
 		return fullZoneImportList, nil
 	}
+	if fetchConfig.ConfigOnly {
+		fullZoneImportList := &zoneImportListStruct{Zone: zoneName}
+		fullZoneImportList.Recordsets = make(map[string]Types)
+		return fullZoneImportList, nil
+	}
 	importListFilename := createImportListFilename(rscName)
 	if _, err := os.Stat(importListFilename); err != nil {
 		return nil, err
@@ -475,5 +520,29 @@ func retrieveZoneImportList(rscName string) (*zoneImportListStruct, error) {
 	}
 
 	return importList, nil
+
+}
+
+func retrieveZoneResourceConfig(rscName string) (map[string]Types, error) {
+
+	configList := make(map[string]Types)
+	// check if createConfig set. If so, already have ....
+	if createConfig {
+		return fullZoneConfigMap, nil
+	}
+	resourceConfigFilename := createResourceConfigFilename(rscName)
+	if _, err := os.Stat(resourceConfigFilename); err != nil {
+		return configList, err
+	}
+	configData, err := ioutil.ReadFile(resourceConfigFilename)
+	if err != nil {
+		return configList, err
+	}
+	err = json.Unmarshal(configData, &configList)
+	if err != nil {
+		return configList, err
+	}
+
+	return configList, nil
 
 }
