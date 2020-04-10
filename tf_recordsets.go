@@ -108,12 +108,24 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 			recordFields["recordtype"] = rs.Type
 			recordFields["ttl"] = rs.TTL
 			recordBody = ""
+			strval := ""
 			rString = dnsRecordsetConfigP1
 			for fname, fval := range recordFields {
+				if rs.Type == "SOA" && fname == "serial" {
+					continue	// computed
+				}
+                                if rs.Type == "AKAMAITLC" && (fname == "dns_name" || fname == "answer_type") {
+                                        continue        // computed
+                                }
 				recordBody += tab4 + fname + " = "
 				switch fval.(type) {
 				case string:
-					recordBody += "\"" + fmt.Sprint(fval) + "\"\n"
+					strval = fmt.Sprint(fval)
+					if strings.HasPrefix(strval, "\"") {
+						strval = strings.Trim(strval, "\"")
+						strval = "\\\"" + strval + "\\\""
+					}
+					recordBody += "\"" + strval + "\"\n"
 
 				case []string:
 					// target
@@ -121,6 +133,10 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 					if len(fval.([]string)) > 0 {
 						listString += "["
 						for _, str := range fval.([]string) {
+		                                        if strings.HasPrefix(str, "\"") {
+                		                                str = strings.Trim(str, "\"")
+                                		                str = "\\\"" + str + "\\\""
+                                        		}
 							listString += "\"" + str + "\""
 							listString += ", "
 						}

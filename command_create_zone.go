@@ -125,7 +125,6 @@ func cmdCreateZone(c *cli.Context) error {
 		fetchConfig.ModSegment = true
 	}
 	if c.IsSet("importscript") {
-		fmt.Println("importscript true")
 		importScript = true
 	}
 
