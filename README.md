@@ -51,13 +51,14 @@ Built-In Commands:
 
 ### Usage
 
+```
    akamai-terraform create-domain [domain] [--tfworkpath] [--resources] [--createconfig] 
 
 Flags: 
    --tfworkpath value      file path location for placement of created and/or modified artifacts. Default: current directory
    --resources             Create json formatted resource import list file, <domain>_resources.json. Used as input by createconfig.
    --createconfig          Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files using resources json
-
+```
 
 ### Create list of all domain objects. Written in json format to <domain>_resources.json
 
@@ -79,6 +80,7 @@ $ akamai terraform create-domain example.akadns.net --createconfig
 
 ### Usage
 
+```
    akamai-terraform create-zone [zone] [--tfworkpath] [--resources] [--createconfig] [--importscript] [--segmentconfig] [--configonly] [--namesonly] [--recordname]
 
 Flags: 
@@ -91,6 +93,7 @@ Flags:
                            importscript. Ignores any existing resource json file.
    --namesonly             Directive for both resource gathering and config generation. All record set types assumed.
    --recordname value      Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.
+```
 
 ### Create List of Zone Recordsets. Written in json format to <zone>_resources.json
 
