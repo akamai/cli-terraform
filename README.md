@@ -33,24 +33,31 @@ If you want to compile it from source, you will need Go 1.8 or later, and the [D
   - Windows: `go build -o akamai-terraform.exe`
 5. Move the binary (`akamai-terraform` or `akamai-terraform.exe`) in to your `PATH`
 
-## Usage
+## General Usage
 
 ```
   akamai-terraform [--edgerc] [--section] <command> [sub-command]
 
 Description:
-   Manage Terraform GTM Domain configurations and assoc objects
-
-Global Flags:
-   --tfworkpath value      file path location for placement of created and/or modified artifacts. Default: current directory
-   --resources             Create json formatted resource import list file, <domain>_resources.json. Used as input by createconfig.
-   --createconfig          Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files
+   Manage Akamai Terraform configurations and assoc objects. Current support includes Akamai GTM domains and EdgeDNS zones.
 
 Built-In Commands:
   create-domain
   list
   help
 ```
+
+## GTM Domains
+
+### Usage
+
+   akamai-terraform create-domain [domain] [--tfworkpath] [--resources] [--createconfig] 
+
+Flags: 
+   --tfworkpath value      file path location for placement of created and/or modified artifacts. Default: current directory
+   --resources             Create json formatted resource import list file, <domain>_resources.json. Used as input by createconfig.
+   --createconfig          Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files using resources json
+
 
 ### Create list of all domain objects. Written in json format to <domain>_resources.json
 
@@ -64,9 +71,62 @@ $ akamai terraform create-domain example.akadns.net --resources
 $ akamai terraform create-domain example.akadns.net --createconfig
 ```
 
-Notes:
+### Domain Notes:
 1. Mapping GTM entity names to TF resource names may require normalization. Invalid TF resource name characters will be replaced by underscores, '_' in config generation.
  
+
+## Edgegrid Zones
+
+### Usage
+
+   akamai-terraform create-zone [zone] [--tfworkpath] [--resources] [--createconfig] [--importscript] [--segmentconfig] [--configonly] [--namesonly] [--recordname]
+
+Flags: 
+   --tfworkpath value      file path location for placement of created and/or modified artifacts. Default: current directory
+   --resources             Create json formatted resource import list file, <zone>_resources.json. Used as input by createconfig.
+   --createconfig          Create Terraform configuration (<zone>.tf), dnsvars.tf from generated resources file. Saves zone config for import.
+   --importscript          Create import script for generated Terraform configuration script (<zone>_import.script) files
+   --segmentconfig         Directive for createconfig. Group and segment records by name into separate config files.
+   --configonly            Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Saves zone config for 
+                           importscript. Ignores any existing resource json file.
+   --namesonly             Directive for both resource gathering and config generation. All record set types assumed.
+   --recordname value      Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.
+
+### Create List of Zone Recordsets. Written in json format to <zone>_resources.json
+
+```
+$ akamai terraform create-zone testprimaryzone.com --resources
+```
+
+### Generate Terraform Zone configuration file. Default args create <zone>.tf, vars config file, dnsvars.tf
+
+```
+$ akamai terraform create-zone testprimaryzone.com --createconfig
+```
+
+### Generate Zone import script, <zone>_resource_import.script
+
+```
+$ akamai terraform create-zone testprimaryzone.com --importscript
+```
+
+
+### Zone Notes
+
+1. The resources directive generates a <zone>_resources.json file for consumption by createconfig
+2. The createconfig directive generates a <zone>_zoneconfig.json file for consumption by importscript
+
+####  Advanced options for --resources
+
+1. recordname - filters generated resources list by record name(s)
+2. namesonly - Generates resource file with recordset names only. All associated Types will be represented.
+
+#### Advanced options for --createconfig
+
+1. namesonly - Resources for all associated Types will be generated
+2. segmentconfig - Generate a modularized configuration. 
+3. configonly. Generate zone configuration directly without json itemization. Scope limited by additional specified flags.
+
 ## License
 
 This package is licensed under the Apache 2.0 License. See [LICENSE](LICENSE) for details.
