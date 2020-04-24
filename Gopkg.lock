@@ -2,17 +2,26 @@
 
 
 [[projects]]
-  digest = "1:142b53ace66a8235bcc38b53cfe118233820eb59435117eec237e095be712147"
+  digest = "1:9909e0a06cff3bd88841c9d2e0cc91b0a431676009018c74c3315f33b49b0046"
+  name = "github.com/StackExchange/wmi"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "cbe66965904dbe8a6cd589e2298e5d8b986bd7dd"
+  version = "1.1.0"
+
+[[projects]]
+  digest = "1:3e0618d616639706509ebd9ce9f617e7bac18e58dc0a2f125980c0911fe40240"
   name = "github.com/akamai/AkamaiOPEN-edgegrid-golang"
   packages = [
     "client-v1",
+    "configdns-v2",
     "configgtm-v1_4",
     "edgegrid",
     "jsonhooks-v1",
   ]
   pruneopts = "UT"
-  revision = "fd2a4de8100d90f143b411ad88837dc56dde81f9"
-  version = "v0.9.8"
+  revision = "1753fe4633a2a3546ddf5ddc1e105dd846c2d2fe"
+  version = "v0.9.13"
 
 [[projects]]
   branch = "master"
@@ -45,6 +54,17 @@
   pruneopts = "UT"
   revision = "5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4"
   version = "v1.7.0"
+
+[[projects]]
+  digest = "1:440028f55cb322d8cb5b9d5ebec298a00b7d74690a658fe6b1c0c0b44341bfae"
+  name = "github.com/go-ole/go-ole"
+  packages = [
+    ".",
+    "oleutil",
+  ]
+  pruneopts = "UT"
+  revision = "97b6244175ae18ea6eef668034fd6565847501c9"
+  version = "v1.2.4"
 
 [[projects]]
   digest = "1:582b704bebaa06b48c29b0cec224a6058a09c86883aaddabde889cd1a5f73e1b"
@@ -87,12 +107,31 @@
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:808cdddf087fb64baeae67b8dfaee2069034d9704923a3cb8bd96a995421a625"
+  name = "github.com/patrickmn/go-cache"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0"
+  version = "v2.1.0"
+
+[[projects]]
   digest = "1:b36a0ede02c4c2aef7df7f91cbbb7bb88a98b5d253509d4f997dda526e50c88c"
   name = "github.com/russross/blackfriday"
   packages = ["."]
   pruneopts = "UT"
   revision = "05f3235734ad95d0016f6a23902f06461fcf567a"
   version = "v1.5.2"
+
+[[projects]]
+  digest = "1:d6962d5c108ea66e1ba40269404db31ce1490cb23f8134110f9f434251d63d4a"
+  name = "github.com/shirou/gopsutil"
+  packages = [
+    "internal/common",
+    "mem",
+  ]
+  pruneopts = "UT"
+  revision = "8048a2e9c5773235122027dd585cf821b2af1249"
+  version = "v2.18.07"
 
 [[projects]]
   digest = "1:04457f9f6f3ffc5fea48e71d62f2ca256637dee0a04d710288e27e05c8b41976"
@@ -112,9 +151,12 @@
 
 [[projects]]
   branch = "release-branch.go1.11"
-  digest = "1:33a43cb31975899cfcd81600d1390467db1778ae87102f80668a753fed8c663e"
+  digest = "1:a60cae5be8993938498243605b120290533a5208fd5cac81c932afbad3642fb0"
   name = "golang.org/x/sys"
-  packages = ["unix"]
+  packages = [
+    "unix",
+    "windows",
+  ]
   pruneopts = "UT"
   revision = "98c5dad5d1a0e8a73845ecc8897d0bd56586511d"
 
@@ -130,9 +172,11 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/akamai/AkamaiOPEN-edgegrid-golang/configdns-v2",
     "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4",
     "github.com/akamai/cli-common-golang",
     "github.com/fatih/color",
+    "github.com/shirou/gopsutil/mem",
     "github.com/urfave/cli",
   ]
   solver-name = "gps-cdcl"
