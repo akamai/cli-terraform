@@ -22,7 +22,7 @@ import (
 func setHelpTemplates() {
 	cli.AppHelpTemplate =
 		color.YellowString("Usage: \n") +
-			`{{if or (or (eq .HelpName "akamai-terraform create-domain") (eq .HelpName "akamai terraform create-domain")) (or (eq .HelpName "akamai-terraform create-zone") (eq .HelpName "akamai terraform create-zone"))}}` +
+			`{{if or (or (eq .HelpName "akamai-terraform create-domain") (eq .HelpName "akamai terraform create-domain")) (or (eq .HelpName "akamai-terraform create-zone") (eq .HelpName "akamai terraform create-zone")) (or (eq .HelpName "akamai-terraform create-property") (eq .HelpName "akamai terraform create-property"))}}` +
 			color.BlueString(`	{{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}}{{if .ArgsUsage}} {{.ArgsUsage}}{{end}}{{end}}`) +
 			`{{else}}` +
 			color.BlueString(`	{{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}}{{if .VisibleFlags}}{{range .VisibleFlags}} [--{{.Name}}]{{end}}{{end}}{{if .ArgsUsage}} {{.ArgsUsage}}{{end}}{{if .Commands}} <command> [sub-command]{{end}}{{end}}`) +
@@ -42,7 +42,7 @@ func setHelpTemplates() {
 			"\n\n{{end}}" +
 
 			"{{if .VisibleCommands}}" +
-			`{{if or (or (eq .HelpName "akamai-terraform create-domain") (eq .HelpName "akamai terraform create-domain")) (or (eq .HelpName "akamai-terraform create-zone") (eq .HelpName "akamai terraform create-zone"))}}` +
+			`{{if or (or (eq .HelpName "akamai-terraform create-domain") (eq .HelpName "akamai terraform create-domain")) (or (eq .HelpName "akamai-terraform create-zone") (eq .HelpName "akamai terraform create-zone")) (or (eq .HelpName "akamai-terraform create-property") (eq .HelpName "akamai terraform create-property"))}}` +
 			`{{else}}` +
 			color.YellowString("Built-In Commands:\n") +
 			`{{end}}` +

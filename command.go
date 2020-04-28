@@ -26,7 +26,7 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 	commands = append(commands, cli.Command{
 		Name:        "create-domain",
 		Description: "Create Terraform Domain Resources",
-		ArgsUsage:   "[domain]",
+		ArgsUsage:   "<domain>",
 		Action:      cmdCreateDomain,
 		Flags: []cli.Flag{
 			cli.StringFlag{
@@ -48,7 +48,7 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 	commands = append(commands, cli.Command{
 		Name:        "create-zone",
 		Description: "Create Terraform Zone Resources",
-		ArgsUsage:   "[zone]",
+		ArgsUsage:   "<zone>",
 		Action:      cmdCreateZone,
 		Flags: []cli.Flag{
 			cli.StringFlag{
@@ -87,6 +87,21 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 		BashComplete: akamai.DefaultAutoComplete,
 	})
 
+	commands = append(commands, cli.Command{
+		Name:        "create-property",
+		Description: "Create Terraform Property Resource",
+		Usage:       "create-property",
+		ArgsUsage:   "<property name>",
+		Action:      cmdCreateProperty,
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "tfworkpath",
+				Usage: "file path location for placement of created and/or modified artifacts. Default: current directory",
+			},
+		},
+		BashComplete: akamai.DefaultAutoComplete,
+	})
+
 	commands = append(commands,
 		cli.Command{
 			Name:        "list",
@@ -96,7 +111,7 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 		cli.Command{
 			Name:         "help",
 			Description:  "Displays help information",
-			ArgsUsage:    "[command] [sub-command]",
+			ArgsUsage:    "<command> <sub-command>",
 			Action:       akamai.CmdHelp,
 			BashComplete: akamai.DefaultAutoComplete,
 		},

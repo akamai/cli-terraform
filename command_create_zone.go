@@ -130,7 +130,7 @@ func cmdCreateZone(c *cli.Context) error {
 
 	akamai.StartSpinner(
 		"Processing zone entity ...",
-		fmt.Sprintf("Processinging zone entity ...... [%s]", color.GreenString("OK")))
+		fmt.Sprintf("Processing zone entity ...... [%s]", color.GreenString("OK")))
 	zoneObject, err := configdns.GetZone(zoneName)
 	if err != nil {
 		akamai.StopSpinnerFail()
@@ -329,6 +329,8 @@ func cmdCreateZone(c *cli.Context) error {
 		}
 		f.Sync()
 	}
+
+	akamai.StopSpinner("Zone configuration completed", false)
 
 	return nil
 }

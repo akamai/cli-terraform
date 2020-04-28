@@ -312,6 +312,8 @@ func cmdCreateDomain(c *cli.Context) error {
 		f.Sync()
 	}
 
+	akamai.StopSpinner("Domain configuration completed", false)
+
 	return nil
 }
 
