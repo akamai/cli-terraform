@@ -20,18 +20,16 @@ for your system, or by cloning this repository and compiling it yourself.
 
 ### Compiling from Source
 
-If you want to compile it from source, you will need Go 1.8 or later, and the [Dep](https://golang.github.io/dep/) package manager installed:
+If you want to compile it from source, you will need Go 1.12 or later:
 
 1. Fetch the package:  
   `go get github.com/akamai/cli-terraform`
 2. Change to the package directory:  
   `cd $GOPATH/src/github.com/akamai/cli-terraform`
-3. Install dependencies using `dep`:  
-  `dep ensure`
-4. Compile the binary:
+3. Compile the binary:
   - Linux/macOS/*nix: `go build -o akamai-terraform`
   - Windows: `go build -o akamai-terraform.exe`
-5. Move the binary (`akamai-terraform` or `akamai-terraform.exe`) in to your `PATH`
+4. Move the binary (`akamai-terraform` or `akamai-terraform.exe`) in to your `PATH`
 
 ## General Usage
 
@@ -41,8 +39,14 @@ If you want to compile it from source, you will need Go 1.8 or later, and the [D
 Description:
    Manage Akamai Terraform configurations and assoc objects. Current support includes Akamai GTM domains and EdgeDNS zones.
 
+Global Flags:
+   --edgerc value  Location of the credentials file (default: "/home/elynes/.edgerc") [$AKAMAI_EDGERC]
+   --section value     Section of the credentials file (default: "terraform") [$AKAMAI_EDGERC_SECTION]
+
 Built-In Commands:
   create-domain
+  create-zone
+  create-property
   list
   help
 ```
@@ -129,6 +133,26 @@ $ akamai terraform create-zone testprimaryzone.com --importscript
 1. namesonly - Resources for all associated Types will be generated
 2. segmentconfig - Generate a modularized configuration. 
 3. configonly. Generate zone configuration directly without json itemization. Scope limited by additional specified flags.
+
+## Property Manager Properties
+
+### Usage
+
+```
+   akamai-terraform create-property [property name] [--tfworkpath] 
+
+Flags:
+   --tfworkpath value      file path location for placement of created and/or modified artifacts. Default: current directory
+```
+
+### Create property manager property configuration.
+
+```
+$ akamai terraform create-property
+```
+
+## General Notes
+1. Terraform variable configuration is generated in a separately named TF file for each Akamai entity type. These files will need to be merged by the Admin in the case where multiple entities are managed concurrently with the Terraform client.
 
 ## License
 

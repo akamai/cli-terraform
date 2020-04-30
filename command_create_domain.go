@@ -128,19 +128,19 @@ func cmdCreateDomain(c *cli.Context) error {
 		createConfig = true
 	}
 
-	akamai.StartSpinner(
-		"Fetching domain entity ...",
-		fmt.Sprintf("Fetching domain entity ...... [%s]", color.GreenString("OK")))
+	fmt.Println("Configuring Domain")
+	akamai.StartSpinner("Fetching domain entity ", "")
 	domain, err := configgtm.GetDomain(domainName)
 	if err != nil {
 		akamai.StopSpinnerFail()
 		fmt.Println("Error: " + err.Error())
 		return cli.NewExitError(color.RedString("Domain retrieval failed"), 1)
 	}
+	akamai.StopSpinnerOk()
 	// use domain name sans suffix for domain resource name
 	resourceDomainName := normalizeResourceName(strings.TrimSuffix(domainName, ".akadns.net"))
 	if createImportList {
-		fmt.Println("Inventorying domain objects ...")
+		akamai.StartSpinner("Inventorying domain objects ", "")
 		// Inventory datacenters
 		datacenters := make(map[int]string)
 		for _, dc := range domain.Datacenters {
@@ -192,7 +192,8 @@ func cmdCreateDomain(c *cli.Context) error {
 			}
 			asmaps[as.Name] = targets
 		}
-		fmt.Println("Creating Resources list file...")
+		akamai.StopSpinnerOk()
+		akamai.StartSpinner("Creating Resources list file ", "")
 		// pathname and exists?
 		if stat, err := os.Stat(tfWorkPath); err == nil && stat.IsDir() {
 			importListFilename := createImportListFilename(resourceDomainName)
@@ -230,6 +231,7 @@ func cmdCreateDomain(c *cli.Context) error {
 			akamai.StopSpinnerFail()
 			return cli.NewExitError(color.RedString("Destination work path is not accessible."), 1)
 		}
+		akamai.StopSpinnerOk()
 	}
 
 	if createConfig {
@@ -239,7 +241,7 @@ func cmdCreateDomain(c *cli.Context) error {
 			akamai.StopSpinnerFail()
 			return cli.NewExitError(color.RedString("Failed to read json resources file"), 1)
 		}
-		fmt.Println("Creating domain configuration file ...")
+		akamai.StartSpinner("Creating domain configuration file ", "")
 		// see if configuration file already exists and exclude any resources already represented.
 		domainTFfileHandle, tfConfig, configImportList, err := reconcileResourceTargets(importList, resourceDomainName)
 		if err != nil {
@@ -286,8 +288,8 @@ func cmdCreateDomain(c *cli.Context) error {
 			return cli.NewExitError(color.RedString("Unable to write gtmvars config file"), 1)
 		}
 		gtmvarsHandle.Sync()
-
-		fmt.Println("Creating domain import script file...")
+		akamai.StopSpinnerOk()
+		akamai.StartSpinner("Creating domain import script file ", "")
 		importScriptFilename := filepath.Join(tfWorkPath, resourceDomainName+"_resource_import.script")
 		if _, err := os.Stat(importScriptFilename); err == nil {
 			// File exists. Bail
@@ -310,9 +312,10 @@ func cmdCreateDomain(c *cli.Context) error {
 			return cli.NewExitError(color.RedString("Unable to write import script file"), 1)
 		}
 		f.Sync()
+		akamai.StopSpinnerOk()
 	}
 
-	akamai.StopSpinner("Domain configuration completed", false)
+	fmt.Println("Domain configuration completed")
 
 	return nil
 }

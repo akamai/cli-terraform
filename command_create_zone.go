@@ -128,9 +128,7 @@ func cmdCreateZone(c *cli.Context) error {
 		importScript = true
 	}
 
-	akamai.StartSpinner(
-		"Processing zone entity ...",
-		fmt.Sprintf("Processing zone entity ...... [%s]", color.GreenString("OK")))
+	fmt.Println("Configuring Zone")
 	zoneObject, err := configdns.GetZone(zoneName)
 	if err != nil {
 		akamai.StopSpinnerFail()
@@ -141,10 +139,9 @@ func cmdCreateZone(c *cli.Context) error {
 	resourceZoneName := normalizeResourceName(zoneName)
 	if createImportList {
 
-		fmt.Println("Inventorying zone and recordsets ...")
+		akamai.StartSpinner("Inventorying zone and recordsets ", "")
 		recordsets := make(map[string]Types)
 		// Retrieve all zone names
-		fmt.Println("Gathering zone Recordsets...")
 		if len(recordNames) == 0 {
 			recordsetNames, err := configdns.GetZoneNames(zoneName)
 			if err != nil {
@@ -167,7 +164,8 @@ func cmdCreateZone(c *cli.Context) error {
 				recordsets[zname] = nameTypesResp.Types
 			}
 		}
-		fmt.Println("Creating Zone Resources list file...")
+		akamai.StopSpinnerOk()
+		akamai.StartSpinner("Creating Zone Resources list file ", "")
 		// pathname and exists?
 		if stat, err := os.Stat(tfWorkPath); err == nil && stat.IsDir() {
 			importListFilename := createImportListFilename(resourceZoneName)
@@ -200,6 +198,7 @@ func cmdCreateZone(c *cli.Context) error {
 			akamai.StopSpinnerFail()
 			return cli.NewExitError(color.RedString("Destination work path is not accessible."), 1)
 		}
+		akamai.StopSpinnerOk()
 	}
 
 	if createConfig {
@@ -217,7 +216,7 @@ func cmdCreateZone(c *cli.Context) error {
 				return cli.NewExitError(color.RedString("Failed to create modules folder."), 1)
 			}
 		}
-		fmt.Println("Creating zone configuration file ...")
+		akamai.StartSpinner("Creating zone configuration file ", "")
 		// see if configuration file already exists and exclude any resources already represented.
 		var configImportList *zoneImportListStruct
 		var zoneTypeMap map[string]map[string]bool
@@ -300,10 +299,11 @@ func cmdCreateZone(c *cli.Context) error {
 			return cli.NewExitError(color.RedString("Unable to write gtmvars config file"), 1)
 		}
 		dnsvarsHandle.Sync()
+		akamai.StopSpinnerOk()
 	}
 
 	if importScript {
-		fmt.Println("Creating zone import script file...")
+		akamai.StartSpinner("Creating zone import script file", "")
 		fullZoneConfigMap, err = retrieveZoneResourceConfig(resourceZoneName)
 		importScriptFilename := filepath.Join(tfWorkPath, resourceZoneName+"_resource_import.script")
 		if _, err := os.Stat(importScriptFilename); err == nil {
@@ -328,9 +328,10 @@ func cmdCreateZone(c *cli.Context) error {
 			return cli.NewExitError(color.RedString("Unable to write import script file"), 1)
 		}
 		f.Sync()
+		akamai.StopSpinnerOk()
 	}
 
-	akamai.StopSpinner("Zone configuration completed", false)
+	fmt.Println("Zone configuration completed")
 
 	return nil
 }

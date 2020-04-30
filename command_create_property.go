@@ -104,10 +104,8 @@ func cmdCreateProperty(c *cli.Context) error {
 
 	// Get Property
 	propertyName := c.Args().First()
-	akamai.StartSpinner(
-		"Processing Property  ...",
-		fmt.Sprintf("Fetching property.... [%s]", color.GreenString("OK")))
-
+	fmt.Println("Configuring Property")
+	akamai.StartSpinner("Fetching property ", "")
 	property := findProperty(propertyName)
 	if property == nil {
 		akamai.StopSpinnerFail()
@@ -116,11 +114,9 @@ func cmdCreateProperty(c *cli.Context) error {
 
 	tfData.PropertyName = property.PropertyName
 	tfData.PropertyResourceName = strings.Replace(property.PropertyName, ".", "-", -1)
+	akamai.StopSpinnerOk()
 
-	fmt.Printf("Fetching property...... [%s]\n", color.GreenString("OK"))
-
-	fmt.Printf("Fetching property rules...")
-
+	akamai.StartSpinner("Fetching property rules ", "")
 	// Get Property Rules
 	rules, err := property.GetRules()
 
@@ -171,10 +167,10 @@ func cmdCreateProperty(c *cli.Context) error {
 		return cli.NewExitError(color.RedString("Can't write property rules: ", err), 1)
 	}
 
-	fmt.Printf("Fetching property rules...... [%s]\n", color.GreenString("OK"))
+	akamai.StopSpinnerOk()
 
 	// Get Group
-	fmt.Printf("Fetching group...")
+	akamai.StartSpinner("Fetching group ", "")
 	group, err := getGroup(property.GroupID)
 	if err != nil {
 		akamai.StopSpinnerFail()
@@ -183,10 +179,10 @@ func cmdCreateProperty(c *cli.Context) error {
 
 	tfData.GroupName = group.GroupName
 
-	fmt.Printf("Fetching group...... [%s]\n", color.GreenString("OK"))
+	akamai.StopSpinnerOk()
 
 	// Get Version
-	fmt.Printf("Fetching property version...")
+	akamai.StartSpinner("Fetching property version ", "")
 	version, err := getVersion(property)
 	if err != nil {
 		akamai.StopSpinnerFail()
@@ -195,10 +191,10 @@ func cmdCreateProperty(c *cli.Context) error {
 
 	tfData.ProductID = version.ProductID
 
-	fmt.Printf("Fetching property version...... [%s]\n", color.GreenString("OK"))
+	akamai.StopSpinnerOk()
 
 	// Get Product
-	fmt.Printf("Fetching product name...")
+	akamai.StartSpinner("Fetching product name ", "")
 	product, err := getProduct(tfData.ProductID, property.Contract)
 	if err != nil {
 		akamai.StopSpinnerFail()
@@ -207,10 +203,10 @@ func cmdCreateProperty(c *cli.Context) error {
 
 	tfData.ProductName = product.ProductName
 
-	fmt.Printf("Fetching product name...... [%s]\n", color.GreenString("OK"))
+	akamai.StopSpinnerOk()
 
 	// Get Hostnames
-	fmt.Printf("Fetching hostnames...")
+	akamai.StartSpinner("Fetching hostnames ", "")
 	hostnames, err := getHostnames(property, version)
 
 	if err != nil {
@@ -238,10 +234,10 @@ func cmdCreateProperty(c *cli.Context) error {
 
 	}
 
-	fmt.Printf("Fetching hostnames...... [%s]\n", color.GreenString("OK"))
+	akamai.StopSpinnerOk()
 
 	// Get CPCode Name
-	fmt.Printf("Fetching CPCode name...")
+	akamai.StartSpinner("Fetching CPCode name ", "")
 	cpcodeName, err := getCPCode(property, tfData.CPCodeID)
 	if err != nil {
 		akamai.StopSpinnerFail()
@@ -250,10 +246,10 @@ func cmdCreateProperty(c *cli.Context) error {
 
 	tfData.CPCodeName = cpcodeName
 
-	fmt.Printf("Fetching CPCode name...... [%s]\n", color.GreenString("OK"))
+	akamai.StopSpinnerOk()
 
 	// Get contact details
-	fmt.Printf("Fetching contact details...")
+	akamai.StartSpinner("Fetching contact details ", "")
 	activations, err := property.GetActivations()
 	if err != nil {
 		tfData.Emails = append(tfData.Emails, "")
@@ -266,19 +262,18 @@ func cmdCreateProperty(c *cli.Context) error {
 		}
 	}
 
-	fmt.Printf("Fetching contact details...... [%s]\n", color.GreenString("OK"))
+	akamai.StopSpinnerOk()
 
 	// Save file
-	fmt.Printf("Saving TF definition...")
+	akamai.StartSpinner("Saving TF definition ", "")
 	err = saveTerraformDefinition(tfData)
 	if err != nil {
 		akamai.StopSpinnerFail()
 		return cli.NewExitError(color.RedString("Couldn't save tf file: %s", err), 1)
 	}
 
-	fmt.Printf("Saving TF definition...... [%s]\n", color.GreenString("OK"))
-
-	akamai.StopSpinner("Property configuration completed", false)
+	akamai.StopSpinnerOk()
+	fmt.Println("Property configuration completed")
 
 	return nil
 
