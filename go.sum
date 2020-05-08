@@ -3,12 +3,10 @@ github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d h1:G0m3OIz70MZUW
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=
 github.com/akamai/AkamaiOPEN-edgegrid-golang v0.9.13 h1:4TBWOJynmCczvd3Z+wldGFoIdpmvwLI92uPtU8KFH+c=
 github.com/akamai/AkamaiOPEN-edgegrid-golang v0.9.13/go.mod h1:L+HB2uBoDgi3+r1pJEJcbGwyyHhd2QXaGsKLbDwtm8Q=
-github.com/akamai/cli-common-golang v0.0.0-20190304161655-ff6f30c42c80 h1:Z4G4fQIQtPM6yGpcmrOI1d9NjjHTWLmeU9ysaoJoxZo=
-github.com/akamai/cli-common-golang v0.0.0-20190304161655-ff6f30c42c80/go.mod h1:zCub6Q5dfWVvCjXQubVbepcb4DT2AIEPKSxWaTsydRU=
-github.com/akamai/cli-common-golang v0.0.0-20200502175207-216a7c74655c h1:bV1cr+Tm5zcq2/HOGKgyRbX+0+f/7MwLHSWNSt6VUJw=
-github.com/akamai/cli-common-golang v0.0.0-20200502175207-216a7c74655c/go.mod h1:zCub6Q5dfWVvCjXQubVbepcb4DT2AIEPKSxWaTsydRU=
-github.com/briandowns/spinner v1.11.0 h1:g5xjAJwbpnBm7wleS9MCPO6gOfWuHposkk2CDXAIRD8=
-github.com/briandowns/spinner v1.11.0/go.mod h1:QOuQk7x+EaDASo80FEXwlwiA+j/PPIcX3FScO+3/ZPQ=
+github.com/akamai/cli-common-golang v0.0.0-20200508194158-7dad60634830 h1:zj+/CjJDuKnCKSmFH2cmYoEHprvkTihBN9klDB4jOKc=
+github.com/akamai/cli-common-golang v0.0.0-20200508194158-7dad60634830/go.mod h1:zCub6Q5dfWVvCjXQubVbepcb4DT2AIEPKSxWaTsydRU=
+github.com/briandowns/spinner v1.11.1 h1:OixPqDEcX3juo5AjQZAnFPbeUA0jvkp2qzB5gOZJ/L0=
+github.com/briandowns/spinner v1.11.1/go.mod h1:QOuQk7x+EaDASo80FEXwlwiA+j/PPIcX3FScO+3/ZPQ=
 github.com/cpuguy83/go-md2man v1.0.10 h1:BSKMNlYxDvnunlTymqtgONjNnaRV1sTpcovwwjF22jk=
 github.com/cpuguy83/go-md2man v1.0.10/go.mod h1:SmD6nW6nTyfqj6ABTjUi3V3JVMnlJmwcJI5acqYI6dE=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
