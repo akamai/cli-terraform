@@ -111,6 +111,9 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 			strval := ""
 			rString = dnsRecordsetConfigP1
 			for fname, fval := range recordFields {
+				if (fname == "priority" || fname == "priority_increment") && rs.Type == "MX" {
+					fval = 0
+				}
 				if rs.Type == "SOA" && fname == "serial" {
 					continue // computed
 				}
@@ -132,16 +135,23 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 					listString = ""
 					if len(fval.([]string)) > 0 {
 						listString += "["
-						for _, str := range fval.([]string) {
-							if strings.HasPrefix(str, "\"") {
-								str = strings.Trim(str, "\"")
-								if strings.Contains(str, "\\\"") {
-									strings.ReplaceAll(str, "\\\"", "\\\\\\\"")
-								}
-								str = "\\\"" + str + "\\\""
+						if rs.Type == "MX" {
+							for _, rstr := range rs.Rdata {
+								listString += "\"" + rstr + "\""
+								listString += ", "
 							}
-							listString += "\"" + str + "\""
-							listString += ", "
+						} else {
+							for _, str := range fval.([]string) {
+								if strings.HasPrefix(str, "\"") {
+									str = strings.Trim(str, "\"")
+									if strings.Contains(str, "\\\"") {
+										strings.ReplaceAll(str, "\\\"", "\\\\\\\"")
+									}
+									str = "\\\"" + str + "\\\""
+								}
+								listString += "\"" + str + "\""
+								listString += ", "
+							}
 						}
 						listString = strings.TrimRight(listString, ", ")
 						listString += "]"
