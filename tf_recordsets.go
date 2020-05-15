@@ -140,6 +140,13 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 								listString += "\"" + rstr + "\""
 								listString += ", "
 							}
+						} else if rs.Type == "CAA" {
+							for _, rstr := range rs.Rdata {
+								caaparts := strings.Split(rstr, " ")
+								caaparts[2] = strings.ReplaceAll(caaparts[2], "\"", "\\\"")
+								listString += "\"" + strings.Join(caaparts, " ") + "\""
+								listString += ", "
+							}
 						} else {
 							for _, str := range fval.([]string) {
 								if strings.HasPrefix(str, "\"") {

@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
-	github.com/akamai/AkamaiOPEN-edgegrid-golang v0.9.13
+	github.com/akamai/AkamaiOPEN-edgegrid-golang v0.9.15
 	github.com/akamai/cli-common-golang v0.0.0-20200508194158-7dad60634830
 	github.com/briandowns/spinner v1.11.1
 	github.com/fatih/color v1.7.0

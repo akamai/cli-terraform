@@ -42,6 +42,7 @@ Description:
 Global Flags:
    --edgerc value  Location of the credentials file (default: "/home/elynes/.edgerc") [$AKAMAI_EDGERC]
    --section value     Section of the credentials file (default: "terraform") [$AKAMAI_EDGERC_SECTION]
+   --accountkey value  Account switch key [$AKAMAI_EDGERC_ACCOUNT_KEY]
 
 Built-In Commands:
   create-domain
