@@ -28,7 +28,7 @@ import (
 	"encoding/json"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/client-v1"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/papi-v1"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/edgehostnames-v1"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/hapi-v1"
 	akamai "github.com/akamai/cli-common-golang"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -88,7 +88,7 @@ func cmdCreateProperty(c *cli.Context) error {
 	}
 
 	papi.Init(config)
-	edgehostnames.Init(config)
+	hapi.Init(config)
 
 	var tfData TFData
 	tfData.EdgeHostnames = make(map[string]EdgeHostname)
@@ -224,7 +224,7 @@ func cmdCreateProperty(c *cli.Context) error {
 		// Get slot details
 		ehnid := strings.Replace(hostname.EdgeHostnameID, "ehn_", "", 1)
 		
-		edgehostname, err := edgehostnames.GetEdgeHostnameById(ehnid)
+		edgehostname, err := hapi.GetEdgeHostnameById(ehnid)
 		if err != nil {
 			akamai.StopSpinnerFail()
 			return cli.NewExitError(color.RedString("Edge Hostname not found: %s", err), 1)
