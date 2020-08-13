@@ -28,6 +28,7 @@ import (
 	"encoding/json"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/client-v1"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/papi-v1"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/edgehostnames-v1"
 	akamai "github.com/akamai/cli-common-golang"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -39,6 +40,8 @@ type EdgeHostname struct {
 	ID                       string
 	IPv6                     string
 	EdgeHostnameResourceName string
+	SlotNumber		 int
+	SecurityType		 string
 }
 
 type Hostname struct {
@@ -85,6 +88,7 @@ func cmdCreateProperty(c *cli.Context) error {
 	}
 
 	papi.Init(config)
+	edgehostnames.Init(config)
 
 	var tfData TFData
 	tfData.EdgeHostnames = make(map[string]EdgeHostname)
@@ -118,7 +122,7 @@ func cmdCreateProperty(c *cli.Context) error {
 
 	akamai.StartSpinner("Fetching property rules ", "")
 	// Get Property Rules
-	rules, err := property.GetRules()
+	rules, err := property.GetRules("")
 
 	if err != nil {
 		akamai.StopSpinnerFail()
@@ -216,6 +220,16 @@ func cmdCreateProperty(c *cli.Context) error {
 
 	for _, hostname := range hostnames.Hostnames.Items {
 		_ = hostname
+
+		// Get slot details
+		ehnid := strings.Replace(hostname.EdgeHostnameID, "ehn_", "", 1)
+		
+		edgehostname, err := edgehostnames.GetEdgeHostnameById(ehnid)
+		if err != nil {
+			akamai.StopSpinnerFail()
+			return cli.NewExitError(color.RedString("Edge Hostname not found: %s", err), 1)
+		}
+
 		cnameTo := hostname.CnameTo
 		cnameFrom := hostname.CnameFrom
 		cnameToResource := strings.Replace(cnameTo, ".", "-", -1)
@@ -225,12 +239,17 @@ func cmdCreateProperty(c *cli.Context) error {
 		edgeHostnameN.EdgeHostnameResourceName = cnameToResource
 		edgeHostnameN.ProductName = product.ProductName
 		edgeHostnameN.IPv6 = isIPv6(property, hostname.EdgeHostnameID)
+		edgeHostnameN.SlotNumber = edgehostname.SlotNumber
+		edgeHostnameN.SecurityType = edgehostname.SecurityType
 		tfData.EdgeHostnames[cnameToResource] = edgeHostnameN
 
 		var hostnamesN Hostname
 		hostnamesN.Hostname = cnameFrom
 		hostnamesN.EdgeHostnameResourceName = cnameToResource
 		tfData.Hostnames[cnameFrom] = hostnamesN
+
+
+	
 
 	}
 
@@ -280,7 +299,7 @@ func cmdCreateProperty(c *cli.Context) error {
 }
 
 func getHostnames(property *papi.Property, version *papi.Version) (*papi.Hostnames, error) {
-	hostnames, err := property.GetHostnames(version)
+	hostnames, err := property.GetHostnames(version, "")
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +335,7 @@ func getCPCode(property *papi.Property, cpCodeID string) (string, error) {
 }
 
 func findProperty(name string) *papi.Property {
-	results, err := papi.Search(papi.SearchByPropertyName, name)
+	results, err := papi.Search(papi.SearchByPropertyName, name, "")
 	if err != nil {
 		return nil
 	}
@@ -335,7 +354,7 @@ func findProperty(name string) *papi.Property {
 		},
 	}
 
-	err = property.GetProperty()
+	err = property.GetProperty("")
 	if err != nil {
 		return nil
 	}
@@ -345,12 +364,12 @@ func findProperty(name string) *papi.Property {
 
 func getVersion(property *papi.Property) (*papi.Version, error) {
 
-	versions, err := property.GetVersions()
+	versions, err := property.GetVersions("")
 	if err != nil {
 		return nil, err
 	}
 
-	version, err := versions.GetLatestVersion("")
+	version, err := versions.GetLatestVersion("", "")
 	if err != nil {
 		return nil, err
 	}
@@ -360,7 +379,7 @@ func getVersion(property *papi.Property) (*papi.Version, error) {
 
 func getGroup(groupID string) (*papi.Group, error) {
 	groups := papi.NewGroups()
-	e := groups.GetGroups()
+	e := groups.GetGroups("")
 	if e != nil {
 		return nil, e
 	}
@@ -379,7 +398,7 @@ func getProduct(productID string, contract *papi.Contract) (*papi.Product, error
 	}
 
 	products := papi.NewProducts()
-	e := products.GetProducts(contract)
+	e := products.GetProducts(contract, "")
 	if e != nil {
 		return nil, e
 	}
@@ -429,6 +448,9 @@ func saveTerraformDefinition(data TFData) error {
 			" group = data.akamai_group.group.id\n" +
 			" ipv6 = {{.IPv6}}\n" +
 			" edge_hostname = \"{{.EdgeHostname}}\"\n" +
+			"{{if .SlotNumber}}" +
+			" certificate = {{.SlotNumber}}\n" +
+			"{{end}}"+
 			"}\n" +
 			"\n" +
 			"{{end}}" +
