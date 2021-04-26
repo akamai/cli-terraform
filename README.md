@@ -81,7 +81,7 @@ $ akamai terraform create-domain example.akadns.net --createconfig
 1. Mapping GTM entity names to TF resource names may require normalization. Invalid TF resource name characters will be replaced by underscores, '_' in config generation.
  
 
-## Edgegrid Zones
+## EdgeDNS Zones
 
 ### Usage
 
