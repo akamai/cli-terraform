@@ -1,11 +1,11 @@
 package hapi
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"time"
-	"encoding/json"
-	"bytes"
-	
+
 	client "github.com/akamai/AkamaiOPEN-edgegrid-golang/client-v1"
 )
 
@@ -40,23 +40,23 @@ type EdgeHostname struct {
 		IsChinaCdn bool `json:"isChinaCdn"`
 	} `json:"chinaCdn,omitempty"`
 	IsEdgeIPBindingEnabled bool `json:"isEdgeIPBindingEnabled,omitempty"`
-} 
+}
 
 type ListEdgeHostnamesResponse struct {
 	EdgeHostnames []EdgeHostname `json:"edgeHostnames"`
 }
 
 type ChangeRequest struct {
-	Action            string    `json:"action"`
-	ChangeID          int       `json:"changeId"`
-	Comments          string    `json:"comments"`
-	Status            string    `json:"status"`
-	StatusMessage     string    `json:"statusMessage"`
-	StatusUpdateDate  time.Time `json:"statusUpdateDate"`
-	StatusUpdateEmail string    `json:"statusUpdateEmail"`
-	SubmitDate        time.Time `json:"submitDate"`
-	Submitter         string    `json:"submitter"`
-	SubmitterEmail    string    `json:"submitterEmail"`
+	Action            string         `json:"action"`
+	ChangeID          int            `json:"changeId"`
+	Comments          string         `json:"comments"`
+	Status            string         `json:"status"`
+	StatusMessage     string         `json:"statusMessage"`
+	StatusUpdateDate  time.Time      `json:"statusUpdateDate"`
+	StatusUpdateEmail string         `json:"statusUpdateEmail"`
+	SubmitDate        time.Time      `json:"submitDate"`
+	Submitter         string         `json:"submitter"`
+	SubmitterEmail    string         `json:"submitterEmail"`
 	EdgeHostnames     []EdgeHostname `json:"edgeHostnames"`
 }
 
@@ -105,7 +105,7 @@ func ListEdgeHostnames() (*ListEdgeHostnamesResponse, error) {
 	}
 
 	return &response, nil
-} 
+}
 
 func GetEdgeHostname(recordName string, dnsZone string) (*EdgeHostname, error) {
 	req, err := client.NewRequest(
@@ -135,7 +135,7 @@ func GetEdgeHostname(recordName string, dnsZone string) (*EdgeHostname, error) {
 	}
 
 	return &response, nil
-} 
+}
 
 func GetCertificate(recordName string, dnsZone string) (*Certificate, error) {
 	req, err := client.NewRequest(
@@ -165,7 +165,7 @@ func GetCertificate(recordName string, dnsZone string) (*Certificate, error) {
 	}
 
 	return &response, nil
-} 
+}
 
 func GetEdgeHostnameById(id string) (*EdgeHostname, error) {
 	req, err := client.NewRequest(
@@ -195,7 +195,7 @@ func GetEdgeHostnameById(id string) (*EdgeHostname, error) {
 	}
 
 	return &response, nil
-} 
+}
 
 func DeleteEdgeHostname(recordName string, dnsZone string) (*ChangeRequest, error) {
 	req, err := client.NewRequest(
@@ -229,7 +229,7 @@ func DeleteEdgeHostname(recordName string, dnsZone string) (*ChangeRequest, erro
 
 func PatchEdgeHostname(recordName string, dnsZone string, patch []Patch) (*ChangeRequest, error) {
 
-        r, err := json.Marshal(patch)
+	r, err := json.Marshal(patch)
 	if err != nil {
 		return nil, err
 	}
@@ -291,7 +291,7 @@ func ListChangeRequestsByHostname(recordName string, dnsZone string) (*ListChang
 	}
 
 	return &response, nil
-} 
+}
 
 func ListChangeRequests() (*ListChangeRequestsResponse, error) {
 	req, err := client.NewRequest(
@@ -321,7 +321,7 @@ func ListChangeRequests() (*ListChangeRequestsResponse, error) {
 	}
 
 	return &response, nil
-} 
+}
 
 func GetChangeRequest(id string) (*ChangeRequest, error) {
 	req, err := client.NewRequest(
@@ -351,7 +351,7 @@ func GetChangeRequest(id string) (*ChangeRequest, error) {
 	}
 
 	return &response, nil
-} 
+}
 
 func ListProducts() (*Products, error) {
 	req, err := client.NewRequest(
@@ -381,4 +381,4 @@ func ListProducts() (*Products, error) {
 	}
 
 	return &response, nil
-} 
+}

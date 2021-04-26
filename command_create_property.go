@@ -21,15 +21,15 @@ import (
 	"strings"
 	"text/template"
 
-	"log"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 
 	"encoding/json"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/papi-v1"
-	"github.com/akamai/cli-terraform/hapi"
 	akamai "github.com/akamai/cli-common-golang"
+	"github.com/akamai/cli-terraform/hapi"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
@@ -40,8 +40,8 @@ type EdgeHostname struct {
 	ID                       string
 	IPv6                     string
 	EdgeHostnameResourceName string
-	SlotNumber		 int
-	SecurityType		 string
+	SlotNumber               int
+	SecurityType             string
 }
 
 type Hostname struct {
@@ -69,7 +69,7 @@ type TFData struct {
 func checkFiles(arg ...string) {
 	for _, val := range arg {
 		_, err := os.Stat(val)
-		if (err == nil) {
+		if err == nil {
 			log.Fatal("Error ", val, " already exists")
 		}
 	}
@@ -212,13 +212,13 @@ func cmdCreateProperty(c *cli.Context) error {
 	for _, hostname := range hostnames.Hostnames.Items {
 		_ = hostname
 
-		if (hostname.EdgeHostnameID == "") {
+		if hostname.EdgeHostnameID == "" {
 			continue
 		}
 
 		// Get slot details
 		ehnid := strings.Replace(hostname.EdgeHostnameID, "ehn_", "", 1)
-		
+
 		edgehostname, err := hapi.GetEdgeHostnameById(ehnid)
 		if err != nil {
 			akamai.StopSpinnerFail()
@@ -242,9 +242,6 @@ func cmdCreateProperty(c *cli.Context) error {
 		hostnamesN.Hostname = cnameFrom
 		hostnamesN.EdgeHostnameResourceName = cnameToResource
 		tfData.Hostnames[cnameFrom] = hostnamesN
-
-
-	
 
 	}
 
@@ -441,7 +438,7 @@ func saveTerraformDefinition(data TFData) error {
 			" edge_hostname = \"{{.EdgeHostname}}\"\n" +
 			"{{if .SlotNumber}}" +
 			" certificate = {{.SlotNumber}}\n" +
-			"{{end}}"+
+			"{{end}}" +
 			"}\n" +
 			"\n" +
 			"{{end}}" +
@@ -493,12 +490,12 @@ func saveTerraformDefinition(data TFData) error {
 	}
 
 	f.WriteString("terraform {\n")
-  	f.WriteString("required_providers {\n")
-    	f.WriteString("akamai = {\n")
-      	f.WriteString("source = \"akamai/akamai\"\n")
-    	f.WriteString("}\n")
-  	f.WriteString("}\n")
-  	f.WriteString("required_version = \">= 0.13\"\n")
+	f.WriteString("required_providers {\n")
+	f.WriteString("akamai = {\n")
+	f.WriteString("source = \"akamai/akamai\"\n")
+	f.WriteString("}\n")
+	f.WriteString("}\n")
+	f.WriteString("required_version = \">= 0.13\"\n")
 	f.WriteString("}\n")
 	f.Close()
 
