@@ -21,13 +21,14 @@ import (
 	"strings"
 	"text/template"
 
+	"log"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	"encoding/json"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/client-v1"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/papi-v1"
+	"github.com/akamai/cli-terraform/hapi"
 	akamai "github.com/akamai/cli-common-golang"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -39,6 +40,8 @@ type EdgeHostname struct {
 	ID                       string
 	IPv6                     string
 	EdgeHostnameResourceName string
+	SlotNumber		 int
+	SecurityType		 string
 }
 
 type Hostname struct {
@@ -46,17 +49,9 @@ type Hostname struct {
 	EdgeHostnameResourceName string
 }
 
-type Variable struct {
-	client.Resource
-	Name        string
-	Value       string
-	Description string
-	Hidden      bool
-	Sensitive   bool
-}
-
 type TFData struct {
 	GroupName            string
+	ContractID           string
 	PropertyResourceName string
 	PropertyName         string
 	CPCodeID             string
@@ -69,7 +64,15 @@ type TFData struct {
 	Hostnames            map[string]Hostname
 	Section              string
 	Emails               []string
-	Variables            []Variable
+}
+
+func checkFiles(arg ...string) {
+	for _, val := range arg {
+		_, err := os.Stat(val)
+		if (err == nil) {
+			log.Fatal("Error ", val, " already exists")
+		}
+	}
 }
 
 func cmdCreateProperty(c *cli.Context) error {
@@ -79,12 +82,15 @@ func cmdCreateProperty(c *cli.Context) error {
 		return cli.NewExitError(color.RedString("property name is required"), 1)
 	}
 
+	checkFiles(createTFFilename("property"), createTFFilename("versions"), createTFFilename("variables"), "rules.json")
+
 	config, err := akamai.GetEdgegridConfig(c)
 	if err != nil {
 		return cli.NewExitError(err.Error(), 1)
 	}
 
 	papi.Init(config)
+	hapi.Init(config)
 
 	var tfData TFData
 	tfData.EdgeHostnames = make(map[string]EdgeHostname)
@@ -112,6 +118,7 @@ func cmdCreateProperty(c *cli.Context) error {
 		return cli.NewExitError(color.RedString("Property not found "), 1)
 	}
 
+	tfData.ContractID = property.Contract.ContractID
 	tfData.PropertyName = property.PropertyName
 	tfData.PropertyResourceName = strings.Replace(property.PropertyName, ".", "-", -1)
 	akamai.StopSpinnerOk()
@@ -137,18 +144,6 @@ func cmdCreateProperty(c *cli.Context) error {
 			value := options["value"].(map[string]interface{})
 			tfData.CPCodeID = fmt.Sprintf("%.0f", value["id"].(float64))
 		}
-	}
-
-	// Get Variables
-	tfData.Variables = make([]Variable, 0)
-	for _, variable := range rules.Rule.Variables {
-		var v Variable
-		v.Name = variable.Name
-		v.Value = variable.Value
-		v.Description = variable.Description
-		v.Hidden = variable.Hidden
-		v.Sensitive = variable.Sensitive
-		tfData.Variables = append(tfData.Variables, v)
 	}
 
 	// Get Rule Format
@@ -216,6 +211,20 @@ func cmdCreateProperty(c *cli.Context) error {
 
 	for _, hostname := range hostnames.Hostnames.Items {
 		_ = hostname
+
+		if (hostname.EdgeHostnameID == "") {
+			continue
+		}
+
+		// Get slot details
+		ehnid := strings.Replace(hostname.EdgeHostnameID, "ehn_", "", 1)
+		
+		edgehostname, err := hapi.GetEdgeHostnameById(ehnid)
+		if err != nil {
+			akamai.StopSpinnerFail()
+			return cli.NewExitError(color.RedString("Edge Hostname not found: %s", err), 1)
+		}
+
 		cnameTo := hostname.CnameTo
 		cnameFrom := hostname.CnameFrom
 		cnameToResource := strings.Replace(cnameTo, ".", "-", -1)
@@ -224,13 +233,18 @@ func cmdCreateProperty(c *cli.Context) error {
 		edgeHostnameN.EdgeHostname = cnameTo
 		edgeHostnameN.EdgeHostnameResourceName = cnameToResource
 		edgeHostnameN.ProductName = product.ProductName
-		edgeHostnameN.IPv6 = isIPv6(property, hostname.EdgeHostnameID)
+		edgeHostnameN.IPv6 = getIPv6(property, hostname.EdgeHostnameID)
+		edgeHostnameN.SlotNumber = edgehostname.SlotNumber
+		edgeHostnameN.SecurityType = edgehostname.SecurityType
 		tfData.EdgeHostnames[cnameToResource] = edgeHostnameN
 
 		var hostnamesN Hostname
 		hostnamesN.Hostname = cnameFrom
 		hostnamesN.EdgeHostnameResourceName = cnameToResource
 		tfData.Hostnames[cnameFrom] = hostnamesN
+
+
+	
 
 	}
 
@@ -287,7 +301,7 @@ func getHostnames(property *papi.Property, version *papi.Version) (*papi.Hostnam
 	return hostnames, nil
 }
 
-func isIPv6(property *papi.Property, ehn string) string {
+func getIPv6(property *papi.Property, ehn string) string {
 	edgeHostnames, err := papi.GetEdgeHostnames(property.Contract, property.Group, "")
 	if err != nil {
 		return "false"
@@ -295,14 +309,10 @@ func isIPv6(property *papi.Property, ehn string) string {
 	for _, edgehostname := range edgeHostnames.EdgeHostnames.Items {
 		_ = edgehostname
 		if edgehostname.EdgeHostnameID == ehn {
-			if edgehostname.IPVersionBehavior == "IPV4" {
-				return "false"
-			} else {
-				return "true"
-			}
+			return edgehostname.IPVersionBehavior
 		}
 	}
-	return "false"
+	return ""
 }
 
 func getCPCode(property *papi.Property, cpCodeID string) (string, error) {
@@ -397,16 +407,16 @@ func saveTerraformDefinition(data TFData) error {
 	template, err := template.New("tf").Parse(
 		"provider \"akamai\" {\n" +
 			" edgerc = \"~/.edgerc\"\n" +
-			" papi_section = \"{{.Section}}\"\n" +
+			" config_section = \"{{.Section}}\"\n" +
 			"}\n" +
 			"\n" +
-			"\n" +
 			"data \"akamai_group\" \"group\" {\n" +
-			" name = \"{{.GroupName}}\"\n" +
+			" group_name = \"{{.GroupName}}\"\n" +
+			" contract_id = \"{{.ContractID}}\"\n" +
 			"}\n" +
 			"\n" +
 			"data \"akamai_contract\" \"contract\" {\n" +
-			"  group = data.akamai_group.group.name\n" +
+			"  group_name = data.akamai_group.group.name\n" +
 			"}\n" +
 			"\n" +
 			"data \"template_file\" \"rules\" {\n" +
@@ -414,9 +424,9 @@ func saveTerraformDefinition(data TFData) error {
 			"}\n" +
 			"\n" +
 			"resource \"akamai_cp_code\" \"{{.PropertyResourceName}}\" {\n" +
-			" product  = \"prd_{{.ProductName}}\"\n" +
-			" contract = data.akamai_contract.contract.id\n" +
-			" group = data.akamai_group.group.id\n" +
+			" product_id  = \"prd_{{.ProductName}}\"\n" +
+			" contract_id = data.akamai_contract.contract.id\n" +
+			" group_id = data.akamai_group.group.id\n" +
 			" name = \"{{.CPCodeName}}\"\n" +
 			"}\n" +
 			"\n" +
@@ -424,58 +434,40 @@ func saveTerraformDefinition(data TFData) error {
 			// Edge hostname loop
 			"{{range .EdgeHostnames}}" +
 			"resource \"akamai_edge_hostname\" \"{{.EdgeHostnameResourceName}}\" {\n" +
-			" product  = \"prd_{{.ProductName}}\"\n" +
-			" contract = data.akamai_contract.contract.id\n" +
-			" group = data.akamai_group.group.id\n" +
-			" ipv6 = {{.IPv6}}\n" +
+			" product_id  = \"prd_{{.ProductName}}\"\n" +
+			" contract_id = data.akamai_contract.contract.id\n" +
+			" group_id = data.akamai_group.group.id\n" +
+			" ip_behavior = \"{{.IPv6}}\"\n" +
 			" edge_hostname = \"{{.EdgeHostname}}\"\n" +
-			"}\n" +
-			"\n" +
-			"{{end}}" +
-
-			"{{if .Variables}}" +
-			"resource \"akamai_property_variables\" \"variables\" {\n" +
-			" variables {\n" +
-			"{{range .Variables}}" +
-			"  variable {\n" +
-			"    name  = \"{{.Name}}\"\n" +
-			"    value  = \"{{.Value}}\"\n" +
-			"    description  = \"{{.Description}}\"\n" +
-			"    hidden  = \"{{.Hidden}}\"\n" +
-			"    sensitive  = \"{{.Sensitive}}\"\n" +
-			"  }\n" +
-			"{{end}}" +
-			" }\n" +
+			"{{if .SlotNumber}}" +
+			" certificate = {{.SlotNumber}}\n" +
+			"{{end}}"+
 			"}\n" +
 			"\n" +
 			"{{end}}" +
 
 			"resource \"akamai_property\" \"{{.PropertyResourceName}}\" {\n" +
 			" name = \"{{.PropertyName}}\"\n" +
-			" cp_code = akamai_cp_code.{{.PropertyResourceName}}.id\n" +
-			" contact = [\"\"]\n" +
-			" contract = data.akamai_contract.contract.id\n" +
-			" group = data.akamai_group.group.id\n" +
-			" product = \"prd_{{.ProductName}}\"\n" +
+			" contract_id = data.akamai_contract.contract.id\n" +
+			" group_id = data.akamai_group.group.id\n" +
+			" product_id = \"prd_{{.ProductName}}\"\n" +
 			" rule_format = \"{{.RuleFormat}}\"\n" +
-			" hostnames = {\n" +
 
 			"{{range .Hostnames}}" +
-			"  \"{{.Hostname}}\" = akamai_edge_hostname.{{.EdgeHostnameResourceName}}.edge_hostname\n" +
-			"{{end}}" +
+			" hostnames {\n" +
+			"  cname_from = \"{{.Hostname}}\"\n" +
+			"  cname_to = akamai_edge_hostname.{{.EdgeHostnameResourceName}}.edge_hostname\n" +
+			"  cert_provisioning_type = \"CPS_MANAGED\"\n" +
 			" }\n" +
-			" rules = data.template_file.rules.rendered\n" +
-			" is_secure = {{.IsSecure}}\n" +
-			"{{if .Variables}}" +
-			" variables = akamai_property_variables.variables.json\n" +
 			"{{end}}" +
+			" rules = data.template_file.rules.rendered\n" +
 			"}\n" +
 			"\n" +
 			"resource \"akamai_property_activation\" \"{{.PropertyResourceName}}\" {\n" +
-			" property = akamai_property.{{.PropertyResourceName}}.id\n" +
+			" property_id = akamai_property.{{.PropertyResourceName}}.id\n" +
 			" contact = [\"{{range $index, $element := .Emails}}{{if $index}},{{end}}{{$element}}{{end}}\"]\n" +
+			" version = akamai_property.{{.PropertyResourceName}}.latest_version\n" +
 			" network = upper(var.env)\n" +
-			" activate = true\n" +
 			"}\n")
 
 	if err != nil {
@@ -491,6 +483,23 @@ func saveTerraformDefinition(data TFData) error {
 	if err != nil {
 		return err
 	}
+	f.Close()
+
+	// version
+	versionsconfigfilename := createTFFilename("versions")
+	f, err = os.Create(versionsconfigfilename)
+	if err != nil {
+		return err
+	}
+
+	f.WriteString("terraform {\n")
+  	f.WriteString("required_providers {\n")
+    	f.WriteString("akamai = {\n")
+      	f.WriteString("source = \"akamai/akamai\"\n")
+    	f.WriteString("}\n")
+  	f.WriteString("}\n")
+  	f.WriteString("required_version = \">= 0.13\"\n")
+	f.WriteString("}\n")
 	f.Close()
 
 	// variables
