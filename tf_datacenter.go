@@ -77,6 +77,10 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
 				if key == "nickname" {
 					name = keyVal
 				}
+				// datacenter_id is computed. Can't be in ignore map because it exists in property config
+				if varName == "DatacenterId" {
+					continue
+				}
 				if varName == "DefaultLoadObject" {
 					if varValue.(*gtm.LoadObject) == nil {
 						continue

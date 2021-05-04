@@ -41,6 +41,7 @@ var mappedKeys map[string]string = map[string]string{"DynamicTTL": "dynamic_ttl"
 var tab4 = "    "
 var tab8 = "        "
 var tab12 = "            "
+var tab16 = "                "
 
 // header, domain
 var gtmHeaderConfig = fmt.Sprintf(`provider "akamai" {

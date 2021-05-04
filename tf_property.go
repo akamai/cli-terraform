@@ -19,6 +19,7 @@ import (
 	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 // property
@@ -70,6 +71,9 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 				}
 				propertyBody += processLivenessTests(varValue.([]*gtm.LivenessTest), childFieldsNullMap[varName].(map[string]gtm.NullPerObjectAttributeStruct))
 			case "TrafficTargets":
+				if strings.ToUpper(property.Type) == "STATIC" {
+					continue
+				}
 				if _, ok := childFieldsNullMap[varName]; !ok {
 					continue
 				}
