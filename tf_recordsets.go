@@ -53,9 +53,9 @@ var dnsRConfigP2 = fmt.Sprintf(`    zone = local.zone
 // Util func to split params string
 func splitSvcParams(params string) []string {
 
-    	r := regexp.MustCompile(`[^\s"]+|"([^"]*)"`)
-    	paramslice := r.FindAllString(params, -1)
-	return paramslice 
+	r := regexp.MustCompile(`[^\s"]+|"([^"]*)"`)
+	paramslice := r.FindAllString(params, -1)
+	return paramslice
 }
 
 // Util func to walk params and create a map
@@ -66,10 +66,10 @@ func createParamsMap(params []string) *map[string]string {
 	for _, param := range params {
 		keyval := strings.Split(param, "=")
 		if len(keyval) == 0 || len(keyval) > 2 {
-			continue			// weird but skip
+			continue // weird but skip
 		}
 		if len(keyval) == 1 {
-			paramsMap[strings.TrimSpace(keyval[0])] = ""		// no value
+			paramsMap[strings.TrimSpace(keyval[0])] = "" // no value
 			continue
 		}
 		paramsMap[strings.TrimSpace(keyval[0])] = strings.TrimSpace(keyval[1])
@@ -154,8 +154,8 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 					continue // computed
 				}
 				var paramsMap *map[string]string
-                                if fname == "svc_params" && (rs.Type == "SVCB" || rs.Type == "HTTPS") {
-                                	paramsMap = createParamsMap(splitSvcParams(fmt.Sprint(fval)))
+				if fname == "svc_params" && (rs.Type == "SVCB" || rs.Type == "HTTPS") {
+					paramsMap = createParamsMap(splitSvcParams(fmt.Sprint(fval)))
 					if paramsMap == nil {
 						continue
 					}
@@ -167,26 +167,6 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 					if rs.Type == "HTTPS" || rs.Type == "SVCB" {
 						strval = strings.ReplaceAll(strval, "\"", "\\\"")
 					}
-					/*
-  					if paramsMap != nil {
-						fmt.Println(" paramsMap: ", paramsMap)
-						mapString := "{\n"
-						for p, val := range *paramsMap {
-                                                	if strings.HasPrefix(val, "\"") {
-                                                               val = strings.Trim(val, "\"")
-                                                               if strings.Contains(val, "\\\"") {
-                                                                        strings.ReplaceAll(val, "\\\"", "\\\\\\\"")
-                                                               }
-                                                               val = "\\\"" + val + "\\\""
-                                                        }
-                                                        mapString += tab16 + `"` + p + `"` + " = " + `"` + val + `"`
-                                                        mapString += "\n"
-                                                }
-                                                mapString += tab12 + "}" + "\n"
-						recordBody += mapString
-						break
-					}
-					*/
 					if strings.HasPrefix(strval, "\"") {
 						strval = strings.Trim(strval, "\"")
 						strval = "\\\"" + strval + "\\\""
