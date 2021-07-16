@@ -24,9 +24,15 @@ import (
 var ignoredZoneKeys map[string]int = map[string]int{"LastActivationDate": 0, "LastModifiedBy": 0, "LastModifiedDate": 0,
 	"AliasCount": 0, "ActivationState": 0, "VersionId": 0}
 
-// header, domain
-var dnsHeaderConfig = fmt.Sprintf(`provider "akamai" {
-  dns_section = var.dnssection
+// header, zone
+var tfHeaderContent = fmt.Sprint(`terraform {
+  required_version = ">= 0.13"
+  required_providers {
+    akamai = {
+      source = "akamai/akamai"
+      version = "~> 1.6.1"
+    }
+  }
 }
 
 `)
@@ -99,7 +105,7 @@ func processZone(zone *dns.ZoneResponse, resourceZoneName string, modSegment boo
 	zoneResourceString += dnsZoneConfigP2
 	zoneResourceString += zoneBody
 	zoneResourceString += "}\n\n"
-	zoneTF := dnsHeaderConfig
+	zoneTF := tfHeaderContent
 	if modSegment {
 		// create initial TF preamble and zone  module
 		zoneTF += dnsModZoneConfigP1 + "\"" + zone.Zone + "\"\n" + "}\n\n"

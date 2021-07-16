@@ -57,6 +57,7 @@ var fetchConfig = fetchConfigStruct{ConfigOnly: false, ModSegment: false, NamesO
 
 var zoneName string
 var zoneObject configdns.ZoneResponse
+var contractid string
 
 var fullZoneImportList *zoneImportListStruct
 var fullZoneConfigMap map[string]Types
@@ -79,8 +80,9 @@ var dnsvarsContent = fmt.Sprint(`variable "dnssection" {
   default = "default"
 }
 variable "contractid" {
-  default = ""
+  default = "%s"
 }
+// Notice: groupid unknown at time of import. Please update.
 variable "groupid" {
   default = ""
 }
@@ -135,6 +137,7 @@ func cmdCreateZone(c *cli.Context) error {
 		fmt.Println("Error: " + err.Error())
 		return cli.NewExitError(color.RedString("Zone retrieval failed"), 1)
 	}
+	contractid = zoneObject.ContractId // grab for use later
 	// normalize zone name for zone resource name
 	resourceZoneName := normalizeResourceName(zoneName)
 	if createImportList {
@@ -293,7 +296,7 @@ func cmdCreateZone(c *cli.Context) error {
 			return cli.NewExitError(color.RedString("Unable to create gtmvars config file"), 1)
 		}
 		defer dnsvarsHandle.Close()
-		_, err = dnsvarsHandle.WriteString(dnsvarsContent)
+		_, err = dnsvarsHandle.WriteString(fmt.Sprintf(dnsvarsContent, contractid))
 		if err != nil {
 			akamai.StopSpinnerFail()
 			return cli.NewExitError(color.RedString("Unable to write gtmvars config file"), 1)

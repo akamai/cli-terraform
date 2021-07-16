@@ -44,11 +44,8 @@ var tab12 = "            "
 var tab16 = "                "
 
 // header, domain
-var gtmHeaderConfig = fmt.Sprintf(`provider "akamai" {
-  gtm_section = var.gtmsection
-}
+var gtmHeaderConfig = fmt.Sprintf(`resource "akamai_gtm_domain" `)
 
-resource "akamai_gtm_domain" `)
 var gtmDomainConfigP2 = fmt.Sprintf(`    contract = var.contractid
     group = var.groupid
     comment =  "Domain import"
@@ -66,7 +63,8 @@ func processDomain(domain *gtm.Domain, resourceDomainName string) string {
 	coreFieldsNullMap := getDomainNullValues().CoreObjectFields
 
 	domainBody := ""
-	domainString := gtmHeaderConfig
+	domainString := tfHeaderContent
+	domainString += gtmHeaderConfig
 
 	domElems := reflect.ValueOf(domain).Elem()
 	for i := 0; i < domElems.NumField(); i++ {
