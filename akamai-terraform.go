@@ -28,7 +28,7 @@ func main() {
 		"A CLI Plugin for Akamai Terraform Provider",
 		"Administer and Manage Supported Akamai Feature resources with Terraform",
 		VERSION,
-		"terraform",
+		"default",
 		commandLocator,
 	)
 
