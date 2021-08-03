@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	VERSION = "0.1.0"
+	VERSION = "0.3.0"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 		"A CLI Plugin for Akamai Terraform Provider",
 		"Administer and Manage Supported Akamai Feature resources with Terraform",
 		VERSION,
-		"terraform",
+		"default",
 		commandLocator,
 	)
 

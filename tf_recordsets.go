@@ -16,6 +16,8 @@ package main
 
 import (
 	"fmt"
+	"regexp"
+
 	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/configdns-v2"
 	"github.com/shirou/gopsutil/mem"
 	"strings"
@@ -47,6 +49,37 @@ resource "akamai_dns_record" `)
 // misc
 var dnsRConfigP2 = fmt.Sprintf(`    zone = local.zone
 `)
+
+// Util func to split params string
+func splitSvcParams(params string) []string {
+
+	r := regexp.MustCompile(`[^\s"]+|"([^"]*)"`)
+	paramslice := r.FindAllString(params, -1)
+	return paramslice
+}
+
+// Util func to walk params and create a map
+func createParamsMap(params []string) *map[string]string {
+
+	paramsMap := map[string]string{}
+
+	for _, param := range params {
+		keyval := strings.Split(param, "=")
+		if len(keyval) == 0 || len(keyval) > 2 {
+			continue // weird but skip
+		}
+		if len(keyval) == 1 {
+			paramsMap[strings.TrimSpace(keyval[0])] = "" // no value
+			continue
+		}
+		paramsMap[strings.TrimSpace(keyval[0])] = strings.TrimSpace(keyval[1])
+	}
+	if len(paramsMap) < 1 {
+		return nil
+	}
+	return &paramsMap
+
+}
 
 // Process recordset resources
 func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[string]map[string]bool, fetchconfig fetchConfigStruct) (map[string]Types, error) {
@@ -120,10 +153,20 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 				if rs.Type == "AKAMAITLC" && (fname == "dns_name" || fname == "answer_type") {
 					continue // computed
 				}
+				var paramsMap *map[string]string
+				if fname == "svc_params" && (rs.Type == "SVCB" || rs.Type == "HTTPS") {
+					paramsMap = createParamsMap(splitSvcParams(fmt.Sprint(fval)))
+					if paramsMap == nil {
+						continue
+					}
+				}
 				recordBody += tab4 + fname + " = "
 				switch fval.(type) {
 				case string:
 					strval = fmt.Sprint(fval)
+					if rs.Type == "HTTPS" || rs.Type == "SVCB" {
+						strval = strings.ReplaceAll(strval, "\"", "\\\"")
+					}
 					if strings.HasPrefix(strval, "\"") {
 						strval = strings.Trim(strval, "\"")
 						strval = "\\\"" + strval + "\\\""
