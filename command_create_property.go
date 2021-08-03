@@ -61,7 +61,6 @@ type TFData struct {
 	PropertyName         string
 	PropertyID           string
 	CPCodeID             string
-	CPCodeName           string
 	ProductID            string
 	ProductName          string
 	RuleFormat           string
@@ -345,18 +344,6 @@ func cmdCreateProperty(c *cli.Context) error {
 
 	akamai.StopSpinnerOk()
 
-	// Get CPCode Name
-	akamai.StartSpinner("Fetching CPCode name ", "")
-	cpcodeName, err := getCPCode(property, tfData.CPCodeID)
-	if err != nil {
-		akamai.StopSpinnerFail()
-		return cli.NewExitError(color.RedString("Product not found: %s", err), 1)
-	}
-
-	tfData.CPCodeName = cpcodeName
-
-	akamai.StopSpinnerOk()
-
 	// Get contact details
 	akamai.StartSpinner("Fetching contact details ", "")
 	activations, err := property.GetActivations()
@@ -518,13 +505,6 @@ func saveTerraformDefinition(data TFData) error {
 			"  template_file = abspath(\"${path.module}/property-snippets/main.json\")\n" +
 			"}\n" +
 			"\n" +
-			"resource \"akamai_cp_code\" \"{{.PropertyResourceName}}\" {\n" +
-			" product_id  = \"prd_{{.ProductName}}\"\n" +
-			" contract_id = data.akamai_contract.contract.id\n" +
-			" group_id = data.akamai_group.group.id\n" +
-			" name = \"{{.CPCodeName}}\"\n" +
-			"}\n" +
-			"\n" +
 
 			// Edge hostname loop
 			"{{range .EdgeHostnames}}" +
@@ -618,7 +598,6 @@ func saveTerraformDefinition(data TFData) error {
 
 	importtemplate, err := template.New("import").Parse(
 		"terraform init\n" +
-			"terraform import akamai_cp_code.{{.PropertyResourceName}} {{.CPCodeID}},{{.ContractID}},{{.GroupID}}\n" +
 			"{{range .EdgeHostnames}}" +
 			"terraform import akamai_edge_hostname.{{.EdgeHostnameResourceName}} {{.EdgeHostnameID}},{{.ContractID}},{{.GroupID}}\n" +
 			"{{end}}" +
