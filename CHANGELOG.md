@@ -1,5 +1,24 @@
 # Release Notes
 
+## Version 0.3.0
+
+### Features/Enhancements
+
+* General
+  * Add `account-key` as alias for `accountkey` argument
+
+* DNS
+  * Change edgerc section default to `default`
+  * Update generated Terraform config file header
+  * Populate contractId variable in dnsvars.tf generation
+
+* GTM
+  * Change edgerc section default to `default`
+  * Update generated Terraform config file header
+
+* PAPI
+  * Remove deprecated CPCode support
+
 ## Version 0.2.0 
 
 ### Bug Fixes
