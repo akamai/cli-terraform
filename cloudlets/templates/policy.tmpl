@@ -1,0 +1,27 @@
+terraform {
+  required_providers {
+    akamai = {
+      source = "akamai/akamai"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
+provider "akamai" {
+  edgerc = var.edgerc_path
+  config_section = var.config_section
+}
+
+resource "akamai_cloudlets_policy" "policy" {
+  name = "{{.Name}}"
+  cloudlet_code = "{{.CloudletCode}}"
+  description = "{{.Description}}"
+  group_id = "{{.GroupID}}"
+  match_rule_format = "{{.MatchRuleFormat}}"
+{{- if and (.MatchRules) (eq .CloudletCode "ER")}}
+  match_rules = data.akamai_cloudlets_edge_redirector_match_rule.match_rules_er.json
+{{- end}}
+}
+{{if and (.MatchRules) (eq .CloudletCode "ER")}}
+{{template "match-rules-er.tmpl" .}}
+{{end}}

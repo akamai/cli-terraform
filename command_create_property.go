@@ -17,22 +17,24 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"text/template"
+
+	"github.com/akamai/cli-terraform/tools"
 
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	"encoding/json"
+	"log"
+
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/papi-v1"
 	akamai "github.com/akamai/cli-common-golang"
 	"github.com/akamai/cli-terraform/hapi"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
-	"log"
 )
 
 type EdgeHostname struct {
@@ -102,16 +104,6 @@ type RuleTemplate struct {
 	CustomOverride *papi.CustomOverride `json:"customOverride,omitempty"`
 }
 
-func checkFiles(arg ...string) error {
-	for _, val := range arg {
-		_, err := os.Stat(val)
-		if err == nil {
-			return errors.New(fmt.Sprintf("Error: file %s already exists", val))
-		}
-	}
-	return nil
-}
-
 func cmdCreateProperty(c *cli.Context) error {
 
 	log.SetOutput(ioutil.Discard)
@@ -120,7 +112,12 @@ func cmdCreateProperty(c *cli.Context) error {
 		return cli.NewExitError(color.RedString("property name is required"), 1)
 	}
 
-	err := checkFiles(createTFFilename("property"), createTFFilename("versions"), createTFFilename("variables"), "rules.json", "import.sh")
+	err := tools.CheckFiles(
+		tools.CreateTFFilename("property"),
+		tools.CreateTFFilename("versions"),
+		tools.CreateTFFilename("variables"),
+		filepath.Join(tools.TFWorkPath, "rules.json"),
+		filepath.Join(tools.TFWorkPath, "import.sh"))
 	if err != nil {
 		return cli.NewExitError(err, 1)
 	}
@@ -142,11 +139,11 @@ func cmdCreateProperty(c *cli.Context) error {
 	tfData.Section = c.GlobalString("section")
 	// working path?
 	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+		tools.TFWorkPath = c.String("tfworkpath")
 	}
-	tfWorkPath = filepath.FromSlash(tfWorkPath)
+	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
 	// pathname exists?
-	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
+	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
 		return cli.NewExitError(color.RedString("Destination work path is not accessible."), 1)
 	}
 
@@ -204,7 +201,7 @@ func cmdCreateProperty(c *cli.Context) error {
 	ruletemplate.Variables = rules.Rule.Variables
 	ruletemplate.AdvancedOverride = rules.Rule.AdvancedOverride
 	ruletemplate.Children = make([]string, 0)
-        ruletemplate.Options = rules.Rule.Options
+	ruletemplate.Options = rules.Rule.Options
 
 	var rulestemplate RulesTemplate
 	rulestemplate.AccountID = rules.AccountID
@@ -217,7 +214,7 @@ func cmdCreateProperty(c *cli.Context) error {
 	rulestemplate.Rule = &ruletemplate
 
 	// Save snippets
-	snippetspath := filepath.Join(tfWorkPath, "property-snippets")
+	snippetspath := filepath.Join(tools.TFWorkPath, "property-snippets")
 	os.Mkdir(snippetspath, 0755)
 
 	for _, rule := range rules.Rule.Children {
@@ -239,22 +236,6 @@ func cmdCreateProperty(c *cli.Context) error {
 		akamai.StopSpinnerFail()
 		return cli.NewExitError(color.RedString("Can't write property rule template: ", err), 1)
 	}
-
-	// Save Property Rules
-	/*
-		jsonBody, err := json.MarshalIndent(rules, "", "  ")
-		if err != nil {
-			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Can't marshal property rules: ", err), 1)
-		}
-
-		rulesnamepath := filepath.Join(tfWorkPath, "rules.json")
-		err = ioutil.WriteFile(rulesnamepath, jsonBody, 0644)
-		if err != nil {
-			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Can't write property rules: ", err), 1)
-		}
-	*/
 
 	akamai.StopSpinnerOk()
 
@@ -549,7 +530,7 @@ func saveTerraformDefinition(data TFData) error {
 	if err != nil {
 		return err
 	}
-	propertyconfigfilename := createTFFilename("property")
+	propertyconfigfilename := tools.CreateTFFilename("property")
 	f, err := os.Create(propertyconfigfilename)
 	if err != nil {
 		return err
@@ -562,7 +543,7 @@ func saveTerraformDefinition(data TFData) error {
 	f.Close()
 
 	// version
-	versionsconfigfilename := createTFFilename("versions")
+	versionsconfigfilename := tools.CreateTFFilename("versions")
 	f, err = os.Create(versionsconfigfilename)
 	if err != nil {
 		return err
@@ -579,7 +560,7 @@ func saveTerraformDefinition(data TFData) error {
 	f.Close()
 
 	// variables
-	variablesconfigfilename := createTFFilename("variables")
+	variablesconfigfilename := tools.CreateTFFilename("variables")
 	f, err = os.Create(variablesconfigfilename)
 	if err != nil {
 		return err
@@ -591,7 +572,7 @@ func saveTerraformDefinition(data TFData) error {
 	f.Close()
 
 	// import script
-	importfilename := filepath.Join(tfWorkPath, "import.sh")
+	importfilename := filepath.Join(tools.TFWorkPath, "import.sh")
 	f, err = os.Create(importfilename)
 	if err != nil {
 		return err

@@ -1,0 +1,25 @@
+data "akamai_cloudlets_edge_redirector_match_rule" "match_rules_er" {
+{{- range .MatchRules}}
+  match_rules {
+    name = "{{.Name}}"
+    start = {{.Start}}
+    end = {{.End}}
+    {{- range .Matches}}
+    matches {
+      match_type = "{{.MatchType}}"
+      match_value = "{{.MatchValue}}"
+      match_operator = "{{.MatchOperator}}"
+      case_sensitive = {{.CaseSensitive}}
+      negate = {{.Negate}}
+      check_ips = "{{.CheckIPs}}"
+    }
+    {{- end}}
+    use_relative_url = "{{.UseRelativeURL}}"
+    status_code = {{.StatusCode}}
+    redirect_url = "{{.RedirectURL}}"
+    match_url = "{{.MatchURL}}"
+    use_incoming_query_string = {{.UseIncomingQueryString}}
+    use_incoming_scheme_and_host = {{.UseIncomingSchemeAndHost}}
+  }
+{{end -}}
+}

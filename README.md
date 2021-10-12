@@ -57,10 +57,10 @@ Built-In Commands:
 ### Usage
 
 ```
-   akamai-terraform create-domain [domain] [--tfworkpath] [--resources] [--createconfig] 
+   akamai-terraform create-domain [domain] [--tfworkpath path] [--resources] [--createconfig] 
 
 Flags: 
-   --tfworkpath value      file path location for placement of created and/or modified artifacts. Default: current directory
+   --tfworkpath path       file path location for placement of created and/or modified artifacts. Default: current directory
    --resources             Create json formatted resource import list file, <domain>_resources.json. Used as input by createconfig.
    --createconfig          Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files using resources json
 ```
@@ -86,10 +86,10 @@ $ akamai terraform create-domain example.akadns.net --createconfig
 ### Usage
 
 ```
-   akamai-terraform create-zone [zone] [--tfworkpath] [--resources] [--createconfig] [--importscript] [--segmentconfig] [--configonly] [--namesonly] [--recordname]
+   akamai-terraform create-zone [zone] [--tfworkpath path] [--resources] [--createconfig] [--importscript] [--segmentconfig] [--configonly] [--namesonly] [--recordname]
 
 Flags: 
-   --tfworkpath value      file path location for placement of created and/or modified artifacts. Default: current directory
+   --tfworkpath path       file path location for placement of created and/or modified artifacts. Default: current directory
    --resources             Create json formatted resource import list file, <zone>_resources.json. Used as input by createconfig.
    --createconfig          Create Terraform configuration (<zone>.tf), dnsvars.tf from generated resources file. Saves zone config for import.
    --importscript          Create import script for generated Terraform configuration script (<zone>_import.script) files
@@ -140,16 +140,33 @@ $ akamai terraform create-zone testprimaryzone.com --importscript
 ### Usage
 
 ```
-   akamai-terraform create-property [property name] [--tfworkpath] 
+   akamai-terraform create-property [property name] [--tfworkpath path] 
 
 Flags:
-   --tfworkpath value      file path location for placement of created and/or modified artifacts. Default: current directory
+   --tfworkpath path      file path location for placement of created and/or modified artifacts. Default: current directory
 ```
 
 ### Create property manager property configuration.
 
 ```
 $ akamai terraform create-property
+```
+
+## Cloudlets
+
+### Usage
+
+```
+   akamai-terraform create-policy [policy name] [--tfworkpath path] 
+
+Flags:
+   --tfworkpath path      path location for placement of created artifacts. Default: current directory
+```
+
+### Create policy configuration.
+
+```
+$ akamai terraform create-policy
 ```
 
 ## General Notes

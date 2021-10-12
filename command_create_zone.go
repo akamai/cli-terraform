@@ -17,15 +17,17 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	configdns "github.com/akamai/AkamaiOPEN-edgegrid-golang/configdns-v2"
-	akamai "github.com/akamai/cli-common-golang"
-	"github.com/fatih/color"
-	"github.com/urfave/cli"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	configdns "github.com/akamai/AkamaiOPEN-edgegrid-golang/configdns-v2"
+	akamai "github.com/akamai/cli-common-golang"
+	"github.com/akamai/cli-terraform/tools"
+	"github.com/fatih/color"
+	"github.com/urfave/cli"
 )
 
 // Terraform resource names
@@ -76,7 +78,7 @@ var dnsModuleConfig2 = fmt.Sprintf(`" {
     source = "`)
 
 // text for dnsvars.tf construction
-var dnsvarsContent = fmt.Sprint(`variable "dnssection" {
+var dnsvarsContent = `variable "dnssection" {
   default = "default"
 }
 variable "contractid" {
@@ -86,7 +88,7 @@ variable "contractid" {
 variable "groupid" {
   default = ""
 }
-`)
+`
 
 // command function create-zone
 func cmdCreateZone(c *cli.Context) error {
@@ -105,9 +107,9 @@ func cmdCreateZone(c *cli.Context) error {
 
 	zoneName = c.Args().Get(0)
 	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+		tools.TFWorkPath = c.String("tfworkpath")
 	}
-	tfWorkPath = filepath.FromSlash(tfWorkPath)
+	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
 	if c.IsSet("resources") {
 		createImportList = true
 	}
@@ -170,7 +172,7 @@ func cmdCreateZone(c *cli.Context) error {
 		akamai.StopSpinnerOk()
 		akamai.StartSpinner("Creating Zone Resources list file ", "")
 		// pathname and exists?
-		if stat, err := os.Stat(tfWorkPath); err == nil && stat.IsDir() {
+		if stat, err := os.Stat(tools.TFWorkPath); err == nil && stat.IsDir() {
 			importListFilename := createImportListFilename(resourceZoneName)
 			if _, err := os.Stat(importListFilename); err == nil {
 				akamai.StopSpinnerFail()
@@ -213,7 +215,7 @@ func cmdCreateZone(c *cli.Context) error {
 		}
 		// if segmenting recordsets by name, make sure module folder exists
 		if fetchConfig.ModSegment {
-			modulePath = filepath.Join(tfWorkPath, moduleFolder)
+			modulePath = filepath.Join(tools.TFWorkPath, moduleFolder)
 			if !createDirectory(modulePath) {
 				akamai.StopSpinnerFail()
 				return cli.NewExitError(color.RedString("Failed to create modules folder."), 1)
@@ -286,7 +288,7 @@ func cmdCreateZone(c *cli.Context) error {
 		f.Sync()
 
 		// Need create dnsvars.tf dependency
-		dnsvarsFilename := filepath.Join(tfWorkPath, "dnsvars.tf")
+		dnsvarsFilename := filepath.Join(tools.TFWorkPath, "dnsvars.tf")
 		// see if exists already.
 		//if _, err := os.Stat(dnsvarsFilename); err != nil {
 		dnsvarsHandle, err := os.Create(dnsvarsFilename)
@@ -308,7 +310,7 @@ func cmdCreateZone(c *cli.Context) error {
 	if importScript {
 		akamai.StartSpinner("Creating zone import script file", "")
 		fullZoneConfigMap, err = retrieveZoneResourceConfig(resourceZoneName)
-		importScriptFilename := filepath.Join(tfWorkPath, resourceZoneName+"_resource_import.script")
+		importScriptFilename := filepath.Join(tools.TFWorkPath, resourceZoneName+"_resource_import.script")
 		if _, err := os.Stat(importScriptFilename); err == nil {
 			// File exists. Bail
 			akamai.StopSpinnerOk()
@@ -355,14 +357,14 @@ func appendRootModuleTF(configText string) error {
 // Utility method to create full resource config file path
 func createResourceConfigFilename(resourceName string) string {
 
-	return filepath.Join(tfWorkPath, resourceName+"_zoneconfig.json")
+	return filepath.Join(tools.TFWorkPath, resourceName+"_zoneconfig.json")
 
 }
 
 // util func. create named module path
 func createNamedModulePath(modName string) string {
 
-	fpath := filepath.Join(tfWorkPath, moduleFolder, normalizeResourceName(modName))
+	fpath := filepath.Join(tools.TFWorkPath, moduleFolder, normalizeResourceName(modName))
 	if fpath[0:1] != "./" && fpath[0:2] != "../" {
 		fpath = filepath.FromSlash("./" + fpath)
 	}
@@ -451,7 +453,7 @@ func reconcileZoneResourceTargets(zoneImportList *zoneImportListStruct, zoneName
 	zoneTypeMap := make(map[string]map[string]bool)
 	// populate zoneTypeMap
 
-	tfFilename := createTFFilename(zoneName)
+	tfFilename := tools.CreateTFFilename(zoneName)
 	var tfHandle *os.File
 	tfHandle, err := os.OpenFile(tfFilename, os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil && err != io.EOF {

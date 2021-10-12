@@ -19,6 +19,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/akamai/cli-terraform/tools"
 )
 
 type tfStateStruct struct {
@@ -42,8 +44,8 @@ var tfState *tfStateStruct
 
 // Utility method to read in tfstate content
 func readTfState() error {
-	// tfWorkPath global var
-	tfStateFilename := filepath.Join(tfWorkPath, "terraform.tfstate")
+	// TFWorkPath global var
+	tfStateFilename := filepath.Join(tools.TFWorkPath, "terraform.tfstate")
 	if _, err := os.Stat(tfStateFilename); err != nil {
 		return err
 	}
