@@ -204,7 +204,7 @@ func cmdCreateProperty(c *cli.Context) error {
 	ruletemplate.Variables = rules.Rule.Variables
 	ruletemplate.AdvancedOverride = rules.Rule.AdvancedOverride
 	ruletemplate.Children = make([]string, 0)
-        ruletemplate.Options = rules.Rule.Options
+	ruletemplate.Options = rules.Rule.Options
 
 	var rulestemplate RulesTemplate
 	rulestemplate.AccountID = rules.AccountID
