@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version 0.3.1
+
+### Bug Fixes
+
+* General
+  * Update binaries URL to fix binary installation failure [link to issue](https://github.com/akamai/cli-terraform/issues/6)
+  * Update dependencies to fix issue under MacOS Big Sur
+
 ## Version 0.3.0
 
 ### Features/Enhancements
