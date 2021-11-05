@@ -1,6 +1,7 @@
 package cloudlets
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -42,13 +43,124 @@ func TestCreatePolicy(t *testing.T) {
 	// This should be removed once a dependency on "github.com/akamai/cli-common-golang" is removed
 	common.App = &cli.App{ErrWriter: ioutil.Discard}
 
+	pageSize := 1000
 	tests := map[string]struct {
 		init      func(*mockCloudlets, *mockProcessor)
 		withError error
 	}{
-		"fetch latest version of policy and produce output": {
+		"fetch latest version of policy and produce output with activations": {
 			init: func(c *mockCloudlets, p *mockProcessor) {
-				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{}).Return([]cloudlets.Policy{
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
+					{
+						PolicyID:     1,
+						GroupID:      123,
+						Name:         "some policy",
+						CloudletID:   0,
+						CloudletCode: "ER",
+					},
+					{
+						PolicyID:     2,
+						GroupID:      234,
+						Name:         "test_policy",
+						Description:  "test_policy description",
+						CloudletID:   0,
+						CloudletCode: "ER",
+						Activations: []cloudlets.PolicyActivation{
+							{
+								Network: "staging",
+								PolicyInfo: cloudlets.PolicyInfo{
+									Version: 2,
+								},
+								PropertyInfo: cloudlets.PropertyInfo{
+									Name: "test_prp_1",
+								},
+							},
+							{
+								Network: "prod",
+								PolicyInfo: cloudlets.PolicyInfo{
+									Version: 1,
+								},
+								PropertyInfo: cloudlets.PropertyInfo{
+									Name: "test_prp_1",
+								},
+							},
+							{
+								Network: "staging",
+								PolicyInfo: cloudlets.PolicyInfo{
+									Version: 2,
+								},
+								PropertyInfo: cloudlets.PropertyInfo{
+									Name: "test_prp_2",
+								},
+							},
+						},
+					},
+				}, nil).Once()
+				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2, PageSize: &pageSize, Offset: 0}).Return([]cloudlets.PolicyVersion{
+					{
+						PolicyID: 2,
+						Version:  1,
+					},
+					{
+						PolicyID:        2,
+						Version:         2,
+						Description:     "version 2 description",
+						MatchRuleFormat: "1.0",
+					},
+				}, nil).Once()
+				c.On("GetPolicyVersion", mock.Anything, cloudlets.GetPolicyVersionRequest{
+					PolicyID: 2,
+					Version:  2,
+				}).Return(&cloudlets.PolicyVersion{
+					PolicyID:    2,
+					Version:     2,
+					Description: "version 2 description",
+					MatchRules: cloudlets.MatchRules{
+						&cloudlets.MatchRuleER{
+							Name:  "some rule",
+							Type:  "ER",
+							Start: 1,
+							End:   2,
+							ID:    1234,
+						},
+					},
+					MatchRuleFormat: "1.0",
+				}, nil).Once()
+				p.On("ProcessTemplates", TFPolicyData{
+					Name:            "test_policy",
+					CloudletCode:    "ER",
+					Description:     "version 2 description",
+					GroupID:         234,
+					MatchRuleFormat: "1.0",
+					MatchRules: cloudlets.MatchRules{
+						&cloudlets.MatchRuleER{
+							Name:  "some rule",
+							Type:  "ER",
+							Start: 1,
+							End:   2,
+							ID:    1234,
+						},
+					},
+					Activations: []TFActivationData{
+						{
+							PolicyID:   2,
+							Network:    "staging",
+							Version:    2,
+							Properties: []string{"test_prp_1", "test_prp_2"},
+						},
+						{
+							PolicyID:   2,
+							Network:    "prod",
+							Version:    1,
+							Properties: []string{"test_prp_1"},
+						},
+					},
+				}).Return(nil).Once()
+			},
+		},
+		"fetch latest version of policy and produce output without activations": {
+			init: func(c *mockCloudlets, p *mockProcessor) {
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
 						GroupID:      123,
@@ -65,7 +177,7 @@ func TestCreatePolicy(t *testing.T) {
 						CloudletCode: "ER",
 					},
 				}, nil).Once()
-				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2}).Return([]cloudlets.PolicyVersion{
+				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2, PageSize: &pageSize, Offset: 0}).Return([]cloudlets.PolicyVersion{
 					{
 						PolicyID: 2,
 						Version:  1,
@@ -115,13 +227,13 @@ func TestCreatePolicy(t *testing.T) {
 		},
 		"error fetching policy": {
 			init: func(c *mockCloudlets, p *mockProcessor) {
-				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{}).Return(nil, fmt.Errorf("oops")).Once()
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return(nil, fmt.Errorf("oops")).Once()
 			},
 			withError: ErrFetchingPolicy,
 		},
 		"error policy not found": {
 			init: func(c *mockCloudlets, p *mockProcessor) {
-				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{}).Return([]cloudlets.Policy{
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
 						GroupID:      123,
@@ -135,7 +247,7 @@ func TestCreatePolicy(t *testing.T) {
 		},
 		"unsupported cloudlet type": {
 			init: func(c *mockCloudlets, p *mockProcessor) {
-				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{}).Return([]cloudlets.Policy{
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
 						GroupID:      123,
@@ -157,7 +269,7 @@ func TestCreatePolicy(t *testing.T) {
 		},
 		"error listing versions": {
 			init: func(c *mockCloudlets, p *mockProcessor) {
-				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{}).Return([]cloudlets.Policy{
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
 						GroupID:      123,
@@ -174,13 +286,13 @@ func TestCreatePolicy(t *testing.T) {
 						CloudletCode: "ER",
 					},
 				}, nil).Once()
-				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2}).Return(nil, fmt.Errorf("oops")).Once()
+				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2, PageSize: &pageSize, Offset: 0}).Return(nil, fmt.Errorf("oops")).Once()
 			},
 			withError: ErrFetchingVersion,
 		},
 		"error fetching latest version": {
 			init: func(c *mockCloudlets, p *mockProcessor) {
-				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{}).Return([]cloudlets.Policy{
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
 						GroupID:      123,
@@ -197,7 +309,7 @@ func TestCreatePolicy(t *testing.T) {
 						CloudletCode: "ER",
 					},
 				}, nil).Once()
-				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2}).Return([]cloudlets.PolicyVersion{
+				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2, PageSize: &pageSize, Offset: 0}).Return([]cloudlets.PolicyVersion{
 					{
 						PolicyID: 2,
 						Version:  1,
@@ -218,7 +330,7 @@ func TestCreatePolicy(t *testing.T) {
 		},
 		"error processing template": {
 			init: func(c *mockCloudlets, p *mockProcessor) {
-				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{}).Return([]cloudlets.Policy{
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
 						GroupID:      123,
@@ -235,7 +347,7 @@ func TestCreatePolicy(t *testing.T) {
 						CloudletCode: "ER",
 					},
 				}, nil).Once()
-				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2}).Return([]cloudlets.PolicyVersion{
+				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2, PageSize: &pageSize, Offset: 0}).Return([]cloudlets.PolicyVersion{
 					{
 						PolicyID: 2,
 						Version:  1,
@@ -291,7 +403,7 @@ func TestCreatePolicy(t *testing.T) {
 			mc := new(mockCloudlets)
 			mp := new(mockProcessor)
 			test.init(mc, mp)
-			err := createPolicy("test_policy", mc, mp)
+			err := createPolicy(context.Background(), "test_policy", mc, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -308,6 +420,70 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		givenData TFPolicyData
 		dir       string
 	}{
+		"policy with match rules and activations": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				CloudletCode:    "ER",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				Activations: []TFActivationData{
+					{
+						PolicyID:   2,
+						Network:    "staging",
+						Version:    2,
+						Properties: []string{"prp_0", "prp_1"},
+					},
+					{
+						PolicyID:   2,
+						Network:    "prod",
+						Version:    1,
+						Properties: []string{"prp_0"},
+					},
+				},
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleER{
+						Name:  "r1",
+						Start: 1,
+						End:   2,
+						Matches: []cloudlets.MatchCriteriaER{
+							{
+								MatchType:     "extension",
+								MatchValue:    "txt",
+								MatchOperator: "equals",
+							},
+							{
+								MatchType:     "cookie",
+								MatchValue:    "cookie=cookievalue",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+							},
+							{
+								MatchType:     "hostname",
+								MatchValue:    "3333.dom",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								Negate:        true,
+							},
+						},
+						UseRelativeURL:           "copy_scheme_hostname",
+						StatusCode:               307,
+						RedirectURL:              "/abc/sss",
+						MatchURL:                 "test.url",
+						UseIncomingSchemeAndHost: true,
+					},
+					cloudlets.MatchRuleER{
+						Name:                     "r2",
+						UseRelativeURL:           "copy_scheme_hostname",
+						StatusCode:               301,
+						RedirectURL:              "/ddd",
+						MatchURL:                 "abc.com",
+						UseIncomingSchemeAndHost: true,
+					},
+				},
+			},
+			dir: "with_activations_and_match_rules",
+		},
 		"policy with match rules": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
@@ -356,7 +532,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 				},
 			},
-			dir: "with_match_rules",
+			dir: "no_activations_with_match_rules",
 		},
 		"policy without match rules": {
 			givenData: TFPolicyData{
@@ -366,7 +542,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
 			},
-			dir: "no_match_rules",
+			dir: "no_activations_no_match_rules",
 		},
 	}
 
@@ -393,5 +569,4 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			}
 		})
 	}
-
 }

@@ -35,20 +35,20 @@ func (m *mockCloudlets) UpdateLoadBalancerVersion(ctx context.Context, req cloud
 	return args.Get(0).(*cloudlets.LoadBalancerVersion), args.Error(1)
 }
 
-func (m *mockCloudlets) GetLoadBalancerActivations(ctx context.Context, req string) (cloudlets.ActivationsList, error) {
+func (m *mockCloudlets) ListLoadBalancerActivations(ctx context.Context, req cloudlets.ListLoadBalancerActivationsRequest) ([]cloudlets.LoadBalancerActivation, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(cloudlets.ActivationsList), args.Error(1)
+	return args.Get(0).([]cloudlets.LoadBalancerActivation), args.Error(1)
 }
 
-func (m *mockCloudlets) ActivateLoadBalancerVersion(ctx context.Context, req cloudlets.ActivateLoadBalancerVersionRequest) (*cloudlets.ActivationResponse, error) {
+func (m *mockCloudlets) ActivateLoadBalancerVersion(ctx context.Context, req cloudlets.ActivateLoadBalancerVersionRequest) (*cloudlets.LoadBalancerActivation, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*cloudlets.ActivationResponse), args.Error(1)
+	return args.Get(0).(*cloudlets.LoadBalancerActivation), args.Error(1)
 }
 
 func (m *mockCloudlets) ListPolicyActivations(ctx context.Context, req cloudlets.ListPolicyActivationsRequest) ([]cloudlets.PolicyActivation, error) {
@@ -72,7 +72,7 @@ func (m *mockCloudlets) ListOrigins(ctx context.Context, req cloudlets.ListOrigi
 	return args.Get(0).([]cloudlets.OriginResponse), args.Error(1)
 }
 
-func (m *mockCloudlets) GetOrigin(ctx context.Context, req string) (*cloudlets.Origin, error) {
+func (m *mockCloudlets) GetOrigin(ctx context.Context, req cloudlets.GetOriginRequest) (*cloudlets.Origin, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -80,7 +80,7 @@ func (m *mockCloudlets) GetOrigin(ctx context.Context, req string) (*cloudlets.O
 	return args.Get(0).(*cloudlets.Origin), args.Error(1)
 }
 
-func (m *mockCloudlets) CreateOrigin(ctx context.Context, req cloudlets.LoadBalancerOriginCreateRequest) (*cloudlets.Origin, error) {
+func (m *mockCloudlets) CreateOrigin(ctx context.Context, req cloudlets.CreateOriginRequest) (*cloudlets.Origin, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -88,7 +88,7 @@ func (m *mockCloudlets) CreateOrigin(ctx context.Context, req cloudlets.LoadBala
 	return args.Get(0).(*cloudlets.Origin), args.Error(1)
 }
 
-func (m *mockCloudlets) UpdateOrigin(ctx context.Context, req cloudlets.LoadBalancerOriginUpdateRequest) (*cloudlets.Origin, error) {
+func (m *mockCloudlets) UpdateOrigin(ctx context.Context, req cloudlets.UpdateOriginRequest) (*cloudlets.Origin, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -104,7 +104,7 @@ func (m *mockCloudlets) ListPolicies(ctx context.Context, request cloudlets.List
 	return args.Get(0).([]cloudlets.Policy), args.Error(1)
 }
 
-func (m *mockCloudlets) GetPolicy(ctx context.Context, policyID int64) (*cloudlets.Policy, error) {
+func (m *mockCloudlets) GetPolicy(ctx context.Context, policyID cloudlets.GetPolicyRequest) (*cloudlets.Policy, error) {
 	args := m.Called(ctx, policyID)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -120,7 +120,7 @@ func (m *mockCloudlets) CreatePolicy(ctx context.Context, req cloudlets.CreatePo
 	return args.Get(0).(*cloudlets.Policy), args.Error(1)
 }
 
-func (m *mockCloudlets) RemovePolicy(ctx context.Context, policyID int64) error {
+func (m *mockCloudlets) RemovePolicy(ctx context.Context, policyID cloudlets.RemovePolicyRequest) error {
 	args := m.Called(ctx, policyID)
 	return args.Error(0)
 }
@@ -170,12 +170,12 @@ func (m *mockCloudlets) UpdatePolicyVersion(ctx context.Context, req cloudlets.U
 	return args.Get(0).(*cloudlets.PolicyVersion), args.Error(1)
 }
 
-func (m *mockCloudlets) GetPolicyProperties(ctx context.Context, req int64) (cloudlets.GetPolicyPropertiesResponse, error) {
+func (m *mockCloudlets) GetPolicyProperties(ctx context.Context, req cloudlets.GetPolicyPropertiesRequest) (map[string]cloudlets.PolicyProperty, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(cloudlets.GetPolicyPropertiesResponse), args.Error(1)
+	return args.Get(0).(map[string]cloudlets.PolicyProperty), args.Error(1)
 }
 
 func (m *mockCloudlets) ListLoadBalancerVersions(ctx context.Context, req cloudlets.ListLoadBalancerVersionsRequest) ([]cloudlets.LoadBalancerVersion, error) {
@@ -184,4 +184,9 @@ func (m *mockCloudlets) ListLoadBalancerVersions(ctx context.Context, req cloudl
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]cloudlets.LoadBalancerVersion), args.Error(1)
+}
+
+func (m *mockCloudlets) DeletePolicyProperty(ctx context.Context, policyID cloudlets.DeletePolicyPropertyRequest) error {
+	args := m.Called(ctx, policyID)
+	return args.Error(0)
 }

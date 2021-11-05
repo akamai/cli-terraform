@@ -1,3 +1,4 @@
+{{- /*gotype: github.com/akamai/cli-terraform/cloudlets.TFPolicyData*/ -}}
 terraform {
   required_providers {
     akamai = {
@@ -24,4 +25,5 @@ resource "akamai_cloudlets_policy" "policy" {
 }
 {{if and (.MatchRules) (eq .CloudletCode "ER")}}
 {{template "match-rules-er.tmpl" .}}
-{{end}}
+{{end -}}
+{{range .Activations}}{{template "policy-activation.tmpl" .}}{{end}}

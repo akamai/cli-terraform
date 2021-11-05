@@ -26,6 +26,15 @@ type (
 		GroupID         int64
 		MatchRuleFormat cloudlets.MatchRuleFormat
 		MatchRules      cloudlets.MatchRules
+		Activations     []TFActivationData
+	}
+
+	// TFActivationData represents data used in policy activation resource templates
+	TFActivationData struct {
+		PolicyID   int64
+		Network    string
+		Version    int64
+		Properties []string
 	}
 )
 
@@ -49,6 +58,8 @@ var (
 
 // CmdCreatePolicy is an entrypoint to create-policy command
 func CmdCreatePolicy(c *cli.Context) error {
+	// TODO context should be retrieved from cli.Context once we migrate to urfave/cli v2
+	ctx := context.Background()
 	if c.NArg() == 0 {
 		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
 			return cli.NewExitError(color.RedString("Error displaying help command"), 1)
@@ -95,19 +106,19 @@ func CmdCreatePolicy(c *cli.Context) error {
 	}
 
 	policyName := c.Args().First()
-	if err = createPolicy(policyName, client, processor); err != nil {
+	if err = createPolicy(ctx, policyName, client, processor); err != nil {
 		return cli.NewExitError(color.RedString(fmt.Sprintf("Error exporting policy HCL: %s", err)), 1)
 	}
 	return nil
 }
 
-func createPolicy(policyName string, client cloudlets.Cloudlets, templateProcessor templates.TemplateProcessor) error {
+func createPolicy(ctx context.Context, policyName string, client cloudlets.Cloudlets, templateProcessor templates.TemplateProcessor) error {
 	var tfPolicyData TFPolicyData
 
 	fmt.Println("Configuring Policy")
 	common.StartSpinner("Fetching policy "+policyName, "")
 
-	policy, err := findPolicy(policyName, client)
+	policy, err := findPolicy(ctx, policyName, client)
 	if err != nil {
 		common.StopSpinnerFail()
 		return fmt.Errorf("%w: %s", ErrFetchingPolicy, err)
@@ -121,7 +132,7 @@ func createPolicy(policyName string, client cloudlets.Cloudlets, templateProcess
 	tfPolicyData.CloudletCode = policy.CloudletCode
 	tfPolicyData.GroupID = policy.GroupID
 
-	policyVersion, err := getLatestPolicyVersion(policy.PolicyID, client)
+	policyVersion, err := getLatestPolicyVersion(ctx, policy.PolicyID, client)
 	if err != nil {
 		common.StopSpinnerFail()
 		return fmt.Errorf("%w: %s", ErrFetchingVersion, err)
@@ -129,6 +140,13 @@ func createPolicy(policyName string, client cloudlets.Cloudlets, templateProcess
 	tfPolicyData.Description = policyVersion.Description
 	tfPolicyData.MatchRuleFormat = policyVersion.MatchRuleFormat
 	tfPolicyData.MatchRules = policyVersion.MatchRules
+
+	if activationStaging := getActiveVersionAndProperties(policy, cloudlets.PolicyActivationNetworkStaging); activationStaging != nil {
+		tfPolicyData.Activations = append(tfPolicyData.Activations, *activationStaging)
+	}
+	if activationProd := getActiveVersionAndProperties(policy, cloudlets.PolicyActivationNetworkProduction); activationProd != nil {
+		tfPolicyData.Activations = append(tfPolicyData.Activations, *activationProd)
+	}
 
 	common.StopSpinnerOk()
 	common.StartSpinner("Saving TF configurations ", "")
@@ -142,39 +160,55 @@ func createPolicy(policyName string, client cloudlets.Cloudlets, templateProcess
 	return nil
 }
 
-func findPolicy(name string, client cloudlets.Cloudlets) (*cloudlets.Policy, error) {
-	ctx := context.Background()
-	policies, err := client.ListPolicies(ctx, cloudlets.ListPoliciesRequest{})
-	if err != nil {
-		return nil, err
-	}
+func findPolicy(ctx context.Context, name string, client cloudlets.Cloudlets) (*cloudlets.Policy, error) {
+	pageSize, offset := 1000, 0
 	var policy *cloudlets.Policy
-	for _, p := range policies {
-		if p.Name == name {
-			policy = &p
-			return policy, nil
+	for {
+		policies, err := client.ListPolicies(ctx, cloudlets.ListPoliciesRequest{
+			Offset:   offset,
+			PageSize: &pageSize,
+		})
+		if err != nil {
+			return nil, err
 		}
+		for _, p := range policies {
+			if p.Name == name {
+				policy = &p
+				return policy, nil
+			}
+		}
+		if len(policies) < pageSize {
+			break
+		}
+		offset += pageSize
 	}
 	return nil, fmt.Errorf("policy '%s' does not exist", name)
 }
 
-func getLatestPolicyVersion(policyID int64, client cloudlets.Cloudlets) (*cloudlets.PolicyVersion, error) {
-	ctx := context.Background()
-	versions, err := client.ListPolicyVersions(ctx, cloudlets.ListPolicyVersionsRequest{
-		PolicyID:     policyID,
-		IncludeRules: false,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if len(versions) == 0 {
-		return nil, fmt.Errorf("no policy versions found for given policy")
-	}
+func getLatestPolicyVersion(ctx context.Context, policyID int64, client cloudlets.Cloudlets) (*cloudlets.PolicyVersion, error) {
 	var version int64
-	for _, v := range versions {
-		if v.Version > version {
-			version = v.Version
+	pageSize, offset := 1000, 0
+	for {
+		versions, err := client.ListPolicyVersions(ctx, cloudlets.ListPolicyVersionsRequest{
+			PolicyID:     policyID,
+			IncludeRules: false,
+			PageSize:     &pageSize,
+			Offset:       offset,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		if len(versions) == 0 {
+			return nil, fmt.Errorf("no policy versions found for given policy")
+		}
+		for _, v := range versions {
+			if v.Version > version {
+				version = v.Version
+			}
+		}
+		if len(versions) < pageSize {
+			break
 		}
 	}
 	policyVersion, err := client.GetPolicyVersion(ctx, cloudlets.GetPolicyVersionRequest{
@@ -185,4 +219,25 @@ func getLatestPolicyVersion(policyID int64, client cloudlets.Cloudlets) (*cloudl
 		return nil, err
 	}
 	return policyVersion, nil
+}
+
+func getActiveVersionAndProperties(policy *cloudlets.Policy, network cloudlets.PolicyActivationNetwork) *TFActivationData {
+	var version int64
+	var associatedProperties []string
+	for _, activation := range policy.Activations {
+		if activation.Network != network {
+			continue
+		}
+		version = activation.PolicyInfo.Version
+		associatedProperties = append(associatedProperties, activation.PropertyInfo.Name)
+	}
+	if associatedProperties == nil {
+		return nil
+	}
+	return &TFActivationData{
+		PolicyID:   policy.PolicyID,
+		Network:    string(network),
+		Version:    version,
+		Properties: associatedProperties,
+	}
 }

@@ -1,0 +1,9 @@
+{{- /*gotype: github.com/akamai/cli-terraform/cloudlets.TFPolicyData*/ -}}
+{{- if and .Version .Properties}}
+resource "akamai_cloudlets_policy_activation" "policy_activation_{{.Network}}" {
+  policy_id = {{.PolicyID}}
+  network = "{{.Network}}"
+  version = {{.Version}}
+  associated_properties = [ {{range $i, $v := .Properties}}{{if $i}}, {{end}}"{{$v}}"{{end}} ]
+}
+{{end}}
