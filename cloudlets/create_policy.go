@@ -118,7 +118,7 @@ func createPolicy(ctx context.Context, policyName string, client cloudlets.Cloud
 	fmt.Println("Configuring Policy")
 	common.StartSpinner("Fetching policy "+policyName, "")
 
-	policy, err := findPolicy(ctx, policyName, client)
+	policy, err := findPolicyByName(ctx, policyName, client)
 	if err != nil {
 		common.StopSpinnerFail()
 		return fmt.Errorf("%w: %s", ErrFetchingPolicy, err)
@@ -160,7 +160,7 @@ func createPolicy(ctx context.Context, policyName string, client cloudlets.Cloud
 	return nil
 }
 
-func findPolicy(ctx context.Context, name string, client cloudlets.Cloudlets) (*cloudlets.Policy, error) {
+func findPolicyByName(ctx context.Context, name string, client cloudlets.Cloudlets) (*cloudlets.Policy, error) {
 	pageSize, offset := 1000, 0
 	var policy *cloudlets.Policy
 	for {
@@ -210,6 +210,7 @@ func getLatestPolicyVersion(ctx context.Context, policyID int64, client cloudlet
 		if len(versions) < pageSize {
 			break
 		}
+		offset += pageSize
 	}
 	policyVersion, err := client.GetPolicyVersion(ctx, cloudlets.GetPolicyVersionRequest{
 		PolicyID: policyID,
