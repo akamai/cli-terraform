@@ -15,8 +15,8 @@
 package main
 
 import (
-	//"errors"
 	akamai "github.com/akamai/cli-common-golang"
+	"github.com/akamai/cli-terraform/cloudlets"
 	"github.com/urfave/cli"
 )
 
@@ -31,7 +31,7 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "tfworkpath",
-				Usage: "file path location for placement of created and/or modified artifacts. Default: current directory",
+				Usage: "Path location for placement of created and/or modified artifacts. Default: current directory",
 			},
 			cli.BoolTFlag{
 				Name:  "resources",
@@ -53,7 +53,7 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "tfworkpath",
-				Usage: "file path location for placement of created and/or modified artifacts. Default: current directory",
+				Usage: "Path location for placement of created and/or modified artifacts. Default: current directory",
 			},
 			cli.BoolTFlag{
 				Name:  "resources",
@@ -96,7 +96,22 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "tfworkpath",
-				Usage: "file path location for placement of created and/or modified artifacts. Default: current directory",
+				Usage: "Path location for placement of created artifacts. Default: current directory",
+			},
+		},
+		BashComplete: akamai.DefaultAutoComplete,
+	})
+
+	commands = append(commands, cli.Command{
+		Name:        "create-policy",
+		Description: "Create Terraform Policy Resource",
+		Usage:       "create-policy",
+		ArgsUsage:   "<policy_name>",
+		Action:      cloudlets.CmdCreatePolicy,
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "tfworkpath",
+				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
 		BashComplete: akamai.DefaultAutoComplete,
