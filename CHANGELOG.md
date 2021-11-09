@@ -1,5 +1,16 @@
 # Release Notes
 
+## Version 0.3.1
+
+### Bug Fixes
+
+* General
+  * Update binaries URL to fix binary installation failure ([#6](https://github.com/akamai/cli-terraform/issues/6))
+  * Update dependencies to fix issue under MacOS Big Sur
+
+* PAPI
+  * Add field `is_secure` into rule tree structure ([#9](https://github.com/akamai/cli-terraform/issues/9))
+
 ## Version 0.3.0
 
 ### Features/Enhancements
