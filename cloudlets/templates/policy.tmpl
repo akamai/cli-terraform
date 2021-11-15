@@ -22,8 +22,15 @@ resource "akamai_cloudlets_policy" "policy" {
 {{- if and (.MatchRules) (eq .CloudletCode "ER")}}
   match_rules = data.akamai_cloudlets_edge_redirector_match_rule.match_rules_er.json
 {{- end}}
+{{- if and (.MatchRules) (eq .CloudletCode "ALB")}}
+  match_rules = data.akamai_cloudlets_application_load_balancer_match_rule.match_rules_alb.json
+{{- end}}
 }
 {{if and (.MatchRules) (eq .CloudletCode "ER")}}
 {{template "match-rules-er.tmpl" .}}
 {{end -}}
-{{range .Activations}}{{template "policy-activation.tmpl" .}}{{end}}
+{{if and (.MatchRules) (eq .CloudletCode "ALB")}}
+{{template "match-rules-alb.tmpl" .}}
+{{end -}}
+
+{{- range .PolicyActivations}}{{template "policy-activation.tmpl" .}}{{end -}}

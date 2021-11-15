@@ -1,0 +1,46 @@
+{{- /*gotype: github.com/akamai/cli-terraform/cloudlets.TFPolicyData*/ -}}
+{{- range .LoadBalancers -}}
+resource "akamai_cloudlets_application_load_balancer" "{{.OriginID}}" {
+  origin_id = "{{.OriginID}}"
+  description = "{{.Description}}"
+  balancing_type = "{{.BalancingType}}"
+  {{- range .DataCenters}}
+
+  data_centers {
+    latitude = {{.Latitude}}
+    longitude = {{.Longitude}}
+    continent = "{{.Continent}}"
+    country = "{{.Country}}"
+    origin_id = "{{.OriginID}}"
+    percent = {{.Percent}}
+    cloud_service = {{.CloudService}}
+    liveness_hosts = [{{range $i, $v := .LivenessHosts}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+    hostname = "{{.Hostname}}"
+    state_or_province = "{{.StateOrProvince}}"
+    city = "{{.City}}"
+    cloud_server_host_header_override = {{.CloudServerHostHeaderOverride}}
+  }
+  {{- end}}
+  {{- with .LivenessSettings}}
+
+  liveness_settings {
+    port = {{.Port}}
+    protocol = "{{.Protocol}}"
+    path = "{{.Path}}"
+    host_header = "{{.HostHeader}}"
+    additional_headers = {
+      {{range $k, $v := .AdditionalHeaders}}{{$k}} = "{{$v}}"{{end}}
+    }
+    interval = {{.Interval}}
+    peer_certificate_verification = {{.PeerCertificateVerification}}
+    request_string = "{{.RequestString}}"
+    response_string = "{{.ResponseString}}"
+    status_3xx_failure = {{.Status3xxFailure}}
+    status_4xx_failure = {{.Status4xxFailure}}
+    status_5xx_failure = {{.Status5xxFailure}}
+    timeout = {{.Timeout}}
+  }
+  {{- end}}
+}
+{{- end}}
+{{template "load-balancer-activation.tmpl" .}}

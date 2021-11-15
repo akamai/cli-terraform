@@ -48,7 +48,117 @@ func TestCreatePolicy(t *testing.T) {
 		init      func(*mockCloudlets, *mockProcessor)
 		withError error
 	}{
-		"fetch latest version of policy and produce output with activations": {
+		"fetch latest version of policy and produce output ALB": {
+			init: func(c *mockCloudlets, p *mockProcessor) {
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
+					{
+						PolicyID:     1,
+						GroupID:      123,
+						Name:         "some policy",
+						CloudletID:   0,
+						CloudletCode: "ALB",
+					},
+					{
+						PolicyID:     2,
+						GroupID:      234,
+						Name:         "test_policy",
+						Description:  "test_policy description",
+						CloudletID:   0,
+						CloudletCode: "ALB",
+					},
+				}, nil).Once()
+				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2, PageSize: &pageSize, Offset: 0}).Return([]cloudlets.PolicyVersion{
+					{
+						PolicyID: 2,
+						Version:  1,
+					},
+					{
+						PolicyID:        2,
+						Version:         2,
+						Description:     "version 2 description",
+						MatchRuleFormat: "1.0",
+					},
+				}, nil).Once()
+				c.On("GetPolicyVersion", mock.Anything, cloudlets.GetPolicyVersionRequest{
+					PolicyID: 2,
+					Version:  2,
+				}).Return(&cloudlets.PolicyVersion{
+					PolicyID:    2,
+					Version:     2,
+					Description: "version 2 description",
+					MatchRules: cloudlets.MatchRules{
+						&cloudlets.MatchRuleALB{
+							Name:  "some rule",
+							Type:  "ALB",
+							Start: 1,
+							End:   2,
+							ID:    1234,
+							ForwardSettings: cloudlets.ForwardSettings{
+								OriginID: "test_origin",
+							},
+						},
+					},
+					MatchRuleFormat: "1.0",
+				}, nil).Once()
+
+				origin := cloudlets.Origin{
+					OriginID:    "test_origin",
+					Description: "test description",
+					Type:        "APPLICATION_LOAD_BALANCER",
+				}
+
+				var versionList []cloudlets.LoadBalancerVersion
+				for i := 1; i <= 2; i++ {
+					versionList = append(versionList, cloudlets.LoadBalancerVersion{OriginID: origin.OriginID, Version: int64(i)})
+				}
+				c.On("ListLoadBalancerVersions", mock.Anything, cloudlets.ListLoadBalancerVersionsRequest{
+					OriginID: origin.OriginID,
+				}).Return(versionList, nil).Once()
+
+				activations := []cloudlets.LoadBalancerActivation{
+					{
+						ActivatedDate: "2021-10-29T00:00:10.000Z",
+						Network:       cloudlets.LoadBalancerActivationNetworkProduction,
+						OriginID:      origin.OriginID,
+						Status:        cloudlets.LoadBalancerActivationStatusActive,
+						Version:       2,
+					},
+					{
+						ActivatedDate: "2021-10-29T00:00:20.000Z",
+						Network:       cloudlets.LoadBalancerActivationNetworkStaging,
+						OriginID:      origin.OriginID,
+						Status:        cloudlets.LoadBalancerActivationStatusActive,
+						Version:       2,
+					},
+				}
+				c.On("ListLoadBalancerActivations", mock.Anything, cloudlets.ListLoadBalancerActivationsRequest{
+					OriginID: origin.OriginID,
+				}).Return(activations, nil).Twice()
+
+				p.On("ProcessTemplates", TFPolicyData{
+					Name:            "test_policy",
+					CloudletCode:    "ALB",
+					Description:     "version 2 description",
+					GroupID:         234,
+					MatchRuleFormat: "1.0",
+					MatchRules: cloudlets.MatchRules{
+						&cloudlets.MatchRuleALB{
+							Name:  "some rule",
+							Type:  "ALB",
+							Start: 1,
+							End:   2,
+							ID:    1234,
+							ForwardSettings: cloudlets.ForwardSettings{
+								OriginID: "test_origin",
+							},
+						},
+					},
+					LoadBalancers:           versionList[1:],
+					LoadBalancerActivations: activations,
+				}).Return(nil).Once()
+			},
+		},
+		"fetch latest version of policy and produce output with activations ER": {
 			init: func(c *mockCloudlets, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
@@ -141,7 +251,7 @@ func TestCreatePolicy(t *testing.T) {
 							ID:    1234,
 						},
 					},
-					Activations: []TFActivationData{
+					PolicyActivations: []TFPolicyActivationData{
 						{
 							PolicyID:   2,
 							Network:    "staging",
@@ -417,17 +527,18 @@ func TestCreatePolicy(t *testing.T) {
 
 func TestProcessPolicyTemplates(t *testing.T) {
 	tests := map[string]struct {
-		givenData TFPolicyData
-		dir       string
+		givenData    TFPolicyData
+		dir          string
+		filesToCheck []string
 	}{
-		"policy with match rules and activations": {
+		"policy with ER match rules and activations": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
 				CloudletCode:    "ER",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
-				Activations: []TFActivationData{
+				PolicyActivations: []TFPolicyActivationData{
 					{
 						PolicyID:   2,
 						Network:    "staging",
@@ -482,7 +593,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 				},
 			},
-			dir: "with_activations_and_match_rules",
+			dir:          "with_activations_and_match_rules",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
 		"policy with match rules": {
 			givenData: TFPolicyData{
@@ -532,7 +644,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 				},
 			},
-			dir: "no_activations_with_match_rules",
+			dir:          "no_activations_with_match_rules",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
 		"policy without match rules": {
 			givenData: TFPolicyData{
@@ -542,7 +655,254 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
 			},
-			dir: "no_activations_no_match_rules",
+			dir:          "no_activations_no_match_rules",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+		},
+		// cloudlet ALB
+		"policy with match rules alb": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				CloudletCode:    "ALB",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleALB{
+						Name: "r1",
+						Matches: []cloudlets.MatchCriteriaALB{
+							{
+								CaseSensitive: false,
+								MatchOperator: "equals",
+								MatchType:     "range",
+								Negate:        false,
+								ObjectMatchValue: &cloudlets.ObjectMatchValueRangeOrSimpleSubtype{
+									Type:  "range",
+									Value: []interface{}{float64(1), float64(50)},
+								},
+							},
+							{
+								MatchType:     "cookie",
+								MatchValue:    "cookie=cookievalue",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								ObjectMatchValue: cloudlets.ObjectMatchValueRangeOrSimpleSubtype{
+									Type:  "simple",
+									Value: "GET",
+								},
+							},
+							{
+								MatchType:     "hostname",
+								MatchValue:    "3333.dom",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								Negate:        true,
+							},
+						},
+						MatchURL:      "test.url",
+						MatchesAlways: false,
+						ForwardSettings: cloudlets.ForwardSettings{
+							OriginID: "test_origin",
+						},
+						Disabled: false,
+					},
+					cloudlets.MatchRuleALB{
+						Name:     "r2",
+						MatchURL: "abc.com",
+						ForwardSettings: cloudlets.ForwardSettings{
+							OriginID: "test_origin",
+						},
+						Matches: []cloudlets.MatchCriteriaALB{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								ObjectMatchValue: cloudlets.ObjectMatchValueObjectSubtype{
+									Type: "object",
+									Name: "ALB",
+									Options: &cloudlets.Options{
+										Value: []interface{}{
+											"y",
+										},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
+					},
+				},
+				LoadBalancers: []cloudlets.LoadBalancerVersion{
+					{
+						OriginID:      "test_origin",
+						Description:   "test description",
+						BalancingType: cloudlets.BalancingTypeWeighted,
+						DataCenters: []cloudlets.DataCenter{
+							{
+								City:            "Boston",
+								CloudService:    true,
+								Continent:       "NA",
+								Country:         "US",
+								Hostname:        "test-hostname",
+								Latitude:        102.78108,
+								LivenessHosts:   []string{"tf1.test", "tf2.test"},
+								Longitude:       -116.07064,
+								OriginID:        "test_origin",
+								Percent:         10,
+								StateOrProvince: stringPtr("MA"),
+							},
+						},
+						LivenessSettings: &cloudlets.LivenessSettings{
+							HostHeader:        "header",
+							AdditionalHeaders: map[string]string{"abc": "123"},
+							Interval:          10,
+							Path:              "/status",
+							Port:              1234,
+							Protocol:          "HTTP",
+							RequestString:     "test_request_string",
+							ResponseString:    "test_response_string",
+							Timeout:           60,
+						},
+						Version: 2,
+					},
+				},
+			},
+			dir:          "with_match_rules_alb",
+			filesToCheck: []string{"policy.tf", "load-balancer.tf", "variables.tf", "import.sh"},
+		},
+		"policy with match rules alb and activations": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				CloudletCode:    "ALB",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleALB{
+						Name: "r1",
+						Matches: []cloudlets.MatchCriteriaALB{
+							{
+								CaseSensitive: false,
+								MatchOperator: "equals",
+								MatchType:     "range",
+								Negate:        false,
+								ObjectMatchValue: &cloudlets.ObjectMatchValueRangeOrSimpleSubtype{
+									Type:  "range",
+									Value: []interface{}{float64(1), float64(50)},
+								},
+							},
+							{
+								MatchType:     "cookie",
+								MatchValue:    "cookie=cookievalue",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								ObjectMatchValue: cloudlets.ObjectMatchValueRangeOrSimpleSubtype{
+									Type:  "simple",
+									Value: "GET",
+								},
+							},
+							{
+								MatchType:     "hostname",
+								MatchValue:    "3333.dom",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								Negate:        true,
+							},
+						},
+						MatchURL:      "test.url",
+						MatchesAlways: false,
+						ForwardSettings: cloudlets.ForwardSettings{
+							OriginID: "test_origin",
+						},
+						Disabled: false,
+					},
+					cloudlets.MatchRuleALB{
+						Name:     "r2",
+						MatchURL: "abc.com",
+						ForwardSettings: cloudlets.ForwardSettings{
+							OriginID: "test_origin",
+						},
+						Matches: []cloudlets.MatchCriteriaALB{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								ObjectMatchValue: cloudlets.ObjectMatchValueObjectSubtype{
+									Type: "object",
+									Name: "ALB",
+									Options: &cloudlets.Options{
+										Value: []interface{}{
+											"y",
+										},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
+					},
+				},
+				LoadBalancers: []cloudlets.LoadBalancerVersion{
+					{
+						OriginID:      "test_origin",
+						Description:   "test description",
+						BalancingType: cloudlets.BalancingTypeWeighted,
+						DataCenters: []cloudlets.DataCenter{
+							{
+								City:            "Boston",
+								CloudService:    true,
+								Continent:       "NA",
+								Country:         "US",
+								Hostname:        "test-hostname",
+								Latitude:        102.78108,
+								LivenessHosts:   []string{"tf1.test", "tf2.test"},
+								Longitude:       -116.07064,
+								OriginID:        "test_origin",
+								Percent:         10,
+								StateOrProvince: stringPtr("MA"),
+							},
+						},
+						LivenessSettings: &cloudlets.LivenessSettings{
+							HostHeader:        "header",
+							AdditionalHeaders: map[string]string{"abc": "123"},
+							Interval:          10,
+							Path:              "/status",
+							Port:              1234,
+							Protocol:          "HTTP",
+							RequestString:     "test_request_string",
+							ResponseString:    "test_response_string",
+							Timeout:           60,
+						},
+						Version: 2,
+					},
+				},
+				LoadBalancerActivations: []cloudlets.LoadBalancerActivation{
+					{
+						ActivatedDate: "2021-10-29T00:00:10.000Z",
+						Network:       cloudlets.LoadBalancerActivationNetworkProduction,
+						OriginID:      "test_origin",
+						Status:        cloudlets.LoadBalancerActivationStatusActive,
+						Version:       2,
+					},
+					{
+						ActivatedDate: "2021-10-29T00:00:20.000Z",
+						Network:       cloudlets.LoadBalancerActivationNetworkStaging,
+						OriginID:      "test_origin",
+						Status:        cloudlets.LoadBalancerActivationStatusActive,
+						Version:       2,
+					},
+				},
+			},
+			dir:          "with_activations_and_match_rules_alb",
+			filesToCheck: []string{"policy.tf", "load-balancer.tf", "variables.tf", "import.sh"},
+		},
+		"policy without match rules alb": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				CloudletCode:    "ALB",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+			},
+			dir:          "no_match_rules_alb",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
 	}
 
@@ -552,15 +912,15 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			processor := templates.FSTemplateProcessor{
 				TemplatesFS: templateFiles,
 				TemplateTargets: map[string]string{
-					"policy.tmpl":    fmt.Sprintf("./testdata/res/%s/policy.tf", test.dir),
-					"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
-					"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
+					"policy.tmpl":        fmt.Sprintf("./testdata/res/%s/policy.tf", test.dir),
+					"load-balancer.tmpl": fmt.Sprintf("./testdata/res/%s/load-balancer.tf", test.dir),
+					"variables.tmpl":     fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
+					"imports.tmpl":       fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
 				},
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 
-			filesToCheck := []string{"policy.tf", "variables.tf", "import.sh"}
-			for _, f := range filesToCheck {
+			for _, f := range test.filesToCheck {
 				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
 				require.NoError(t, err)
 				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
@@ -569,6 +929,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			}
 		})
 	}
+}
+
+func stringPtr(i string) *string {
+	return &i
 }
 
 func TestFindPolicy(t *testing.T) {
