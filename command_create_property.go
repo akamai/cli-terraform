@@ -33,6 +33,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 	"log"
+	"regexp"
 )
 
 type EdgeHostname struct {
@@ -222,7 +223,8 @@ func cmdCreateProperty(c *cli.Context) error {
 
 	for _, rule := range rules.Rule.Children {
 		jsonBody, err := json.MarshalIndent(rule, "", "  ")
-		name := strings.ReplaceAll(rule.Name, " ", "_")
+		re, err := regexp.Compile(`[^\w]`)
+                name := re.ReplaceAllString(rule.Name, "_")
 		rulesnamepath := filepath.Join(snippetspath, fmt.Sprintf("%s.json", name))
 		err = ioutil.WriteFile(rulesnamepath, jsonBody, 0644)
 		if err != nil {
