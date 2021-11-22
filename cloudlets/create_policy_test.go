@@ -559,6 +559,16 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						End:   2,
 						Matches: []cloudlets.MatchCriteriaER{
 							{
+								MatchType:     "cookie",
+								MatchValue:    "cookie=cookievalue",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								ObjectMatchValue: cloudlets.ObjectMatchValueSimple{
+									Type:  "simple",
+									Value: []string{"GET"},
+								},
+							},
+							{
 								MatchType:     "extension",
 								MatchValue:    "txt",
 								MatchOperator: "equals",
@@ -590,6 +600,21 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						RedirectURL:              "/ddd",
 						MatchURL:                 "abc.com",
 						UseIncomingSchemeAndHost: true,
+						Matches: []cloudlets.MatchCriteriaER{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
+									Type: "object",
+									Name: "ALB",
+									Options: &cloudlets.Options{
+										Value:            []string{"y"},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
 					},
 				},
 			},
@@ -658,7 +683,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "no_activations_no_match_rules",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
-		// cloudlet ALB
 		"policy with match rules alb": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
@@ -675,9 +699,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								MatchOperator: "equals",
 								MatchType:     "range",
 								Negate:        false,
-								ObjectMatchValue: &cloudlets.ObjectMatchValueRangeOrSimpleSubtype{
+								ObjectMatchValue: &cloudlets.ObjectMatchValueRange{
 									Type:  "range",
-									Value: []interface{}{float64(1), float64(50)},
+									Value: []int64{1, 50},
 								},
 							},
 							{
@@ -685,9 +709,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								MatchValue:    "cookie=cookievalue",
 								MatchOperator: "equals",
 								CaseSensitive: true,
-								ObjectMatchValue: cloudlets.ObjectMatchValueRangeOrSimpleSubtype{
+								ObjectMatchValue: cloudlets.ObjectMatchValueSimple{
 									Type:  "simple",
-									Value: "GET",
+									Value: []string{"GET"},
 								},
 							},
 							{
@@ -715,13 +739,11 @@ func TestProcessPolicyTemplates(t *testing.T) {
 							{
 								MatchOperator: "equals",
 								MatchType:     "header",
-								ObjectMatchValue: cloudlets.ObjectMatchValueObjectSubtype{
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
 									Type: "object",
 									Name: "ALB",
 									Options: &cloudlets.Options{
-										Value: []interface{}{
-											"y",
-										},
+										Value:            []string{"y"},
 										ValueHasWildcard: true,
 									},
 								},
@@ -784,9 +806,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								MatchOperator: "equals",
 								MatchType:     "range",
 								Negate:        false,
-								ObjectMatchValue: &cloudlets.ObjectMatchValueRangeOrSimpleSubtype{
+								ObjectMatchValue: &cloudlets.ObjectMatchValueRange{
 									Type:  "range",
-									Value: []interface{}{float64(1), float64(50)},
+									Value: []int64{1, 50},
 								},
 							},
 							{
@@ -794,9 +816,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								MatchValue:    "cookie=cookievalue",
 								MatchOperator: "equals",
 								CaseSensitive: true,
-								ObjectMatchValue: cloudlets.ObjectMatchValueRangeOrSimpleSubtype{
+								ObjectMatchValue: cloudlets.ObjectMatchValueSimple{
 									Type:  "simple",
-									Value: "GET",
+									Value: []string{"GET"},
 								},
 							},
 							{
@@ -824,13 +846,11 @@ func TestProcessPolicyTemplates(t *testing.T) {
 							{
 								MatchOperator: "equals",
 								MatchType:     "header",
-								ObjectMatchValue: cloudlets.ObjectMatchValueObjectSubtype{
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
 									Type: "object",
 									Name: "ALB",
 									Options: &cloudlets.Options{
-										Value: []interface{}{
-											"y",
-										},
+										Value:            []string{"y"},
 										ValueHasWildcard: true,
 									},
 								},

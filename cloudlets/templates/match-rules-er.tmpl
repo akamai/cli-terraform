@@ -13,6 +13,28 @@ data "akamai_cloudlets_edge_redirector_match_rule" "match_rules_er" {
       case_sensitive = {{.CaseSensitive}}
       negate = {{.Negate}}
       check_ips = "{{.CheckIPs}}"
+      {{- with .ObjectMatchValue}}
+      object_match_value {
+      {{- if (eq .Type "simple")}}
+        type = "{{.Type}}"
+        value = [{{range $i, $v := .Value}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+      {{- end}}
+      {{- if (eq .Type "object")}}
+        name = "{{.Name}}"
+        type = "{{.Type}}"
+        name_case_sensitive = {{.NameCaseSensitive}}
+        name_has_wildcard = {{.NameHasWildcard}}
+        {{- with .Options}}
+        options {
+          value = [{{range $i, $v := .Value}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+          value_has_wildcard = {{.ValueHasWildcard}}
+          value_case_sensitive = {{.ValueCaseSensitive}}
+          value_escaped = {{.ValueEscaped}}
+        }
+        {{- end}}
+      {{- end}}
+      }
+    {{- end}}
     }
     {{- end}}
     use_relative_url = "{{.UseRelativeURL}}"

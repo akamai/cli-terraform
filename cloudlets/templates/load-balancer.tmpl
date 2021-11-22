@@ -16,7 +16,7 @@ resource "akamai_cloudlets_application_load_balancer" "{{.OriginID}}" {
     cloud_service = {{.CloudService}}
     liveness_hosts = [{{range $i, $v := .LivenessHosts}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
     hostname = "{{.Hostname}}"
-    state_or_province = "{{.StateOrProvince}}"
+    state_or_province = "{{if .StateOrProvince}}{{.StateOrProvince}}{{end}}"
     city = "{{.City}}"
     cloud_server_host_header_override = {{.CloudServerHostHeaderOverride}}
   }

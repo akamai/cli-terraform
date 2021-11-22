@@ -49,6 +49,20 @@ func TestProcessTemplates(t *testing.T) {
 				"./testdata/res/2.txt": "World",
 			},
 		},
+		"do not save empty file": {
+			templateDir: "./testdata",
+			templateTargets: map[string]string{
+				"1.tmpl": "./testdata/res/1.txt",
+				"2.tmpl": "./testdata/res/not_existing.txt",
+			},
+			data: TestData{
+				A: "Hello",
+			},
+			expected: map[string]string{
+				"./testdata/res/1.txt":            "Hello",
+				"./testdata/res/not_existing.txt": "",
+			},
+		},
 		"nested template": {
 			templateDir: "./testdata",
 			templateTargets: map[string]string{
@@ -87,6 +101,11 @@ func TestProcessTemplates(t *testing.T) {
 			}
 			require.NoError(t, err)
 			for path, val := range test.expected {
+				if val == "" {
+					_, err = os.Stat(path)
+					assert.True(t, errors.Is(err, os.ErrNotExist), "expected no file but found '%s'", path)
+					return
+				}
 				res, err := ioutil.ReadFile(path)
 				require.NoError(t, err)
 				assert.Equal(t, val, string(res))

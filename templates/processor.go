@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -36,15 +37,15 @@ var (
 func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
 	tmpl := template.Must(template.ParseFS(t.TemplatesFS, "**/*.tmpl"))
 	for templateName, targetPath := range t.TemplateTargets {
-		file, err := os.Create(targetPath)
-		if err != nil {
-			return err
-		}
-		if err := tmpl.Lookup(templateName).Execute(file, data); err != nil {
+		buf := bytes.Buffer{}
+		if err := tmpl.Lookup(templateName).Execute(&buf, data); err != nil {
 			return fmt.Errorf("%w: %s: %s", ErrTemplateExecution, templateName, err)
 		}
-		if err := file.Close(); err != nil {
-			return err
+		if buf.Len() == 0 {
+			continue
+		}
+		if err := os.WriteFile(targetPath, buf.Bytes(), 0644); err != nil {
+			return fmt.Errorf("creating '%s': %s", targetPath, err)
 		}
 	}
 	return nil

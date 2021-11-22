@@ -17,11 +17,11 @@ data "akamai_cloudlets_application_load_balancer_match_rule" "match_rules_alb" {
       object_match_value {
       {{- if (eq .Type "simple")}}
         type = "{{.Type}}"
-        value = "{{.Value}}"
+        value = [{{range $i, $v := .Value}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
       {{- end}}
       {{- if (eq .Type "range")}}
         type = "{{.Type}}"
-        value = "{{.Value}}"
+        value = [{{range $i, $v := .Value}}{{if $i}}, {{end}}{{$v}}{{end}}]
       {{- end}}
       {{- if (eq .Type "object")}}
         name = "{{.Name}}"
@@ -30,7 +30,7 @@ data "akamai_cloudlets_application_load_balancer_match_rule" "match_rules_alb" {
         name_has_wildcard = {{.NameHasWildcard}}
         {{- with .Options}}
         options {
-          value = "{{.Value}}"
+          value = [{{range $i, $v := .Value}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
           value_has_wildcard = {{.ValueHasWildcard}}
           value_case_sensitive = {{.ValueCaseSensitive}}
           value_escaped = {{.ValueEscaped}}

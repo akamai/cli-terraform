@@ -35,7 +35,7 @@ data "akamai_cloudlets_application_load_balancer_match_rule" "match_rules_alb" {
       check_ips = ""
       object_match_value {
         type = "range"
-        value = "[1 50]"
+        value = [1, 50]
       }
     }
     matches {
@@ -47,7 +47,7 @@ data "akamai_cloudlets_application_load_balancer_match_rule" "match_rules_alb" {
       check_ips = ""
       object_match_value {
         type = "simple"
-        value = "GET"
+        value = ["GET"]
       }
     }
     matches {
@@ -82,7 +82,7 @@ data "akamai_cloudlets_application_load_balancer_match_rule" "match_rules_alb" {
         name_case_sensitive = false
         name_has_wildcard = false
         options {
-          value = "[y]"
+          value = ["y"]
           value_has_wildcard = true
           value_case_sensitive = false
           value_escaped = false

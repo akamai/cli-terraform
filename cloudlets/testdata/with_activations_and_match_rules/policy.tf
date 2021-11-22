@@ -27,6 +27,18 @@ data "akamai_cloudlets_edge_redirector_match_rule" "match_rules_er" {
     start = 1
     end = 2
     matches {
+      match_type = "cookie"
+      match_value = "cookie=cookievalue"
+      match_operator = "equals"
+      case_sensitive = true
+      negate = false
+      check_ips = ""
+      object_match_value {
+        type = "simple"
+        value = ["GET"]
+      }
+    }
+    matches {
       match_type = "extension"
       match_value = "txt"
       match_operator = "equals"
@@ -62,6 +74,26 @@ data "akamai_cloudlets_edge_redirector_match_rule" "match_rules_er" {
     name = "r2"
     start = 0
     end = 0
+    matches {
+      match_type = "header"
+      match_value = ""
+      match_operator = "equals"
+      case_sensitive = false
+      negate = false
+      check_ips = ""
+      object_match_value {
+        name = "ALB"
+        type = "object"
+        name_case_sensitive = false
+        name_has_wildcard = false
+        options {
+          value = ["y"]
+          value_has_wildcard = true
+          value_case_sensitive = false
+          value_escaped = false
+        }
+      }
+    }
     use_relative_url = "copy_scheme_hostname"
     status_code = 301
     redirect_url = "/ddd"
