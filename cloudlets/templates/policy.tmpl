@@ -33,4 +33,4 @@ resource "akamai_cloudlets_policy" "policy" {
 {{template "match-rules-alb.tmpl" .}}
 {{end -}}
 
-{{- range .PolicyActivations}}{{template "policy-activation.tmpl" .}}{{end -}}
+{{template "policy-activation.tmpl" .PolicyActivations}}

@@ -27,7 +27,7 @@ type (
 		GroupID                 int64
 		MatchRuleFormat         cloudlets.MatchRuleFormat
 		MatchRules              cloudlets.MatchRules
-		PolicyActivations       []TFPolicyActivationData
+		PolicyActivations       map[string]TFPolicyActivationData
 		LoadBalancers           []cloudlets.LoadBalancerVersion
 		LoadBalancerActivations []cloudlets.LoadBalancerActivation
 	}
@@ -35,7 +35,6 @@ type (
 	// TFPolicyActivationData represents data used in policy activation resource templates
 	TFPolicyActivationData struct {
 		PolicyID   int64
-		Network    string
 		Version    int64
 		Properties []string
 	}
@@ -147,11 +146,12 @@ func createPolicy(ctx context.Context, policyName string, client cloudlets.Cloud
 	tfPolicyData.MatchRuleFormat = policyVersion.MatchRuleFormat
 	tfPolicyData.MatchRules = policyVersion.MatchRules
 
+	tfPolicyData.PolicyActivations = make(map[string]TFPolicyActivationData)
 	if activationStaging := getActiveVersionAndProperties(policy, cloudlets.PolicyActivationNetworkStaging); activationStaging != nil {
-		tfPolicyData.PolicyActivations = append(tfPolicyData.PolicyActivations, *activationStaging)
+		tfPolicyData.PolicyActivations["staging"] = *activationStaging
 	}
 	if activationProd := getActiveVersionAndProperties(policy, cloudlets.PolicyActivationNetworkProduction); activationProd != nil {
-		tfPolicyData.PolicyActivations = append(tfPolicyData.PolicyActivations, *activationProd)
+		tfPolicyData.PolicyActivations["prod"] = *activationProd
 	}
 
 	if tfPolicyData.CloudletCode == "ALB" {
@@ -351,7 +351,6 @@ func getActiveVersionAndProperties(policy *cloudlets.Policy, network cloudlets.P
 	}
 	return &TFPolicyActivationData{
 		PolicyID:   policy.PolicyID,
-		Network:    string(network),
 		Version:    version,
 		Properties: associatedProperties,
 	}

@@ -103,17 +103,9 @@ data "akamai_cloudlets_edge_redirector_match_rule" "match_rules_er" {
   }
 }
 
-resource "akamai_cloudlets_policy_activation" "policy_activation_staging" {
-  policy_id = 2
-  network = "staging"
-  version = 2
-  associated_properties = [ "prp_0", "prp_1" ]
-}
-
 resource "akamai_cloudlets_policy_activation" "policy_activation_prod" {
   policy_id = 2
   network = "prod"
   version = 1
   associated_properties = [ "prp_0" ]
-  depends_on = [ akamai_cloudlets_policy_activation.policy_activation_staging ]
 }

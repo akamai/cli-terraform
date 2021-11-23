@@ -136,11 +136,12 @@ func TestCreatePolicy(t *testing.T) {
 				}).Return(activations, nil).Twice()
 
 				p.On("ProcessTemplates", TFPolicyData{
-					Name:            "test_policy",
-					CloudletCode:    "ALB",
-					Description:     "version 2 description",
-					GroupID:         234,
-					MatchRuleFormat: "1.0",
+					Name:              "test_policy",
+					CloudletCode:      "ALB",
+					Description:       "version 2 description",
+					GroupID:           234,
+					PolicyActivations: map[string]TFPolicyActivationData{},
+					MatchRuleFormat:   "1.0",
 					MatchRules: cloudlets.MatchRules{
 						&cloudlets.MatchRuleALB{
 							Name:  "some rule",
@@ -251,16 +252,14 @@ func TestCreatePolicy(t *testing.T) {
 							ID:    1234,
 						},
 					},
-					PolicyActivations: []TFPolicyActivationData{
-						{
+					PolicyActivations: map[string]TFPolicyActivationData{
+						"staging": {
 							PolicyID:   2,
-							Network:    "staging",
 							Version:    2,
 							Properties: []string{"test_prp_1", "test_prp_2"},
 						},
-						{
+						"prod": {
 							PolicyID:   2,
-							Network:    "prod",
 							Version:    1,
 							Properties: []string{"test_prp_1"},
 						},
@@ -318,11 +317,12 @@ func TestCreatePolicy(t *testing.T) {
 					MatchRuleFormat: "1.0",
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
-					Name:            "test_policy",
-					CloudletCode:    "ER",
-					Description:     "version 2 description",
-					GroupID:         234,
-					MatchRuleFormat: "1.0",
+					Name:              "test_policy",
+					CloudletCode:      "ER",
+					Description:       "version 2 description",
+					GroupID:           234,
+					PolicyActivations: map[string]TFPolicyActivationData{},
+					MatchRuleFormat:   "1.0",
 					MatchRules: cloudlets.MatchRules{
 						&cloudlets.MatchRuleER{
 							Name:  "some rule",
@@ -488,11 +488,12 @@ func TestCreatePolicy(t *testing.T) {
 					MatchRuleFormat: "1.0",
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
-					Name:            "test_policy",
-					CloudletCode:    "ER",
-					Description:     "version 2 description",
-					GroupID:         234,
-					MatchRuleFormat: "1.0",
+					Name:              "test_policy",
+					CloudletCode:      "ER",
+					Description:       "version 2 description",
+					GroupID:           234,
+					PolicyActivations: map[string]TFPolicyActivationData{},
+					MatchRuleFormat:   "1.0",
 					MatchRules: cloudlets.MatchRules{
 						&cloudlets.MatchRuleER{
 							Name:  "some rule",
@@ -538,16 +539,14 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
-				PolicyActivations: []TFPolicyActivationData{
-					{
+				PolicyActivations: map[string]TFPolicyActivationData{
+					"staging": {
 						PolicyID:   2,
-						Network:    "staging",
 						Version:    2,
 						Properties: []string{"prp_0", "prp_1"},
 					},
-					{
+					"prod": {
 						PolicyID:   2,
-						Network:    "prod",
 						Version:    1,
 						Properties: []string{"prp_0"},
 					},
@@ -619,6 +618,89 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 			},
 			dir:          "with_activations_and_match_rules",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+		},
+		"policy with ER match rules and single activation": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				CloudletCode:    "ER",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				PolicyActivations: map[string]TFPolicyActivationData{
+					"prod": {
+						PolicyID:   2,
+						Version:    1,
+						Properties: []string{"prp_0"},
+					},
+				},
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleER{
+						Name:  "r1",
+						Start: 1,
+						End:   2,
+						Matches: []cloudlets.MatchCriteriaER{
+							{
+								MatchType:     "cookie",
+								MatchValue:    "cookie=cookievalue",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								ObjectMatchValue: cloudlets.ObjectMatchValueSimple{
+									Type:  "simple",
+									Value: []string{"GET"},
+								},
+							},
+							{
+								MatchType:     "extension",
+								MatchValue:    "txt",
+								MatchOperator: "equals",
+							},
+							{
+								MatchType:     "cookie",
+								MatchValue:    "cookie=cookievalue",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+							},
+							{
+								MatchType:     "hostname",
+								MatchValue:    "3333.dom",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								Negate:        true,
+							},
+						},
+						UseRelativeURL:           "copy_scheme_hostname",
+						StatusCode:               307,
+						RedirectURL:              "/abc/sss",
+						MatchURL:                 "test.url",
+						UseIncomingSchemeAndHost: true,
+					},
+					cloudlets.MatchRuleER{
+						Name:                     "r2",
+						UseRelativeURL:           "copy_scheme_hostname",
+						StatusCode:               301,
+						RedirectURL:              "/ddd",
+						MatchURL:                 "abc.com",
+						UseIncomingSchemeAndHost: true,
+						Matches: []cloudlets.MatchCriteriaER{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
+									Type: "object",
+									Name: "ALB",
+									Options: &cloudlets.Options{
+										Value:            []string{"y"},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
+					},
+				},
+			},
+			dir:          "with_single_activation",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
 		"policy with match rules": {
