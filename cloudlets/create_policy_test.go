@@ -754,6 +754,113 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "no_activations_with_match_rules",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
+		"policy with match rules and invalid escape er": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				CloudletCode:    "ER",
+				Description:     `Testing\ exported policy`,
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleER{
+						Name:                     `\r2`,
+						UseRelativeURL:           "copy_scheme_hostname",
+						StatusCode:               301,
+						RedirectURL:              `/\ddd`,
+						MatchURL:                 `abc.\com`,
+						UseIncomingSchemeAndHost: true,
+						Matches: []cloudlets.MatchCriteriaER{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								MatchValue: `value\`,
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
+									Type: "object",
+									Name: `ER\`,
+									Options: &cloudlets.Options{
+										Value:            []string{`\y`},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
+					},
+				},
+			},
+			dir:          "no_activations_with_escaped_strings_er",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+		},
+		"policy with match rules and invalid escape alb": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				CloudletCode:    "ALB",
+				Description:     `Testing\ exported policy`,
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleALB{
+						Name:  `\r2`,
+						Matches: []cloudlets.MatchCriteriaALB{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								MatchValue:    `value\`,
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
+									Type: "object",
+									Name: `ALB\`,
+									Options: &cloudlets.Options{
+										Value:            []string{`\y`},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
+						MatchURL:        `abc.\com`,
+						MatchesAlways:   false,
+						ForwardSettings: cloudlets.ForwardSettings{},
+						Disabled:        false,
+					},
+				},
+				LoadBalancers: []cloudlets.LoadBalancerVersion{
+					{
+						OriginID:      "test_origin",
+						Description:   `test\ description`,
+						BalancingType: cloudlets.BalancingTypeWeighted,
+						DataCenters: []cloudlets.DataCenter{
+							{
+								City:            "Boston",
+								CloudService:    true,
+								Continent:       "NA",
+								Country:         "US",
+								Hostname:        "test-hostname",
+								Latitude:        102.78108,
+								LivenessHosts:   []string{"tf1.test", "tf2.test"},
+								Longitude:       -116.07064,
+								OriginID:        "test_origin",
+								Percent:         10,
+								StateOrProvince: stringPtr("MA"),
+							},
+						},
+						LivenessSettings: &cloudlets.LivenessSettings{
+							HostHeader:        "header",
+							AdditionalHeaders: map[string]string{"abc": "123"},
+							Interval:          10,
+							Path:              `/\status`,
+							Port:              1234,
+							Protocol:          "HTTP",
+							RequestString:     `test_\request_string`,
+							ResponseString:    `test_\response_string`,
+							Timeout:           60,
+						},
+						Version: 2,
+					},
+				},
+			},
+			dir:          "no_activations_with_escaped_strings_alb",
+			filesToCheck: []string{"policy.tf", "load-balancer.tf", "variables.tf", "import.sh"},
+		},
 		"policy without match rules": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",

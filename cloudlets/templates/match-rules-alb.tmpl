@@ -2,13 +2,13 @@
 data "akamai_cloudlets_application_load_balancer_match_rule" "match_rules_alb" {
 {{- range .MatchRules}}
   match_rules {
-    name = "{{.Name}}"
+    name = "{{escape .Name}}"
     start = {{.Start}}
     end = {{.End}}
     {{- range .Matches}}
     matches {
       match_type = "{{.MatchType}}"
-      match_value = "{{.MatchValue}}"
+      match_value = "{{escape .MatchValue}}"
       match_operator = "{{.MatchOperator}}"
       case_sensitive = {{.CaseSensitive}}
       negate = {{.Negate}}
@@ -24,13 +24,13 @@ data "akamai_cloudlets_application_load_balancer_match_rule" "match_rules_alb" {
         value = [{{range $i, $v := .Value}}{{if $i}}, {{end}}{{$v}}{{end}}]
       {{- end}}
       {{- if (eq .Type "object")}}
-        name = "{{.Name}}"
+        name = "{{escape .Name}}"
         type = "{{.Type}}"
         name_case_sensitive = {{.NameCaseSensitive}}
         name_has_wildcard = {{.NameHasWildcard}}
         {{- with .Options}}
         options {
-          value = [{{range $i, $v := .Value}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+          value = [{{range $i, $v := .Value}}{{if $i}}, {{end}}"{{escape $v}}"{{end}}]
           value_has_wildcard = {{.ValueHasWildcard}}
           value_case_sensitive = {{.ValueCaseSensitive}}
           value_escaped = {{.ValueEscaped}}
@@ -41,7 +41,7 @@ data "akamai_cloudlets_application_load_balancer_match_rule" "match_rules_alb" {
     {{- end}}
     }
     {{- end}}
-    match_url = "{{.MatchURL}}"
+    match_url = "{{escape .MatchURL}}"
     matches_always = {{.MatchesAlways}}
     {{- with .ForwardSettings}}
     forward_settings {

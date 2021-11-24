@@ -2,7 +2,7 @@
 {{- range .LoadBalancers -}}
 resource "akamai_cloudlets_application_load_balancer" "load_balancer_{{.OriginID}}" {
   origin_id = "{{.OriginID}}"
-  description = "{{.Description}}"
+  description = "{{escape .Description}}"
   balancing_type = "{{.BalancingType}}"
   {{- range .DataCenters}}
 
@@ -26,15 +26,15 @@ resource "akamai_cloudlets_application_load_balancer" "load_balancer_{{.OriginID
   liveness_settings {
     port = {{.Port}}
     protocol = "{{.Protocol}}"
-    path = "{{.Path}}"
+    path = "{{escape .Path}}"
     host_header = "{{.HostHeader}}"
     additional_headers = {
       {{range $k, $v := .AdditionalHeaders}}{{$k}} = "{{$v}}"{{end}}
     }
     interval = {{.Interval}}
     peer_certificate_verification = {{.PeerCertificateVerification}}
-    request_string = "{{.RequestString}}"
-    response_string = "{{.ResponseString}}"
+    request_string = "{{escape .RequestString}}"
+    response_string = "{{escape .ResponseString}}"
     status_3xx_failure = {{.Status3xxFailure}}
     status_4xx_failure = {{.Status4xxFailure}}
     status_5xx_failure = {{.Status5xxFailure}}

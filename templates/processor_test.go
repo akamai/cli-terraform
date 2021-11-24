@@ -113,3 +113,46 @@ func TestProcessTemplates(t *testing.T) {
 		})
 	}
 }
+
+func TestEscapeQuotedStringLit(t *testing.T) {
+	tests := map[string]struct{
+		data   string
+		expect string
+	}{
+		"string":{
+			data:   "foo",
+			expect: "foo",
+		},
+		"string with quotes":{
+			data:   `"foo"`,
+			expect: `\"foo\"`,
+		},
+		"new line character":{
+			data:   "hello\nworld\n",
+			expect: `hello\nworld\n`,
+		},
+		"new line and carriage return":{
+			data:   "hello\r\nworld\r\n",
+			expect: `hello\r\nworld\r\n`,
+		},
+		"backslash":{
+			data:   `what\what`,
+			expect: `what\\what`,
+		},
+		"unicode char":{
+			data:   "𝄞",
+			expect: "𝄞",
+		},
+		"non backslash escape sequence":{
+			data:   "%{",
+			expect: "%%{",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := escapeQuotedStringLit(test.data)
+			assert.Equal(t, got, test.expect)
+		})
+	}
+}

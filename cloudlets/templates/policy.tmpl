@@ -16,7 +16,7 @@ provider "akamai" {
 resource "akamai_cloudlets_policy" "policy" {
   name = "{{.Name}}"
   cloudlet_code = "{{.CloudletCode}}"
-  description = "{{.Description}}"
+  description = "{{escape .Description}}"
   group_id = "{{.GroupID}}"
   match_rule_format = "{{.MatchRuleFormat}}"
 {{- if and (.MatchRules) (eq .CloudletCode "ER")}}

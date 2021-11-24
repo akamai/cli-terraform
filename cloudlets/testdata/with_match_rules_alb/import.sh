@@ -1,3 +1,3 @@
 terraform init
-terraform import akamai_cloudlets_application_load_balancer.test_origin test_origin
+terraform import akamai_cloudlets_application_load_balancer.load_balancer_test_origin test_origin
 terraform import akamai_cloudlets_policy.policy test_policy_export
