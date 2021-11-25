@@ -1,4 +1,4 @@
-resource "akamai_cloudlets_application_load_balancer" "test_origin" {
+resource "akamai_cloudlets_application_load_balancer" "load_balancer_test_origin" {
   origin_id = "test_origin"
   description = "test description"
   balancing_type = "WEIGHTED"
@@ -37,13 +37,13 @@ resource "akamai_cloudlets_application_load_balancer" "test_origin" {
   }
 }
 
-resource "akamai_cloudlets_application_load_balancer_activation" "test_origin_PRODUCTION" {
+resource "akamai_cloudlets_application_load_balancer_activation" "load_balancer_activation_test_origin_PRODUCTION" {
   origin_id = "test_origin"
   network = "PRODUCTION"
   version = 2
 }
 
-resource "akamai_cloudlets_application_load_balancer_activation" "test_origin_STAGING" {
+resource "akamai_cloudlets_application_load_balancer_activation" "load_balancer_activation_test_origin_STAGING" {
   origin_id = "test_origin"
   network = "STAGING"
   version = 2

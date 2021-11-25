@@ -1,4 +1,4 @@
-resource "akamai_cloudlets_application_load_balancer" "test_origin" {
+resource "akamai_cloudlets_application_load_balancer" "load_balancer_test_origin" {
   origin_id = "test_origin"
   description = "test description"
   balancing_type = "WEIGHTED"
