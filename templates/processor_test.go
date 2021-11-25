@@ -52,8 +52,8 @@ func TestProcessTemplates(t *testing.T) {
 		"do not save empty file": {
 			templateDir: "./testdata",
 			templateTargets: map[string]string{
-				"1.tmpl": "./testdata/res/1.txt",
-				"2.tmpl": "./testdata/res/not_existing.txt",
+				"1.tmpl":     "./testdata/res/1.txt",
+				"empty.tmpl": "./testdata/res/not_existing.txt",
 			},
 			data: TestData{
 				A: "Hello",
