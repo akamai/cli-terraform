@@ -42,7 +42,6 @@ data "akamai_cloudlets_edge_redirector_match_rule" "match_rules_er" {
     redirect_url = "{{escape .RedirectURL}}"
     match_url = "{{escape .MatchURL}}"
     use_incoming_query_string = {{.UseIncomingQueryString}}
-    use_incoming_scheme_and_host = {{.UseIncomingSchemeAndHost}}
   }
 {{end -}}
 }

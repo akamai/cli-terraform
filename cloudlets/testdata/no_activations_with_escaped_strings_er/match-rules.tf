@@ -28,6 +28,5 @@ data "akamai_cloudlets_edge_redirector_match_rule" "match_rules_er" {
     redirect_url = "/\\ddd"
     match_url = "abc.\\com"
     use_incoming_query_string = false
-    use_incoming_scheme_and_host = true
   }
 }
