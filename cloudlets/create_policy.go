@@ -90,6 +90,7 @@ func CmdCreatePolicy(c *cli.Context) error {
 	}
 
 	policyPath := filepath.Join(tools.TFWorkPath, "policy.tf")
+	matchRulesPath := filepath.Join(tools.TFWorkPath, "match-rules.tf")
 	loadBalancerPath := filepath.Join(tools.TFWorkPath, "load-balancer.tf")
 	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
 	importPath := filepath.Join(tools.TFWorkPath, "import.sh")
@@ -100,6 +101,7 @@ func CmdCreatePolicy(c *cli.Context) error {
 	}
 	templateToFile := map[string]string{
 		"policy.tmpl":        policyPath,
+		"match-rules.tmpl":   matchRulesPath,
 		"load-balancer.tmpl": loadBalancerPath,
 		"variables.tmpl":     variablesPath,
 		"imports.tmpl":       importPath,

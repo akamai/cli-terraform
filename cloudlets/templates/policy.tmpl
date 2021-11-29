@@ -26,11 +26,4 @@ resource "akamai_cloudlets_policy" "policy" {
   match_rules = data.akamai_cloudlets_application_load_balancer_match_rule.match_rules_alb.json
 {{- end}}
 }
-{{if and (.MatchRules) (eq .CloudletCode "ER")}}
-{{template "match-rules-er.tmpl" .}}
-{{end -}}
-{{if and (.MatchRules) (eq .CloudletCode "ALB")}}
-{{template "match-rules-alb.tmpl" .}}
-{{end -}}
-
 {{template "policy-activation.tmpl" .PolicyActivations}}

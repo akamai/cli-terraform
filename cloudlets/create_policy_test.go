@@ -618,7 +618,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 			},
 			dir:          "with_activations_and_match_rules",
-			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
 		},
 		"policy with ER match rules and single activation": {
 			givenData: TFPolicyData{
@@ -701,7 +701,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 			},
 			dir:          "with_single_activation",
-			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
 		},
 		"policy with match rules": {
 			givenData: TFPolicyData{
@@ -752,7 +752,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 			},
 			dir:          "no_activations_with_match_rules",
-			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
 		},
 		"policy with match rules and invalid escape er": {
 			givenData: TFPolicyData{
@@ -977,7 +977,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 			},
 			dir:          "with_match_rules_alb",
-			filesToCheck: []string{"policy.tf", "load-balancer.tf", "variables.tf", "import.sh"},
+			filesToCheck: []string{"policy.tf", "match-rules.tf", "load-balancer.tf", "variables.tf", "import.sh"},
 		},
 		"policy with match rules alb and activations": {
 			givenData: TFPolicyData{
@@ -1100,7 +1100,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 			},
 			dir:          "with_activations_and_match_rules_alb",
-			filesToCheck: []string{"policy.tf", "load-balancer.tf", "variables.tf", "import.sh"},
+			filesToCheck: []string{"policy.tf", "match-rules.tf", "load-balancer.tf", "variables.tf", "import.sh"},
 		},
 		"policy without match rules alb": {
 			givenData: TFPolicyData{
@@ -1122,6 +1122,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				TemplatesFS: templateFiles,
 				TemplateTargets: map[string]string{
 					"policy.tmpl":        fmt.Sprintf("./testdata/res/%s/policy.tf", test.dir),
+					"match-rules.tmpl":   fmt.Sprintf("./testdata/res/%s/match-rules.tf", test.dir),
 					"load-balancer.tmpl": fmt.Sprintf("./testdata/res/%s/load-balancer.tf", test.dir),
 					"variables.tmpl":     fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
 					"imports.tmpl":       fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
