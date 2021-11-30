@@ -103,9 +103,9 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 	})
 
 	commands = append(commands, cli.Command{
-		Name:        "create-policy",
-		Description: "Create Terraform Policy Resource",
-		Usage:       "create-policy",
+		Name:        "create-cloudlets-policy",
+		Description: "Create Terraform Cloudlets Policy Resource",
+		Usage:       "create-cloudlets-policy",
 		ArgsUsage:   "<policy_name>",
 		Action:      cloudlets.CmdCreatePolicy,
 		Flags: []cli.Flag{

@@ -157,7 +157,7 @@ $ akamai terraform create-property
 ### Usage
 
 ```
-   akamai-terraform create-policy [policy name] [--tfworkpath path] 
+   akamai-terraform create-cloudlets-policy [policy name] [--tfworkpath path] 
 
 Flags:
    --tfworkpath path      path location for placement of created artifacts. Default: current directory
@@ -166,7 +166,7 @@ Flags:
 ### Create policy configuration.
 
 ```
-$ akamai terraform create-policy
+$ akamai terraform create-cloudlets-policy
 ```
 
 ## General Notes
