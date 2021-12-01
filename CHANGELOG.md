@@ -7,8 +7,8 @@
 * [IMPORTANT] Cloudlets
   * Support importing existing Cloudlets policy and policy versions configuration with related resource
   * Support importing existing Cloudlets application load balancer configuration with related resource
-  * Support importing existing Cloudlets match rules for application load balancer  with related data source
-  * Support importing existing Cloudlets match rules for edge redirector  with related data source
+  * Support importing existing Cloudlets match rules for application load balancer with related data source
+  * Support importing existing Cloudlets match rules for edge redirector with related data source
 
 ## Version 0.3.1
 
