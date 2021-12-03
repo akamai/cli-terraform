@@ -93,7 +93,7 @@ func TestCreatePolicy(t *testing.T) {
 							Start: 1,
 							End:   2,
 							ID:    1234,
-							ForwardSettings: cloudlets.ForwardSettings{
+							ForwardSettings: cloudlets.ForwardSettingsALB{
 								OriginID: "test_origin",
 							},
 						},
@@ -149,7 +149,7 @@ func TestCreatePolicy(t *testing.T) {
 							Start: 1,
 							End:   2,
 							ID:    1234,
-							ForwardSettings: cloudlets.ForwardSettings{
+							ForwardSettings: cloudlets.ForwardSettingsALB{
 								OriginID: "test_origin",
 							},
 						},
@@ -773,7 +773,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 							{
 								MatchOperator: "equals",
 								MatchType:     "header",
-								MatchValue: `value\`,
+								MatchValue:    `value\`,
 								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
 									Type: "object",
 									Name: `ER\`,
@@ -800,7 +800,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				MatchRuleFormat: "1.0",
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleALB{
-						Name:  `\r2`,
+						Name: `\r2`,
 						Matches: []cloudlets.MatchCriteriaALB{
 							{
 								MatchOperator: "equals",
@@ -819,7 +819,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 						MatchURL:        `abc.\com`,
 						MatchesAlways:   false,
-						ForwardSettings: cloudlets.ForwardSettings{},
+						ForwardSettings: cloudlets.ForwardSettingsALB{},
 						Disabled:        false,
 					},
 				},
@@ -913,7 +913,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 						MatchURL:      "test.url",
 						MatchesAlways: false,
-						ForwardSettings: cloudlets.ForwardSettings{
+						ForwardSettings: cloudlets.ForwardSettingsALB{
 							OriginID: "test_origin",
 						},
 						Disabled: false,
@@ -921,7 +921,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					cloudlets.MatchRuleALB{
 						Name:     "r2",
 						MatchURL: "abc.com",
-						ForwardSettings: cloudlets.ForwardSettings{
+						ForwardSettings: cloudlets.ForwardSettingsALB{
 							OriginID: "test_origin",
 						},
 						Matches: []cloudlets.MatchCriteriaALB{
@@ -1020,7 +1020,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 						MatchURL:      "test.url",
 						MatchesAlways: false,
-						ForwardSettings: cloudlets.ForwardSettings{
+						ForwardSettings: cloudlets.ForwardSettingsALB{
 							OriginID: "test_origin",
 						},
 						Disabled: false,
@@ -1028,7 +1028,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					cloudlets.MatchRuleALB{
 						Name:     "r2",
 						MatchURL: "abc.com",
-						ForwardSettings: cloudlets.ForwardSettings{
+						ForwardSettings: cloudlets.ForwardSettingsALB{
 							OriginID: "test_origin",
 						},
 						Matches: []cloudlets.MatchCriteriaALB{
