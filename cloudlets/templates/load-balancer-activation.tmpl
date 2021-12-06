@@ -1,0 +1,8 @@
+{{- /*gotype: github.com/akamai/cli-terraform/cloudlets.TFPolicyData*/ -}}
+{{- range .LoadBalancerActivations}}
+resource "akamai_cloudlets_application_load_balancer_activation" "load_balancer_activation_{{.OriginID}}_{{.Network}}" {
+  origin_id = "{{.OriginID}}"
+  network = "{{.Network}}"
+  version = {{.Version}}
+}
+{{end}}

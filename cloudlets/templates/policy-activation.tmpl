@@ -1,0 +1,20 @@
+{{- /*gotype: github.com/akamai/cli-terraform/cloudlets.TFPolicyData*/ -}}
+{{- if .staging}}
+resource "akamai_cloudlets_policy_activation" "policy_activation_staging" {
+  policy_id = {{.staging.PolicyID}}
+  network = "staging"
+  version = {{.staging.Version}}
+  associated_properties = [ {{range $i, $v := .staging.Properties}}{{if $i}}, {{end}}"{{$v}}"{{end}} ]
+}
+{{end}}
+{{- if .prod}}
+resource "akamai_cloudlets_policy_activation" "policy_activation_prod" {
+  policy_id = {{.prod.PolicyID}}
+  network = "prod"
+  version = {{.prod.Version}}
+  associated_properties = [ {{range $i, $v := .prod.Properties}}{{if $i}}, {{end}}"{{$v}}"{{end}} ]
+  {{- if .staging}}
+  depends_on = [ akamai_cloudlets_policy_activation.policy_activation_staging ]
+  {{- end}}
+}
+{{end -}}

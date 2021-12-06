@@ -1,0 +1,29 @@
+{{- /*gotype: github.com/akamai/cli-terraform/cloudlets.TFPolicyData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source = "akamai/akamai"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
+provider "akamai" {
+  edgerc = var.edgerc_path
+  config_section = var.config_section
+}
+
+resource "akamai_cloudlets_policy" "policy" {
+  name = "{{.Name}}"
+  cloudlet_code = "{{.CloudletCode}}"
+  description = "{{escape .Description}}"
+  group_id = "{{.GroupID}}"
+  match_rule_format = "{{.MatchRuleFormat}}"
+{{- if and (.MatchRules) (eq .CloudletCode "ER")}}
+  match_rules = data.akamai_cloudlets_edge_redirector_match_rule.match_rules_er.json
+{{- end}}
+{{- if and (.MatchRules) (eq .CloudletCode "ALB")}}
+  match_rules = data.akamai_cloudlets_application_load_balancer_match_rule.match_rules_alb.json
+{{- end}}
+}
+{{template "policy-activation.tmpl" .PolicyActivations}}

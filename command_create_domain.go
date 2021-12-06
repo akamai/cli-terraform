@@ -19,6 +19,7 @@ import (
 	"fmt"
 	configgtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
 	akamai "github.com/akamai/cli-common-golang"
+	"github.com/akamai/cli-terraform/tools"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 	"io"
@@ -52,7 +53,6 @@ type importListStruct struct {
 	Asmaps      map[string][]int
 }
 
-var tfWorkPath = "./"
 var createImportList = false
 var createConfig = false
 
@@ -120,9 +120,9 @@ func cmdCreateDomain(c *cli.Context) error {
 
 	domainName = c.Args().Get(0)
 	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+		tools.TFWorkPath = c.String("tfworkpath")
 	}
-	tfWorkPath = filepath.FromSlash(tfWorkPath)
+	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
 	if c.IsSet("resources") {
 		createImportList = true
 	}
@@ -197,7 +197,7 @@ func cmdCreateDomain(c *cli.Context) error {
 		akamai.StopSpinnerOk()
 		akamai.StartSpinner("Creating Resources list file ", "")
 		// pathname and exists?
-		if stat, err := os.Stat(tfWorkPath); err == nil && stat.IsDir() {
+		if stat, err := os.Stat(tools.TFWorkPath); err == nil && stat.IsDir() {
 			importListFilename := createImportListFilename(resourceDomainName)
 			if _, err := os.Stat(importListFilename); err == nil {
 				akamai.StopSpinnerFail()
@@ -277,7 +277,7 @@ func cmdCreateDomain(c *cli.Context) error {
 		domainTFfileHandle.Sync()
 
 		// Need create gtmvars.tf dependency
-		gtmvarsFilename := filepath.Join(tfWorkPath, "gtmvars.tf")
+		gtmvarsFilename := filepath.Join(tools.TFWorkPath, "gtmvars.tf")
 		gtmvarsHandle, err := os.Create(gtmvarsFilename)
 		if err != nil {
 			akamai.StopSpinnerFail()
@@ -292,7 +292,7 @@ func cmdCreateDomain(c *cli.Context) error {
 		gtmvarsHandle.Sync()
 		akamai.StopSpinnerOk()
 		akamai.StartSpinner("Creating domain import script file ", "")
-		importScriptFilename := filepath.Join(tfWorkPath, resourceDomainName+"_resource_import.script")
+		importScriptFilename := filepath.Join(tools.TFWorkPath, resourceDomainName+"_resource_import.script")
 		if _, err := os.Stat(importScriptFilename); err == nil {
 			// File exists. Bail
 			akamai.StopSpinnerOk()
@@ -349,14 +349,7 @@ func retrieveImportList(rscName string) (*importListStruct, error) {
 // Utility method to create full import list file path
 func createImportListFilename(resourceName string) string {
 
-	return filepath.Join(tfWorkPath, resourceName+"_resources.json")
-
-}
-
-// Utility method to create full tf file path
-func createTFFilename(resourceName string) string {
-
-	return filepath.Join(tfWorkPath, resourceName+".tf")
+	return filepath.Join(tools.TFWorkPath, resourceName+"_resources.json")
 
 }
 
@@ -458,7 +451,7 @@ func buildImportScript(importList *importListStruct, resourceDomainName string) 
 func reconcileResourceTargets(importList *importListStruct, domainName string) (*os.File, string, *importListStruct, error) {
 
 	var tfScratchLen int64
-	tfFilename := createTFFilename(domainName)
+	tfFilename := tools.CreateTFFilename(domainName)
 	if tfInfo, err := os.Stat(tfFilename); err != nil && os.IsExist(err) {
 		tfScratchLen = tfInfo.Size()
 	}
