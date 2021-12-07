@@ -1113,6 +1113,81 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "no_match_rules_alb",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
+		"policy without match rules fr": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				CloudletCode:    "FR",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+			},
+			dir:          "no_match_rules_fr",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+		},
+		"policy with match rules fr": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				CloudletCode:    "FR",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleFR{
+						Name: "r1",
+						Matches: []cloudlets.MatchCriteriaFR{
+							{
+								MatchType:     "cookie",
+								MatchValue:    "cookie=cookievalue",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								ObjectMatchValue: cloudlets.ObjectMatchValueSimple{
+									Type:  "simple",
+									Value: []string{"GET"},
+								},
+							},
+							{
+								MatchType:     "hostname",
+								MatchValue:    "3333.dom",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								Negate:        true,
+							},
+						},
+						MatchURL:      "test.url",
+						ForwardSettings: cloudlets.ForwardSettingsFR{
+							PathAndQS:              "/test",
+							UseIncomingQueryString: false,
+							OriginID:               "test_origin",
+						},
+						Disabled: false,
+					},
+					cloudlets.MatchRuleFR{
+						Name:     "r2",
+						MatchURL: "abc.com",
+						ForwardSettings: cloudlets.ForwardSettingsFR{
+							OriginID: "test_origin",
+						},
+						Matches: []cloudlets.MatchCriteriaFR{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
+									Type: "object",
+									Name: "test_omv",
+									Options: &cloudlets.Options{
+										Value:            []string{"y"},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
+					},
+				},
+			},
+			dir:          "with_match_rules_fr",
+			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
+		},
 	}
 
 	for name, test := range tests {
