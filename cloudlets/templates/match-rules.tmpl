@@ -8,3 +8,6 @@
 {{- if and (.MatchRules) (eq .CloudletCode "FR")}}
 {{- template "match-rules-fr.tmpl" .}}
 {{end -}}
+{{- if and (.MatchRules) (eq .CloudletCode "VP")}}
+{{- template "match-rules-vp.tmpl" .}}
+{{end -}}

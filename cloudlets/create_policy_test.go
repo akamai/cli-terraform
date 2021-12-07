@@ -12,6 +12,7 @@ import (
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/cloudlets"
 	common "github.com/akamai/cli-common-golang"
 	"github.com/akamai/cli-terraform/templates"
+	"github.com/akamai/cli-terraform/tools"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -840,7 +841,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								Longitude:       -116.07064,
 								OriginID:        "test_origin",
 								Percent:         10,
-								StateOrProvince: stringPtr("MA"),
+								StateOrProvince: tools.StringPtr("MA"),
 							},
 						},
 						LivenessSettings: &cloudlets.LivenessSettings{
@@ -958,7 +959,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								Longitude:       -116.07064,
 								OriginID:        "test_origin",
 								Percent:         10,
-								StateOrProvince: stringPtr("MA"),
+								StateOrProvince: tools.StringPtr("MA"),
 							},
 						},
 						LivenessSettings: &cloudlets.LivenessSettings{
@@ -1065,7 +1066,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								Longitude:       -116.07064,
 								OriginID:        "test_origin",
 								Percent:         10,
-								StateOrProvince: stringPtr("MA"),
+								StateOrProvince: tools.StringPtr("MA"),
 							},
 						},
 						LivenessSettings: &cloudlets.LivenessSettings{
@@ -1188,6 +1189,79 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "with_match_rules_fr",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
 		},
+		"policy with match rules vp": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				CloudletCode:    "VP",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleVP{
+						Name: "r1",
+						Matches: []cloudlets.MatchCriteriaVP{
+							{
+								MatchType:     "cookie",
+								MatchValue:    "cookie=cookievalue",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								ObjectMatchValue: cloudlets.ObjectMatchValueSimple{
+									Type:  "simple",
+									Value: []string{"GET"},
+								},
+							},
+							{
+								MatchType:     "hostname",
+								MatchValue:    "3333.dom",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								Negate:        true,
+							},
+						},
+						MatchURL:      "test.url",
+						Disabled: false,
+						PassThroughPercent: tools.Float64Ptr(100),
+					},
+					cloudlets.MatchRuleVP{
+						Name:     "r2",
+						MatchURL: "abc.com",
+						Matches: []cloudlets.MatchCriteriaVP{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
+									Type: "object",
+									Name: "VP",
+									Options: &cloudlets.Options{
+										Value:            []string{"y"},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
+						PassThroughPercent: tools.Float64Ptr(-1),
+					},
+					cloudlets.MatchRuleVP{
+						Name: "r3",
+						PassThroughPercent: tools.Float64Ptr(50.55),
+					},
+				},
+			},
+			dir:          "with_match_rules_vp",
+			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
+		},
+		"policy without match rules vp": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				CloudletCode:    "VP",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+			},
+			dir:          "no_match_rules_vp",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+		},
 	}
 
 	for name, test := range tests {
@@ -1214,10 +1288,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			}
 		})
 	}
-}
-
-func stringPtr(i string) *string {
-	return &i
 }
 
 func TestFindPolicy(t *testing.T) {
