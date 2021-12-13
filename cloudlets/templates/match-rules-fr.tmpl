@@ -45,6 +45,7 @@ data "akamai_cloudlets_forward_rewrite_match_rule" "match_rules_fr" {
       use_incoming_query_string = "{{.UseIncomingQueryString}}"
     }
     {{- end}}
+    disabled = {{.Disabled}}
   }
 {{end -}}
 }

@@ -917,7 +917,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						ForwardSettings: cloudlets.ForwardSettingsALB{
 							OriginID: "test_origin",
 						},
-						Disabled: false,
 					},
 					cloudlets.MatchRuleALB{
 						Name:     "r2",
@@ -940,6 +939,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								Negate: false,
 							},
 						},
+						Disabled: true,
 					},
 				},
 				LoadBalancers: []cloudlets.LoadBalancerVersion{
@@ -1047,6 +1047,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								Negate: false,
 							},
 						},
+						Disabled: true,
 					},
 				},
 				LoadBalancers: []cloudlets.LoadBalancerVersion{
@@ -1183,6 +1184,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								Negate: false,
 							},
 						},
+						Disabled: true,
 					},
 				},
 			},
@@ -1245,6 +1247,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					cloudlets.MatchRuleVP{
 						Name: "r3",
 						PassThroughPercent: tools.Float64Ptr(50.55),
+						Disabled: true,
 					},
 				},
 			},

@@ -39,6 +39,7 @@ data "akamai_cloudlets_visitor_prioritization_match_rule" "match_rules_vp" {
     {{- end}}
     match_url = "{{escape .MatchURL}}"
     pass_through_percent = {{.PassThroughPercent}}
+    disabled = {{.Disabled}}
   }
 {{end -}}
 }

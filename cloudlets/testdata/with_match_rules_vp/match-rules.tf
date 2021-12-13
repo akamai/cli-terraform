@@ -25,6 +25,7 @@ data "akamai_cloudlets_visitor_prioritization_match_rule" "match_rules_vp" {
     }
     match_url = "test.url"
     pass_through_percent = 100
+    disabled = false
   }
 
   match_rules {
@@ -53,6 +54,7 @@ data "akamai_cloudlets_visitor_prioritization_match_rule" "match_rules_vp" {
     }
     match_url = "abc.com"
     pass_through_percent = -1
+    disabled = false
   }
 
   match_rules {
@@ -61,5 +63,6 @@ data "akamai_cloudlets_visitor_prioritization_match_rule" "match_rules_vp" {
     end = 0
     match_url = ""
     pass_through_percent = 50.55
+    disabled = true
   }
 }

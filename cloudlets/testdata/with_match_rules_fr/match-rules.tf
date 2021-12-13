@@ -29,6 +29,7 @@ data "akamai_cloudlets_forward_rewrite_match_rule" "match_rules_fr" {
       path_and_qs = "/test"
       use_incoming_query_string = "false"
     }
+    disabled = false
   }
 
   match_rules {
@@ -61,5 +62,6 @@ data "akamai_cloudlets_forward_rewrite_match_rule" "match_rules_fr" {
       path_and_qs = ""
       use_incoming_query_string = "false"
     }
+    disabled = true
   }
 }
