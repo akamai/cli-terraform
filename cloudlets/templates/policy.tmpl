@@ -22,6 +22,9 @@ resource "akamai_cloudlets_policy" "policy" {
 {{- if and (.MatchRules) (eq .CloudletCode "ALB")}}
   match_rules = data.akamai_cloudlets_application_load_balancer_match_rule.match_rules_alb.json
 {{- end}}
+{{- if and (.MatchRules) (eq .CloudletCode "CD")}}
+  match_rules = data.akamai_cloudlets_phased_release_match_rule.match_rules_cd.json
+{{- end}}
 {{- if and (.MatchRules) (eq .CloudletCode "ER")}}
   match_rules = data.akamai_cloudlets_edge_redirector_match_rule.match_rules_er.json
 {{- end}}
