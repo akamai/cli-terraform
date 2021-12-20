@@ -2,6 +2,9 @@
 {{- if and (.MatchRules) (eq .CloudletCode "ALB")}}
 {{- template "match-rules-alb.tmpl" .}}
 {{end -}}
+{{- if and (.MatchRules) (eq .CloudletCode "AP")}}
+{{- template "match-rules-ap.tmpl" .}}
+{{end -}}
 {{- if and (.MatchRules) (eq .CloudletCode "CD")}}
 {{- template "match-rules-cd.tmpl" .}}
 {{end -}}

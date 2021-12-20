@@ -444,6 +444,78 @@ func TestCreatePolicy(t *testing.T) {
 				}).Return(nil).Once()
 			},
 		},
+		"fetch latest version of policy and produce output without activations AP": {
+			init: func(c *mockCloudlets, p *mockProcessor) {
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
+					{
+						PolicyID:     1,
+						GroupID:      123,
+						Name:         "some policy",
+						CloudletID:   0,
+						CloudletCode: "AP",
+					},
+					{
+						PolicyID:     2,
+						GroupID:      234,
+						Name:         "test_policy",
+						Description:  "test_policy description",
+						CloudletID:   0,
+						CloudletCode: "AP",
+					},
+				}, nil).Once()
+				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2, PageSize: &pageSize, Offset: 0}).Return([]cloudlets.PolicyVersion{
+					{
+						PolicyID: 2,
+						Version:  1,
+					},
+					{
+						PolicyID:        2,
+						Version:         2,
+						Description:     "version 2 description",
+						MatchRuleFormat: "1.0",
+					},
+				}, nil).Once()
+				c.On("GetPolicyVersion", mock.Anything, cloudlets.GetPolicyVersionRequest{
+					PolicyID: 2,
+					Version:  2,
+				}).Return(&cloudlets.PolicyVersion{
+					PolicyID:    2,
+					Version:     2,
+					Description: "version 2 description",
+					MatchRules: cloudlets.MatchRules{
+						&cloudlets.MatchRuleAP{
+							Name:               "some rule",
+							Type:               "AP",
+							Start:              1,
+							End:                2,
+							ID:                 1234,
+							PassThroughPercent: tools.Float64Ptr(100),
+							Disabled:           true,
+						},
+					},
+					MatchRuleFormat: "1.0",
+				}, nil).Once()
+				p.On("ProcessTemplates", TFPolicyData{
+					Name:              "test_policy",
+					CloudletCode:      "AP",
+					Description:       "version 2 description",
+					GroupID:           234,
+					PolicyActivations: map[string]TFPolicyActivationData{},
+					MatchRuleFormat:   "1.0",
+					MatchRules: cloudlets.MatchRules{
+						&cloudlets.MatchRuleAP{
+							Name:               "some rule",
+							Type:               "AP",
+							Start:              1,
+							End:                2,
+							ID:                 1234,
+							PassThroughPercent: tools.Float64Ptr(100),
+							Disabled:           true,
+						},
+					},
+				}).Return(nil).Once()
+			},
+		},
 		"error fetching policy": {
 			init: func(c *mockCloudlets, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return(nil, fmt.Errorf("oops")).Once()
@@ -1447,6 +1519,79 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				MatchRuleFormat: "1.0",
 			},
 			dir:          "no_match_rules_vp",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+		},
+		"policy with match rules ap": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				CloudletCode:    "AP",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleAP{
+						Name: "r1",
+						Matches: []cloudlets.MatchCriteriaAP{
+							{
+								MatchType:     "method",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								ObjectMatchValue: cloudlets.ObjectMatchValueSimple{
+									Type:  "simple",
+									Value: []string{"GET"},
+								},
+							},
+							{
+								MatchType:     "hostname",
+								MatchValue:    "3333.dom",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								Negate:        true,
+							},
+						},
+						MatchURL:           "test.url",
+						Disabled:           false,
+						PassThroughPercent: tools.Float64Ptr(100),
+					},
+					cloudlets.MatchRuleAP{
+						Name:     "r2",
+						MatchURL: "abc.com",
+						Matches: []cloudlets.MatchCriteriaAP{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
+									Type: "object",
+									Name: "AP",
+									Options: &cloudlets.Options{
+										Value:            []string{"y"},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
+						PassThroughPercent: tools.Float64Ptr(-1),
+					},
+					cloudlets.MatchRuleAP{
+						Name:               "r3",
+						PassThroughPercent: tools.Float64Ptr(50.55),
+						Disabled:           true,
+					},
+				},
+			},
+			dir:          "with_match_rules_ap",
+			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
+		},
+		"policy without match rules ap": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				CloudletCode:    "AP",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+			},
+			dir:          "no_match_rules_ap",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
 	}
