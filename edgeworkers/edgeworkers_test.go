@@ -316,6 +316,24 @@ func (m *mockEdgeworkers) ListProperties(ctx context.Context, req edgeworkers.Li
 	return args.Get(0).(*edgeworkers.ListPropertiesResponse), args.Error(1)
 }
 
+// Reports
+
+func (m *mockEdgeworkers) GetReport(ctx context.Context, req edgeworkers.GetReportRequest) (*edgeworkers.GetReportResponse, error) {
+	args := m.Called(ctx, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*edgeworkers.GetReportResponse), args.Error(1)
+}
+
+func (m *mockEdgeworkers) ListReports(ctx context.Context) (*edgeworkers.ListReportsResponse, error) {
+	args := m.Called(ctx)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*edgeworkers.ListReportsResponse), args.Error(1)
+}
+
 // ResourceTiers
 
 func (m *mockEdgeworkers) ListResourceTiers(ctx context.Context, req edgeworkers.ListResourceTiersRequest) (*edgeworkers.ListResourceTiersResponse, error) {
