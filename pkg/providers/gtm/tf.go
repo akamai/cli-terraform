@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package gtm
 
 import (
 	"fmt"
-	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
 	"reflect"
 	"regexp"
 	"strconv"
 	"unicode"
+
+	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
 )
 
 // Keys that can be ignored, e.g. lists, read-only, don't want

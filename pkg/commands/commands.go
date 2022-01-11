@@ -12,23 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package commands
 
 import (
 	akamai "github.com/akamai/cli-common-golang"
-	"github.com/akamai/cli-terraform/cloudlets"
+	cloudlets "github.com/akamai/cli-terraform/pkg/providers/cloudlets"
 	"github.com/akamai/cli-terraform/edgeworkers"
+	"github.com/akamai/cli-terraform/pkg/providers/dns"
+	"github.com/akamai/cli-terraform/pkg/providers/gtm"
+	"github.com/akamai/cli-terraform/pkg/providers/papi"
 	"github.com/urfave/cli"
 )
 
-var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
+var CommandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 	var commands []cli.Command
 
 	commands = append(commands, cli.Command{
 		Name:        "create-domain",
 		Description: "Create Terraform Domain Resources",
 		ArgsUsage:   "<domain>",
-		Action:      cmdCreateDomain,
+		Action:      gtm.CmdCreateDomain,
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "tfworkpath",
@@ -50,7 +53,7 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 		Name:        "create-zone",
 		Description: "Create Terraform Zone Resources",
 		ArgsUsage:   "<zone>",
-		Action:      cmdCreateZone,
+		Action:      dns.CmdCreateZone,
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "tfworkpath",
@@ -93,7 +96,7 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 		Description: "Create Terraform Property Resource",
 		Usage:       "create-property",
 		ArgsUsage:   "<property name>",
-		Action:      cmdCreateProperty,
+		Action:      papi.CmdCreateProperty,
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "tfworkpath",

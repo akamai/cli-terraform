@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package dns
 
 import (
 	"encoding/json"
@@ -25,7 +25,7 @@ import (
 
 	configdns "github.com/akamai/AkamaiOPEN-edgegrid-golang/configdns-v2"
 	akamai "github.com/akamai/cli-common-golang"
-	"github.com/akamai/cli-terraform/tools"
+	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
@@ -44,8 +44,9 @@ type zoneImportListStruct struct {
 }
 
 //var tfWorkPath = "./"
-//var createImportList = false
-//var createConfig = false
+var createImportList = false
+var createConfig = false
+
 var recordNames []string
 var importScript = false
 
@@ -91,7 +92,7 @@ variable "groupid" {
 `
 
 // command function create-zone
-func cmdCreateZone(c *cli.Context) error {
+func CmdCreateZone(c *cli.Context) error {
 
 	config, err := akamai.GetEdgegridConfig(c)
 	if err != nil {

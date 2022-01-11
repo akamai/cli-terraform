@@ -12,22 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package gtm
 
 import (
 	"encoding/json"
 	"fmt"
-	configgtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
-	akamai "github.com/akamai/cli-common-golang"
-	"github.com/akamai/cli-terraform/tools"
-	"github.com/fatih/color"
-	"github.com/urfave/cli"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	configgtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
+	akamai "github.com/akamai/cli-common-golang"
+	"github.com/akamai/cli-terraform/pkg/tools"
+	"github.com/fatih/color"
+	"github.com/urfave/cli"
 )
 
 var defaultDCs = []int{5400, 5401, 5402}
@@ -104,7 +105,7 @@ func getNullValuesList(objType string) map[string]configgtm.NullPerObjectAttribu
 }
 
 // command function create-domain
-func cmdCreateDomain(c *cli.Context) error {
+func CmdCreateDomain(c *cli.Context) error {
 
 	config, err := akamai.GetEdgegridConfig(c)
 	if err != nil {

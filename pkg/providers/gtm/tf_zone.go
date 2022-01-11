@@ -12,18 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package gtm
 
 import (
 	"fmt"
-	"os"
-
-	"github.com/akamai/cli-terraform/cli"
 )
 
-func main() {
-	if err := cli.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
-	}
+// header, zone
+var tfHeaderContent = fmt.Sprint(`terraform {
+  required_version = ">= 0.13"
+  required_providers {
+    akamai = {
+      source = "akamai/akamai"
+      version = "~> 1.6.1"
+    }
+  }
 }
+
+`)

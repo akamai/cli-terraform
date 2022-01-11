@@ -14,8 +14,8 @@ import (
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/cloudlets"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
 	common "github.com/akamai/cli-common-golang"
-	"github.com/akamai/cli-terraform/templates"
-	"github.com/akamai/cli-terraform/tools"
+	"github.com/akamai/cli-terraform/pkg/templates"
+	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )

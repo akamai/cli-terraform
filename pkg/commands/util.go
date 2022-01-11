@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package commands
 
 import (
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
 
-func setHelpTemplates() {
+func SetHelpTemplates() {
 	cli.AppHelpTemplate =
 		color.YellowString("Usage: \n") +
 			`{{if or (or (eq .HelpName "akamai-terraform create-domain") (eq .HelpName "akamai terraform create-domain")) (or (eq .HelpName "akamai-terraform create-zone") (eq .HelpName "akamai terraform create-zone")) (or (eq .HelpName "akamai-terraform create-property") (eq .HelpName "akamai terraform create-property"))}}` +

@@ -36,14 +36,13 @@ var (
 	ErrTemplateExecution = errors.New("executing template")
 )
 
-
 // ProcessTemplates parses templates located in fs.FS and executes them using the provided data
 // result of each template execution is persisted in location provided in FSTemplateProcessor.TemplateTargets
 func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
 	funcs := template.FuncMap{
 		"escape": escapeQuotedStringLit,
 	}
-	tmpl := template.Must(template.New("templates").Funcs(funcs).Funcs(t.AdditionalFuncs).ParseFS(t.TemplatesFS,"**/*.tmpl"))
+	tmpl := template.Must(template.New("templates").Funcs(funcs).Funcs(t.AdditionalFuncs).ParseFS(t.TemplatesFS, "**/*.tmpl"))
 
 	for templateName, targetPath := range t.TemplateTargets {
 		buf := bytes.Buffer{}

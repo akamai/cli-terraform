@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package dns
 
 import (
 	"encoding/json"
@@ -20,7 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/akamai/cli-terraform/tools"
+	"github.com/akamai/cli-terraform/pkg/tools"
 )
 
 type tfStateStruct struct {

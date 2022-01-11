@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package dns
 
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/configdns-v2"
 	"github.com/shirou/gopsutil/mem"
-	"strings"
 )
 
 const (

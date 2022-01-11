@@ -12,18 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cli
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/akamai/cli-terraform/cli"
+	akamai "github.com/akamai/cli-common-golang"
+	"github.com/akamai/cli-terraform/pkg/commands"
 )
 
-func main() {
-	if err := cli.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
-	}
+var (
+	VERSION = "0.4.0"
+)
+
+func Run() error {
+	akamai.CreateApp(
+		"terraform",
+		"A CLI Plugin for Akamai Terraform Provider",
+		"Administer and Manage Supported Akamai Feature resources with Terraform",
+		VERSION,
+		"default",
+		commands.CommandLocator,
+	)
+
+	commands.SetHelpTemplates()
+	return akamai.App.Run(os.Args)
 }

@@ -13,8 +13,8 @@ import (
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/cloudlets"
 	common "github.com/akamai/cli-common-golang"
-	"github.com/akamai/cli-terraform/templates"
-	"github.com/akamai/cli-terraform/tools"
+	"github.com/akamai/cli-terraform/pkg/templates"
+	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

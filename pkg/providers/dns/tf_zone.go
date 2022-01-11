@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package dns
 
 import (
 	"fmt"
-	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/configdns-v2"
 	"reflect"
+
+	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/configdns-v2"
 )
 
 // Keys that can be ignored, e.g. lists, read-only, don't want

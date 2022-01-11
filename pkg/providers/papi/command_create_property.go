@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-package main
+package papi
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 
-	"github.com/akamai/cli-terraform/tools"
-
-	"io/ioutil"
-	"os"
-	"path/filepath"
-
-	"encoding/json"
-	"log"
-
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/papi-v1"
 	akamai "github.com/akamai/cli-common-golang"
-	"github.com/akamai/cli-terraform/hapi"
+	hapi "github.com/akamai/cli-terraform/pkg/providers/papi/hapi"
+	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
@@ -109,7 +106,7 @@ type RuleTemplate struct {
 	CustomOverride *papi.CustomOverride `json:"customOverride,omitempty"`
 }
 
-func cmdCreateProperty(c *cli.Context) error {
+func CmdCreateProperty(c *cli.Context) error {
 
 	log.SetOutput(ioutil.Discard)
 	if c.NArg() == 0 {
