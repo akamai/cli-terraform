@@ -1,11 +1,11 @@
 {
   "requirements": {
-    "go": "1.12.0"
+    "go": "1.16.0"
   },
   "commands": [
     {
       "name": "terraform",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "description": "Administer and Manage Akamai Terraform configurations",
       "bin": "https://github.com/akamai/cli-terraform/releases/download/v{{.Version}}/akamai-{{.Name}}-{{.Version}}-{{.OS}}{{.Arch}}{{.BinSuffix}}",
       "auto-complete": true
