@@ -15,6 +15,7 @@
 package cli
 
 import (
+	"context"
 	"os"
 
 	akamai "github.com/akamai/cli-common-golang"
@@ -36,5 +37,7 @@ func Run() error {
 	)
 
 	commands.SetHelpTemplates()
-	return akamai.App.Run(os.Args)
+
+	ctx := context.Background()
+	return akamai.App.RunContext(ctx, os.Args)
 }

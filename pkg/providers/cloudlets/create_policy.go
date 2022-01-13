@@ -17,7 +17,7 @@ import (
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/fatih/color"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 type (
@@ -73,9 +73,9 @@ func CmdCreatePolicy(c *cli.Context) error {
 	ctx := context.Background()
 	if c.NArg() == 0 {
 		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-			return cli.NewExitError(color.RedString("Error displaying help command"), 1)
+			return cli.Exit(color.RedString("Error displaying help command"), 1)
 		}
-		return cli.NewExitError(color.RedString("Policy name is required"), 1)
+		return cli.Exit(color.RedString("Policy name is required"), 1)
 	}
 	config, err := tools.GetEdgegridConfig(c)
 	if err != nil {
@@ -86,7 +86,7 @@ func CmdCreatePolicy(c *cli.Context) error {
 		session.WithSigner(config),
 	)
 	if err != nil {
-		return cli.NewExitError(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString(err.Error()), 1)
 	}
 	client := cloudlets.Client(sess)
 	if c.IsSet("tfworkpath") {
@@ -94,7 +94,7 @@ func CmdCreatePolicy(c *cli.Context) error {
 	}
 	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
 	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
-		return cli.NewExitError(color.RedString("Destination work path is not accessible"), 1)
+		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
 	}
 
 	policyPath := filepath.Join(tools.TFWorkPath, "policy.tf")
@@ -105,7 +105,7 @@ func CmdCreatePolicy(c *cli.Context) error {
 
 	err = tools.CheckFiles(policyPath, variablesPath, importPath)
 	if err != nil {
-		return cli.NewExitError(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString(err.Error()), 1)
 	}
 	templateToFile := map[string]string{
 		"policy.tmpl":        policyPath,
@@ -126,7 +126,7 @@ func CmdCreatePolicy(c *cli.Context) error {
 	policyName := c.Args().First()
 	section := tools.GetEdgercSection(c)
 	if err = createPolicy(ctx, policyName, section, client, processor); err != nil {
-		return cli.NewExitError(color.RedString(fmt.Sprintf("Error exporting policy HCL: %s", err)), 1)
+		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting policy HCL: %s", err)), 1)
 	}
 	return nil
 }

@@ -11,11 +11,11 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
 	github.com/shirou/gopsutil v2.20.4+incompatible
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	github.com/tj/assert v0.0.3
-	github.com/urfave/cli v1.22.0
+	github.com/urfave/cli/v2 v2.3.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
-	gopkg.in/ini.v1 v1.63.2 // indirect
 )
 
 //replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 => ../akamaiopen-edgegrid-golang
+//replace github.com/akamai/cli-common-golang => ../cli-common-golang

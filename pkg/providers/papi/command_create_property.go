@@ -31,7 +31,7 @@ import (
 	hapi "github.com/akamai/cli-terraform/pkg/providers/papi/hapi"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/fatih/color"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // EdgeHostname represent data used for single Edge host
@@ -111,7 +111,7 @@ func CmdCreateProperty(c *cli.Context) error {
 	log.SetOutput(ioutil.Discard)
 	if c.NArg() == 0 {
 		cli.ShowCommandHelp(c, c.Command.Name)
-		return cli.NewExitError(color.RedString("property name is required"), 1)
+		return cli.Exit(color.RedString("property name is required"), 1)
 	}
 
 	if c.IsSet("tfworkpath") {
@@ -128,12 +128,12 @@ func CmdCreateProperty(c *cli.Context) error {
 		filepath.Join(tools.TFWorkPath, "rules.json"),
 		filepath.Join(tools.TFWorkPath, "import.sh"))
 	if err != nil {
-		return cli.NewExitError(err, 1)
+		return cli.Exit(err, 1)
 	}
 
 	config, err := akamai.GetEdgegridConfig(c)
 	if err != nil {
-		return cli.NewExitError(err.Error(), 1)
+		return cli.Exit(err.Error(), 1)
 	}
 	config.Debug = false
 
@@ -145,7 +145,7 @@ func CmdCreateProperty(c *cli.Context) error {
 	tfData.Hostnames = make(map[string]Hostname)
 	tfData.Emails = make([]string, 0)
 
-	tfData.Section = c.GlobalString("section")
+	tfData.Section = c.String("section")
 
 	// Get Property
 	propertyName := c.Args().First()
@@ -154,7 +154,7 @@ func CmdCreateProperty(c *cli.Context) error {
 	property := findProperty(propertyName)
 	if property == nil {
 		akamai.StopSpinnerFail()
-		return cli.NewExitError(color.RedString("Property not found "), 1)
+		return cli.Exit(color.RedString("Property not found "), 1)
 	}
 
 	tfData.ContractID = property.Contract.ContractID
@@ -169,7 +169,7 @@ func CmdCreateProperty(c *cli.Context) error {
 
 	if err != nil {
 		akamai.StopSpinnerFail()
-		return cli.NewExitError(color.RedString("Property rules not found: ", err), 1)
+		return cli.Exit(color.RedString("Property rules not found: ", err), 1)
 	}
 
 	tfData.IsSecure = "false"
@@ -224,7 +224,7 @@ func CmdCreateProperty(c *cli.Context) error {
 		err = ioutil.WriteFile(rulesnamepath, jsonBody, 0644)
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Can't write property rule snippets: ", err), 1)
+			return cli.Exit(color.RedString("Can't write property rule snippets: ", err), 1)
 		}
 		ruletemplate.Children = append(ruletemplate.Children, fmt.Sprintf("#include:%s.json", name))
 	}
@@ -234,7 +234,7 @@ func CmdCreateProperty(c *cli.Context) error {
 	err = ioutil.WriteFile(templatepath, jsonBody, 0644)
 	if err != nil {
 		akamai.StopSpinnerFail()
-		return cli.NewExitError(color.RedString("Can't write property rule template: ", err), 1)
+		return cli.Exit(color.RedString("Can't write property rule template: ", err), 1)
 	}
 
 	akamai.StopSpinnerOk()
@@ -244,7 +244,7 @@ func CmdCreateProperty(c *cli.Context) error {
 	group, err := getGroup(property.GroupID)
 	if err != nil {
 		akamai.StopSpinnerFail()
-		return cli.NewExitError(color.RedString("Group not found: %s", err), 1)
+		return cli.Exit(color.RedString("Group not found: %s", err), 1)
 	}
 
 	tfData.GroupName = group.GroupName
@@ -257,7 +257,7 @@ func CmdCreateProperty(c *cli.Context) error {
 	version, err := getVersion(property)
 	if err != nil {
 		akamai.StopSpinnerFail()
-		return cli.NewExitError(color.RedString("Version not found: %s", err), 1)
+		return cli.Exit(color.RedString("Version not found: %s", err), 1)
 	}
 
 	tfData.ProductID = version.ProductID
@@ -269,7 +269,7 @@ func CmdCreateProperty(c *cli.Context) error {
 	product, err := getProduct(tfData.ProductID, property.Contract)
 	if err != nil {
 		akamai.StopSpinnerFail()
-		return cli.NewExitError(color.RedString("Product not found: %s", err), 1)
+		return cli.Exit(color.RedString("Product not found: %s", err), 1)
 	}
 
 	tfData.ProductName = product.ProductName
@@ -282,7 +282,7 @@ func CmdCreateProperty(c *cli.Context) error {
 
 	if err != nil {
 		akamai.StopSpinnerFail()
-		return cli.NewExitError(color.RedString("Hostnames not found: %s", err), 1)
+		return cli.Exit(color.RedString("Hostnames not found: %s", err), 1)
 	}
 
 	for _, hostname := range hostnames.Hostnames.Items {
@@ -298,7 +298,7 @@ func CmdCreateProperty(c *cli.Context) error {
 		edgehostname, err := hapi.GetEdgeHostnameById(ehnid)
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Edge Hostname not found: %s", err), 1)
+			return cli.Exit(color.RedString("Edge Hostname not found: %s", err), 1)
 		}
 
 		cnameTo := hostname.CnameTo
@@ -347,7 +347,7 @@ func CmdCreateProperty(c *cli.Context) error {
 	err = saveTerraformDefinition(tfData)
 	if err != nil {
 		akamai.StopSpinnerFail()
-		return cli.NewExitError(color.RedString("Couldn't save tf file: %s", err), 1)
+		return cli.Exit(color.RedString("Couldn't save tf file: %s", err), 1)
 	}
 
 	akamai.StopSpinnerOk()

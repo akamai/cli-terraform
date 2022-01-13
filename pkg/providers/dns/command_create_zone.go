@@ -27,7 +27,7 @@ import (
 	akamai "github.com/akamai/cli-common-golang"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/fatih/color"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // Terraform resource names
@@ -103,7 +103,7 @@ func CmdCreateZone(c *cli.Context) error {
 
 	if c.NArg() < 1 {
 		cli.ShowCommandHelp(c, c.Command.Name)
-		return cli.NewExitError(color.RedString("zone is required"), 1)
+		return cli.Exit(color.RedString("zone is required"), 1)
 	}
 
 	zoneName = c.Args().Get(0)
@@ -138,7 +138,7 @@ func CmdCreateZone(c *cli.Context) error {
 	if err != nil {
 		akamai.StopSpinnerFail()
 		fmt.Println("Error: " + err.Error())
-		return cli.NewExitError(color.RedString("Zone retrieval failed"), 1)
+		return cli.Exit(color.RedString("Zone retrieval failed"), 1)
 	}
 	contractid = zoneObject.ContractId // grab for use later
 	// normalize zone name for zone resource name
@@ -153,7 +153,7 @@ func CmdCreateZone(c *cli.Context) error {
 			if err != nil {
 				akamai.StopSpinnerFail()
 				fmt.Println("Error: " + err.Error())
-				return cli.NewExitError(color.RedString("Zone Name retrieval failed"), 1)
+				return cli.Exit(color.RedString("Zone Name retrieval failed"), 1)
 			}
 			recordNames = recordsetNames.Names
 		}
@@ -165,7 +165,7 @@ func CmdCreateZone(c *cli.Context) error {
 				if err != nil {
 					akamai.StopSpinnerFail()
 					fmt.Println("Error: " + err.Error())
-					return cli.NewExitError(color.RedString("Zone Name types retrieval failed"), 1)
+					return cli.Exit(color.RedString("Zone Name types retrieval failed"), 1)
 				}
 				recordsets[zname] = nameTypesResp.Types
 			}
@@ -177,7 +177,7 @@ func CmdCreateZone(c *cli.Context) error {
 			importListFilename := createImportListFilename(resourceZoneName)
 			if _, err := os.Stat(importListFilename); err == nil {
 				akamai.StopSpinnerFail()
-				return cli.NewExitError(color.RedString("Resource list file exists. Remove to continue."), 1)
+				return cli.Exit(color.RedString("Resource list file exists. Remove to continue."), 1)
 			}
 			fullZoneImportList = &zoneImportListStruct{}
 			fullZoneImportList.Zone = zoneName
@@ -185,24 +185,24 @@ func CmdCreateZone(c *cli.Context) error {
 			json, err := json.MarshalIndent(fullZoneImportList, "", "  ")
 			if err != nil {
 				akamai.StopSpinnerFail()
-				return cli.NewExitError(color.RedString("Unable to generate json formatted zone resource list"), 1)
+				return cli.Exit(color.RedString("Unable to generate json formatted zone resource list"), 1)
 			}
 			f, err := os.Create(importListFilename)
 			if err != nil {
 				akamai.StopSpinnerFail()
-				return cli.NewExitError(color.RedString("Unable to create zone resources file"), 1)
+				return cli.Exit(color.RedString("Unable to create zone resources file"), 1)
 			}
 			defer f.Close()
 			_, err = f.WriteString(string(json))
 			if err != nil {
 				akamai.StopSpinnerFail()
-				return cli.NewExitError(color.RedString("Unable to write zone resources file"), 1)
+				return cli.Exit(color.RedString("Unable to write zone resources file"), 1)
 			}
 			f.Sync()
 		} else {
 			// Path doesnt exist. Bail
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Destination work path is not accessible."), 1)
+			return cli.Exit(color.RedString("Destination work path is not accessible."), 1)
 		}
 		akamai.StopSpinnerOk()
 	}
@@ -212,14 +212,14 @@ func CmdCreateZone(c *cli.Context) error {
 		zoneImportList, err := retrieveZoneImportList(resourceZoneName)
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Failed to read json zone resources file"), 1)
+			return cli.Exit(color.RedString("Failed to read json zone resources file"), 1)
 		}
 		// if segmenting recordsets by name, make sure module folder exists
 		if fetchConfig.ModSegment {
 			modulePath = filepath.Join(tools.TFWorkPath, moduleFolder)
 			if !createDirectory(modulePath) {
 				akamai.StopSpinnerFail()
-				return cli.NewExitError(color.RedString("Failed to create modules folder."), 1)
+				return cli.Exit(color.RedString("Failed to create modules folder."), 1)
 			}
 		}
 		akamai.StartSpinner("Creating zone configuration file ", "")
@@ -229,7 +229,7 @@ func CmdCreateZone(c *cli.Context) error {
 		zoneTFfileHandle, zonetfConfig, configImportList, zoneTypeMap, err = reconcileZoneResourceTargets(zoneImportList, resourceZoneName)
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Failed to open/create zone config file."), 1)
+			return cli.Exit(color.RedString("Failed to open/create zone config file."), 1)
 		}
 		defer zoneTFfileHandle.Close()
 
@@ -239,12 +239,12 @@ func CmdCreateZone(c *cli.Context) error {
 				if !fetchConfig.ModSegment {
 					// already have a top level zone config and its modularized!
 					akamai.StopSpinnerFail()
-					return cli.NewExitError(color.RedString("Failed. Existing zone config is modularized"), 1)
+					return cli.Exit(color.RedString("Failed. Existing zone config is modularized"), 1)
 				}
 			} else if fetchConfig.ModSegment {
 				// already have a top level zone config and its not mudularized!
 				akamai.StopSpinnerFail()
-				return cli.NewExitError(color.RedString("Failed. Existing zone config is not modularized"), 1)
+				return cli.Exit(color.RedString("Failed. Existing zone config is not modularized"), 1)
 			}
 		} else {
 			// if tf pre existed, zone has to exist by definition
@@ -252,39 +252,39 @@ func CmdCreateZone(c *cli.Context) error {
 			if err != nil {
 				akamai.StopSpinnerFail()
 				fmt.Println(err.Error())
-				return cli.NewExitError(color.RedString("Failed. Couldn't initialize zone config"), 1)
+				return cli.Exit(color.RedString("Failed. Couldn't initialize zone config"), 1)
 			}
 		}
 		err = appendRootModuleTF(zonetfConfig)
 		if err != nil {
 			akamai.StopSpinnerFail()
 			fmt.Println(err.Error())
-			return cli.NewExitError(color.RedString("Failed. Couldn't write to zone config"), 1)
+			return cli.Exit(color.RedString("Failed. Couldn't write to zone config"), 1)
 		}
 
 		// process Recordsets.
 		fullZoneConfigMap, err = processRecordsets(configImportList.Zone, resourceZoneName, zoneTypeMap, fetchConfig)
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Failed to process recordsets."), 1)
+			return cli.Exit(color.RedString("Failed to process recordsets."), 1)
 		}
 		// Save config map for import script generation
 		resourceConfigFilename := createResourceConfigFilename(resourceZoneName)
 		json, err := json.MarshalIndent(&fullZoneConfigMap, "", "  ")
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Unable to generate json formatted zone config"), 1)
+			return cli.Exit(color.RedString("Unable to generate json formatted zone config"), 1)
 		}
 		f, err := os.Create(resourceConfigFilename)
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Unable to create resource config file"), 1)
+			return cli.Exit(color.RedString("Unable to create resource config file"), 1)
 		}
 		defer f.Close()
 		_, err = f.WriteString(string(json))
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Unable to write zone resource config file"), 1)
+			return cli.Exit(color.RedString("Unable to write zone resource config file"), 1)
 		}
 		f.Sync()
 
@@ -296,13 +296,13 @@ func CmdCreateZone(c *cli.Context) error {
 		//}
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Unable to create gtmvars config file"), 1)
+			return cli.Exit(color.RedString("Unable to create gtmvars config file"), 1)
 		}
 		defer dnsvarsHandle.Close()
 		_, err = dnsvarsHandle.WriteString(fmt.Sprintf(dnsvarsContent, contractid))
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Unable to write gtmvars config file"), 1)
+			return cli.Exit(color.RedString("Unable to write gtmvars config file"), 1)
 		}
 		dnsvarsHandle.Sync()
 		akamai.StopSpinnerOk()
@@ -320,18 +320,18 @@ func CmdCreateZone(c *cli.Context) error {
 
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Import script content generation failed"), 1)
+			return cli.Exit(color.RedString("Import script content generation failed"), 1)
 		}
 		f, err := os.Create(importScriptFilename)
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Unable to create import script file"), 1)
+			return cli.Exit(color.RedString("Unable to create import script file"), 1)
 		}
 		defer f.Close()
 		_, err = f.WriteString(scriptContent)
 		if err != nil {
 			akamai.StopSpinnerFail()
-			return cli.NewExitError(color.RedString("Unable to write import script file"), 1)
+			return cli.Exit(color.RedString("Unable to write import script file"), 1)
 		}
 		f.Sync()
 		akamai.StopSpinnerOk()
