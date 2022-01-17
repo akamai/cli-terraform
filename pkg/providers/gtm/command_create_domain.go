@@ -25,8 +25,9 @@ import (
 	"strings"
 
 	configgtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
-	akamai "github.com/akamai/cli-common-golang"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/tools"
+	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 )
@@ -104,10 +105,26 @@ func getNullValuesList(objType string) map[string]configgtm.NullPerObjectAttribu
 	return map[string]configgtm.NullPerObjectAttributeStruct{}
 }
 
+func getEdgegridConfig(c *cli.Context) (edgegrid.Config, error) {
+	config, err := edgegrid.Init(c.String("edgerc"), c.String("section"))
+	if err != nil {
+		return edgegrid.Config{}, cli.Exit(err.Error(), 1)
+	}
+
+	if len(c.String("accountkey")) > 0 {
+		config.AccountKey = c.String("accountkey")
+	} else if len(c.String("account-key")) > 0 {
+		config.AccountKey = c.String("account-key")
+	}
+
+	return config, nil
+}
+
 // command function create-domain
 func CmdCreateDomain(c *cli.Context) error {
+	term := terminal.Get(c.Context)
 
-	config, err := akamai.GetEdgegridConfig(c)
+	config, err := getEdgegridConfig(c)
 	if err != nil {
 		return err
 	}
@@ -132,18 +149,18 @@ func CmdCreateDomain(c *cli.Context) error {
 	}
 
 	fmt.Println("Configuring Domain")
-	akamai.StartSpinner("Fetching domain entity ", "")
+	term.Spinner().Start("Fetching domain entity ")
 	domain, err := configgtm.GetDomain(domainName)
 	if err != nil {
-		akamai.StopSpinnerFail()
+		term.Spinner().Fail()
 		fmt.Println("Error: " + err.Error())
 		return cli.Exit(color.RedString("Domain retrieval failed"), 1)
 	}
-	akamai.StopSpinnerOk()
+	term.Spinner().OK()
 	// use domain name sans suffix for domain resource name
 	resourceDomainName := normalizeResourceName(strings.TrimSuffix(domainName, ".akadns.net"))
 	if createImportList {
-		akamai.StartSpinner("Inventorying domain objects ", "")
+		term.Spinner().Start("Inventorying domain objects ")
 		// Inventory datacenters
 		datacenters := make(map[int]string)
 		for _, dc := range domain.Datacenters {
@@ -195,13 +212,13 @@ func CmdCreateDomain(c *cli.Context) error {
 			}
 			asmaps[as.Name] = targets
 		}
-		akamai.StopSpinnerOk()
-		akamai.StartSpinner("Creating Resources list file ", "")
+		term.Spinner().OK()
+		term.Spinner().Start("Creating Resources list file ")
 		// pathname and exists?
 		if stat, err := os.Stat(tools.TFWorkPath); err == nil && stat.IsDir() {
 			importListFilename := createImportListFilename(resourceDomainName)
 			if _, err := os.Stat(importListFilename); err == nil {
-				akamai.StopSpinnerFail()
+				term.Spinner().Fail()
 				return cli.Exit(color.RedString("Resource list file exists. Remove to continue."), 1)
 			}
 			fullImportList = &importListStruct{}
@@ -214,48 +231,48 @@ func CmdCreateDomain(c *cli.Context) error {
 			fullImportList.Asmaps = asmaps
 			json, err := json.MarshalIndent(fullImportList, "", "  ")
 			if err != nil {
-				akamai.StopSpinnerFail()
+				term.Spinner().Fail()
 				return cli.Exit(color.RedString("Unable to generate json formatted resource list"), 1)
 			}
 			f, err := os.Create(importListFilename)
 			if err != nil {
-				akamai.StopSpinnerFail()
+				term.Spinner().Fail()
 				return cli.Exit(color.RedString("Unable to create resources file"), 1)
 			}
 			defer f.Close()
 			_, err = f.WriteString(string(json))
 			if err != nil {
-				akamai.StopSpinnerFail()
+				term.Spinner().Fail()
 				return cli.Exit(color.RedString("Unable to write resources file"), 1)
 			}
 			f.Sync()
 		} else {
 			// Path doesnt exist. Bail
-			akamai.StopSpinnerFail()
+			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Destination work path is not accessible."), 1)
 		}
-		akamai.StopSpinnerOk()
+		term.Spinner().OK()
 	}
 
 	if createConfig {
 		// Read in resources list
 		importList, err := retrieveImportList(resourceDomainName)
 		if err != nil {
-			akamai.StopSpinnerFail()
+			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Failed to read json resources file"), 1)
 		}
-		akamai.StartSpinner("Creating domain configuration file ", "")
+		term.Spinner().Start("Creating domain configuration file ")
 		// see if configuration file already exists and exclude any resources already represented.
 		domainTFfileHandle, tfConfig, configImportList, err := reconcileResourceTargets(importList, resourceDomainName)
 		if err != nil {
-			akamai.StopSpinnerFail()
+			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Failed to open/create config file."), 1)
 		}
 		defer domainTFfileHandle.Close()
 		//initialize Null Fields Struct
 		nullFieldMap, err = domain.NullFieldMap()
 		if err != nil {
-			akamai.StopSpinnerFail()
+			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Failed to initialize Domain null fields map"), 1)
 		}
 		// build tf file
@@ -272,7 +289,7 @@ func CmdCreateDomain(c *cli.Context) error {
 		tfConfig += "\n"
 		_, err = domainTFfileHandle.Write([]byte(tfConfig))
 		if err != nil {
-			akamai.StopSpinnerFail()
+			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Failed to save domain configuration file."), 1)
 		}
 		domainTFfileHandle.Sync()
@@ -281,41 +298,41 @@ func CmdCreateDomain(c *cli.Context) error {
 		gtmvarsFilename := filepath.Join(tools.TFWorkPath, "gtmvars.tf")
 		gtmvarsHandle, err := os.Create(gtmvarsFilename)
 		if err != nil {
-			akamai.StopSpinnerFail()
+			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Unable to create gtmvars config file"), 1)
 		}
 		defer gtmvarsHandle.Close()
 		_, err = gtmvarsHandle.WriteString(gtmvarsContent)
 		if err != nil {
-			akamai.StopSpinnerFail()
+			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Unable to write gtmvars config file"), 1)
 		}
 		gtmvarsHandle.Sync()
-		akamai.StopSpinnerOk()
-		akamai.StartSpinner("Creating domain import script file ", "")
+		term.Spinner().OK()
+		term.Spinner().Start("Creating domain import script file ")
 		importScriptFilename := filepath.Join(tools.TFWorkPath, resourceDomainName+"_resource_import.script")
 		if _, err := os.Stat(importScriptFilename); err == nil {
 			// File exists. Bail
-			akamai.StopSpinnerOk()
+			term.Spinner().OK()
 		}
 		scriptContent, err := buildImportScript(configImportList, resourceDomainName)
 		if err != nil {
-			akamai.StopSpinnerFail()
+			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Import script content generation failed"), 1)
 		}
 		f, err := os.Create(importScriptFilename)
 		if err != nil {
-			akamai.StopSpinnerFail()
+			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Unable to create import script file"), 1)
 		}
 		defer f.Close()
 		_, err = f.WriteString(scriptContent)
 		if err != nil {
-			akamai.StopSpinnerFail()
+			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Unable to write import script file"), 1)
 		}
 		f.Sync()
-		akamai.StopSpinnerOk()
+		term.Spinner().OK()
 	}
 
 	fmt.Println("Domain configuration completed")

@@ -26,10 +26,11 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/edgegrid"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/papi-v1"
-	akamai "github.com/akamai/cli-common-golang"
-	hapi "github.com/akamai/cli-terraform/pkg/providers/papi/hapi"
+	"github.com/akamai/cli-terraform/pkg/providers/papi/hapi"
 	"github.com/akamai/cli-terraform/pkg/tools"
+	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 )
@@ -106,7 +107,23 @@ type RuleTemplate struct {
 	CustomOverride *papi.CustomOverride `json:"customOverride,omitempty"`
 }
 
+func getEdgegridConfig(c *cli.Context) (edgegrid.Config, error) {
+	config, err := edgegrid.Init(c.String("edgerc"), c.String("section"))
+	if err != nil {
+		return edgegrid.Config{}, cli.NewExitError(err.Error(), 1)
+	}
+
+	if len(c.String("accountkey")) > 0 {
+		config.AccountKey = c.String("accountkey")
+	} else if len(c.String("account-key")) > 0 {
+		config.AccountKey = c.String("account-key")
+	}
+
+	return config, nil
+}
+
 func CmdCreateProperty(c *cli.Context) error {
+	term := terminal.Get(c.Context)
 
 	log.SetOutput(ioutil.Discard)
 	if c.NArg() == 0 {
@@ -131,7 +148,7 @@ func CmdCreateProperty(c *cli.Context) error {
 		return cli.Exit(err, 1)
 	}
 
-	config, err := akamai.GetEdgegridConfig(c)
+	config, err := getEdgegridConfig(c)
 	if err != nil {
 		return cli.Exit(err.Error(), 1)
 	}
@@ -150,10 +167,10 @@ func CmdCreateProperty(c *cli.Context) error {
 	// Get Property
 	propertyName := c.Args().First()
 	fmt.Println("Configuring Property")
-	akamai.StartSpinner("Fetching property ", "")
+	term.Spinner().Start("Fetching property ")
 	property := findProperty(propertyName)
 	if property == nil {
-		akamai.StopSpinnerFail()
+		term.Spinner().Fail()
 		return cli.Exit(color.RedString("Property not found "), 1)
 	}
 
@@ -161,14 +178,14 @@ func CmdCreateProperty(c *cli.Context) error {
 	tfData.PropertyName = property.PropertyName
 	tfData.PropertyID = property.PropertyID
 	tfData.PropertyResourceName = strings.Replace(property.PropertyName, ".", "-", -1)
-	akamai.StopSpinnerOk()
+	term.Spinner().OK()
 
 	// Get Property Rules
-	akamai.StartSpinner("Fetching property rules ", "")
+	term.Spinner().Start("Fetching property rules ")
 	rules, err := property.GetRules("")
 
 	if err != nil {
-		akamai.StopSpinnerFail()
+		term.Spinner().Fail()
 		return cli.Exit(color.RedString("Property rules not found: ", err), 1)
 	}
 
@@ -223,7 +240,7 @@ func CmdCreateProperty(c *cli.Context) error {
 		rulesnamepath := filepath.Join(snippetspath, fmt.Sprintf("%s.json", name))
 		err = ioutil.WriteFile(rulesnamepath, jsonBody, 0644)
 		if err != nil {
-			akamai.StopSpinnerFail()
+			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Can't write property rule snippets: ", err), 1)
 		}
 		ruletemplate.Children = append(ruletemplate.Children, fmt.Sprintf("#include:%s.json", name))
@@ -233,55 +250,56 @@ func CmdCreateProperty(c *cli.Context) error {
 	templatepath := filepath.Join(snippetspath, "main.json")
 	err = ioutil.WriteFile(templatepath, jsonBody, 0644)
 	if err != nil {
-		akamai.StopSpinnerFail()
+		term.Spinner().Fail()
+
 		return cli.Exit(color.RedString("Can't write property rule template: ", err), 1)
 	}
 
-	akamai.StopSpinnerOk()
+	term.Spinner().OK()
 
 	// Get Group
-	akamai.StartSpinner("Fetching group ", "")
+	term.Spinner().Start("Fetching group ")
 	group, err := getGroup(property.GroupID)
 	if err != nil {
-		akamai.StopSpinnerFail()
+		term.Spinner().Fail()
 		return cli.Exit(color.RedString("Group not found: %s", err), 1)
 	}
 
 	tfData.GroupName = group.GroupName
 	tfData.GroupID = group.GroupID
 
-	akamai.StopSpinnerOk()
+	term.Spinner().OK()
 
 	// Get Version
-	akamai.StartSpinner("Fetching property version ", "")
+	term.Spinner().Start("Fetching property version ")
 	version, err := getVersion(property)
 	if err != nil {
-		akamai.StopSpinnerFail()
+		term.Spinner().Fail()
 		return cli.Exit(color.RedString("Version not found: %s", err), 1)
 	}
 
 	tfData.ProductID = version.ProductID
 
-	akamai.StopSpinnerOk()
+	term.Spinner().OK()
 
 	// Get Product
-	akamai.StartSpinner("Fetching product name ", "")
+	term.Spinner().Start("Fetching product name ")
 	product, err := getProduct(tfData.ProductID, property.Contract)
 	if err != nil {
-		akamai.StopSpinnerFail()
+		term.Spinner().Fail()
 		return cli.Exit(color.RedString("Product not found: %s", err), 1)
 	}
 
 	tfData.ProductName = product.ProductName
 
-	akamai.StopSpinnerOk()
+	term.Spinner().OK()
 
 	// Get Hostnames
-	akamai.StartSpinner("Fetching hostnames ", "")
+	term.Spinner().Start("Fetching hostnames ")
 	hostnames, err := getHostnames(property, version)
 
 	if err != nil {
-		akamai.StopSpinnerFail()
+		term.Spinner().Fail()
 		return cli.Exit(color.RedString("Hostnames not found: %s", err), 1)
 	}
 
@@ -297,7 +315,7 @@ func CmdCreateProperty(c *cli.Context) error {
 
 		edgehostname, err := hapi.GetEdgeHostnameById(ehnid)
 		if err != nil {
-			akamai.StopSpinnerFail()
+			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Edge Hostname not found: %s", err), 1)
 		}
 
@@ -324,10 +342,10 @@ func CmdCreateProperty(c *cli.Context) error {
 
 	}
 
-	akamai.StopSpinnerOk()
+	term.Spinner().OK()
 
 	// Get contact details
-	akamai.StartSpinner("Fetching contact details ", "")
+	term.Spinner().Start("Fetching contact details ")
 	activations, err := property.GetActivations()
 	if err != nil {
 		tfData.Emails = append(tfData.Emails, "")
@@ -340,17 +358,17 @@ func CmdCreateProperty(c *cli.Context) error {
 		}
 	}
 
-	akamai.StopSpinnerOk()
+	term.Spinner().OK()
 
 	// Save file
-	akamai.StartSpinner("Saving TF configurations ", "")
+	term.Spinner().Start("Saving TF configurations ")
 	err = saveTerraformDefinition(tfData)
 	if err != nil {
-		akamai.StopSpinnerFail()
+		term.Spinner().Fail()
 		return cli.Exit(color.RedString("Couldn't save tf file: %s", err), 1)
 	}
 
-	akamai.StopSpinnerOk()
+	term.Spinner().OK()
 	fmt.Println("Property configuration completed")
 
 	return nil

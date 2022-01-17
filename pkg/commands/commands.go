@@ -15,16 +15,16 @@
 package commands
 
 import (
-	akamai "github.com/akamai/cli-common-golang"
 	cloudlets "github.com/akamai/cli-terraform/pkg/providers/cloudlets"
 	"github.com/akamai/cli-terraform/edgeworkers"
 	"github.com/akamai/cli-terraform/pkg/providers/dns"
 	"github.com/akamai/cli-terraform/pkg/providers/gtm"
 	"github.com/akamai/cli-terraform/pkg/providers/papi"
+	akacli "github.com/akamai/cli/pkg/app"
 	"github.com/urfave/cli/v2"
 )
 
-var CommandLocator akamai.CommandLocator = func() ([]*cli.Command, error) {
+func CommandLocator() ([]*cli.Command, error) {
 	var commands []*cli.Command
 
 	commands = append(commands, &cli.Command{
@@ -48,7 +48,7 @@ var CommandLocator akamai.CommandLocator = func() ([]*cli.Command, error) {
 				Usage: "Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files using resources json",
 			},
 		},
-		BashComplete: akamai.DefaultAutoComplete,
+		BashComplete: akacli.DefaultAutoComplete,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -96,7 +96,7 @@ var CommandLocator akamai.CommandLocator = func() ([]*cli.Command, error) {
 				Usage: "Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.",
 			},
 		},
-		BashComplete: akamai.DefaultAutoComplete,
+		BashComplete: akacli.DefaultAutoComplete,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -111,7 +111,7 @@ var CommandLocator akamai.CommandLocator = func() ([]*cli.Command, error) {
 				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
-		BashComplete: akamai.DefaultAutoComplete,
+		BashComplete: akacli.DefaultAutoComplete,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -126,7 +126,7 @@ var CommandLocator akamai.CommandLocator = func() ([]*cli.Command, error) {
 				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
-		BashComplete: akamai.DefaultAutoComplete,
+		BashComplete: akacli.DefaultAutoComplete,
 	})
 
 	commands = append(commands, cli.Command{
@@ -167,14 +167,14 @@ var CommandLocator akamai.CommandLocator = func() ([]*cli.Command, error) {
 		&cli.Command{
 			Name:        "list",
 			Description: "List commands",
-			Action:      akamai.CmdList,
+			Action:      cmdList,
 		},
 		&cli.Command{
 			Name:         "help",
 			Description:  "Displays help information",
 			ArgsUsage:    "<command> <sub-command>",
-			Action:       akamai.CmdHelp,
-			BashComplete: akamai.DefaultAutoComplete,
+			Action:       cmdHelp,
+			BashComplete: akacli.DefaultAutoComplete,
 		},
 	)
 

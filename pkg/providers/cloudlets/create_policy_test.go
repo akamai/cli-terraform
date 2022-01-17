@@ -12,13 +12,12 @@ import (
 	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/cloudlets"
-	common "github.com/akamai/cli-common-golang"
 	"github.com/akamai/cli-terraform/pkg/templates"
+	"github.com/akamai/cli/pkg/terminal"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"github.com/urfave/cli/v2"
 )
 
 type mockProcessor struct {
@@ -42,10 +41,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreatePolicy(t *testing.T) {
-	// TODO this is a workaround to prevent common.StartSpinner and common.StopSpinner from panicking
-	// This should be removed once a dependency on "github.com/akamai/cli-common-golang" is removed
-	common.App = &cli.App{ErrWriter: ioutil.Discard}
-
 	section := "test_section"
 	pageSize := 1000
 	tests := map[string]struct {
@@ -775,7 +770,8 @@ func TestCreatePolicy(t *testing.T) {
 			mc := new(mockCloudlets)
 			mp := new(mockProcessor)
 			test.init(mc, mp)
-			err := createPolicy(context.Background(), "test_policy", section, mc, mp)
+			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
+			err := createPolicy(ctx, "test_policy", section, mc, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return

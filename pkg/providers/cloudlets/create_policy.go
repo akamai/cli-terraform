@@ -13,9 +13,9 @@ import (
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/cloudlets"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
-	common "github.com/akamai/cli-common-golang"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
+	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 )
@@ -69,8 +69,7 @@ var (
 
 // CmdCreatePolicy is an entrypoint to create-policy command
 func CmdCreatePolicy(c *cli.Context) error {
-	// TODO context should be retrieved from cli.Context once we migrate to urfave/cli v2
-	ctx := context.Background()
+	ctx := c.Context
 	if c.NArg() == 0 {
 		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
 			return cli.Exit(color.RedString("Error displaying help command"), 1)
@@ -132,16 +131,18 @@ func CmdCreatePolicy(c *cli.Context) error {
 }
 
 func createPolicy(ctx context.Context, policyName, section string, client cloudlets.Cloudlets, templateProcessor templates.TemplateProcessor) error {
+	term := terminal.Get(ctx)
+
 	fmt.Println("Configuring Policy")
-	common.StartSpinner("Fetching policy "+policyName, "")
+	term.Spinner().Start("Fetching policy " + policyName)
 
 	policy, err := findPolicyByName(ctx, policyName, client)
 	if err != nil {
-		common.StopSpinnerFail()
+		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrFetchingPolicy, err)
 	}
 	if _, ok := supportedCloudlets[policy.CloudletCode]; !ok {
-		common.StopSpinnerFail()
+		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrCloudletTypeNotSupported, policy.CloudletCode)
 	}
 
@@ -154,7 +155,7 @@ func createPolicy(ctx context.Context, policyName, section string, client cloudl
 
 	policyVersion, err := getLatestPolicyVersion(ctx, policy.PolicyID, client)
 	if err != nil {
-		common.StopSpinnerFail()
+		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrFetchingVersion, err)
 	}
 	tfPolicyData.Description = policyVersion.Description
@@ -172,29 +173,29 @@ func createPolicy(ctx context.Context, policyName, section string, client cloudl
 	if tfPolicyData.CloudletCode == "ALB" {
 		originIDs, err := getOriginIDs(policyVersion.MatchRules)
 		if err != nil {
-			common.StopSpinnerFail()
+			term.Spinner().Fail()
 			return fmt.Errorf("%w: %s", ErrFetchingVersion, err)
 		}
 		tfPolicyData.LoadBalancers, err = getLoadBalancers(ctx, client, originIDs)
 		if err != nil {
-			common.StopSpinnerFail()
+			term.Spinner().Fail()
 			return fmt.Errorf("%w: %s", ErrFetchingVersion, err)
 		}
 		tfPolicyData.LoadBalancerActivations, err = getLoadBalancerActivations(ctx, client, originIDs)
 		if err != nil {
-			common.StopSpinnerFail()
+			term.Spinner().Fail()
 			return fmt.Errorf("%w: %s", ErrFetchingVersion, err)
 		}
 
 	}
 
-	common.StopSpinnerOk()
-	common.StartSpinner("Saving TF configurations ", "")
+	term.Spinner().OK()
+	term.Spinner().Start("Saving TF configurations ")
 	if err := templateProcessor.ProcessTemplates(tfPolicyData); err != nil {
-		common.StopSpinnerFail()
+		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
 	}
-	common.StopSpinnerOk()
+	term.Spinner().OK()
 	fmt.Printf("Terraform configuration for policy '%s' was saved successfully\n", policy.Name)
 
 	return nil

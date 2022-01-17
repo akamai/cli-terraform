@@ -16,10 +16,13 @@ package cli
 
 import (
 	"context"
+	"fmt"
 	"os"
 
-	akamai "github.com/akamai/cli-common-golang"
 	"github.com/akamai/cli-terraform/pkg/commands"
+	akacli "github.com/akamai/cli/pkg/app"
+	"github.com/akamai/cli/pkg/terminal"
+	"github.com/fatih/color"
 )
 
 var (
@@ -27,17 +30,22 @@ var (
 )
 
 func Run() error {
-	akamai.CreateApp(
-		"terraform",
+	term := terminal.Color()
+	ctx := context.Background()
+	ctx = terminal.Context(ctx, term)
+
+	app := akacli.CreateAppTemplate(ctx, "terraform",
 		"A CLI Plugin for Akamai Terraform Provider",
 		"Administer and Manage Supported Akamai Feature resources with Terraform",
-		VERSION,
-		"default",
-		commands.CommandLocator,
-	)
+		VERSION)
 
-	commands.SetHelpTemplates()
+	cmds, err := commands.CommandLocator()
+	if err != nil {
+		return fmt.Errorf(color.RedString("An error occurred initializing commands: %s"), err)
+	}
+	if len(cmds) > 0 {
+		app.Commands = cmds
+	}
 
-	ctx := context.Background()
-	return akamai.App.RunContext(ctx, os.Args)
+	return app.RunContext(ctx, os.Args)
 }
