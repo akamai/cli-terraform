@@ -48,3 +48,4 @@ resource "akamai_cloudlets_application_load_balancer_activation" "load_balancer_
   network = "STAGING"
   version = 2
 }
+

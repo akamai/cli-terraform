@@ -42,5 +42,6 @@ resource "akamai_cloudlets_application_load_balancer" "load_balancer_{{.OriginID
   }
   {{- end}}
 }
-{{- end}}
-{{template "load-balancer-activation.tmpl" .}}
+
+{{end}}
+{{- template "load-balancer-activation.tmpl" .}}
