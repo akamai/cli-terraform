@@ -1,5 +1,15 @@
 # Release Notes
 
+## Version 0.5.0 (Jan 27, 2021)
+
+### Features / Enhancements
+
+* CLOUDLETS
+  * Support importing existing Cloudlets match rules for Visitor Prioritization with related data source
+  * Support importing existing Cloudlets match rules for Continuous Deployment/Phased Release with related data source
+  * Support importing existing Cloudlets match rules for Forward Rewrite with related data source
+  * Support importing existing Cloudlets match rules for API Prioritization with related data source
+
 ## Version 0.4.0
 
 ### Features/Enhancements
