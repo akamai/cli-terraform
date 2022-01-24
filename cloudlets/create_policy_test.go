@@ -338,7 +338,7 @@ func TestCreatePolicy(t *testing.T) {
 					MatchRules: cloudlets.MatchRules{
 						&cloudlets.MatchRulePR{
 							Name:  "some rule",
-							Type:  "PR",
+							Type:  "CD",
 							Start: 1,
 							End:   2,
 							ID:    1234,
@@ -355,7 +355,7 @@ func TestCreatePolicy(t *testing.T) {
 					MatchRules: cloudlets.MatchRules{
 						&cloudlets.MatchRulePR{
 							Name:  "some rule",
-							Type:  "PR",
+							Type:  "CD",
 							Start: 1,
 							End:   2,
 							ID:    1234,
