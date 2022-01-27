@@ -1,7 +1,19 @@
 {{- /*gotype: github.com/akamai/cli-terraform/cloudlets.TFPolicyData*/ -}}
+{{- if and (.MatchRules) (eq .CloudletCode "ALB")}}
+{{- template "match-rules-alb.tmpl" .}}
+{{end -}}
+{{- if and (.MatchRules) (eq .CloudletCode "AP")}}
+{{- template "match-rules-ap.tmpl" .}}
+{{end -}}
+{{- if and (.MatchRules) (eq .CloudletCode "CD")}}
+{{- template "match-rules-cd.tmpl" .}}
+{{end -}}
 {{- if and (.MatchRules) (eq .CloudletCode "ER")}}
 {{- template "match-rules-er.tmpl" .}}
 {{end -}}
-{{- if and (.MatchRules) (eq .CloudletCode "ALB")}}
-{{- template "match-rules-alb.tmpl" .}}
+{{- if and (.MatchRules) (eq .CloudletCode "FR")}}
+{{- template "match-rules-fr.tmpl" .}}
+{{end -}}
+{{- if and (.MatchRules) (eq .CloudletCode "VP")}}
+{{- template "match-rules-vp.tmpl" .}}
 {{end -}}

@@ -36,3 +36,4 @@ resource "akamai_cloudlets_application_load_balancer" "load_balancer_test_origin
     timeout = 60
   }
 }
+

@@ -45,7 +45,11 @@ var templateFiles embed.FS
 
 var supportedCloudlets = map[string]struct{}{
 	"ALB": {},
+	"AP":  {},
+	"CD":  {},
 	"ER":  {},
+	"FR":  {},
+	"VP":  {},
 }
 
 var (
@@ -168,6 +172,10 @@ func createPolicy(ctx context.Context, policyName string, client cloudlets.Cloud
 			return fmt.Errorf("%w: %s", ErrFetchingVersion, err)
 		}
 		tfPolicyData.LoadBalancerActivations, err = getLoadBalancerActivations(ctx, client, originIDs)
+		if err != nil {
+			common.StopSpinnerFail()
+			return fmt.Errorf("%w: %s", ErrFetchingVersion, err)
+		}
 
 	}
 

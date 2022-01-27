@@ -48,6 +48,7 @@ data "akamai_cloudlets_application_load_balancer_match_rule" "match_rules_alb" {
       origin_id = "{{.OriginID}}"
     }
     {{- end}}
+    disabled = {{.Disabled}}
   }
 {{end -}}
 }

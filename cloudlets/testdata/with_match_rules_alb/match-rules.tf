@@ -40,6 +40,7 @@ data "akamai_cloudlets_application_load_balancer_match_rule" "match_rules_alb" {
     forward_settings {
       origin_id = "test_origin"
     }
+    disabled = false
   }
 
   match_rules {
@@ -71,5 +72,6 @@ data "akamai_cloudlets_application_load_balancer_match_rule" "match_rules_alb" {
     forward_settings {
       origin_id = "test_origin"
     }
+    disabled = true
   }
 }
