@@ -44,6 +44,7 @@ func TestCreatePolicy(t *testing.T) {
 	// This should be removed once a dependency on "github.com/akamai/cli-common-golang" is removed
 	common.App = &cli.App{ErrWriter: ioutil.Discard}
 
+	section := "test_section"
 	pageSize := 1000
 	tests := map[string]struct {
 		init      func(*mockCloudlets, *mockProcessor)
@@ -138,6 +139,7 @@ func TestCreatePolicy(t *testing.T) {
 
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:              "test_policy",
+					Section:           section,
 					CloudletCode:      "ALB",
 					Description:       "version 2 description",
 					GroupID:           234,
@@ -240,6 +242,7 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:            "test_policy",
+					Section:         section,
 					CloudletCode:    "ER",
 					Description:     "version 2 description",
 					GroupID:         234,
@@ -348,6 +351,7 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:            "test_policy",
+					Section:         section,
 					CloudletCode:    "CD",
 					Description:     "version 2 description",
 					GroupID:         234,
@@ -427,6 +431,7 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:              "test_policy",
+					Section:           section,
 					CloudletCode:      "ER",
 					Description:       "version 2 description",
 					GroupID:           234,
@@ -497,6 +502,7 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:              "test_policy",
+					Section:           section,
 					CloudletCode:      "AP",
 					Description:       "version 2 description",
 					GroupID:           234,
@@ -670,6 +676,7 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:              "test_policy",
+					Section:           section,
 					CloudletCode:      "ER",
 					Description:       "version 2 description",
 					GroupID:           234,
@@ -695,7 +702,7 @@ func TestCreatePolicy(t *testing.T) {
 			mc := new(mockCloudlets)
 			mp := new(mockProcessor)
 			test.init(mc, mp)
-			err := createPolicy(context.Background(), "test_policy", mc, mp)
+			err := createPolicy(context.Background(), "test_policy", section, mc, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -716,6 +723,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with ER match rules and activations": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "ER",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -804,6 +812,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with ER match rules and single activation": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "ER",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -887,6 +896,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "ER",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -938,6 +948,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules and invalid escape er": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "ER",
 				Description:     `Testing\ exported policy`,
 				GroupID:         12345,
@@ -975,6 +986,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules and invalid escape alb": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "ALB",
 				Description:     `Testing\ exported policy`,
 				GroupID:         12345,
@@ -1016,11 +1028,11 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								Continent:       "NA",
 								Country:         "US",
 								Hostname:        "test-hostname",
-								Latitude:        102.78108,
+								Latitude:        tools.Float64Ptr(102.78108),
 								LivenessHosts:   []string{"tf1.test", "tf2.test"},
-								Longitude:       -116.07064,
+								Longitude:       tools.Float64Ptr(-116.07064),
 								OriginID:        "test_origin",
-								Percent:         10,
+								Percent:         tools.Float64Ptr(10),
 								StateOrProvince: tools.StringPtr("MA"),
 							},
 						},
@@ -1045,6 +1057,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules and two alb": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "ALB",
 				Description:     `Testing exported policy`,
 				GroupID:         12345,
@@ -1086,11 +1099,11 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								Continent:       "NA",
 								Country:         "US",
 								Hostname:        "test-hostname",
-								Latitude:        102.78108,
+								Latitude:        tools.Float64Ptr(102.78108),
 								LivenessHosts:   []string{"tf1.test", "tf2.test"},
-								Longitude:       -116.07064,
+								Longitude:       tools.Float64Ptr(-116.07064),
 								OriginID:        "test_origin",
-								Percent:         10,
+								Percent:         tools.Float64Ptr(10),
 								StateOrProvince: tools.StringPtr("MA"),
 							},
 						},
@@ -1118,11 +1131,11 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								Continent:       "NA",
 								Country:         "US",
 								Hostname:        "test-hostname",
-								Latitude:        102.78108,
+								Latitude:        tools.Float64Ptr(102.78108),
 								LivenessHosts:   []string{"tf1.test", "tf2.test"},
-								Longitude:       -116.07064,
+								Longitude:       tools.Float64Ptr(-116.07064),
 								OriginID:        "test_origin",
-								Percent:         10,
+								Percent:         tools.Float64Ptr(10),
 								StateOrProvince: tools.StringPtr("MA"),
 							},
 						},
@@ -1147,6 +1160,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "ER",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -1158,6 +1172,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules alb": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "ALB",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -1236,11 +1251,11 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								Continent:       "NA",
 								Country:         "US",
 								Hostname:        "test-hostname",
-								Latitude:        102.78108,
+								Latitude:        tools.Float64Ptr(102.78108),
 								LivenessHosts:   []string{"tf1.test", "tf2.test"},
-								Longitude:       -116.07064,
+								Longitude:       tools.Float64Ptr(-116.07064),
 								OriginID:        "test_origin",
-								Percent:         10,
+								Percent:         tools.Float64Ptr(10),
 								StateOrProvince: tools.StringPtr("MA"),
 							},
 						},
@@ -1265,6 +1280,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules alb and activations": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "ALB",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -1344,11 +1360,11 @@ func TestProcessPolicyTemplates(t *testing.T) {
 								Continent:       "NA",
 								Country:         "US",
 								Hostname:        "test-hostname",
-								Latitude:        102.78108,
+								Latitude:        tools.Float64Ptr(102.78108),
 								LivenessHosts:   []string{"tf1.test", "tf2.test"},
-								Longitude:       -116.07064,
+								Longitude:       tools.Float64Ptr(-116.07064),
 								OriginID:        "test_origin",
-								Percent:         10,
+								Percent:         tools.Float64Ptr(10),
 								StateOrProvince: tools.StringPtr("MA"),
 							},
 						},
@@ -1389,6 +1405,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules alb": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "ALB",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -1400,6 +1417,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules fr": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "FR",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -1411,6 +1429,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules CD": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "CD",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -1422,6 +1441,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules fr": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "FR",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -1487,6 +1507,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules CD": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "CD",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -1552,6 +1573,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules vp": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "VP",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -1615,6 +1637,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules vp": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "VP",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -1626,6 +1649,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules ap": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "AP",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -1688,6 +1712,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules ap": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
+				Section:         "test_section",
 				CloudletCode:    "AP",
 				Description:     "Testing exported policy",
 				GroupID:         12345,

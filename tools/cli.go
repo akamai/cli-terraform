@@ -10,8 +10,8 @@ func GetEdgegridConfig(c *cli.Context) (*edgegrid.Config, error) {
 
 	edgercOps := []edgegrid.Option{
 		edgegrid.WithEnv(true),
-		edgegrid.WithFile(getEdgercPath(c)),
-		edgegrid.WithSection(getEdgercSection(c)),
+		edgegrid.WithFile(GetEdgercPath(c)),
+		edgegrid.WithSection(GetEdgercSection(c)),
 	}
 	config, err := edgegrid.New(edgercOps...)
 	if err != nil {
@@ -20,7 +20,8 @@ func GetEdgegridConfig(c *cli.Context) (*edgegrid.Config, error) {
 	return config, nil
 }
 
-func getEdgercPath(c *cli.Context) string {
+// GetEdgercPath returns the location of edgerc credential file or "~/.edgerc" if not found
+func GetEdgercPath(c *cli.Context) string {
 	edgercPath := c.GlobalString("edgerc")
 	if edgercPath == "" {
 		return edgegrid.DefaultConfigFile
@@ -28,7 +29,8 @@ func getEdgercPath(c *cli.Context) string {
 	return edgercPath
 }
 
-func getEdgercSection(c *cli.Context) string {
+// GetEdgercSection returns the section in edgerc credential file or "default" if not found
+func GetEdgercSection(c *cli.Context) string {
 	edgercSection := c.GlobalString("section")
 	if edgercSection == "" {
 		return edgegrid.DefaultSection
