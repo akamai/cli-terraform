@@ -19,3 +19,12 @@ resource "akamai_cloudlets_policy" "policy" {
   group_id = "12345"
   match_rule_format = "1.0"
 }
+
+/*
+resource "akamai_cloudlets_policy_activation" "policy_activation" {
+  policy_id = tonumber(akamai_cloudlets_policy.policy.id)
+  network = var.env
+  version = akamai_cloudlets_policy.policy.version
+  associated_properties = [ "UNKNOWN_CHANGE_ME" ]
+}
+*/

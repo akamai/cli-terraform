@@ -7,7 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"reflect"
 	"testing"
+	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/cloudlets"
 	common "github.com/akamai/cli-common-golang"
@@ -1734,6 +1736,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					"load-balancer.tmpl": fmt.Sprintf("./testdata/res/%s/load-balancer.tf", test.dir),
 					"variables.tmpl":     fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
 					"imports.tmpl":       fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
+				},
+				AdditionalFuncs: template.FuncMap{
+					"deepequal": reflect.DeepEqual,
 				},
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
