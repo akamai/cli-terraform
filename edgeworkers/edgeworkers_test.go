@@ -29,7 +29,6 @@ func (m *mockEdgeworkers) GetActivation(ctx context.Context, req edgeworkers.Get
 	return args.Get(0).(*edgeworkers.Activation), args.Error(1)
 }
 
-
 func (m *mockEdgeworkers) ActivateVersion(ctx context.Context, req edgeworkers.ActivateVersionRequest) (*edgeworkers.Activation, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
@@ -74,7 +73,7 @@ func (m *mockEdgeworkers) GetDeactivation(ctx context.Context, req edgeworkers.G
 	return args.Get(0).(*edgeworkers.Deactivation), args.Error(1)
 }
 
-func (m *mockEdgeworkers) DeactivateVersion(ctx context.Context, req edgeworkers.DeactivateVersionRequest) (*edgeworkers.Deactivation, error)  {
+func (m *mockEdgeworkers) DeactivateVersion(ctx context.Context, req edgeworkers.DeactivateVersionRequest) (*edgeworkers.Deactivation, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -324,6 +323,14 @@ func (m *mockEdgeworkers) GetReport(ctx context.Context, req edgeworkers.GetRepo
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*edgeworkers.GetReportResponse), args.Error(1)
+}
+
+func (m *mockEdgeworkers) GetSummaryReport(ctx context.Context, req edgeworkers.GetSummaryReportRequest) (*edgeworkers.GetSummaryReportResponse, error) {
+	args := m.Called(ctx, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*edgeworkers.GetSummaryReportResponse), args.Error(1)
 }
 
 func (m *mockEdgeworkers) ListReports(ctx context.Context) (*edgeworkers.ListReportsResponse, error) {

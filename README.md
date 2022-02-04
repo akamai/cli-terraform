@@ -48,6 +48,8 @@ Built-In Commands:
   create-domain
   create-zone
   create-property
+  create-cloudlets-policy
+  create-edgekv
   list
   help
 ```
@@ -167,6 +169,23 @@ Flags:
 
 ```
 $ akamai terraform create-cloudlets-policy
+```
+
+## Edgeworkers
+
+### Usage
+
+```
+   akamai-terraform create-edgekv [namespace_name] [network] [--tfworkpath path] 
+
+Flags:
+   --tfworkpath path      path location for placement of created artifacts. Default: current directory
+```
+
+### Create edgekv configuration.
+
+```
+$ akamai terraform create-edgekv
 ```
 
 ## General Notes

@@ -9,7 +9,7 @@ import (
 // TFWorkPath is a target directory for generated terraform resources
 var TFWorkPath = "./"
 
-// CheckFiles verifies if all given files exist in filesystem
+// CheckFiles verifies if all given files doesn't exist in filesystem
 func CheckFiles(files ...string) error {
 	for _, file := range files {
 		_, err := os.Stat(file)

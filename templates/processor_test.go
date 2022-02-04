@@ -115,35 +115,35 @@ func TestProcessTemplates(t *testing.T) {
 }
 
 func TestEscapeQuotedStringLit(t *testing.T) {
-	tests := map[string]struct{
+	tests := map[string]struct {
 		data   string
 		expect string
 	}{
-		"string":{
+		"string": {
 			data:   "foo",
 			expect: "foo",
 		},
-		"string with quotes":{
+		"string with quotes": {
 			data:   `"foo"`,
 			expect: `\"foo\"`,
 		},
-		"new line character":{
+		"new line character": {
 			data:   "hello\nworld\n",
 			expect: `hello\nworld\n`,
 		},
-		"new line and carriage return":{
+		"new line and carriage return": {
 			data:   "hello\r\nworld\r\n",
 			expect: `hello\r\nworld\r\n`,
 		},
-		"backslash":{
+		"backslash": {
 			data:   `what\what`,
 			expect: `what\\what`,
 		},
-		"unicode char":{
+		"unicode char": {
 			data:   "𝄞",
 			expect: "𝄞",
 		},
-		"non backslash escape sequence":{
+		"non backslash escape sequence": {
 			data:   "%{",
 			expect: "%%{",
 		},

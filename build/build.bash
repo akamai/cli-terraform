@@ -63,12 +63,12 @@ find_provider_branch() {
 }
 
 clone_repository() {
-  case "$1" in 
-    edgegrid) 
-      repo="akamaiopen-edgegrid-golang" 
+  case "$1" in
+    edgegrid)
+      repo="akamaiopen-edgegrid-golang"
       ;;
-    provider) 
-      repo="terraform-provider-akamai" 
+    provider)
+      repo="terraform-provider-akamai"
       ;;
     *)
       echo "Repository '${1}' is unknown, exiting..." && exit 1
@@ -94,6 +94,6 @@ clone_repository provider
 find_edgegrid_branch
 find_provider_branch
 
-if ! ./build/docker_jenkins.bash "$CURRENT_BRANCH" "$PROVIDER_BRANCH" "$EDGEGRID_BRANCH"; then
+if ! ./build/docker_jenkins.bash "$CURRENT_BRANCH" "$EDGEGRID_BRANCH" "$EDGEGRID_BRANCH"; then
     exit 1
 fi
