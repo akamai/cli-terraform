@@ -3,8 +3,8 @@ github.com/StackExchange/wmi v1.2.1 h1:VIkavFPXSjcnS+O8yTq7NI32k0R5Aj+v39y29VYDO
 github.com/StackExchange/wmi v1.2.1/go.mod h1:rcmrprowKIVzvc+NUiLncP2uuArMWLCbu9SBzvHz7e8=
 github.com/akamai/AkamaiOPEN-edgegrid-golang v1.1.1 h1:bLzehmpyCwQiqCE1Qe9Ny6fbFqs7hPlmo9vKv2orUxs=
 github.com/akamai/AkamaiOPEN-edgegrid-golang v1.1.1/go.mod h1:kX6YddBkXqqywAe8c9LyvgTCyFuZCTMF4cRPQhc3Fy8=
-github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 v2.9.0 h1:e22LzByyNCwTtDkM49lXCvE1P/4Mmc6GPP+hMfoCbz4=
-github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 v2.9.0/go.mod h1:NUp3zcqw6k6AXwf9yr8ksTXpppJTbm35kXeqwdNreRc=
+github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 v2.9.1 h1:JRcJpWWMzhDd9j7CEswm5NpIa7Po+YDA+i+HB8B92ts=
+github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 v2.9.1/go.mod h1:NUp3zcqw6k6AXwf9yr8ksTXpppJTbm35kXeqwdNreRc=
 github.com/akamai/cli-common-golang v0.0.0-20210716202303-5a2a24172430 h1:r3rIAjiTm3sghyvwQ5H6S2/JIsFoscysECo4wrGBaZU=
 github.com/akamai/cli-common-golang v0.0.0-20210716202303-5a2a24172430/go.mod h1:zCub6Q5dfWVvCjXQubVbepcb4DT2AIEPKSxWaTsydRU=
 github.com/apex/log v1.9.0 h1:FHtw/xuaM8AgmvDDTI9fiwoAL25Sq2cxojnZICUU8l0=
