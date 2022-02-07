@@ -29,8 +29,12 @@ func (m *mockProcessor) ProcessTemplates(i interface{}) error {
 }
 
 var (
+	intPtr = func(i int) *int {
+		return &i
+	}
+
 	expectGetEdgeKVNamespace = func(e *mockEdgeworkers, network edgeworkers.NamespaceNetwork, name string, geoLocation string,
-		retention int, groupID int, err error) *mock.Call {
+		retention *int, groupID *int, err error) *mock.Call {
 		call := e.On(
 			"GetEdgeKVNamespace",
 			mock.Anything,
@@ -46,23 +50,28 @@ var (
 			&edgeworkers.Namespace{
 				Name:        name,
 				GeoLocation: geoLocation,
-				Retention:   &retention,
-				GroupID:     &groupID,
+				Retention:   retention,
+				GroupID:     groupID,
 			}, nil)
 	}
 
 	expectProcessTemplates = func(p *mockProcessor, network edgeworkers.NamespaceNetwork, name string, geoLocation string,
-		retention int, groupID int, section string, err error) *mock.Call {
+		retention int, groupID *int, section string, err error) *mock.Call {
+		var tfData TFEdgeKVData
+		tfData = TFEdgeKVData{
+			Name:        name,
+			Network:     network,
+			Retention:   retention,
+			GeoLocation: geoLocation,
+			Section:     section,
+		}
+		if groupID != nil {
+			tfData.GroupID = *groupID
+		}
+
 		call := p.On(
 			"ProcessTemplates",
-			TFEdgeKVData{
-				Name:        name,
-				Network:     network,
-				GroupID:     groupID,
-				Retention:   retention,
-				GeoLocation: geoLocation,
-				Section:     section,
-			},
+			tfData,
 		)
 		if err != nil {
 			return call.Return(err)
@@ -83,20 +92,26 @@ func TestCreateEdgeKV(t *testing.T) {
 	}{
 		"fetch edgekv based on namespace and network": {
 			init: func(e *mockEdgeworkers, p *mockProcessor) {
-				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, 123, nil).Once()
-				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, 123, section, nil).Once()
+				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), nil).Once()
+				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), section, nil).Once()
+			},
+		},
+		"fetch edgekv based on namespace and network with no group_id returned": {
+			init: func(e *mockEdgeworkers, p *mockProcessor) {
+				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), nil, nil).Once()
+				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, nil, section, nil).Once()
 			},
 		},
 		"error fetching edgekv": {
 			init: func(e *mockEdgeworkers, p *mockProcessor) {
-				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, 123, fmt.Errorf("error")).Once()
+				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), fmt.Errorf("error")).Once()
 			},
 			withError: ErrFetchingEdgeKV,
 		},
 		"error processing template": {
 			init: func(e *mockEdgeworkers, p *mockProcessor) {
-				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, 123, nil).Once()
-				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, 123, section, fmt.Errorf("error")).Once()
+				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), nil).Once()
+				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), section, fmt.Errorf("error")).Once()
 			},
 			withError: ErrSavingFiles,
 		},
@@ -135,6 +150,17 @@ func TestProcessEdgeKVTemplates(t *testing.T) {
 				Section:     "test_section",
 			},
 			dir:          "with_staging_network",
+			filesToCheck: []string{"edgekv.tf", "variables.tf", "import.sh"},
+		},
+		"edgekv with staging network no group_id": {
+			givenData: TFEdgeKVData{
+				Name:        "test_namespace",
+				Network:     edgeworkers.NamespaceStagingNetwork,
+				Retention:   0,
+				GeoLocation: "EU",
+				Section:     "test_section",
+			},
+			dir:          "with_staging_network_no_group_id",
 			filesToCheck: []string{"edgekv.tf", "variables.tf", "import.sh"},
 		},
 		"edgekv with production network": {

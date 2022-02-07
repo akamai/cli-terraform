@@ -111,10 +111,14 @@ func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.Nam
 	tfEdgeKVData := TFEdgeKVData{
 		Name:        edgeKV.Name,
 		Network:     network,
-		GroupID:     *edgeKV.GroupID,
 		Retention:   *edgeKV.Retention,
 		GeoLocation: edgeKV.GeoLocation,
 		Section:     section,
+	}
+
+	// Only add GroupID if the API returns it
+	if edgeKV.GroupID != nil {
+		tfEdgeKVData.GroupID = *edgeKV.GroupID
 	}
 
 	common.StopSpinnerOk()

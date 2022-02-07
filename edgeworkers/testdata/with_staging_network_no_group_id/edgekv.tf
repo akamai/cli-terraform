@@ -14,8 +14,8 @@ provider "akamai" {
 
 resource "akamai_edgekv" "edgekv" {
   namespace_name       = "test_namespace"
-  network              = "production"
-  group_id             = 123
+  network              = "staging"
+  group_id             = 0
   retention_in_seconds = 0
   geo_location         = "EU"
 }
