@@ -5,4 +5,10 @@ variable "edgerc_path" {
 
 variable "config_section" {
   type = string
+  default = "test_section"
+}
+
+variable "env" {
+  type = string
+  default = "staging"
 }

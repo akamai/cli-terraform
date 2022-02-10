@@ -20,3 +20,12 @@ resource "akamai_cloudlets_policy" "policy" {
   match_rule_format = "1.0"
   match_rules = data.akamai_cloudlets_edge_redirector_match_rule.match_rules_er.json
 }
+
+/*
+resource "akamai_cloudlets_policy_activation" "policy_activation" {
+  policy_id = tonumber(akamai_cloudlets_policy.policy.id)
+  network = var.env
+  version = akamai_cloudlets_policy.policy.version
+  associated_properties = [ "UNKNOWN_CHANGE_ME" ]
+}
+*/

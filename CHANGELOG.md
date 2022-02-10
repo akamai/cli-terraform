@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version 0.5.1 (Feb 10, 2021)
+
+### Features / Enhancements
+
+* CLOUDLETS
+  * Add a `default` value to the `config_section` variable in `create-cloudlets-policy` in case the user did not specify any
+  * Set the latest application load balancer version in the resource `akamai_cloudlets_application_load_balancer_activation`
+
 ## Version 0.5.0 (Jan 27, 2021)
 
 ### Features / Enhancements

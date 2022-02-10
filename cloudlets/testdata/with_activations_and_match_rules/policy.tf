@@ -21,17 +21,11 @@ resource "akamai_cloudlets_policy" "policy" {
   match_rules = data.akamai_cloudlets_edge_redirector_match_rule.match_rules_er.json
 }
 
-resource "akamai_cloudlets_policy_activation" "policy_activation_staging" {
-  policy_id = 2
-  network = "staging"
-  version = 2
-  associated_properties = [ "prp_0", "prp_1" ]
+/*
+resource "akamai_cloudlets_policy_activation" "policy_activation" {
+  policy_id = tonumber(akamai_cloudlets_policy.policy.id)
+  network = var.env
+  version = akamai_cloudlets_policy.policy.version
+  associated_properties = [ "UNKNOWN_CHANGE_ME" ]
 }
-
-resource "akamai_cloudlets_policy_activation" "policy_activation_prod" {
-  policy_id = 2
-  network = "prod"
-  version = 1
-  associated_properties = [ "prp_0" ]
-  depends_on = [ akamai_cloudlets_policy_activation.policy_activation_staging ]
-}
+*/

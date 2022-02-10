@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sort"
+	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/cloudlets"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
@@ -30,6 +32,7 @@ type (
 		PolicyActivations       map[string]TFPolicyActivationData
 		LoadBalancers           []cloudlets.LoadBalancerVersion
 		LoadBalancerActivations []cloudlets.LoadBalancerActivation
+		Section                 string
 	}
 
 	// TFPolicyActivationData represents data used in policy activation resource templates
@@ -114,18 +117,20 @@ func CmdCreatePolicy(c *cli.Context) error {
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
+		AdditionalFuncs: template.FuncMap{
+			"deepequal": reflect.DeepEqual,
+		},
 	}
 
 	policyName := c.Args().First()
-	if err = createPolicy(ctx, policyName, client, processor); err != nil {
+	section := tools.GetEdgercSection(c)
+	if err = createPolicy(ctx, policyName, section, client, processor); err != nil {
 		return cli.NewExitError(color.RedString(fmt.Sprintf("Error exporting policy HCL: %s", err)), 1)
 	}
 	return nil
 }
 
-func createPolicy(ctx context.Context, policyName string, client cloudlets.Cloudlets, templateProcessor templates.TemplateProcessor) error {
-	var tfPolicyData TFPolicyData
-
+func createPolicy(ctx context.Context, policyName, section string, client cloudlets.Cloudlets, templateProcessor templates.TemplateProcessor) error {
 	fmt.Println("Configuring Policy")
 	common.StartSpinner("Fetching policy "+policyName, "")
 
@@ -139,9 +144,12 @@ func createPolicy(ctx context.Context, policyName string, client cloudlets.Cloud
 		return fmt.Errorf("%w: %s", ErrCloudletTypeNotSupported, policy.CloudletCode)
 	}
 
-	tfPolicyData.Name = policy.Name
-	tfPolicyData.CloudletCode = policy.CloudletCode
-	tfPolicyData.GroupID = policy.GroupID
+	tfPolicyData := TFPolicyData{
+		Section:      section,
+		Name:         policy.Name,
+		CloudletCode: policy.CloudletCode,
+		GroupID:      policy.GroupID,
+	}
 
 	policyVersion, err := getLatestPolicyVersion(ctx, policy.PolicyID, client)
 	if err != nil {
