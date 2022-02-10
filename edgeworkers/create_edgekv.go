@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/edgeworkers"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
@@ -78,14 +80,19 @@ func CmdCreateEdgeKV(c *cli.Context) error {
 		return cli.NewExitError(color.RedString(err.Error()), 1)
 	}
 	templateToFile := map[string]string{
-		"edgekv.tmpl":    edgeKVPath,
-		"variables.tmpl": variablesPath,
-		"imports.tmpl":   importPath,
+		"edgekv.tmpl":           edgeKVPath,
+		"edgekv-variables.tmpl": variablesPath,
+		"edgekv-imports.tmpl":   importPath,
 	}
 
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
+		AdditionalFuncs: template.FuncMap{
+			"ToLower": func(network edgeworkers.ActivationNetwork) string {
+				return strings.ToLower(string(network))
+			},
+		},
 	}
 
 	namespace := c.Args().First()

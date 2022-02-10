@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
+	"text/template"
 
 	"github.com/akamai/cli-terraform/templates"
 
@@ -149,7 +151,7 @@ func TestProcessEdgeKVTemplates(t *testing.T) {
 				GeoLocation: "EU",
 				Section:     "test_section",
 			},
-			dir:          "with_staging_network",
+			dir:          "edgekv_with_staging_network",
 			filesToCheck: []string{"edgekv.tf", "variables.tf", "import.sh"},
 		},
 		"edgekv with staging network no group_id": {
@@ -160,7 +162,7 @@ func TestProcessEdgeKVTemplates(t *testing.T) {
 				GeoLocation: "EU",
 				Section:     "test_section",
 			},
-			dir:          "with_staging_network_no_group_id",
+			dir:          "edgekv_with_staging_network_no_group_id",
 			filesToCheck: []string{"edgekv.tf", "variables.tf", "import.sh"},
 		},
 		"edgekv with production network": {
@@ -172,7 +174,7 @@ func TestProcessEdgeKVTemplates(t *testing.T) {
 				GeoLocation: "EU",
 				Section:     "test_section",
 			},
-			dir:          "with_production_network",
+			dir:          "edgekv_with_production_network",
 			filesToCheck: []string{"edgekv.tf", "variables.tf", "import.sh"},
 		},
 	}
@@ -183,9 +185,14 @@ func TestProcessEdgeKVTemplates(t *testing.T) {
 			processor := templates.FSTemplateProcessor{
 				TemplatesFS: templateFiles,
 				TemplateTargets: map[string]string{
-					"edgekv.tmpl":    fmt.Sprintf("./testdata/res/%s/edgekv.tf", test.dir),
-					"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
-					"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
+					"edgekv.tmpl":           fmt.Sprintf("./testdata/res/%s/edgekv.tf", test.dir),
+					"edgekv-variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
+					"edgekv-imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
+				},
+				AdditionalFuncs: template.FuncMap{
+					"ToLower": func(network edgeworkers.ActivationNetwork) string {
+						return strings.ToLower(string(network))
+					},
 				},
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))

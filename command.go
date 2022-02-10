@@ -133,6 +133,25 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 		BashComplete: akamai.DefaultAutoComplete,
 	})
 
+	commands = append(commands, cli.Command{
+		Name:        "create-edgeworker",
+		Description: "Create Terraform EdgeWorker Resource",
+		Usage:       "create-edgeworker",
+		ArgsUsage:   "<edgeworker_id>",
+		Action:      edgeworkers.CmdCreateEdgeWorker,
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "bundlepath",
+				Usage: "Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath",
+			},
+			cli.StringFlag{
+				Name:  "tfworkpath",
+				Usage: "Path location for placement of created artifacts. Default: current directory",
+			},
+		},
+		BashComplete: akamai.DefaultAutoComplete,
+	})
+
 	commands = append(commands,
 		cli.Command{
 			Name:        "list",
