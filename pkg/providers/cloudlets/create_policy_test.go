@@ -13,8 +13,8 @@ import (
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/cloudlets"
 	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli/pkg/terminal"
 	"github.com/akamai/cli-terraform/pkg/tools"
+	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -1615,6 +1615,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						MatchURL: "abc.com",
 						ForwardSettings: cloudlets.ForwardSettingsPR{
 							OriginID: "test_origin",
+							Percent:  1,
 						},
 						Matches: []cloudlets.MatchCriteriaPR{
 							{

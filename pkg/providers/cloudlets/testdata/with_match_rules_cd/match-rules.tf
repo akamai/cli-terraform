@@ -59,7 +59,7 @@ data "akamai_cloudlets_phased_release_match_rule" "match_rules_cd" {
     match_url = "abc.com"
     forward_settings {
       origin_id = "test_origin"
-      percent   = 0
+      percent   = 1
     }
     disabled       = true
     matches_always = true

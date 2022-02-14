@@ -2,6 +2,7 @@ linters:
   disable-all: true
   enable:
   - revive
+  - errcheck
 
 output:
   sort-results: true
@@ -10,6 +11,19 @@ issues:
   exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
+  exclude-rules:
+    - path: pkg/providers/papi/
+      linters:
+        - errcheck
+    - path: pkg/providers/hapi/
+      linters:
+        - errcheck
+    - path: pkg/providers/dns/
+      linters:
+        - errcheck
+    - path: pkg/providers/gtm/
+      linters:
+        - errcheck
 
 linters-settings:
   revive:
