@@ -9,6 +9,7 @@ require (
 	github.com/akamai/cli v1.3.0
 	github.com/briandowns/spinner v1.16.0 // indirect
 	github.com/fatih/color v1.13.0
+	github.com/hashicorp/hcl/v2 v2.11.1
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
 	github.com/shirou/gopsutil v2.20.4+incompatible
 	github.com/stretchr/testify v1.7.0

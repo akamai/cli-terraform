@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 	"unicode"
+
+	"github.com/hashicorp/hcl/v2/hclwrite"
 )
 
 type (
@@ -50,11 +53,14 @@ func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
 		if err := tmpl.Lookup(templateName).Execute(&buf, data); err != nil {
 			return fmt.Errorf("%w: %s: %s", ErrTemplateExecution, templateName, err)
 		}
-		data := buf.Bytes()
-		if len(data) == 0 || len(bytes.TrimSpace(data)) == 0 {
+		out := buf.Bytes()
+		if len(bytes.TrimSpace(out)) == 0 {
 			continue
 		}
-		if err := os.WriteFile(targetPath, data, 0644); err != nil {
+		if filepath.Ext(targetPath) == ".tf" {
+			out = hclwrite.Format(out)
+		}
+		if err := os.WriteFile(targetPath, out, 0644); err != nil {
 			return fmt.Errorf("creating '%s': %s", targetPath, err)
 		}
 	}
