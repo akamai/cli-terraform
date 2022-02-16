@@ -8,11 +8,14 @@
 # Script will end immediately when some command exits with a non-zero exit code.
 set -e
 
-CLI_BRANCH_NAME="${1:-develop}"
+CLI_TERRAFORM_BRANCH_NAME="${1:-develop}"
 PROVIDER_BRANCH_NAME="${2:-develop}"
 EDGEGRID_BRANCH_NAME_V2="${3:-v2}"
-EDGEGRID_BRANCH_NAME_V1="${4:-develop}"
-RELOAD_DOCKER_IMAGE="${5:-false}"
+CLI_TERRAFORM_BRANCH_NAME="${4:-develop}"
+EDGEGRID_BRANCH_NAME_V1="${5:-develop}"
+RELOAD_DOCKER_IMAGE="${6:-false}"
+
+
 TIMEOUT="20m"
 # Recalculate DOCKER_IMAGE_SIZE if any changes to dockerfile.
 DOCKER_IMAGE_SIZE="642345946"
@@ -66,10 +69,11 @@ docker run -d -it --name akatf-container --entrypoint "/usr/bin/tail" \
         -e TF_LOG=DEBUG \
         -e TF_LOG_PATH="provider.log" \
         -e COVERMODE="atomic" \
-        -e CLI_BRANCH_NAME="$CLI_BRANCH_NAME" \
+        -e CLI_TERRAFORM_BRANCH_NAME="$CLI_TERRAFORM_BRANCH_NAME" \
         -e EDGEGRID_BRANCH_NAME_V1="$EDGEGRID_BRANCH_NAME_V1" \
         -e EDGEGRID_BRANCH_NAME_V2="$EDGEGRID_BRANCH_NAME_V2" \
         -e PROVIDER_BRANCH_NAME="$PROVIDER_BRANCH_NAME" \
+        -e CLI_BRANCH_NAME="$CLI_BRANCH_NAME" \
         -e SSH_PUB_KEY="${SSH_PUB_KEY}" \
         -e SSH_PRV_KEY="${SSH_PRV_KEY}" \
         -e SSH_KNOWN_HOSTS="${SSH_KNOWN_HOSTS}" \
@@ -92,7 +96,8 @@ echo "Cloning repos"
 docker exec akatf-container sh -c 'git clone ssh://git@git.source.akamai.com:7999/devexp/terraform-provider-akamai.git;
                                    git clone ssh://git@git.source.akamai.com:7999/devexp/akamaiopen-edgegrid-golang.git edgegrid-v1;
                                    git clone ssh://git@git.source.akamai.com:7999/devexp/akamaiopen-edgegrid-golang.git edgegrid-v2;
-                                   git clone ssh://git@git.source.akamai.com:7999/devexp/cli-terraform.git'
+                                   git clone ssh://git@git.source.akamai.com:7999/devexp/cli-terraform.git;
+                                   git clone ssh://git@git.source.akamai.com:7999/devexp/cli.git'
 
 echo "Checkout branches"
 docker exec akatf-container sh -c 'cd edgegrid-v1; git checkout ${EDGEGRID_BRANCH_NAME_V1};
@@ -100,9 +105,12 @@ docker exec akatf-container sh -c 'cd edgegrid-v1; git checkout ${EDGEGRID_BRANC
                                    cd ../terraform-provider-akamai; git checkout ${PROVIDER_BRANCH_NAME};
                                    go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v2=../edgegrid-v2;
                                    go mod tidy;
-                                   cd ../cli-terraform; git checkout ${CLI_BRANCH_NAME};
+                                   cd ../cli-terraform; git checkout ${CLI_TERRAFORM_BRANCH_NAME};
                                    go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang=../edgegrid-v1;
                                    go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v2=../edgegrid-v2;
+                                   go mod tidy;
+                                   cd ../cli; git checkout ${CLI_BRANCH_NAME};
+                                   go mod edit -replace github.com/akamai/cli=../cli;
                                    go mod tidy'
 
 echo "Running tests with xUnit output"

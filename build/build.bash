@@ -50,7 +50,7 @@ find_provider_branch() {
     branches=($(list_branches))
     for branch in ${branches[*]}
     do
-      echo "Checking branch '${branch}'"
+      echo "Checking Terraform branch '${branch}'"
       PROVIDER_BRANCH=$branch
       git -C ./terraform-provider-akamai branch -r | grep $PROVIDER_BRANCH > /dev/null
       if [[ $? -eq 0 ]]; then
@@ -62,6 +62,27 @@ find_provider_branch() {
   echo "Current branch is '${CURRENT_BRANCH}', matching Terraform Provider branch is '${PROVIDER_BRANCH}'"
 }
 
+find_cli_branch() {
+  CURRENT_BRANCH=$GIT_BRANCH
+  if [[ $CURRENT_BRANCH =~ .*/sp-.* ]]; then
+    CLI_BRANCH=${CURRENT_BRANCH//origin\//}
+  else
+    # find parent branch from which this branch was created, iterate over the list of branches from the history of commits
+    branches=($(list_branches))
+    for branch in ${branches[*]}
+    do
+      echo "Checking Cli branch '${branch}'"
+      CLI_BRANCH=$branch
+      git -C ./cli-clone branch -r | grep $CLI_BRANCH > /dev/null
+      if [[ $? -eq 0 ]]; then
+        echo "There is matching Cli branch '${CLI_BRANCH}'"
+        break
+      fi
+    done
+  fi
+  echo "Current branch is '${CURRENT_BRANCH}', matching Cli branch is '${CLI_BRANCH}'"
+}
+
 clone_repository() {
   case "$1" in
     edgegrid)
@@ -70,18 +91,22 @@ clone_repository() {
     provider)
       repo="terraform-provider-akamai"
       ;;
+    cli)
+      repo="cli"
+      ;;
     *)
       echo "Repository '${1}' is unknown, exiting..." && exit 1
       ;;
   esac
+  target_dir=${2:-$repo}
 
-  if [ ! -d "./${repo}" ]
+  if [ ! -d "./${target_dir}" ]
   then
-    echo "First time build, cloning the '${repo}' repo"
-    git clone ssh://git@git.source.akamai.com:7999/devexp/${repo}.git
+    echo "First time build, cloning the '${repo}' repo into '${target_dir}'"
+    git clone ssh://git@git.source.akamai.com:7999/devexp/${repo}.git $target_dir
   else
     echo "Repository '${repo}' already exists, so only cleaning and updating it"
-    pushd ${repo}
+    pushd ${target_dir}
     git reset --hard
     git fetch --prune
     popd
@@ -91,9 +116,11 @@ clone_repository() {
 clean
 clone_repository edgegrid
 clone_repository provider
+clone_repository cli cli-clone
 find_edgegrid_branch
 find_provider_branch
+find_cli_branch
 
-if ! ./build/docker_jenkins.bash "$CURRENT_BRANCH" "$PROVIDER_BRANCH" "$EDGEGRID_BRANCH"; then
+if ! ./build/docker_jenkins.bash "$CURRENT_BRANCH" "$PROVIDER_BRANCH" "$EDGEGRID_BRANCH" "$CLI_BRANCH"; then
     exit 1
 fi
