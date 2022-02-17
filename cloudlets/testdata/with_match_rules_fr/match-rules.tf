@@ -27,7 +27,7 @@ data "akamai_cloudlets_forward_rewrite_match_rule" "match_rules_fr" {
     forward_settings {
       origin_id = "test_origin"
       path_and_qs = "/test"
-      use_incoming_query_string = "false"
+      use_incoming_query_string = false
     }
     disabled = false
   }
@@ -60,7 +60,7 @@ data "akamai_cloudlets_forward_rewrite_match_rule" "match_rules_fr" {
     forward_settings {
       origin_id = "test_origin"
       path_and_qs = ""
-      use_incoming_query_string = "false"
+      use_incoming_query_string = false
     }
     disabled = true
   }

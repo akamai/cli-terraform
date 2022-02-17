@@ -42,7 +42,7 @@ data "akamai_cloudlets_forward_rewrite_match_rule" "match_rules_fr" {
     forward_settings {
       origin_id = "{{.OriginID}}"
       path_and_qs = "{{escape .PathAndQS}}"
-      use_incoming_query_string = "{{.UseIncomingQueryString}}"
+      use_incoming_query_string = {{.UseIncomingQueryString}}
     }
     {{- end}}
     disabled = {{.Disabled}}
