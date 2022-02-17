@@ -11,7 +11,7 @@ set -e
 CLI_TERRAFORM_BRANCH_NAME="${1:-develop}"
 PROVIDER_BRANCH_NAME="${2:-develop}"
 EDGEGRID_BRANCH_NAME_V2="${3:-v2}"
-CLI_TERRAFORM_BRANCH_NAME="${4:-develop}"
+CLI_BRANCH_NAME="${4:-develop}"
 EDGEGRID_BRANCH_NAME_V1="${5:-develop}"
 RELOAD_DOCKER_IMAGE="${6:-false}"
 
