@@ -104,10 +104,6 @@ validate-testdata: ; $(info $(M) Validating testdata agains terraform-provider-a
 release: ; $(info $(M) Generating release binaries and signatures...) @ ## Generate release binaries
 	@./scripts/build.sh
 
-.PHONY: pack
-pack: ; $(info $(M) Generating tarball...) @ ## Create cli tarball
-	@tar -zcf cli.tar.gz *
-
 .PHONY: ; clean
 clean: ; $(info $(M) Removing 'tools' directory and test results...) @ ## Cleanup installed packages and test reports
 	@rm -rf $(BIN)

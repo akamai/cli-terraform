@@ -58,7 +58,6 @@ if [[ "$(docker images -q terraform/akamai:terraform-provider-akamai 2> /dev/nul
 fi
 
 echo "Creating docker container"
-docker --version
 docker run -d -it --name akatf-container --entrypoint "/usr/bin/tail" \
         -e TF_LOG=DEBUG \
         -e TF_LOG_PATH="provider.log" \
