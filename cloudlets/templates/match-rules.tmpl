@@ -5,6 +5,9 @@
 {{- if and (.MatchRules) (eq .CloudletCode "AP")}}
 {{- template "match-rules-ap.tmpl" .}}
 {{end -}}
+{{- if and (.MatchRules) (eq .CloudletCode "AS")}}
+{{- template "match-rules-as.tmpl" .}}
+{{end -}}
 {{- if and (.MatchRules) (eq .CloudletCode "CD")}}
 {{- template "match-rules-cd.tmpl" .}}
 {{end -}}

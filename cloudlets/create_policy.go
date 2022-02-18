@@ -49,6 +49,7 @@ var templateFiles embed.FS
 var supportedCloudlets = map[string]struct{}{
 	"ALB": {},
 	"AP":  {},
+	"AS":  {},
 	"CD":  {},
 	"ER":  {},
 	"FR":  {},

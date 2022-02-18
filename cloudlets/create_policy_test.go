@@ -524,6 +524,77 @@ func TestCreatePolicy(t *testing.T) {
 				}).Return(nil).Once()
 			},
 		},
+		"fetch latest version of policy and produce output without activations AS": {
+			init: func(c *mockCloudlets, p *mockProcessor) {
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
+					{
+						PolicyID:     1,
+						GroupID:      11,
+						Name:         "some policy",
+						CloudletID:   0,
+						CloudletCode: "AS",
+					},
+					{
+						PolicyID:     2,
+						GroupID:      22,
+						Name:         "test_policy",
+						Description:  "test_policy description",
+						CloudletID:   0,
+						CloudletCode: "AS",
+					},
+				}, nil).Once()
+				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2, PageSize: &pageSize, Offset: 0}).Return([]cloudlets.PolicyVersion{
+					{
+						PolicyID: 2,
+						Version:  1,
+					},
+					{
+						PolicyID:        2,
+						Version:         2,
+						Description:     "version 2 description",
+						MatchRuleFormat: "1.0",
+					},
+				}, nil).Once()
+				c.On("GetPolicyVersion", mock.Anything, cloudlets.GetPolicyVersionRequest{
+					PolicyID: 2,
+					Version:  2,
+				}).Return(&cloudlets.PolicyVersion{
+					PolicyID:    2,
+					Version:     2,
+					Description: "version 2 description",
+					MatchRules: cloudlets.MatchRules{
+						&cloudlets.MatchRuleAS{
+							Name:     "a rule",
+							Type:     "AS",
+							Start:    1,
+							End:      2,
+							ID:       1000,
+							Disabled: true,
+						},
+					},
+					MatchRuleFormat: "1.0",
+				}, nil).Once()
+				p.On("ProcessTemplates", TFPolicyData{
+					Name:              "test_policy",
+					Section:           section,
+					CloudletCode:      "AS",
+					Description:       "version 2 description",
+					GroupID:           22,
+					PolicyActivations: map[string]TFPolicyActivationData{},
+					MatchRuleFormat:   "1.0",
+					MatchRules: cloudlets.MatchRules{
+						&cloudlets.MatchRuleAS{
+							Name:     "a rule",
+							Type:     "AS",
+							Start:    1,
+							End:      2,
+							ID:       1000,
+							Disabled: true,
+						},
+					},
+				}).Return(nil).Once()
+			},
+		},
 		"error fetching policy": {
 			init: func(c *mockCloudlets, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return(nil, fmt.Errorf("oops")).Once()
@@ -1722,6 +1793,97 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			},
 			dir:          "no_match_rules_ap",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+		},
+		"policy without match rules as": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				Section:         "test_section",
+				CloudletCode:    "AS",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+			},
+			dir:          "no_match_rules_as",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+		},
+		"policy with match rules as": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				Section:         "test_section",
+				CloudletCode:    "AS",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleAS{
+						Name: "rule1",
+						Matches: []cloudlets.MatchCriteriaAS{
+							{
+								MatchType:     "method",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								ObjectMatchValue: cloudlets.ObjectMatchValueSimple{
+									Type:  "simple",
+									Value: []string{"GET"},
+								},
+							},
+						},
+						ForwardSettings: cloudlets.ForwardSettingsAS{
+							PathAndQS: "some_path",
+						},
+						MatchURL: "test.url",
+						Disabled: false,
+					},
+					cloudlets.MatchRuleAS{
+						Name:     "rule2",
+						MatchURL: "abc.com",
+						Matches: []cloudlets.MatchCriteriaAS{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
+									Type: "object",
+									Name: "AS",
+									Options: &cloudlets.Options{
+										Value:            []string{"y"},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
+						ForwardSettings: cloudlets.ForwardSettingsAS{
+							UseIncomingQueryString: true,
+						},
+					},
+					cloudlets.MatchRuleAS{
+						Name:  "rule3",
+						Start: 1,
+						End:   2,
+						Matches: []cloudlets.MatchCriteriaAS{
+							{
+								MatchType:     "range",
+								MatchOperator: "equals",
+								ObjectMatchValue: &cloudlets.ObjectMatchValueRange{
+									Type:  "range",
+									Value: []int64{1, 50},
+								},
+							},
+						},
+						MatchURL: "test.url",
+						ForwardSettings: cloudlets.ForwardSettingsAS{
+							OriginID: "test_origin",
+						},
+						Disabled: false,
+					},
+					cloudlets.MatchRuleAS{
+						Name:     "rule_empty",
+						Disabled: true,
+					},
+				},
+			},
+			dir:          "with_match_rules_as",
+			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
 		},
 	}
 
