@@ -26,9 +26,11 @@ import (
 )
 
 var (
+	// VERSION holds current version of cli
 	VERSION = "0.4.0"
 )
 
+// Run initializes the cli and runs it
 func Run() error {
 	term := terminal.Color()
 	ctx := context.Background()

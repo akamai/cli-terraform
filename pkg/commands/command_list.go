@@ -28,7 +28,7 @@ func cmdList(c *cli.Context) error {
 
 	for _, command := range c.App.Commands {
 		bold := color.New(color.FgWhite, color.Bold)
-		bold.Printf("  %s", command.Name)
+		fmt.Print(bold.Sprintf("  %s", command.Name))
 		if len(command.Aliases) > 0 {
 			var aliases string
 
@@ -40,7 +40,7 @@ func cmdList(c *cli.Context) error {
 
 			fmt.Printf(" (%s: ", aliases)
 			for i, alias := range command.Aliases {
-				bold.Print(alias)
+				fmt.Print(bold.Sprint(alias))
 				if i < len(command.Aliases)-1 {
 					fmt.Print(", ")
 				}

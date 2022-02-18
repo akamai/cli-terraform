@@ -116,7 +116,7 @@ func processProperties(properties []*gtm.Property, pImportList map[string][]int,
 
 }
 
-func processHttpHeaders(headers []*gtm.HttpHeader) string {
+func processHTTPHeaders(headers []*gtm.HttpHeader) string {
 
 	if len(headers) == 0 {
 		return ""
@@ -206,7 +206,7 @@ func processLivenessTests(tests []*gtm.LivenessTest, childObjectList map[string]
 				continue
 			}
 			if varName == "HttpHeaders" {
-				testsString += processHttpHeaders(varValue.([]*gtm.HttpHeader))
+				testsString += processHTTPHeaders(varValue.([]*gtm.HttpHeader))
 				continue
 			}
 			if varType.Kind() == reflect.String {
@@ -222,7 +222,7 @@ func processLivenessTests(tests []*gtm.LivenessTest, childObjectList map[string]
 
 }
 
-func processStaticRRSets(rrsets []*gtm.StaticRRSet, childObjectList map[string]gtm.NullPerObjectAttributeStruct) string {
+func processStaticRRSets(rrsets []*gtm.StaticRRSet, _ map[string]gtm.NullPerObjectAttributeStruct) string {
 
 	if len(rrsets) == 0 {
 		return ""

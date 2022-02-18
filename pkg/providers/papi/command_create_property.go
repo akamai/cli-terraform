@@ -35,7 +35,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// EdgeHostname represent data used for single Edge host
+// EdgeHostname represents EdgeHostname resource
 type EdgeHostname struct {
 	EdgeHostname             string
 	EdgeHostnameID           string
@@ -49,13 +49,13 @@ type EdgeHostname struct {
 	SecurityType             string
 }
 
-// Hostname represent data used for single host
+// Hostname represents edge hostname resource
 type Hostname struct {
 	Hostname                 string
 	EdgeHostnameResourceName string
 }
 
-// TFData represent data used in templates
+// TFData holds template data
 type TFData struct {
 	GroupName            string
 	GroupID              string
@@ -110,7 +110,7 @@ type RuleTemplate struct {
 func getEdgegridConfig(c *cli.Context) (edgegrid.Config, error) {
 	config, err := edgegrid.Init(c.String("edgerc"), c.String("section"))
 	if err != nil {
-		return edgegrid.Config{}, cli.NewExitError(err.Error(), 1)
+		return edgegrid.Config{}, cli.Exit(err.Error(), 1)
 	}
 
 	if len(c.String("accountkey")) > 0 {
@@ -122,6 +122,7 @@ func getEdgegridConfig(c *cli.Context) (edgegrid.Config, error) {
 	return config, nil
 }
 
+// CmdCreateProperty is an entrypoint to create-property command
 func CmdCreateProperty(c *cli.Context) error {
 	term := terminal.Get(c.Context)
 
@@ -236,6 +237,10 @@ func CmdCreateProperty(c *cli.Context) error {
 
 	for _, rule := range rules.Rule.Children {
 		jsonBody, err := json.MarshalIndent(rule, "", "  ")
+		if err != nil {
+			term.Spinner().Fail()
+			return cli.Exit(color.RedString("Can't marshall property rule snippets: ", err), 1)
+		}
 		name := strings.ReplaceAll(rule.Name, " ", "_")
 		rulesnamepath := filepath.Join(snippetspath, fmt.Sprintf("%s.json", name))
 		err = ioutil.WriteFile(rulesnamepath, jsonBody, 0644)
@@ -247,6 +252,10 @@ func CmdCreateProperty(c *cli.Context) error {
 	}
 
 	jsonBody, err := json.MarshalIndent(rulestemplate, "", "  ")
+	if err != nil {
+		term.Spinner().Fail()
+		return cli.Exit(color.RedString("Can't marshall rule template: ", err), 1)
+	}
 	templatepath := filepath.Join(snippetspath, "main.json")
 	err = ioutil.WriteFile(templatepath, jsonBody, 0644)
 	if err != nil {
@@ -313,7 +322,7 @@ func CmdCreateProperty(c *cli.Context) error {
 		// Get slot details
 		ehnid := strings.Replace(hostname.EdgeHostnameID, "ehn_", "", 1)
 
-		edgehostname, err := hapi.GetEdgeHostnameById(ehnid)
+		edgehostname, err := hapi.GetEdgeHostnameByID(ehnid)
 		if err != nil {
 			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Edge Hostname not found: %s", err), 1)
@@ -395,16 +404,6 @@ func getIPv6(property *papi.Property, ehn string) string {
 		}
 	}
 	return ""
-}
-
-func getCPCode(property *papi.Property, cpCodeID string) (string, error) {
-	cpCode := papi.NewCpCodes(property.Contract, property.Group).NewCpCode()
-	cpCode.CpcodeID = cpCodeID
-	err := cpCode.GetCpCode()
-	if err != nil {
-		return "", err
-	}
-	return cpCode.CpcodeName, nil
 }
 
 func findProperty(name string) *papi.Property {
@@ -600,12 +599,14 @@ func saveTerraformDefinition(data TFData) error {
 			"terraform import akamai_edge_hostname.{{.EdgeHostnameResourceName}} {{.EdgeHostnameID}},{{.ContractID}},{{.GroupID}}\n" +
 			"{{end}}" +
 			"terraform import akamai_property.{{.PropertyResourceName}} {{.PropertyID}},{{.ContractID}},{{.GroupID}}\n")
+	if err != nil {
+		return err
+	}
 
 	err = importtemplate.Execute(f, data)
 	if err != nil {
 		return err
 	}
-	f.Close()
 
-	return nil
+	return f.Close()
 }

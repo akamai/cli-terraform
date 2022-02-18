@@ -24,13 +24,12 @@ import (
 
 func cmdHelp(c *cli.Context) error {
 	if c.Args().Present() {
-		if sub_cmd := c.Args().Get(1); sub_cmd != "" {
+		if subCmd := c.Args().Get(1); subCmd != "" {
 			args := []string{os.Args[0]}
 			args = append(args, os.Args[2:]...)
 			args = append(args, "--help")
 			os.Args = args
-			c.App.Run(os.Args)
-			return nil
+			return c.App.Run(os.Args)
 		}
 
 		cmd := c.Args().First()

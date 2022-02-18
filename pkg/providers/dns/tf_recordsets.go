@@ -24,9 +24,9 @@ import (
 )
 
 const (
-	MinUint uint = 0
-	MaxUint      = ^MinUint
-	MaxInt       = int(MaxUint >> 1)
+	minUint uint = 0
+	maxUint      = ^minUint
+	maxInt       = int(maxUint >> 1)
 )
 
 // module preamble
@@ -82,14 +82,14 @@ func createParamsMap(params []string) *map[string]string {
 }
 
 // Process recordset resources
-func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[string]map[string]bool, fetchconfig fetchConfigStruct) (map[string]Types, error) {
+func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[string]map[string]bool, _ fetchConfigStruct) (map[string]Types, error) {
 
-	var configuredMap = make(map[string]Types, 0) // returned variable
+	var configuredMap = make(map[string]Types) // returned variable
 
 	v, _ := mem.VirtualMemory()
 	maxPageSize := (v.Free / 2) / 512 // use max half of free memory. Assume avg recordset size is 512 bytes
-	if maxPageSize > uint64(MaxInt/512) {
-		maxPageSize = uint64(MaxInt / 512)
+	if maxPageSize > uint64(maxInt/512) {
+		maxPageSize = uint64(maxInt / 512)
 	}
 	pagesize := int(maxPageSize)
 
@@ -239,7 +239,7 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 		if nameRecordSetsResp.Metadata.Page == nameRecordSetsResp.Metadata.LastPage || nameRecordSetsResp.Metadata.LastPage == 0 {
 			break
 		}
-		queryArgs.Page += 1
+		queryArgs.Page++
 		nameRecordSetsResp, err = dns.GetRecordsets(zone, queryArgs)
 		if err != nil {
 			return configuredMap, fmt.Errorf("Failed to read record set. %s", err.Error())

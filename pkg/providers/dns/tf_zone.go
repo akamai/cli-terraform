@@ -22,7 +22,7 @@ import (
 )
 
 // Keys that can be ignored, e.g. lists, read-only, don't want
-var ignoredZoneKeys map[string]int = map[string]int{"LastActivationDate": 0, "LastModifiedBy": 0, "LastModifiedDate": 0,
+var ignoredZoneKeys = map[string]int{"LastActivationDate": 0, "LastModifiedBy": 0, "LastModifiedDate": 0,
 	"AliasCount": 0, "ActivationState": 0, "VersionId": 0}
 
 // header, zone
@@ -42,9 +42,6 @@ var dnsZoneResourceConfig = fmt.Sprintf(`resource "akamai_dns_zone" "`)
 
 var dnsZoneConfigP2 = fmt.Sprintf(`    contract = var.contractid
     group = var.groupid
-`)
-
-var dnsZoneConfigP3 = fmt.Sprintf(`    comment =  "Zone import"
 `)
 
 // module

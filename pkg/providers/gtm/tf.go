@@ -25,7 +25,7 @@ import (
 )
 
 // Keys that can be ignored, e.g. lists, read-only, don't want
-var ignoredKeys map[string]int = map[string]int{"AsMaps": 0, "Resources": 0, "Properties": 0, "Datacenters": 0, "CidrMaps": 0, "GeographicMaps": 0,
+var ignoredKeys = map[string]int{"AsMaps": 0, "Resources": 0, "Properties": 0, "Datacenters": 0, "CidrMaps": 0, "GeographicMaps": 0,
 	"Links": 0, "Status": 0, "DefaultUnreachableThreshold": 0, "MinPingableRegionFraction": 0,
 	"ServermonitorLivenessCount": 0, "RoundRobinPrefix": 0, "ServermonitorLoadCount": 0,
 	"PingInterval": 0, "MaxTTL": 0, "DefaultHealthMax": 0, "MapUpdateInterval": 0, "MaxProperties": 0,
@@ -35,14 +35,13 @@ var ignoredKeys map[string]int = map[string]int{"AsMaps": 0, "Resources": 0, "Pr
 	"WeightedHashBitsForIPv4": 0, "WeightedHashBitsForIPv6": 0, "Virtual": 0}
 
 // initialized with key names that don't follow mapping pattern. populated in convert key for secondary encounters
-var mappedKeys map[string]string = map[string]string{"DynamicTTL": "dynamic_ttl", "StaticTTL": "static_ttl", "StaticRRSets": "static_rr_sets",
+var mappedKeys = map[string]string{"DynamicTTL": "dynamic_ttl", "StaticTTL": "static_ttl", "StaticRRSets": "static_rr_sets",
 	"TTL": "ttl", "DatacenterId": "datacenter_id", "HandoutCName": "handout_cname", "StickinessBonusPercentage": "stickiness_bonus_percentage",
 	"CName": "cname", "BackupCName": "backup_cname"}
 
 var tab4 = "    "
 var tab8 = "        "
 var tab12 = "            "
-var tab16 = "                "
 
 // header, domain
 var gtmHeaderConfig = fmt.Sprintf(`resource "akamai_gtm_domain" `)
@@ -145,7 +144,7 @@ func processNumList(sl []int64) string {
 }
 
 // utility method to convert camelCased struct field names to provider field naming convention
-func convertKey(inKey string, keyVal string, keyKind reflect.Kind) string {
+func convertKey(inKey string, _ string, _ reflect.Kind) string {
 
 	if _, ok := ignoredKeys[inKey]; ok {
 		return ""

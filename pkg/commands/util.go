@@ -19,6 +19,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+// SetHelpTemplates customizes help templates
 func SetHelpTemplates() {
 	cli.AppHelpTemplate =
 		color.YellowString("Usage: \n") +

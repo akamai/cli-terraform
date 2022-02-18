@@ -120,7 +120,7 @@ func getEdgegridConfig(c *cli.Context) (edgegrid.Config, error) {
 	return config, nil
 }
 
-// command function create-domain
+// CmdCreateDomain is an entrypoint to create-domain command
 func CmdCreateDomain(c *cli.Context) error {
 	term := terminal.Get(c.Context)
 
@@ -374,14 +374,14 @@ func createImportListFilename(resourceName string) string {
 func buildImportScript(importList *importListStruct, resourceDomainName string) (string, error) {
 
 	// build import script
-	var import_prefix = "terraform import "
-	var import_file = ""
+	var importPrefix = "terraform import "
+	var importFile = ""
 	// Init TF
-	import_file += "terraform init\n"
+	importFile += "terraform init\n"
 	// domain
 	if !checkForResource(domainResource, resourceDomainName) {
 		// Assuming a domain name cannot contain spaces ....
-		import_file += import_prefix + domainResource + "." + resourceDomainName + " " + importList.Domain + "\n"
+		importFile += importPrefix + domainResource + "." + resourceDomainName + " " + importList.Domain + "\n"
 	}
 	// datacenters
 	for id, nickname := range importList.Datacenters {
@@ -397,71 +397,71 @@ func buildImportScript(importList *importListStruct, resourceDomainName string) 
 			continue
 		}
 		if !checkForResource(datacenterResource, normalName) {
-			import_file += import_prefix + datacenterResource + "." + normalName + " " + importList.Domain + ":" + strconv.Itoa(id) + "\n"
+			importFile += importPrefix + datacenterResource + "." + normalName + " " + importList.Domain + ":" + strconv.Itoa(id) + "\n"
 		}
 	}
 	// properties
-	for name, _ := range importList.Properties {
+	for name := range importList.Properties {
 		normalName := normalizeResourceName(name)
 		if !checkForResource(propertyResource, normalName) {
-			import_file += import_prefix + propertyResource + "." + normalName + " "
+			importFile += importPrefix + propertyResource + "." + normalName + " "
 			if strings.Contains(name, " ") {
-				import_file += `"` + importList.Domain + ":" + name + `"` + "\n"
+				importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
 			} else {
-				import_file += importList.Domain + ":" + name + "\n"
+				importFile += importList.Domain + ":" + name + "\n"
 			}
 		}
 	}
 	// resources
-	for name, _ := range importList.Resources {
+	for name := range importList.Resources {
 		normalName := normalizeResourceName(name)
 		if !checkForResource(resourceResource, normalName) {
-			import_file += import_prefix + resourceResource + "." + normalName + " "
+			importFile += importPrefix + resourceResource + "." + normalName + " "
 			if strings.Contains(name, " ") {
-				import_file += `"` + importList.Domain + ":" + name + `"` + "\n"
+				importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
 			} else {
-				import_file += importList.Domain + ":" + name + "\n"
+				importFile += importList.Domain + ":" + name + "\n"
 			}
 		}
 	}
 	// cidrmaps
-	for name, _ := range importList.Cidrmaps {
+	for name := range importList.Cidrmaps {
 		normalName := normalizeResourceName(name)
 		if !checkForResource(cidrResource, normalName) {
-			import_file += import_prefix + cidrResource + "." + normalName + " "
+			importFile += importPrefix + cidrResource + "." + normalName + " "
 			if strings.Contains(name, " ") {
-				import_file += `"` + importList.Domain + ":" + name + `"` + "\n"
+				importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
 			} else {
-				import_file += importList.Domain + ":" + name + "\n"
+				importFile += importList.Domain + ":" + name + "\n"
 			}
 		}
 	}
 	// geomaps
-	for name, _ := range importList.Geomaps {
+	for name := range importList.Geomaps {
 		normalName := normalizeResourceName(name)
 		if !checkForResource(geoResource, normalName) {
-			import_file += import_prefix + geoResource + "." + normalName + " "
+			importFile += importPrefix + geoResource + "." + normalName + " "
 			if strings.Contains(name, " ") {
-				import_file += `"` + importList.Domain + ":" + name + `"` + "\n"
+				importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
 			} else {
-				import_file += importList.Domain + ":" + name + "\n"
+				importFile += importList.Domain + ":" + name + "\n"
 			}
 		}
 	}
 	// asmaps
-	for name, _ := range importList.Asmaps {
+	for name := range importList.Asmaps {
 		normalName := normalizeResourceName(name)
 		if !checkForResource(asResource, normalName) {
-			import_file += import_prefix + asResource + "." + normalName + " "
+			importFile += importPrefix + asResource + "." + normalName + " "
 			if strings.Contains(name, " ") {
-				import_file += `"` + importList.Domain + ":" + name + `"` + "\n"
+				importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
 			} else {
-				import_file += importList.Domain + ":" + name + "\n"
+				importFile += importList.Domain + ":" + name + "\n"
 			}
 		}
 	}
 
-	return import_file, nil
+	return importFile, nil
 
 }
 
@@ -505,35 +505,35 @@ func reconcileResourceTargets(importList *importListStruct, domainName string) (
 			delete(importList.Datacenters, id)
 		}
 	}
-	for name, _ := range importList.Properties {
+	for name := range importList.Properties {
 		normalName := normalizeResourceName(name)
 		if strings.Contains(tfConfig, "\""+normalName+"\"") {
 			fmt.Println("Property " + name + " found in existing tf file")
 			delete(importList.Properties, name)
 		}
 	}
-	for name, _ := range importList.Resources {
+	for name := range importList.Resources {
 		normalName := normalizeResourceName(name)
 		if strings.Contains(tfConfig, "\""+normalName+"\"") {
 			fmt.Println("Resource " + name + " found in existing tf file")
 			delete(importList.Resources, name)
 		}
 	}
-	for name, _ := range importList.Cidrmaps {
+	for name := range importList.Cidrmaps {
 		normalName := normalizeResourceName(name)
 		if strings.Contains(tfConfig, "\""+normalName+"\"") {
 			fmt.Println("Cidrmap " + name + " found in existing tf file")
 			delete(importList.Cidrmaps, name)
 		}
 	}
-	for name, _ := range importList.Geomaps {
+	for name := range importList.Geomaps {
 		normalName := normalizeResourceName(name)
 		if strings.Contains(tfConfig, "\""+normalName+"\"") {
 			fmt.Println("Geomap " + name + " found in existing tf file")
 			delete(importList.Geomaps, name)
 		}
 	}
-	for name, _ := range importList.Asmaps {
+	for name := range importList.Asmaps {
 		normalName := normalizeResourceName(name)
 		if strings.Contains(tfConfig, "\""+normalName+"\"") {
 			fmt.Println("Asmap " + name + " found in existing tf file")

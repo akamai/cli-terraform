@@ -9,6 +9,7 @@ import (
 	client "github.com/akamai/AkamaiOPEN-edgegrid-golang/client-v1"
 )
 
+// Certificate holds certificate information
 type Certificate struct {
 	CertificateID    string    `json:"certificateId"`
 	CommonName       string    `json:"commonName"`
@@ -21,6 +22,7 @@ type Certificate struct {
 	AvailableDomains []string  `json:"availableDomains"`
 }
 
+// EdgeHostname represents edge hostname
 type EdgeHostname struct {
 	EdgeHostnameID    int    `json:"edgeHostnameId"`
 	RecordName        string `json:"recordName"`
@@ -42,10 +44,12 @@ type EdgeHostname struct {
 	IsEdgeIPBindingEnabled bool `json:"isEdgeIPBindingEnabled,omitempty"`
 }
 
+// ListEdgeHostnamesResponse holds a response from ListEdgeHostnames
 type ListEdgeHostnamesResponse struct {
 	EdgeHostnames []EdgeHostname `json:"edgeHostnames"`
 }
 
+// ChangeRequest represents a change response
 type ChangeRequest struct {
 	Action            string         `json:"action"`
 	ChangeID          int            `json:"changeId"`
@@ -60,16 +64,19 @@ type ChangeRequest struct {
 	EdgeHostnames     []EdgeHostname `json:"edgeHostnames"`
 }
 
+// ListChangeRequestsResponse holds a response from ListChangeRequests
 type ListChangeRequestsResponse struct {
 	ChangeRequests []ChangeRequest `json:"changeRequests"`
 }
 
+// Patch contains json patch
 type Patch struct {
 	Op    string `json:"op"`
 	Path  string `json:"path"`
 	Value string `json:"value"`
 }
 
+// Products contains a response from ListProducts
 type Products struct {
 	ProductDisplayNames []struct {
 		ProductID          string `json:"productId"`
@@ -77,6 +84,7 @@ type Products struct {
 	} `json:"productDisplayNames"`
 }
 
+// ListEdgeHostnames return a list of all edge hostnames
 func ListEdgeHostnames() (*ListEdgeHostnamesResponse, error) {
 	req, err := client.NewRequest(
 		Config,
@@ -107,6 +115,7 @@ func ListEdgeHostnames() (*ListEdgeHostnamesResponse, error) {
 	return &response, nil
 }
 
+// GetEdgeHostname gets hostame by dnszone and recordname
 func GetEdgeHostname(recordName string, dnsZone string) (*EdgeHostname, error) {
 	req, err := client.NewRequest(
 		Config,
@@ -137,6 +146,7 @@ func GetEdgeHostname(recordName string, dnsZone string) (*EdgeHostname, error) {
 	return &response, nil
 }
 
+// GetCertificate returns edge hostname certificate for given dnsZone and recordName
 func GetCertificate(recordName string, dnsZone string) (*Certificate, error) {
 	req, err := client.NewRequest(
 		Config,
@@ -167,7 +177,8 @@ func GetCertificate(recordName string, dnsZone string) (*Certificate, error) {
 	return &response, nil
 }
 
-func GetEdgeHostnameById(id string) (*EdgeHostname, error) {
+// GetEdgeHostnameByID returns edge hostname with given id
+func GetEdgeHostnameByID(id string) (*EdgeHostname, error) {
 	req, err := client.NewRequest(
 		Config,
 		"GET",
@@ -197,6 +208,7 @@ func GetEdgeHostnameById(id string) (*EdgeHostname, error) {
 	return &response, nil
 }
 
+// DeleteEdgeHostname deletes
 func DeleteEdgeHostname(recordName string, dnsZone string) (*ChangeRequest, error) {
 	req, err := client.NewRequest(
 		Config,
@@ -227,6 +239,7 @@ func DeleteEdgeHostname(recordName string, dnsZone string) (*ChangeRequest, erro
 	return &response, nil
 }
 
+// PatchEdgeHostname updates edge hostname with given patch
 func PatchEdgeHostname(recordName string, dnsZone string, patch []Patch) (*ChangeRequest, error) {
 
 	r, err := json.Marshal(patch)
@@ -263,6 +276,7 @@ func PatchEdgeHostname(recordName string, dnsZone string, patch []Patch) (*Chang
 	return &response, nil
 }
 
+// ListChangeRequestsByHostname returns a list of all ChangeRequests with given dnsZone and recordName
 func ListChangeRequestsByHostname(recordName string, dnsZone string) (*ListChangeRequestsResponse, error) {
 	req, err := client.NewRequest(
 		Config,
@@ -293,6 +307,7 @@ func ListChangeRequestsByHostname(recordName string, dnsZone string) (*ListChang
 	return &response, nil
 }
 
+// ListChangeRequests lists all ChangeRequests
 func ListChangeRequests() (*ListChangeRequestsResponse, error) {
 	req, err := client.NewRequest(
 		Config,
@@ -323,6 +338,7 @@ func ListChangeRequests() (*ListChangeRequestsResponse, error) {
 	return &response, nil
 }
 
+// GetChangeRequest returns ChangeRequest with given id
 func GetChangeRequest(id string) (*ChangeRequest, error) {
 	req, err := client.NewRequest(
 		Config,
@@ -353,6 +369,7 @@ func GetChangeRequest(id string) (*ChangeRequest, error) {
 	return &response, nil
 }
 
+// ListProducts returns list of products
 func ListProducts() (*Products, error) {
 	req, err := client.NewRequest(
 		Config,

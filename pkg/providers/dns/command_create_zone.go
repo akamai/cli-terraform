@@ -35,8 +35,8 @@ import (
 var zoneResource = "akamai_dns_zone"
 var recordsetResource = "akamai_dns_record"
 
-// type to organize types by name
-type Types []string // list of Name Types.
+// Types contains list of Name Types to organize types by name
+type Types []string
 
 // Import List Struct
 type zoneImportListStruct struct {
@@ -60,7 +60,6 @@ type fetchConfigStruct struct {
 var fetchConfig = fetchConfigStruct{ConfigOnly: false, ModSegment: false, NamesOnly: false}
 
 var zoneName string
-var zoneObject configdns.ZoneResponse
 var contractid string
 
 var fullZoneImportList *zoneImportListStruct
@@ -95,7 +94,7 @@ variable "groupid" {
 func getEdgegridConfig(c *cli.Context) (edgegrid.Config, error) {
 	config, err := edgegrid.Init(c.String("edgerc"), c.String("section"))
 	if err != nil {
-		return edgegrid.Config{}, cli.NewExitError(err.Error(), 1)
+		return edgegrid.Config{}, cli.Exit(err.Error(), 1)
 	}
 
 	if len(c.String("accountkey")) > 0 {
@@ -107,7 +106,7 @@ func getEdgegridConfig(c *cli.Context) (edgegrid.Config, error) {
 	return config, nil
 }
 
-// command function create-zone
+// CmdCreateZone is an entrypoint to create-zone command
 func CmdCreateZone(c *cli.Context) error {
 	term := terminal.Get(c.Context)
 
@@ -327,7 +326,7 @@ func CmdCreateZone(c *cli.Context) error {
 
 	if importScript {
 		term.Spinner().Start("Creating zone import script file")
-		fullZoneConfigMap, err = retrieveZoneResourceConfig(resourceZoneName)
+		fullZoneConfigMap, _ = retrieveZoneResourceConfig(resourceZoneName)
 		importScriptFilename := filepath.Join(tools.TFWorkPath, resourceZoneName+"_resource_import.script")
 		if _, err := os.Stat(importScriptFilename); err == nil {
 			// File exists. Bail
@@ -365,7 +364,7 @@ func appendRootModuleTF(configText string) error {
 	// save top level Zone TF config
 	_, err := zoneTFfileHandle.Write([]byte(configText))
 	if err != nil {
-		return fmt.Errorf("Failed to save zone configuration file.")
+		return fmt.Errorf("failed to save zone configuration file")
 	}
 	zoneTFfileHandle.Sync()
 
@@ -393,7 +392,7 @@ func createNamedModulePath(modName string) string {
 // Work routine to create module TF file
 func createModuleTF(modName string, content string) error {
 
-	fmt.Sprintf("Creating zone name %s module configuration file...", modName)
+	fmt.Printf("Creating zone name %s module configuration file...", modName)
 	namedmodulePath := createNamedModulePath(modName)
 	if !createDirectory(namedmodulePath) {
 		return fmt.Errorf("Failed to create name module folder: %s", namedmodulePath)
@@ -441,14 +440,14 @@ func createDirectory(dirName string) bool {
 func buildZoneImportScript(zone string, zoneConfigMap map[string]Types, resourceName string) (string, error) {
 
 	// build import script
-	var import_prefix = "terraform import "
-	var import_file = ""
+	var importPrefix = "terraform import "
+	var importFile = ""
 	// Init TF
-	import_file += "terraform init\n"
+	importFile += "terraform init\n"
 	// zone
 	if !checkForResource(zoneResource, resourceName) {
 		// Assuming a zone name cannot contain spaces ....
-		import_file += import_prefix + zoneResource + "." + resourceName + " " + zone + "\n"
+		importFile += importPrefix + zoneResource + "." + resourceName + " " + zone + "\n"
 	}
 	// recordsets
 	for zname, typeList := range zoneConfigMap {
@@ -456,12 +455,12 @@ func buildZoneImportScript(zone string, zoneConfigMap map[string]Types, resource
 		for _, tname := range typeList {
 			normalName := createRecordsetNormalName(resourceName, zname, tname)
 			if !checkForResource(recordsetResource, normalName) {
-				import_file += import_prefix + recordsetResource + "." + normalName + " " + zone + "#" + zname + "#" + tname + "\n"
+				importFile += importPrefix + recordsetResource + "." + normalName + " " + zone + "#" + zname + "#" + tname + "\n"
 			}
 		}
 	}
 
-	return import_file, nil
+	return importFile, nil
 
 }
 

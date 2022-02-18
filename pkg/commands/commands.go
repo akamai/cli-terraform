@@ -24,6 +24,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+// CommandLocator creates and returns a list of subcommands
 func CommandLocator() ([]*cli.Command, error) {
 	var commands []*cli.Command
 

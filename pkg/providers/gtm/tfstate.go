@@ -24,14 +24,15 @@ import (
 )
 
 type tfStateStruct struct {
-	Version           int         `json:"version"`
-	Terraform_version string      `json:"terraform_version"`
-	Serial            int         `json:"serial"`
-	Lineage           string      `json:"lineage"`
-	Outputs           interface{} `json:"outputs"`
-	Resources         []*Resource `json:"resources"`
+	Version          int         `json:"version"`
+	TerraformVersion string      `json:"terraform_version"`
+	Serial           int         `json:"serial"`
+	Lineage          string      `json:"lineage"`
+	Outputs          interface{} `json:"outputs"`
+	Resources        []*Resource `json:"resources"`
 }
 
+// Resource describes tf state resource
 type Resource struct {
 	Mode      string        `json:"mode"`
 	Type      string        `json:"type"`
