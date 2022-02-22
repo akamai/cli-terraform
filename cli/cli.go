@@ -20,9 +20,11 @@ import (
 	"os"
 
 	"github.com/akamai/cli-terraform/pkg/commands"
+	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	akacli "github.com/akamai/cli/pkg/app"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
+	"github.com/urfave/cli/v2"
 )
 
 var (
@@ -48,6 +50,16 @@ func Run() error {
 	if len(cmds) > 0 {
 		app.Commands = cmds
 	}
+	app.Before = putSessionInContext
 
 	return app.RunContext(ctx, os.Args)
+}
+
+func putSessionInContext(c *cli.Context) error {
+	s, err := edgegrid.InitializeSession(c)
+	if err != nil {
+		return err
+	}
+	c.Context = edgegrid.WithSession(c.Context, s)
+	return nil
 }

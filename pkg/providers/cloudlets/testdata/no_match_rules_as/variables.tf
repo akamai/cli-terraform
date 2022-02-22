@@ -1,14 +1,14 @@
 variable "edgerc_path" {
-  type = string
+  type    = string
   default = "~/.edgerc"
 }
 
 variable "config_section" {
-  type = string
+  type    = string
   default = "test_section"
 }
 
 variable "env" {
-  type = string
+  type    = string
   default = "staging"
 }

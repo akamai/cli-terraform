@@ -1,4 +1,4 @@
-package tools
+package edgegrid
 
 import (
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/edgegrid"
@@ -7,7 +7,6 @@ import (
 
 // GetEdgegridConfig gets configuration from .edgerc file
 func GetEdgegridConfig(c *cli.Context) (*edgegrid.Config, error) {
-
 	edgercOps := []edgegrid.Option{
 		edgegrid.WithEnv(true),
 		edgegrid.WithFile(GetEdgercPath(c)),

@@ -12,7 +12,7 @@ import (
 	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/cloudlets"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
+	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
@@ -76,17 +76,8 @@ func CmdCreatePolicy(c *cli.Context) error {
 		}
 		return cli.Exit(color.RedString("Policy name is required"), 1)
 	}
-	config, err := tools.GetEdgegridConfig(c)
-	if err != nil {
-		return err
-	}
 
-	sess, err := session.New(
-		session.WithSigner(config),
-	)
-	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
-	}
+	sess := edgegrid.GetSession(c.Context)
 	client := cloudlets.Client(sess)
 	if c.IsSet("tfworkpath") {
 		tools.TFWorkPath = c.String("tfworkpath")
@@ -102,7 +93,7 @@ func CmdCreatePolicy(c *cli.Context) error {
 	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
 	importPath := filepath.Join(tools.TFWorkPath, "import.sh")
 
-	err = tools.CheckFiles(policyPath, variablesPath, importPath)
+	err := tools.CheckFiles(policyPath, variablesPath, importPath)
 	if err != nil {
 		return cli.Exit(color.RedString(err.Error()), 1)
 	}
@@ -123,7 +114,7 @@ func CmdCreatePolicy(c *cli.Context) error {
 	}
 
 	policyName := c.Args().First()
-	section := tools.GetEdgercSection(c)
+	section := edgegrid.GetEdgercSection(c)
 	if err = createPolicy(ctx, policyName, section, client, processor); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting policy HCL: %s", err)), 1)
 	}
