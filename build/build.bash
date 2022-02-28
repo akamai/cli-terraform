@@ -94,6 +94,6 @@ clone_repository provider
 find_edgegrid_branch
 find_provider_branch
 
-if ! ./build/docker_jenkins.bash "$CURRENT_BRANCH" "$EDGEGRID_BRANCH" "$EDGEGRID_BRANCH"; then
+if ! ./build/docker_jenkins.bash "$CURRENT_BRANCH" "$PROVIDER_BRANCH" "$EDGEGRID_BRANCH"; then
     exit 1
 fi
