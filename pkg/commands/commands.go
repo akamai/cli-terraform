@@ -19,6 +19,7 @@ import (
 	"github.com/akamai/cli-terraform/pkg/providers/dns"
 	"github.com/akamai/cli-terraform/pkg/providers/edgeworkers"
 	"github.com/akamai/cli-terraform/pkg/providers/gtm"
+	"github.com/akamai/cli-terraform/pkg/providers/imaging"
 	"github.com/akamai/cli-terraform/pkg/providers/papi"
 	akacli "github.com/akamai/cli/pkg/app"
 	"github.com/urfave/cli/v2"
@@ -164,20 +165,49 @@ func CommandLocator() ([]*cli.Command, error) {
 		BashComplete: akacli.DefaultAutoComplete,
 	})
 
-	commands = append(commands,
-		&cli.Command{
-			Name:        "list",
-			Description: "List commands",
-			Action:      cmdList,
+	commands = append(commands, &cli.Command{
+		Name:        "create-cloudlets-policy",
+		Description: "Create Terraform Cloudlets Policy Resource",
+		Usage:       "create-cloudlets-policy",
+		ArgsUsage:   "<policy_name>",
+		Action:      cloudlets.CmdCreatePolicy,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "tfworkpath",
+				Usage: "Path location for placement of created artifacts. Default: current directory",
+			},
 		},
-		&cli.Command{
-			Name:         "help",
-			Description:  "Displays help information",
-			ArgsUsage:    "<command> <sub-command>",
-			Action:       cmdHelp,
-			BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: akacli.DefaultAutoComplete,
+	})
+
+	commands = append(commands, &cli.Command{
+		Name:        "create-imaging",
+		Description: "Create Terraform Image and Video Manager resources",
+		Usage:       "create-imaging",
+		ArgsUsage:   "<contract_id> <policy_set_id>",
+		Action:      imaging.CmdCreateImaging,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "tfworkpath",
+				Usage: "Path location for placement of created artifacts. Default: current directory",
+			},
 		},
-	)
+		BashComplete: akacli.DefaultAutoComplete,
+	})
+
+	commands = append(commands, &cli.Command{
+		Name:        "list",
+		Description: "List commands",
+		Action:      cmdList,
+	})
+
+	commands = append(commands, &cli.Command{
+		Name:         "help",
+		Description:  "Displays help information",
+		ArgsUsage:    "<command> <sub-command>",
+		Action:       cmdHelp,
+		BashComplete: akacli.DefaultAutoComplete,
+	})
 
 	return commands, nil
 }

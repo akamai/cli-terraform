@@ -759,9 +759,9 @@ func TestCreatePolicy(t *testing.T) {
 							ID:    1234,
 						},
 					},
-				}).Return(fmt.Errorf("oops")).Once()
+				}).Return(templates.ErrSavingFiles).Once()
 			},
-			withError: ErrSavingFiles,
+			withError: templates.ErrSavingFiles,
 		},
 	}
 

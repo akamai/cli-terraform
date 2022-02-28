@@ -37,6 +37,8 @@ type (
 var (
 	// ErrTemplateExecution is returned when template.Execute method fails
 	ErrTemplateExecution = errors.New("executing template")
+	// ErrSavingFiles is returned when an issue with processing templates occurs
+	ErrSavingFiles = errors.New("saving processed terraform file")
 )
 
 // ProcessTemplates parses templates located in fs.FS and executes them using the provided data
@@ -61,7 +63,7 @@ func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
 			out = hclwrite.Format(out)
 		}
 		if err := os.WriteFile(targetPath, out, 0644); err != nil {
-			return fmt.Errorf("creating '%s': %s", targetPath, err)
+			return fmt.Errorf("%w: '%s': %s", ErrSavingFiles, targetPath, err)
 		}
 	}
 	return nil

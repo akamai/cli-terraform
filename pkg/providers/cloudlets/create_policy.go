@@ -64,11 +64,9 @@ var (
 	ErrFetchingVersion = errors.New("unable to fetch latest policy version")
 	// ErrCloudletTypeNotSupported is returned when a provided cloudlet type is not yet supported
 	ErrCloudletTypeNotSupported = errors.New("cloudlet type not supported")
-	// ErrSavingFiles is returned when an issue with processing templates occurs
-	ErrSavingFiles = errors.New("saving terraform project files")
 )
 
-// CmdCreatePolicy is an entrypoint to create-policy command
+// CmdCreatePolicy is an entrypoint to create-cloudlets-policy command
 func CmdCreatePolicy(c *cli.Context) error {
 	ctx := c.Context
 	if c.NArg() != 1 {
@@ -185,7 +183,7 @@ func createPolicy(ctx context.Context, policyName, section string, client cloudl
 	term.Spinner().Start("Saving TF configurations ")
 	if err := templateProcessor.ProcessTemplates(tfPolicyData); err != nil {
 		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
+		return err
 	}
 	term.Spinner().OK()
 	fmt.Printf("Terraform configuration for policy '%s' was saved successfully\n", policy.Name)
