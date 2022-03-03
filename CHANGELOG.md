@@ -1,6 +1,19 @@
 # Release Notes
 
-## Version 0.5.1 (Feb 10, 2021)
+## Version 0.6.0 (Mar 3, 2022)
+
+### Features / Enhancements
+
+* [IMPORTANT] EdgeWorkers and EdgeKV
+  * EDGEWORKERS
+    * Support importing existing EdgeWorker configuration with related resources
+  * EDGEKV
+    * Support importing existing EdgeKV configuration with related resource
+
+* CLOUDLETS
+  * Support importing existing Cloudlets match rules for Audience Segmentation with related data source
+
+## Version 0.5.1 (Feb 10, 2022)
 
 ### Features / Enhancements
 
@@ -8,7 +21,7 @@
   * Add a `default` value to the `config_section` variable in `create-cloudlets-policy` in case the user did not specify any
   * Set the latest application load balancer version in the resource `akamai_cloudlets_application_load_balancer_activation`
 
-## Version 0.5.0 (Jan 27, 2021)
+## Version 0.5.0 (Jan 27, 2022)
 
 ### Features / Enhancements
 

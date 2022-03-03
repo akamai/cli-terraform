@@ -17,6 +17,7 @@ package main
 import (
 	akamai "github.com/akamai/cli-common-golang"
 	"github.com/akamai/cli-terraform/cloudlets"
+	"github.com/akamai/cli-terraform/edgeworkers"
 	"github.com/urfave/cli"
 )
 
@@ -109,6 +110,40 @@ var commandLocator akamai.CommandLocator = func() ([]cli.Command, error) {
 		ArgsUsage:   "<policy_name>",
 		Action:      cloudlets.CmdCreatePolicy,
 		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "tfworkpath",
+				Usage: "Path location for placement of created artifacts. Default: current directory",
+			},
+		},
+		BashComplete: akamai.DefaultAutoComplete,
+	})
+
+	commands = append(commands, cli.Command{
+		Name:        "create-edgekv",
+		Description: "Create Terraform EdgeKV Resource",
+		Usage:       "create-edgekv",
+		ArgsUsage:   "<namespace_name>, <network>",
+		Action:      edgeworkers.CmdCreateEdgeKV,
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "tfworkpath",
+				Usage: "Path location for placement of created artifacts. Default: current directory",
+			},
+		},
+		BashComplete: akamai.DefaultAutoComplete,
+	})
+
+	commands = append(commands, cli.Command{
+		Name:        "create-edgeworker",
+		Description: "Create Terraform EdgeWorker Resource",
+		Usage:       "create-edgeworker",
+		ArgsUsage:   "<edgeworker_id>",
+		Action:      edgeworkers.CmdCreateEdgeWorker,
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "bundlepath",
+				Usage: "Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath",
+			},
 			cli.StringFlag{
 				Name:  "tfworkpath",
 				Usage: "Path location for placement of created artifacts. Default: current directory",

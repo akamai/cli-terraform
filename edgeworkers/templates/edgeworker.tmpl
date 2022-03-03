@@ -1,0 +1,32 @@
+{{- /*gotype: github.com/akamai/cli-terraform/cloudlets.TFEdgeWorkerData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source = "akamai/akamai"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
+provider "akamai" {
+  edgerc         = var.edgerc_path
+  config_section = var.config_section
+}
+
+resource "akamai_edgeworker" "edgeworker" {
+  name             = "{{.Name}}"
+  group_id         = {{.GroupID}}
+  resource_tier_id = {{.ResourceTierID}}
+  {{- if eq .LocalBundle ""}}
+  // Local Bundle will default to helloworld.tgz from https://github.com/akamai/edgeworkers-examples/tree/master/edgecompute/examples/getting-started/hello-world%20(EW)
+  {{- else}}
+  local_bundle     = "{{.LocalBundle}}"
+  {{- end}}
+}
+{{ if ne .LocalBundle ""}}
+resource "akamai_edgeworkers_activation" "edgeworker_activation" {
+  edgeworker_id = {{$.EdgeWorkerID}}
+  network       = var.env
+  version       = akamai_edgeworker.edgeworker.version
+}
+{{ end }}

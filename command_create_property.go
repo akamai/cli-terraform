@@ -37,6 +37,7 @@ import (
 	"github.com/urfave/cli"
 )
 
+// EdgeHostname represent data used for single Edge host
 type EdgeHostname struct {
 	EdgeHostname             string
 	EdgeHostnameID           string
@@ -50,11 +51,13 @@ type EdgeHostname struct {
 	SecurityType             string
 }
 
+// Hostname represent data used for single host
 type Hostname struct {
 	Hostname                 string
 	EdgeHostnameResourceName string
 }
 
+// TFData represent data used in templates
 type TFData struct {
 	GroupName            string
 	GroupID              string
@@ -73,6 +76,7 @@ type TFData struct {
 	Emails               []string
 }
 
+// RulesTemplate represent data used for rules
 type RulesTemplate struct {
 	AccountID       string             `json:"accountId"`
 	ContractID      string             `json:"contractId"`
@@ -85,6 +89,7 @@ type RulesTemplate struct {
 	Errors          []*papi.RuleErrors `json:"errors,omitempty"`
 }
 
+// RuleTemplate represent data used for single rule
 type RuleTemplate struct {
 	Name                string                            `json:"name"`
 	Criteria            []*papi.Criteria                  `json:"criteria,omitempty"`
@@ -112,6 +117,13 @@ func cmdCreateProperty(c *cli.Context) error {
 		return cli.NewExitError(color.RedString("property name is required"), 1)
 	}
 
+	if c.IsSet("tfworkpath") {
+		tools.TFWorkPath = c.String("tfworkpath")
+	}
+	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
+	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
+		return cli.NewExitError(color.RedString("Destination work path is not accessible."), 1)
+	}
 	err := tools.CheckFiles(
 		tools.CreateTFFilename("property"),
 		tools.CreateTFFilename("versions"),
@@ -137,15 +149,6 @@ func cmdCreateProperty(c *cli.Context) error {
 	tfData.Emails = make([]string, 0)
 
 	tfData.Section = c.GlobalString("section")
-	// working path?
-	if c.IsSet("tfworkpath") {
-		tools.TFWorkPath = c.String("tfworkpath")
-	}
-	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
-	// pathname exists?
-	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
-		return cli.NewExitError(color.RedString("Destination work path is not accessible."), 1)
-	}
 
 	// Get Property
 	propertyName := c.Args().First()
@@ -502,14 +505,12 @@ func saveTerraformDefinition(data TFData) error {
 			"}\n" +
 			"\n" +
 			"{{end}}" +
-
 			"resource \"akamai_property\" \"{{.PropertyResourceName}}\" {\n" +
 			" name = \"{{.PropertyName}}\"\n" +
 			" contract_id = data.akamai_contract.contract.id\n" +
 			" group_id = data.akamai_group.group.id\n" +
 			" product_id = \"prd_{{.ProductName}}\"\n" +
 			" rule_format = \"{{.RuleFormat}}\"\n" +
-
 			"{{range .Hostnames}}" +
 			" hostnames {\n" +
 			"  cname_from = \"{{.Hostname}}\"\n" +

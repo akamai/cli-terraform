@@ -1,5 +1,5 @@
 {{- /*gotype: github.com/akamai/cli-terraform/cloudlets.TFPolicyData*/ -}}
-data "akamai_cloudlets_forward_rewrite_match_rule" "match_rules_fr" {
+data "akamai_cloudlets_audience_segmentation_match_rule" "match_rules_as" {
 {{- range .MatchRules}}
   match_rules {
     name = "{{escape .Name}}"
@@ -18,6 +18,10 @@ data "akamai_cloudlets_forward_rewrite_match_rule" "match_rules_fr" {
       {{- if (eq .Type "simple")}}
         type = "{{.Type}}"
         value = [{{range $i, $v := .Value}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+      {{- end}}
+      {{- if (eq .Type "range")}}
+        type = "{{.Type}}"
+        value = [{{range $i, $v := .Value}}{{if $i}}, {{end}}{{$v}}{{end}}]
       {{- end}}
       {{- if (eq .Type "object")}}
         name = "{{escape .Name}}"

@@ -48,6 +48,9 @@ Built-In Commands:
   create-domain
   create-zone
   create-property
+  create-cloudlets-policy
+  create-edgekv
+  create-edgeworker
   list
   help
 ```
@@ -169,8 +172,44 @@ Flags:
 $ akamai terraform create-cloudlets-policy
 ```
 
+## Edgeworkers
+
+### Create EdgeKV Usage
+
+```
+   akamai-terraform create-edgekv [namespace_name] [network] [--tfworkpath path] 
+
+Flags:
+   --tfworkpath path      path location for placement of created artifacts. Default: current directory
+```
+
+### Create edgekv configuration.
+
+```
+$ akamai terraform create-edgekv
+```
+
+### Create EdgeWorker Usage
+
+```
+   akamai-terraform create-edgeworker [edgeworker_id] [--bundlepath path] [--tfworkpath path]
+
+Flags:
+   --bundlepath path      path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath
+   --tfworkpath path      path location for placement of created artifacts. Default: current directory
+```
+
+### Create edgeworker configuration.
+
+```
+$ akamai terraform create-edgekv
+```
+
 ## General Notes
-1. Terraform variable configuration is generated in a separately named TF file for each Akamai entity type. These files will need to be merged by the Admin in the case where multiple entities are managed concurrently with the Terraform client.
+
+1. Terraform variable configuration is generated in a separately named TF file for each Akamai entity type. These files
+   will need to be merged by the Admin in the case where multiple entities are managed concurrently with the Terraform
+   client.
 
 ## License
 

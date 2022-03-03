@@ -1,11 +1,11 @@
-data "akamai_cloudlets_forward_rewrite_match_rule" "match_rules_fr" {
+data "akamai_cloudlets_audience_segmentation_match_rule" "match_rules_as" {
   match_rules {
-    name = "r1"
+    name = "rule1"
     start = 0
     end = 0
     matches {
-      match_type = "cookie"
-      match_value = "cookie=cookievalue"
+      match_type = "method"
+      match_value = ""
       match_operator = "equals"
       case_sensitive = true
       negate = false
@@ -15,25 +15,17 @@ data "akamai_cloudlets_forward_rewrite_match_rule" "match_rules_fr" {
         value = ["GET"]
       }
     }
-    matches {
-      match_type = "hostname"
-      match_value = "3333.dom"
-      match_operator = "equals"
-      case_sensitive = true
-      negate = true
-      check_ips = ""
-    }
     match_url = "test.url"
     forward_settings {
-      origin_id = "test_origin"
-      path_and_qs = "/test"
+      origin_id = ""
+      path_and_qs = "some_path"
       use_incoming_query_string = false
     }
     disabled = false
   }
 
   match_rules {
-    name = "r2"
+    name = "rule2"
     start = 0
     end = 0
     matches {
@@ -44,7 +36,7 @@ data "akamai_cloudlets_forward_rewrite_match_rule" "match_rules_fr" {
       negate = false
       check_ips = ""
       object_match_value {
-        name = "test_omv"
+        name = "AS"
         type = "object"
         name_case_sensitive = false
         name_has_wildcard = false
@@ -58,7 +50,45 @@ data "akamai_cloudlets_forward_rewrite_match_rule" "match_rules_fr" {
     }
     match_url = "abc.com"
     forward_settings {
+      origin_id = ""
+      path_and_qs = ""
+      use_incoming_query_string = true
+    }
+    disabled = false
+  }
+
+  match_rules {
+    name = "rule3"
+    start = 1
+    end = 2
+    matches {
+      match_type = "range"
+      match_value = ""
+      match_operator = "equals"
+      case_sensitive = false
+      negate = false
+      check_ips = ""
+      object_match_value {
+        type = "range"
+        value = [1, 50]
+      }
+    }
+    match_url = "test.url"
+    forward_settings {
       origin_id = "test_origin"
+      path_and_qs = ""
+      use_incoming_query_string = false
+    }
+    disabled = false
+  }
+
+  match_rules {
+    name = "rule_empty"
+    start = 0
+    end = 0
+    match_url = ""
+    forward_settings {
+      origin_id = ""
       path_and_qs = ""
       use_incoming_query_string = false
     }
