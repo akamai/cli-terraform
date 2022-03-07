@@ -12,19 +12,18 @@ import (
 	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/edgeworkers"
-	common "github.com/akamai/cli-common-golang"
-	"github.com/akamai/cli-terraform/templates"
+	"github.com/akamai/cli-terraform/pkg/templates"
+	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/tj/assert"
-	"github.com/urfave/cli"
 )
 
 var (
-	expectEdgeWorkerProcessTemplates = func(p *mockProcessor, edgegeWorkerID int, name string, groupID int64, resourceTierID int,
+	expectEdgeWorkerProcessTemplates = func(p *mockProcessor, edgeWorkerID int, name string, groupID int64, resourceTierID int,
 		localBundle, section string, err error) *mock.Call {
 		tfData := TFEdgeWorkerData{
-			EdgeWorkerID:   edgegeWorkerID,
+			EdgeWorkerID:   edgeWorkerID,
 			Name:           name,
 			GroupID:        groupID,
 			ResourceTierID: resourceTierID,
@@ -122,9 +121,6 @@ var (
 )
 
 func TestCreateEdgeWorker(t *testing.T) {
-	// TODO this is a workaround to prevent common.StartSpinner and common.StopSpinner from panicking
-	// This should be removed once a dependency on "github.com/akamai/cli-common-golang" is removed
-	common.App = &cli.App{ErrWriter: ioutil.Discard}
 	section := "test_section"
 	localBundlePath := "testdata/res/bundle"
 	localBundle := fmt.Sprintf("%s/1.24.5.tgz", localBundlePath)
@@ -193,7 +189,8 @@ func TestCreateEdgeWorker(t *testing.T) {
 			me := new(mockEdgeworkers)
 			mp := new(mockProcessor)
 			test.init(me, mp)
-			err := createEdgeWorker(context.Background(), 123, localBundlePath, section, me, mp)
+			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
+			err := createEdgeWorker(ctx, 123, localBundlePath, section, me, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return

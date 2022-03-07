@@ -10,15 +10,12 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/cli-terraform/templates"
-
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/edgeworkers"
-
-	common "github.com/akamai/cli-common-golang"
+	"github.com/akamai/cli-terraform/pkg/templates"
+	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/tj/assert"
-	"github.com/urfave/cli"
 )
 
 type mockProcessor struct {
@@ -83,9 +80,6 @@ var (
 )
 
 func TestCreateEdgeKV(t *testing.T) {
-	// TODO this is a workaround to prevent common.StartSpinner and common.StopSpinner from panicking
-	// This should be removed once a dependency on "github.com/akamai/cli-common-golang" is removed
-	common.App = &cli.App{ErrWriter: ioutil.Discard}
 	section := "test_section"
 
 	tests := map[string]struct {
@@ -124,7 +118,8 @@ func TestCreateEdgeKV(t *testing.T) {
 			me := new(mockEdgeworkers)
 			mp := new(mockProcessor)
 			test.init(me, mp)
-			err := createEdgeKV(context.Background(), "test_namespace", edgeworkers.NamespaceStagingNetwork, section, me, mp)
+			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
+			err := createEdgeKV(ctx, "test_namespace", edgeworkers.NamespaceStagingNetwork, section, me, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return

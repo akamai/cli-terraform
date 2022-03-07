@@ -15,9 +15,9 @@
 package commands
 
 import (
-	cloudlets "github.com/akamai/cli-terraform/pkg/providers/cloudlets"
-	"github.com/akamai/cli-terraform/edgeworkers"
+	"github.com/akamai/cli-terraform/pkg/providers/cloudlets"
 	"github.com/akamai/cli-terraform/pkg/providers/dns"
+	"github.com/akamai/cli-terraform/pkg/providers/edgeworkers"
 	"github.com/akamai/cli-terraform/pkg/providers/gtm"
 	"github.com/akamai/cli-terraform/pkg/providers/papi"
 	akacli "github.com/akamai/cli/pkg/app"
@@ -130,38 +130,38 @@ func CommandLocator() ([]*cli.Command, error) {
 		BashComplete: akacli.DefaultAutoComplete,
 	})
 
-	commands = append(commands, cli.Command{
+	commands = append(commands, &cli.Command{
 		Name:        "create-edgekv",
 		Description: "Create Terraform EdgeKV Resource",
 		Usage:       "create-edgekv",
 		ArgsUsage:   "<namespace_name>, <network>",
 		Action:      edgeworkers.CmdCreateEdgeKV,
 		Flags: []cli.Flag{
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  "tfworkpath",
 				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
-		BashComplete: akamai.DefaultAutoComplete,
+		BashComplete: akacli.DefaultAutoComplete,
 	})
 
-	commands = append(commands, cli.Command{
+	commands = append(commands, &cli.Command{
 		Name:        "create-edgeworker",
 		Description: "Create Terraform EdgeWorker Resource",
 		Usage:       "create-edgeworker",
 		ArgsUsage:   "<edgeworker_id>",
 		Action:      edgeworkers.CmdCreateEdgeWorker,
 		Flags: []cli.Flag{
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  "bundlepath",
 				Usage: "Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath",
 			},
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  "tfworkpath",
 				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
-		BashComplete: akamai.DefaultAutoComplete,
+		BashComplete: akacli.DefaultAutoComplete,
 	})
 
 	commands = append(commands,

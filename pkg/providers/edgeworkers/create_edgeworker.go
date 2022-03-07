@@ -13,12 +13,12 @@ import (
 	"time"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/edgeworkers"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
-	common "github.com/akamai/cli-common-golang"
-	"github.com/akamai/cli-terraform/templates"
-	"github.com/akamai/cli-terraform/tools"
+	"github.com/akamai/cli-terraform/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/pkg/templates"
+	"github.com/akamai/cli-terraform/pkg/tools"
+	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 type (
@@ -40,33 +40,21 @@ var (
 
 // CmdCreateEdgeWorker is an entrypoint to create-edgeworker command
 func CmdCreateEdgeWorker(c *cli.Context) error {
-	// TODO context should be retrieved from cli.Context once we migrate to urfave/cli v2
-	ctx := context.Background()
+	ctx := c.Context
 	if c.NArg() == 0 {
 		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-			return cli.NewExitError(color.RedString("Error displaying help command"), 1)
+			return cli.Exit(color.RedString("Error displaying help command"), 1)
 		}
-		return cli.NewExitError(color.RedString("EdgeWorker id is required"), 1)
+		return cli.Exit(color.RedString("EdgeWorker id is required"), 1)
 	}
-	config, err := tools.GetEdgegridConfig(c)
-	if err != nil {
-		return err
-	}
-
-	sess, err := session.New(
-		session.WithSigner(config),
-	)
-	if err != nil {
-		return cli.NewExitError(color.RedString(err.Error()), 1)
-	}
+	sess := edgegrid.GetSession(c.Context)
 	client := edgeworkers.Client(sess)
-
 	if c.IsSet("tfworkpath") {
 		tools.TFWorkPath = c.String("tfworkpath")
 	}
 	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
 	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
-		return cli.NewExitError(color.RedString("Destination work path is not accessible"), 1)
+		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
 	}
 
 	edgeWorkerPath := filepath.Join(tools.TFWorkPath, "edgeworker.tf")
@@ -79,12 +67,12 @@ func CmdCreateEdgeWorker(c *cli.Context) error {
 	}
 	bundleDir = filepath.FromSlash(bundleDir)
 	if stat, err := os.Stat(bundleDir); err != nil || !stat.IsDir() {
-		return cli.NewExitError(color.RedString("Bundle path is not accessible"), 1)
+		return cli.Exit(color.RedString("Bundle path is not accessible"), 1)
 	}
 
-	err = tools.CheckFiles(edgeWorkerPath, variablesPath, importPath)
+	err := tools.CheckFiles(edgeWorkerPath, variablesPath, importPath)
 	if err != nil {
-		return cli.NewExitError(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString(err.Error()), 1)
 	}
 	templateToFile := map[string]string{
 		"edgeworker.tmpl":           edgeWorkerPath,
@@ -104,31 +92,32 @@ func CmdCreateEdgeWorker(c *cli.Context) error {
 
 	edgeWorkerID, err := strconv.Atoi(c.Args().First())
 	if err != nil {
-		return cli.NewExitError(color.RedString("edgeworker_id is not a valid integer"), 1)
+		return cli.Exit(color.RedString("edgeworker_id is not a valid integer"), 1)
 	}
-	section := tools.GetEdgercSection(c)
+	section := edgegrid.GetEdgercSection(c)
 
 	if err = createEdgeWorker(ctx, edgeWorkerID, bundleDir, section, client, processor); err != nil {
-		return cli.NewExitError(color.RedString(fmt.Sprintf("Error exporting edgeworker HCL: %s", err)), 1)
+		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting edgeworker HCL: %s", err)), 1)
 	}
 	return nil
 }
 
 func createEdgeWorker(ctx context.Context, edgeWorkerID int, bundleDir, section string, client edgeworkers.Edgeworkers, templateProcessor templates.TemplateProcessor) error {
+	term := terminal.Get(ctx)
 	fmt.Println("Configuring EdgeWorker")
-	common.StartSpinner(fmt.Sprintf("Fetching EdgeWorker %d", edgeWorkerID), "")
+	term.Spinner().Start(fmt.Sprintf("Fetching EdgeWorker %d", edgeWorkerID), "")
 
 	edgeWorker, err := client.GetEdgeWorkerID(ctx, edgeworkers.GetEdgeWorkerIDRequest{
 		EdgeWorkerID: edgeWorkerID,
 	})
 	if err != nil {
-		common.StopSpinnerFail()
+		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrFetchingEdgeWorker, err)
 	}
 
 	localBundle, err := getEdgeWorkerBundle(ctx, edgeWorkerID, bundleDir, client)
 	if err != nil {
-		common.StopSpinnerFail()
+		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrFetchingEdgeWorker, err)
 	}
 
@@ -141,13 +130,13 @@ func createEdgeWorker(ctx context.Context, edgeWorkerID int, bundleDir, section 
 		Section:        section,
 	}
 
-	common.StopSpinnerOk()
-	common.StartSpinner("Saving TF configurations ", "")
+	term.Spinner().OK()
+	term.Spinner().Start("Saving TF configurations ", "")
 	if err := templateProcessor.ProcessTemplates(tfEdgeWorkerData); err != nil {
-		common.StopSpinnerFail()
+		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
 	}
-	common.StopSpinnerOk()
+	term.Spinner().OK()
 	fmt.Printf("Terraform configuration for edgeworker '%s' with edgeworker_id '%d' was saved successfully\n", edgeWorker.Name, edgeWorkerID)
 
 	return nil
