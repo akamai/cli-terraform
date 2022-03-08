@@ -19,3 +19,12 @@ resource "akamai_imaging_policy_set" "policyset" {
   type        = "{{.PolicySet.Type}}"
   contract_id = "{{.PolicySet.ContractID}}"
 }
+{{ range .Policies }}
+resource "akamai_imaging_policy_{{$.PolicySet.Type | ToLower}}" "policy_{{.PolicyID | RemoveSymbols}}" {
+  policy_id              = "{{.PolicyID}}"
+  contract_id            = "{{$.PolicySet.ContractID}}"
+  policyset_id           = "{{$.PolicySet.ID}}"
+  activate_on_production = {{.ActivateOnProduction}}
+  json                   = file("{{.JSON}}")
+}
+{{ end -}}

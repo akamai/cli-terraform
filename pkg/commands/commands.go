@@ -166,27 +166,16 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-cloudlets-policy",
-		Description: "Create Terraform Cloudlets Policy Resource",
-		Usage:       "create-cloudlets-policy",
-		ArgsUsage:   "<policy_name>",
-		Action:      cloudlets.CmdCreatePolicy,
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
-			},
-		},
-		BashComplete: akacli.DefaultAutoComplete,
-	})
-
-	commands = append(commands, &cli.Command{
 		Name:        "create-imaging",
 		Description: "Create Terraform Image and Video Manager resources",
 		Usage:       "create-imaging",
 		ArgsUsage:   "<contract_id> <policy_set_id>",
 		Action:      imaging.CmdCreateImaging,
 		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "policy-json-dir",
+				Usage: "Path location for placement of policy jsons. Default: same value as tfworkpath",
+			},
 			&cli.StringFlag{
 				Name:  "tfworkpath",
 				Usage: "Path location for placement of created artifacts. Default: current directory",
