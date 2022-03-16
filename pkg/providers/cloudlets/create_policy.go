@@ -53,6 +53,7 @@ var supportedCloudlets = map[string]struct{}{
 	"CD":  {},
 	"ER":  {},
 	"FR":  {},
+	"IG":  {},
 	"VP":  {},
 }
 

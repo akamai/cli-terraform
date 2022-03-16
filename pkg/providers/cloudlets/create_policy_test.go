@@ -1882,6 +1882,73 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "with_match_rules_as",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
 		},
+		"policy without match rules ig": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				Section:         "test_section",
+				CloudletCode:    "IG",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+			},
+			dir:          "no_match_rules_ig",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+		},
+		"policy with match rules ig": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				Section:         "test_section",
+				CloudletCode:    "IG",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleRC{
+						Name: "rule1",
+						Matches: []cloudlets.MatchCriteriaRC{
+							{
+								MatchType:     "method",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								ObjectMatchValue: cloudlets.ObjectMatchValueSimple{
+									Type:  "simple",
+									Value: []string{"GET"},
+								},
+							},
+						},
+						AllowDeny: cloudlets.Allow,
+						Disabled:  false,
+					},
+					cloudlets.MatchRuleRC{
+						Name: "rule2",
+						Matches: []cloudlets.MatchCriteriaRC{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
+									Type: "object",
+									Name: "Accept",
+									Options: &cloudlets.Options{
+										Value:            []string{"y"},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
+						AllowDeny: cloudlets.Allow,
+					},
+					cloudlets.MatchRuleRC{
+						Name:          "rule_empty",
+						AllowDeny:     cloudlets.Deny,
+						MatchesAlways: true,
+						Disabled:      true,
+					},
+				},
+			},
+			dir:          "with_match_rules_ig",
+			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
+		},
 	}
 
 	for name, test := range tests {

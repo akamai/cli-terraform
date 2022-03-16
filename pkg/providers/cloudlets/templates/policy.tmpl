@@ -37,6 +37,9 @@ resource "akamai_cloudlets_policy" "policy" {
 {{- if and (.MatchRules) (eq .CloudletCode "FR")}}
   match_rules = data.akamai_cloudlets_forward_rewrite_match_rule.match_rules_fr.json
 {{- end}}
+{{- if and (.MatchRules) (eq .CloudletCode "IG")}}
+  match_rules = data.akamai_cloudlets_request_control_match_rule.match_rules_ig.json
+{{- end}}
 {{- if and (.MatchRules) (eq .CloudletCode "VP")}}
   match_rules = data.akamai_cloudlets_visitor_prioritization_match_rule.match_rules_vp.json
 {{- end}}
