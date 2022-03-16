@@ -41,7 +41,7 @@ var (
 // CmdCreateEdgeWorker is an entrypoint to create-edgeworker command
 func CmdCreateEdgeWorker(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() == 0 {
+	if c.NArg() != 1 {
 		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
 			return cli.Exit(color.RedString("Error displaying help command"), 1)
 		}

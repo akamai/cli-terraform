@@ -113,7 +113,7 @@ type RuleTemplate struct {
 func CmdCreateProperty(c *cli.Context) error {
 	ctx := c.Context
 	log.SetOutput(ioutil.Discard)
-	if c.NArg() < 2 {
+	if c.NArg() != 1 {
 		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
 			return cli.Exit(color.RedString("Error displaying help command"), 1)
 		}
