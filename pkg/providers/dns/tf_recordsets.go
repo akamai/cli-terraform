@@ -15,11 +15,12 @@
 package dns
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
 
-	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/configdns-v2"
+	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configdns"
 	"github.com/shirou/gopsutil/mem"
 )
 
@@ -82,7 +83,7 @@ func createParamsMap(params []string) *map[string]string {
 }
 
 // Process recordset resources
-func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[string]map[string]bool, _ fetchConfigStruct) (map[string]Types, error) {
+func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourceZoneName string, zoneTypeMap map[string]map[string]bool, _ fetchConfigStruct) (map[string]Types, error) {
 
 	var configuredMap = make(map[string]Types) // returned variable
 
@@ -95,7 +96,7 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 
 	// get recordsets
 	queryArgs := dns.RecordsetQueryArgs{PageSize: pagesize, SortBy: "name, type", Page: 1}
-	nameRecordSetsResp, err := dns.GetRecordsets(zone, queryArgs)
+	nameRecordSetsResp, err := client.GetRecordsets(ctx, zone, queryArgs)
 	if err != nil {
 		return configuredMap, fmt.Errorf("failed to read record set %s", err.Error())
 	}
@@ -134,7 +135,7 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 			}
 			configuredMap[rs.Name] = append(configuredMap[rs.Name], rs.Type)
 
-			recordFields = dns.ParseRData(rs.Type, rs.Rdata) //returns map[string]interface{}
+			recordFields = client.ParseRData(ctx, rs.Type, rs.Rdata) //returns map[string]interface{}
 			// required fields
 			recordFields["name"] = rs.Name
 			//recordFields["active"] = true                   // how set?
@@ -244,7 +245,7 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 			break
 		}
 		queryArgs.Page++
-		nameRecordSetsResp, err = dns.GetRecordsets(zone, queryArgs)
+		nameRecordSetsResp, err = client.GetRecordsets(ctx, zone, queryArgs)
 		if err != nil {
 			return configuredMap, fmt.Errorf("failed to read record set %s", err.Error())
 		}

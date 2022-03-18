@@ -73,7 +73,7 @@ func convertKey(inKey string, _ string, _ reflect.Kind) string {
 	outKey := ""
 	for i, char := range inKey {
 		if unicode.IsUpper(char) {
-			if i != 0 {
+			if i != 0 && !unicode.IsUpper(rune(inKey[i-1])) {
 				outKey += "_"
 			}
 			outKey += string(unicode.ToLower(char))

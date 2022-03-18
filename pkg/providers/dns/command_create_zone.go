@@ -19,12 +19,13 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
-	configdns "github.com/akamai/AkamaiOPEN-edgegrid-golang/configdns-v2"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/edgegrid"
+	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configdns"
+	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
@@ -91,39 +92,21 @@ variable "groupid" {
 }
 `
 
-func getEdgegridConfig(c *cli.Context) (edgegrid.Config, error) {
-	config, err := edgegrid.Init(c.String("edgerc"), c.String("section"))
-	if err != nil {
-		return edgegrid.Config{}, cli.Exit(err.Error(), 1)
-	}
-
-	if len(c.String("accountkey")) > 0 {
-		config.AccountKey = c.String("accountkey")
-	} else if len(c.String("account-key")) > 0 {
-		config.AccountKey = c.String("account-key")
-	}
-
-	return config, nil
-}
-
 // CmdCreateZone is an entrypoint to create-zone command
 func CmdCreateZone(c *cli.Context) error {
-	term := terminal.Get(c.Context)
-
-	config, err := getEdgegridConfig(c)
-	if err != nil {
-		return err
-	}
-
-	configdns.Init(config)
-
-	if c.NArg() < 1 {
+	ctx := c.Context
+	log.SetOutput(ioutil.Discard)
+	if c.NArg() != 1 {
 		cli.ShowCommandHelp(c, c.Command.Name)
 		return cli.Exit(color.RedString("zone is required"), 1)
 	}
 
+	sess := edgegrid.GetSession(ctx)
+	configdns := dns.Client(sess)
+
 	// uppercase characters cause issues with TF and the generated config
 	zoneName = strings.ToLower(c.Args().Get(0))
+
 	if c.IsSet("tfworkpath") {
 		tools.TFWorkPath = c.String("tfworkpath")
 	}
@@ -150,14 +133,15 @@ func CmdCreateZone(c *cli.Context) error {
 		importScript = true
 	}
 
+	term := terminal.Get(ctx)
 	fmt.Println("Configuring Zone")
-	zoneObject, err := configdns.GetZone(zoneName)
+	zoneObject, err := configdns.GetZone(ctx, zoneName)
 	if err != nil {
 		term.Spinner().Fail()
 		fmt.Println("Error: " + err.Error())
 		return cli.Exit(color.RedString("Zone retrieval failed"), 1)
 	}
-	contractid = zoneObject.ContractId // grab for use later
+	contractid = zoneObject.ContractID // grab for use later
 	// normalize zone name for zone resource name
 	resourceZoneName := normalizeResourceName(zoneName)
 	if createImportList {
@@ -166,7 +150,7 @@ func CmdCreateZone(c *cli.Context) error {
 		recordsets := make(map[string]Types)
 		// Retrieve all zone names
 		if len(recordNames) == 0 {
-			recordsetNames, err := configdns.GetZoneNames(zoneName)
+			recordsetNames, err := configdns.GetZoneNames(ctx, zoneName)
 			if err != nil {
 				term.Spinner().Fail()
 				fmt.Println("Error: " + err.Error())
@@ -178,7 +162,7 @@ func CmdCreateZone(c *cli.Context) error {
 			if fetchConfig.NamesOnly {
 				recordsets[zname] = make([]string, 0, 0)
 			} else {
-				nameTypesResp, err := configdns.GetZoneNameTypes(zname, zoneName)
+				nameTypesResp, err := configdns.GetZoneNameTypes(ctx, zname, zoneName)
 				if err != nil {
 					term.Spinner().Fail()
 					fmt.Println("Error: " + err.Error())
@@ -280,7 +264,7 @@ func CmdCreateZone(c *cli.Context) error {
 		}
 
 		// process Recordsets.
-		fullZoneConfigMap, err = processRecordsets(configImportList.Zone, resourceZoneName, zoneTypeMap, fetchConfig)
+		fullZoneConfigMap, err = processRecordsets(ctx, configdns, configImportList.Zone, resourceZoneName, zoneTypeMap, fetchConfig)
 		if err != nil {
 			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Failed to process recordsets."), 1)

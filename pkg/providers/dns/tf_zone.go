@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"reflect"
 
-	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/configdns-v2"
+	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configdns"
 )
 
 // Keys that can be ignored, e.g. lists, read-only, don't want
@@ -80,7 +80,7 @@ func processZone(zone *dns.ZoneResponse, resourceZoneName string, modSegment boo
 		if key == "" {
 			continue
 		}
-		if varName == "ContractId" {
+		if varName == "ContractID" {
 			continue
 		} else if varName == "Zone" {
 			keyVal = "local.zone"
