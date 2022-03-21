@@ -6,6 +6,9 @@ An [Akamai CLI](https://developer.akamai.com/cli) package for administering and 
 
 ## Getting Started
 
+### Creating authentication credentials
+Before you can use this CLI, you need to [Create authentication credentials.](https://techdocs.akamai.com/developer/docs/set-up-authentication-credentials)
+
 ### Installing
 
 To install this package, use Akamai CLI:
@@ -34,15 +37,10 @@ If you want to compile it from source, you will need Go 1.12 or later:
 ## General Usage
 
 ```
-  akamai-terraform [--edgerc] [--section] <command> [sub-command]
+  akamai-terraform [global flags] command [command flags] [arguments...]
 
 Description:
-   Manage Akamai Terraform configurations and assoc objects. Current support includes Akamai GTM domains and EdgeDNS zones.
-
-Global Flags:
-   --edgerc value  Location of the credentials file (default: "/home/elynes/.edgerc") [$AKAMAI_EDGERC]
-   --section value     Section of the credentials file (default: "terraform") [$AKAMAI_EDGERC_SECTION]
-   --accountkey value  Account switch key [$AKAMAI_EDGERC_ACCOUNT_KEY]
+   Administer and manage available Akamai resources with Terraform
 
 Built-In Commands:
   create-domain
@@ -53,6 +51,12 @@ Built-In Commands:
   create-edgeworker
   list
   help
+
+Global Flags:
+   --edgerc value, -e value                 Location of the credentials file (default: "/home/user/.edgerc") [$AKAMAI_EDGERC]
+   --section value, -s value                Section of the credentials file (default: "default") [$AKAMAI_EDGERC_SECTION]
+   --accountkey value, --account-key value  Account switch key [$AKAMAI_EDGERC_ACCOUNT_KEY]
+   --version                                Output CLI version (default: false)
 ```
 
 ## GTM Domains
@@ -60,24 +64,24 @@ Built-In Commands:
 ### Usage
 
 ```
-   akamai-terraform create-domain [domain] [--tfworkpath path] [--resources] [--createconfig] 
+   akamai-terraform create-domain [command flags] <domain>
 
-Flags: 
-   --tfworkpath path       file path location for placement of created and/or modified artifacts. Default: current directory
-   --resources             Create json formatted resource import list file, <domain>_resources.json. Used as input by createconfig.
-   --createconfig          Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files using resources json
+Flags:
+   --tfworkpath path      Path location for placement of created and modified artifacts. Default: current directory
+   --resources             Creates a JSON-formatted resource file for import: <domain>_resources.json. The createconfig flag uses this file as an input. (default: false)
+   --createconfig          Creates these Terraform configuration files based on the values in <domain>_resources.json: <domain>.tf and gtmvars.tf. Also creates this import script: <domain>_import.script. (default: false)
 ```
 
 ### Create list of all domain objects. Written in json format to <domain>_resources.json
 
 ```
-$ akamai terraform create-domain example.akadns.net --resources
+$ akamai terraform create-domain --resources example.akadns.net
 ```
 
 ### Generate Terraform GTM Domain configuration file <domain>.tf, vars config file, gtmvars.tf, and import script, <domain>_resource_import.script
 
 ```
-$ akamai terraform create-domain example.akadns.net --createconfig
+$ akamai terraform create-domain --createconfig example.akadns.net
 ```
 
 ### Domain Notes:
@@ -89,36 +93,36 @@ $ akamai terraform create-domain example.akadns.net --createconfig
 ### Usage
 
 ```
-   akamai-terraform create-zone [zone] [--tfworkpath path] [--resources] [--createconfig] [--importscript] [--segmentconfig] [--configonly] [--namesonly] [--recordname]
+   akamai-terraform create-zone [command flags] <zone>
 
 Flags: 
-   --tfworkpath path       file path location for placement of created and/or modified artifacts. Default: current directory
-   --resources             Create json formatted resource import list file, <zone>_resources.json. Used as input by createconfig.
-   --createconfig          Create Terraform configuration (<zone>.tf), dnsvars.tf from generated resources file. Saves zone config for import.
-   --importscript          Create import script for generated Terraform configuration script (<zone>_import.script) files
-   --segmentconfig         Directive for createconfig. Group and segment records by name into separate config files.
+   --tfworkpath path       Path location for placement of created and modified artifacts. Default: current directory
+   --resources             Creates a JSON-formatted resource file for import: <zone>_resources.json. The createconfig flag uses this file as an input. (default: false)
+   --createconfig          Creates these Terraform configuration files based on the values in <zone>_resources.json: <zone>.tf and gtmvars.tf. (default: false)
+   --importscript          Creates import script for generated Terraform configuration script (<zone>_import.script) files. (default: false)
+   --segmentconfig         Use with the createconfig flag to group and segment records by name into separate config files. (default: false)
    --configonly            Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Saves zone config for 
-                           importscript. Ignores any existing resource json file.
-   --namesonly             Directive for both resource gathering and config generation. All record set types assumed.
+                           importscript. Ignores any existing resource JSON file. (default: false)
+   --namesonly             Directive for both resource gathering and config generation. All record set types assumed. (default: false)
    --recordname value      Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.
 ```
 
 ### Create List of Zone Recordsets. Written in json format to <zone>_resources.json
 
 ```
-$ akamai terraform create-zone testprimaryzone.com --resources
+$ akamai terraform create-zone --resources testprimaryzone.com
 ```
 
 ### Generate Terraform Zone configuration file. Default args create <zone>.tf, vars config file, dnsvars.tf
 
 ```
-$ akamai terraform create-zone testprimaryzone.com --createconfig
+$ akamai terraform create-zone --createconfig testprimaryzone.com
 ```
 
 ### Generate Zone import script, <zone>_resource_import.script
 
 ```
-$ akamai terraform create-zone testprimaryzone.com --importscript
+$ akamai terraform create-zone --importscript testprimaryzone.com
 ```
 
 
@@ -136,17 +140,17 @@ $ akamai terraform create-zone testprimaryzone.com --importscript
 
 1. namesonly - Resources for all associated Types will be generated
 2. segmentconfig - Generate a modularized configuration. 
-3. configonly. Generate zone configuration directly without json itemization. Scope limited by additional specified flags.
+3. configonly - Generates a zone configuration without JSON itemization. The configuration generated varies based on which set of flags you use.
 
 ## Property Manager Properties
 
 ### Usage
 
 ```
-   akamai-terraform create-property [property name] [--tfworkpath path] 
+   akamai-terraform create-property [command flags] <property name>
 
 Flags:
-   --tfworkpath path      file path location for placement of created and/or modified artifacts. Default: current directory
+   --tfworkpath path      Path location for placement of created artifacts. Default: current directory
 ```
 
 ### Create property manager property configuration.
@@ -160,10 +164,10 @@ $ akamai terraform create-property
 ### Usage
 
 ```
-   akamai-terraform create-cloudlets-policy [policy name] [--tfworkpath path] 
+   akamai-terraform create-cloudlets-policy [command flags] <policy_name>
 
 Flags:
-   --tfworkpath path      path location for placement of created artifacts. Default: current directory
+   --tfworkpath path      Path location for placement of created artifacts. Default: current directory
 ```
 
 ### Create policy configuration.
@@ -177,10 +181,10 @@ $ akamai terraform create-cloudlets-policy
 ### Create EdgeKV Usage
 
 ```
-   akamai-terraform create-edgekv [namespace_name] [network] [--tfworkpath path] 
+   akamai-terraform create-edgekv [command flags] <namespace_name> <network>
 
 Flags:
-   --tfworkpath path      path location for placement of created artifacts. Default: current directory
+   --tfworkpath path      Path location for placement of created artifacts. Default: current directory
 ```
 
 ### Create edgekv configuration.
@@ -192,11 +196,11 @@ $ akamai terraform create-edgekv
 ### Create EdgeWorker Usage
 
 ```
-   akamai-terraform create-edgeworker [edgeworker_id] [--bundlepath path] [--tfworkpath path]
+   akamai-terraform create-edgeworker [command flags] <edgeworker_id>
 
 Flags:
-   --bundlepath path      path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath
-   --tfworkpath path      path location for placement of created artifacts. Default: current directory
+   --bundlepath path      Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath
+   --tfworkpath path      Path location for placement of created artifacts. Default: current directory
 ```
 
 ### Create edgeworker configuration.

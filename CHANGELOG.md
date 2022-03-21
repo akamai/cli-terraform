@@ -1,5 +1,14 @@
 # Release Notes
 
+## Version 0.7.0 (Mar ?, 2022)
+
+### Features / Enhancements
+
+* General
+  * Update urfave/cli to v2
+    * BREAKING CHANGE: now flags must come before args
+  * Update the README to reflect changes in command line flag ordering
+
 ## Version 0.6.0 (Mar 3, 2022)
 
 ### Features / Enhancements
