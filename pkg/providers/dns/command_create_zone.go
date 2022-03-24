@@ -122,7 +122,8 @@ func CmdCreateZone(c *cli.Context) error {
 		return cli.Exit(color.RedString("zone is required"), 1)
 	}
 
-	zoneName = c.Args().Get(0)
+	// uppercase characters cause issues with TF and the generated config
+	zoneName = strings.ToLower(c.Args().Get(0))
 	if c.IsSet("tfworkpath") {
 		tools.TFWorkPath = c.String("tfworkpath")
 	}

@@ -97,7 +97,7 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 	queryArgs := dns.RecordsetQueryArgs{PageSize: pagesize, SortBy: "name, type", Page: 1}
 	nameRecordSetsResp, err := dns.GetRecordsets(zone, queryArgs)
 	if err != nil {
-		return configuredMap, fmt.Errorf("Failed to read record set. %s", err.Error())
+		return configuredMap, fmt.Errorf("failed to read record set %s", err.Error())
 	}
 	var recordFields map[string]interface{}
 	for {
@@ -194,9 +194,7 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 							for _, str := range fval.([]string) {
 								if strings.HasPrefix(str, "\"") {
 									str = strings.Trim(str, "\"")
-									if strings.Contains(str, "\\\"") {
-										strings.ReplaceAll(str, "\\\"", "\\\\\\\"")
-									}
+									str = processString(str)
 									str = "\\\"" + str + "\\\""
 								}
 								listString += "\"" + str + "\""
@@ -225,14 +223,20 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 				tfModule += dnsModuleConfig2 + createNamedModulePath(modName)
 				tfModule += dnsModuleConfig3
 				tfModule += "}\n"
-				appendRootModuleTF(tfModule)
+				if err := appendRootModuleTF(tfModule); err != nil {
+					return nil, err
+				}
 				modstring = dnsRecConfigP1
 				modstring += dnsModZoneConfigP1 + "var.zonename\n" + "}\n"
 				modstring += rString
-				createModuleTF(modName, modstring)
+				if err := createModuleTF(modName, modstring); err != nil {
+					return nil, err
+				}
 			} else {
 				// add to toplevel TF
-				appendRootModuleTF(rString)
+				if err := appendRootModuleTF(rString); err != nil {
+					return nil, err
+				}
 			}
 		}
 
@@ -242,12 +246,53 @@ func processRecordsets(zone string, resourceZoneName string, zoneTypeMap map[str
 		queryArgs.Page++
 		nameRecordSetsResp, err = dns.GetRecordsets(zone, queryArgs)
 		if err != nil {
-			return configuredMap, fmt.Errorf("Failed to read record set. %s", err.Error())
+			return configuredMap, fmt.Errorf("failed to read record set %s", err.Error())
 		}
 	}
 
 	return configuredMap, nil
 
+}
+
+// process string with embedded quotes
+func processString(source string) string {
+
+	if len(source) < 1 {
+		return source
+	}
+	stringSlice := strings.Split(source, " ")
+	if len(stringSlice) == 1 {
+		return stringSlice[0]
+	}
+	cleanString := ""
+	workingString := source
+	var quoteIndex int
+	for {
+		quoteIndex = strings.Index(workingString, "\"")
+		switch quoteIndex {
+		case -1:
+			cleanString += workingString
+			return cleanString
+		case 0:
+			cleanString += "\\\""
+		case len(workingString) - 1:
+			if workingString[quoteIndex-1:quoteIndex] != "\\" {
+				cleanString += workingString[:quoteIndex]
+				cleanString += "\\\""
+			} else {
+				cleanString += workingString[:]
+			}
+			return cleanString
+		default:
+			if workingString[quoteIndex-1:quoteIndex] != "\\" {
+				cleanString += workingString[:quoteIndex]
+				cleanString += "\\\""
+			} else {
+				cleanString += workingString[:quoteIndex+1]
+			}
+		}
+		workingString = workingString[quoteIndex+1:]
+	}
 }
 
 // create unique resource record name

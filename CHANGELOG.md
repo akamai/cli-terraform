@@ -9,6 +9,11 @@
     * BREAKING CHANGE: now flags must come before args
   * Update the README to reflect changes in command line flag ordering
 
+### Bug Fixes
+
+* DNS
+  * Corrected handling of embedded double quotes in TXT Recordsets
+
 ## Version 0.6.0 (Mar 3, 2022)
 
 ### Features / Enhancements
