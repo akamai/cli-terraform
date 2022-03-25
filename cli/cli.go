@@ -55,7 +55,28 @@ func Run() error {
 	return app.RunContext(ctx, os.Args)
 }
 
+func sessionRequired(c *cli.Context) bool {
+	command := c.Args().First()
+
+	for _, cmd := range []string{"help", "list", ""} {
+		if cmd == command {
+			return false
+		}
+	}
+
+	for _, cmd := range c.App.Commands {
+		if cmd.Name == command {
+			return true
+		}
+	}
+
+	return false
+}
+
 func putSessionInContext(c *cli.Context) error {
+	if !sessionRequired(c) {
+		return nil
+	}
 	s, err := edgegrid.InitializeSession(c)
 	if err != nil {
 		return err
