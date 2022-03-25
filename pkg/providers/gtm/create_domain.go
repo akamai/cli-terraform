@@ -15,6 +15,8 @@
 package gtm
 
 import (
+	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -24,13 +26,17 @@ import (
 	"strconv"
 	"strings"
 
-	configgtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/edgegrid"
+	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configgtm"
+	"github.com/akamai/cli-terraform/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 )
+
+//go:embed templates/*
+var templateFiles embed.FS
 
 var defaultDCs = []int{5400, 5401, 5402}
 
@@ -58,34 +64,19 @@ type importListStruct struct {
 var createImportList = false
 var createConfig = false
 
-var domainName string
 var fullImportList *importListStruct
 
-// text for gtmvars.tf construction
-var gtmvarsContent = fmt.Sprint(`variable "gtmsection" {
-  default = "default"
-}
-// Notice: contractid unknown at time of import. Please update.
-variable "contractid" {
-  default = ""
-}
-// Notice: groupid unknown at time of import. Please update.
-variable "groupid" {
-  default = ""
-}
-`)
-
-var nullFieldMap = &configgtm.NullFieldMapStruct{}
+var nullFieldMap = &gtm.NullFieldMapStruct{}
 
 // retrieve Null Values for Domain
-func getDomainNullValues() configgtm.NullPerObjectAttributeStruct {
+func getDomainNullValues() gtm.NullPerObjectAttributeStruct {
 
 	return nullFieldMap.Domain
 
 }
 
 // retrieve Null Values for Object Type
-func getNullValuesList(objType string) map[string]configgtm.NullPerObjectAttributeStruct {
+func getNullValuesList(objType string) map[string]gtm.NullPerObjectAttributeStruct {
 
 	switch objType {
 	case "Properties":
@@ -102,45 +93,47 @@ func getNullValuesList(objType string) map[string]configgtm.NullPerObjectAttribu
 		return nullFieldMap.AsMaps
 	}
 	// unknown
-	return map[string]configgtm.NullPerObjectAttributeStruct{}
-}
-
-func getEdgegridConfig(c *cli.Context) (edgegrid.Config, error) {
-	config, err := edgegrid.Init(c.String("edgerc"), c.String("section"))
-	if err != nil {
-		return edgegrid.Config{}, cli.Exit(err.Error(), 1)
-	}
-
-	if len(c.String("accountkey")) > 0 {
-		config.AccountKey = c.String("accountkey")
-	} else if len(c.String("account-key")) > 0 {
-		config.AccountKey = c.String("account-key")
-	}
-
-	return config, nil
+	return map[string]gtm.NullPerObjectAttributeStruct{}
 }
 
 // CmdCreateDomain is an entrypoint to create-domain command
 func CmdCreateDomain(c *cli.Context) error {
-	term := terminal.Get(c.Context)
-
-	config, err := getEdgegridConfig(c)
-	if err != nil {
-		return err
+	ctx := c.Context
+	if c.NArg() != 1 {
+		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
+			return cli.Exit(color.RedString("Error displaying help command"), 1)
+		}
+		return cli.Exit(color.RedString("Domain is required"), 1)
 	}
 
-	configgtm.Init(config)
-
-	if c.NArg() < 1 {
-		cli.ShowCommandHelp(c, c.Command.Name)
-		return cli.Exit(color.RedString("domain is required"), 1)
-	}
-
-	domainName = c.Args().Get(0)
+	sess := edgegrid.GetSession(ctx)
+	client := gtm.Client(sess)
 	if c.IsSet("tfworkpath") {
 		tools.TFWorkPath = c.String("tfworkpath")
 	}
 	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
+	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
+		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
+	}
+
+	// TODO: change to "variables.tf" later. Leaving now to avoid changing integration tests in scope of this story
+	variablesPath := filepath.Join(tools.TFWorkPath, "gtmvars.tf")
+
+	templateToFile := map[string]string{
+		"variables.tmpl": variablesPath,
+	}
+
+	err := tools.CheckFiles(variablesPath)
+	if err != nil {
+		return cli.Exit(color.RedString(err.Error()), 1)
+	}
+
+	processor := templates.FSTemplateProcessor{
+		TemplatesFS:     templateFiles,
+		TemplateTargets: templateToFile,
+	}
+
+	domainName := c.Args().First()
 	if c.IsSet("resources") {
 		createImportList = true
 	}
@@ -148,9 +141,18 @@ func CmdCreateDomain(c *cli.Context) error {
 		createConfig = true
 	}
 
+	if err := createDomain(ctx, client, domainName, processor); err != nil {
+		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting domain HCL: %s", err)), 1)
+	}
+	return nil
+}
+
+func createDomain(ctx context.Context, client gtm.GTM, domainName string, templateProcessor templates.TemplateProcessor) error {
+	term := terminal.Get(ctx)
+
 	fmt.Println("Configuring Domain")
 	term.Spinner().Start("Fetching domain entity ")
-	domain, err := configgtm.GetDomain(domainName)
+	domain, err := client.GetDomain(ctx, domainName)
 	if err != nil {
 		term.Spinner().Fail()
 		fmt.Println("Error: " + err.Error())
@@ -270,7 +272,7 @@ func CmdCreateDomain(c *cli.Context) error {
 		}
 		defer domainTFfileHandle.Close()
 		//initialize Null Fields Struct
-		nullFieldMap, err = domain.NullFieldMap()
+		nullFieldMap, err = client.NullFieldMap(ctx, domain)
 		if err != nil {
 			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Failed to initialize Domain null fields map"), 1)
@@ -294,21 +296,6 @@ func CmdCreateDomain(c *cli.Context) error {
 		}
 		domainTFfileHandle.Sync()
 
-		// Need create gtmvars.tf dependency
-		gtmvarsFilename := filepath.Join(tools.TFWorkPath, "gtmvars.tf")
-		gtmvarsHandle, err := os.Create(gtmvarsFilename)
-		if err != nil {
-			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Unable to create gtmvars config file"), 1)
-		}
-		defer gtmvarsHandle.Close()
-		_, err = gtmvarsHandle.WriteString(gtmvarsContent)
-		if err != nil {
-			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Unable to write gtmvars config file"), 1)
-		}
-		gtmvarsHandle.Sync()
-		term.Spinner().OK()
 		term.Spinner().Start("Creating domain import script file ")
 		importScriptFilename := filepath.Join(tools.TFWorkPath, resourceDomainName+"_resource_import.script")
 		if _, err := os.Stat(importScriptFilename); err == nil {
@@ -333,6 +320,15 @@ func CmdCreateDomain(c *cli.Context) error {
 		}
 		f.Sync()
 		term.Spinner().OK()
+
+		term.Spinner().OK()
+		term.Spinner().Start("Saving TF configurations ")
+		if err := templateProcessor.ProcessTemplates(map[string]interface{}{}); err != nil {
+			term.Spinner().Fail()
+			return err
+		}
+		term.Spinner().OK()
+		fmt.Printf("Terraform configuration for policy '%s' was saved successfully\n", domain.Name)
 	}
 
 	fmt.Println("Domain configuration completed")
@@ -379,10 +375,9 @@ func buildImportScript(importList *importListStruct, resourceDomainName string) 
 	// Init TF
 	importFile += "terraform init\n"
 	// domain
-	if !checkForResource(domainResource, resourceDomainName) {
-		// Assuming a domain name cannot contain spaces ....
-		importFile += importPrefix + domainResource + "." + resourceDomainName + " " + importList.Domain + "\n"
-	}
+	// Assuming a domain name cannot contain spaces ....
+	importFile += importPrefix + domainResource + "." + resourceDomainName + " " + importList.Domain + "\n"
+
 	// datacenters
 	for id, nickname := range importList.Datacenters {
 		normalName := normalizeResourceName(nickname)
@@ -396,69 +391,67 @@ func buildImportScript(importList *importListStruct, resourceDomainName string) 
 		if ddcfound {
 			continue
 		}
-		if !checkForResource(datacenterResource, normalName) {
-			importFile += importPrefix + datacenterResource + "." + normalName + " " + importList.Domain + ":" + strconv.Itoa(id) + "\n"
-		}
+		importFile += importPrefix + datacenterResource + "." + normalName + " " + importList.Domain + ":" + strconv.Itoa(id) + "\n"
+
 	}
 	// properties
 	for name := range importList.Properties {
 		normalName := normalizeResourceName(name)
-		if !checkForResource(propertyResource, normalName) {
-			importFile += importPrefix + propertyResource + "." + normalName + " "
-			if strings.Contains(name, " ") {
-				importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
-			} else {
-				importFile += importList.Domain + ":" + name + "\n"
-			}
+		importFile += importPrefix + propertyResource + "." + normalName + " "
+		if strings.Contains(name, " ") {
+			importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
+		} else {
+			importFile += importList.Domain + ":" + name + "\n"
 		}
+
 	}
 	// resources
 	for name := range importList.Resources {
 		normalName := normalizeResourceName(name)
-		if !checkForResource(resourceResource, normalName) {
-			importFile += importPrefix + resourceResource + "." + normalName + " "
-			if strings.Contains(name, " ") {
-				importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
-			} else {
-				importFile += importList.Domain + ":" + name + "\n"
-			}
+
+		importFile += importPrefix + resourceResource + "." + normalName + " "
+		if strings.Contains(name, " ") {
+			importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
+		} else {
+			importFile += importList.Domain + ":" + name + "\n"
 		}
+
 	}
 	// cidrmaps
 	for name := range importList.Cidrmaps {
 		normalName := normalizeResourceName(name)
-		if !checkForResource(cidrResource, normalName) {
-			importFile += importPrefix + cidrResource + "." + normalName + " "
-			if strings.Contains(name, " ") {
-				importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
-			} else {
-				importFile += importList.Domain + ":" + name + "\n"
-			}
+
+		importFile += importPrefix + cidrResource + "." + normalName + " "
+		if strings.Contains(name, " ") {
+			importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
+		} else {
+			importFile += importList.Domain + ":" + name + "\n"
 		}
+
 	}
 	// geomaps
 	for name := range importList.Geomaps {
 		normalName := normalizeResourceName(name)
-		if !checkForResource(geoResource, normalName) {
-			importFile += importPrefix + geoResource + "." + normalName + " "
-			if strings.Contains(name, " ") {
-				importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
-			} else {
-				importFile += importList.Domain + ":" + name + "\n"
-			}
+
+		importFile += importPrefix + geoResource + "." + normalName + " "
+		if strings.Contains(name, " ") {
+			importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
+		} else {
+			importFile += importList.Domain + ":" + name + "\n"
 		}
+
 	}
 	// asmaps
 	for name := range importList.Asmaps {
 		normalName := normalizeResourceName(name)
-		if !checkForResource(asResource, normalName) {
-			importFile += importPrefix + asResource + "." + normalName + " "
-			if strings.Contains(name, " ") {
-				importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
-			} else {
-				importFile += importList.Domain + ":" + name + "\n"
-			}
+
+		importFile += importPrefix + asResource + "." + normalName + " "
+		if strings.Contains(name, " ") {
+			importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
+		} else {
+			importFile += importList.Domain + ":" + name + "\n"
 		}
+
 	}
 
 	return importFile, nil
@@ -496,7 +489,7 @@ func reconcileResourceTargets(importList *importListStruct, domainName string) (
 	if charsRead == 0 {
 		return tfHandle, "", importList, err
 	}
-	tfConfig := fmt.Sprintf("%s", tfScratch[0:charsRead-1])
+	tfConfig := string(tfScratch[0 : charsRead-1])
 	// need walk thru each resource type
 	for id, nickname := range importList.Datacenters {
 		normalName := normalizeResourceName(nickname)

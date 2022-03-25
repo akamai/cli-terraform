@@ -37,8 +37,6 @@ var (
 
 	// ErrFetchingEdgeKV is returned when fetching edgekv fails
 	ErrFetchingEdgeKV = errors.New("unable to fetch edgekv with given namespace_name and network")
-	// ErrSavingFiles is returned when an issue with processing templates occurs
-	ErrSavingFiles = errors.New("saving terraform project files")
 )
 
 // CmdCreateEdgeKV is an entrypoint to create-edgekv command
@@ -122,7 +120,7 @@ func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.Nam
 	term.Spinner().Start("Saving TF configurations ")
 	if err := templateProcessor.ProcessTemplates(tfEdgeKVData); err != nil {
 		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
+		return err
 	}
 	term.Spinner().OK()
 	fmt.Printf("Terraform configuration for edgeKV '%s' on network '%s' was saved successfully\n", edgeKV.Name, network)

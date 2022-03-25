@@ -134,7 +134,7 @@ func createEdgeWorker(ctx context.Context, edgeWorkerID int, bundleDir, section 
 	term.Spinner().Start("Saving TF configurations ", "")
 	if err := templateProcessor.ProcessTemplates(tfEdgeWorkerData); err != nil {
 		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
+		return err
 	}
 	term.Spinner().OK()
 	fmt.Printf("Terraform configuration for edgeworker '%s' with edgeworker_id '%d' was saved successfully\n", edgeWorker.Name, edgeWorkerID)

@@ -109,7 +109,7 @@ func TestCreateEdgeKV(t *testing.T) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), nil).Once()
 				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), section, fmt.Errorf("error")).Once()
 			},
-			withError: ErrSavingFiles,
+			withError: templates.ErrSavingFiles,
 		},
 	}
 

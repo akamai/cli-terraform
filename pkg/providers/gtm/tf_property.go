@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"strings"
 
-	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
+	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configgtm"
 )
 
 // property

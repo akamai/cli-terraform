@@ -66,7 +66,7 @@ var (
 	ErrCloudletTypeNotSupported = errors.New("cloudlet type not supported")
 )
 
-// CmdCreatePolicy is an entrypoint to create-cloudlets-policy command
+// CmdCreatePolicy is an entrypoint to create-policy command
 func CmdCreatePolicy(c *cli.Context) error {
 	ctx := c.Context
 	if c.NArg() != 1 {
@@ -92,7 +92,7 @@ func CmdCreatePolicy(c *cli.Context) error {
 	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
 	importPath := filepath.Join(tools.TFWorkPath, "import.sh")
 
-	err := tools.CheckFiles(policyPath, variablesPath, importPath)
+	err := tools.CheckFiles(policyPath, matchRulesPath, loadBalancerPath, variablesPath, importPath)
 	if err != nil {
 		return cli.Exit(color.RedString(err.Error()), 1)
 	}

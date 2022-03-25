@@ -21,7 +21,7 @@ import (
 	"strconv"
 	"unicode"
 
-	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/configgtm-v1_4"
+	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configgtm"
 )
 
 // Keys that can be ignored, e.g. lists, read-only, don't want
