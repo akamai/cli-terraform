@@ -20,11 +20,23 @@ resource "akamai_imaging_policy_set" "policyset" {
   contract_id = "{{.PolicySet.ContractID}}"
 }
 {{ range .Policies }}
-resource "akamai_imaging_policy_{{$.PolicySet.Type | ToLower}}" "policy_{{.PolicyID | RemoveSymbols}}" {
+  resource "akamai_imaging_policy_{{$.PolicySet.Type | ToLower}}" "policy_{{.PolicyID | RemoveSymbols}}" {
   policy_id              = "{{.PolicyID}}"
   contract_id            = "{{$.PolicySet.ContractID}}"
   policyset_id           = "{{$.PolicySet.ID}}"
   activate_on_production = {{.ActivateOnProduction}}
-  json                   = file("{{.JSON}}")
-}
+  {{- if .JSON}}
+    json                   = file("{{.JSON}}")
+  {{- end}}
+  {{- $type := $.PolicySet.Type}}
+  {{- with .Policy}}
+    {{- if eq $type "IMAGE"}}
+      {{- template "policy_image.gen.tmpl" .}}
+      {{- template "PolicyInputImage" .}}
+    {{- else if eq $type "VIDEO"}}
+      {{- template "policy_video.gen.tmpl" .}}
+      {{- template "PolicyInputVideo" .}}
+    {{- end}}
+  {{- end}}
+  }
 {{ end -}}

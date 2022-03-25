@@ -46,6 +46,7 @@ type (
 		PolicyID             string
 		ActivateOnProduction bool
 		JSON                 string
+		Policy               imaging.PolicyInput
 	}
 )
 
