@@ -1,0 +1,45 @@
+{{- /*gotype: github.com/akamai/cli-terraform/cloudlets.TFPolicyData*/ -}}
+data "akamai_cloudlets_request_control_match_rule" "match_rules_ig" {
+{{- range .MatchRules}}
+  match_rules {
+    name = "{{escape .Name}}"
+    start = {{.Start}}
+    end = {{.End}}
+    {{- range .Matches}}
+    matches {
+      match_type = "{{.MatchType}}"
+      match_value = "{{escape .MatchValue}}"
+      match_operator = "{{.MatchOperator}}"
+      case_sensitive = {{.CaseSensitive}}
+      negate = {{.Negate}}
+      check_ips = "{{.CheckIPs}}"
+      {{- with .ObjectMatchValue}}
+      object_match_value {
+      {{- if (eq .Type "simple")}}
+        type = "{{.Type}}"
+        value = [{{range $i, $v := .Value}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+      {{- end}}
+      {{- if (eq .Type "object")}}
+        name = "{{escape .Name}}"
+        type = "{{.Type}}"
+        name_case_sensitive = {{.NameCaseSensitive}}
+        name_has_wildcard = {{.NameHasWildcard}}
+        {{- with .Options}}
+        options {
+          value = [{{range $i, $v := .Value}}{{if $i}}, {{end}}"{{escape $v}}"{{end}}]
+          value_has_wildcard = {{.ValueHasWildcard}}
+          value_case_sensitive = {{.ValueCaseSensitive}}
+          value_escaped = {{.ValueEscaped}}
+        }
+        {{- end}}
+      {{- end}}
+      }
+    {{- end}}
+    }
+    {{- end}}
+    allow_deny = "{{.AllowDeny}}"
+    matches_always = {{.MatchesAlways}}
+    disabled = {{.Disabled}}
+  }
+{{end -}}
+}

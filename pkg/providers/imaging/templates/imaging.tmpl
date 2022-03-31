@@ -1,0 +1,30 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/imaging.TFImagingData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source = "akamai/akamai"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
+provider "akamai" {
+  edgerc = var.edgerc_path
+  config_section = var.config_section
+}
+
+resource "akamai_imaging_policy_set" "policyset" {
+  name        = "{{.PolicySet.Name}}"
+  region      = "{{.PolicySet.Region}}"
+  type        = "{{.PolicySet.Type}}"
+  contract_id = "{{.PolicySet.ContractID}}"
+}
+{{ range .Policies }}
+resource "akamai_imaging_policy_{{$.PolicySet.Type | ToLower}}" "policy_{{.PolicyID | RemoveSymbols}}" {
+  policy_id              = "{{.PolicyID}}"
+  contract_id            = "{{$.PolicySet.ContractID}}"
+  policyset_id           = "{{$.PolicySet.ID}}"
+  activate_on_production = {{.ActivateOnProduction}}
+  json                   = file("{{.JSON}}")
+}
+{{ end -}}

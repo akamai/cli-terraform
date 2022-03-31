@@ -1,0 +1,2 @@
+terraform init
+terraform import akamai_cloudlets_policy.policy test_policy_export

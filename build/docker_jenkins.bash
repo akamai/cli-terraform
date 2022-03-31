@@ -8,11 +8,14 @@
 # Script will end immediately when some command exits with a non-zero exit code.
 set -e
 
-CLI_BRANCH_NAME="${1:-develop}"
+CLI_TERRAFORM_BRANCH_NAME="${1:-develop}"
 PROVIDER_BRANCH_NAME="${2:-develop}"
 EDGEGRID_BRANCH_NAME_V2="${3:-v2}"
-EDGEGRID_BRANCH_NAME_V1="${4:-develop}"
-RELOAD_DOCKER_IMAGE="${5:-false}"
+CLI_BRANCH_NAME="${4:-develop}"
+EDGEGRID_BRANCH_NAME_V1="${5:-develop}"
+RELOAD_DOCKER_IMAGE="${6:-false}"
+
+
 TIMEOUT="20m"
 # Recalculate DOCKER_IMAGE_SIZE if any changes to dockerfile.
 DOCKER_IMAGE_SIZE="642345946"
@@ -20,11 +23,6 @@ DOCKER_IMAGE_SIZE="642345946"
 SSH_PRV_KEY="$(cat ~/.ssh/id_rsa)"
 SSH_PUB_KEY="$(cat ~/.ssh/id_rsa.pub)"
 SSH_KNOWN_HOSTS="$(cat ~/.ssh/known_hosts)"
-
-COVERAGE_DIR=test/coverage
-COVERAGE_PROFILE="$COVERAGE_DIR"/profile.out
-COVERAGE_XML="$COVERAGE_DIR"/coverage.xml
-COVERAGE_HTML="$COVERAGE_DIR"/index.html
 
 WORKDIR="${WORKDIR-$(pwd)}"
 echo "WORKDIR is $WORKDIR"
@@ -38,7 +36,6 @@ eTAG="$(git describe --tags --always)"
 PROVIDER_BRANCH_HASH="$(git rev-parse --short HEAD)"
 echo "Making build on branch $PROVIDER_BRANCH_NAME at hash $PROVIDER_BRANCH_HASH with tag $eTAG"
 
-mkdir -p $COVERAGE_DIR
 cp "$HOME"/.edgerc "$WORKDIR"/.edgerc
 sed -i -e "1s/^.*$/[default]/" "$WORKDIR"/.edgerc
 
@@ -60,16 +57,16 @@ if [[ "$(docker images -q terraform/akamai:terraform-provider-akamai 2> /dev/nul
     -t terraform/akamai:terraform-provider-akamai .
 fi
 
-
 echo "Creating docker container"
 docker run -d -it --name akatf-container --entrypoint "/usr/bin/tail" \
         -e TF_LOG=DEBUG \
         -e TF_LOG_PATH="provider.log" \
         -e COVERMODE="atomic" \
-        -e CLI_BRANCH_NAME="$CLI_BRANCH_NAME" \
+        -e CLI_TERRAFORM_BRANCH_NAME="$CLI_TERRAFORM_BRANCH_NAME" \
         -e EDGEGRID_BRANCH_NAME_V1="$EDGEGRID_BRANCH_NAME_V1" \
         -e EDGEGRID_BRANCH_NAME_V2="$EDGEGRID_BRANCH_NAME_V2" \
         -e PROVIDER_BRANCH_NAME="$PROVIDER_BRANCH_NAME" \
+        -e CLI_BRANCH_NAME="$CLI_BRANCH_NAME" \
         -e SSH_PUB_KEY="${SSH_PUB_KEY}" \
         -e SSH_PRV_KEY="${SSH_PRV_KEY}" \
         -e SSH_KNOWN_HOSTS="${SSH_KNOWN_HOSTS}" \
@@ -87,12 +84,12 @@ docker exec akatf-container sh -c 'echo "$SSH_KNOWN_HOSTS" > /root/.ssh/known_ho
                                    chmod 700 /root/.ssh;
                                    chmod 600 /root/.ssh/id_rsa;
                                    chmod 644 /root/.ssh/id_rsa.pub /root/.ssh/known_hosts'
-
 echo "Cloning repos"
 docker exec akatf-container sh -c 'git clone ssh://git@git.source.akamai.com:7999/devexp/terraform-provider-akamai.git;
                                    git clone ssh://git@git.source.akamai.com:7999/devexp/akamaiopen-edgegrid-golang.git edgegrid-v1;
                                    git clone ssh://git@git.source.akamai.com:7999/devexp/akamaiopen-edgegrid-golang.git edgegrid-v2;
-                                   git clone ssh://git@git.source.akamai.com:7999/devexp/cli-terraform.git'
+                                   git clone ssh://git@git.source.akamai.com:7999/devexp/cli-terraform.git;
+                                   git clone ssh://git@git.source.akamai.com:7999/devexp/cli.git'
 
 echo "Checkout branches"
 docker exec akatf-container sh -c 'cd edgegrid-v1; git checkout ${EDGEGRID_BRANCH_NAME_V1};
@@ -100,43 +97,22 @@ docker exec akatf-container sh -c 'cd edgegrid-v1; git checkout ${EDGEGRID_BRANC
                                    cd ../terraform-provider-akamai; git checkout ${PROVIDER_BRANCH_NAME};
                                    go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v2=../edgegrid-v2;
                                    go mod tidy;
-                                   cd ../cli-terraform; git checkout ${CLI_BRANCH_NAME};
+                                   cd ../cli; git checkout ${CLI_BRANCH_NAME};
+                                   go mod tidy;
+                                   cd ../cli-terraform; git checkout ${CLI_TERRAFORM_BRANCH_NAME};
                                    go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang=../edgegrid-v1;
                                    go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v2=../edgegrid-v2;
+                                   go mod edit -replace github.com/akamai/cli=../cli;
                                    go mod tidy'
 
-echo "Running tests with xUnit output"
-docker exec akatf-container sh -c 'cd cli-terraform; go test -timeout $TIMEOUT -v -coverpkg=./... -coverprofile=../profile.out -covermode=$COVERMODE ./... 2>&1 | tee ../tests.output'
-docker exec akatf-container sh -c 'cat tests.output | go-junit-report' > test/tests.xml
-docker exec akatf-container sh -c 'cat tests.output' > test/tests.output
-sed -i -e 's/skip=/skipped=/g;s/ failures=/ errors="0" failures=/g' test/tests.xml
 
-echo "Creating coverage files"
-docker exec akatf-container sh -c 'cd cli-terraform;
-                                   go tool cover -html=../profile.out -o ../index.html;
-                                   gocov convert ../profile.out | gocov-xml > ../coverage.xml'
-docker exec akatf-container sh -c 'cat profile.out' > "$COVERAGE_PROFILE"
-docker exec akatf-container sh -c 'cat index.html' > "$COVERAGE_HTML"
-docker exec akatf-container sh -c 'cat coverage.xml' > "$COVERAGE_XML"
 
-echo "Creating docker build for terraform akamai provider"
+echo "Creating docker build for terraform-provider-akamai"
 docker exec akatf-container sh -c 'cd terraform-provider-akamai; go install -tags all;
                                    mkdir -p /root/.terraform.d/plugins/registry.terraform.io/akamai/akamai/${PROVIDER_VERSION}/linux_amd64;
-                                   cp /root/go/bin/terraform-provider-akamai /root/.terraform.d/plugins/registry.terraform.io/akamai/akamai/${PROVIDER_VERSION}/linux_amd64/terraform-provider-akamai_v${PROVIDER_VERSION}'
+                                   cp /go/bin/terraform-provider-akamai /root/.terraform.d/plugins/registry.terraform.io/akamai/akamai/${PROVIDER_VERSION}/linux_amd64/terraform-provider-akamai_v${PROVIDER_VERSION}'
 
-echo "Creating docker build for cli-terraform"
-docker exec akatf-container sh -c 'cd cli-terraform; go install -tags all'
-
-echo "Validate test data"
-docker exec akatf-container sh -c 'cd cli-terraform;
-                                   for dir in $(find . -type f -name "*.tf" -exec dirname "{}" \; |sort -u); do (cd ${dir} && echo Validating directory: $(pwd) && terraform init && terraform validate && rm -r .terraform* ); done'
-
-echo "Running cli-terraform fmt"
-#TF files are not properly formatted - https://track.akamai.com/jira/browse/DXE-131
-#docker exec akatf-container sh -c 'cd cli-terraform; terraform fmt -recursive -check'
-
-echo "Running tflint on cloudlets"
-#TF files are not properly formatted - https://track.akamai.com/jira/browse/DXE-131
-#docker exec akatf-container sh -c 'find cli-terraform/ -type f -name "*.tf" | xargs -I % dirname % | sort -u | xargs -I @ sh -c "echo @ && tflint @"'
+echo "Running checks"
+docker exec akatf-container sh -c 'cd cli-terraform; make all'
 
 docker rm -f akatf-container 2> /dev/null || true

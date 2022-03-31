@@ -1,0 +1,6 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/cloudlets.TFPolicyData*/ -}}
+terraform init
+{{- range .LoadBalancers}}
+terraform import akamai_cloudlets_application_load_balancer.load_balancer_{{.OriginID}} {{.OriginID}}
+{{- end}}
+terraform import akamai_cloudlets_policy.policy {{.Name}}

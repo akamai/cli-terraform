@@ -1,5 +1,26 @@
 # Release Notes
 
+## Version 0.7.0 (Mar 31, 2022)
+
+### Features / Enhancements
+
+* [IMPORTANT] Image and Video Manager
+  * Support importing existing Video and Image Policies
+  * Support importing existing Policy Set
+
+* CLOUDLETS
+  * Support importing existing Cloudlets match rules for Request Control with related data source
+
+* General
+  * Update urfave/cli to v2
+    * BREAKING CHANGE: now flags must come before args
+  * Update the README to reflect changes in command line flag ordering
+
+### Bug Fixes
+
+* DNS
+  * Corrected handling of embedded double quotes in TXT Recordsets
+
 ## Version 0.6.0 (Mar 3, 2022)
 
 ### Features / Enhancements
