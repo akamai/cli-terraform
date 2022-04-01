@@ -120,7 +120,7 @@ func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.Nam
 	term.Spinner().Start("Saving TF configurations ")
 	if err := templateProcessor.ProcessTemplates(tfEdgeKVData); err != nil {
 		term.Spinner().Fail()
-		return err
+		return fmt.Errorf("%w: %s", templates.ErrSavingFiles, err)
 	}
 	term.Spinner().OK()
 	fmt.Printf("Terraform configuration for edgeKV '%s' on network '%s' was saved successfully\n", edgeKV.Name, network)
