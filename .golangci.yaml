@@ -12,12 +12,6 @@ issues:
   max-issues-per-linter: 0
   max-same-issues: 0
   exclude-rules:
-    - path: pkg/providers/papi/
-      linters:
-        - errcheck
-    - path: pkg/providers/hapi/
-      linters:
-        - errcheck
     - path: pkg/providers/dns/
       linters:
         - errcheck
