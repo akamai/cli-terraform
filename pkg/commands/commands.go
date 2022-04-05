@@ -21,6 +21,7 @@ import (
 	"github.com/akamai/cli-terraform/pkg/providers/gtm"
 	"github.com/akamai/cli-terraform/pkg/providers/imaging"
 	"github.com/akamai/cli-terraform/pkg/providers/papi"
+	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/apphelp"
 	"github.com/akamai/cli/pkg/autocomplete"
 	"github.com/urfave/cli/v2"
@@ -186,6 +187,11 @@ func CommandLocator() ([]*cli.Command, error) {
 			&cli.StringFlag{
 				Name:  "tfworkpath",
 				Usage: "Path location for placement of created artifacts. Default: current directory",
+			},
+			&cli.BoolFlag{
+				Name:        "schema",
+				Usage:       "Generate content of the policy using HCL instead of JSON file",
+				Destination: &tools.Schema,
 			},
 		},
 		BashComplete: autocomplete.Default,

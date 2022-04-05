@@ -1,0 +1,2 @@
+terraform init
+terraform import akamai_imaging_policy_set.policyset test_policyset_id:ctr_123

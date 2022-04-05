@@ -10,5 +10,11 @@
   },
   "output": {
     "perceptualQuality": "mediumHigh"
-  }
+  },
+  "transformations": [
+    {
+      "colors": 2,
+      "transformation": "MaxColors"
+    }
+  ]
 }

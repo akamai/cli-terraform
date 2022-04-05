@@ -2,6 +2,7 @@ package imaging
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -20,15 +21,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type mockProcessor struct {
-	mock.Mock
-}
-
-func (m *mockProcessor) ProcessTemplates(i interface{}) error {
-	args := m.Called(i)
-	return args.Error(0)
-}
-
 func TestMain(m *testing.M) {
 	if err := os.MkdirAll("./testdata/res", 0755); err != nil {
 		log.Fatal(err)
@@ -41,6 +33,452 @@ func TestMain(m *testing.M) {
 }
 
 var (
+	veryDeepPolicy = imaging.PolicyInputImage{
+		RolloutDuration: 3600,
+		Hosts:           []string{"host1", "host2"},
+		Variables: []imaging.Variable{
+			{
+				Name:         "ResizeDim",
+				Type:         "number",
+				DefaultValue: "280",
+			},
+			{
+				Name:         "ResizeDimWithBorder",
+				Type:         "number",
+				DefaultValue: "260",
+			},
+			{
+				Name:         "MinDim",
+				Type:         "number",
+				DefaultValue: "1000",
+				EnumOptions: []*imaging.EnumOptions{
+					{
+						ID:    "1",
+						Value: "value1",
+					},
+					{
+						ID:    "2",
+						Value: "value2",
+					},
+				},
+			},
+			{
+				Name:         "MinDimNew",
+				Type:         "number",
+				DefaultValue: "1450",
+			},
+			{
+				Name:         "MaxDimOld",
+				Type:         "number",
+				DefaultValue: "1500",
+			},
+		},
+		Transformations: []imaging.TransformationType{
+			&imaging.RegionOfInterestCrop{
+				Transformation: "RegionOfInterestCrop",
+				Style:          &imaging.RegionOfInterestCropStyleVariableInline{Value: imaging.RegionOfInterestCropStylePtr("fill")},
+				Gravity:        &imaging.GravityVariableInline{Value: imaging.GravityPtr("Center")},
+				Width:          &imaging.IntegerVariableInline{Value: tools.IntPtr(7)},
+				Height:         &imaging.IntegerVariableInline{Value: tools.IntPtr(8)},
+				RegionOfInterest: &imaging.RectangleShapeType{
+					Anchor: imaging.PointShapeType{
+						X: &imaging.NumberVariableInline{Value: tools.Float32Ptr(4)},
+						Y: &imaging.NumberVariableInline{Value: tools.Float32Ptr(5)},
+					},
+					Width:  &imaging.NumberVariableInline{Value: tools.Float32Ptr(8)},
+					Height: &imaging.NumberVariableInline{Value: tools.Float32Ptr(9)},
+				},
+			},
+			&imaging.Append{
+				Transformation:         "Append",
+				Gravity:                &imaging.GravityVariableInline{Value: imaging.GravityPtr("Center")},
+				GravityPriority:        &imaging.AppendGravityPriorityVariableInline{Value: imaging.AppendGravityPriorityPtr("horizontal")},
+				PreserveMinorDimension: &imaging.BooleanVariableInline{Value: tools.BoolPtr(true)},
+				Image: &imaging.TextImageType{
+					Type:       "Text",
+					Fill:       &imaging.StringVariableInline{Value: tools.StringPtr("#000000")},
+					Size:       &imaging.NumberVariableInline{Value: tools.Float32Ptr(72)},
+					Stroke:     &imaging.StringVariableInline{Value: tools.StringPtr("#FFFFFF")},
+					StrokeSize: &imaging.NumberVariableInline{Value: tools.Float32Ptr(0)},
+					Text:       &imaging.StringVariableInline{Value: tools.StringPtr("test")},
+					Transformation: &imaging.Compound{
+						Transformation: "Compound",
+					},
+				},
+			},
+			&imaging.Trim{
+				Transformation: "Trim",
+				Fuzz: &imaging.NumberVariableInline{
+					Value: tools.Float32Ptr(0.08),
+				},
+				Padding: &imaging.IntegerVariableInline{
+					Value: tools.IntPtr(0),
+				},
+			},
+			&imaging.IfDimension{
+				Transformation: "IfDimension",
+				Dimension: &imaging.IfDimensionDimensionVariableInline{
+					Value: imaging.IfDimensionDimensionPtr("width"),
+				},
+				Value: &imaging.IntegerVariableInline{
+					Name: tools.StringPtr("MaxDimOld"),
+				},
+				Default: &imaging.Compound{
+					Transformation: "Compound",
+					Transformations: []imaging.TransformationType{
+						&imaging.IfDimension{
+							Transformation: "IfDimension",
+							Dimension: &imaging.IfDimensionDimensionVariableInline{
+								Value: imaging.IfDimensionDimensionPtr("width"),
+							},
+							Value: &imaging.IntegerVariableInline{
+								Name: tools.StringPtr("MinDim"),
+							},
+							LessThan: &imaging.Compound{
+								Transformation: "Compound",
+								Transformations: []imaging.TransformationType{
+									&imaging.Resize{
+										Transformation: "Resize",
+										Aspect: &imaging.ResizeAspectVariableInline{
+											Value: imaging.ResizeAspectPtr("fit"),
+										},
+										Type: &imaging.ResizeTypeVariableInline{
+											Value: imaging.ResizeTypePtr("normal"),
+										},
+										Width: &imaging.IntegerVariableInline{
+											Name: tools.StringPtr("ResizeDimWithBorder"),
+										},
+										Height: &imaging.IntegerVariableInline{
+											Name: tools.StringPtr("ResizeDimWithBorder"),
+										},
+									},
+									&imaging.Crop{
+										Transformation: "Crop",
+										XPosition: &imaging.IntegerVariableInline{
+											Value: tools.IntPtr(0),
+										},
+										YPosition: &imaging.IntegerVariableInline{
+											Value: tools.IntPtr(0),
+										},
+										Gravity: &imaging.GravityVariableInline{
+											Value: imaging.GravityPtr("Center"),
+										},
+										AllowExpansion: &imaging.BooleanVariableInline{
+											Value: tools.BoolPtr(true),
+										},
+										Width: &imaging.IntegerVariableInline{
+											Name: tools.StringPtr("ResizeDim"),
+										},
+										Height: &imaging.IntegerVariableInline{
+											Name: tools.StringPtr("ResizeDim"),
+										},
+									},
+									&imaging.BackgroundColor{
+										Transformation: "BackgroundColor",
+										Color: &imaging.StringVariableInline{
+											Value: tools.StringPtr("#ffffff"),
+										},
+									},
+								},
+							},
+							Default: &imaging.Compound{
+								Transformation: "Compound",
+								Transformations: []imaging.TransformationType{
+									&imaging.IfDimension{
+										Transformation: "IfDimension",
+										Dimension: &imaging.IfDimensionDimensionVariableInline{
+											Value: imaging.IfDimensionDimensionPtr("height"),
+										},
+										Value: &imaging.IntegerVariableInline{
+											Name: tools.StringPtr("MinDim"),
+										},
+										LessThan: &imaging.Compound{
+											Transformation: "Compound",
+											Transformations: []imaging.TransformationType{
+												&imaging.Resize{
+													Transformation: "Resize",
+													Aspect: &imaging.ResizeAspectVariableInline{
+														Value: imaging.ResizeAspectPtr("fit"),
+													},
+													Type: &imaging.ResizeTypeVariableInline{
+														Value: imaging.ResizeTypePtr("normal"),
+													},
+													Width: &imaging.IntegerVariableInline{
+														Name: tools.StringPtr("ResizeDimWithBorder"),
+													},
+													Height: &imaging.IntegerVariableInline{
+														Name: tools.StringPtr("ResizeDimWithBorder"),
+													},
+												},
+												&imaging.Crop{
+													Transformation: "Crop",
+													XPosition: &imaging.IntegerVariableInline{
+														Value: tools.IntPtr(0),
+													},
+													YPosition: &imaging.IntegerVariableInline{
+														Value: tools.IntPtr(0),
+													},
+													Gravity: &imaging.GravityVariableInline{
+														Value: imaging.GravityPtr("Center"),
+													},
+													AllowExpansion: &imaging.BooleanVariableInline{
+														Value: tools.BoolPtr(true),
+													},
+													Width: &imaging.IntegerVariableInline{
+														Name: tools.StringPtr("ResizeDim"),
+													},
+													Height: &imaging.IntegerVariableInline{
+														Name: tools.StringPtr("ResizeDim"),
+													},
+												},
+												&imaging.BackgroundColor{
+													Transformation: "BackgroundColor",
+													Color: &imaging.StringVariableInline{
+														Value: tools.StringPtr("#ffffff"),
+													},
+												},
+											},
+										},
+										Default: &imaging.Compound{
+											Transformation: "Compound",
+											Transformations: []imaging.TransformationType{
+												&imaging.IfDimension{
+													Transformation: "IfDimension",
+													Dimension: &imaging.IfDimensionDimensionVariableInline{
+														Value: imaging.IfDimensionDimensionPtr("height"),
+													},
+													Value: &imaging.IntegerVariableInline{
+														Name: tools.StringPtr("MaxDimOld"),
+													},
+													GreaterThan: &imaging.Compound{
+														Transformation: "Compound",
+														Transformations: []imaging.TransformationType{
+															&imaging.Resize{
+																Transformation: "Resize",
+																Aspect: &imaging.ResizeAspectVariableInline{
+																	Value: imaging.ResizeAspectPtr("fit"),
+																},
+																Type: &imaging.ResizeTypeVariableInline{
+																	Value: imaging.ResizeTypePtr("normal"),
+																},
+
+																Width: &imaging.IntegerVariableInline{
+																	Name: tools.StringPtr("ResizeDimWithBorder"),
+																},
+																Height: &imaging.IntegerVariableInline{
+																	Name: tools.StringPtr("ResizeDimWithBorder"),
+																},
+															},
+															&imaging.Crop{
+																Transformation: "Crop",
+																XPosition: &imaging.IntegerVariableInline{
+																	Value: tools.IntPtr(0),
+																},
+																YPosition: &imaging.IntegerVariableInline{
+																	Value: tools.IntPtr(0),
+																},
+																Gravity: &imaging.GravityVariableInline{
+																	Value: imaging.GravityPtr("Center"),
+																},
+																AllowExpansion: &imaging.BooleanVariableInline{
+																	Value: tools.BoolPtr(true),
+																},
+																Width: &imaging.IntegerVariableInline{
+																	Name: tools.StringPtr("ResizeDim"),
+																},
+																Height: &imaging.IntegerVariableInline{
+																	Name: tools.StringPtr("ResizeDim"),
+																},
+															},
+															&imaging.BackgroundColor{
+																Transformation: "BackgroundColor",
+																Color: &imaging.StringVariableInline{
+																	Value: tools.StringPtr("#ffffff"),
+																},
+															},
+														},
+													},
+													Default: &imaging.Compound{
+														Transformation: "Compound",
+														Transformations: []imaging.TransformationType{
+															&imaging.Resize{
+																Transformation: "Resize",
+																Aspect: &imaging.ResizeAspectVariableInline{
+																	Value: imaging.ResizeAspectPtr("fit"),
+																},
+																Type: &imaging.ResizeTypeVariableInline{
+																	Value: imaging.ResizeTypePtr("normal"),
+																},
+																Width: &imaging.IntegerVariableInline{
+																	Name: tools.StringPtr("ResizeDim"),
+																},
+																Height: &imaging.IntegerVariableInline{
+																	Name: tools.StringPtr("ResizeDim"),
+																},
+															},
+															&imaging.Crop{
+																Transformation: "Crop",
+																XPosition: &imaging.IntegerVariableInline{
+																	Value: tools.IntPtr(0),
+																},
+																YPosition: &imaging.IntegerVariableInline{
+																	Value: tools.IntPtr(0),
+																},
+																Gravity: &imaging.GravityVariableInline{
+																	Value: imaging.GravityPtr("Center"),
+																},
+																AllowExpansion: &imaging.BooleanVariableInline{
+																	Value: tools.BoolPtr(true),
+																},
+																Width: &imaging.IntegerVariableInline{
+																	Name: tools.StringPtr("ResizeDim"),
+																},
+																Height: &imaging.IntegerVariableInline{
+																	Name: tools.StringPtr("ResizeDim"),
+																},
+															},
+															&imaging.BackgroundColor{
+																Transformation: "BackgroundColor",
+																Color: &imaging.StringVariableInline{
+																	Value: tools.StringPtr("#ffffff"),
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		PostBreakpointTransformations: []imaging.TransformationType{
+			&imaging.BackgroundColor{
+				Transformation: "BackgroundColor",
+				Color: &imaging.StringVariableInline{
+					Value: tools.StringPtr("#ffffff"),
+				},
+			},
+			&imaging.IfDimension{
+				Transformation: "IfDimension",
+				Dimension: &imaging.IfDimensionDimensionVariableInline{
+					Value: imaging.IfDimensionDimensionPtr("height"),
+				},
+				Value: &imaging.IntegerVariableInline{
+					Name: tools.StringPtr("MaxDimOld"),
+				},
+				GreaterThan: &imaging.Compound{
+					Transformation: "Compound",
+					Transformations: []imaging.TransformationType{
+						&imaging.Resize{
+							Transformation: "Resize",
+							Aspect: &imaging.ResizeAspectVariableInline{
+								Value: imaging.ResizeAspectPtr("fit"),
+							},
+							Type: &imaging.ResizeTypeVariableInline{
+								Value: imaging.ResizeTypePtr("normal"),
+							},
+
+							Width: &imaging.IntegerVariableInline{
+								Name: tools.StringPtr("ResizeDimWithBorder"),
+							},
+							Height: &imaging.IntegerVariableInline{
+								Name: tools.StringPtr("ResizeDimWithBorder"),
+							},
+						},
+						&imaging.Crop{
+							Transformation: "Crop",
+							XPosition: &imaging.IntegerVariableInline{
+								Value: tools.IntPtr(0),
+							},
+							YPosition: &imaging.IntegerVariableInline{
+								Value: tools.IntPtr(0),
+							},
+							Gravity: &imaging.GravityVariableInline{
+								Value: imaging.GravityPtr("Center"),
+							},
+							AllowExpansion: &imaging.BooleanVariableInline{
+								Value: tools.BoolPtr(true),
+							},
+							Width: &imaging.IntegerVariableInline{
+								Name: tools.StringPtr("ResizeDim"),
+							},
+							Height: &imaging.IntegerVariableInline{
+								Name: tools.StringPtr("ResizeDim"),
+							},
+						},
+						&imaging.BackgroundColor{
+							Transformation: "BackgroundColor",
+							Color: &imaging.StringVariableInline{
+								Value: tools.StringPtr("#ffffff"),
+							},
+						},
+					},
+				},
+				Default: &imaging.Compound{
+					Transformation: "Compound",
+					Transformations: []imaging.TransformationType{
+						&imaging.Resize{
+							Transformation: "Resize",
+							Aspect: &imaging.ResizeAspectVariableInline{
+								Value: imaging.ResizeAspectPtr("fit"),
+							},
+							Type: &imaging.ResizeTypeVariableInline{
+								Value: imaging.ResizeTypePtr("normal"),
+							},
+							Width: &imaging.IntegerVariableInline{
+								Name: tools.StringPtr("ResizeDim"),
+							},
+							Height: &imaging.IntegerVariableInline{
+								Name: tools.StringPtr("ResizeDim"),
+							},
+						},
+						&imaging.Crop{
+							Transformation: "Crop",
+							XPosition: &imaging.IntegerVariableInline{
+								Value: tools.IntPtr(0),
+							},
+							YPosition: &imaging.IntegerVariableInline{
+								Value: tools.IntPtr(0),
+							},
+							Gravity: &imaging.GravityVariableInline{
+								Value: imaging.GravityPtr("Center"),
+							},
+							AllowExpansion: &imaging.BooleanVariableInline{
+								Value: tools.BoolPtr(true),
+							},
+							Width: &imaging.IntegerVariableInline{
+								Name: tools.StringPtr("ResizeDim"),
+							},
+							Height: &imaging.IntegerVariableInline{
+								Name: tools.StringPtr("ResizeDim"),
+							},
+						},
+						&imaging.BackgroundColor{
+							Transformation: "BackgroundColor",
+							Color: &imaging.StringVariableInline{
+								Value: tools.StringPtr("#ffffff"),
+							},
+						},
+					},
+				},
+			},
+		},
+		Breakpoints: &imaging.Breakpoints{
+			Widths: []int{280, 1080},
+		},
+		Output: &imaging.OutputImage{
+			PerceptualQuality: &imaging.OutputImagePerceptualQualityVariableInline{
+				Value: imaging.OutputImagePerceptualQualityPtr("mediumHigh"),
+			},
+			AdaptiveQuality: 50,
+		},
+	}
+
 	policiesRequests = []imaging.GetPolicyRequest{
 		{
 			PolicyID:    ".auto",
@@ -210,26 +648,23 @@ var (
 		},
 	}
 
-	expectImagingProcessTemplates = func(p *mockProcessor, policySetID, contractID, name, policyType, region, section string,
-		policies []TFPolicy, err error) *mock.Call {
-		call := p.On(
-			"ProcessTemplates",
-			TFImagingData{
-				PolicySet: TFPolicySet{
-					ID:         policySetID,
-					ContractID: contractID,
-					Name:       name,
-					Region:     region,
-					Type:       policyType,
-				},
-				Policies: policies,
-				Section:  section,
+	processor = func(testdir string) templates.FSTemplateProcessor {
+		return templates.FSTemplateProcessor{
+			TemplatesFS: templateFiles,
+			TemplateTargets: map[string]string{
+				"imaging.tmpl":   fmt.Sprintf("./testdata/res/%s/imaging.tf", testdir),
+				"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", testdir),
+				"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", testdir),
 			},
-		)
-		if err != nil {
-			return call.Return(err)
+			AdditionalFuncs: template.FuncMap{
+				"ToLower": func(val string) string {
+					return strings.ToLower(val)
+				},
+				"RemoveSymbols": func(val string) string {
+					return RemoveSymbols.ReplaceAllString(val, "_")
+				},
+			},
 		}
-		return call.Return(nil)
 	}
 
 	expectGetPolicySet = func(i *mockimaging, policySetID, contractID, name, policyType string, region imaging.Region,
@@ -292,24 +727,24 @@ var (
 func TestCreateImaging(t *testing.T) {
 	section := "test_section"
 	tests := map[string]struct {
-		init         func(*mockimaging, *mockProcessor)
+		init         func(*mockimaging)
 		filesToCheck []string
 		jsonDir      string
 		withError    error
+		schema       bool
 	}{
 		"fetch policy set with given id and contract and no policies": {
-			init: func(i *mockimaging, p *mockProcessor) {
+			init: func(i *mockimaging) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
 				// getPolicies returns zero policies
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
 					nil, 0, nil).Once()
-
-				expectImagingProcessTemplates(p, "test_policyset_id", "ctr_123", "some policy set",
-					"IMAGE", "EMEA", "test_section", nil, nil).Once()
 			},
+			jsonDir:      "json/image_no_policies",
+			filesToCheck: []string{"imaging.tf", "import.sh", "variables.tf"},
 		},
 		"fetch policy set with image policies same on production": {
-			init: func(i *mockimaging, p *mockProcessor) {
+			init: func(i *mockimaging) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -319,15 +754,48 @@ func TestCreateImaging(t *testing.T) {
 				expectGetPolicy(i, policiesRequests[0], imagePoliciesOutputs[0], nil)
 				// policyID: test_policy_image - same on production
 				expectGetPolicy(i, policiesRequests[1], imagePoliciesOutputs[1], nil)
-
-				expectImagingProcessTemplates(p, "test_policyset_id", "ctr_123", "some policy set",
-					"IMAGE", "EMEA", "test_section", imagePoliciesData[:2], nil).Once()
 			},
 			jsonDir:      "json/image_policies",
-			filesToCheck: []string{"_auto.json", "test_policy_image.json"},
+			filesToCheck: []string{"_auto.json", "test_policy_image.json", "imaging.tf", "import.sh", "variables.tf"},
+		},
+		"fetch policy set with image policies same on production as schema": {
+			init: func(i *mockimaging) {
+				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
+				// getPolicies returns two policy outputs from staging
+				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
+					imagePoliciesOutputs[:2], 2, nil).Once()
+				// getPoliciesImageData
+				// policyID: .auto - same on production
+				expectGetPolicy(i, policiesRequests[0], imagePoliciesOutputs[0], nil)
+				// policyID: test_policy_image - same on production
+				expectGetPolicy(i, policiesRequests[1], imagePoliciesOutputs[1], nil)
+			},
+			jsonDir:      "json/image_policies_schema",
+			filesToCheck: []string{"imaging.tf", "import.sh", "variables.tf"},
+			schema:       true,
+		},
+		"fetch policy set with image policies same on production as schema, too many levels": {
+			init: func(i *mockimaging) {
+				policy, err := convertPolicyInputImage(&veryDeepPolicy)
+				require.NoError(t, err)
+				policy.ID = ".auto"
+
+				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
+				// getPolicies returns two policy outputs from staging
+				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
+					[]imaging.PolicyOutput{policy}, 1, nil).Once()
+				expectGetPolicy(i, imaging.GetPolicyRequest{
+					PolicyID:    ".auto",
+					Network:     imaging.PolicyNetworkProduction,
+					ContractID:  "ctr_123",
+					PolicySetID: "test_policyset_id",
+				}, policy, nil)
+			},
+			withError: ErrFetchingPolicy,
+			schema:    true,
 		},
 		"fetch policy set with image policies different on production": {
-			init: func(i *mockimaging, p *mockProcessor) {
+			init: func(i *mockimaging) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -337,16 +805,13 @@ func TestCreateImaging(t *testing.T) {
 				expectGetPolicy(i, policiesRequests[0], imagePoliciesOutputs[0], nil)
 				// policyID: test_policy_image - different on production
 				expectGetPolicy(i, policiesRequests[1], imagePoliciesOutputs[2], nil)
-
-				expectImagingProcessTemplates(p, "test_policyset_id", "ctr_123", "some policy set",
-					"IMAGE", "EMEA", "test_section", []TFPolicy{imagePoliciesData[0], imagePoliciesData[2]}, nil).Once()
 			},
-			jsonDir:      "json/image_policies",
-			filesToCheck: []string{"_auto.json", "test_policy_image.json"},
+			jsonDir:      "json/image_policies_diff_prod",
+			filesToCheck: []string{"_auto.json", "test_policy_image.json", "imaging.tf", "import.sh", "variables.tf"},
 		},
 
 		"fetch policy set with video policies same on production": {
-			init: func(i *mockimaging, p *mockProcessor) {
+			init: func(i *mockimaging) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "VIDEO", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -356,15 +821,28 @@ func TestCreateImaging(t *testing.T) {
 				expectGetPolicy(i, policiesRequests[0], videoPoliciesOutputs[0], nil)
 				// policyID: test_policy_image - same on production
 				expectGetPolicy(i, policiesRequests[2], videoPoliciesOutputs[1], nil)
-
-				expectImagingProcessTemplates(p, "test_policyset_id", "ctr_123", "some policy set",
-					"VIDEO", "EMEA", "test_section", videoPoliciesData[:2], nil).Once()
 			},
 			jsonDir:      "json/video_policies",
-			filesToCheck: []string{"_auto.json", "test_policy_video.json"},
+			filesToCheck: []string{"_auto.json", "test_policy_video.json", "imaging.tf", "import.sh", "variables.tf"},
+		},
+		"fetch policy set with video policies same on production as schema": {
+			init: func(i *mockimaging) {
+				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "VIDEO", "EMEA", nil).Once()
+				// getPolicies returns two policy outputs from staging
+				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
+					videoPoliciesOutputs[:2], 2, nil).Once()
+				// getPoliciesVideoData
+				// policyID: .auto - same on production
+				expectGetPolicy(i, policiesRequests[0], videoPoliciesOutputs[0], nil)
+				// policyID: test_policy_image - same on production
+				expectGetPolicy(i, policiesRequests[2], videoPoliciesOutputs[1], nil)
+			},
+			jsonDir:      "json/video_policies_schema",
+			schema:       true,
+			filesToCheck: []string{"imaging.tf", "import.sh", "variables.tf"},
 		},
 		"fetch policy set with video policies different on production": {
-			init: func(i *mockimaging, p *mockProcessor) {
+			init: func(i *mockimaging) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "VIDEO", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -374,21 +852,18 @@ func TestCreateImaging(t *testing.T) {
 				expectGetPolicy(i, policiesRequests[0], videoPoliciesOutputs[0], nil)
 				// policyID: test_policy_image - different on production
 				expectGetPolicy(i, policiesRequests[2], videoPoliciesOutputs[2], nil)
-
-				expectImagingProcessTemplates(p, "test_policyset_id", "ctr_123", "some policy set",
-					"VIDEO", "EMEA", "test_section", []TFPolicy{videoPoliciesData[0], videoPoliciesData[2]}, nil).Once()
 			},
-			jsonDir:      "json/video_policies",
-			filesToCheck: []string{"_auto.json", "test_policy_video.json"},
+			jsonDir:      "json/video_policies_diff_prod",
+			filesToCheck: []string{"_auto.json", "test_policy_video.json", "imaging.tf", "import.sh", "variables.tf"},
 		},
 		"error fetching policy set": {
-			init: func(i *mockimaging, p *mockProcessor) {
+			init: func(i *mockimaging) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "VIDEO", "EMEA", fmt.Errorf("oops")).Once()
 			},
 			withError: ErrFetchingPolicySet,
 		},
 		"error fetching policies": {
-			init: func(i *mockimaging, p *mockProcessor) {
+			init: func(i *mockimaging) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
 				// getPolicies
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -397,7 +872,7 @@ func TestCreateImaging(t *testing.T) {
 			withError: ErrFetchingPolicy,
 		},
 		"error fetching policy": {
-			init: func(i *mockimaging, p *mockProcessor) {
+			init: func(i *mockimaging) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -408,34 +883,16 @@ func TestCreateImaging(t *testing.T) {
 			},
 			withError: ErrFetchingPolicy,
 		},
-		"error processing template": {
-			init: func(i *mockimaging, p *mockProcessor) {
-				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
-				// getPolicies returns two policy outputs from staging
-				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
-					imagePoliciesOutputs[:2], 2, nil).Once()
-				// getPoliciesImageData
-				// policyID: .auto - same on production
-				expectGetPolicy(i, policiesRequests[0], imagePoliciesOutputs[0], nil)
-				// policyID: test_policy_image - same on production
-				expectGetPolicy(i, policiesRequests[1], imagePoliciesOutputs[1], nil)
-
-				expectImagingProcessTemplates(p, "test_policyset_id", "ctr_123", "some policy set",
-					"IMAGE", "EMEA", "test_section", imagePoliciesData[:2], templates.ErrSavingFiles).Once()
-			},
-			jsonDir:   "json/image_policies",
-			withError: templates.ErrSavingFiles,
-		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("testdata/res/%s", test.jsonDir), 0755))
 			mi := new(mockimaging)
-			mp := new(mockProcessor)
-			test.init(mi, mp)
+			mp := processor(test.jsonDir)
+			test.init(mi)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createImaging(ctx, "ctr_123", "test_policyset_id", fmt.Sprintf("testdata/res/%s", test.jsonDir), section, mi, mp)
+			err := createImaging(ctx, "ctr_123", "test_policyset_id", fmt.Sprintf("testdata/res/%s", test.jsonDir), section, mi, mp, test.schema)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -452,7 +909,6 @@ func TestCreateImaging(t *testing.T) {
 				}
 			}
 			mi.AssertExpectations(t)
-			mp.AssertExpectations(t)
 		})
 	}
 }
@@ -505,451 +961,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					{
 						PolicyID:             "test_policy_image",
 						ActivateOnProduction: true,
-						Policy: &imaging.PolicyInputImage{
-							RolloutDuration: 3600,
-							Hosts:           []string{"host1", "host2"},
-							Variables: []imaging.Variable{
-								{
-									Name:         "ResizeDim",
-									Type:         "number",
-									DefaultValue: "280",
-								},
-								{
-									Name:         "ResizeDimWithBorder",
-									Type:         "number",
-									DefaultValue: "260",
-								},
-								{
-									Name:         "MinDim",
-									Type:         "number",
-									DefaultValue: "1000",
-									EnumOptions: []*imaging.EnumOptions{
-										{
-											ID:    "1",
-											Value: "value1",
-										},
-										{
-											ID:    "2",
-											Value: "value2",
-										},
-									},
-								},
-								{
-									Name:         "MinDimNew",
-									Type:         "number",
-									DefaultValue: "1450",
-								},
-								{
-									Name:         "MaxDimOld",
-									Type:         "number",
-									DefaultValue: "1500",
-								},
-							},
-							Transformations: []imaging.TransformationType{
-								&imaging.RegionOfInterestCrop{
-									Transformation: "RegionOfInterestCrop",
-									Style:          &imaging.RegionOfInterestCropStyleVariableInline{Value: imaging.RegionOfInterestCropStylePtr("fill")},
-									Gravity:        &imaging.GravityVariableInline{Value: imaging.GravityPtr("Center")},
-									Width:          &imaging.IntegerVariableInline{Value: tools.IntPtr(7)},
-									Height:         &imaging.IntegerVariableInline{Value: tools.IntPtr(8)},
-									RegionOfInterest: &imaging.RectangleShapeType{
-										Anchor: imaging.PointShapeType{
-											X: &imaging.NumberVariableInline{Value: tools.Float32Ptr(4)},
-											Y: &imaging.NumberVariableInline{Value: tools.Float32Ptr(5)},
-										},
-										Width:  &imaging.NumberVariableInline{Value: tools.Float32Ptr(8)},
-										Height: &imaging.NumberVariableInline{Value: tools.Float32Ptr(9)},
-									},
-								},
-								&imaging.Append{
-									Transformation:         "Append",
-									Gravity:                &imaging.GravityVariableInline{Value: imaging.GravityPtr("Center")},
-									GravityPriority:        &imaging.AppendGravityPriorityVariableInline{Value: imaging.AppendGravityPriorityPtr("horizontal")},
-									PreserveMinorDimension: &imaging.BooleanVariableInline{Value: tools.BoolPtr(true)},
-									Image: &imaging.TextImageType{
-										Type:       "Text",
-										Fill:       &imaging.StringVariableInline{Value: tools.StringPtr("#000000")},
-										Size:       &imaging.NumberVariableInline{Value: tools.Float32Ptr(72)},
-										Stroke:     &imaging.StringVariableInline{Value: tools.StringPtr("#FFFFFF")},
-										StrokeSize: &imaging.NumberVariableInline{Value: tools.Float32Ptr(0)},
-										Text:       &imaging.StringVariableInline{Value: tools.StringPtr("test")},
-										Transformation: &imaging.Compound{
-											Transformation: "Compound",
-										},
-									},
-								},
-								&imaging.Trim{
-									Transformation: "Trim",
-									Fuzz: &imaging.NumberVariableInline{
-										Value: tools.Float32Ptr(0.08),
-									},
-									Padding: &imaging.IntegerVariableInline{
-										Value: tools.IntPtr(0),
-									},
-								},
-								&imaging.IfDimension{
-									Transformation: "IfDimension",
-									Dimension: &imaging.IfDimensionDimensionVariableInline{
-										Value: imaging.IfDimensionDimensionPtr("width"),
-									},
-									Value: &imaging.IntegerVariableInline{
-										Name: tools.StringPtr("MaxDimOld"),
-									},
-									Default: &imaging.Compound{
-										Transformation: "Compound",
-										Transformations: []imaging.TransformationType{
-											&imaging.IfDimension{
-												Transformation: "IfDimension",
-												Dimension: &imaging.IfDimensionDimensionVariableInline{
-													Value: imaging.IfDimensionDimensionPtr("width"),
-												},
-												Value: &imaging.IntegerVariableInline{
-													Name: tools.StringPtr("MinDim"),
-												},
-												LessThan: &imaging.Compound{
-													Transformation: "Compound",
-													Transformations: []imaging.TransformationType{
-														&imaging.Resize{
-															Transformation: "Resize",
-															Aspect: &imaging.ResizeAspectVariableInline{
-																Value: imaging.ResizeAspectPtr("fit"),
-															},
-															Type: &imaging.ResizeTypeVariableInline{
-																Value: imaging.ResizeTypePtr("normal"),
-															},
-															Width: &imaging.IntegerVariableInline{
-																Name: tools.StringPtr("ResizeDimWithBorder"),
-															},
-															Height: &imaging.IntegerVariableInline{
-																Name: tools.StringPtr("ResizeDimWithBorder"),
-															},
-														},
-														&imaging.Crop{
-															Transformation: "Crop",
-															XPosition: &imaging.IntegerVariableInline{
-																Value: tools.IntPtr(0),
-															},
-															YPosition: &imaging.IntegerVariableInline{
-																Value: tools.IntPtr(0),
-															},
-															Gravity: &imaging.GravityVariableInline{
-																Value: imaging.GravityPtr("Center"),
-															},
-															AllowExpansion: &imaging.BooleanVariableInline{
-																Value: tools.BoolPtr(true),
-															},
-															Width: &imaging.IntegerVariableInline{
-																Name: tools.StringPtr("ResizeDim"),
-															},
-															Height: &imaging.IntegerVariableInline{
-																Name: tools.StringPtr("ResizeDim"),
-															},
-														},
-														&imaging.BackgroundColor{
-															Transformation: "BackgroundColor",
-															Color: &imaging.StringVariableInline{
-																Value: tools.StringPtr("#ffffff"),
-															},
-														},
-													},
-												},
-												Default: &imaging.Compound{
-													Transformation: "Compound",
-													Transformations: []imaging.TransformationType{
-														&imaging.IfDimension{
-															Transformation: "IfDimension",
-															Dimension: &imaging.IfDimensionDimensionVariableInline{
-																Value: imaging.IfDimensionDimensionPtr("height"),
-															},
-															Value: &imaging.IntegerVariableInline{
-																Name: tools.StringPtr("MinDim"),
-															},
-															LessThan: &imaging.Compound{
-																Transformation: "Compound",
-																Transformations: []imaging.TransformationType{
-																	&imaging.Resize{
-																		Transformation: "Resize",
-																		Aspect: &imaging.ResizeAspectVariableInline{
-																			Value: imaging.ResizeAspectPtr("fit"),
-																		},
-																		Type: &imaging.ResizeTypeVariableInline{
-																			Value: imaging.ResizeTypePtr("normal"),
-																		},
-																		Width: &imaging.IntegerVariableInline{
-																			Name: tools.StringPtr("ResizeDimWithBorder"),
-																		},
-																		Height: &imaging.IntegerVariableInline{
-																			Name: tools.StringPtr("ResizeDimWithBorder"),
-																		},
-																	},
-																	&imaging.Crop{
-																		Transformation: "Crop",
-																		XPosition: &imaging.IntegerVariableInline{
-																			Value: tools.IntPtr(0),
-																		},
-																		YPosition: &imaging.IntegerVariableInline{
-																			Value: tools.IntPtr(0),
-																		},
-																		Gravity: &imaging.GravityVariableInline{
-																			Value: imaging.GravityPtr("Center"),
-																		},
-																		AllowExpansion: &imaging.BooleanVariableInline{
-																			Value: tools.BoolPtr(true),
-																		},
-																		Width: &imaging.IntegerVariableInline{
-																			Name: tools.StringPtr("ResizeDim"),
-																		},
-																		Height: &imaging.IntegerVariableInline{
-																			Name: tools.StringPtr("ResizeDim"),
-																		},
-																	},
-																	&imaging.BackgroundColor{
-																		Transformation: "BackgroundColor",
-																		Color: &imaging.StringVariableInline{
-																			Value: tools.StringPtr("#ffffff"),
-																		},
-																	},
-																},
-															},
-															Default: &imaging.Compound{
-																Transformation: "Compound",
-																Transformations: []imaging.TransformationType{
-																	&imaging.IfDimension{
-																		Transformation: "IfDimension",
-																		Dimension: &imaging.IfDimensionDimensionVariableInline{
-																			Value: imaging.IfDimensionDimensionPtr("height"),
-																		},
-																		Value: &imaging.IntegerVariableInline{
-																			Name: tools.StringPtr("MaxDimOld"),
-																		},
-																		GreaterThan: &imaging.Compound{
-																			Transformation: "Compound",
-																			Transformations: []imaging.TransformationType{
-																				&imaging.Resize{
-																					Transformation: "Resize",
-																					Aspect: &imaging.ResizeAspectVariableInline{
-																						Value: imaging.ResizeAspectPtr("fit"),
-																					},
-																					Type: &imaging.ResizeTypeVariableInline{
-																						Value: imaging.ResizeTypePtr("normal"),
-																					},
-
-																					Width: &imaging.IntegerVariableInline{
-																						Name: tools.StringPtr("ResizeDimWithBorder"),
-																					},
-																					Height: &imaging.IntegerVariableInline{
-																						Name: tools.StringPtr("ResizeDimWithBorder"),
-																					},
-																				},
-																				&imaging.Crop{
-																					Transformation: "Crop",
-																					XPosition: &imaging.IntegerVariableInline{
-																						Value: tools.IntPtr(0),
-																					},
-																					YPosition: &imaging.IntegerVariableInline{
-																						Value: tools.IntPtr(0),
-																					},
-																					Gravity: &imaging.GravityVariableInline{
-																						Value: imaging.GravityPtr("Center"),
-																					},
-																					AllowExpansion: &imaging.BooleanVariableInline{
-																						Value: tools.BoolPtr(true),
-																					},
-																					Width: &imaging.IntegerVariableInline{
-																						Name: tools.StringPtr("ResizeDim"),
-																					},
-																					Height: &imaging.IntegerVariableInline{
-																						Name: tools.StringPtr("ResizeDim"),
-																					},
-																				},
-																				&imaging.BackgroundColor{
-																					Transformation: "BackgroundColor",
-																					Color: &imaging.StringVariableInline{
-																						Value: tools.StringPtr("#ffffff"),
-																					},
-																				},
-																			},
-																		},
-																		Default: &imaging.Compound{
-																			Transformation: "Compound",
-																			Transformations: []imaging.TransformationType{
-																				&imaging.Resize{
-																					Transformation: "Resize",
-																					Aspect: &imaging.ResizeAspectVariableInline{
-																						Value: imaging.ResizeAspectPtr("fit"),
-																					},
-																					Type: &imaging.ResizeTypeVariableInline{
-																						Value: imaging.ResizeTypePtr("normal"),
-																					},
-																					Width: &imaging.IntegerVariableInline{
-																						Name: tools.StringPtr("ResizeDim"),
-																					},
-																					Height: &imaging.IntegerVariableInline{
-																						Name: tools.StringPtr("ResizeDim"),
-																					},
-																				},
-																				&imaging.Crop{
-																					Transformation: "Crop",
-																					XPosition: &imaging.IntegerVariableInline{
-																						Value: tools.IntPtr(0),
-																					},
-																					YPosition: &imaging.IntegerVariableInline{
-																						Value: tools.IntPtr(0),
-																					},
-																					Gravity: &imaging.GravityVariableInline{
-																						Value: imaging.GravityPtr("Center"),
-																					},
-																					AllowExpansion: &imaging.BooleanVariableInline{
-																						Value: tools.BoolPtr(true),
-																					},
-																					Width: &imaging.IntegerVariableInline{
-																						Name: tools.StringPtr("ResizeDim"),
-																					},
-																					Height: &imaging.IntegerVariableInline{
-																						Name: tools.StringPtr("ResizeDim"),
-																					},
-																				},
-																				&imaging.BackgroundColor{
-																					Transformation: "BackgroundColor",
-																					Color: &imaging.StringVariableInline{
-																						Value: tools.StringPtr("#ffffff"),
-																					},
-																				},
-																			},
-																		},
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-							PostBreakpointTransformations: []imaging.TransformationType{
-								&imaging.BackgroundColor{
-									Transformation: "BackgroundColor",
-									Color: &imaging.StringVariableInline{
-										Value: tools.StringPtr("#ffffff"),
-									},
-								},
-								&imaging.IfDimension{
-									Transformation: "IfDimension",
-									Dimension: &imaging.IfDimensionDimensionVariableInline{
-										Value: imaging.IfDimensionDimensionPtr("height"),
-									},
-									Value: &imaging.IntegerVariableInline{
-										Name: tools.StringPtr("MaxDimOld"),
-									},
-									GreaterThan: &imaging.Compound{
-										Transformation: "Compound",
-										Transformations: []imaging.TransformationType{
-											&imaging.Resize{
-												Transformation: "Resize",
-												Aspect: &imaging.ResizeAspectVariableInline{
-													Value: imaging.ResizeAspectPtr("fit"),
-												},
-												Type: &imaging.ResizeTypeVariableInline{
-													Value: imaging.ResizeTypePtr("normal"),
-												},
-
-												Width: &imaging.IntegerVariableInline{
-													Name: tools.StringPtr("ResizeDimWithBorder"),
-												},
-												Height: &imaging.IntegerVariableInline{
-													Name: tools.StringPtr("ResizeDimWithBorder"),
-												},
-											},
-											&imaging.Crop{
-												Transformation: "Crop",
-												XPosition: &imaging.IntegerVariableInline{
-													Value: tools.IntPtr(0),
-												},
-												YPosition: &imaging.IntegerVariableInline{
-													Value: tools.IntPtr(0),
-												},
-												Gravity: &imaging.GravityVariableInline{
-													Value: imaging.GravityPtr("Center"),
-												},
-												AllowExpansion: &imaging.BooleanVariableInline{
-													Value: tools.BoolPtr(true),
-												},
-												Width: &imaging.IntegerVariableInline{
-													Name: tools.StringPtr("ResizeDim"),
-												},
-												Height: &imaging.IntegerVariableInline{
-													Name: tools.StringPtr("ResizeDim"),
-												},
-											},
-											&imaging.BackgroundColor{
-												Transformation: "BackgroundColor",
-												Color: &imaging.StringVariableInline{
-													Value: tools.StringPtr("#ffffff"),
-												},
-											},
-										},
-									},
-									Default: &imaging.Compound{
-										Transformation: "Compound",
-										Transformations: []imaging.TransformationType{
-											&imaging.Resize{
-												Transformation: "Resize",
-												Aspect: &imaging.ResizeAspectVariableInline{
-													Value: imaging.ResizeAspectPtr("fit"),
-												},
-												Type: &imaging.ResizeTypeVariableInline{
-													Value: imaging.ResizeTypePtr("normal"),
-												},
-												Width: &imaging.IntegerVariableInline{
-													Name: tools.StringPtr("ResizeDim"),
-												},
-												Height: &imaging.IntegerVariableInline{
-													Name: tools.StringPtr("ResizeDim"),
-												},
-											},
-											&imaging.Crop{
-												Transformation: "Crop",
-												XPosition: &imaging.IntegerVariableInline{
-													Value: tools.IntPtr(0),
-												},
-												YPosition: &imaging.IntegerVariableInline{
-													Value: tools.IntPtr(0),
-												},
-												Gravity: &imaging.GravityVariableInline{
-													Value: imaging.GravityPtr("Center"),
-												},
-												AllowExpansion: &imaging.BooleanVariableInline{
-													Value: tools.BoolPtr(true),
-												},
-												Width: &imaging.IntegerVariableInline{
-													Name: tools.StringPtr("ResizeDim"),
-												},
-												Height: &imaging.IntegerVariableInline{
-													Name: tools.StringPtr("ResizeDim"),
-												},
-											},
-											&imaging.BackgroundColor{
-												Transformation: "BackgroundColor",
-												Color: &imaging.StringVariableInline{
-													Value: tools.StringPtr("#ffffff"),
-												},
-											},
-										},
-									},
-								},
-							},
-							Breakpoints: &imaging.Breakpoints{
-								Widths: []int{280, 1080},
-							},
-							Output: &imaging.OutputImage{
-								PerceptualQuality: &imaging.OutputImagePerceptualQualityVariableInline{
-									Value: imaging.OutputImagePerceptualQualityPtr("mediumHigh"),
-								},
-								AdaptiveQuality: 50,
-							},
-						},
+						Policy:               &veryDeepPolicy,
 					},
 				},
 				Section: "test_section",
@@ -1049,23 +1061,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
-			processor := templates.FSTemplateProcessor{
-				TemplatesFS: templateFiles,
-				TemplateTargets: map[string]string{
-					"imaging.tmpl":   fmt.Sprintf("./testdata/res/%s/imaging.tf", test.dir),
-					"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
-					"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
-				},
-				AdditionalFuncs: template.FuncMap{
-					"ToLower": func(val string) string {
-						return strings.ToLower(val)
-					},
-					"RemoveSymbols": func(val string) string {
-						return RemoveSymbols.ReplaceAllString(val, "_")
-					},
-				},
-			}
-			require.NoError(t, processor.ProcessTemplates(test.givenData))
+			require.NoError(t, processor(test.dir).ProcessTemplates(test.givenData))
 
 			for _, f := range test.filesToCheck {
 				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
@@ -1076,4 +1072,39 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetDepth(t *testing.T) {
+	tests := map[string]struct {
+		args  interface{}
+		depth int
+	}{
+		"2 depth": {
+			args:  imagePoliciesOutputs[0].(*imaging.PolicyOutputImage),
+			depth: 2,
+		},
+		"14 depth": {
+			args:  veryDeepPolicy,
+			depth: 14,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.Equalf(t, tt.depth, getDepth(tt.args, 0), "getDepth(%v, %v)", tt.args, tt.depth)
+		})
+	}
+}
+
+func convertPolicyInputImage(policy imaging.PolicyInput) (*imaging.PolicyOutputImage, error) {
+	var policyJSON []byte
+	var err error
+	if policyJSON, err = json.Marshal(policy); err != nil {
+		return nil, err
+	}
+
+	var policyInput imaging.PolicyOutputImage
+	if err := json.Unmarshal(policyJSON, &policyInput); err != nil {
+		return nil, err
+	}
+	return &policyInput, nil
 }
