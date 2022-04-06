@@ -969,6 +969,27 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "with_image_policies_schema",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
 		},
+		"policy set with image policies schema empty": {
+			givenData: TFImagingData{
+				PolicySet: TFPolicySet{
+					ID:         "test_policyset_id",
+					ContractID: "ctr_123",
+					Name:       "some policy set",
+					Region:     "EMEA",
+					Type:       "IMAGE",
+				},
+				Policies: []TFPolicy{
+					{
+						PolicyID:             "test_policy_image",
+						ActivateOnProduction: true,
+						Policy:               &imaging.PolicyInputImage{},
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "with_image_policies_schema_empty",
+			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
+		},
 		"policy set with video policies": {
 			givenData: TFImagingData{
 				PolicySet: TFPolicySet{

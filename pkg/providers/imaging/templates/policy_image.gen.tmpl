@@ -61,9 +61,11 @@
     {{- if .Value}}gravity_priority = "{{.Value}}"{{end}}
     {{- if .Name}}gravity_priority_var = "{{.Name}}"{{end}}
 {{- end}}
-image {
-{{template "ImageType" .Image}}
-}
+{{- if .Image}}
+    image {
+    {{template "ImageType" .Image}}
+    }
+{{- end}}
 {{- with .PreserveMinorDimension}}
     {{""}}
     {{- if .Value}}preserve_minor_dimension = {{.Value}}{{end}}
@@ -210,9 +212,11 @@ image {
 {{- /*// CircleImageTypeType */}}
 {{- /*// CircleShapeType */}}
 {{- define "CircleShapeType"}}circle_shape {
-center {
-{{template "PointShapeType" .Center}}
-}
+{{- if .Center}}
+    center {
+    {{template "PointShapeType" .Center}}
+    }
+{{- end}}
 {{- with .Radius}}
     {{""}}
     {{- if .Value}}radius = {{.Value}}{{end}}
@@ -227,9 +231,11 @@ center {
     {{- if .Value}}gravity = "{{.Value}}"{{end}}
     {{- if .Name}}gravity_var = "{{.Name}}"{{end}}
 {{- end}}
-image {
-{{template "ImageType" .Image}}
-}
+{{- if .Image}}
+    image {
+    {{template "ImageType" .Image}}
+    }
+{{- end}}
 {{- with .Placement}}
     {{""}}
     {{- if .Value}}placement = "{{.Value}}"{{end}}
@@ -668,13 +674,17 @@ image {
 {{- end}}
 {{- /*// PolicyInputImage */}}
 {{- define "PolicyInputImage"}}policy {
-breakpoints {
-{{template "Breakpoints" .Breakpoints}}
-}
+{{- if .Breakpoints}}
+    breakpoints {
+    {{template "Breakpoints" .Breakpoints}}
+    }
+{{- end}}
 {{if .Hosts}}hosts = [{{range $i, $v := .Hosts}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
-output {
-{{template "OutputImage" .Output}}
-}
+{{- if .Output}}
+    output {
+    {{template "OutputImage" .Output}}
+    }
+{{- end}}
 {{- if .PostBreakpointTransformations}}
     post_breakpoint_transformations {
     {{- range .PostBreakpointTransformations}}
@@ -709,9 +719,11 @@ output {
 {{- end}}
 {{- /*// RectangleShapeType */}}
 {{- define "RectangleShapeType"}}rectangle_shape {
-anchor {
-{{template "PointShapeType" .Anchor}}
-}
+{{- if .Anchor}}
+    anchor {
+    {{template "PointShapeType" .Anchor}}
+    }
+{{- end}}
 {{- with .Height}}
     {{""}}
     {{- if .Value}}height = {{.Value}}{{end}}
@@ -736,9 +748,11 @@ anchor {
     {{- if .Value}}height = {{.Value}}{{end}}
     {{- if .Name}}height_var = "{{.Name}}"{{end}}
 {{- end}}
-region_of_interest {
-{{template "ShapeType" .RegionOfInterest}}
-}
+{{- if .RegionOfInterest}}
+    region_of_interest {
+    {{template "ShapeType" .RegionOfInterest}}
+    }
+{{- end}}
 {{- with .Style}}
     {{""}}
     {{- if .Value}}style = "{{.Value}}"{{end}}

@@ -52,13 +52,17 @@
 {{- /*// OutputVideoVideoAdaptiveQuality */}}
 {{- /*// PolicyInputVideo */}}
 {{- define "PolicyInputVideo"}}policy {
-breakpoints {
-{{template "Breakpoints" .Breakpoints}}
-}
+{{- if .Breakpoints}}
+    breakpoints {
+    {{template "Breakpoints" .Breakpoints}}
+    }
+{{- end}}
 {{if .Hosts}}hosts = [{{range $i, $v := .Hosts}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
-output {
-{{template "OutputVideo" .Output}}
-}
+{{- if .Output}}
+    output {
+    {{template "OutputVideo" .Output}}
+    }
+{{- end}}
 {{if .RolloutDuration}}rollout_duration = {{.RolloutDuration}}{{end}}
 {{- range .Variables}}
     variables {
