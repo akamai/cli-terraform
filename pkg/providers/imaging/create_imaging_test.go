@@ -990,6 +990,68 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "with_image_policies_schema_empty",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
 		},
+		"policy set with image policies schema with image type": {
+			givenData: TFImagingData{
+				PolicySet: TFPolicySet{
+					ID:         "test_policyset_id",
+					ContractID: "ctr_123",
+					Name:       "some policy set",
+					Region:     "EMEA",
+					Type:       "IMAGE",
+				},
+				Policies: []TFPolicy{
+					{
+						PolicyID:             "test_policy_image",
+						ActivateOnProduction: true,
+						Policy: &imaging.PolicyInputImage{
+							Transformations: []imaging.TransformationType{
+								&imaging.Append{
+									Gravity:         &imaging.GravityVariableInline{Value: imaging.GravityPtr("Center")},
+									GravityPriority: &imaging.AppendGravityPriorityVariableInline{Value: imaging.AppendGravityPriorityPtr("horizontal")},
+									Image: &imaging.BoxImageType{
+										Transformation: &imaging.Compound{
+											Transformation: "Compound",
+											Transformations: []imaging.TransformationType{
+												&imaging.Append{
+													Gravity:         &imaging.GravityVariableInline{Value: imaging.GravityPtr("Center")},
+													GravityPriority: &imaging.AppendGravityPriorityVariableInline{Value: imaging.AppendGravityPriorityPtr("horizontal")},
+													Image: &imaging.BoxImageType{
+														Transformation: &imaging.Compound{
+															Transformation: "Compound",
+															Transformations: []imaging.TransformationType{
+																&imaging.Append{
+																	Gravity:         &imaging.GravityVariableInline{Value: imaging.GravityPtr("Center")},
+																	GravityPriority: &imaging.AppendGravityPriorityVariableInline{Value: imaging.AppendGravityPriorityPtr("horizontal")},
+																	Image: &imaging.BoxImageType{
+																		Transformation: &imaging.Compound{},
+																		Type:           "Box",
+																	},
+																	PreserveMinorDimension: &imaging.BooleanVariableInline{Value: tools.BoolPtr(false)},
+																	Transformation:         "Append",
+																},
+															},
+														},
+														Type: "Box",
+													},
+													PreserveMinorDimension: &imaging.BooleanVariableInline{Value: tools.BoolPtr(false)},
+													Transformation:         "Append",
+												},
+											},
+										},
+										Type: "Box",
+									},
+									PreserveMinorDimension: &imaging.BooleanVariableInline{Value: tools.BoolPtr(false)},
+									Transformation:         "Append",
+								},
+							},
+						},
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "with_image_policies_schema_with_imagetype",
+			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
+		},
 		"policy set with video policies": {
 			givenData: TFImagingData{
 				PolicySet: TFPolicySet{

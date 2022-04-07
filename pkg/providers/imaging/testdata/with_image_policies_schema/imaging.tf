@@ -122,6 +122,10 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
             stroke      = "#FFFFFF"
             stroke_size = 0
             text        = "test"
+            transformation {
+              compound {
+              }
+            }
           }
         }
         preserve_minor_dimension = true

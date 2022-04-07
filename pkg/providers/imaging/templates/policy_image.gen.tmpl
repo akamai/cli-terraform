@@ -137,6 +137,11 @@
     {{- if .Value}}height = {{.Value}}{{end}}
     {{- if .Name}}height_var = "{{.Name}}"{{end}}
 {{- end}}
+{{- if .Transformation}}
+    transformation {
+    {{template "Transformations" .Transformation}}
+    }
+{{- end}}
 {{- with .Width}}
     {{""}}
     {{- if .Value}}width = {{.Value}}{{end}}
@@ -201,6 +206,11 @@
     {{""}}
     {{- if .Value}}diameter = {{.Value}}{{end}}
     {{- if .Name}}diameter_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Transformation}}
+    transformation {
+    {{template "Transformations" .Transformation}}
+    }
 {{- end}}
 {{- with .Width}}
     {{""}}
@@ -913,6 +923,11 @@
     {{- if .Value}}text = "{{.Value}}"{{end}}
     {{- if .Name}}text_var = "{{.Name}}"{{end}}
 {{- end}}
+{{- if .Transformation}}
+    transformation {
+    {{template "Transformations" .Transformation}}
+    }
+{{- end}}
 {{- with .Typeface}}
     {{""}}
     {{- if .Value}}typeface = "{{.Value}}"{{end}}
@@ -938,6 +953,11 @@
 {{- /*// TrimTransformation */}}
 {{- /*// URLImageType */}}
 {{- define "URLImageType"}}url_image {
+{{- if .Transformation}}
+    transformation {
+    {{template "Transformations" .Transformation}}
+    }
+{{- end}}
 {{- with .URL}}
     {{""}}
     {{- if .Value}}url = "{{.Value}}"{{end}}

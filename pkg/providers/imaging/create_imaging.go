@@ -257,7 +257,7 @@ func getPoliciesImageData(ctx context.Context, policies []imaging.PolicyOutput, 
 				return nil, err
 			}
 			if depth := getDepth(policyInput, 0); depth > maxDepth {
-				return nil, fmt.Errorf("policy has %d transformation levels, while only %d are allowed; please use JSON format instead", depth, maxDepth)
+				return nil, fmt.Errorf("policy has %d nested transformation levels, while only %d are allowed; please use JSON format instead", depth, maxDepth)
 			}
 			tfPoliciesData = append(tfPoliciesData, TFPolicy{
 				PolicyID:             policy.ID,
