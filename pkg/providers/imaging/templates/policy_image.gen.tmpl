@@ -46,9 +46,9 @@
     {{- if eq $shapeType "*imaging.RectangleShapeType"}}{{- template "RectangleShapeType" .}}{{- end}}
     {{- if eq $shapeType "*imaging.UnionShapeType"}}{{- template "UnionShapeType" .}}{{- end}}
 {{- end}}
-{{/*////////////////////////////////////////*/}}
-{{/*////////// Generated types /////////////*/}}
-{{/*////////////////////////////////////////*/}}
+{{- /*////////////////////////////////////////*/}}
+{{- /*////////// Generated types /////////////*/}}
+{{- /*////////////////////////////////////////*/}}
 {{- /*// Append */}}
 {{- define "Append"}}append {
 {{- with .Gravity}}
@@ -152,7 +152,8 @@
 {{- /*// BoxImageTypeType */}}
 {{- /*// Breakpoints */}}
 {{- define "Breakpoints"}}
-    {{if .Widths}}widths = [{{range $i, $v := .Widths}}{{if $i}}, {{end}}{{$v}}{{end}}]{{end}}
+    {{- if .Widths}}
+        widths = [{{range $i, $v := .Widths}}{{if $i}}, {{end}}{{$v}}{{end}}]{{end}}
 
 {{- end}}
 {{- /*// ChromaKey */}}
@@ -336,8 +337,10 @@
 {{- /*// CropTransformation */}}
 {{- /*// EnumOptions */}}
 {{- define "EnumOptions"}}
-    {{if .ID}}id = "{{.ID}}"{{end}}
-    {{if .Value}}value = "{{.Value}}"{{end}}
+    {{- if .ID}}
+        id = "{{.ID}}"{{end}}
+    {{- if .Value}}
+        value = "{{.Value}}"{{end}}
 
 {{- end}}
 {{- /*// FaceCrop */}}
@@ -649,15 +652,19 @@
 {{- /*// OpacityTransformation */}}
 {{- /*// OutputImage */}}
 {{- define "OutputImage"}}
-    {{if .AdaptiveQuality}}adaptive_quality = {{.AdaptiveQuality}}{{end}}
-    {{if .AllowedFormats}}allowed_formats = [{{range $i, $v := .AllowedFormats}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
-    {{if .ForcedFormats}}forced_formats = [{{range $i, $v := .ForcedFormats}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
+    {{- if .AdaptiveQuality}}
+        adaptive_quality = {{.AdaptiveQuality}}{{end}}
+    {{- if .AllowedFormats}}
+        allowed_formats = [{{range $i, $v := .AllowedFormats}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
+    {{- if .ForcedFormats}}
+        forced_formats = [{{range $i, $v := .ForcedFormats}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
     {{- with .PerceptualQuality}}
         {{""}}
         {{- if .Value}}perceptual_quality = "{{.Value}}"{{end}}
         {{- if .Name}}perceptual_quality_var = "{{.Name}}"{{end}}
     {{- end}}
-    {{if .PerceptualQualityFloor}}perceptual_quality_floor = {{.PerceptualQualityFloor}}{{end}}
+    {{- if .PerceptualQualityFloor}}
+        perceptual_quality_floor = {{.PerceptualQualityFloor}}{{end}}
     {{- with .Quality}}
         {{""}}
         {{- if .Value}}quality = {{.Value}}{{end}}
@@ -689,7 +696,8 @@
     {{template "Breakpoints" .Breakpoints}}
     }
 {{- end}}
-{{if .Hosts}}hosts = [{{range $i, $v := .Hosts}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
+{{- if .Hosts}}
+    hosts = [{{range $i, $v := .Hosts}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
 {{- if .Output}}
     output {
     {{template "OutputImage" .Output}}
@@ -702,7 +710,8 @@
     {{- end}}
     }
 {{- end}}
-{{if .RolloutDuration}}rollout_duration = {{.RolloutDuration}}{{end}}
+{{- if .RolloutDuration}}
+    rollout_duration = {{.RolloutDuration}}{{end}}
 {{- if .Transformations}}
     transformations {
     {{- range .Transformations}}
@@ -851,9 +860,12 @@
 {{- /*// ResizeType */}}
 {{- /*// RolloutInfo */}}
 {{- define "RolloutInfo"}}
-    {{if .EndTime}}end_time = {{.EndTime}}{{end}}
-    {{if .RolloutDuration}}rollout_duration = {{.RolloutDuration}}{{end}}
-    {{if .StartTime}}start_time = {{.StartTime}}{{end}}
+    {{- if .EndTime}}
+        end_time = {{.EndTime}}{{end}}
+    {{- if .RolloutDuration}}
+        rollout_duration = {{.RolloutDuration}}{{end}}
+    {{- if .StartTime}}
+        start_time = {{.StartTime}}{{end}}
 
 {{- end}}
 {{- /*// Rotate */}}
@@ -997,21 +1009,27 @@
 {{- /*// UnsharpMaskTransformation */}}
 {{- /*// Variable */}}
 {{- define "Variable"}}
-    {{if .DefaultValue}}default_value = "{{.DefaultValue}}"{{end}}
+    {{- if .DefaultValue}}
+        default_value = "{{.DefaultValue}}"{{end}}
     {{- range .EnumOptions}}
         enum_options {
         {{template "EnumOptions" .}}
         }
     {{- end}}
-    {{if .Name}}name = "{{.Name}}"{{end}}
-    {{if .Postfix}}postfix = "{{.Postfix}}"{{end}}
-    {{if .Prefix}}prefix = "{{.Prefix}}"{{end}}
-    {{if .Type}}type = "{{.Type}}"{{end}}
+    {{- if .Name}}
+        name = "{{.Name}}"{{end}}
+    {{- if .Postfix}}
+        postfix = "{{.Postfix}}"{{end}}
+    {{- if .Prefix}}
+        prefix = "{{.Prefix}}"{{end}}
+    {{- if .Type}}
+        type = "{{.Type}}"{{end}}
 
 {{- end}}
 {{- /*// VariableInline */}}
 {{- define "VariableInline"}}
-    {{if .Var}}var = "{{.Var}}"{{end}}
+    {{- if .Var}}
+        var = "{{.Var}}"{{end}}
 
 {{- end}}
 {{- /*// VariableType */}}

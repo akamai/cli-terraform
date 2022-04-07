@@ -15,18 +15,21 @@
     {{- if eq $shapeType "*imaging.RectangleShapeType"}}{{- template "RectangleShapeType" .}}{{- end}}
     {{- if eq $shapeType "*imaging.UnionShapeType"}}{{- template "UnionShapeType" .}}{{- end}}
 {{- end}}
-{{/*////////////////////////////////////////*/}}
-{{/*////////// Generated types /////////////*/}}
-{{/*////////////////////////////////////////*/}}
+{{- /*////////////////////////////////////////*/}}
+{{- /*////////// Generated types /////////////*/}}
+{{- /*////////////////////////////////////////*/}}
 {{- /*// Breakpoints */}}
 {{- define "Breakpoints"}}
-    {{if .Widths}}widths = [{{range $i, $v := .Widths}}{{if $i}}, {{end}}{{$v}}{{end}}]{{end}}
+    {{- if .Widths}}
+        widths = [{{range $i, $v := .Widths}}{{if $i}}, {{end}}{{$v}}{{end}}]{{end}}
 
 {{- end}}
 {{- /*// EnumOptions */}}
 {{- define "EnumOptions"}}
-    {{if .ID}}id = "{{.ID}}"{{end}}
-    {{if .Value}}value = "{{.Value}}"{{end}}
+    {{- if .ID}}
+        id = "{{.ID}}"{{end}}
+    {{- if .Value}}
+        value = "{{.Value}}"{{end}}
 
 {{- end}}
 {{- /*// OutputVideo */}}
@@ -57,13 +60,15 @@
     {{template "Breakpoints" .Breakpoints}}
     }
 {{- end}}
-{{if .Hosts}}hosts = [{{range $i, $v := .Hosts}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
+{{- if .Hosts}}
+    hosts = [{{range $i, $v := .Hosts}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
 {{- if .Output}}
     output {
     {{template "OutputVideo" .Output}}
     }
 {{- end}}
-{{if .RolloutDuration}}rollout_duration = {{.RolloutDuration}}{{end}}
+{{- if .RolloutDuration}}
+    rollout_duration = {{.RolloutDuration}}{{end}}
 {{- range .Variables}}
     variables {
     {{template "Variable" .}}
@@ -74,28 +79,37 @@
 {{- /*// PolicyOutputVideoVideo */}}
 {{- /*// RolloutInfo */}}
 {{- define "RolloutInfo"}}
-    {{if .EndTime}}end_time = {{.EndTime}}{{end}}
-    {{if .RolloutDuration}}rollout_duration = {{.RolloutDuration}}{{end}}
-    {{if .StartTime}}start_time = {{.StartTime}}{{end}}
+    {{- if .EndTime}}
+        end_time = {{.EndTime}}{{end}}
+    {{- if .RolloutDuration}}
+        rollout_duration = {{.RolloutDuration}}{{end}}
+    {{- if .StartTime}}
+        start_time = {{.StartTime}}{{end}}
 
 {{- end}}
 {{- /*// Variable */}}
 {{- define "Variable"}}
-    {{if .DefaultValue}}default_value = "{{.DefaultValue}}"{{end}}
+    {{- if .DefaultValue}}
+        default_value = "{{.DefaultValue}}"{{end}}
     {{- range .EnumOptions}}
         enum_options {
         {{template "EnumOptions" .}}
         }
     {{- end}}
-    {{if .Name}}name = "{{.Name}}"{{end}}
-    {{if .Postfix}}postfix = "{{.Postfix}}"{{end}}
-    {{if .Prefix}}prefix = "{{.Prefix}}"{{end}}
-    {{if .Type}}type = "{{.Type}}"{{end}}
+    {{- if .Name}}
+        name = "{{.Name}}"{{end}}
+    {{- if .Postfix}}
+        postfix = "{{.Postfix}}"{{end}}
+    {{- if .Prefix}}
+        prefix = "{{.Prefix}}"{{end}}
+    {{- if .Type}}
+        type = "{{.Type}}"{{end}}
 
 {{- end}}
 {{- /*// VariableInline */}}
 {{- define "VariableInline"}}
-    {{if .Var}}var = "{{.Var}}"{{end}}
+    {{- if .Var}}
+        var = "{{.Var}}"{{end}}
 
 {{- end}}
 {{- /*// VariableType */}}

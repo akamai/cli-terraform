@@ -24,9 +24,6 @@ resource "akamai_imaging_policy_video" "policy_test_policy_video" {
   contract_id            = "ctr_123"
   policyset_id           = "test_policyset_id"
   activate_on_production = true
-
-
-
   policy {
     breakpoints {
 
@@ -43,17 +40,13 @@ resource "akamai_imaging_policy_video" "policy_test_policy_video" {
 
       default_value = "280"
       name          = "ResizeDim"
-
-
-      type = "number"
+      type          = "number"
     }
     variables {
 
       default_value = "260"
       name          = "ResizeDimWithBorder"
-
-
-      type = "number"
+      type          = "number"
     }
     variables {
 
@@ -69,25 +62,19 @@ resource "akamai_imaging_policy_video" "policy_test_policy_video" {
         value = "value2"
       }
       name = "MinDim"
-
-
       type = "number"
     }
     variables {
 
       default_value = "1450"
       name          = "MinDimNew"
-
-
-      type = "number"
+      type          = "number"
     }
     variables {
 
       default_value = "1500"
       name          = "MaxDimOld"
-
-
-      type = "number"
+      type          = "number"
     }
   }
 }
