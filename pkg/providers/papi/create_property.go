@@ -50,6 +50,7 @@ type EdgeHostname struct {
 	EdgeHostnameResourceName string
 	SlotNumber               int
 	SecurityType             string
+	UseCases                 string
 }
 
 // Hostname represents edge hostname resource
@@ -360,6 +361,20 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			return nil, nil, fmt.Errorf("edge hostname not found: %s", err)
 		}
 
+		papiEdgeHostnames, err := clientPAPI.GetEdgeHostnames(ctx, papi.GetEdgeHostnamesRequest{
+			ContractID: property.ContractID,
+			GroupID:    property.GroupID,
+			Options:    nil,
+		})
+		if err != nil {
+			return nil, nil, fmt.Errorf("cannot list edge hostnames: %s", err)
+		}
+
+		useCases, err := getUseCases(papiEdgeHostnames, hostname.EdgeHostnameID)
+		if err != nil {
+			return nil, nil, fmt.Errorf("cannot get use cases: %s", err)
+		}
+
 		cnameTo := hostname.CnameTo
 		cnameFrom := hostname.CnameFrom
 		cnameToResource := strings.Replace(cnameTo, ".", "-", -1)
@@ -370,10 +385,11 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			ProductName:              productName,
 			ContractID:               property.ContractID,
 			GroupID:                  property.GroupID,
-			IPv6:                     getIPv6(ctx, clientPAPI, property.ContractID, property.GroupID, hostname.EdgeHostnameID),
+			IPv6:                     getIPv6(papiEdgeHostnames, hostname.EdgeHostnameID),
 			EdgeHostnameResourceName: cnameToResource,
 			SlotNumber:               edgeHostname.SlotNumber,
 			SecurityType:             edgeHostname.SecurityType,
+			UseCases:                 useCases,
 		}
 
 		hostnamesMap[cnameFrom] = Hostname{
@@ -482,16 +498,23 @@ func findCPCodeID(rbs []papi.RuleBehavior) (string, error) {
 	return "", nil
 }
 
-// getIPv6 fetches IPVersionBehavior for given egdehostnameID
-func getIPv6(ctx context.Context, client papi.PAPI, contractID, groupID, edgehostnameID string) string {
-	edgeHostnames, err := client.GetEdgeHostnames(ctx, papi.GetEdgeHostnamesRequest{
-		ContractID: contractID,
-		GroupID:    groupID,
-		Options:    nil,
-	})
-	if err != nil {
-		return "false"
+// getUseCases finds UseCases for given egdehostnameID
+func getUseCases(edgeHostnames *papi.GetEdgeHostnamesResponse, edgehostnameID string) (string, error) {
+	for _, edgehostname := range edgeHostnames.EdgeHostnames.Items {
+		if edgehostname.ID == edgehostnameID && edgehostname.UseCases != nil {
+			useCasesJSON, err := json.MarshalIndent(edgehostname.UseCases, "", "  ")
+			if err != nil {
+				return "", fmt.Errorf("error marshaling Use Cases: %s", err)
+			}
+			return string(useCasesJSON), nil
+		}
 	}
+
+	return "", nil
+}
+
+// getIPv6 find IPVersionBehavior for given egdehostnameID
+func getIPv6(edgeHostnames *papi.GetEdgeHostnamesResponse, edgehostnameID string) string {
 	for _, edgehostname := range edgeHostnames.EdgeHostnames.Items {
 		if edgehostname.ID == edgehostnameID {
 			return edgehostname.IPVersionBehavior

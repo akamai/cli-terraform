@@ -741,6 +741,17 @@ func TestCreateProperty(t *testing.T) {
 }
 
 func TestProcessPolicyTemplates(t *testing.T) {
+
+	useCases := []papi.UseCase{
+		{
+			Option:  "BACKGROUND",
+			Type:    "GLOBAL",
+			UseCase: "Download_Mode",
+		},
+	}
+	useCasesJSON, err := json.MarshalIndent(useCases, "", "  ")
+	assert.NoError(t, err)
+
 	tests := map[string]struct {
 		givenData    TFData
 		dir          string
@@ -782,6 +793,45 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Emails:  []string{"jsmith@akamai.com"},
 			},
 			dir:          "basic",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
+		"property with use cases": {
+			givenData: TFData{
+				GroupName:            "test_group",
+				GroupID:              "grp_18420",
+				ContractID:           "ctr_1",
+				PropertyResourceName: "test-edgesuite-net",
+				PropertyName:         "test.edgesuite.net",
+				PropertyID:           "prp_445968",
+				CPCodeID:             "626358",
+				ProductID:            "prd_HTTP_Content_Del",
+				ProductName:          "HTTP_Content_Del",
+				RuleFormat:           "latest",
+				IsSecure:             "false",
+				EdgeHostnames: map[string]EdgeHostname{
+					"test-edgesuite-net": {
+						EdgeHostname:             "test.edgesuite.net",
+						EdgeHostnameID:           "ehn_2867480",
+						ProductName:              "HTTP_Content_Del",
+						ContractID:               "ctr_1",
+						GroupID:                  "grp_18420",
+						ID:                       "",
+						IPv6:                     "IPV6_COMPLIANCE",
+						SecurityType:             "STANDARD-TLS",
+						EdgeHostnameResourceName: "test-edgesuite-net",
+						UseCases:                 string(useCasesJSON),
+					},
+				},
+				Hostnames: map[string]Hostname{
+					"test.edgesuite.net": {
+						Hostname:                 "test.edgesuite.net",
+						EdgeHostnameResourceName: "test-edgesuite-net",
+					},
+				},
+				Section: "test_section",
+				Emails:  []string{"jsmith@akamai.com"},
+			},
+			dir:          "basic_with_use_cases",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
 	}
