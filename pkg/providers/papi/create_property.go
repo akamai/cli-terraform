@@ -76,6 +76,7 @@ type TFData struct {
 	Hostnames            map[string]Hostname
 	Section              string
 	Emails               []string
+	ActivationNote       string
 }
 
 // RulesTemplate represent data used for rules
@@ -288,10 +289,12 @@ func createProperty(ctx context.Context, propertyName, section string, jsonDir s
 
 	term.Spinner().OK()
 
-	// Get contact details
-	term.Spinner().Start("Fetching contact details ")
-	tfData.Emails = getContactEmails(ctx, client, property)
-
+	term.Spinner().Start("Fetching activation details ")
+	latestActivation, err := fetchLatestActivation(ctx, client, property)
+	if err == nil {
+		tfData.ActivationNote = latestActivation.Note
+		tfData.Emails = getContactEmails(latestActivation)
+	}
 	term.Spinner().OK()
 
 	term.Spinner().Start("Saving TF configurations ")
@@ -401,23 +404,30 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 	return hostnamesMap, edgeHostnamesMap, nil
 }
 
-// getContactEmails gets list of emails from latest activation
-func getContactEmails(ctx context.Context, client papi.PAPI, property *papi.Property) []string {
+func fetchLatestActivation(ctx context.Context, client papi.PAPI, property *papi.Property) (*papi.Activation, error) {
 	activationsResponse, err := client.GetActivations(ctx, papi.GetActivationsRequest{
 		PropertyID: property.PropertyID,
 		ContractID: property.ContractID,
 		GroupID:    property.GroupID,
 	})
 	if err != nil {
-		return []string{""}
+		return nil, err
 	}
 
 	latestActivation, err := getLatestStagingActivation(activationsResponse.Activations, "")
 	if err != nil {
-		return []string{""}
+		return nil, err
 	}
 
-	return latestActivation.NotifyEmails
+	return latestActivation, nil
+}
+
+// getContactEmails gets list of emails from latest activation
+func getContactEmails(activation *papi.Activation) []string {
+	if activation == nil || len(activation.NotifyEmails) == 0 {
+		return []string{""}
+	}
+	return activation.NotifyEmails
 }
 
 // saveSnippets saves given property rules into files under jsonDir directory

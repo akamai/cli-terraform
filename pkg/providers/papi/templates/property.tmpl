@@ -60,4 +60,7 @@ resource "akamai_property_activation" "{{.PropertyResourceName}}" {
   contact = [{{range $index, $element := .Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
   version = akamai_property.{{.PropertyResourceName}}.latest_version
   network = upper(var.env)
+{{- if .ActivationNote}}
+  note = "{{.ActivationNote}}"
+{{- end}}
 }
