@@ -25,6 +25,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -114,6 +115,9 @@ type RuleTemplate struct {
 
 //go:embed templates/*
 var templateFiles embed.FS
+
+// normalizeRuleNameRegexp is a regexp for finding invalid characters in a path created from the rule name
+var normalizeRuleNameRegexp = regexp.MustCompile(`[^\w-.]`)
 
 var (
 	// ErrHostnamesNotFound is returned when hostnames cloudnt be found
@@ -465,12 +469,13 @@ func saveSnippets(jsonDir string, rules *papi.GetRuleTreeResponse) error {
 		return fmt.Errorf("can't create directory for rule snippets: %s", err)
 	}
 
+	nameNormalizer := ruleNameNormalizer()
 	for _, rule := range rules.Rules.Children {
 		jsonBody, err := json.MarshalIndent(rule, "", "  ")
 		if err != nil {
 			return fmt.Errorf("can't marshall property rule snippets: %s", err)
 		}
-		name := strings.ReplaceAll(rule.Name, " ", "_")
+		name := nameNormalizer(rule.Name)
 		rulesNamePath := filepath.Join(snippetsPath, fmt.Sprintf("%s.json", name))
 		err = ioutil.WriteFile(rulesNamePath, jsonBody, 0644)
 		if err != nil {
@@ -688,4 +693,20 @@ func getLatestActivation(activations papi.ActivationsItems, network papi.Activat
 	}
 
 	return latest, nil
+}
+
+func ruleNameNormalizer() func(string) string {
+	names := map[string]int{}
+	return func(name string) string {
+		name = normalizeRuleName(name)
+		names[name]++
+		if count := names[name]; count > 1 {
+			name = fmt.Sprintf("%s%d", name, count-1)
+		}
+		return name
+	}
+}
+
+func normalizeRuleName(name string) string {
+	return normalizeRuleNameRegexp.ReplaceAllString(name, "_")
 }

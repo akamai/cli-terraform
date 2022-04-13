@@ -1190,3 +1190,72 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		})
 	}
 }
+
+func TestNormalizeRuleName(t *testing.T) {
+	tests := map[string]struct {
+		given    string
+		expected string
+	}{
+		"one word": {
+			given:    "testName1",
+			expected: "testName1",
+		},
+		"with spaces": {
+			given:    "this is test name",
+			expected: "this_is_test_name",
+		},
+		"with slashes": {
+			given:    "this\\is test/name",
+			expected: "this_is_test_name",
+		},
+		"with dots and dashes": {
+			given:    "this-is.test-name.1",
+			expected: "this-is.test-name.1",
+		},
+		"with other symbols": {
+			given:    "this#is!te$tN@me",
+			expected: "this_is_te_tN_me",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			result := normalizeRuleName(test.given)
+			assert.Equal(t, test.expected, result)
+		})
+	}
+}
+
+func TestRuleNameNormalizer(t *testing.T) {
+	tests := map[string]struct {
+		given    string
+		expected string
+		preTest  []string
+	}{
+		"no duplicates": {
+			given:    "this is test name",
+			expected: "this_is_test_name",
+			preTest:  []string{"testName1", "test name"},
+		},
+		"one duplicate": {
+			given:    "test@name",
+			expected: "test_name1",
+			preTest:  []string{"testName", "test name"},
+		},
+		"two duplicates": {
+			given:    "test@name",
+			expected: "test_name2",
+			preTest:  []string{"test%name", "testName", "test name"},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			normalizer := ruleNameNormalizer()
+			for _, n := range test.preTest {
+				normalizer(n)
+			}
+			assert.Equal(t, test.expected, normalizer(test.given))
+		})
+	}
+}
