@@ -19,9 +19,11 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
 	"github.com/akamai/cli-terraform/pkg/commands"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	akacli "github.com/akamai/cli/pkg/app"
+	"github.com/akamai/cli/pkg/log"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
@@ -50,9 +52,21 @@ func Run() error {
 	if len(cmds) > 0 {
 		app.Commands = cmds
 	}
-	app.Before = putSessionInContext
+	app.Before = ensureBefore(putSessionInContext, putLoggerInContext)
 
 	return app.RunContext(ctx, os.Args)
+}
+
+func ensureBefore(bfs ...cli.BeforeFunc) cli.BeforeFunc {
+	return func(c *cli.Context) error {
+		for _, bf := range bfs {
+			err := bf(c)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
 }
 
 func sessionRequired(c *cli.Context) bool {
@@ -82,5 +96,13 @@ func putSessionInContext(c *cli.Context) error {
 		return err
 	}
 	c.Context = edgegrid.WithSession(c.Context, s)
+
+	return nil
+}
+
+func putLoggerInContext(c *cli.Context) error {
+	c.Context = log.SetupContext(c.Context, c.App.Writer)
+	c.Context = session.ContextWithOptions(c.Context, session.WithContextLog(log.FromContext(c.Context)))
+
 	return nil
 }
