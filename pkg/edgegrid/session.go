@@ -3,6 +3,7 @@ package edgegrid
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
 	"github.com/urfave/cli/v2"
@@ -20,6 +21,7 @@ func InitializeSession(c *cli.Context) (session.Session, error) {
 	}
 	s, err := session.New(
 		session.WithSigner(edgerc),
+		session.WithHTTPTracing(os.Getenv("AKAMAI_HTTP_TRACE_ENABLED") == "true"),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize edgegrid session: %s", err)
