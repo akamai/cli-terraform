@@ -39,6 +39,8 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
       background_color {
         color = "#ffffff"
       }
+    }
+    post_breakpoint_transformations {
       if_dimension {
         default {
           compound {
@@ -106,6 +108,8 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
         style = "fill"
         width = 7
       }
+    }
+    transformations {
       append {
         gravity          = "Center"
         gravity_priority = "horizontal"
@@ -124,10 +128,14 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
         }
         preserve_minor_dimension = true
       }
+    }
+    transformations {
       trim {
         fuzz    = 0.08
         padding = 0
       }
+    }
+    transformations {
       if_dimension {
         default {
           compound {

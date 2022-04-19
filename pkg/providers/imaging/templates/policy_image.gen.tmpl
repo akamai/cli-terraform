@@ -704,20 +704,20 @@
     }
 {{- end}}
 {{- if .PostBreakpointTransformations}}
-    post_breakpoint_transformations {
     {{- range .PostBreakpointTransformations}}
+    post_breakpoint_transformations {
         {{template "Transformations" .}}
-    {{- end}}
     }
+    {{- end}}
 {{- end}}
 {{- if .RolloutDuration}}
     rollout_duration = {{.RolloutDuration}}{{end}}
 {{- if .Transformations}}
-    transformations {
     {{- range .Transformations}}
+    transformations {
         {{template "Transformations" .}}
+     }
     {{- end}}
-    }
 {{- end}}
 {{- range .Variables}}
     variables {

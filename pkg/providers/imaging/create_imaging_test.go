@@ -81,12 +81,12 @@ var (
 				Width:          &imaging.IntegerVariableInline{Value: tools.IntPtr(7)},
 				Height:         &imaging.IntegerVariableInline{Value: tools.IntPtr(8)},
 				RegionOfInterest: &imaging.RectangleShapeType{
-					Anchor: imaging.PointShapeType{
-						X: &imaging.NumberVariableInline{Value: tools.Float32Ptr(4)},
-						Y: &imaging.NumberVariableInline{Value: tools.Float32Ptr(5)},
+					Anchor: &imaging.PointShapeType{
+						X: &imaging.NumberVariableInline{Value: tools.Float64Ptr(4)},
+						Y: &imaging.NumberVariableInline{Value: tools.Float64Ptr(5)},
 					},
-					Width:  &imaging.NumberVariableInline{Value: tools.Float32Ptr(8)},
-					Height: &imaging.NumberVariableInline{Value: tools.Float32Ptr(9)},
+					Width:  &imaging.NumberVariableInline{Value: tools.Float64Ptr(8)},
+					Height: &imaging.NumberVariableInline{Value: tools.Float64Ptr(9)},
 				},
 			},
 			&imaging.Append{
@@ -97,9 +97,9 @@ var (
 				Image: &imaging.TextImageType{
 					Type:       "Text",
 					Fill:       &imaging.StringVariableInline{Value: tools.StringPtr("#000000")},
-					Size:       &imaging.NumberVariableInline{Value: tools.Float32Ptr(72)},
+					Size:       &imaging.NumberVariableInline{Value: tools.Float64Ptr(72)},
 					Stroke:     &imaging.StringVariableInline{Value: tools.StringPtr("#FFFFFF")},
-					StrokeSize: &imaging.NumberVariableInline{Value: tools.Float32Ptr(0)},
+					StrokeSize: &imaging.NumberVariableInline{Value: tools.Float64Ptr(0)},
 					Text:       &imaging.StringVariableInline{Value: tools.StringPtr("test")},
 					Transformation: &imaging.Compound{
 						Transformation: "Compound",
@@ -109,7 +109,7 @@ var (
 			&imaging.Trim{
 				Transformation: "Trim",
 				Fuzz: &imaging.NumberVariableInline{
-					Value: tools.Float32Ptr(0.08),
+					Value: tools.Float64Ptr(0.08),
 				},
 				Padding: &imaging.IntegerVariableInline{
 					Value: tools.IntPtr(0),
