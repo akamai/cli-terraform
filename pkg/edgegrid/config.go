@@ -16,6 +16,9 @@ func GetEdgegridConfig(c *cli.Context) (*edgegrid.Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	if c.IsSet("accountkey") {
+		config.AccountKey = c.String("accountkey")
+	}
 	return config, nil
 }
 
