@@ -68,7 +68,6 @@ type TFData struct {
 	PropertyResourceName string
 	PropertyName         string
 	PropertyID           string
-	CPCodeID             string
 	ProductID            string
 	ProductName          string
 	RuleFormat           string
@@ -128,8 +127,6 @@ var (
 	ErrProductNameNotFound = errors.New("product name not found")
 	// ErrFetchingHostnameDetails is returned when fetching hsotname details request failed
 	ErrFetchingHostnameDetails = errors.New("fetching hostnames")
-	// ErrFindingCPCodeID is returned when error occured trying to find CPCodeID
-	ErrFindingCPCodeID = errors.New("finding CPCodeID")
 	// ErrSavingSnippets is returned when error appeared while saving property snippet JSON files
 	ErrSavingSnippets = errors.New("saving snippets")
 	// ErrPropertyRulesNotFound is returned when property rules couldn't be found
@@ -226,13 +223,6 @@ func createProperty(ctx context.Context, propertyName, section string, jsonDir s
 	if rules.Rules.Options.IsSecure {
 		tfData.IsSecure = "true"
 	}
-
-	cpCodeID, err := findCPCodeID(rules.Rules.Behaviors)
-	if err != nil {
-		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrFindingCPCodeID, err)
-	}
-	tfData.CPCodeID = cpCodeID
 
 	// Get Rule Format
 	tfData.RuleFormat = rules.RuleFormat
@@ -495,22 +485,6 @@ func saveSnippets(jsonDir string, rules *papi.GetRuleTreeResponse) error {
 	}
 
 	return nil
-}
-
-// findCPCodeID searches for CPCodeID in property rule behaviors
-func findCPCodeID(rbs []papi.RuleBehavior) (string, error) {
-	for _, behaviour := range rbs {
-		if behaviour.Name == "cpCode" {
-			options := behaviour.Options
-			value := options["value"].(map[string]interface{})
-			v, ok := value["id"].(float64)
-			if !ok {
-				return "", fmt.Errorf("cpcode value id has a wrong type: expected float64, got %T", value["id"])
-			}
-			return fmt.Sprintf("%.0f", v), nil
-		}
-	}
-	return "", nil
 }
 
 // getUseCases finds UseCases for given egdehostnameID
