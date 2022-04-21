@@ -63,7 +63,8 @@ var (
 	ErrFetchingPolicy = errors.New("unable to fetch policy with given name")
 )
 
-const maxDepth = 9
+// maxDepth value has to match the MaxPolicyDepth value in terraform imaging subprovider
+const maxDepth = 7
 
 // CmdCreateImaging is an entrypoint to create-imaging command
 func CmdCreateImaging(c *cli.Context) error {
