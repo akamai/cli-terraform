@@ -93,7 +93,7 @@ $ akamai terraform create-domain --createconfig example.akadns.net
 ### Usage
 
 ```
-   akamai-terraform create-zone [command flags] <zone>
+   akamai terraform create-zone [command flags] <zone>
 
 Flags: 
    --tfworkpath path       Path location for placement of created and modified artifacts. Default: current directory
