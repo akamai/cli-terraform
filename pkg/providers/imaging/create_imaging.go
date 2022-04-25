@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -61,6 +62,8 @@ var (
 	ErrFetchingPolicySet = errors.New("unable to fetch policy set with given name")
 	// ErrFetchingPolicy is returned when fetching policy set fails
 	ErrFetchingPolicy = errors.New("unable to fetch policy with given name")
+	// ErrCreateDir is returned when error occurred creating directory
+	ErrCreateDir = errors.New("cannot create directory")
 )
 
 // maxDepth value has to match the MaxPolicyDepth value in terraform imaging subprovider
@@ -80,31 +83,37 @@ func CmdCreateImaging(c *cli.Context) error {
 
 	sess := edgegrid.GetSession(ctx)
 	client := imaging.Client(sess)
+
+	tfWorkPath := "." // default is current dir
 	if c.IsSet("tfworkpath") {
-		tools.TFWorkPath = c.String("tfworkpath")
+		tfWorkPath = c.String("tfworkpath")
 	}
-	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
-	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
+	tfWorkPath = filepath.FromSlash(tfWorkPath)
+	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
 		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
 	}
 
-	imagingPath := filepath.Join(tools.TFWorkPath, "imaging.tf")
-	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
-	importPath := filepath.Join(tools.TFWorkPath, "import.sh")
-
-	jsonDir := tools.TFWorkPath
-	if c.IsSet("policy-json-dir") {
-		jsonDir = c.String("policy-json-dir")
-	}
-	jsonDir = filepath.FromSlash(jsonDir)
-	if stat, err := os.Stat(jsonDir); err != nil || !stat.IsDir() {
-		return cli.NewExitError(color.RedString("Policy JSON path is not accessible"), 1)
-	}
+	imagingPath := filepath.Join(tfWorkPath, "imaging.tf")
+	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
+	importPath := filepath.Join(tfWorkPath, "import.sh")
 
 	err := tools.CheckFiles(imagingPath, variablesPath, importPath)
 	if err != nil {
 		return cli.Exit(color.RedString(err.Error()), 1)
 	}
+
+	jsonDir := "."
+	if c.IsSet("policy-json-dir") {
+		jsonDir = c.String("policy-json-dir")
+	}
+	if !c.IsSet("schema") {
+		jsonDirPath := path.Join(tfWorkPath, jsonDir)
+		err = ensureDirExists(jsonDirPath)
+		if err != nil {
+			return cli.Exit(color.RedString(err.Error()), 1)
+		}
+	}
+
 	templateToFile := map[string]string{
 		"imaging.tmpl":   imagingPath,
 		"variables.tmpl": variablesPath,
@@ -126,13 +135,13 @@ func CmdCreateImaging(c *cli.Context) error {
 
 	contractID, policySetID := c.Args().Get(0), c.Args().Get(1)
 	section := edgegrid.GetEdgercSection(c)
-	if err = createImaging(ctx, contractID, policySetID, jsonDir, section, client, processor, tools.Schema); err != nil {
+	if err = createImaging(ctx, contractID, policySetID, tfWorkPath, jsonDir, section, client, processor, tools.Schema); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting policy HCL: %s", err)), 1)
 	}
 	return nil
 }
 
-func createImaging(ctx context.Context, contractID, policySetID, jsonDir, section string, client imaging.Imaging, templateProcessor templates.TemplateProcessor, schema bool) error {
+func createImaging(ctx context.Context, contractID, policySetID, tfWorkPath, jsonDir, section string, client imaging.Imaging, templateProcessor templates.TemplateProcessor, schema bool) error {
 	term := terminal.Get(ctx)
 
 	fmt.Println("Exporting Image and Video Manager configuration")
@@ -158,9 +167,9 @@ func createImaging(ctx context.Context, contractID, policySetID, jsonDir, sectio
 	var tfPoliciesData []TFPolicy
 	switch policySet.Type {
 	case string(imaging.TypeImage):
-		tfPoliciesData, err = getPoliciesImageData(ctx, policies, policySetID, contractID, jsonDir, client, schema)
+		tfPoliciesData, err = getPoliciesImageData(ctx, policies, policySetID, contractID, tfWorkPath, jsonDir, client, schema)
 	case string(imaging.TypeVideo):
-		tfPoliciesData, err = getPoliciesVideoData(ctx, policies, policySetID, contractID, jsonDir, client, schema)
+		tfPoliciesData, err = getPoliciesVideoData(ctx, policies, policySetID, contractID, tfWorkPath, jsonDir, client, schema)
 	}
 	if err != nil {
 		term.Spinner().Fail()
@@ -196,6 +205,16 @@ func createImaging(ctx context.Context, contractID, policySetID, jsonDir, sectio
 	return nil
 }
 
+func ensureDirExists(dirPath string) error {
+	dirPath = filepath.FromSlash(dirPath)
+
+	err := os.MkdirAll(dirPath, 0755)
+	if err != nil {
+		return fmt.Errorf("%w: %s", ErrCreateDir, err)
+	}
+	return nil
+}
+
 func getPolicies(ctx context.Context, policySetID, contractID string, client imaging.Imaging) ([]imaging.PolicyOutput, error) {
 	stagingPolicies, err := client.ListPolicies(ctx, imaging.ListPoliciesRequest{
 		Network:     imaging.PolicyNetworkStaging,
@@ -209,7 +228,7 @@ func getPolicies(ctx context.Context, policySetID, contractID string, client ima
 	return stagingPolicies.Items, nil
 }
 
-func getPoliciesImageData(ctx context.Context, policies []imaging.PolicyOutput, policySetID, contractID, jsonDir string, client imaging.Imaging, schema bool) ([]TFPolicy, error) {
+func getPoliciesImageData(ctx context.Context, policies []imaging.PolicyOutput, policySetID, contractID, tfWorkPath, jsonDir string, client imaging.Imaging, schema bool) ([]TFPolicy, error) {
 	var tfPoliciesData []TFPolicy
 
 	for _, policyOutput := range policies {
@@ -267,7 +286,7 @@ func getPoliciesImageData(ctx context.Context, policies []imaging.PolicyOutput, 
 			})
 		} else {
 			jsonPath := filepath.Join(jsonDir, RemoveSymbols.ReplaceAllString(policy.ID, "_")+".json")
-			err = ioutil.WriteFile(jsonPath, []byte(policyJSON), 0755)
+			err = ioutil.WriteFile(filepath.Join(tfWorkPath, jsonPath), []byte(policyJSON), 0644)
 			if err != nil {
 				return nil, err
 			}
@@ -283,7 +302,7 @@ func getPoliciesImageData(ctx context.Context, policies []imaging.PolicyOutput, 
 	return tfPoliciesData, nil
 }
 
-func getPoliciesVideoData(ctx context.Context, policies []imaging.PolicyOutput, policySetID, contractID, jsonDir string, client imaging.Imaging, schema bool) ([]TFPolicy, error) {
+func getPoliciesVideoData(ctx context.Context, policies []imaging.PolicyOutput, policySetID, contractID, tfWorkPath, jsonDir string, client imaging.Imaging, schema bool) ([]TFPolicy, error) {
 	var tfPoliciesData []TFPolicy
 
 	for _, policyOutput := range policies {
@@ -338,7 +357,7 @@ func getPoliciesVideoData(ctx context.Context, policies []imaging.PolicyOutput, 
 			})
 		} else {
 			jsonPath := filepath.Join(jsonDir, RemoveSymbols.ReplaceAllString(policy.ID, "_")+".json")
-			err = ioutil.WriteFile(jsonPath, []byte(policyJSON), 0755)
+			err = ioutil.WriteFile(filepath.Join(tfWorkPath, jsonPath), []byte(policyJSON), 0644)
 			if err != nil {
 				return nil, err
 			}

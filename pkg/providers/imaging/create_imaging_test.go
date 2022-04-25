@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"strings"
 	"testing"
 	"text/template"
@@ -729,6 +730,7 @@ func TestCreateImaging(t *testing.T) {
 	tests := map[string]struct {
 		init         func(*mockimaging)
 		filesToCheck []string
+		dataDir      string
 		jsonDir      string
 		withError    error
 		schema       bool
@@ -740,7 +742,7 @@ func TestCreateImaging(t *testing.T) {
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
 					nil, 0, nil).Once()
 			},
-			jsonDir:      "json/image_no_policies",
+			dataDir:      "json/image_no_policies",
 			filesToCheck: []string{"imaging.tf", "import.sh", "variables.tf"},
 		},
 		"fetch policy set with image policies same on production": {
@@ -755,9 +757,26 @@ func TestCreateImaging(t *testing.T) {
 				// policyID: test_policy_image - same on production
 				expectGetPolicy(i, policiesRequests[1], imagePoliciesOutputs[1], nil)
 			},
-			jsonDir:      "json/image_policies",
+			dataDir:      "json/image_policies",
 			filesToCheck: []string{"_auto.json", "test_policy_image.json", "imaging.tf", "import.sh", "variables.tf"},
 		},
+		"fetch policy set with image policies same on production with jsondir": {
+			init: func(i *mockimaging) {
+				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
+				// getPolicies returns two policy outputs from staging
+				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
+					imagePoliciesOutputs[:2], 2, nil).Once()
+				// getPoliciesImageData
+				// policyID: .auto - same on production
+				expectGetPolicy(i, policiesRequests[0], imagePoliciesOutputs[0], nil)
+				// policyID: test_policy_image - same on production
+				expectGetPolicy(i, policiesRequests[1], imagePoliciesOutputs[1], nil)
+			},
+			dataDir:      "json/image_policies_jsondir",
+			jsonDir:      "jsondir",
+			filesToCheck: []string{"jsondir/_auto.json", "jsondir/test_policy_image.json", "imaging.tf", "import.sh", "variables.tf"},
+		},
+
 		"fetch policy set with image policies same on production as schema": {
 			init: func(i *mockimaging) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
@@ -770,7 +789,7 @@ func TestCreateImaging(t *testing.T) {
 				// policyID: test_policy_image - same on production
 				expectGetPolicy(i, policiesRequests[1], imagePoliciesOutputs[1], nil)
 			},
-			jsonDir:      "json/image_policies_schema",
+			dataDir:      "json/image_policies_schema",
 			filesToCheck: []string{"imaging.tf", "import.sh", "variables.tf"},
 			schema:       true,
 		},
@@ -806,7 +825,7 @@ func TestCreateImaging(t *testing.T) {
 				// policyID: test_policy_image - different on production
 				expectGetPolicy(i, policiesRequests[1], imagePoliciesOutputs[2], nil)
 			},
-			jsonDir:      "json/image_policies_diff_prod",
+			dataDir:      "json/image_policies_diff_prod",
 			filesToCheck: []string{"_auto.json", "test_policy_image.json", "imaging.tf", "import.sh", "variables.tf"},
 		},
 
@@ -822,9 +841,26 @@ func TestCreateImaging(t *testing.T) {
 				// policyID: test_policy_image - same on production
 				expectGetPolicy(i, policiesRequests[2], videoPoliciesOutputs[1], nil)
 			},
-			jsonDir:      "json/video_policies",
+			dataDir:      "json/video_policies",
 			filesToCheck: []string{"_auto.json", "test_policy_video.json", "imaging.tf", "import.sh", "variables.tf"},
 		},
+		"fetch policy set with video policies same on production with jsondir": {
+			init: func(i *mockimaging) {
+				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "VIDEO", "EMEA", nil).Once()
+				// getPolicies returns two policy outputs from staging
+				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
+					videoPoliciesOutputs[:2], 2, nil).Once()
+				// getPoliciesVideoData
+				// policyID: .auto - same on production
+				expectGetPolicy(i, policiesRequests[0], videoPoliciesOutputs[0], nil)
+				// policyID: test_policy_image - same on production
+				expectGetPolicy(i, policiesRequests[2], videoPoliciesOutputs[1], nil)
+			},
+			dataDir:      "json/video_policies_jsondir",
+			jsonDir:      "jsondir",
+			filesToCheck: []string{"jsondir/_auto.json", "jsondir/test_policy_video.json", "imaging.tf", "import.sh", "variables.tf"},
+		},
+
 		"fetch policy set with video policies same on production as schema": {
 			init: func(i *mockimaging) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "VIDEO", "EMEA", nil).Once()
@@ -837,7 +873,7 @@ func TestCreateImaging(t *testing.T) {
 				// policyID: test_policy_image - same on production
 				expectGetPolicy(i, policiesRequests[2], videoPoliciesOutputs[1], nil)
 			},
-			jsonDir:      "json/video_policies_schema",
+			dataDir:      "json/video_policies_schema",
 			schema:       true,
 			filesToCheck: []string{"imaging.tf", "import.sh", "variables.tf"},
 		},
@@ -853,7 +889,7 @@ func TestCreateImaging(t *testing.T) {
 				// policyID: test_policy_image - different on production
 				expectGetPolicy(i, policiesRequests[2], videoPoliciesOutputs[2], nil)
 			},
-			jsonDir:      "json/video_policies_diff_prod",
+			dataDir:      "json/video_policies_diff_prod",
 			filesToCheck: []string{"_auto.json", "test_policy_video.json", "imaging.tf", "import.sh", "variables.tf"},
 		},
 		"error fetching policy set": {
@@ -887,12 +923,13 @@ func TestCreateImaging(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			require.NoError(t, os.MkdirAll(fmt.Sprintf("testdata/res/%s", test.jsonDir), 0755))
+			require.NoError(t, os.MkdirAll(fmt.Sprintf("testdata/res/%s/%s", test.dataDir, test.jsonDir), 0755))
+			tfWorkPath := fmt.Sprintf("testdata/res/%s", test.dataDir)
 			mi := new(mockimaging)
-			mp := processor(test.jsonDir)
+			mp := processor(test.dataDir)
 			test.init(mi)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createImaging(ctx, "ctr_123", "test_policyset_id", fmt.Sprintf("testdata/res/%s", test.jsonDir), section, mi, mp, test.schema)
+			err := createImaging(ctx, "ctr_123", "test_policyset_id", tfWorkPath, test.jsonDir, section, mi, mp, test.schema)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -901,9 +938,9 @@ func TestCreateImaging(t *testing.T) {
 
 			if test.filesToCheck != nil {
 				for _, f := range test.filesToCheck {
-					expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.jsonDir, f))
+					expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dataDir, f))
 					require.NoError(t, err)
-					result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.jsonDir, f))
+					result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dataDir, f))
 					require.NoError(t, err)
 					assert.Equal(t, string(expected), string(result))
 				}
@@ -1190,4 +1227,62 @@ func convertPolicyInputImage(policy imaging.PolicyInput) (*imaging.PolicyOutputI
 		return nil, err
 	}
 	return &policyInput, nil
+}
+
+func TestEnsureDirExists(t *testing.T) {
+	t.Run("no json dir specified", func(t *testing.T) {
+		tfDir, err := ioutil.TempDir("", "tfworkpath")
+		defer assert.NoError(t, os.RemoveAll(tfDir))
+		jsonDirPath := path.Join(tfDir, ".")
+
+		err = ensureDirExists(jsonDirPath)
+
+		assert.NoError(t, err)
+		assert.DirExists(t, jsonDirPath)
+	})
+
+	t.Run("json dir already exists", func(t *testing.T) {
+		tfDir, err := ioutil.TempDir("", "tfworkpath")
+		assert.NoError(t, err)
+		defer assert.NoError(t, os.RemoveAll(tfDir))
+		jsonDirPath := path.Join(tfDir, "jsondir")
+
+		// create a dir in path where json dir is expected
+		err = os.Mkdir(jsonDirPath, 0755)
+		assert.NoError(t, err)
+
+		err = ensureDirExists(jsonDirPath)
+
+		assert.NoError(t, err)
+		assert.DirExists(t, jsonDirPath)
+	})
+
+	t.Run("json dir does not exists", func(t *testing.T) {
+		tfDir, err := ioutil.TempDir("", "tfworkpath")
+		assert.NoError(t, err)
+		defer assert.NoError(t, os.RemoveAll(tfDir))
+		jsonDirPath := path.Join(tfDir, "jsondir")
+
+		err = ensureDirExists(jsonDirPath)
+
+		assert.NoError(t, err)
+		assert.DirExists(t, jsonDirPath)
+	})
+
+	t.Run("path exists but is not a dir", func(t *testing.T) {
+		tfDir, err := ioutil.TempDir("", "tfworkpath")
+		assert.NoError(t, err)
+		defer assert.NoError(t, os.RemoveAll(tfDir))
+		jsonDirPath := path.Join(tfDir, "jsondir")
+
+		// create a file in path where json dir is expected
+		f, err := os.Create(jsonDirPath)
+		assert.NoError(t, err)
+		defer assert.NoError(t, f.Close())
+
+		err = ensureDirExists(jsonDirPath)
+
+		assert.ErrorIs(t, err, ErrCreateDir)
+		assert.NoDirExists(t, jsonDirPath)
+	})
 }
