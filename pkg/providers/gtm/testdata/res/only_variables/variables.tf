@@ -1,12 +1,11 @@
-{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/gtm.TFDomainData*/ -}}
 variable "edgerc_path" {
-  type = string
+  type    = string
   default = "~/.edgerc"
 }
 
 variable "config_section" {
-  type = string
-  default = "{{.Section}}"
+  type    = string
+  default = "test_section"
 }
 
 // Notice: contractid unknown at time of import. Please update.

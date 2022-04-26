@@ -1,9 +1,9 @@
 package gtm
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/akamai/cli-terraform/pkg/templates"
@@ -18,26 +18,33 @@ func TestProcessDomainTemplates(t *testing.T) {
 		filesToCheck []string
 	}{
 		"variables file correct": {
-			givenData:    map[string]interface{}{},
+			givenData:    TFDomainData{Section: "test_section"},
 			dir:          "only_variables",
-			filesToCheck: []string{"gtmvars.tf"},
+			filesToCheck: []string{"variables.tf"},
+		},
+		"domain file header correct": {
+			givenData:    TFDomainData{Section: "default"},
+			dir:          "domain_file",
+			filesToCheck: []string{"domain.tf", "variables.tf"},
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
+			outDir := filepath.Join("./testdata/res", test.dir)
+			require.NoError(t, os.MkdirAll(outDir, 0755))
 			processor := templates.FSTemplateProcessor{
 				TemplatesFS: templateFiles,
 				TemplateTargets: map[string]string{
-					"variables.tmpl": fmt.Sprintf("./testdata/res/%s/gtmvars.tf", test.dir),
+					"variables.tmpl": filepath.Join(outDir, "variables.tf"),
+					"domain.tmpl":    filepath.Join(outDir, "domain.tf"),
 				},
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 			for _, f := range test.filesToCheck {
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				expected, err := ioutil.ReadFile(filepath.Join("./testdata", test.dir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				result, err := ioutil.ReadFile(filepath.Join(outDir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}

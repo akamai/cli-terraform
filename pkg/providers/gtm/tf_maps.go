@@ -232,7 +232,7 @@ func processDefaultDatacenter(ddc *gtm.DatacenterBase, dcIDs map[int]string, str
 				ddcString += tab8 + key + " = " + keyVal + "\n"
 			} else {
 				if structreq && keyVal == "5400" {
-					ddcString += tab8 + key + " = " + defaultDatacenterDataSource + "." + "default_datacenter_5400.datacenter_id\n"
+					ddcString += tab8 + key + " = data." + defaultDatacenterDataSource + "." + "default_datacenter_5400.datacenter_id\n"
 				} else {
 					ddcString += tab8 + key + " = " + datacenterResource + "." + normalizeResourceName(dcIDs[varValue.(int)]) + ".datacenter_id\n"
 				}

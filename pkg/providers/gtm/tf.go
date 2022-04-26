@@ -63,8 +63,7 @@ func processDomain(domain *gtm.Domain, resourceDomainName string) string {
 	coreFieldsNullMap := getDomainNullValues().CoreObjectFields
 
 	domainBody := ""
-	domainString := tfHeaderContent
-	domainString += gtmHeaderConfig
+	domainString := gtmHeaderConfig
 
 	domElems := reflect.ValueOf(domain).Elem()
 	for i := 0; i < domElems.NumField(); i++ {

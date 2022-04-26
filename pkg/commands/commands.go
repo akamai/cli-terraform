@@ -43,16 +43,6 @@ func CommandLocator() ([]*cli.Command, error) {
 				Name:  "tfworkpath",
 				Usage: "Path location for placement of created and/or modified artifacts. Default: current directory",
 			},
-			&cli.BoolFlag{
-				Name:  "resources",
-				Value: true,
-				Usage: "Create json formatted resource import list file, <domain>_resources.json. Used as input by createconfig.",
-			},
-			&cli.BoolFlag{
-				Name:  "createconfig",
-				Value: true,
-				Usage: "Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files using resources json",
-			},
 		},
 		BashComplete: autocomplete.Default,
 	})
