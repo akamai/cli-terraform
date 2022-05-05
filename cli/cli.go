@@ -31,7 +31,7 @@ import (
 
 var (
 	// VERSION holds current version of cli-terraform
-	VERSION = "0.7.0"
+	VERSION = "0.7.1"
 )
 
 // Run initializes the cli and runs it
@@ -52,6 +52,12 @@ func Run() error {
 	if len(cmds) > 0 {
 		app.Commands = cmds
 	}
+
+	app.Flags = append(app.Flags, &cli.BoolFlag{
+		Name:  "help",
+		Usage: "show help",
+	})
+
 	app.Before = ensureBefore(putSessionInContext, putLoggerInContext)
 
 	return app.RunContext(ctx, os.Args)

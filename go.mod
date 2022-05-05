@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/akamai/AkamaiOPEN-edgegrid-golang v1.1.1
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 v2.11.0
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 v2.12.0
 	github.com/akamai/cli v1.4.1
 	github.com/briandowns/spinner v1.16.0 // indirect
 	github.com/fatih/color v1.13.0
