@@ -357,61 +357,24 @@ var (
 				},
 			},
 		},
-		PostBreakpointTransformations: []imaging.TransformationType{
+		PostBreakpointTransformations: []imaging.TransformationTypePost{
 			&imaging.BackgroundColor{
 				Transformation: "BackgroundColor",
 				Color: &imaging.StringVariableInline{
 					Value: tools.StringPtr("#ffffff"),
 				},
 			},
-			&imaging.IfDimension{
+			&imaging.IfDimensionPost{
 				Transformation: "IfDimension",
-				Dimension: &imaging.IfDimensionDimensionVariableInline{
-					Value: imaging.IfDimensionDimensionPtr("height"),
+				Dimension: &imaging.IfDimensionPostDimensionVariableInline{
+					Value: imaging.IfDimensionPostDimensionPtr("height"),
 				},
 				Value: &imaging.IntegerVariableInline{
 					Name: tools.StringPtr("MaxDimOld"),
 				},
-				GreaterThan: &imaging.Compound{
+				GreaterThan: &imaging.CompoundPost{
 					Transformation: "Compound",
-					Transformations: []imaging.TransformationType{
-						&imaging.Resize{
-							Transformation: "Resize",
-							Aspect: &imaging.ResizeAspectVariableInline{
-								Value: imaging.ResizeAspectPtr("fit"),
-							},
-							Type: &imaging.ResizeTypeVariableInline{
-								Value: imaging.ResizeTypePtr("normal"),
-							},
-
-							Width: &imaging.IntegerVariableInline{
-								Name: tools.StringPtr("ResizeDimWithBorder"),
-							},
-							Height: &imaging.IntegerVariableInline{
-								Name: tools.StringPtr("ResizeDimWithBorder"),
-							},
-						},
-						&imaging.Crop{
-							Transformation: "Crop",
-							XPosition: &imaging.IntegerVariableInline{
-								Value: tools.IntPtr(0),
-							},
-							YPosition: &imaging.IntegerVariableInline{
-								Value: tools.IntPtr(0),
-							},
-							Gravity: &imaging.GravityVariableInline{
-								Value: imaging.GravityPtr("Center"),
-							},
-							AllowExpansion: &imaging.BooleanVariableInline{
-								Value: tools.BoolPtr(true),
-							},
-							Width: &imaging.IntegerVariableInline{
-								Name: tools.StringPtr("ResizeDim"),
-							},
-							Height: &imaging.IntegerVariableInline{
-								Name: tools.StringPtr("ResizeDim"),
-							},
-						},
+					Transformations: []imaging.TransformationTypePost{
 						&imaging.BackgroundColor{
 							Transformation: "BackgroundColor",
 							Color: &imaging.StringVariableInline{
@@ -420,45 +383,9 @@ var (
 						},
 					},
 				},
-				Default: &imaging.Compound{
+				Default: &imaging.CompoundPost{
 					Transformation: "Compound",
-					Transformations: []imaging.TransformationType{
-						&imaging.Resize{
-							Transformation: "Resize",
-							Aspect: &imaging.ResizeAspectVariableInline{
-								Value: imaging.ResizeAspectPtr("fit"),
-							},
-							Type: &imaging.ResizeTypeVariableInline{
-								Value: imaging.ResizeTypePtr("normal"),
-							},
-							Width: &imaging.IntegerVariableInline{
-								Name: tools.StringPtr("ResizeDim"),
-							},
-							Height: &imaging.IntegerVariableInline{
-								Name: tools.StringPtr("ResizeDim"),
-							},
-						},
-						&imaging.Crop{
-							Transformation: "Crop",
-							XPosition: &imaging.IntegerVariableInline{
-								Value: tools.IntPtr(0),
-							},
-							YPosition: &imaging.IntegerVariableInline{
-								Value: tools.IntPtr(0),
-							},
-							Gravity: &imaging.GravityVariableInline{
-								Value: imaging.GravityPtr("Center"),
-							},
-							AllowExpansion: &imaging.BooleanVariableInline{
-								Value: tools.BoolPtr(true),
-							},
-							Width: &imaging.IntegerVariableInline{
-								Name: tools.StringPtr("ResizeDim"),
-							},
-							Height: &imaging.IntegerVariableInline{
-								Name: tools.StringPtr("ResizeDim"),
-							},
-						},
+					Transformations: []imaging.TransformationTypePost{
 						&imaging.BackgroundColor{
 							Transformation: "BackgroundColor",
 							Color: &imaging.StringVariableInline{

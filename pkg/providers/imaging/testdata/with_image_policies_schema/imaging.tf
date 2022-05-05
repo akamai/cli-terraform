@@ -44,20 +44,6 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
       if_dimension {
         default {
           compound {
-            resize {
-              aspect     = "fit"
-              height_var = "ResizeDim"
-              type       = "normal"
-              width_var  = "ResizeDim"
-            }
-            crop {
-              allow_expansion = true
-              gravity         = "Center"
-              height_var      = "ResizeDim"
-              width_var       = "ResizeDim"
-              x_position      = 0
-              y_position      = 0
-            }
             background_color {
               color = "#ffffff"
             }
@@ -66,20 +52,6 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
         dimension = "height"
         greater_than {
           compound {
-            resize {
-              aspect     = "fit"
-              height_var = "ResizeDimWithBorder"
-              type       = "normal"
-              width_var  = "ResizeDimWithBorder"
-            }
-            crop {
-              allow_expansion = true
-              gravity         = "Center"
-              height_var      = "ResizeDim"
-              width_var       = "ResizeDim"
-              x_position      = 0
-              y_position      = 0
-            }
             background_color {
               color = "#ffffff"
             }
