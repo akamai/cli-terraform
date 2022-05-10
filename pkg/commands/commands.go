@@ -109,8 +109,14 @@ func CommandLocator() ([]*cli.Command, error) {
 		Action:      papi.CmdCreateProperty,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Path location for placement of created artifacts",
+				DefaultText: "current directory",
+			},
+			&cli.StringFlag{
+				Name:        "version",
+				Usage:       "Property version to import",
+				DefaultText: "LATEST",
 			},
 		},
 		BashComplete: akacli.DefaultAutoComplete,

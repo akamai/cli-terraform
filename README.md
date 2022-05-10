@@ -150,7 +150,8 @@ $ akamai terraform create-zone --importscript testprimaryzone.com
    akamai terraform create-property [command flags] <property name>
 
 Flags:
-   --tfworkpath path      Path location for placement of created artifacts. Default: current directory
+   --tfworkpath path      Path location for placement of created artifacts (default: current directory)
+   --version value        Property version to import  (default: LATEST)
 ```
 
 ### Create property manager property configuration.

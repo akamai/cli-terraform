@@ -1,5 +1,12 @@
 # Release Notes
 
+## Version 0.7.2 (Xxx YY, 2022)
+
+### Features / Enhancements
+
+* PAPI
+  * Add optional `version` flag to `create-property` command ([I#8](https://github.com/akamai/cli-terraform/issues/8))
+
 ## Version 0.7.1 (May 11, 2022)
 
 ### Bug fixes
