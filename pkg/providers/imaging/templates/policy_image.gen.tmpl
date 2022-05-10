@@ -32,6 +32,25 @@
     {{- if eq .Transformation "Trim"}}{{- template "Trim" .}}{{- end}}
     {{- if eq .Transformation "UnsharpMask"}}{{- template "UnsharpMask" .}}{{- end}}
 {{- end}}
+{{- define "TransformationsPost"}}
+    {{- if eq .Transformation "BackgroundColor"}}{{- template "BackgroundColor" .}}{{- end}}
+    {{- if eq .Transformation "Blur"}}{{- template "Blur" .}}{{- end}}
+    {{- if eq .Transformation "ChromaKey"}}{{- template "ChromaKey" .}}{{- end}}
+    {{- if eq .Transformation "Compound"}}{{- template "CompoundPost" .}}{{- end}}
+    {{- if eq .Transformation "Contrast"}}{{- template "Contrast" .}}{{- end}}
+    {{- if eq .Transformation "Goop"}}{{- template "Goop" .}}{{- end}}
+    {{- if eq .Transformation "Grayscale"}}{{- template "Grayscale" .}}{{- end}}
+    {{- if eq .Transformation "HSL"}}{{- template "HSL" .}}{{- end}}
+    {{- if eq .Transformation "HSV"}}{{- template "HSV" .}}{{- end}}
+    {{- if eq .Transformation "IfDimension"}}{{- template "IfDimensionPost" .}}{{- end}}
+    {{- if eq .Transformation "IfOrientation"}}{{- template "IfOrientationPost" .}}{{- end}}
+    {{- if eq .Transformation "MaxColors"}}{{- template "MaxColors" .}}{{- end}}
+    {{- if eq .Transformation "Mirror"}}{{- template "Mirror" .}}{{- end}}
+    {{- if eq .Transformation "MonoHue"}}{{- template "MonoHue" .}}{{- end}}
+    {{- if eq .Transformation "Opacity"}}{{- template "Opacity" .}}{{- end}}
+    {{- if eq .Transformation "RemoveColor"}}{{- template "RemoveColor" .}}{{- end}}
+    {{- if eq .Transformation "UnsharpMask"}}{{- template "UnsharpMask" .}}{{- end}}
+{{- end}}
 {{- define "ImageType"}}
     {{- if eq .Type "Box"}}{{- template "BoxImageType" .}}{{- end}}
     {{- if eq .Type "Text"}}{{- template "TextImageType" .}}{{- end}}
@@ -278,13 +297,20 @@
 {{- /*// CompositeScaleDimension */}}
 {{- /*// CompositeTransformation */}}
 {{- /*// Compound */}}
-{{- define "Compound"}}compound {
-{{- range .Transformations}}
-    {{template "Transformations" .}}
+{{- define "Compound"}}
+    {{- range .Transformations}}
+        compound {
+        {{template "Transformations" .}}
+        }{{- end}}
 {{- end}}
-}
+{{- /*// CompoundPost */}}
+{{- define "CompoundPost"}}
+    {{- range .Transformations}}
+        compound {
+        {{template "TransformationsPost" .}}
+        }{{- end}}
 {{- end}}
-{{- /*// CompoundTransformation */}}
+{{- /*// CompoundPostTransformation */}}
 {{- /*// Contrast */}}
 {{- define "Contrast"}}contrast {
 {{- with .Brightness}}
@@ -578,8 +604,42 @@
 {{- end}}
 }
 {{- end}}
-{{- /*// IfDimensionDimension */}}
-{{- /*// IfDimensionTransformation */}}
+{{- /*// IfDimensionPost */}}
+{{- define "IfDimensionPost"}}if_dimension {
+{{- if .Default}}
+    default {
+    {{template "TransformationsPost" .Default}}
+    }
+{{- end}}
+{{- with .Dimension}}
+    {{""}}
+    {{- if .Value}}dimension = "{{.Value}}"{{end}}
+    {{- if .Name}}dimension_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Equal}}
+    equal {
+    {{template "TransformationsPost" .Equal}}
+    }
+{{- end}}
+{{- if .GreaterThan}}
+    greater_than {
+    {{template "TransformationsPost" .GreaterThan}}
+    }
+{{- end}}
+{{- if .LessThan}}
+    less_than {
+    {{template "TransformationsPost" .LessThan}}
+    }
+{{- end}}
+{{- with .Value}}
+    {{""}}
+    {{- if .Value}}value = {{.Value}}{{end}}
+    {{- if .Name}}value_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// IfDimensionPostDimension */}}
+{{- /*// IfDimensionPostTransformation */}}
 {{- /*// IfOrientation */}}
 {{- define "IfOrientation"}}if_orientation {
 {{- if .Default}}
@@ -604,7 +664,31 @@
 {{- end}}
 }
 {{- end}}
-{{- /*// IfOrientationTransformation */}}
+{{- /*// IfOrientationPost */}}
+{{- define "IfOrientationPost"}}if_orientation {
+{{- if .Default}}
+    default {
+    {{template "TransformationsPost" .Default}}
+    }
+{{- end}}
+{{- if .Landscape}}
+    landscape {
+    {{template "TransformationsPost" .Landscape}}
+    }
+{{- end}}
+{{- if .Portrait}}
+    portrait {
+    {{template "TransformationsPost" .Portrait}}
+    }
+{{- end}}
+{{- if .Square}}
+    square {
+    {{template "TransformationsPost" .Square}}
+    }
+{{- end}}
+}
+{{- end}}
+{{- /*// IfOrientationPostTransformation */}}
 {{- /*// MaxColors */}}
 {{- define "MaxColors"}}max_colors {
 {{- with .Colors}}
@@ -705,18 +789,18 @@
 {{- end}}
 {{- if .PostBreakpointTransformations}}
     {{- range .PostBreakpointTransformations}}
-    post_breakpoint_transformations {
-        {{template "Transformations" .}}
-    }
+        post_breakpoint_transformations {
+        {{template "TransformationsPost" .}}
+        }
     {{- end}}
 {{- end}}
 {{- if .RolloutDuration}}
     rollout_duration = {{.RolloutDuration}}{{end}}
 {{- if .Transformations}}
     {{- range .Transformations}}
-    transformations {
+        transformations {
         {{template "Transformations" .}}
-     }
+        }
     {{- end}}
 {{- end}}
 {{- range .Variables}}

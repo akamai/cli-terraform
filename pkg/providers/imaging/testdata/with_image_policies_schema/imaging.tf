@@ -43,6 +43,7 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
     post_breakpoint_transformations {
       if_dimension {
         default {
+
           compound {
             background_color {
               color = "#ffffff"
@@ -51,6 +52,7 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
         }
         dimension = "height"
         greater_than {
+
           compound {
             background_color {
               color = "#ffffff"
@@ -93,8 +95,7 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
             stroke_size = 0
             text        = "test"
             transformation {
-              compound {
-              }
+
             }
           }
         }
@@ -110,15 +111,19 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
     transformations {
       if_dimension {
         default {
+
           compound {
             if_dimension {
               default {
+
                 compound {
                   if_dimension {
                     default {
+
                       compound {
                         if_dimension {
                           default {
+
                             compound {
                               resize {
                                 aspect     = "fit"
@@ -126,6 +131,8 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
                                 type       = "normal"
                                 width_var  = "ResizeDim"
                               }
+                            }
+                            compound {
                               crop {
                                 allow_expansion = true
                                 gravity         = "Center"
@@ -134,6 +141,8 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
                                 x_position      = 0
                                 y_position      = 0
                               }
+                            }
+                            compound {
                               background_color {
                                 color = "#ffffff"
                               }
@@ -141,6 +150,7 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
                           }
                           dimension = "height"
                           greater_than {
+
                             compound {
                               resize {
                                 aspect     = "fit"
@@ -148,6 +158,8 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
                                 type       = "normal"
                                 width_var  = "ResizeDimWithBorder"
                               }
+                            }
+                            compound {
                               crop {
                                 allow_expansion = true
                                 gravity         = "Center"
@@ -156,6 +168,8 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
                                 x_position      = 0
                                 y_position      = 0
                               }
+                            }
+                            compound {
                               background_color {
                                 color = "#ffffff"
                               }
@@ -167,6 +181,7 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
                     }
                     dimension = "height"
                     less_than {
+
                       compound {
                         resize {
                           aspect     = "fit"
@@ -174,6 +189,8 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
                           type       = "normal"
                           width_var  = "ResizeDimWithBorder"
                         }
+                      }
+                      compound {
                         crop {
                           allow_expansion = true
                           gravity         = "Center"
@@ -182,6 +199,8 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
                           x_position      = 0
                           y_position      = 0
                         }
+                      }
+                      compound {
                         background_color {
                           color = "#ffffff"
                         }
@@ -193,6 +212,7 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
               }
               dimension = "width"
               less_than {
+
                 compound {
                   resize {
                     aspect     = "fit"
@@ -200,6 +220,8 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
                     type       = "normal"
                     width_var  = "ResizeDimWithBorder"
                   }
+                }
+                compound {
                   crop {
                     allow_expansion = true
                     gravity         = "Center"
@@ -208,6 +230,8 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
                     x_position      = 0
                     y_position      = 0
                   }
+                }
+                compound {
                   background_color {
                     color = "#ffffff"
                   }

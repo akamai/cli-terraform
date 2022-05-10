@@ -32,6 +32,7 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
         image {
           box_image {
             transformation {
+
               compound {
                 append {
                   gravity          = "Center"
@@ -39,6 +40,7 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
                   image {
                     box_image {
                       transformation {
+
                         compound {
                           append {
                             gravity          = "Center"
