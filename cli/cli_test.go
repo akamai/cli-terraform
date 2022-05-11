@@ -1,8 +1,13 @@
 package cli
 
 import (
+	"bytes"
+	"context"
 	"flag"
 	"testing"
+
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
+	"github.com/akamai/cli/pkg/log"
 
 	"github.com/stretchr/testify/assert"
 
@@ -63,4 +68,32 @@ func Test_sessionRequired(t *testing.T) {
 			assert.Equal(t, test.expected, sessionRequired(test.c()))
 		})
 	}
+}
+
+func TestPutLoggerInContext(t *testing.T) {
+	t.Setenv("AKAMAI_LOG", "debug")
+	app := cli.NewApp()
+	buffer := &bytes.Buffer{}
+	app.Writer = buffer
+
+	ctx := context.Background()
+
+	cliCtx := &cli.Context{
+		Context: ctx,
+		App:     app,
+	}
+	err := putLoggerInContext(cliCtx)
+	assert.NoError(t, err)
+
+	logger := log.FromContext(cliCtx.Context)
+	buffer.Reset()
+	logger.Info("oops")
+	assert.Contains(t, buffer.String(), "oops")
+
+	sess, err := session.New()
+	assert.NoError(t, err)
+	logger = sess.Log(cliCtx.Context)
+	buffer.Reset()
+	logger.Info("oops")
+	assert.Contains(t, buffer.String(), "oops")
 }

@@ -1,5 +1,21 @@
 # Release Notes
 
+## Version 0.7.1 (May 11, 2022)
+
+### Bug fixes
+
+* General
+  * `./cli-terraform --help` should return a zero status
+
+* PAPI
+  * Normalize rule names in `create-property` command
+
+### Features / Enhancements
+
+* General
+  * Support `--acountkey` flag
+  * Logging improvements
+
 ## Version 0.7.0 (Mar 31, 2022)
 
 ### Features / Enhancements

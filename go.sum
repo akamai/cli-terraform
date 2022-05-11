@@ -11,8 +11,8 @@ github.com/agext/levenshtein v1.2.1 h1:QmvMAjj2aEICytGiWzmxoE0x2KZvE0fvmqMOfy2tj
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/akamai/AkamaiOPEN-edgegrid-golang v1.1.1 h1:bLzehmpyCwQiqCE1Qe9Ny6fbFqs7hPlmo9vKv2orUxs=
 github.com/akamai/AkamaiOPEN-edgegrid-golang v1.1.1/go.mod h1:kX6YddBkXqqywAe8c9LyvgTCyFuZCTMF4cRPQhc3Fy8=
-github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 v2.11.0 h1:kCQ7TjnKSlEItY3YotPCAatBmmNbSIbo4tA7Z7pQuxA=
-github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 v2.11.0/go.mod h1:NUp3zcqw6k6AXwf9yr8ksTXpppJTbm35kXeqwdNreRc=
+github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 v2.12.0 h1:+burAM1odRca0uwE+NMKQ4balG0Yk0wonxt6BQ8LKbo=
+github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 v2.12.0/go.mod h1:NUp3zcqw6k6AXwf9yr8ksTXpppJTbm35kXeqwdNreRc=
 github.com/akamai/cli v1.4.1 h1:+f3RFxdVDj8+ptE+30Q0zlkBYIo2kTWKnnXvMkduhIo=
 github.com/akamai/cli v1.4.1/go.mod h1:NfdIWkrAm4RBxsaBZT3zEzSyguOznIf9GD0ayAn63/Q=
 github.com/alcortesm/tgz v0.0.0-20161220082320-9c5fe88206d7/go.mod h1:6zEj6s6u/ghQa61ZWa/C2Aw3RkjiTBOix7dkqa1VLIs=

@@ -37,7 +37,7 @@ If you want to compile it from source, you will need Go 1.12 or later:
 ## General Usage
 
 ```
-  akamai-terraform [global flags] command [command flags] [arguments...]
+  akamai terraform [global flags] command [command flags] [arguments...]
 
 Description:
    Administer and manage available Akamai resources with Terraform
@@ -64,7 +64,7 @@ Global Flags:
 ### Usage
 
 ```
-   akamai-terraform create-domain [command flags] <domain>
+   akamai terraform create-domain [command flags] <domain>
 
 Flags:
    --tfworkpath path      Path location for placement of created and modified artifacts. Default: current directory
@@ -93,7 +93,7 @@ $ akamai terraform create-domain --createconfig example.akadns.net
 ### Usage
 
 ```
-   akamai-terraform create-zone [command flags] <zone>
+   akamai terraform create-zone [command flags] <zone>
 
 Flags: 
    --tfworkpath path       Path location for placement of created and modified artifacts. Default: current directory
@@ -147,7 +147,7 @@ $ akamai terraform create-zone --importscript testprimaryzone.com
 ### Usage
 
 ```
-   akamai-terraform create-property [command flags] <property name>
+   akamai terraform create-property [command flags] <property name>
 
 Flags:
    --tfworkpath path      Path location for placement of created artifacts. Default: current directory
@@ -164,7 +164,7 @@ $ akamai terraform create-property
 ### Usage
 
 ```
-   akamai-terraform create-cloudlets-policy [command flags] <policy_name>
+   akamai terraform create-cloudlets-policy [command flags] <policy_name>
 
 Flags:
    --tfworkpath path      Path location for placement of created artifacts. Default: current directory
@@ -181,7 +181,7 @@ $ akamai terraform create-cloudlets-policy
 ### Create EdgeKV Usage
 
 ```
-   akamai-terraform create-edgekv [command flags] <namespace_name> <network>
+   akamai terraform create-edgekv [command flags] <namespace_name> <network>
 
 Flags:
    --tfworkpath path      Path location for placement of created artifacts. Default: current directory
@@ -196,7 +196,7 @@ $ akamai terraform create-edgekv
 ### Create EdgeWorker Usage
 
 ```
-   akamai-terraform create-edgeworker [command flags] <edgeworker_id>
+   akamai terraform create-edgeworker [command flags] <edgeworker_id>
 
 Flags:
    --bundlepath path      Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath
@@ -207,6 +207,24 @@ Flags:
 
 ```
 $ akamai terraform create-edgekv
+```
+
+## Image and Video Manager
+
+### Create Image and Video policy usage
+
+```
+   akamai terraform create-imaging [command flags] <contract_id> <policy_set_id>
+
+Flags:
+   --tfworkpath path         Path location for placement of created artifacts. Default: current directory
+   --policy-json-dir path    Path location for placement of policy jsons. Default: same value as tfworkpath
+```
+
+### Create Image and Video policy configuration.
+
+```
+$ akamai terraform create-imaging
 ```
 
 ## General Notes

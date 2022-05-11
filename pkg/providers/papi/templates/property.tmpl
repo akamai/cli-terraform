@@ -1,0 +1,66 @@
+terraform {
+  required_providers {
+    akamai = {
+      source = "akamai/akamai"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
+provider "akamai" {
+  edgerc = "~/.edgerc"
+  config_section = var.config_section
+}
+
+data "akamai_group" "group" {
+  group_name = "{{.GroupName}}"
+  contract_id = "{{.ContractID}}"
+}
+
+data "akamai_contract" "contract" {
+  group_name = data.akamai_group.group.name
+}
+
+data "akamai_property_rules_template" "rules" {
+  template_file = abspath("${path.module}/property-snippets/main.json")
+}
+{{range .EdgeHostnames}}
+resource "akamai_edge_hostname" "{{.EdgeHostnameResourceName}}" {
+  product_id  = "prd_{{.ProductName}}"
+  contract_id = data.akamai_contract.contract.id
+  group_id = data.akamai_group.group.id
+  ip_behavior = "{{.IPv6}}"
+  edge_hostname = "{{.EdgeHostname}}"
+{{- if .SlotNumber}}
+  certificate = {{.SlotNumber}}
+{{- end}}
+{{- if .UseCases}}
+  use_cases = jsonencode({{.UseCases}})
+{{- end}}
+}
+{{end}}
+resource "akamai_property" "{{.PropertyResourceName}}" {
+  name = "{{.PropertyName}}"
+  contract_id = data.akamai_contract.contract.id
+  group_id = data.akamai_group.group.id
+  product_id = "prd_{{.ProductName}}"
+  rule_format = "{{.RuleFormat}}"
+{{- range .Hostnames}}
+  hostnames {
+    cname_from = "{{.Hostname}}"
+    cname_to = akamai_edge_hostname.{{.EdgeHostnameResourceName}}.edge_hostname
+    cert_provisioning_type = "CPS_MANAGED"
+  }
+{{- end}}
+  rules = data.akamai_property_rules_template.rules.json
+}
+
+resource "akamai_property_activation" "{{.PropertyResourceName}}" {
+  property_id = akamai_property.{{.PropertyResourceName}}.id
+  contact = [{{range $index, $element := .Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+  version = akamai_property.{{.PropertyResourceName}}.latest_version
+  network = upper(var.env)
+{{- if .ActivationNote}}
+  note = "{{.ActivationNote}}"
+{{- end}}
+}

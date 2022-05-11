@@ -135,7 +135,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Name:        "create-edgekv",
 		Description: "Create Terraform EdgeKV Resource",
 		Usage:       "create-edgekv",
-		ArgsUsage:   "<namespace_name>, <network>",
+		ArgsUsage:   "<namespace_name> <network>",
 		Action:      edgeworkers.CmdCreateEdgeKV,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
