@@ -15,7 +15,7 @@
   * `./cli-terraform --help` should return a zero status
 
 * PAPI
-  * Fix `create-property` to accept `/` in property rule names ([PR#13](https://github.com/akamai/cli-terraform/pull/13))
+  * Normalize rule names in `create-property` command
 
 ### Features / Enhancements
 
