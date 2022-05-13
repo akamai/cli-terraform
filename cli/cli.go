@@ -30,8 +30,8 @@ import (
 )
 
 var (
-	// VERSION holds current version of cli-terraform
-	VERSION = "0.7.1"
+	// Version holds current version of cli-terraform
+	Version = "dev"
 )
 
 // Run initializes the cli and runs it
@@ -43,7 +43,7 @@ func Run() error {
 	app := akacli.CreateAppTemplate(ctx, "terraform",
 		"A CLI Plugin for Akamai Terraform Provider",
 		"Administer and Manage Supported Akamai Feature resources with Terraform",
-		VERSION)
+		Version)
 
 	cmds, err := commands.CommandLocator()
 	if err != nil {
