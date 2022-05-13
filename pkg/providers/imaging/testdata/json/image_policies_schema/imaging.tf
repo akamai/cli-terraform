@@ -19,11 +19,7 @@ resource "akamai_imaging_policy_set" "policyset" {
   contract_id = "ctr_123"
 }
 
-resource "akamai_imaging_policy_image" "policy__auto" {
-  policy_id              = ".auto"
-  contract_id            = "ctr_123"
-  policyset_id           = "test_policyset_id"
-  activate_on_production = true
+data "akamai_imaging_policy_image" "data_policy__auto" {
   policy {
     breakpoints {
 
@@ -41,11 +37,7 @@ resource "akamai_imaging_policy_image" "policy__auto" {
   }
 }
 
-resource "akamai_imaging_policy_image" "policy_test_policy_image" {
-  policy_id              = "test_policy_image"
-  contract_id            = "ctr_123"
-  policyset_id           = "test_policyset_id"
-  activate_on_production = true
+data "akamai_imaging_policy_image" "data_policy_test_policy_image" {
   policy {
     breakpoints {
 
@@ -61,4 +53,20 @@ resource "akamai_imaging_policy_image" "policy_test_policy_image" {
       }
     }
   }
+}
+
+resource "akamai_imaging_policy_image" "policy__auto" {
+  policy_id              = ".auto"
+  contract_id            = "ctr_123"
+  policyset_id           = "test_policyset_id"
+  activate_on_production = true
+  json                   = data.akamai_imaging_policy_image.data_policy__auto.json
+}
+
+resource "akamai_imaging_policy_image" "policy_test_policy_image" {
+  policy_id              = "test_policy_image"
+  contract_id            = "ctr_123"
+  policyset_id           = "test_policyset_id"
+  activate_on_production = true
+  json                   = data.akamai_imaging_policy_image.data_policy_test_policy_image.json
 }

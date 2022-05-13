@@ -1175,7 +1175,7 @@ func TestEnsureDirExists(t *testing.T) {
 		jsonDirPath := path.Join(tfDir, "jsondir")
 
 		// create a dir in path where json dir is expected
-		err = os.Mkdir(jsonDirPath, 0755)
+		err = os.MkdirAll(jsonDirPath, 0755)
 		assert.NoError(t, err)
 
 		err = ensureDirExists(jsonDirPath)
@@ -1203,6 +1203,8 @@ func TestEnsureDirExists(t *testing.T) {
 		jsonDirPath := path.Join(tfDir, "jsondir")
 
 		// create a file in path where json dir is expected
+		err = os.MkdirAll(tfDir, 0755)
+		assert.NoError(t, err)
 		f, err := os.Create(jsonDirPath)
 		assert.NoError(t, err)
 		defer assert.NoError(t, f.Close())

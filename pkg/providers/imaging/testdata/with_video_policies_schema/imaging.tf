@@ -19,11 +19,7 @@ resource "akamai_imaging_policy_set" "policyset" {
   contract_id = "ctr_123"
 }
 
-resource "akamai_imaging_policy_video" "policy_test_policy_video" {
-  policy_id              = "test_policy_video"
-  contract_id            = "ctr_123"
-  policyset_id           = "test_policyset_id"
-  activate_on_production = true
+data "akamai_imaging_policy_video" "data_policy_test_policy_video" {
   policy {
     breakpoints {
 
@@ -77,4 +73,12 @@ resource "akamai_imaging_policy_video" "policy_test_policy_video" {
       type          = "number"
     }
   }
+}
+
+resource "akamai_imaging_policy_video" "policy_test_policy_video" {
+  policy_id              = "test_policy_video"
+  contract_id            = "ctr_123"
+  policyset_id           = "test_policyset_id"
+  activate_on_production = true
+  json                   = data.akamai_imaging_policy_video.data_policy_test_policy_video.json
 }
