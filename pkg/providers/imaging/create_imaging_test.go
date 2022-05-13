@@ -49,6 +49,11 @@ var (
 				DefaultValue: "260",
 			},
 			{
+				Name:         "VariableWithoutDefaultValue",
+				Type:         "string",
+				DefaultValue: "",
+			},
+			{
 				Name:         "MinDim",
 				Type:         "number",
 				DefaultValue: "1000",

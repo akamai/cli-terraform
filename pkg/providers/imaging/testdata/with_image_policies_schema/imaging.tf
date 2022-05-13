@@ -255,6 +255,12 @@ data "akamai_imaging_policy_image" "data_policy_test_policy_image" {
     }
     variables {
 
+      default_value = ""
+      name          = "VariableWithoutDefaultValue"
+      type          = "string"
+    }
+    variables {
+
       default_value = "1000"
       enum_options {
 

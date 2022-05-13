@@ -26,10 +26,8 @@
 {{- end}}
 {{- /*// EnumOptions */}}
 {{- define "EnumOptions"}}
-    {{- if .ID}}
-        id = "{{.ID}}"{{end}}
-    {{- if .Value}}
-        value = "{{.Value}}"{{end}}
+    id = "{{.ID}}"
+    value = "{{.Value}}"
 
 {{- end}}
 {{- /*// OutputVideo */}}
@@ -89,27 +87,23 @@
 {{- end}}
 {{- /*// Variable */}}
 {{- define "Variable"}}
-    {{- if .DefaultValue}}
-        default_value = "{{.DefaultValue}}"{{end}}
+    default_value = "{{.DefaultValue}}"
     {{- range .EnumOptions}}
         enum_options {
         {{template "EnumOptions" .}}
         }
     {{- end}}
-    {{- if .Name}}
-        name = "{{.Name}}"{{end}}
+    name = "{{.Name}}"
     {{- if .Postfix}}
         postfix = "{{.Postfix}}"{{end}}
     {{- if .Prefix}}
         prefix = "{{.Prefix}}"{{end}}
-    {{- if .Type}}
-        type = "{{.Type}}"{{end}}
+    type = "{{.Type}}"
 
 {{- end}}
 {{- /*// VariableInline */}}
 {{- define "VariableInline"}}
-    {{- if .Var}}
-        var = "{{.Var}}"{{end}}
+    var = "{{.Var}}"
 
 {{- end}}
 {{- /*// VariableType */}}
