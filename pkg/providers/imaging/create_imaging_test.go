@@ -35,7 +35,7 @@ func TestMain(m *testing.M) {
 
 var (
 	veryDeepPolicy = imaging.PolicyInputImage{
-		RolloutDuration: 3600,
+		RolloutDuration: tools.IntPtr(3600),
 		Hosts:           []string{"host1", "host2"},
 		Variables: []imaging.Variable{
 			{
@@ -408,7 +408,7 @@ var (
 			PerceptualQuality: &imaging.OutputImagePerceptualQualityVariableInline{
 				Value: imaging.OutputImagePerceptualQualityPtr("mediumHigh"),
 			},
-			AdaptiveQuality: 50,
+			AdaptiveQuality: tools.IntPtr(50),
 		},
 	}
 
@@ -1050,7 +1050,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						PolicyID:             "test_policy_video",
 						ActivateOnProduction: true,
 						Policy: &imaging.PolicyInputVideo{
-							RolloutDuration: 3600,
+							RolloutDuration: tools.IntPtr(3600),
 							Hosts:           []string{"host1", "host2"},
 							Variables: []imaging.Variable{
 								{
@@ -1164,7 +1164,7 @@ func convertPolicyInputImage(policy imaging.PolicyInput) (*imaging.PolicyOutputI
 func TestEnsureDirExists(t *testing.T) {
 	t.Run("no json dir specified", func(t *testing.T) {
 		tfDir, err := ioutil.TempDir("", "tfworkpath")
-		defer assert.NoError(t, os.RemoveAll(tfDir))
+		defer func() { assert.NoError(t, os.RemoveAll(tfDir)) }()
 		jsonDirPath := path.Join(tfDir, ".")
 
 		err = ensureDirExists(jsonDirPath)
@@ -1176,7 +1176,7 @@ func TestEnsureDirExists(t *testing.T) {
 	t.Run("json dir already exists", func(t *testing.T) {
 		tfDir, err := ioutil.TempDir("", "tfworkpath")
 		assert.NoError(t, err)
-		defer assert.NoError(t, os.RemoveAll(tfDir))
+		defer func() { assert.NoError(t, os.RemoveAll(tfDir)) }()
 		jsonDirPath := path.Join(tfDir, "jsondir")
 
 		// create a dir in path where json dir is expected
@@ -1192,7 +1192,7 @@ func TestEnsureDirExists(t *testing.T) {
 	t.Run("json dir does not exists", func(t *testing.T) {
 		tfDir, err := ioutil.TempDir("", "tfworkpath")
 		assert.NoError(t, err)
-		defer assert.NoError(t, os.RemoveAll(tfDir))
+		defer func() { assert.NoError(t, os.RemoveAll(tfDir)) }()
 		jsonDirPath := path.Join(tfDir, "jsondir")
 
 		err = ensureDirExists(jsonDirPath)
@@ -1204,7 +1204,7 @@ func TestEnsureDirExists(t *testing.T) {
 	t.Run("path exists but is not a dir", func(t *testing.T) {
 		tfDir, err := ioutil.TempDir("", "tfworkpath")
 		assert.NoError(t, err)
-		defer assert.NoError(t, os.RemoveAll(tfDir))
+		defer func() { assert.NoError(t, os.RemoveAll(tfDir)) }()
 		jsonDirPath := path.Join(tfDir, "jsondir")
 
 		// create a file in path where json dir is expected
@@ -1212,7 +1212,7 @@ func TestEnsureDirExists(t *testing.T) {
 		assert.NoError(t, err)
 		f, err := os.Create(jsonDirPath)
 		assert.NoError(t, err)
-		defer assert.NoError(t, f.Close())
+		assert.NoError(t, f.Close())
 
 		err = ensureDirExists(jsonDirPath)
 
