@@ -21,7 +21,8 @@ import (
 	"github.com/akamai/cli-terraform/pkg/providers/gtm"
 	"github.com/akamai/cli-terraform/pkg/providers/imaging"
 	"github.com/akamai/cli-terraform/pkg/providers/papi"
-	akacli "github.com/akamai/cli/pkg/app"
+	"github.com/akamai/cli/pkg/apphelp"
+	"github.com/akamai/cli/pkg/autocomplete"
 	"github.com/urfave/cli/v2"
 )
 
@@ -50,7 +51,7 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage: "Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files using resources json",
 			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -98,7 +99,7 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage: "Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.",
 			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -119,7 +120,7 @@ func CommandLocator() ([]*cli.Command, error) {
 				DefaultText: "LATEST",
 			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -134,7 +135,7 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -149,7 +150,7 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -168,7 +169,7 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -187,21 +188,14 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "list",
-		Description: "List commands",
-		Action:      cmdList,
-	})
-
-	commands = append(commands, &cli.Command{
-		Name:         "help",
-		Description:  "Displays help information",
-		ArgsUsage:    "<command> <sub-command>",
-		Action:       cmdHelp,
-		BashComplete: akacli.DefaultAutoComplete,
+		Name:               "list",
+		Description:        "List commands",
+		Action:             cmdList,
+		CustomHelpTemplate: apphelp.SimplifiedHelpTemplate,
 	})
 
 	return commands, nil

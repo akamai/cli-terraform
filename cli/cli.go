@@ -50,13 +50,8 @@ func Run() error {
 		return fmt.Errorf(color.RedString("An error occurred initializing commands: %s"), err)
 	}
 	if len(cmds) > 0 {
-		app.Commands = cmds
+		app.Commands = append(cmds, app.Commands...)
 	}
-
-	app.Flags = append(app.Flags, &cli.BoolFlag{
-		Name:  "help",
-		Usage: "show help",
-	})
 
 	app.Before = ensureBefore(putSessionInContext, putLoggerInContext)
 

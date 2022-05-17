@@ -53,6 +53,7 @@ Built-In Commands:
   help
 
 Global Flags:
+   --help                                   show help (default: false)
    --edgerc value, -e value                 Location of the credentials file (default: "/home/user/.edgerc") [$AKAMAI_EDGERC]
    --section value, -s value                Section of the credentials file (default: "default") [$AKAMAI_EDGERC_SECTION]
    --accountkey value, --account-key value  Account switch key [$AKAMAI_EDGERC_ACCOUNT_KEY]
@@ -64,10 +65,10 @@ Global Flags:
 ### Usage
 
 ```
-   akamai terraform create-domain [command flags] <domain>
+   akamai terraform [global flags] create-domain [flags] <domain>
 
 Flags:
-   --tfworkpath path      Path location for placement of created and modified artifacts. Default: current directory
+   --tfworkpath path       Path location for placement of created and modified artifacts. Default: current directory
    --resources             Creates a JSON-formatted resource file for import: <domain>_resources.json. The createconfig flag uses this file as an input. (default: false)
    --createconfig          Creates these Terraform configuration files based on the values in <domain>_resources.json: <domain>.tf and gtmvars.tf. Also creates this import script: <domain>_import.script. (default: false)
 ```
@@ -93,7 +94,7 @@ $ akamai terraform create-domain --createconfig example.akadns.net
 ### Usage
 
 ```
-   akamai terraform create-zone [command flags] <zone>
+   akamai terraform [global flags] create-zone [flags] <zone>
 
 Flags: 
    --tfworkpath path       Path location for placement of created and modified artifacts. Default: current directory
@@ -147,7 +148,7 @@ $ akamai terraform create-zone --importscript testprimaryzone.com
 ### Usage
 
 ```
-   akamai terraform create-property [command flags] <property name>
+   akamai terraform [global flags] create-property [flags] <property name>
 
 Flags:
    --tfworkpath path      Path location for placement of created artifacts (default: current directory)
@@ -165,7 +166,7 @@ $ akamai terraform create-property
 ### Usage
 
 ```
-   akamai terraform create-cloudlets-policy [command flags] <policy_name>
+   akamai terraform [global flags] create-cloudlets-policy [flags] <policy_name>
 
 Flags:
    --tfworkpath path      Path location for placement of created artifacts. Default: current directory
@@ -182,7 +183,7 @@ $ akamai terraform create-cloudlets-policy
 ### Create EdgeKV Usage
 
 ```
-   akamai terraform create-edgekv [command flags] <namespace_name> <network>
+   akamai terraform [global flags] create-edgekv [flags] <namespace_name> <network>
 
 Flags:
    --tfworkpath path      Path location for placement of created artifacts. Default: current directory
@@ -197,7 +198,7 @@ $ akamai terraform create-edgekv
 ### Create EdgeWorker Usage
 
 ```
-   akamai terraform create-edgeworker [command flags] <edgeworker_id>
+   akamai terraform [global flags] create-edgeworker [flags] <edgeworker_id>
 
 Flags:
    --bundlepath path      Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath
@@ -215,7 +216,7 @@ $ akamai terraform create-edgekv
 ### Create Image and Video policy usage
 
 ```
-   akamai terraform create-imaging [command flags] <contract_id> <policy_set_id>
+   akamai terraform [global flags] create-imaging [flags] <contract_id> <policy_set_id>
 
 Flags:
    --tfworkpath path         Path location for placement of created artifacts. Default: current directory

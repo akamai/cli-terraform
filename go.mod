@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.11.1
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
 	github.com/shirou/gopsutil v2.20.4+incompatible
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/tj/assert v0.0.3
 	github.com/urfave/cli/v2 v2.3.0
 )
