@@ -293,7 +293,7 @@ data "akamai_imaging_policy_image" "data_policy_test_policy_image" {
 resource "akamai_imaging_policy_image" "policy_test_policy_image" {
   policy_id              = "test_policy_image"
   contract_id            = "ctr_123"
-  policyset_id           = "test_policyset_id"
+  policyset_id           = akamai_imaging_policy_set.policyset.id
   activate_on_production = true
   json                   = data.akamai_imaging_policy_image.data_policy_test_policy_image.json
 }

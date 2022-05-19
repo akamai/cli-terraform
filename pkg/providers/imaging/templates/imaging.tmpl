@@ -41,7 +41,7 @@ resource "akamai_imaging_policy_set" "policyset" {
   resource "akamai_imaging_policy_{{$.PolicySet.Type | ToLower}}" "policy_{{.PolicyID | RemoveSymbols}}" {
   policy_id              = "{{.PolicyID}}"
   contract_id            = "{{$.PolicySet.ContractID}}"
-  policyset_id           = "{{$.PolicySet.ID}}"
+  policyset_id           = akamai_imaging_policy_set.policyset.id
   activate_on_production = {{.ActivateOnProduction}}
   {{- if .JSON}}
     json                   = file("{{.JSON}}")

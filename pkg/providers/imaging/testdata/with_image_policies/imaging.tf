@@ -22,7 +22,7 @@ resource "akamai_imaging_policy_set" "policyset" {
 resource "akamai_imaging_policy_image" "policy__auto" {
   policy_id              = ".auto"
   contract_id            = "ctr_123"
-  policyset_id           = "test_policyset_id"
+  policyset_id           = akamai_imaging_policy_set.policyset.id
   activate_on_production = true
   json                   = file("testdata/res/json/image_policies/_auto.json")
 }
@@ -30,7 +30,7 @@ resource "akamai_imaging_policy_image" "policy__auto" {
 resource "akamai_imaging_policy_image" "policy_test_policy_image" {
   policy_id              = "test_policy_image"
   contract_id            = "ctr_123"
-  policyset_id           = "test_policyset_id"
+  policyset_id           = akamai_imaging_policy_set.policyset.id
   activate_on_production = true
   json                   = file("testdata/res/json/image_policies/test_policy_image.json")
 }
