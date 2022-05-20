@@ -91,7 +91,8 @@ data "akamai_imaging_policy_image" "data_policy_test_policy_image" {
             stroke_size = 0
             text        = "test"
             transformation {
-
+              compound {
+              }
             }
           }
         }

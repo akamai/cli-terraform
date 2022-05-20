@@ -298,17 +298,25 @@
 {{- /*// CompositeTransformation */}}
 {{- /*// Compound */}}
 {{- define "Compound"}}
-    {{- range .Transformations}}
-        compound {
-        {{template "Transformations" .}}
-        }{{- end}}
+    {{- if .Transformations}}
+        {{- range .Transformations}}
+            compound {
+            {{template "Transformations" .}}
+            }
+        {{- end}}
+    {{- else}}compound {
+    }{{- end}}
 {{- end}}
 {{- /*// CompoundPost */}}
 {{- define "CompoundPost"}}
-    {{- range .Transformations}}
-        compound {
-        {{template "TransformationsPost" .}}
-        }{{- end}}
+    {{- if .Transformations}}
+        {{- range .Transformations}}
+            compound {
+            {{template "TransformationsPost" .}}
+            }
+        {{- end}}
+    {{- else}}compound {
+    }{{- end}}
 {{- end}}
 {{- /*// CompoundPostTransformation */}}
 {{- /*// Contrast */}}
