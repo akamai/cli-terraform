@@ -1,9 +1,11 @@
 # Release Notes
 
-## Version 0.7.2 (Xxx YY, 2022)
+## Version 0.8.0 (Jun 02, 2022)
 
 ### Features / Enhancements
 
+* General
+  * Add `arm64` support (Apple M1)
 * PAPI
   * Add optional `version` flag to `create-property` command ([I#8](https://github.com/akamai/cli-terraform/issues/8))
 
