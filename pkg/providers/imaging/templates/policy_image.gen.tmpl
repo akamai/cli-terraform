@@ -18,6 +18,7 @@
     {{- if eq .Transformation "HSV"}}{{- template "HSV" .}}{{- end}}
     {{- if eq .Transformation "IfDimension"}}{{- template "IfDimension" .}}{{- end}}
     {{- if eq .Transformation "IfOrientation"}}{{- template "IfOrientation" .}}{{- end}}
+    {{- if eq .Transformation "ImQuery"}}{{- template "ImQuery" .}}{{- end}}
     {{- if eq .Transformation "MaxColors"}}{{- template "MaxColors" .}}{{- end}}
     {{- if eq .Transformation "Mirror"}}{{- template "Mirror" .}}{{- end}}
     {{- if eq .Transformation "MonoHue"}}{{- template "MonoHue" .}}{{- end}}
@@ -695,6 +696,18 @@
 }
 {{- end}}
 {{- /*// IfOrientationPostTransformation */}}
+{{- /*// ImQuery */}}
+{{- define "ImQuery"}}im_query {
+{{- if .AllowedTransformations}}
+    allowed_transformations = [{{range $i, $v := .AllowedTransformations}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
+{{- with .Query}}
+    {{""}}
+    {{- if .Name}}query_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// ImQueryAllowedTransformations */}}
+{{- /*// ImQueryTransformation */}}
 {{- /*// MaxColors */}}
 {{- define "MaxColors"}}max_colors {
 {{- with .Colors}}
