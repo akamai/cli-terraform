@@ -38,6 +38,7 @@
     {{- if eq .Transformation "Blur"}}{{- template "Blur" .}}{{- end}}
     {{- if eq .Transformation "ChromaKey"}}{{- template "ChromaKey" .}}{{- end}}
     {{- if eq .Transformation "Compound"}}{{- template "CompoundPost" .}}{{- end}}
+    {{- if eq .Transformation "Composite"}}{{- template "CompositePost" .}}{{- end}}
     {{- if eq .Transformation "Contrast"}}{{- template "Contrast" .}}{{- end}}
     {{- if eq .Transformation "Goop"}}{{- template "Goop" .}}{{- end}}
     {{- if eq .Transformation "Grayscale"}}{{- template "Grayscale" .}}{{- end}}
@@ -57,6 +58,12 @@
     {{- if eq .Type "Text"}}{{- template "TextImageType" .}}{{- end}}
     {{- if eq .Type "Url"}}{{- template "URLImageType" .}}{{- end}}
     {{- if eq .Type "Circle"}}{{- template "CircleImageType" .}}{{- end}}
+{{- end}}
+{{- define "ImageTypePost"}}
+    {{- if eq .Type "Box"}}{{- template "BoxImageTypePost" .}}{{- end}}
+    {{- if eq .Type "Text"}}{{- template "TextImageTypePost" .}}{{- end}}
+    {{- if eq .Type "Url"}}{{- template "URLImageTypePost" .}}{{- end}}
+    {{- if eq .Type "Circle"}}{{- template "CircleImageTypePost" .}}{{- end}}
 {{- end}}
 {{- define "ShapeType"}}
     {{- $shapeType := printf "%T" .}}
@@ -169,6 +176,31 @@
 {{- end}}
 }
 {{- end}}
+{{- /*// BoxImageTypePost */}}
+{{- define "BoxImageTypePost"}}box_image {
+{{- with .Color}}
+    {{""}}
+    {{- if .Value}}color = "{{.Value}}"{{end}}
+    {{- if .Name}}color_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Height}}
+    {{""}}
+    {{- if .Value}}height = {{.Value}}{{end}}
+    {{- if .Name}}height_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Transformation}}
+    transformation {
+    {{template "TransformationsPost" .Transformation}}
+    }
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// BoxImageTypePostType */}}
 {{- /*// BoxImageTypeType */}}
 {{- /*// Breakpoints */}}
 {{- define "Breakpoints"}}
@@ -240,6 +272,31 @@
 {{- end}}
 }
 {{- end}}
+{{- /*// CircleImageTypePost */}}
+{{- define "CircleImageTypePost"}}circle_image {
+{{- with .Color}}
+    {{""}}
+    {{- if .Value}}color = "{{.Value}}"{{end}}
+    {{- if .Name}}color_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Diameter}}
+    {{""}}
+    {{- if .Value}}diameter = {{.Value}}{{end}}
+    {{- if .Name}}diameter_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Transformation}}
+    transformation {
+    {{template "TransformationsPost" .Transformation}}
+    }
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// CircleImageTypePostType */}}
 {{- /*// CircleImageTypeType */}}
 {{- /*// CircleShapeType */}}
 {{- define "CircleShapeType"}}circle_shape {
@@ -295,6 +352,48 @@
 }
 {{- end}}
 {{- /*// CompositePlacement */}}
+{{- /*// CompositePost */}}
+{{- define "CompositePost"}}composite {
+{{- with .Gravity}}
+    {{""}}
+    {{- if .Value}}gravity = "{{.Value}}"{{end}}
+    {{- if .Name}}gravity_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Image}}
+    image {
+    {{template "ImageTypePost" .Image}}
+    }
+{{- end}}
+{{- with .Placement}}
+    {{""}}
+    {{- if .Value}}placement = "{{.Value}}"{{end}}
+    {{- if .Name}}placement_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Scale}}
+    {{""}}
+    {{- if .Value}}scale = {{.Value}}{{end}}
+    {{- if .Name}}scale_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .ScaleDimension}}
+    {{""}}
+    {{- if .Value}}scale_dimension = "{{.Value}}"{{end}}
+    {{- if .Name}}scale_dimension_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .XPosition}}
+    {{""}}
+    {{- if .Value}}x_position = {{.Value}}{{end}}
+    {{- if .Name}}x_position_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .YPosition}}
+    {{""}}
+    {{- if .Value}}y_position = {{.Value}}{{end}}
+    {{- if .Name}}y_position_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// CompositePostPlacement */}}
+{{- /*// CompositePostScaleDimension */}}
+{{- /*// CompositePostTransformation */}}
 {{- /*// CompositeScaleDimension */}}
 {{- /*// CompositeTransformation */}}
 {{- /*// Compound */}}
@@ -526,6 +625,7 @@
 {{- end}}
 {{- /*// GoopTransformation */}}
 {{- /*// Gravity */}}
+{{- /*// GravityPost */}}
 {{- /*// Grayscale */}}
 {{- define "Grayscale"}}grayscale {
 {{- with .Type}}
@@ -1050,6 +1150,46 @@
 {{- end}}
 }
 {{- end}}
+{{- /*// TextImageTypePost */}}
+{{- define "TextImageTypePost"}}text_image {
+{{- with .Fill}}
+    {{""}}
+    {{- if .Value}}fill = "{{.Value}}"{{end}}
+    {{- if .Name}}fill_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Size}}
+    {{""}}
+    {{- if .Value}}size = {{.Value}}{{end}}
+    {{- if .Name}}size_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Stroke}}
+    {{""}}
+    {{- if .Value}}stroke = "{{.Value}}"{{end}}
+    {{- if .Name}}stroke_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .StrokeSize}}
+    {{""}}
+    {{- if .Value}}stroke_size = {{.Value}}{{end}}
+    {{- if .Name}}stroke_size_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Text}}
+    {{""}}
+    {{- if .Value}}text = "{{.Value}}"{{end}}
+    {{- if .Name}}text_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Transformation}}
+    transformation {
+    {{template "TransformationsPost" .Transformation}}
+    }
+{{- end}}
+{{- with .Typeface}}
+    {{""}}
+    {{- if .Value}}typeface = "{{.Value}}"{{end}}
+    {{- if .Name}}typeface_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// TextImageTypePostType */}}
 {{- /*// TextImageTypeType */}}
 {{- /*// Trim */}}
 {{- define "Trim"}}trim {
@@ -1080,6 +1220,21 @@
 {{- end}}
 }
 {{- end}}
+{{- /*// URLImageTypePost */}}
+{{- define "URLImageTypePost"}}url_image {
+{{- if .Transformation}}
+    transformation {
+    {{template "TransformationsPost" .Transformation}}
+    }
+{{- end}}
+{{- with .URL}}
+    {{""}}
+    {{- if .Value}}url = "{{.Value}}"{{end}}
+    {{- if .Name}}url_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// URLImageTypePostType */}}
 {{- /*// URLImageTypeType */}}
 {{- /*// UnionShapeType */}}
 {{- define "UnionShapeType"}}union_shape {

@@ -400,6 +400,24 @@ var (
 					},
 				},
 			},
+			&imaging.CompositePost{
+				Gravity: &imaging.GravityPostVariableInline{Value: imaging.GravityPostPtr("NorthWest")},
+				Image: &imaging.TextImageTypePost{
+					Fill:       &imaging.StringVariableInline{Value: tools.StringPtr("#000000")},
+					Size:       &imaging.NumberVariableInline{Value: tools.Float64Ptr(72)},
+					Stroke:     &imaging.StringVariableInline{Value: tools.StringPtr("#FFFFFF")},
+					StrokeSize: &imaging.NumberVariableInline{Value: tools.Float64Ptr(0)},
+					Text:       &imaging.StringVariableInline{Value: tools.StringPtr("test")},
+					Type:       imaging.TextImageTypePostTypeText,
+					Transformation: &imaging.CompoundPost{
+						Transformation: imaging.CompoundPostTransformationCompound,
+					},
+				},
+				Placement:      &imaging.CompositePostPlacementVariableInline{Value: imaging.CompositePostPlacementPtr(imaging.CompositePostPlacementOver)},
+				Transformation: imaging.CompositePostTransformationComposite,
+				XPosition:      &imaging.IntegerVariableInline{Value: tools.IntPtr(0)},
+				YPosition:      &imaging.IntegerVariableInline{Value: tools.IntPtr(0)},
+			},
 		},
 		Breakpoints: &imaging.Breakpoints{
 			Widths: []int{280, 1080},

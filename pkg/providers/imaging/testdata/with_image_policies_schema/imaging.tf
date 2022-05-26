@@ -58,6 +58,27 @@ data "akamai_imaging_policy_image" "data_policy_test_policy_image" {
         value_var = "MaxDimOld"
       }
     }
+    post_breakpoint_transformations {
+      composite {
+        gravity = "NorthWest"
+        image {
+          text_image {
+            fill        = "#000000"
+            size        = 72
+            stroke      = "#FFFFFF"
+            stroke_size = 0
+            text        = "test"
+            transformation {
+              compound {
+              }
+            }
+          }
+        }
+        placement  = "Over"
+        x_position = 0
+        y_position = 0
+      }
+    }
     rollout_duration = 3600
     transformations {
       region_of_interest_crop {
