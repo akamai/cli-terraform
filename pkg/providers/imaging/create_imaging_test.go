@@ -101,7 +101,7 @@ var (
 				},
 			},
 			Version: 1,
-			Video:   false,
+			Video:   tools.BoolPtr(false),
 		},
 		&imaging.PolicyOutputImage{
 			ID: "test_policy_image",
@@ -122,7 +122,7 @@ var (
 				},
 			},
 			Version: 2,
-			Video:   false,
+			Video:   tools.BoolPtr(false),
 		},
 		&imaging.PolicyOutputImage{
 			// Return object for GetPolicy when older version is in production
@@ -144,7 +144,7 @@ var (
 				},
 			},
 			Version: 1,
-			Video:   false,
+			Video:   tools.BoolPtr(false),
 		},
 	}
 
@@ -179,7 +179,7 @@ var (
 				},
 			},
 			Version: 1,
-			Video:   true,
+			Video:   tools.BoolPtr(true),
 		},
 		&imaging.PolicyOutputVideo{
 			ID: "test_policy_video",
@@ -192,7 +192,7 @@ var (
 				},
 			},
 			Version: 2,
-			Video:   true,
+			Video:   tools.BoolPtr(true),
 		},
 		&imaging.PolicyOutputVideo{
 			// Return object for GetPolicy when older version is in production
@@ -206,7 +206,7 @@ var (
 				},
 			},
 			Version: 1,
-			Video:   true,
+			Video:   tools.BoolPtr(true),
 		},
 	}
 

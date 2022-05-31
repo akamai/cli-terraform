@@ -6,6 +6,8 @@
 
 * General
   * Add `arm64` support (Apple M1)
+* Image and Video Manager
+  * New `create-imaging` command to import image and video policies
 * PAPI
   * Add optional `version` flag to `create-property` command ([I#8](https://github.com/akamai/cli-terraform/issues/8))
 
