@@ -1,5 +1,16 @@
 # Release Notes
 
+## Version 0.8.0 (Jun 02, 2022)
+
+### Features / Enhancements
+
+* General
+  * Add `arm64` support (Apple M1)
+* Image and Video Manager
+  * New `create-imaging` command to import image and video policies
+* PAPI
+  * Add optional `version` flag to `create-property` command ([I#8](https://github.com/akamai/cli-terraform/issues/8))
+
 ## Version 0.7.1 (May 11, 2022)
 
 ### Bug fixes

@@ -1,0 +1,1289 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/imaging.TFImagingData.Policy*/ -}}
+{{- define "Transformations"}}
+    {{- if eq .Transformation "Append"}}{{- template "Append" .}}{{- end}}
+    {{- if eq .Transformation "AspectCrop"}}{{- template "AspectCrop" .}}{{- end}}
+    {{- if eq .Transformation "BackgroundColor"}}{{- template "BackgroundColor" .}}{{- end}}
+    {{- if eq .Transformation "Blur"}}{{- template "Blur" .}}{{- end}}
+    {{- if eq .Transformation "ChromaKey"}}{{- template "ChromaKey" .}}{{- end}}
+    {{- if eq .Transformation "Composite"}}{{- template "Composite" .}}{{- end}}
+    {{- if eq .Transformation "Compound"}}{{- template "Compound" .}}{{- end}}
+    {{- if eq .Transformation "Contrast"}}{{- template "Contrast" .}}{{- end}}
+    {{- if eq .Transformation "Crop"}}{{- template "Crop" .}}{{- end}}
+    {{- if eq .Transformation "FaceCrop"}}{{- template "FaceCrop" .}}{{- end}}
+    {{- if eq .Transformation "FeatureCrop"}}{{- template "FeatureCrop" .}}{{- end}}
+    {{- if eq .Transformation "FitAndFill"}}{{- template "FitAndFill" .}}{{- end}}
+    {{- if eq .Transformation "Goop"}}{{- template "Goop" .}}{{- end}}
+    {{- if eq .Transformation "Grayscale"}}{{- template "Grayscale" .}}{{- end}}
+    {{- if eq .Transformation "HSL"}}{{- template "HSL" .}}{{- end}}
+    {{- if eq .Transformation "HSV"}}{{- template "HSV" .}}{{- end}}
+    {{- if eq .Transformation "IfDimension"}}{{- template "IfDimension" .}}{{- end}}
+    {{- if eq .Transformation "IfOrientation"}}{{- template "IfOrientation" .}}{{- end}}
+    {{- if eq .Transformation "ImQuery"}}{{- template "ImQuery" .}}{{- end}}
+    {{- if eq .Transformation "MaxColors"}}{{- template "MaxColors" .}}{{- end}}
+    {{- if eq .Transformation "Mirror"}}{{- template "Mirror" .}}{{- end}}
+    {{- if eq .Transformation "MonoHue"}}{{- template "MonoHue" .}}{{- end}}
+    {{- if eq .Transformation "Opacity"}}{{- template "Opacity" .}}{{- end}}
+    {{- if eq .Transformation "RegionOfInterestCrop"}}{{- template "RegionOfInterestCrop" .}}{{- end}}
+    {{- if eq .Transformation "RelativeCrop"}}{{- template "RelativeCrop" .}}{{- end}}
+    {{- if eq .Transformation "RemoveColor"}}{{- template "RemoveColor" .}}{{- end}}
+    {{- if eq .Transformation "Resize"}}{{- template "Resize" .}}{{- end}}
+    {{- if eq .Transformation "Rotate"}}{{- template "Rotate" .}}{{- end}}
+    {{- if eq .Transformation "Scale"}}{{- template "Scale" .}}{{- end}}
+    {{- if eq .Transformation "Shear"}}{{- template "Shear" .}}{{- end}}
+    {{- if eq .Transformation "Trim"}}{{- template "Trim" .}}{{- end}}
+    {{- if eq .Transformation "UnsharpMask"}}{{- template "UnsharpMask" .}}{{- end}}
+{{- end}}
+{{- define "TransformationsPost"}}
+    {{- if eq .Transformation "BackgroundColor"}}{{- template "BackgroundColor" .}}{{- end}}
+    {{- if eq .Transformation "Blur"}}{{- template "Blur" .}}{{- end}}
+    {{- if eq .Transformation "ChromaKey"}}{{- template "ChromaKey" .}}{{- end}}
+    {{- if eq .Transformation "Compound"}}{{- template "CompoundPost" .}}{{- end}}
+    {{- if eq .Transformation "Composite"}}{{- template "CompositePost" .}}{{- end}}
+    {{- if eq .Transformation "Contrast"}}{{- template "Contrast" .}}{{- end}}
+    {{- if eq .Transformation "Goop"}}{{- template "Goop" .}}{{- end}}
+    {{- if eq .Transformation "Grayscale"}}{{- template "Grayscale" .}}{{- end}}
+    {{- if eq .Transformation "HSL"}}{{- template "HSL" .}}{{- end}}
+    {{- if eq .Transformation "HSV"}}{{- template "HSV" .}}{{- end}}
+    {{- if eq .Transformation "IfDimension"}}{{- template "IfDimensionPost" .}}{{- end}}
+    {{- if eq .Transformation "IfOrientation"}}{{- template "IfOrientationPost" .}}{{- end}}
+    {{- if eq .Transformation "MaxColors"}}{{- template "MaxColors" .}}{{- end}}
+    {{- if eq .Transformation "Mirror"}}{{- template "Mirror" .}}{{- end}}
+    {{- if eq .Transformation "MonoHue"}}{{- template "MonoHue" .}}{{- end}}
+    {{- if eq .Transformation "Opacity"}}{{- template "Opacity" .}}{{- end}}
+    {{- if eq .Transformation "RemoveColor"}}{{- template "RemoveColor" .}}{{- end}}
+    {{- if eq .Transformation "UnsharpMask"}}{{- template "UnsharpMask" .}}{{- end}}
+{{- end}}
+{{- define "ImageType"}}
+    {{- if eq .Type "Box"}}{{- template "BoxImageType" .}}{{- end}}
+    {{- if eq .Type "Text"}}{{- template "TextImageType" .}}{{- end}}
+    {{- if eq .Type "Url"}}{{- template "URLImageType" .}}{{- end}}
+    {{- if eq .Type "Circle"}}{{- template "CircleImageType" .}}{{- end}}
+{{- end}}
+{{- define "ImageTypePost"}}
+    {{- if eq .Type "Box"}}{{- template "BoxImageTypePost" .}}{{- end}}
+    {{- if eq .Type "Text"}}{{- template "TextImageTypePost" .}}{{- end}}
+    {{- if eq .Type "Url"}}{{- template "URLImageTypePost" .}}{{- end}}
+    {{- if eq .Type "Circle"}}{{- template "CircleImageTypePost" .}}{{- end}}
+{{- end}}
+{{- define "ShapeType"}}
+    {{- $shapeType := printf "%T" .}}
+    {{- if eq $shapeType "*imaging.CircleShapeType"}}{{- template "CircleShapeType" .}}{{- end}}
+    {{- if eq $shapeType "*imaging.PointShapeType"}}{{- template "PointShapeType" .}}{{- end}}
+    {{- if eq $shapeType "*imaging.PolygonShapeType"}}{{- template "PolygonShapeType" .}}{{- end}}
+    {{- if eq $shapeType "*imaging.RectangleShapeType"}}{{- template "RectangleShapeType" .}}{{- end}}
+    {{- if eq $shapeType "*imaging.UnionShapeType"}}{{- template "UnionShapeType" .}}{{- end}}
+{{- end}}
+{{- /*////////////////////////////////////////*/}}
+{{- /*////////// Generated types /////////////*/}}
+{{- /*////////////////////////////////////////*/}}
+{{- /*// Append */}}
+{{- define "Append"}}append {
+{{- with .Gravity}}
+    {{""}}
+    {{- if .Value}}gravity = "{{.Value}}"{{end}}
+    {{- if .Name}}gravity_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .GravityPriority}}
+    {{""}}
+    {{- if .Value}}gravity_priority = "{{.Value}}"{{end}}
+    {{- if .Name}}gravity_priority_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Image}}
+    image {
+    {{template "ImageType" .Image}}
+    }
+{{- end}}
+{{- with .PreserveMinorDimension}}
+    {{""}}
+    {{- if .Value}}preserve_minor_dimension = {{.Value}}{{end}}
+    {{- if .Name}}preserve_minor_dimension_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// AppendGravityPriority */}}
+{{- /*// AppendTransformation */}}
+{{- /*// AspectCrop */}}
+{{- define "AspectCrop"}}aspect_crop {
+{{- with .AllowExpansion}}
+    {{""}}
+    {{- if .Value}}allow_expansion = {{.Value}}{{end}}
+    {{- if .Name}}allow_expansion_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Height}}
+    {{""}}
+    {{- if .Value}}height = {{.Value}}{{end}}
+    {{- if .Name}}height_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .XPosition}}
+    {{""}}
+    {{- if .Value}}x_position = {{.Value}}{{end}}
+    {{- if .Name}}x_position_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .YPosition}}
+    {{""}}
+    {{- if .Value}}y_position = {{.Value}}{{end}}
+    {{- if .Name}}y_position_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// AspectCropTransformation */}}
+{{- /*// BackgroundColor */}}
+{{- define "BackgroundColor"}}background_color {
+{{- with .Color}}
+    {{""}}
+    {{- if .Value}}color = "{{.Value}}"{{end}}
+    {{- if .Name}}color_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// BackgroundColorTransformation */}}
+{{- /*// Blur */}}
+{{- define "Blur"}}blur {
+{{- with .Sigma}}
+    {{""}}
+    {{- if .Value}}sigma = {{.Value}}{{end}}
+    {{- if .Name}}sigma_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// BlurTransformation */}}
+{{- /*// BoxImageType */}}
+{{- define "BoxImageType"}}box_image {
+{{- with .Color}}
+    {{""}}
+    {{- if .Value}}color = "{{.Value}}"{{end}}
+    {{- if .Name}}color_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Height}}
+    {{""}}
+    {{- if .Value}}height = {{.Value}}{{end}}
+    {{- if .Name}}height_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Transformation}}
+    transformation {
+    {{template "Transformations" .Transformation}}
+    }
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// BoxImageTypePost */}}
+{{- define "BoxImageTypePost"}}box_image {
+{{- with .Color}}
+    {{""}}
+    {{- if .Value}}color = "{{.Value}}"{{end}}
+    {{- if .Name}}color_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Height}}
+    {{""}}
+    {{- if .Value}}height = {{.Value}}{{end}}
+    {{- if .Name}}height_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Transformation}}
+    transformation {
+    {{template "TransformationsPost" .Transformation}}
+    }
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// BoxImageTypePostType */}}
+{{- /*// BoxImageTypeType */}}
+{{- /*// Breakpoints */}}
+{{- define "Breakpoints"}}
+    {{- if .Widths}}
+        widths = [{{range $i, $v := .Widths}}{{if $i}}, {{end}}{{$v}}{{end}}]{{end}}
+
+{{- end}}
+{{- /*// ChromaKey */}}
+{{- define "ChromaKey"}}chroma_key {
+{{- with .Hue}}
+    {{""}}
+    {{- if .Value}}hue = {{.Value}}{{end}}
+    {{- if .Name}}hue_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .HueFeather}}
+    {{""}}
+    {{- if .Value}}hue_feather = {{.Value}}{{end}}
+    {{- if .Name}}hue_feather_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .HueTolerance}}
+    {{""}}
+    {{- if .Value}}hue_tolerance = {{.Value}}{{end}}
+    {{- if .Name}}hue_tolerance_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .LightnessFeather}}
+    {{""}}
+    {{- if .Value}}lightness_feather = {{.Value}}{{end}}
+    {{- if .Name}}lightness_feather_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .LightnessTolerance}}
+    {{""}}
+    {{- if .Value}}lightness_tolerance = {{.Value}}{{end}}
+    {{- if .Name}}lightness_tolerance_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .SaturationFeather}}
+    {{""}}
+    {{- if .Value}}saturation_feather = {{.Value}}{{end}}
+    {{- if .Name}}saturation_feather_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .SaturationTolerance}}
+    {{""}}
+    {{- if .Value}}saturation_tolerance = {{.Value}}{{end}}
+    {{- if .Name}}saturation_tolerance_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// ChromaKeyTransformation */}}
+{{- /*// CircleImageType */}}
+{{- define "CircleImageType"}}circle_image {
+{{- with .Color}}
+    {{""}}
+    {{- if .Value}}color = "{{.Value}}"{{end}}
+    {{- if .Name}}color_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Diameter}}
+    {{""}}
+    {{- if .Value}}diameter = {{.Value}}{{end}}
+    {{- if .Name}}diameter_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Transformation}}
+    transformation {
+    {{template "Transformations" .Transformation}}
+    }
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// CircleImageTypePost */}}
+{{- define "CircleImageTypePost"}}circle_image {
+{{- with .Color}}
+    {{""}}
+    {{- if .Value}}color = "{{.Value}}"{{end}}
+    {{- if .Name}}color_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Diameter}}
+    {{""}}
+    {{- if .Value}}diameter = {{.Value}}{{end}}
+    {{- if .Name}}diameter_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Transformation}}
+    transformation {
+    {{template "TransformationsPost" .Transformation}}
+    }
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// CircleImageTypePostType */}}
+{{- /*// CircleImageTypeType */}}
+{{- /*// CircleShapeType */}}
+{{- define "CircleShapeType"}}circle_shape {
+{{- if .Center}}
+    center {
+    {{template "PointShapeType" .Center}}
+    }
+{{- end}}
+{{- with .Radius}}
+    {{""}}
+    {{- if .Value}}radius = {{.Value}}{{end}}
+    {{- if .Name}}radius_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// Composite */}}
+{{- define "Composite"}}composite {
+{{- with .Gravity}}
+    {{""}}
+    {{- if .Value}}gravity = "{{.Value}}"{{end}}
+    {{- if .Name}}gravity_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Image}}
+    image {
+    {{template "ImageType" .Image}}
+    }
+{{- end}}
+{{- with .Placement}}
+    {{""}}
+    {{- if .Value}}placement = "{{.Value}}"{{end}}
+    {{- if .Name}}placement_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Scale}}
+    {{""}}
+    {{- if .Value}}scale = {{.Value}}{{end}}
+    {{- if .Name}}scale_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .ScaleDimension}}
+    {{""}}
+    {{- if .Value}}scale_dimension = "{{.Value}}"{{end}}
+    {{- if .Name}}scale_dimension_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .XPosition}}
+    {{""}}
+    {{- if .Value}}x_position = {{.Value}}{{end}}
+    {{- if .Name}}x_position_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .YPosition}}
+    {{""}}
+    {{- if .Value}}y_position = {{.Value}}{{end}}
+    {{- if .Name}}y_position_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// CompositePlacement */}}
+{{- /*// CompositePost */}}
+{{- define "CompositePost"}}composite {
+{{- with .Gravity}}
+    {{""}}
+    {{- if .Value}}gravity = "{{.Value}}"{{end}}
+    {{- if .Name}}gravity_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Image}}
+    image {
+    {{template "ImageTypePost" .Image}}
+    }
+{{- end}}
+{{- with .Placement}}
+    {{""}}
+    {{- if .Value}}placement = "{{.Value}}"{{end}}
+    {{- if .Name}}placement_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Scale}}
+    {{""}}
+    {{- if .Value}}scale = {{.Value}}{{end}}
+    {{- if .Name}}scale_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .ScaleDimension}}
+    {{""}}
+    {{- if .Value}}scale_dimension = "{{.Value}}"{{end}}
+    {{- if .Name}}scale_dimension_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .XPosition}}
+    {{""}}
+    {{- if .Value}}x_position = {{.Value}}{{end}}
+    {{- if .Name}}x_position_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .YPosition}}
+    {{""}}
+    {{- if .Value}}y_position = {{.Value}}{{end}}
+    {{- if .Name}}y_position_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// CompositePostPlacement */}}
+{{- /*// CompositePostScaleDimension */}}
+{{- /*// CompositePostTransformation */}}
+{{- /*// CompositeScaleDimension */}}
+{{- /*// CompositeTransformation */}}
+{{- /*// Compound */}}
+{{- define "Compound"}}
+    {{- if .Transformations}}
+        {{- range .Transformations}}
+            compound {
+            {{template "Transformations" .}}
+            }
+        {{- end}}
+    {{- else}}compound {
+    }{{- end}}
+{{- end}}
+{{- /*// CompoundPost */}}
+{{- define "CompoundPost"}}
+    {{- if .Transformations}}
+        {{- range .Transformations}}
+            compound {
+            {{template "TransformationsPost" .}}
+            }
+        {{- end}}
+    {{- else}}compound {
+    }{{- end}}
+{{- end}}
+{{- /*// CompoundPostTransformation */}}
+{{- /*// Contrast */}}
+{{- define "Contrast"}}contrast {
+{{- with .Brightness}}
+    {{""}}
+    {{- if .Value}}brightness = {{.Value}}{{end}}
+    {{- if .Name}}brightness_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Contrast}}
+    {{""}}
+    {{- if .Value}}contrast = {{.Value}}{{end}}
+    {{- if .Name}}contrast_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// ContrastTransformation */}}
+{{- /*// Crop */}}
+{{- define "Crop"}}crop {
+{{- with .AllowExpansion}}
+    {{""}}
+    {{- if .Value}}allow_expansion = {{.Value}}{{end}}
+    {{- if .Name}}allow_expansion_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Gravity}}
+    {{""}}
+    {{- if .Value}}gravity = "{{.Value}}"{{end}}
+    {{- if .Name}}gravity_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Height}}
+    {{""}}
+    {{- if .Value}}height = {{.Value}}{{end}}
+    {{- if .Name}}height_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .XPosition}}
+    {{""}}
+    {{- if .Value}}x_position = {{.Value}}{{end}}
+    {{- if .Name}}x_position_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .YPosition}}
+    {{""}}
+    {{- if .Value}}y_position = {{.Value}}{{end}}
+    {{- if .Name}}y_position_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// CropTransformation */}}
+{{- /*// EnumOptions */}}
+{{- define "EnumOptions"}}
+    id = "{{.ID}}"
+    value = "{{.Value}}"
+
+{{- end}}
+{{- /*// FaceCrop */}}
+{{- define "FaceCrop"}}face_crop {
+{{- with .Algorithm}}
+    {{""}}
+    {{- if .Value}}algorithm = "{{.Value}}"{{end}}
+    {{- if .Name}}algorithm_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Confidence}}
+    {{""}}
+    {{- if .Value}}confidence = {{.Value}}{{end}}
+    {{- if .Name}}confidence_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .FailGravity}}
+    {{""}}
+    {{- if .Value}}fail_gravity = "{{.Value}}"{{end}}
+    {{- if .Name}}fail_gravity_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Focus}}
+    {{""}}
+    {{- if .Value}}focus = "{{.Value}}"{{end}}
+    {{- if .Name}}focus_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Gravity}}
+    {{""}}
+    {{- if .Value}}gravity = "{{.Value}}"{{end}}
+    {{- if .Name}}gravity_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Height}}
+    {{""}}
+    {{- if .Value}}height = {{.Value}}{{end}}
+    {{- if .Name}}height_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Padding}}
+    {{""}}
+    {{- if .Value}}padding = {{.Value}}{{end}}
+    {{- if .Name}}padding_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Style}}
+    {{""}}
+    {{- if .Value}}style = "{{.Value}}"{{end}}
+    {{- if .Name}}style_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// FaceCropAlgorithm */}}
+{{- /*// FaceCropFocus */}}
+{{- /*// FaceCropStyle */}}
+{{- /*// FaceCropTransformation */}}
+{{- /*// FeatureCrop */}}
+{{- define "FeatureCrop"}}feature_crop {
+{{- with .FailGravity}}
+    {{""}}
+    {{- if .Value}}fail_gravity = "{{.Value}}"{{end}}
+    {{- if .Name}}fail_gravity_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .FeatureRadius}}
+    {{""}}
+    {{- if .Value}}feature_radius = {{.Value}}{{end}}
+    {{- if .Name}}feature_radius_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Gravity}}
+    {{""}}
+    {{- if .Value}}gravity = "{{.Value}}"{{end}}
+    {{- if .Name}}gravity_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Height}}
+    {{""}}
+    {{- if .Value}}height = {{.Value}}{{end}}
+    {{- if .Name}}height_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .MaxFeatures}}
+    {{""}}
+    {{- if .Value}}max_features = {{.Value}}{{end}}
+    {{- if .Name}}max_features_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .MinFeatureQuality}}
+    {{""}}
+    {{- if .Value}}min_feature_quality = {{.Value}}{{end}}
+    {{- if .Name}}min_feature_quality_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Padding}}
+    {{""}}
+    {{- if .Value}}padding = {{.Value}}{{end}}
+    {{- if .Name}}padding_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Style}}
+    {{""}}
+    {{- if .Value}}style = "{{.Value}}"{{end}}
+    {{- if .Name}}style_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// FeatureCropStyle */}}
+{{- /*// FeatureCropTransformation */}}
+{{- /*// FitAndFill */}}
+{{- define "FitAndFill"}}fit_and_fill {
+{{- if .FillTransformation}}
+    fill_transformation {
+    {{template "Transformations" .FillTransformation}}
+    }
+{{- end}}
+{{- with .Height}}
+    {{""}}
+    {{- if .Value}}height = {{.Value}}{{end}}
+    {{- if .Name}}height_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// FitAndFillTransformation */}}
+{{- /*// Goop */}}
+{{- define "Goop"}}goop {
+{{- with .Chaos}}
+    {{""}}
+    {{- if .Value}}chaos = {{.Value}}{{end}}
+    {{- if .Name}}chaos_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Density}}
+    {{""}}
+    {{- if .Value}}density = {{.Value}}{{end}}
+    {{- if .Name}}density_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Power}}
+    {{""}}
+    {{- if .Value}}power = {{.Value}}{{end}}
+    {{- if .Name}}power_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Seed}}
+    {{""}}
+    {{- if .Value}}seed = {{.Value}}{{end}}
+    {{- if .Name}}seed_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// GoopTransformation */}}
+{{- /*// Gravity */}}
+{{- /*// GravityPost */}}
+{{- /*// Grayscale */}}
+{{- define "Grayscale"}}grayscale {
+{{- with .Type}}
+    {{""}}
+    {{- if .Value}}type = "{{.Value}}"{{end}}
+    {{- if .Name}}type_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// GrayscaleTransformation */}}
+{{- /*// GrayscaleType */}}
+{{- /*// HSL */}}
+{{- define "HSL"}}hsl {
+{{- with .Hue}}
+    {{""}}
+    {{- if .Value}}hue = {{.Value}}{{end}}
+    {{- if .Name}}hue_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Lightness}}
+    {{""}}
+    {{- if .Value}}lightness = {{.Value}}{{end}}
+    {{- if .Name}}lightness_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Saturation}}
+    {{""}}
+    {{- if .Value}}saturation = {{.Value}}{{end}}
+    {{- if .Name}}saturation_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// HSLTransformation */}}
+{{- /*// HSV */}}
+{{- define "HSV"}}hsv {
+{{- with .Hue}}
+    {{""}}
+    {{- if .Value}}hue = {{.Value}}{{end}}
+    {{- if .Name}}hue_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Saturation}}
+    {{""}}
+    {{- if .Value}}saturation = {{.Value}}{{end}}
+    {{- if .Name}}saturation_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Value}}
+    {{""}}
+    {{- if .Value}}value = {{.Value}}{{end}}
+    {{- if .Name}}value_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// HSVTransformation */}}
+{{- /*// IfDimension */}}
+{{- define "IfDimension"}}if_dimension {
+{{- if .Default}}
+    default {
+    {{template "Transformations" .Default}}
+    }
+{{- end}}
+{{- with .Dimension}}
+    {{""}}
+    {{- if .Value}}dimension = "{{.Value}}"{{end}}
+    {{- if .Name}}dimension_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Equal}}
+    equal {
+    {{template "Transformations" .Equal}}
+    }
+{{- end}}
+{{- if .GreaterThan}}
+    greater_than {
+    {{template "Transformations" .GreaterThan}}
+    }
+{{- end}}
+{{- if .LessThan}}
+    less_than {
+    {{template "Transformations" .LessThan}}
+    }
+{{- end}}
+{{- with .Value}}
+    {{""}}
+    {{- if .Value}}value = {{.Value}}{{end}}
+    {{- if .Name}}value_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// IfDimensionPost */}}
+{{- define "IfDimensionPost"}}if_dimension {
+{{- if .Default}}
+    default {
+    {{template "TransformationsPost" .Default}}
+    }
+{{- end}}
+{{- with .Dimension}}
+    {{""}}
+    {{- if .Value}}dimension = "{{.Value}}"{{end}}
+    {{- if .Name}}dimension_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Equal}}
+    equal {
+    {{template "TransformationsPost" .Equal}}
+    }
+{{- end}}
+{{- if .GreaterThan}}
+    greater_than {
+    {{template "TransformationsPost" .GreaterThan}}
+    }
+{{- end}}
+{{- if .LessThan}}
+    less_than {
+    {{template "TransformationsPost" .LessThan}}
+    }
+{{- end}}
+{{- with .Value}}
+    {{""}}
+    {{- if .Value}}value = {{.Value}}{{end}}
+    {{- if .Name}}value_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// IfDimensionPostDimension */}}
+{{- /*// IfDimensionPostTransformation */}}
+{{- /*// IfOrientation */}}
+{{- define "IfOrientation"}}if_orientation {
+{{- if .Default}}
+    default {
+    {{template "Transformations" .Default}}
+    }
+{{- end}}
+{{- if .Landscape}}
+    landscape {
+    {{template "Transformations" .Landscape}}
+    }
+{{- end}}
+{{- if .Portrait}}
+    portrait {
+    {{template "Transformations" .Portrait}}
+    }
+{{- end}}
+{{- if .Square}}
+    square {
+    {{template "Transformations" .Square}}
+    }
+{{- end}}
+}
+{{- end}}
+{{- /*// IfOrientationPost */}}
+{{- define "IfOrientationPost"}}if_orientation {
+{{- if .Default}}
+    default {
+    {{template "TransformationsPost" .Default}}
+    }
+{{- end}}
+{{- if .Landscape}}
+    landscape {
+    {{template "TransformationsPost" .Landscape}}
+    }
+{{- end}}
+{{- if .Portrait}}
+    portrait {
+    {{template "TransformationsPost" .Portrait}}
+    }
+{{- end}}
+{{- if .Square}}
+    square {
+    {{template "TransformationsPost" .Square}}
+    }
+{{- end}}
+}
+{{- end}}
+{{- /*// IfOrientationPostTransformation */}}
+{{- /*// ImQuery */}}
+{{- define "ImQuery"}}im_query {
+{{- if .AllowedTransformations}}
+    allowed_transformations = [{{range $i, $v := .AllowedTransformations}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
+{{- with .Query}}
+    {{""}}
+    {{- if .Name}}query_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// ImQueryAllowedTransformations */}}
+{{- /*// ImQueryTransformation */}}
+{{- /*// MaxColors */}}
+{{- define "MaxColors"}}max_colors {
+{{- with .Colors}}
+    {{""}}
+    {{- if .Value}}colors = {{.Value}}{{end}}
+    {{- if .Name}}colors_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// MaxColorsTransformation */}}
+{{- /*// Mirror */}}
+{{- define "Mirror"}}mirror {
+{{- with .Horizontal}}
+    {{""}}
+    {{- if .Value}}horizontal = {{.Value}}{{end}}
+    {{- if .Name}}horizontal_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Vertical}}
+    {{""}}
+    {{- if .Value}}vertical = {{.Value}}{{end}}
+    {{- if .Name}}vertical_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// MirrorTransformation */}}
+{{- /*// MonoHue */}}
+{{- define "MonoHue"}}mono_hue {
+{{- with .Hue}}
+    {{""}}
+    {{- if .Value}}hue = {{.Value}}{{end}}
+    {{- if .Name}}hue_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// MonoHueTransformation */}}
+{{- /*// Opacity */}}
+{{- define "Opacity"}}opacity {
+{{- with .Opacity}}
+    {{""}}
+    {{- if .Value}}opacity = {{.Value}}{{end}}
+    {{- if .Name}}opacity_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// OpacityTransformation */}}
+{{- /*// OutputImage */}}
+{{- define "OutputImage"}}
+    {{- if .AdaptiveQuality}}
+        adaptive_quality = {{.AdaptiveQuality}}{{end}}
+    {{- if .AllowedFormats}}
+        allowed_formats = [{{range $i, $v := .AllowedFormats}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
+    {{- if .ForcedFormats}}
+        forced_formats = [{{range $i, $v := .ForcedFormats}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
+    {{- with .PerceptualQuality}}
+        {{""}}
+        {{- if .Value}}perceptual_quality = "{{.Value}}"{{end}}
+        {{- if .Name}}perceptual_quality_var = "{{.Name}}"{{end}}
+    {{- end}}
+    {{- if .PerceptualQualityFloor}}
+        perceptual_quality_floor = {{.PerceptualQualityFloor}}{{end}}
+    {{- with .Quality}}
+        {{""}}
+        {{- if .Value}}quality = {{.Value}}{{end}}
+        {{- if .Name}}quality_var = "{{.Name}}"{{end}}
+    {{- end}}
+
+{{- end}}
+{{- /*// OutputImageAllowedFormats */}}
+{{- /*// OutputImageForcedFormats */}}
+{{- /*// OutputImagePerceptualQuality */}}
+{{- /*// PointShapeType */}}
+{{- define "PointShapeType"}}point_shape {
+{{- with .X}}
+    {{""}}
+    {{- if .Value}}x = {{.Value}}{{end}}
+    {{- if .Name}}x_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Y}}
+    {{""}}
+    {{- if .Value}}y = {{.Value}}{{end}}
+    {{- if .Name}}y_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// PolicyInputImage */}}
+{{- define "PolicyInputImage"}}policy {
+{{- if .Breakpoints}}
+    breakpoints {
+    {{template "Breakpoints" .Breakpoints}}
+    }
+{{- end}}
+{{- if .Hosts}}
+    hosts = [{{range $i, $v := .Hosts}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
+{{- if .Output}}
+    output {
+    {{template "OutputImage" .Output}}
+    }
+{{- end}}
+{{- if .PostBreakpointTransformations}}
+    {{- range .PostBreakpointTransformations}}
+        post_breakpoint_transformations {
+        {{template "TransformationsPost" .}}
+        }
+    {{- end}}
+{{- end}}
+{{- if .RolloutDuration}}
+    rollout_duration = {{.RolloutDuration}}{{end}}
+{{- if .Transformations}}
+    {{- range .Transformations}}
+        transformations {
+        {{template "Transformations" .}}
+        }
+    {{- end}}
+{{- end}}
+{{- range .Variables}}
+    variables {
+    {{template "Variable" .}}
+    }
+{{- end}}
+}
+{{- end}}
+{{- /*// PolicyOutputImageVideo */}}
+{{- /*// PolygonShapeType */}}
+{{- define "PolygonShapeType"}}polygon_shape {
+{{- range .Points}}
+    points {
+    {{template "PointShapeType" .}}
+    }
+{{- end}}
+}
+{{- end}}
+{{- /*// RectangleShapeType */}}
+{{- define "RectangleShapeType"}}rectangle_shape {
+{{- if .Anchor}}
+    anchor {
+    {{template "PointShapeType" .Anchor}}
+    }
+{{- end}}
+{{- with .Height}}
+    {{""}}
+    {{- if .Value}}height = {{.Value}}{{end}}
+    {{- if .Name}}height_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// RegionOfInterestCrop */}}
+{{- define "RegionOfInterestCrop"}}region_of_interest_crop {
+{{- with .Gravity}}
+    {{""}}
+    {{- if .Value}}gravity = "{{.Value}}"{{end}}
+    {{- if .Name}}gravity_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Height}}
+    {{""}}
+    {{- if .Value}}height = {{.Value}}{{end}}
+    {{- if .Name}}height_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .RegionOfInterest}}
+    region_of_interest {
+    {{template "ShapeType" .RegionOfInterest}}
+    }
+{{- end}}
+{{- with .Style}}
+    {{""}}
+    {{- if .Value}}style = "{{.Value}}"{{end}}
+    {{- if .Name}}style_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// RegionOfInterestCropStyle */}}
+{{- /*// RegionOfInterestCropTransformation */}}
+{{- /*// RelativeCrop */}}
+{{- define "RelativeCrop"}}relative_crop {
+{{- with .East}}
+    {{""}}
+    {{- if .Value}}east = {{.Value}}{{end}}
+    {{- if .Name}}east_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .North}}
+    {{""}}
+    {{- if .Value}}north = {{.Value}}{{end}}
+    {{- if .Name}}north_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .South}}
+    {{""}}
+    {{- if .Value}}south = {{.Value}}{{end}}
+    {{- if .Name}}south_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .West}}
+    {{""}}
+    {{- if .Value}}west = {{.Value}}{{end}}
+    {{- if .Name}}west_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// RelativeCropTransformation */}}
+{{- /*// RemoveColor */}}
+{{- define "RemoveColor"}}remove_color {
+{{- with .Color}}
+    {{""}}
+    {{- if .Value}}color = "{{.Value}}"{{end}}
+    {{- if .Name}}color_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Feather}}
+    {{""}}
+    {{- if .Value}}feather = {{.Value}}{{end}}
+    {{- if .Name}}feather_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Tolerance}}
+    {{""}}
+    {{- if .Value}}tolerance = {{.Value}}{{end}}
+    {{- if .Name}}tolerance_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// RemoveColorTransformation */}}
+{{- /*// Resize */}}
+{{- define "Resize"}}resize {
+{{- with .Aspect}}
+    {{""}}
+    {{- if .Value}}aspect = "{{.Value}}"{{end}}
+    {{- if .Name}}aspect_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Height}}
+    {{""}}
+    {{- if .Value}}height = {{.Value}}{{end}}
+    {{- if .Name}}height_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Type}}
+    {{""}}
+    {{- if .Value}}type = "{{.Value}}"{{end}}
+    {{- if .Name}}type_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// ResizeAspect */}}
+{{- /*// ResizeTransformation */}}
+{{- /*// ResizeType */}}
+{{- /*// RolloutInfo */}}
+{{- define "RolloutInfo"}}
+    {{- if .EndTime}}
+        end_time = {{.EndTime}}{{end}}
+    {{- if .RolloutDuration}}
+        rollout_duration = {{.RolloutDuration}}{{end}}
+    {{- if .StartTime}}
+        start_time = {{.StartTime}}{{end}}
+
+{{- end}}
+{{- /*// Rotate */}}
+{{- define "Rotate"}}rotate {
+{{- with .Degrees}}
+    {{""}}
+    {{- if .Value}}degrees = {{.Value}}{{end}}
+    {{- if .Name}}degrees_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// RotateTransformation */}}
+{{- /*// Scale */}}
+{{- define "Scale"}}scale {
+{{- with .Height}}
+    {{""}}
+    {{- if .Value}}height = {{.Value}}{{end}}
+    {{- if .Name}}height_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// ScaleTransformation */}}
+{{- /*// Shear */}}
+{{- define "Shear"}}shear {
+{{- with .XShear}}
+    {{""}}
+    {{- if .Value}}x_shear = {{.Value}}{{end}}
+    {{- if .Name}}x_shear_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .YShear}}
+    {{""}}
+    {{- if .Value}}y_shear = {{.Value}}{{end}}
+    {{- if .Name}}y_shear_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// ShearTransformation */}}
+{{- /*// TextImageType */}}
+{{- define "TextImageType"}}text_image {
+{{- with .Fill}}
+    {{""}}
+    {{- if .Value}}fill = "{{.Value}}"{{end}}
+    {{- if .Name}}fill_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Size}}
+    {{""}}
+    {{- if .Value}}size = {{.Value}}{{end}}
+    {{- if .Name}}size_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Stroke}}
+    {{""}}
+    {{- if .Value}}stroke = "{{.Value}}"{{end}}
+    {{- if .Name}}stroke_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .StrokeSize}}
+    {{""}}
+    {{- if .Value}}stroke_size = {{.Value}}{{end}}
+    {{- if .Name}}stroke_size_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Text}}
+    {{""}}
+    {{- if .Value}}text = "{{.Value}}"{{end}}
+    {{- if .Name}}text_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Transformation}}
+    transformation {
+    {{template "Transformations" .Transformation}}
+    }
+{{- end}}
+{{- with .Typeface}}
+    {{""}}
+    {{- if .Value}}typeface = "{{.Value}}"{{end}}
+    {{- if .Name}}typeface_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// TextImageTypePost */}}
+{{- define "TextImageTypePost"}}text_image {
+{{- with .Fill}}
+    {{""}}
+    {{- if .Value}}fill = "{{.Value}}"{{end}}
+    {{- if .Name}}fill_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Size}}
+    {{""}}
+    {{- if .Value}}size = {{.Value}}{{end}}
+    {{- if .Name}}size_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Stroke}}
+    {{""}}
+    {{- if .Value}}stroke = "{{.Value}}"{{end}}
+    {{- if .Name}}stroke_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .StrokeSize}}
+    {{""}}
+    {{- if .Value}}stroke_size = {{.Value}}{{end}}
+    {{- if .Name}}stroke_size_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Text}}
+    {{""}}
+    {{- if .Value}}text = "{{.Value}}"{{end}}
+    {{- if .Name}}text_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- if .Transformation}}
+    transformation {
+    {{template "TransformationsPost" .Transformation}}
+    }
+{{- end}}
+{{- with .Typeface}}
+    {{""}}
+    {{- if .Value}}typeface = "{{.Value}}"{{end}}
+    {{- if .Name}}typeface_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// TextImageTypePostType */}}
+{{- /*// TextImageTypeType */}}
+{{- /*// Trim */}}
+{{- define "Trim"}}trim {
+{{- with .Fuzz}}
+    {{""}}
+    {{- if .Value}}fuzz = {{.Value}}{{end}}
+    {{- if .Name}}fuzz_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Padding}}
+    {{""}}
+    {{- if .Value}}padding = {{.Value}}{{end}}
+    {{- if .Name}}padding_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// TrimTransformation */}}
+{{- /*// URLImageType */}}
+{{- define "URLImageType"}}url_image {
+{{- if .Transformation}}
+    transformation {
+    {{template "Transformations" .Transformation}}
+    }
+{{- end}}
+{{- with .URL}}
+    {{""}}
+    {{- if .Value}}url = "{{.Value}}"{{end}}
+    {{- if .Name}}url_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// URLImageTypePost */}}
+{{- define "URLImageTypePost"}}url_image {
+{{- if .Transformation}}
+    transformation {
+    {{template "TransformationsPost" .Transformation}}
+    }
+{{- end}}
+{{- with .URL}}
+    {{""}}
+    {{- if .Value}}url = "{{.Value}}"{{end}}
+    {{- if .Name}}url_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// URLImageTypePostType */}}
+{{- /*// URLImageTypeType */}}
+{{- /*// UnionShapeType */}}
+{{- define "UnionShapeType"}}union_shape {
+{{- range .Shapes}}
+    shapes {
+    {{template "ShapeType" .}}
+    }
+{{- end}}
+}
+{{- end}}
+{{- /*// UnsharpMask */}}
+{{- define "UnsharpMask"}}unsharp_mask {
+{{- with .Gain}}
+    {{""}}
+    {{- if .Value}}gain = {{.Value}}{{end}}
+    {{- if .Name}}gain_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Sigma}}
+    {{""}}
+    {{- if .Value}}sigma = {{.Value}}{{end}}
+    {{- if .Name}}sigma_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Threshold}}
+    {{""}}
+    {{- if .Value}}threshold = {{.Value}}{{end}}
+    {{- if .Name}}threshold_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// UnsharpMaskTransformation */}}
+{{- /*// Variable */}}
+{{- define "Variable"}}
+    default_value = "{{.DefaultValue}}"
+    {{- range .EnumOptions}}
+        enum_options {
+        {{template "EnumOptions" .}}
+        }
+    {{- end}}
+    name = "{{.Name}}"
+    {{- if .Postfix}}
+        postfix = "{{.Postfix}}"{{end}}
+    {{- if .Prefix}}
+        prefix = "{{.Prefix}}"{{end}}
+    type = "{{.Type}}"
+
+{{- end}}
+{{- /*// VariableInline */}}
+{{- define "VariableInline"}}
+    var = "{{.Var}}"
+
+{{- end}}
+{{- /*// VariableType */}}

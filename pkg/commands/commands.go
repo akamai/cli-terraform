@@ -21,7 +21,9 @@ import (
 	"github.com/akamai/cli-terraform/pkg/providers/gtm"
 	"github.com/akamai/cli-terraform/pkg/providers/imaging"
 	"github.com/akamai/cli-terraform/pkg/providers/papi"
-	akacli "github.com/akamai/cli/pkg/app"
+	"github.com/akamai/cli-terraform/pkg/tools"
+	"github.com/akamai/cli/pkg/apphelp"
+	"github.com/akamai/cli/pkg/autocomplete"
 	"github.com/urfave/cli/v2"
 )
 
@@ -50,7 +52,7 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage: "Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files using resources json",
 			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -98,7 +100,7 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage: "Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.",
 			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -109,11 +111,17 @@ func CommandLocator() ([]*cli.Command, error) {
 		Action:      papi.CmdCreateProperty,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Path location for placement of created artifacts",
+				DefaultText: "current directory",
+			},
+			&cli.StringFlag{
+				Name:        "version",
+				Usage:       "Property version to import",
+				DefaultText: "LATEST",
 			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -128,7 +136,7 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -143,7 +151,7 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -162,7 +170,7 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
@@ -180,22 +188,20 @@ func CommandLocator() ([]*cli.Command, error) {
 				Name:  "tfworkpath",
 				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
+			&cli.BoolFlag{
+				Name:        "schema",
+				Usage:       "Generate content of the policy using HCL instead of JSON file",
+				Destination: &tools.Schema,
+			},
 		},
-		BashComplete: akacli.DefaultAutoComplete,
+		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "list",
-		Description: "List commands",
-		Action:      cmdList,
-	})
-
-	commands = append(commands, &cli.Command{
-		Name:         "help",
-		Description:  "Displays help information",
-		ArgsUsage:    "<command> <sub-command>",
-		Action:       cmdHelp,
-		BashComplete: akacli.DefaultAutoComplete,
+		Name:               "list",
+		Description:        "List commands",
+		Action:             cmdList,
+		CustomHelpTemplate: apphelp.SimplifiedHelpTemplate,
 	})
 
 	return commands, nil

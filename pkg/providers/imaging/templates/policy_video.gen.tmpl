@@ -1,0 +1,109 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/imaging.TFImagingData.Policy*/ -}}
+{{- define "Transformations"}}
+{{- end}}
+{{- define "ImageType"}}
+    {{- if eq .Type "Box"}}{{- template "BoxImageType" .}}{{- end}}
+    {{- if eq .Type "Text"}}{{- template "TextImageType" .}}{{- end}}
+    {{- if eq .Type "Url"}}{{- template "URLImageType" .}}{{- end}}
+    {{- if eq .Type "Circle"}}{{- template "CircleImageType" .}}{{- end}}
+{{- end}}
+{{- define "ShapeType"}}
+    {{- $shapeType := printf "%T" .}}
+    {{- if eq $shapeType "*imaging.CircleShapeType"}}{{- template "CircleShapeType" .}}{{- end}}
+    {{- if eq $shapeType "*imaging.PointShapeType"}}{{- template "PointShapeType" .}}{{- end}}
+    {{- if eq $shapeType "*imaging.PolygonShapeType"}}{{- template "PolygonShapeType" .}}{{- end}}
+    {{- if eq $shapeType "*imaging.RectangleShapeType"}}{{- template "RectangleShapeType" .}}{{- end}}
+    {{- if eq $shapeType "*imaging.UnionShapeType"}}{{- template "UnionShapeType" .}}{{- end}}
+{{- end}}
+{{- /*////////////////////////////////////////*/}}
+{{- /*////////// Generated types /////////////*/}}
+{{- /*////////////////////////////////////////*/}}
+{{- /*// Breakpoints */}}
+{{- define "Breakpoints"}}
+    {{- if .Widths}}
+        widths = [{{range $i, $v := .Widths}}{{if $i}}, {{end}}{{$v}}{{end}}]{{end}}
+
+{{- end}}
+{{- /*// EnumOptions */}}
+{{- define "EnumOptions"}}
+    id = "{{.ID}}"
+    value = "{{.Value}}"
+
+{{- end}}
+{{- /*// OutputVideo */}}
+{{- define "OutputVideo"}}
+    {{- with .PerceptualQuality}}
+        {{""}}
+        {{- if .Value}}perceptual_quality = "{{.Value}}"{{end}}
+        {{- if .Name}}perceptual_quality_var = "{{.Name}}"{{end}}
+    {{- end}}
+    {{- with .PlaceholderVideoURL}}
+        {{""}}
+        {{- if .Value}}placeholder_video_url = "{{.Value}}"{{end}}
+        {{- if .Name}}placeholder_video_url_var = "{{.Name}}"{{end}}
+    {{- end}}
+    {{- with .VideoAdaptiveQuality}}
+        {{""}}
+        {{- if .Value}}video_adaptive_quality = "{{.Value}}"{{end}}
+        {{- if .Name}}video_adaptive_quality_var = "{{.Name}}"{{end}}
+    {{- end}}
+
+{{- end}}
+{{- /*// OutputVideoPerceptualQuality */}}
+{{- /*// OutputVideoVideoAdaptiveQuality */}}
+{{- /*// PolicyInputVideo */}}
+{{- define "PolicyInputVideo"}}policy {
+{{- if .Breakpoints}}
+    breakpoints {
+    {{template "Breakpoints" .Breakpoints}}
+    }
+{{- end}}
+{{- if .Hosts}}
+    hosts = [{{range $i, $v := .Hosts}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
+{{- if .Output}}
+    output {
+    {{template "OutputVideo" .Output}}
+    }
+{{- end}}
+{{- if .RolloutDuration}}
+    rollout_duration = {{.RolloutDuration}}{{end}}
+{{- range .Variables}}
+    variables {
+    {{template "Variable" .}}
+    }
+{{- end}}
+}
+{{- end}}
+{{- /*// PolicyOutputVideoVideo */}}
+{{- /*// RolloutInfo */}}
+{{- define "RolloutInfo"}}
+    {{- if .EndTime}}
+        end_time = {{.EndTime}}{{end}}
+    {{- if .RolloutDuration}}
+        rollout_duration = {{.RolloutDuration}}{{end}}
+    {{- if .StartTime}}
+        start_time = {{.StartTime}}{{end}}
+
+{{- end}}
+{{- /*// Variable */}}
+{{- define "Variable"}}
+    default_value = "{{.DefaultValue}}"
+    {{- range .EnumOptions}}
+        enum_options {
+        {{template "EnumOptions" .}}
+        }
+    {{- end}}
+    name = "{{.Name}}"
+    {{- if .Postfix}}
+        postfix = "{{.Postfix}}"{{end}}
+    {{- if .Prefix}}
+        prefix = "{{.Prefix}}"{{end}}
+    type = "{{.Type}}"
+
+{{- end}}
+{{- /*// VariableInline */}}
+{{- define "VariableInline"}}
+    var = "{{.Var}}"
+
+{{- end}}
+{{- /*// VariableType */}}

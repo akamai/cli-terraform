@@ -77,6 +77,7 @@ type TFData struct {
 	Section              string
 	Emails               []string
 	ActivationNote       string
+	Version              string
 }
 
 // RulesTemplate represent data used for rules
@@ -123,6 +124,8 @@ var (
 	ErrHostnamesNotFound = errors.New("hostnames not found")
 	// ErrPropertyVersionNotFound is returned when property version couldn't be found
 	ErrPropertyVersionNotFound = errors.New("property version not found")
+	// ErrPropertyVersionNotValid is returned when property version couldn't be found
+	ErrPropertyVersionNotValid = errors.New("property version not valid")
 	// ErrProductNameNotFound is returned when product couldn't be found
 	ErrProductNameNotFound = errors.New("product name not found")
 	// ErrFetchingHostnameDetails is returned when fetching hsotname details request failed
@@ -155,6 +158,10 @@ func CmdCreateProperty(c *cli.Context) error {
 	if c.IsSet("tfworkpath") {
 		tools.TFWorkPath = c.String("tfworkpath")
 	}
+	var version string
+	if c.IsSet("version") {
+		version = c.String("version")
+	}
 	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
 	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
 		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
@@ -181,13 +188,13 @@ func CmdCreateProperty(c *cli.Context) error {
 
 	propertyName := c.Args().First()
 	section := edgegrid.GetEdgercSection(c)
-	if err = createProperty(ctx, propertyName, section, "property-snippets", client, clientHapi, processor); err != nil {
+	if err = createProperty(ctx, propertyName, version, section, "property-snippets", client, clientHapi, processor); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting property: %s", err)), 1)
 	}
 	return nil
 }
 
-func createProperty(ctx context.Context, propertyName, section string, jsonDir string, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
+func createProperty(ctx context.Context, propertyName, readVersion, section, jsonDir string, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
 	var tfData TFData
@@ -242,15 +249,20 @@ func createProperty(ctx context.Context, propertyName, section string, jsonDir s
 
 	term.Spinner().OK()
 
+	if readVersion == "" {
+		readVersion = "LATEST"
+	}
+
 	// Get Version
 	term.Spinner().Start("Fetching property version ")
-	version, err := getVersion(ctx, client, property)
+	version, err := getVersion(ctx, client, property, readVersion)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrPropertyVersionNotFound, err)
 	}
 
 	tfData.ProductID = version.Version.ProductID
+	tfData.Version = readVersion
 
 	term.Spinner().OK()
 
@@ -550,7 +562,7 @@ func getPropertyRules(ctx context.Context, client papi.PAPI, property *papi.Prop
 }
 
 // getVersion gets latest property version for given property from api
-func getVersion(ctx context.Context, client papi.PAPI, property *papi.Property) (*papi.GetPropertyVersionsResponse, error) {
+func getVersion(ctx context.Context, client papi.PAPI, property *papi.Property, readVersion string) (*papi.GetPropertyVersionsResponse, error) {
 	versions, err := client.GetPropertyVersions(ctx, papi.GetPropertyVersionsRequest{
 		PropertyID: property.PropertyID,
 		ContractID: property.ContractID,
@@ -560,17 +572,37 @@ func getVersion(ctx context.Context, client papi.PAPI, property *papi.Property) 
 		return nil, err
 	}
 
-	version, err := client.GetLatestVersion(ctx, papi.GetLatestVersionRequest{
-		PropertyID:  versions.PropertyID,
-		ActivatedOn: "",
-		ContractID:  versions.ContractID,
-		GroupID:     versions.GroupID,
-	})
-	if err != nil {
-		return nil, err
+	if readVersion == "LATEST" {
+		version, err := client.GetLatestVersion(ctx, papi.GetLatestVersionRequest{
+			PropertyID:  versions.PropertyID,
+			ActivatedOn: "",
+			ContractID:  versions.ContractID,
+			GroupID:     versions.GroupID,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		return version, nil
 	}
 
-	return version, nil
+	v, err := strconv.Atoi(readVersion)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s", ErrPropertyVersionNotValid, err)
+	}
+
+	for _, item := range versions.Versions.Items {
+		if item.PropertyVersion == v {
+			return &papi.GetPropertyVersionsResponse{
+				Version: papi.PropertyVersionGetItem{
+					ProductID:       item.ProductID,
+					PropertyVersion: item.PropertyVersion,
+				},
+			}, nil
+		}
+	}
+
+	return nil, ErrPropertyVersionNotFound
 }
 
 // getGroup fetches a group with specific groupID

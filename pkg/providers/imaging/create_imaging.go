@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -46,6 +47,7 @@ type (
 		PolicyID             string
 		ActivateOnProduction bool
 		JSON                 string
+		Policy               imaging.PolicyInput
 	}
 )
 
@@ -60,7 +62,12 @@ var (
 	ErrFetchingPolicySet = errors.New("unable to fetch policy set with given name")
 	// ErrFetchingPolicy is returned when fetching policy set fails
 	ErrFetchingPolicy = errors.New("unable to fetch policy with given name")
+	// ErrCreateDir is returned when error occurred creating directory
+	ErrCreateDir = errors.New("cannot create directory")
 )
+
+// maxDepth value has to match the MaxPolicyDepth value in terraform imaging subprovider
+const maxDepth = 7
 
 // CmdCreateImaging is an entrypoint to create-imaging command
 func CmdCreateImaging(c *cli.Context) error {
@@ -76,31 +83,37 @@ func CmdCreateImaging(c *cli.Context) error {
 
 	sess := edgegrid.GetSession(ctx)
 	client := imaging.Client(sess)
+
+	tfWorkPath := "." // default is current dir
 	if c.IsSet("tfworkpath") {
-		tools.TFWorkPath = c.String("tfworkpath")
+		tfWorkPath = c.String("tfworkpath")
 	}
-	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
-	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
+	tfWorkPath = filepath.FromSlash(tfWorkPath)
+	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
 		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
 	}
 
-	imagingPath := filepath.Join(tools.TFWorkPath, "imaging.tf")
-	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
-	importPath := filepath.Join(tools.TFWorkPath, "import.sh")
-
-	jsonDir := tools.TFWorkPath
-	if c.IsSet("policy-json-dir") {
-		jsonDir = c.String("policy-json-dir")
-	}
-	jsonDir = filepath.FromSlash(jsonDir)
-	if stat, err := os.Stat(jsonDir); err != nil || !stat.IsDir() {
-		return cli.NewExitError(color.RedString("Policy JSON path is not accessible"), 1)
-	}
+	imagingPath := filepath.Join(tfWorkPath, "imaging.tf")
+	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
+	importPath := filepath.Join(tfWorkPath, "import.sh")
 
 	err := tools.CheckFiles(imagingPath, variablesPath, importPath)
 	if err != nil {
 		return cli.Exit(color.RedString(err.Error()), 1)
 	}
+
+	jsonDir := "."
+	if c.IsSet("policy-json-dir") {
+		jsonDir = c.String("policy-json-dir")
+	}
+	if !c.IsSet("schema") {
+		jsonDirPath := path.Join(tfWorkPath, jsonDir)
+		err = ensureDirExists(jsonDirPath)
+		if err != nil {
+			return cli.Exit(color.RedString(err.Error()), 1)
+		}
+	}
+
 	templateToFile := map[string]string{
 		"imaging.tmpl":   imagingPath,
 		"variables.tmpl": variablesPath,
@@ -122,13 +135,13 @@ func CmdCreateImaging(c *cli.Context) error {
 
 	contractID, policySetID := c.Args().Get(0), c.Args().Get(1)
 	section := edgegrid.GetEdgercSection(c)
-	if err = createImaging(ctx, contractID, policySetID, jsonDir, section, client, processor); err != nil {
+	if err = createImaging(ctx, contractID, policySetID, tfWorkPath, jsonDir, section, client, processor, tools.Schema); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting policy HCL: %s", err)), 1)
 	}
 	return nil
 }
 
-func createImaging(ctx context.Context, contractID, policySetID, jsonDir, section string, client imaging.Imaging, templateProcessor templates.TemplateProcessor) error {
+func createImaging(ctx context.Context, contractID, policySetID, tfWorkPath, jsonDir, section string, client imaging.Imaging, templateProcessor templates.TemplateProcessor, schema bool) error {
 	term := terminal.Get(ctx)
 
 	fmt.Println("Exporting Image and Video Manager configuration")
@@ -154,9 +167,9 @@ func createImaging(ctx context.Context, contractID, policySetID, jsonDir, sectio
 	var tfPoliciesData []TFPolicy
 	switch policySet.Type {
 	case string(imaging.TypeImage):
-		tfPoliciesData, err = getPoliciesImageData(ctx, policies, policySetID, contractID, jsonDir, client)
+		tfPoliciesData, err = getPoliciesImageData(ctx, policies, policySetID, contractID, tfWorkPath, jsonDir, client, schema)
 	case string(imaging.TypeVideo):
-		tfPoliciesData, err = getPoliciesVideoData(ctx, policies, policySetID, contractID, jsonDir, client)
+		tfPoliciesData, err = getPoliciesVideoData(ctx, policies, policySetID, contractID, tfWorkPath, jsonDir, client, schema)
 	}
 	if err != nil {
 		term.Spinner().Fail()
@@ -192,6 +205,16 @@ func createImaging(ctx context.Context, contractID, policySetID, jsonDir, sectio
 	return nil
 }
 
+func ensureDirExists(dirPath string) error {
+	dirPath = filepath.FromSlash(dirPath)
+
+	err := os.MkdirAll(dirPath, 0755)
+	if err != nil {
+		return fmt.Errorf("%w: %s", ErrCreateDir, err)
+	}
+	return nil
+}
+
 func getPolicies(ctx context.Context, policySetID, contractID string, client imaging.Imaging) ([]imaging.PolicyOutput, error) {
 	stagingPolicies, err := client.ListPolicies(ctx, imaging.ListPoliciesRequest{
 		Network:     imaging.PolicyNetworkStaging,
@@ -205,7 +228,7 @@ func getPolicies(ctx context.Context, policySetID, contractID string, client ima
 	return stagingPolicies.Items, nil
 }
 
-func getPoliciesImageData(ctx context.Context, policies []imaging.PolicyOutput, policySetID, contractID, jsonDir string, client imaging.Imaging) ([]TFPolicy, error) {
+func getPoliciesImageData(ctx context.Context, policies []imaging.PolicyOutput, policySetID, contractID, tfWorkPath, jsonDir string, client imaging.Imaging, schema bool) ([]TFPolicy, error) {
 	var tfPoliciesData []TFPolicy
 
 	for _, policyOutput := range policies {
@@ -247,23 +270,39 @@ func getPoliciesImageData(ctx context.Context, policies []imaging.PolicyOutput, 
 			}
 		}
 
-		jsonPath := filepath.Join(jsonDir, RemoveSymbols.ReplaceAllString(policy.ID, "_")+".json")
-		err = ioutil.WriteFile(jsonPath, []byte(policyJSON), 0755)
-		if err != nil {
-			return nil, err
-		}
+		if schema {
+			// we store JSON as PolicyInput, so we need to convert it from PolicyInput via JSON representation
+			var policyInput imaging.PolicyInputImage
+			if err := json.Unmarshal([]byte(policyJSON), &policyInput); err != nil {
+				return nil, err
+			}
+			if depth := getDepth(policyInput, 0); depth > maxDepth {
+				return nil, fmt.Errorf("policy has %d nested transformation levels, while only %d are allowed; please use JSON format instead", depth, maxDepth)
+			}
+			tfPoliciesData = append(tfPoliciesData, TFPolicy{
+				PolicyID:             policy.ID,
+				ActivateOnProduction: activateOnProduction,
+				Policy:               &policyInput,
+			})
+		} else {
+			jsonPath := filepath.Join(jsonDir, RemoveSymbols.ReplaceAllString(policy.ID, "_")+".json")
+			err = ioutil.WriteFile(filepath.Join(tfWorkPath, jsonPath), []byte(policyJSON), 0644)
+			if err != nil {
+				return nil, err
+			}
 
-		tfPoliciesData = append(tfPoliciesData, TFPolicy{
-			PolicyID:             policy.ID,
-			ActivateOnProduction: activateOnProduction,
-			JSON:                 jsonPath,
-		})
+			tfPoliciesData = append(tfPoliciesData, TFPolicy{
+				PolicyID:             policy.ID,
+				ActivateOnProduction: activateOnProduction,
+				JSON:                 jsonPath,
+			})
+		}
 	}
 
 	return tfPoliciesData, nil
 }
 
-func getPoliciesVideoData(ctx context.Context, policies []imaging.PolicyOutput, policySetID, contractID, jsonDir string, client imaging.Imaging) ([]TFPolicy, error) {
+func getPoliciesVideoData(ctx context.Context, policies []imaging.PolicyOutput, policySetID, contractID, tfWorkPath, jsonDir string, client imaging.Imaging, schema bool) ([]TFPolicy, error) {
 	var tfPoliciesData []TFPolicy
 
 	for _, policyOutput := range policies {
@@ -305,17 +344,30 @@ func getPoliciesVideoData(ctx context.Context, policies []imaging.PolicyOutput, 
 			}
 		}
 
-		jsonPath := filepath.Join(jsonDir, RemoveSymbols.ReplaceAllString(policy.ID, "_")+".json")
-		err = ioutil.WriteFile(jsonPath, []byte(policyJSON), 0755)
-		if err != nil {
-			return nil, err
-		}
+		if schema {
+			// we store JSON as PolicyInput, so we need to convert it from PolicyInput via JSON representation
+			var policyInput imaging.PolicyInputVideo
+			if err := json.Unmarshal([]byte(policyJSON), &policyInput); err != nil {
+				return nil, err
+			}
+			tfPoliciesData = append(tfPoliciesData, TFPolicy{
+				PolicyID:             policy.ID,
+				ActivateOnProduction: activateOnProduction,
+				Policy:               &policyInput,
+			})
+		} else {
+			jsonPath := filepath.Join(jsonDir, RemoveSymbols.ReplaceAllString(policy.ID, "_")+".json")
+			err = ioutil.WriteFile(filepath.Join(tfWorkPath, jsonPath), []byte(policyJSON), 0644)
+			if err != nil {
+				return nil, err
+			}
 
-		tfPoliciesData = append(tfPoliciesData, TFPolicy{
-			PolicyID:             policy.ID,
-			ActivateOnProduction: activateOnProduction,
-			JSON:                 jsonPath,
-		})
+			tfPoliciesData = append(tfPoliciesData, TFPolicy{
+				PolicyID:             policy.ID,
+				ActivateOnProduction: activateOnProduction,
+				JSON:                 jsonPath,
+			})
+		}
 	}
 
 	return tfPoliciesData, nil
@@ -327,7 +379,7 @@ func getPolicyImageJSON(policy *imaging.PolicyOutputImage) (string, error) {
 		return "", err
 	}
 
-	// we store JSON as PolicyInput, so we need to convert it from PolicyOutput via JSON representation
+	// we store JSON as PolicyInput, so we need to convert it from PolicyInput via JSON representation
 	var policyInput imaging.PolicyInputImage
 	if err := json.Unmarshal(policyJSON, &policyInput); err != nil {
 		return "", err
@@ -347,7 +399,7 @@ func getPolicyVideoJSON(policy *imaging.PolicyOutputVideo) (string, error) {
 		return "", err
 	}
 
-	// we store JSON as PolicyInput, so we need to convert it from PolicyOutput via JSON representation
+	// we store JSON as PolicyInput, so we need to convert it from PolicyInput via JSON representation
 	var policyInput imaging.PolicyInputVideo
 	if err := json.Unmarshal(policyJSON, &policyInput); err != nil {
 		return "", err
@@ -395,4 +447,44 @@ func equalPolicyVideo(old, new string) (bool, error) {
 	}
 
 	return reflect.DeepEqual(oldPolicy, newPolicy), nil
+}
+
+func getDepth(policy interface{}, depth int) int {
+	if policy == nil {
+		return 0
+	}
+	v := reflect.ValueOf(policy)
+	if v.Kind() == reflect.Ptr {
+		vp := v.Elem().Interface()
+		v = reflect.ValueOf(vp)
+	}
+	newDepth := depth
+	for i := 0; i < v.NumField(); i++ {
+		field := v.Field(i)
+		var localDepth int
+		switch field.Type().String() {
+		case "imaging.Transformations":
+			transformations := field.Interface().(imaging.Transformations)
+			for _, transformation := range transformations {
+				d := getDepth(transformation, depth+2)
+				if d > localDepth {
+					localDepth = d
+				}
+			}
+		case "imaging.TransformationType":
+			value := field.Interface()
+			if value != nil {
+				localDepth = getDepth(value.(imaging.TransformationType), depth+1)
+			}
+		case "imaging.ImageType":
+			value := field.Interface()
+			if value != nil {
+				localDepth = getDepth(field.Interface().(imaging.ImageType), depth+1)
+			}
+		}
+		if localDepth > newDepth {
+			newDepth = localDepth
+		}
+	}
+	return newDepth
 }

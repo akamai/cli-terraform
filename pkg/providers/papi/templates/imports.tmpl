@@ -3,4 +3,4 @@ terraform init
 {{- range .EdgeHostnames}}
 terraform import akamai_edge_hostname.{{.EdgeHostnameResourceName}} {{.EdgeHostnameID}},{{.ContractID}},{{.GroupID}}
 {{- end}}
-terraform import akamai_property.{{.PropertyResourceName}} {{.PropertyID}},{{.ContractID}},{{.GroupID}}
+terraform import akamai_property.{{.PropertyResourceName}} {{.PropertyID}},{{.ContractID}},{{.GroupID}},{{.Version}}
