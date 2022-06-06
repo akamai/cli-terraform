@@ -30,3 +30,13 @@ func (m *mockhapi) GetEdgeHostname(ctx context.Context, i int) (*hapi.GetEdgeHos
 
 	return args.Get(0).(*hapi.GetEdgeHostnameResponse), args.Error(1)
 }
+
+func (m *mockhapi) UpdateEdgeHostname(ctx context.Context, r hapi.UpdateEdgeHostnameRequest) (*hapi.UpdateEdgeHostnameResponse, error) {
+	args := m.Called(ctx, r)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*hapi.UpdateEdgeHostnameResponse), args.Error(1)
+}
