@@ -1,0 +1,12 @@
+terraform init
+terraform import akamai_gtm_domain.test_name "test.name.akadns.net"
+terraform import akamai_gtm_datacenter.TEST1 "test.name.akadns.net:123"
+terraform import akamai_gtm_datacenter.TEST2 "test.name.akadns.net:124"
+terraform import akamai_gtm_datacenter.TEST3 "test.name.akadns.net:125"
+terraform import akamai_gtm_property.test_property1 "test.name.akadns.net:test property1"
+terraform import akamai_gtm_property.test_property2 "test.name.akadns.net:test property2"
+terraform import akamai_gtm_resource.test_resource1 "test.name.akadns.net:test resource1"
+terraform import akamai_gtm_resource.test_resource2 "test.name.akadns.net:test resource2"
+terraform import akamai_gtm_cidrmap.test_cidrmap "test.name.akadns.net:test_cidrmap"
+terraform import akamai_gtm_geomap.test_geomap "test.name.akadns.net:test_geomap"
+terraform import akamai_gtm_asmap.test_asmap "test.name.akadns.net:test_asmap"

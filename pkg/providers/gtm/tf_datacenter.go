@@ -31,7 +31,7 @@ var gtmDatacenterConfigP1 = fmt.Sprintf(`
 resource "akamai_gtm_datacenter" `)
 
 // Process datacenter resources
-func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]string, resourceDomainName string) string {
+func processDatacenters(datacenters []*gtm.Datacenter, resourceDomainName string) string {
 
 	// Get Null values list
 	var coreFieldsNullMap map[string]string
@@ -39,16 +39,7 @@ func processDatacenters(datacenters []*gtm.Datacenter, dcImportList map[int]stri
 
 	datacentersString := ""
 	for _, datacenter := range datacenters {
-		if _, ok := dcImportList[datacenter.DatacenterId]; !ok {
-			continue
-		}
-		ddcFlag := false // ddc?
-		for _, ddc := range defaultDCs {
-			if datacenter.DatacenterId == ddc {
-				ddcFlag = true
-			}
-		}
-		// Retrieve Core null fields map
+		_, ddcFlag := defaultDCs[datacenter.DatacenterId]
 		if dcNullFieldObjectMap, ok := nullFieldsMap[strconv.Itoa(datacenter.DatacenterId)]; ok {
 			coreFieldsNullMap = dcNullFieldObjectMap.CoreObjectFields
 		} else {

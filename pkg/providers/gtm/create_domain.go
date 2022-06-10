@@ -22,8 +22,9 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strconv"
+	"regexp"
 	"strings"
+	"text/template"
 
 	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configgtm"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
@@ -37,24 +38,34 @@ import (
 type (
 	// TFDomainData represents the data used in domain templates
 	TFDomainData struct {
-		Section string
-	}
-
-	importListStruct struct {
-		Domain      string
-		Datacenters map[int]string
-		Properties  map[string][]int
-		Resources   map[string][]int
-		Cidrmaps    map[string][]int
-		Geomaps     map[string][]int
-		Asmaps      map[string][]int
+		NormalizedName              string
+		Name                        string
+		Type                        string
+		Comment                     string
+		EmailNotificationList       []string
+		DefaultTimeoutPenalty       int
+		LoadImbalancePercentage     float64
+		DefaultSSLClientPrivateKey  string
+		DefaultErrorPenalty         int
+		CnameCoalescingEnabled      bool
+		LoadFeedback                bool
+		DefaultSSLClientCertificate string
+		EndUserMappingEnabled       bool
+		Section                     string
+		Datacenters                 map[int]string
+		DefaultDatacenters          map[int]string
+		Properties                  map[string][]int
+		Resources                   map[string][]int
+		Cidrmaps                    map[string][]int
+		Geomaps                     map[string][]int
+		Asmaps                      map[string][]int
 	}
 )
 
 //go:embed templates/*
 var templateFiles embed.FS
 
-var defaultDCs = []int{5400, 5401, 5402}
+var defaultDCs = map[int]struct{}{5400: {}, 5401: {}, 5402: {}}
 
 // Terraform resource names
 const (
@@ -77,6 +88,8 @@ var (
 var nullFieldMap = &gtm.NullFieldMapStruct{}
 
 var (
+	subWithUnderscoreRegexp               = regexp.MustCompile(`[^\w-_]`)
+	mustStartWithLetterOrUnderscoreRegexp = regexp.MustCompile("^[^a-zA-Z_]")
 	// ErrFetchingDomain is returned when fetching domain fails
 	ErrFetchingDomain = errors.New("unable to fetch domain with given name")
 )
@@ -103,12 +116,12 @@ func CmdCreateDomain(c *cli.Context) error {
 
 	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
 	domainPath = filepath.Join(tools.TFWorkPath, "domain.tf")
-	// templatizing import script will be part of DXE-692
 	importPath = filepath.Join(tools.TFWorkPath, "import.sh")
 
 	templateToFile := map[string]string{
 		"domain.tmpl":    domainPath,
 		"variables.tmpl": variablesPath,
+		"imports.tmpl":   importPath,
 	}
 
 	err := tools.CheckFiles(domainPath, variablesPath, importPath)
@@ -119,6 +132,9 @@ func CmdCreateDomain(c *cli.Context) error {
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
+		AdditionalFuncs: template.FuncMap{
+			"normalize": normalizeResourceName,
+		},
 	}
 
 	domainName := c.Args().First()
@@ -141,9 +157,23 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, section strin
 	}
 
 	tfDomainData := TFDomainData{
-		Section: section,
+		Section:                     section,
+		NormalizedName:              normalizeResourceName(strings.TrimSuffix(domain.Name, ".akadns.net")),
+		Name:                        domain.Name,
+		Type:                        domain.Type,
+		Comment:                     domain.ModificationComments,
+		EmailNotificationList:       domain.EmailNotificationList,
+		DefaultTimeoutPenalty:       domain.DefaultTimeoutPenalty,
+		LoadImbalancePercentage:     domain.LoadImbalancePercentage,
+		DefaultSSLClientPrivateKey:  domain.DefaultSslClientPrivateKey,
+		DefaultErrorPenalty:         domain.DefaultErrorPenalty,
+		CnameCoalescingEnabled:      domain.CnameCoalescingEnabled,
+		LoadFeedback:                domain.LoadFeedback,
+		DefaultSSLClientCertificate: domain.DefaultSslClientCertificate,
+		EndUserMappingEnabled:       domain.EndUserMappingEnabled,
 	}
-	importList := createImportList(domain)
+
+	createImportList(domain, &tfDomainData)
 	term.Spinner().OK()
 
 	term.Spinner().Start("Saving TF configurations ")
@@ -153,121 +183,16 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, section strin
 	}
 	term.Spinner().OK()
 
-	// use domain name sans suffix for domain resource name
-	resourceDomainName := normalizeResourceName(strings.TrimSuffix(domain.Name, ".akadns.net"))
-
 	term.Spinner().Start("Creating domain configuration file ")
-	if err := createConfig(ctx, client, domain, importList, resourceDomainName); err != nil {
+	if err := createConfig(ctx, client, domain, &tfDomainData); err != nil {
 		term.Spinner().Fail()
 		return err
 	}
 	term.Spinner().OK()
 
-	term.Spinner().Start("Creating domain import script file ")
-	if err := buildImportScript(importList, resourceDomainName); err != nil {
-		term.Spinner().Fail()
-		return err
-	}
-	term.Spinner().OK()
 	fmt.Printf("Terraform configuration for policy '%s' was saved successfully\n", domain.Name)
 
 	return nil
-}
-
-func buildImportScript(importList *importListStruct, resourceDomainName string) error {
-	// build import script
-	var importPrefix = "terraform import "
-	var importFile = ""
-	// Init TF
-	importFile += "terraform init\n"
-	// domain
-	// Assuming a domain name cannot contain spaces ....
-	importFile += importPrefix + domainResource + "." + resourceDomainName + " " + importList.Domain + "\n"
-
-	// datacenters
-	for id, nickname := range importList.Datacenters {
-		normalName := normalizeResourceName(nickname)
-		// default datacenters special case.
-		ddcfound := false
-		for _, ddc := range defaultDCs {
-			if id == ddc {
-				ddcfound = true
-			}
-		}
-		if ddcfound {
-			continue
-		}
-		importFile += importPrefix + datacenterResource + "." + normalName + " " + importList.Domain + ":" + strconv.Itoa(id) + "\n"
-	}
-
-	// properties
-	for name := range importList.Properties {
-		normalName := normalizeResourceName(name)
-		importFile += importPrefix + propertyResource + "." + normalName + " "
-		if strings.Contains(name, " ") {
-			importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
-		} else {
-			importFile += importList.Domain + ":" + name + "\n"
-		}
-	}
-
-	// resources
-	for name := range importList.Resources {
-		normalName := normalizeResourceName(name)
-
-		importFile += importPrefix + resourceResource + "." + normalName + " "
-		if strings.Contains(name, " ") {
-			importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
-		} else {
-			importFile += importList.Domain + ":" + name + "\n"
-		}
-	}
-
-	// cidrmaps
-	for name := range importList.Cidrmaps {
-		normalName := normalizeResourceName(name)
-
-		importFile += importPrefix + cidrResource + "." + normalName + " "
-		if strings.Contains(name, " ") {
-			importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
-		} else {
-			importFile += importList.Domain + ":" + name + "\n"
-		}
-	}
-
-	// geomaps
-	for name := range importList.Geomaps {
-		normalName := normalizeResourceName(name)
-
-		importFile += importPrefix + geoResource + "." + normalName + " "
-		if strings.Contains(name, " ") {
-			importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
-		} else {
-			importFile += importList.Domain + ":" + name + "\n"
-		}
-	}
-
-	// asmaps
-	for name := range importList.Asmaps {
-		normalName := normalizeResourceName(name)
-
-		importFile += importPrefix + asResource + "." + normalName + " "
-		if strings.Contains(name, " ") {
-			importFile += `"` + importList.Domain + ":" + name + `"` + "\n"
-		} else {
-			importFile += importList.Domain + ":" + name + "\n"
-		}
-	}
-
-	if err := os.WriteFile(importPath, []byte(importFile), 0666); err != nil {
-		return fmt.Errorf("unable to write import script file")
-	}
-	return nil
-}
-
-// retrieve Null Values for Domain
-func getDomainNullValues() gtm.NullPerObjectAttributeStruct {
-	return nullFieldMap.Domain
 }
 
 // retrieve Null Values for Object Type
@@ -291,64 +216,65 @@ func getNullValuesList(objType string) map[string]gtm.NullPerObjectAttributeStru
 	return map[string]gtm.NullPerObjectAttributeStruct{}
 }
 
-func createImportList(domain *gtm.Domain) *importListStruct {
-	importList := importListStruct{Domain: domain.Name}
+func createImportList(domain *gtm.Domain, tfData *TFDomainData) {
 	// Inventory datacenters
-	importList.Datacenters = make(map[int]string, len(domain.Datacenters))
+	tfData.Datacenters = make(map[int]string, len(domain.Datacenters))
+	tfData.DefaultDatacenters = make(map[int]string, len(domain.Datacenters))
 	for _, dc := range domain.Datacenters {
-		// include Default DCs. Special handling elsewhere.
-		importList.Datacenters[dc.DatacenterId] = dc.Nickname
+		if _, ok := defaultDCs[dc.DatacenterId]; ok {
+			tfData.DefaultDatacenters[dc.DatacenterId] = dc.Nickname
+		} else {
+			tfData.Datacenters[dc.DatacenterId] = dc.Nickname
+		}
 	}
 	// inventory properties and targets
-	importList.Properties = make(map[string][]int, len(domain.Properties))
+	tfData.Properties = make(map[string][]int, len(domain.Properties))
 	for _, p := range domain.Properties {
 		targets := make([]int, 0, len(p.TrafficTargets))
 		for _, tt := range p.TrafficTargets {
 			targets = append(targets, tt.DatacenterId)
 		}
-		importList.Properties[p.Name] = targets
+		tfData.Properties[p.Name] = targets
 	}
 	// inventory Resources
-	importList.Resources = make(map[string][]int, len(domain.Resources))
+	tfData.Resources = make(map[string][]int, len(domain.Resources))
 	for _, r := range domain.Resources {
 		targets := make([]int, 0, len(r.ResourceInstances))
 		for _, ri := range r.ResourceInstances {
 			targets = append(targets, ri.DatacenterId)
 		}
-		importList.Resources[r.Name] = targets
+		tfData.Resources[r.Name] = targets
 	}
 	// inventory CidrMaps
-	importList.Cidrmaps = make(map[string][]int, len(domain.CidrMaps))
+	tfData.Cidrmaps = make(map[string][]int, len(domain.CidrMaps))
 	for _, c := range domain.CidrMaps {
 		targets := make([]int, 0, len(c.Assignments))
 		for _, a := range c.Assignments {
 			targets = append(targets, a.DatacenterId)
 		}
-		importList.Cidrmaps[c.Name] = targets
+		tfData.Cidrmaps[c.Name] = targets
 	}
 	// inventory GeoMaps
-	importList.Geomaps = make(map[string][]int, len(domain.GeographicMaps))
+	tfData.Geomaps = make(map[string][]int, len(domain.GeographicMaps))
 	for _, g := range domain.GeographicMaps {
 		targets := make([]int, 0, len(g.Assignments))
 		for _, a := range g.Assignments {
 			targets = append(targets, a.DatacenterId)
 		}
-		importList.Geomaps[g.Name] = targets
+		tfData.Geomaps[g.Name] = targets
 	}
 	// inventory ASMaps
-	importList.Asmaps = make(map[string][]int, len(domain.AsMaps))
+	tfData.Asmaps = make(map[string][]int, len(domain.AsMaps))
 	for _, as := range domain.AsMaps {
 		targets := make([]int, 0, len(as.Assignments))
 		for _, a := range as.Assignments {
 			targets = append(targets, a.DatacenterId)
 		}
-		importList.Asmaps[as.Name] = targets
+		tfData.Asmaps[as.Name] = targets
 	}
-
-	return &importList
 }
 
-func createConfig(ctx context.Context, client gtm.GTM, domain *gtm.Domain, importList *importListStruct, resourceDomainName string) error {
+func createConfig(ctx context.Context, client gtm.GTM, domain *gtm.Domain, tfData *TFDomainData) error {
 	domainTFfileHandle, err := os.OpenFile(domainPath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil && err != io.EOF {
 		return err
@@ -361,14 +287,12 @@ func createConfig(ctx context.Context, client gtm.GTM, domain *gtm.Domain, impor
 		return fmt.Errorf("failed to initialize Domain null fields map")
 	}
 	// build tf file
-	tfConfig := "\n"
-	tfConfig += processDomain(domain, resourceDomainName)
-	tfConfig += processDatacenters(domain.Datacenters, importList.Datacenters, resourceDomainName)
-	tfConfig += processProperties(domain.Properties, importList.Properties, importList.Datacenters, resourceDomainName)
-	tfConfig += processResources(domain.Resources, importList.Resources, importList.Datacenters, resourceDomainName)
-	tfConfig += processCidrmaps(domain.CidrMaps, importList.Cidrmaps, importList.Datacenters, resourceDomainName)
-	tfConfig += processGeomaps(domain.GeographicMaps, importList.Geomaps, importList.Datacenters, resourceDomainName)
-	tfConfig += processAsmaps(domain.AsMaps, importList.Asmaps, importList.Datacenters, resourceDomainName)
+	tfConfig := processDatacenters(domain.Datacenters, tfData.NormalizedName)
+	tfConfig += processProperties(domain.Properties, tfData.Properties, tfData.Datacenters, tfData.NormalizedName)
+	tfConfig += processResources(domain.Resources, tfData.Resources, tfData.Datacenters, tfData.NormalizedName)
+	tfConfig += processCidrmaps(domain.CidrMaps, tfData.Cidrmaps, tfData.Datacenters, tfData.NormalizedName)
+	tfConfig += processGeomaps(domain.GeographicMaps, tfData.Geomaps, tfData.Datacenters, tfData.NormalizedName)
+	tfConfig += processAsmaps(domain.AsMaps, tfData.Asmaps, tfData.Datacenters, tfData.NormalizedName)
 	tfConfig += "\n"
 
 	_, err = domainTFfileHandle.Write([]byte(tfConfig))
@@ -377,4 +301,15 @@ func createConfig(ctx context.Context, client gtm.GTM, domain *gtm.Domain, impor
 	}
 	domainTFfileHandle.Sync()
 	return nil
+}
+
+// normalizeResourceName is a utility function to normalize resource names.
+// A name must start with a letter or underscore and may contain only letters, digits, underscores, and dashes.
+func normalizeResourceName(key string) string {
+	key = subWithUnderscoreRegexp.ReplaceAllString(key, "_")
+
+	if mustStartWithLetterOrUnderscoreRegexp.MatchString(key) {
+		key = fmt.Sprintf("_%s", key)
+	}
+	return key
 }

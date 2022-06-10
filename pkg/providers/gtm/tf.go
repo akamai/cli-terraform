@@ -17,11 +17,8 @@ package gtm
 import (
 	"fmt"
 	"reflect"
-	"regexp"
 	"strconv"
 	"unicode"
-
-	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configgtm"
 )
 
 // Keys that can be ignored, e.g. lists, read-only, don't want
@@ -43,60 +40,11 @@ var tab4 = "    "
 var tab8 = "        "
 var tab12 = "            "
 
-// header, domain
-var gtmHeaderConfig = fmt.Sprintf(`resource "akamai_gtm_domain" `)
-
-var gtmDomainConfigP2 = fmt.Sprintf(`    contract = var.contractid
-    group = var.groupid
-    comment =  "Domain import"
-`)
-
 // misc
 var gtmRConfigP2 = fmt.Sprintf(`    domain = akamai_gtm_domain.`)
 
 var dependsClauseP1 = fmt.Sprintf(`    depends_on = [
         akamai_gtm_domain.`)
-
-// process domain
-func processDomain(domain *gtm.Domain, resourceDomainName string) string {
-
-	coreFieldsNullMap := getDomainNullValues().CoreObjectFields
-
-	domainBody := ""
-	domainString := gtmHeaderConfig
-
-	domElems := reflect.ValueOf(domain).Elem()
-	for i := 0; i < domElems.NumField(); i++ {
-		varName := domElems.Type().Field(i).Name
-		varType := domElems.Type().Field(i).Type
-		varValue := domElems.Field(i).Interface()
-		// Skip if field is null
-		if _, ok := coreFieldsNullMap[varName]; ok {
-			continue
-		}
-		keyVal := fmt.Sprint(varValue)
-		key := convertKey(varName, keyVal, varType.Kind())
-		if key == "" {
-			continue
-		}
-		if varName == "EmailNotificationList" {
-			keyVal = processStringList(domain.EmailNotificationList)
-		}
-		domainBody += tab4 + key + " = "
-		if varType.Kind() == reflect.String {
-			domainBody += "\"" + keyVal + "\"\n"
-		} else {
-			domainBody += keyVal + "\n"
-		}
-	}
-	domainString += "\"" + resourceDomainName + "\" {\n"
-	domainString += gtmDomainConfigP2
-	domainString += domainBody
-	domainString += "}\n\n"
-
-	return domainString
-
-}
 
 // utility method to process string lists
 func processStringList(sl []string) string {
@@ -164,30 +112,6 @@ func convertKey(inKey string, _ string, _ reflect.Kind) string {
 		}
 	}
 	mappedKeys[inKey] = outKey
-	return outKey
-
-}
-
-// Utility function to normalize resource names. A name must start with a letter or
-// underscore and may contain only letters, digits, underscores, and dashes.
-func normalizeResourceName(inKey string) string {
-
-	outKey := ""
-	re := regexp.MustCompile("^[a-zA-Z0-9_-]*$")
-	for i, char := range inKey {
-		schar := string(char)
-		if i == 0 {
-			fc := regexp.MustCompile("^[a-zA-Z_]*$")
-			if !fc.MatchString(schar) {
-				outKey += "_"
-			}
-		}
-		if re.MatchString(schar) {
-			outKey += schar
-		} else {
-			outKey += "_"
-		}
-	}
 	return outKey
 
 }

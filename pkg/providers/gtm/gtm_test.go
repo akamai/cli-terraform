@@ -11,8 +11,8 @@ type mockGTM struct {
 	mock.Mock
 }
 
-func (p *mockGTM) NullFieldMap(ctx context.Context, _ *gtm.Domain) (*gtm.NullFieldMapStruct, error) {
-	args := p.Called(ctx)
+func (p *mockGTM) NullFieldMap(ctx context.Context, domain *gtm.Domain) (*gtm.NullFieldMapStruct, error) {
+	args := p.Called(ctx, domain)
 
 	if args.Get(0) == nil {
 		return nil, args.Error(1)

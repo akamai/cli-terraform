@@ -1,3 +1,4 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/gtm.TFPolicyData*/ -}}
 terraform {
   required_providers {
     akamai = {
@@ -10,4 +11,31 @@ terraform {
 provider "akamai" {
   edgerc = var.edgerc_path
   config_section = var.config_section
+}
+
+resource "akamai_gtm_domain" "{{.NormalizedName}}" {
+    contract = var.contractid
+    group = var.groupid
+    name = "{{.Name}}"
+    type = "{{.Type}}"
+    {{- if .Comment}}
+    comment = "{{.Comment}}"
+    {{- end}}
+    {{- if .EmailNotificationList}}
+    email_notification_list = [{{range $i, $v := .EmailNotificationList}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+    {{- end}}
+    default_timeout_penalty = {{.DefaultTimeoutPenalty}}
+    {{- if .LoadImbalancePercentage}}
+    load_imbalance_percentage = {{.LoadImbalancePercentage}}
+    {{- end}}
+    {{- if .DefaultSSLClientPrivateKey}}
+    default_ssl_client_private_key = "{{.DefaultSSLClientPrivateKey}}"
+    {{- end}}
+    default_error_penalty = {{.DefaultErrorPenalty}}
+    cname_coalescing_enabled = {{.CnameCoalescingEnabled}}
+    load_feedback = {{.LoadFeedback}}
+    {{- if .DefaultSSLClientCertificate}}
+    default_ssl_client_certificate = "{{.DefaultSSLClientCertificate}}"
+    {{- end}}
+    end_user_mapping_enabled = {{.EndUserMappingEnabled}}
 }
