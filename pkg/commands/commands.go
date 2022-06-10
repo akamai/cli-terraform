@@ -59,32 +59,26 @@ func CommandLocator() ([]*cli.Command, error) {
 			},
 			&cli.BoolFlag{
 				Name:  "resources",
-				Value: true,
 				Usage: "Create json formatted resource import list file, <zone>_resources.json. Used as input by createconfig.",
 			},
 			&cli.BoolFlag{
 				Name:  "createconfig",
-				Value: true,
 				Usage: "Create Terraform configuration (<zone>.tf), dnsvars.tf from generated resources file. Saves zone config for import.",
 			},
 			&cli.BoolFlag{
 				Name:  "importscript",
-				Value: true,
 				Usage: "Create import script for generated Terraform configuration script (<zone>_import.script) files",
 			},
 			&cli.BoolFlag{
 				Name:  "segmentconfig",
-				Value: true,
 				Usage: "Directive for createconfig. Group and segment records by name into separate config files.",
 			},
 			&cli.BoolFlag{
 				Name:  "configonly",
-				Value: true,
 				Usage: "Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Saves zone config for importscript. Ignores any existing resource json file.",
 			},
 			&cli.BoolFlag{
 				Name:  "namesonly",
-				Value: true,
 				Usage: "Directive for both resource gathering and config generation. All record set types assumed.",
 			},
 			&cli.StringSliceFlag{
