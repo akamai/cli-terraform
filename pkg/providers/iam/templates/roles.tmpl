@@ -1,0 +1,8 @@
+{{range .Roles -}}
+    resource "akamai_iam_role" "role_id_{{.RoleID}}" {
+      name          = "{{.RoleName}}"
+      description   = "{{.RoleDescription}}"
+      granted_roles = {{formatIntList .GrantedRoles}}
+    }
+
+{{end}}

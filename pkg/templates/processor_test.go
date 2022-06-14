@@ -113,3 +113,29 @@ func TestProcessTemplates(t *testing.T) {
 		})
 	}
 }
+
+func TestFormatIntList(t *testing.T) {
+	tests := map[string]struct {
+		data   []int
+		expect string
+	}{
+		"list of ints": {
+			data:   []int{123, 345},
+			expect: "[123, 345]",
+		},
+		"empty list of ints": {
+			data:   []int{},
+			expect: "[]",
+		},
+		"nil list of ints": {
+			data:   nil,
+			expect: "[]",
+		},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := formatIntList(test.data)
+			assert.Equal(t, got, test.expect)
+		})
+	}
+}

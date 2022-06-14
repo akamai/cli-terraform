@@ -238,6 +238,24 @@ Flags:
    --tfworkpath path      Path location for placement of created artifacts. Default: current directory
 ```
 
+## Identity and Access Management
+
+### Create Identity and Access Management usage
+
+```
+   akamai terraform [global flags] create-iam --user <user_email>
+
+Flags:
+   --tfworkpath path         Path location for placement of created artifacts. Default: current directory
+   --user [user's email]     Exports user by email with relevant user's groups and roles
+```
+
+### Create Identity and Access Management configuration.
+
+```
+$ akamai terraform create-iam
+```
+
 ## General Notes
 
 1. Terraform variable configuration is generated in a separately named TF file for each Akamai entity type. These files

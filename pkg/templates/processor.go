@@ -7,6 +7,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"text/template"
 
 	"github.com/akamai/cli-terraform/pkg/tools"
@@ -45,6 +47,7 @@ var (
 func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
 	funcs := template.FuncMap{
 		"escape":     tools.EscapeQuotedStringLit,
+		"formatIntList": formatIntList,
 		"toJSON":     tools.ToJSON,
 		"escapeName": tools.EscapeName,
 		"toList":     tools.ToList,
@@ -69,4 +72,16 @@ func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
 		}
 	}
 	return nil
+}
+
+func formatIntList(items []int) string {
+	if len(items) == 0 {
+		return "[]"
+	}
+	var list []string
+	for _, v := range items {
+		list = append(list, strconv.Itoa(v))
+	}
+	output := strings.Join(list, ", ")
+	return "[" + output + "]"
 }

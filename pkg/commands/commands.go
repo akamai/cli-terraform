@@ -20,6 +20,7 @@ import (
 	"github.com/akamai/cli-terraform/pkg/providers/dns"
 	"github.com/akamai/cli-terraform/pkg/providers/edgeworkers"
 	"github.com/akamai/cli-terraform/pkg/providers/gtm"
+	"github.com/akamai/cli-terraform/pkg/providers/iam"
 	"github.com/akamai/cli-terraform/pkg/providers/imaging"
 	"github.com/akamai/cli-terraform/pkg/providers/papi"
 	"github.com/akamai/cli-terraform/pkg/tools"
@@ -209,6 +210,28 @@ func CommandLocator() ([]*cli.Command, error) {
 				Name:        "schema",
 				Usage:       "Generate content of the policy using HCL instead of JSON file",
 				Destination: &tools.Schema,
+			},
+		},
+		BashComplete: autocomplete.Default,
+	})
+
+	commands = append(commands, &cli.Command{
+		Name:        "create-iam",
+		Description: "Create Terraform Identity and Access Management Resources",
+		Usage:       "create-iam",
+		Subcommands: []*cli.Command{
+			{
+				Name:        "user",
+				Description: "Create Terraform User resource with relevant groups and roles resources",
+				Usage:       "user",
+				ArgsUsage:   "<user_email>",
+				Action:      iam.CmdCreateIAMUser,
+			},
+		},
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "tfworkpath",
+				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,

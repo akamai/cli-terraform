@@ -1,0 +1,9 @@
+{{- /*gotype: github.com/akamai/cli-terraform/iam.TFUserData*/ -}}
+terraform init
+terraform import akamai_iam_user.iam_user_{{.ID}} {{.ID}}
+{{range .Roles -}}
+    terraform import akamai_iam_role.role_id_{{.RoleID}} {{.RoleID}}
+{{end -}}
+{{range .Groups -}}
+    terraform import akamai_iam_group.group_id_{{.GroupID}} {{.GroupID}}
+{{end -}}
