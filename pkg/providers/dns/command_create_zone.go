@@ -32,10 +32,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// Terraform resource names
-var zoneResource = "akamai_dns_zone"
-var recordsetResource = "akamai_dns_record"
-
 // Types contains list of Name Types to organize types by name
 type Types []string
 
@@ -73,24 +69,6 @@ var modulePath = ""
 // text for root module construction
 var zoneTFfileHandle *os.File
 var zonetfConfig = ""
-
-var dnsModuleConfig1 = fmt.Sprintf(`module "`)
-
-var dnsModuleConfig2 = fmt.Sprintf(`" {
-    source = "`)
-
-// text for dnsvars.tf construction
-var dnsvarsContent = `variable "dnssection" {
-  default = "default"
-}
-variable "contractid" {
-  default = "%s"
-}
-// Notice: groupid unknown at time of import. Please update.
-variable "groupid" {
-  default = ""
-}
-`
 
 // CmdCreateZone is an entrypoint to create-zone command
 func CmdCreateZone(c *cli.Context) error {
@@ -233,6 +211,7 @@ func CmdCreateZone(c *cli.Context) error {
 			return cli.Exit(color.RedString("Failed to open/create zone config file."), 1)
 		}
 		defer zoneTFfileHandle.Close()
+		fileUtils := fileUtilsProcessor{}
 
 		// build tf file if none
 		if len(zonetfConfig) > 0 {
@@ -249,14 +228,14 @@ func CmdCreateZone(c *cli.Context) error {
 			}
 		} else {
 			// if tf pre existed, zone has to exist by definition
-			zonetfConfig, err = processZone(zoneObject, resourceZoneName, fetchConfig.ModSegment)
+			zonetfConfig, err = processZone(ctx, zoneObject, resourceZoneName, fetchConfig.ModSegment, fileUtils)
 			if err != nil {
 				term.Spinner().Fail()
 				fmt.Println(err.Error())
 				return cli.Exit(color.RedString("Failed. Couldn't initialize zone config"), 1)
 			}
 		}
-		err = appendRootModuleTF(zonetfConfig)
+		err = fileUtils.appendRootModuleTF(zonetfConfig)
 		if err != nil {
 			term.Spinner().Fail()
 			fmt.Println(err.Error())
@@ -264,7 +243,7 @@ func CmdCreateZone(c *cli.Context) error {
 		}
 
 		// process Recordsets.
-		fullZoneConfigMap, err = processRecordsets(ctx, configdns, configImportList.Zone, resourceZoneName, zoneTypeMap, fetchConfig)
+		fullZoneConfigMap, err = processRecordsets(ctx, configdns, configImportList.Zone, resourceZoneName, zoneTypeMap, fetchConfig, fileUtils)
 		if err != nil {
 			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Failed to process recordsets."), 1)
@@ -300,7 +279,7 @@ func CmdCreateZone(c *cli.Context) error {
 			return cli.Exit(color.RedString("Unable to create gtmvars config file"), 1)
 		}
 		defer dnsvarsHandle.Close()
-		_, err = dnsvarsHandle.WriteString(fmt.Sprintf(dnsvarsContent, contractid))
+		_, err = dnsvarsHandle.WriteString(fmt.Sprintf(useTemplate(nil, "dnsvars.tmpl", true), contractid))
 		if err != nil {
 			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Unable to write gtmvars config file"), 1)
@@ -343,19 +322,6 @@ func CmdCreateZone(c *cli.Context) error {
 	return nil
 }
 
-// Flush string to root module TF file
-func appendRootModuleTF(configText string) error {
-
-	// save top level Zone TF config
-	_, err := zoneTFfileHandle.Write([]byte(configText))
-	if err != nil {
-		return fmt.Errorf("failed to save zone configuration file")
-	}
-	zoneTFfileHandle.Sync()
-
-	return nil
-}
-
 // Utility method to create full resource config file path
 func createResourceConfigFilename(resourceName string) string {
 
@@ -372,33 +338,6 @@ func createNamedModulePath(modName string) string {
 	}
 
 	return fpath
-}
-
-// Work routine to create module TF file
-func createModuleTF(modName string, content string) error {
-
-	fmt.Printf("Creating zone name %s module configuration file...", modName)
-	namedmodulePath := createNamedModulePath(modName)
-	if !createDirectory(namedmodulePath) {
-		return fmt.Errorf("Failed to create name module folder: %s", namedmodulePath)
-	}
-	moduleFilename := filepath.Join(namedmodulePath, normalizeResourceName(modName)+".tf")
-	if _, err := os.Stat(moduleFilename); err == nil {
-		// File exists.
-		return fmt.Errorf("Zone record name config already exists: %s", moduleFilename)
-	}
-	f, err := os.Create(moduleFilename)
-	if err != nil {
-		return fmt.Errorf("Failed to create name module configuration file: %s", namedmodulePath)
-	}
-	defer f.Close()
-	_, err = f.WriteString(content)
-	if err != nil {
-		return fmt.Errorf("Failed to write name module configuration: %s", namedmodulePath)
-	}
-	f.Sync()
-
-	return nil
 }
 
 //Utility func
@@ -423,30 +362,12 @@ func createDirectory(dirName string) bool {
 }
 
 func buildZoneImportScript(zone string, zoneConfigMap map[string]Types, resourceName string) (string, error) {
-
-	// build import script
-	var importPrefix = "terraform import "
-	var importFile = ""
-	// Init TF
-	importFile += "terraform init\n"
-	// zone
-	if !checkForResource(zoneResource, resourceName) {
-		// Assuming a zone name cannot contain spaces ....
-		importFile += importPrefix + zoneResource + "." + resourceName + " " + zone + "\n"
+	data := ImportData{
+		Zone:          zone,
+		ZoneConfigMap: zoneConfigMap,
+		ResourceName:  resourceName,
 	}
-	// recordsets
-	for zname, typeList := range zoneConfigMap {
-		// per zone name
-		for _, tname := range typeList {
-			normalName := createRecordsetNormalName(resourceName, zname, tname)
-			if !checkForResource(recordsetResource, normalName) {
-				importFile += importPrefix + recordsetResource + "." + normalName + " " + zone + "#" + zname + "#" + tname + "\n"
-			}
-		}
-	}
-
-	return importFile, nil
-
+	return useTemplate(&data, "import-script.tmpl", true), nil
 }
 
 // remove any resources already present in existing zone tf configuration
@@ -487,7 +408,7 @@ func reconcileZoneResourceTargets(zoneImportList *zoneImportListStruct, zoneName
 		typeMap := make(map[string]bool)
 		revisedTypeList := make([]string, 0, len(typeList))
 		for _, ntype := range typeList {
-			normalName := createRecordsetNormalName(zoneName, zname, ntype)
+			normalName := createUniqueRecordsetName(zoneName, zname, ntype)
 			if !strings.Contains(tfConfig, "\""+normalName+"\"") {
 				typeMap[ntype] = true
 				revisedTypeList = append(revisedTypeList, ntype)

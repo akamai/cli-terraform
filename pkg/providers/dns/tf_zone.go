@@ -15,6 +15,7 @@
 package dns
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 
@@ -25,48 +26,30 @@ import (
 var ignoredZoneKeys = map[string]int{"LastActivationDate": 0, "LastModifiedBy": 0, "LastModifiedDate": 0,
 	"AliasCount": 0, "ActivationState": 0, "VersionId": 0}
 
-// header, zone
-var tfHeaderContent = fmt.Sprint(`terraform {
-  required_version = ">= 0.13"
-  required_providers {
-    akamai = {
-      source = "akamai/akamai"
-      version = "~> 1.6.1"
-    }
-  }
-}
-
-`)
-
-var dnsZoneResourceConfig = fmt.Sprintf(`resource "akamai_dns_zone" "`)
-
-var dnsZoneConfigP2 = fmt.Sprintf(`    contract = var.contractid
-    group = var.groupid
-`)
-
-// module
-var dnsModZoneConfigP1 = fmt.Sprintf(`locals {
-    zone = `)
-
-var dnsModZoneConfigP2 = fmt.Sprintf(`variable "contract" {
-  description = "contract id for zone creation"
-}
-
-variable "group" {
-  description = "group id for zone creation"
-}
-
-variable "name" {
-  description = "zone name"
-}
-
-output "zonename" {
-	value = akamai_dns_zone.`)
-
 // process zone
-func processZone(zone *dns.ZoneResponse, resourceZoneName string, modSegment bool) (string, error) {
+func processZone(ctx context.Context, zone *dns.ZoneResponse, resourceZoneName string, modSegment bool, fileUtils fileUtils) (string, error) {
+	data := Data{
+		Zone:           zone.Zone,
+		BlockName:      resourceZoneName,
+		ResourceFields: gatherResourceFields(zone),
+	}
+	var zoneTF string
+	if modSegment {
+		err := fileUtils.createModuleTF(ctx, resourceZoneName, useTemplate(&data, "config.tmpl", true))
+		if err != nil {
+			return "", err
+		}
+		zoneTF = useTemplate(&data, "zone.tmpl", true)
+	} else {
+		zoneTF = useTemplate(&data, "full_zone.tmpl", true)
+	}
 
-	zoneBody := ""
+	return zoneTF, nil
+
+}
+
+func gatherResourceFields(zone *dns.ZoneResponse) map[string]string {
+	resourceFields := make(map[string]string)
 	zoneElems := reflect.ValueOf(zone).Elem()
 	for i := 0; i < zoneElems.NumField(); i++ {
 		varName := zoneElems.Type().Field(i).Name
@@ -92,43 +75,14 @@ func processZone(zone *dns.ZoneResponse, resourceZoneName string, modSegment boo
 			}
 			keyVal = processTsigKey(varValue.(*dns.TSIGKey))
 		}
-		zoneBody += tab4 + key + " = "
+
 		if varName != "Zone" && varType.Kind() == reflect.String {
-			zoneBody += "\"" + keyVal + "\"\n"
+			resourceFields[key] = fmt.Sprintf("%q", keyVal)
 		} else {
-			zoneBody += keyVal + "\n"
+			resourceFields[key] = keyVal
 		}
 	}
-	zoneResourceString := dnsZoneResourceConfig + resourceZoneName + "\" {\n"
-	zoneResourceString += dnsZoneConfigP2
-	zoneResourceString += zoneBody
-	zoneResourceString += "}\n\n"
-	zoneTF := tfHeaderContent
-	if modSegment {
-		// create initial TF preamble and zone  module
-		zoneTF += dnsModZoneConfigP1 + "\"" + zone.Zone + "\"\n" + "}\n\n"
-		zoneTF += dnsModuleConfig1 + resourceZoneName
-		zoneTF += dnsModuleConfig2 + createNamedModulePath(resourceZoneName) + "\"\n\n"
-		zoneTF += dnsZoneConfigP2
-		zoneTF += "    name = local.zone\n"
-		zoneTF += "}\n\n"
-		// create module config
-		modConfig := dnsModZoneConfigP2 + resourceZoneName + ".name\n"
-		modConfig += "}\n\n"
-		modConfig += dnsModZoneConfigP1 + "var.name\n" + "}\n"
-		modConfig += zoneResourceString
-		err := createModuleTF(resourceZoneName, modConfig)
-		if err != nil {
-			return "", err
-		}
-	} else {
-		// All in one config file
-		zoneTF += dnsModZoneConfigP1 + "\"" + zone.Zone + "\"\n}\n\n"
-		zoneTF += zoneResourceString
-	}
-
-	return zoneTF, nil
-
+	return resourceFields
 }
 
 func processTsigKey(key *dns.TSIGKey) string {
@@ -138,10 +92,10 @@ func processTsigKey(key *dns.TSIGKey) string {
 		// Name has to be not empty if legit
 		return keyBody
 	}
-	keyBody += " {\n"
-	keyBody += tab8 + "name = \"" + key.Name + "\"\n"
-	keyBody += tab8 + "algorithm = \"" + key.Algorithm + "\"\n"
-	keyBody += tab8 + "secret = \"" + key.Secret + "\"\n"
-	keyBody += tab8 + "}"
+	keyBody += fmt.Sprintf(" {\n")
+	keyBody += fmt.Sprintf("%sname = %q\n", tab8, key.Name)
+	keyBody += fmt.Sprintf("%salgorithm = %q\n", tab8, key.Algorithm)
+	keyBody += fmt.Sprintf("%ssecret = %q\n", tab8, key.Secret)
+	keyBody += fmt.Sprintf("%s}", tab8)
 	return keyBody
 }

@@ -30,27 +30,6 @@ const (
 	maxInt       = int(maxUint >> 1)
 )
 
-// module preamble
-var dnsRecConfigP1 = fmt.Sprintf(`variable "zonename" {
-    description = "zone name for this name record set config"
-}
-
-`)
-
-var dnsModuleConfig3 = fmt.Sprintf(`"
-
-    zonename = local.zone
-`)
-
-// recordset
-var dnsRecordsetConfigP1 = fmt.Sprintf(`
-resource "akamai_dns_record" `)
-
-//
-// misc
-var dnsRConfigP2 = fmt.Sprintf(`    zone = local.zone
-`)
-
 // Util func to split params string
 func splitSvcParams(params string) []string {
 
@@ -83,7 +62,7 @@ func createParamsMap(params []string) *map[string]string {
 }
 
 // Process recordset resources
-func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourceZoneName string, zoneTypeMap map[string]map[string]bool, _ fetchConfigStruct) (map[string]Types, error) {
+func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourceZoneName string, zoneTypeMap map[string]map[string]bool, _ fetchConfigStruct, fileUtils fileUtils) (map[string]Types, error) {
 
 	var configuredMap = make(map[string]Types) // returned variable
 
@@ -102,11 +81,7 @@ func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourc
 	}
 	var recordFields map[string]interface{}
 	for {
-		recordBody := ""
-		rString := ""
-		listString := ""
-		modstring := ""
-		tfModule := ""
+		var recordMap map[string]string
 		if fetchConfig.ConfigOnly {
 			// can specify record names with config only
 			for _, recname := range recordNames {
@@ -141,9 +116,8 @@ func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourc
 			//recordFields["active"] = true                   // how set?
 			recordFields["recordtype"] = rs.Type
 			recordFields["ttl"] = rs.TTL
-			recordBody = ""
+			recordMap = make(map[string]string)
 			strval := ""
-			rString = dnsRecordsetConfigP1
 			for fname, fval := range recordFields {
 				if (fname == "priority" || fname == "priority_increment") && rs.Type == "MX" {
 					fval = 0
@@ -161,7 +135,6 @@ func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourc
 						continue
 					}
 				}
-				recordBody += tab4 + fname + " = "
 				switch fval.(type) {
 				case string:
 					strval = fmt.Sprint(fval)
@@ -172,70 +145,28 @@ func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourc
 						strval = strings.Trim(strval, "\"")
 						strval = "\\\"" + strval + "\\\""
 					}
-					recordBody += "\"" + strval + "\"\n"
+					recordMap[fname] = "\"" + strval + "\""
 
 				case []string:
 					// target
-					listString = ""
-					if len(fval.([]string)) > 0 {
-						listString += "["
-						if rs.Type == "MX" {
-							for _, rstr := range rs.Rdata {
-								listString += "\"" + rstr + "\""
-								listString += ", "
-							}
-						} else if rs.Type == "CAA" {
-							for _, rstr := range rs.Rdata {
-								caaparts := strings.Split(rstr, " ")
-								caaparts[2] = strings.ReplaceAll(caaparts[2], "\"", "\\\"")
-								listString += "\"" + strings.Join(caaparts, " ") + "\""
-								listString += ", "
-							}
-						} else {
-							for _, str := range fval.([]string) {
-								if strings.HasPrefix(str, "\"") {
-									str = strings.Trim(str, "\"")
-									str = processString(str)
-									str = "\\\"" + str + "\\\""
-								}
-								listString += "\"" + str + "\""
-								listString += ", "
-							}
-						}
-						listString = strings.TrimRight(listString, ", ")
-						listString += "]"
-					} else {
-						listString += "[]"
-					}
-					recordBody += fmt.Sprint(listString) + "\n"
-
+					recordMap[fname] = fmt.Sprint(recordValueForSlice(fval, rs))
 				default:
-					recordBody += fmt.Sprint(fval) + "\n"
+					recordMap[fname] = fmt.Sprint(fval)
 				}
 			}
-			rString += "\"" + createRecordsetNormalName(resourceZoneName, rs.Name, rs.Type) + "\" {\n"
-			rString += dnsRConfigP2
-			rString += recordBody
-			rString += "}\n"
+			modName := createUniqueRecordsetName(resourceZoneName, rs.Name, rs.Type)
+			data := Data{BlockName: modName, ResourceFields: recordMap}
 			if fetchConfig.ModSegment {
 				// process as module
-				modName := createRecordsetNormalName(resourceZoneName, rs.Name, rs.Type)
-				tfModule = dnsModuleConfig1 + modName
-				tfModule += dnsModuleConfig2 + createNamedModulePath(modName)
-				tfModule += dnsModuleConfig3
-				tfModule += "}\n"
-				if err := appendRootModuleTF(tfModule); err != nil {
+				if err := fileUtils.appendRootModuleTF(useTemplate(&data, "module-set.tmpl", false)); err != nil {
 					return nil, err
 				}
-				modstring = dnsRecConfigP1
-				modstring += dnsModZoneConfigP1 + "var.zonename\n" + "}\n"
-				modstring += rString
-				if err := createModuleTF(modName, modstring); err != nil {
+				if err := fileUtils.createModuleTF(ctx, modName, useTemplate(&data, "recordset-modsegment.tmpl", true)); err != nil {
 					return nil, err
 				}
 			} else {
 				// add to toplevel TF
-				if err := appendRootModuleTF(rString); err != nil {
+				if err := fileUtils.appendRootModuleTF(useTemplate(&data, "resource-set.tmpl", false)); err != nil {
 					return nil, err
 				}
 			}
@@ -253,6 +184,41 @@ func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourc
 
 	return configuredMap, nil
 
+}
+
+func recordValueForSlice(fval interface{}, rs dns.Recordset) string {
+	listString := ""
+	if len(fval.([]string)) > 0 {
+		listString += "["
+		if rs.Type == "MX" {
+			for _, rstr := range rs.Rdata {
+				listString += "\"" + rstr + "\""
+				listString += ", "
+			}
+		} else if rs.Type == "CAA" {
+			for _, rstr := range rs.Rdata {
+				caaparts := strings.Split(rstr, " ")
+				caaparts[2] = strings.ReplaceAll(caaparts[2], "\"", "\\\"")
+				listString += "\"" + strings.Join(caaparts, " ") + "\""
+				listString += ", "
+			}
+		} else {
+			for _, str := range fval.([]string) {
+				if strings.HasPrefix(str, "\"") {
+					str = strings.Trim(str, "\"")
+					str = processString(str)
+					str = "\\\"" + str + "\\\""
+				}
+				listString += "\"" + str + "\""
+				listString += ", "
+			}
+		}
+		listString = strings.TrimRight(listString, ", ")
+		listString += "]"
+	} else {
+		listString += "[]"
+	}
+	return listString
 }
 
 // process string with embedded quotes
@@ -297,7 +263,7 @@ func processString(source string) string {
 }
 
 // create unique resource record name
-func createRecordsetNormalName(resourceZoneName, rName, rType string) string {
+func createUniqueRecordsetName(resourceZoneName, rName, rType string) string {
 
 	return strings.TrimRight(fmt.Sprintf("%s_%s_%s",
 		normalizeResourceName(resourceZoneName),

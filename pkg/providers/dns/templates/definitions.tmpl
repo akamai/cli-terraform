@@ -1,0 +1,34 @@
+{{- /*gotype: cli-terraform/pkg/providers/dns/dns.Data*/ -}}
+{{- define "terraform"}}
+terraform {
+  required_version = ">= 0.13"
+  required_providers {
+    akamai = {
+      source = "akamai/akamai"
+      version = "~> 1.6.1"
+    }
+  }
+}
+{{- end}}
+{{- define "locals"}}
+locals {
+    zone = {{.}}
+}
+{{- end}}
+{{- define "resource"}}
+resource "akamai_dns_zone" "{{.BlockName}}" {
+    contract = var.contractid
+    group = var.groupid
+    {{- range $name, $value := .ResourceFields}}
+    {{$name}} = {{$value}}
+    {{- end}}
+}
+{{end}}
+{{define "resource-set"}}
+resource "akamai_dns_record" "{{.BlockName}}" {
+    zone = local.zone
+    {{- range $name, $value := .ResourceFields}}
+    {{$name}} = {{$value}}
+    {{- end}}
+}
+{{end}}

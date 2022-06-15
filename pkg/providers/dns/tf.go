@@ -35,7 +35,6 @@ var mappedKeys = map[string]string{"DynamicTTL": "dynamic_ttl", "StaticTTL": "st
 	"TTL": "ttl", "DatacenterId": "datacenter_id", "HandoutCName": "handout_cname", "StickinessBonusPercentage": "stickiness_bonus_percentage",
 	"CName": "cname", "BackupCName": "backup_cname"}
 
-var tab4 = "    "
 var tab8 = "        "
 
 // utility method to process string lists

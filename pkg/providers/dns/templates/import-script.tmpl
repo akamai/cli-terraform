@@ -1,0 +1,15 @@
+{{- /*gotype: cli-terraform/pkg/providers/dns/dns.ImportData*/ -}}
+terraform init
+{{- if not (checkForResource "akamai_dns_zone" .ResourceName)}}
+terraform import akamai_dns_zone.{{.ResourceName}} {{.Zone}}
+{{- end}}
+{{- $rname := .ResourceName}}
+{{- $zone := .Zone}}
+{{- range $zname, $typeList := .ZoneConfigMap}}
+    {{- range $tname := $typeList}}
+        {{- $normalName := createUniqueRecordsetName $rname $zname $tname}}
+        {{- if not (checkForResource "akamai_dns_record" $normalName)}}
+terraform import akamai_dns_record.{{$normalName}} {{$zone}}#{{$zname}}#{{$tname}}
+        {{- end}}
+    {{- end}}
+{{- end}}

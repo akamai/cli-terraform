@@ -62,21 +62,3 @@ func readTfState() error {
 
 	return nil
 }
-
-// check if resource present in state
-func checkForResource(rtype string, name string) bool {
-
-	if tfState == nil {
-		if err := readTfState(); err != nil {
-			// not differentiating between not exists and file error
-			return false
-		}
-	}
-	for _, r := range tfState.Resources {
-		if r.Type == rtype && r.Name == name {
-			return true
-		}
-	}
-
-	return false
-}
