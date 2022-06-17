@@ -32,10 +32,7 @@ var (
 func CmdCreateIAMUser(c *cli.Context) error {
 	ctx := c.Context
 	if c.NArg() != 1 {
-		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-			return cli.Exit(color.RedString("Error displaying help command"), 1)
-		}
-		return cli.Exit(color.RedString("User's email is required"), 1)
+		return showHelpCommandWithErr(c, "User's email is required")
 	}
 	sess := edgegrid.GetSession(ctx)
 	client := iam.Client(sess)

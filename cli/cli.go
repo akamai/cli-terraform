@@ -79,6 +79,10 @@ func sessionRequired(c *cli.Context) bool {
 		}
 	}
 
+	if flag := c.Args().Get(1); flag == "--help" {
+		return false
+	}
+
 	for _, cmd := range c.App.Commands {
 		if cmd.Name == command {
 			return true

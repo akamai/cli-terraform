@@ -216,9 +216,10 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-iam",
-		Description: "Create Terraform Identity and Access Management Resources",
-		Usage:       "create-iam",
+		Name:            "create-iam",
+		Description:     "Create Terraform Identity and Access Management Resources",
+		HideHelpCommand: true,
+		Action:          iam.CmdCreateIAM,
 		Subcommands: []*cli.Command{
 			{
 				Name:        "user",
