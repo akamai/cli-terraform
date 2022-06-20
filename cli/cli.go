@@ -79,7 +79,8 @@ func sessionRequired(c *cli.Context) bool {
 		}
 	}
 
-	if flag := c.Args().Get(1); flag == "--help" {
+	tail := c.Args().Tail()
+	if len(tail) > 0 && tail[len(tail)-1] == "--help" {
 		return false
 	}
 
