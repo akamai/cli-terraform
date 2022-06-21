@@ -1,0 +1,13 @@
+{{ if .Siem -}}
+{{ if .Siem.EnableSiem -}}
+// SIEM Settings
+resource "akamai_appsec_siem_settings" "siem" {
+    config_id   = akamai_appsec_configuration.config.config_id
+    enable_siem = {{ .Siem.EnableSiem }}
+    enable_for_all_policies = {{ .Siem.EnableForAllPolicies }}
+    enable_botman_siem = {{ .Siem.EnabledBotmanSiemEvents }}
+    siem_id = {{ .Siem.SiemDefinitionID }}
+    security_policy_ids = [{{ toList .Siem.FirewallPolicyIds }}]
+}
+{{ end -}}
+{{ end -}}

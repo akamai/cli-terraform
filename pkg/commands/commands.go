@@ -15,6 +15,7 @@
 package commands
 
 import (
+	"github.com/akamai/cli-terraform/pkg/providers/appsec"
 	"github.com/akamai/cli-terraform/pkg/providers/cloudlets"
 	"github.com/akamai/cli-terraform/pkg/providers/dns"
 	"github.com/akamai/cli-terraform/pkg/providers/edgeworkers"
@@ -98,6 +99,22 @@ func CommandLocator() ([]*cli.Command, error) {
 			&cli.StringSliceFlag{
 				Name:  "recordname",
 				Usage: "Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.",
+			},
+		},
+		BashComplete: autocomplete.Default,
+	})
+
+	commands = append(commands, &cli.Command{
+		Name:        "create-appsec",
+		Description: "Create Terraform Application Security Resource",
+		Usage:       "create-appsec",
+		ArgsUsage:   "<security configuration name>",
+		Action:      appsec.CmdCreateAppsec,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "tfworkpath",
+				Usage:       "Path location for placement of created artifacts",
+				DefaultText: "current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,

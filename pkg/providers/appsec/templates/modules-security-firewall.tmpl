@@ -1,0 +1,35 @@
+{{ range .SecurityPolicies -}}
+{{ $policyName := escapeName .Name -}}
+{{ if .IPGeoFirewall -}}
+// IP/GEO Firewall
+resource "akamai_appsec_ip_geo" "{{ $policyName }}" {
+    config_id                  = akamai_appsec_configuration.config.config_id
+    security_policy_id         = akamai_appsec_ip_geo_protection.{{ $policyName}}.security_policy_id
+    {{ if eq .IPGeoFirewall.Block "blockAllTrafficExceptAllowedIPs" -}}
+    mode                       = "allow"
+    {{ else -}}
+    mode                       = "block"
+    {{ end -}}
+    {{ if .IPGeoFirewall.GeoControls -}}
+    {{ if .IPGeoFirewall.GeoControls.BlockedIPNetworkLists -}}
+    {{ if .IPGeoFirewall.GeoControls.BlockedIPNetworkLists.NetworkList -}}
+    geo_network_lists          = [{{ toList .IPGeoFirewall.GeoControls.BlockedIPNetworkLists.NetworkList }}]
+    {{ end -}}
+    {{ end -}}
+    {{ end -}}
+    {{ if .IPGeoFirewall.IPControls -}}
+    {{ if .IPGeoFirewall.IPControls.BlockedIPNetworkLists -}}
+    {{ if .IPGeoFirewall.IPControls.BlockedIPNetworkLists.NetworkList -}}
+    ip_network_lists           = [{{ toList .IPGeoFirewall.IPControls.BlockedIPNetworkLists.NetworkList }}]
+    {{ end -}}
+    {{ end -}}
+    {{ if .IPGeoFirewall.IPControls.AllowedIPNetworkLists -}}
+    {{ if .IPGeoFirewall.IPControls.AllowedIPNetworkLists.NetworkList -}}
+    exception_ip_network_lists = [{{ toList .IPGeoFirewall.IPControls.AllowedIPNetworkLists.NetworkList }}]
+    {{ end -}}
+    {{ end -}}
+    {{ end -}}
+}
+
+{{ end -}}
+{{ end -}}

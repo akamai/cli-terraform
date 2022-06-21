@@ -229,6 +229,15 @@ Flags:
 $ akamai terraform create-imaging
 ```
 
+## Appsec
+### Usage
+```
+   akamai terraform [global flags] create-appsec [flags] <name_of_security_config>
+   
+Flags:
+   --tfworkpath path      Path location for placement of created artifacts. Default: current directory
+```
+
 ## General Notes
 
 1. Terraform variable configuration is generated in a separately named TF file for each Akamai entity type. These files

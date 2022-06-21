@@ -1,0 +1,40 @@
+{{ range .SecurityPolicies -}}
+{{ $policyName := escapeName .Name -}}
+// Enable/Disable Protections for policy {{ $policyName }}
+resource "akamai_appsec_waf_protection" "{{ $policyName }}" {
+    config_id          = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
+    enabled            = {{ .SecurityControls.ApplyApplicationLayerControls }}
+}
+
+resource "akamai_appsec_api_constraints_protection" "{{ $policyName }}" {
+    config_id          = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_waf_protection.{{ $policyName }}.security_policy_id
+    enabled            = {{ .SecurityControls.ApplyAPIConstraints }}
+}
+
+resource "akamai_appsec_ip_geo_protection" "{{ $policyName }}" {
+    config_id          = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_api_constraints_protection.{{ $policyName }}.security_policy_id
+    enabled            = {{ .SecurityControls.ApplyNetworkLayerControls }}
+}
+
+resource "akamai_appsec_rate_protection" "{{ $policyName }}" {
+    config_id          = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_ip_geo_protection.{{ $policyName }}.security_policy_id
+    enabled            = {{ .SecurityControls.ApplyRateControls }}
+}
+
+resource "akamai_appsec_reputation_protection" "{{ $policyName }}" {
+    config_id          = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_rate_protection.{{ $policyName }}.security_policy_id
+    enabled            = {{ .SecurityControls.ApplyReputationControls }}
+}
+
+resource "akamai_appsec_slowpost_protection" "{{ $policyName }}" {
+    config_id          = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_reputation_protection.{{ $policyName }}.security_policy_id
+    enabled            = {{ .SecurityControls.ApplySlowPostControls }}
+}
+
+{{ end -}}
