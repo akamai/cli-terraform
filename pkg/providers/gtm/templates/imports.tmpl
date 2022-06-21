@@ -1,8 +1,8 @@
 {{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/gtm.TFPolicyData*/ -}}
 terraform init
 terraform import akamai_gtm_domain.{{.NormalizedName}} "{{.Name}}"
-{{- range $id, $name := .Datacenters}}
-terraform import akamai_gtm_datacenter.{{normalize $name}} "{{$.Name}}:{{$id}}"
+{{- range .Datacenters}}
+terraform import akamai_gtm_datacenter.{{normalize .Nickname}} "{{$.Name}}:{{.ID}}"
 {{- end}}
 {{- range $name, $v := .Properties}}
 terraform import akamai_gtm_property.{{normalize $name}} "{{$.Name}}:{{$name}}"

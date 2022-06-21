@@ -1,0 +1,56 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/gtm.TFPolicyData*/ -}}
+{{- range .Datacenters -}}
+resource "akamai_gtm_datacenter" "{{normalize .Nickname}}" {
+    domain = akamai_gtm_domain.{{$.NormalizedName}}.name
+    {{- if .Nickname}}
+    nickname = "{{.Nickname}}"
+    {{- end}}
+    {{- if .City}}
+    city = "{{.City}}"
+    {{- end}}
+    {{- if .StateOrProvince}}
+    state_or_province = "{{.StateOrProvince}}"
+    {{- end}}
+    {{- if .Country}}
+    country = "{{.Country}}"
+    {{- end}}
+    {{- if .Continent}}
+    continent = "{{.Continent}}"
+    {{- end}}
+    {{- if .Latitude}}
+    latitude = {{.Latitude}}
+    {{- end}}
+    {{- if .Longitude}}
+    longitude = {{.Longitude}}
+    {{- end}}
+    {{- if .CloneOf}}
+    clone_of = {{.CloneOf}}
+    {{- end}}
+    cloud_server_host_header_override = {{.CloudServerHostHeaderOverride}}
+    cloud_server_targeting = {{.CloudServerTargeting}}
+    {{- with .DefaultLoadObject}}
+    default_load_object {
+        {{- if .LoadObject}}
+        load_object = "{{.LoadObject}}"
+        {{- end}}
+        {{- if .LoadObjectPort}}
+        load_object_port = {{.LoadObjectPort}}
+        {{- end}}
+        {{- if .LoadServers}}
+        load_servers = [{{range $i, $v := .LoadServers}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+        {{- end}}
+    }
+    {{- end}}
+    depends_on = [
+        akamai_gtm_domain.{{$.NormalizedName}}
+    ]
+}
+
+{{end}}
+
+{{- range .DefaultDatacenters -}}
+data "akamai_gtm_default_datacenter" "default_datacenter_{{.ID}}" {
+    domain = akamai_gtm_domain.{{$.NormalizedName}}.name
+    datacenter = {{.ID}}
+}
+{{end}}

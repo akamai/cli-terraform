@@ -52,13 +52,30 @@ type (
 		DefaultSSLClientCertificate string
 		EndUserMappingEnabled       bool
 		Section                     string
-		Datacenters                 map[int]string
-		DefaultDatacenters          map[int]string
+		Datacenters                 []TFDatacenterData
+		DefaultDatacenters          []TFDatacenterData
+		DatacentersImportList       map[int]string // only for compatibility purpose, to be removed
 		Properties                  map[string][]int
 		Resources                   map[string][]int
 		Cidrmaps                    map[string][]int
 		Geomaps                     map[string][]int
 		Asmaps                      map[string][]int
+	}
+
+	// TFDatacenterData represents the data used for processing a dataacenter
+	TFDatacenterData struct {
+		ID                            int
+		Nickname                      string
+		City                          string
+		CloneOf                       int
+		CloudServerHostHeaderOverride bool
+		CloudServerTargeting          bool
+		Continent                     string
+		Country                       string
+		Latitude                      float64
+		Longitude                     float64
+		StateOrProvince               string
+		DefaultLoadObject             *gtm.LoadObject
 	}
 )
 
@@ -114,14 +131,16 @@ func CmdCreateDomain(c *cli.Context) error {
 		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
 	}
 
-	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
+	datacentersPath := filepath.Join(tools.TFWorkPath, "datacenters.tf")
 	domainPath = filepath.Join(tools.TFWorkPath, "domain.tf")
 	importPath = filepath.Join(tools.TFWorkPath, "import.sh")
+	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
 
 	templateToFile := map[string]string{
-		"domain.tmpl":    domainPath,
-		"variables.tmpl": variablesPath,
-		"imports.tmpl":   importPath,
+		"datacenters.tmpl": datacentersPath,
+		"domain.tmpl":      domainPath,
+		"imports.tmpl":     importPath,
+		"variables.tmpl":   variablesPath,
 	}
 
 	err := tools.CheckFiles(domainPath, variablesPath, importPath)
@@ -173,6 +192,8 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, section strin
 		EndUserMappingEnabled:       domain.EndUserMappingEnabled,
 	}
 
+	getDatacenters(domain, &tfDomainData)
+
 	createImportList(domain, &tfDomainData)
 	term.Spinner().OK()
 
@@ -195,14 +216,40 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, section strin
 	return nil
 }
 
+func getDatacenters(domain *gtm.Domain, tfData *TFDomainData) {
+	tfData.Datacenters = make([]TFDatacenterData, 0)
+	tfData.DefaultDatacenters = make([]TFDatacenterData, 0)
+	tfData.DatacentersImportList = make(map[int]string, len(domain.Datacenters))
+	for _, dc := range domain.Datacenters {
+		if _, ok := defaultDCs[dc.DatacenterId]; ok {
+			tfData.DefaultDatacenters = append(tfData.DefaultDatacenters, TFDatacenterData{Nickname: dc.Nickname, ID: dc.DatacenterId})
+		} else {
+			tfData.Datacenters = append(tfData.Datacenters, TFDatacenterData{
+				ID:                            dc.DatacenterId,
+				Nickname:                      dc.Nickname,
+				City:                          dc.City,
+				CloneOf:                       dc.CloneOf,
+				CloudServerHostHeaderOverride: dc.CloudServerHostHeaderOverride,
+				CloudServerTargeting:          dc.CloudServerTargeting,
+				Continent:                     dc.Continent,
+				Country:                       dc.Country,
+				Latitude:                      dc.Latitude,
+				Longitude:                     dc.Longitude,
+				StateOrProvince:               dc.StateOrProvince,
+				DefaultLoadObject:             dc.DefaultLoadObject,
+			})
+
+			tfData.DatacentersImportList[dc.DatacenterId] = dc.Nickname
+		}
+	}
+}
+
 // retrieve Null Values for Object Type
 func getNullValuesList(objType string) map[string]gtm.NullPerObjectAttributeStruct {
 
 	switch objType {
 	case "Properties":
 		return nullFieldMap.Properties
-	case "Datacenters":
-		return nullFieldMap.Datacenters
 	case "Resources":
 		return nullFieldMap.Resources
 	case "CidrMaps":
@@ -217,16 +264,6 @@ func getNullValuesList(objType string) map[string]gtm.NullPerObjectAttributeStru
 }
 
 func createImportList(domain *gtm.Domain, tfData *TFDomainData) {
-	// Inventory datacenters
-	tfData.Datacenters = make(map[int]string, len(domain.Datacenters))
-	tfData.DefaultDatacenters = make(map[int]string, len(domain.Datacenters))
-	for _, dc := range domain.Datacenters {
-		if _, ok := defaultDCs[dc.DatacenterId]; ok {
-			tfData.DefaultDatacenters[dc.DatacenterId] = dc.Nickname
-		} else {
-			tfData.Datacenters[dc.DatacenterId] = dc.Nickname
-		}
-	}
 	// inventory properties and targets
 	tfData.Properties = make(map[string][]int, len(domain.Properties))
 	for _, p := range domain.Properties {
@@ -287,12 +324,11 @@ func createConfig(ctx context.Context, client gtm.GTM, domain *gtm.Domain, tfDat
 		return fmt.Errorf("failed to initialize Domain null fields map")
 	}
 	// build tf file
-	tfConfig := processDatacenters(domain.Datacenters, tfData.NormalizedName)
-	tfConfig += processProperties(domain.Properties, tfData.Properties, tfData.Datacenters, tfData.NormalizedName)
-	tfConfig += processResources(domain.Resources, tfData.Resources, tfData.Datacenters, tfData.NormalizedName)
-	tfConfig += processCidrmaps(domain.CidrMaps, tfData.Cidrmaps, tfData.Datacenters, tfData.NormalizedName)
-	tfConfig += processGeomaps(domain.GeographicMaps, tfData.Geomaps, tfData.Datacenters, tfData.NormalizedName)
-	tfConfig += processAsmaps(domain.AsMaps, tfData.Asmaps, tfData.Datacenters, tfData.NormalizedName)
+	tfConfig := processProperties(domain.Properties, tfData.Properties, tfData.DatacentersImportList, tfData.NormalizedName)
+	tfConfig += processResources(domain.Resources, tfData.Resources, tfData.DatacentersImportList, tfData.NormalizedName)
+	tfConfig += processCidrmaps(domain.CidrMaps, tfData.Cidrmaps, tfData.DatacentersImportList, tfData.NormalizedName)
+	tfConfig += processGeomaps(domain.GeographicMaps, tfData.Geomaps, tfData.DatacentersImportList, tfData.NormalizedName)
+	tfConfig += processAsmaps(domain.AsMaps, tfData.Asmaps, tfData.DatacentersImportList, tfData.NormalizedName)
 	tfConfig += "\n"
 
 	_, err = domainTFfileHandle.Write([]byte(tfConfig))

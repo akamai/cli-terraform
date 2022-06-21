@@ -17,6 +17,7 @@ package gtm
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 
 	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configgtm"
 )
@@ -127,5 +128,19 @@ func processResourceInstances(instances []*gtm.ResourceInstance, dcIDs map[int]s
 	}
 
 	return instanceString
+
+}
+
+func processLoadObject(lo *gtm.LoadObject) string {
+
+	loBody := ""
+	loBody += tab8 + "load_object = \"" + lo.LoadObject + "\"\n"
+	loBody += tab8 + "load_object_port = " + strconv.Itoa(lo.LoadObjectPort) + "\n"
+	lsList := processStringList(lo.LoadServers)
+	if len(lo.LoadServers) < 1 {
+		lsList = "[]"
+	}
+	loBody += tab8 + "load_servers = " + lsList + "\n"
+	return loBody
 
 }
