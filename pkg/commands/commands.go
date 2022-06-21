@@ -224,9 +224,14 @@ func CommandLocator() ([]*cli.Command, error) {
 			{
 				Name:        "user",
 				Description: "Create Terraform User resource with relevant groups and roles resources",
-				Usage:       "user",
 				ArgsUsage:   "<user_email>",
 				Action:      iam.CmdCreateIAMUser,
+			},
+			{
+				Name:        "group",
+				Description: "Create Terraform Group resource with relevant users and roles resources",
+				ArgsUsage:   "<group_id>",
+				Action:      iam.CmdCreateIAMGroup,
 			},
 		},
 		Flags: []cli.Flag{

@@ -1,4 +1,9 @@
-{{range .Roles -}}
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/iam.TFData*/ -}}
+
+{{ if eq .Subcommand "role" -}}
+{{template "terraform_config.tmpl"}}
+{{end}}
+{{- range .TFRoles -}}
     resource "akamai_iam_role" "role_id_{{.RoleID}}" {
       name          = "{{.RoleName}}"
       description   = "{{.RoleDescription}}"

@@ -3,6 +3,7 @@ package iam
 import (
 	"testing"
 
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/iam"
 	"github.com/fatih/color"
 	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
@@ -164,6 +165,42 @@ func TestShowHelpCommandWithErr(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			err := showHelpCommandWithErr(test.ctx, test.stringErr)
 			assert.Equal(t, test.expectedErr, err)
+		})
+	}
+}
+
+func TestGetGrantedRolesID(t *testing.T) {
+	tests := map[string]struct {
+		grantedRoles []iam.RoleGrantedRole
+		expectedIDs  []int
+	}{
+		"granted roles": {
+			grantedRoles: []iam.RoleGrantedRole{
+				{
+					RoleID: 123,
+				},
+				{
+					RoleID: 321,
+				},
+				{
+					RoleID: 456,
+				},
+			},
+			expectedIDs: []int{123, 321, 456},
+		},
+		"empty granted roles": {
+			grantedRoles: []iam.RoleGrantedRole{},
+			expectedIDs:  []int{},
+		},
+		"nil granted roles": {
+			grantedRoles: nil,
+			expectedIDs:  []int{},
+		},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			grantedRolesIDs := getGrantedRolesID(test.grantedRoles)
+			assert.Equal(t, test.expectedIDs, grantedRolesIDs)
 		})
 	}
 }

@@ -33,3 +33,4 @@ resource "akamai_iam_user" "iam_user_123" {
   auth_grants_json   = "[{\"groupId\":56789,\"groupName\":\"Custom group 56789\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role 12345\"},{\"groupId\":987,\"groupName\":\"Custom group 987\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":54321,\"roleName\":\"Custom role 54321\"}]"
   lock               = false
 }
+

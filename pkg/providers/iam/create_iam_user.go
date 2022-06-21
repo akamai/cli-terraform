@@ -2,7 +2,6 @@ package iam
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -60,7 +59,7 @@ func CmdCreateIAMUser(c *cli.Context) error {
 		"groups.tmpl":    groupPath,
 		"imports.tmpl":   importPath,
 		"roles.tmpl":     rolesPath,
-		"user.tmpl":      userPath,
+		"users.tmpl":     userPath,
 		"variables.tmpl": variablesPath,
 	}
 
@@ -79,7 +78,10 @@ func CmdCreateIAMUser(c *cli.Context) error {
 
 func createIAMUserByEmail(ctx context.Context, userEmail, section string, client iam.IAM, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
-	fmt.Println("Exporting Identity and Access Management user configuration with related role and groups")
+	_, err := term.Writeln("Exporting Identity and Access Management user configuration with relevant roles and groups")
+	if err != nil {
+		return err
+	}
 	term.Spinner().Start("Fetching user by email " + userEmail)
 
 	user, err := getUserByEmail(ctx, client, userEmail)
@@ -89,7 +91,7 @@ func createIAMUserByEmail(ctx context.Context, userEmail, section string, client
 	}
 	term.Spinner().OK()
 
-	tfData, err := getTFUserData(user, section)
+	tfUserData, err := getTFUser(user)
 	if err != nil {
 		term.Spinner().Fail()
 		return err
@@ -97,18 +99,30 @@ func createIAMUserByEmail(ctx context.Context, userEmail, section string, client
 
 	authGrantsList := user.AuthGrants
 
-	if len(authGrantsList) > 0 {
-		tfData.Roles, err = getTFUserRoles(ctx, client, authGrantsList)
-		if err != nil {
-			term.Spinner().Fail()
-			return err
-		}
+	tfData := TFData{
+		TFUsers: []*TFUser{
+			tfUserData,
+		},
+		Section:    section,
+		Subcommand: "user",
+	}
 
-		tfData.Groups, err = getTFUserGroups(ctx, client, authGrantsList)
+	if len(authGrantsList) > 0 {
+		term.Spinner().Start("Fetching roles for user " + userEmail)
+		tfData.TFRoles, err = getTFUserRoles(ctx, client, authGrantsList)
 		if err != nil {
 			term.Spinner().Fail()
 			return err
 		}
+		term.Spinner().OK()
+
+		term.Spinner().Start("Fetching groups for user " + userEmail)
+		tfData.TFGroups, err = getTFUserGroups(ctx, client, authGrantsList)
+		if err != nil {
+			term.Spinner().Fail()
+			return err
+		}
+		term.Spinner().OK()
 	}
 
 	term.Spinner().Start("Saving TF configurations ")
@@ -117,7 +131,10 @@ func createIAMUserByEmail(ctx context.Context, userEmail, section string, client
 		return err
 	}
 	term.Spinner().OK()
-	fmt.Printf("Terraform configuration for user with email '%s' was saved successfully\n", tfData.Email)
+	_, err = term.Writeln(fmt.Sprintf("Terraform configuration for user with email '%s' was saved successfully", tfUserData.Email))
+	if err != nil {
+		return nil
+	}
 
 	return nil
 }
@@ -186,57 +203,4 @@ func getTFUserGroups(ctx context.Context, client iam.IAM, authGrantsList []iam.A
 		}
 	}
 	return groups, nil
-}
-
-func getTFUserData(user *iam.User, section string) (*TFUserData, error) {
-	authGrants, err := getUserAuthGrants(user)
-	if err != nil {
-		return nil, fmt.Errorf("%w: %s for user with email %s", ErrMarshalUserAuthGrants, err, user.Email)
-	}
-
-	return &TFUserData{
-		TFUserBasicInfo: TFUserBasicInfo{
-			ID:                user.IdentityID,
-			FirstName:         user.FirstName,
-			LastName:          user.LastName,
-			Email:             user.Email,
-			Country:           user.Country,
-			Phone:             user.Phone,
-			TFAEnabled:        user.TFAEnabled,
-			ContactType:       user.ContactType,
-			JobTitle:          user.JobTitle,
-			TimeZone:          user.TimeZone,
-			SecondaryEmail:    user.SecondaryEmail,
-			MobilePhone:       user.MobilePhone,
-			Address:           user.Address,
-			City:              user.City,
-			State:             user.State,
-			ZipCode:           user.ZipCode,
-			PreferredLanguage: user.PreferredLanguage,
-			SessionTimeOut:    user.SessionTimeOut,
-		},
-		IsLocked:   user.IsLocked,
-		AuthGrants: authGrants,
-		Section:    section,
-	}, nil
-}
-
-func getUserAuthGrants(user *iam.User) (string, error) {
-	var authGrantsJSON []byte
-	var err error
-	if len(user.AuthGrants) > 0 {
-		authGrantsJSON, err = json.Marshal(user.AuthGrants)
-		if err != nil {
-			return "", err
-		}
-	}
-	return string(authGrantsJSON), nil
-}
-
-func getGrantedRolesID(grantedRoles []iam.RoleGrantedRole) []int {
-	rolesIDs := make([]int, 0, len(grantedRoles))
-	for _, v := range grantedRoles {
-		rolesIDs = append(rolesIDs, int(v.RoleID))
-	}
-	return rolesIDs
 }

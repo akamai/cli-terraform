@@ -243,11 +243,14 @@ Flags:
 ### Create Identity and Access Management usage
 
 ```
-   akamai terraform [global flags] create-iam --user <user_email>
+   akamai terraform [global flags] create-iam [subcommand]
 
+Subcommands:
+    group [group id]        Exports group by id with relevant users and their roles      
+    user [user's email]     Exports user by email with relevant user's groups and roles
+    
 Flags:
-   --tfworkpath path         Path location for placement of created artifacts. Default: current directory
-   --user [user's email]     Exports user by email with relevant user's groups and roles
+   --tfworkpath path        Path location for placement of created artifacts. Default: current directory
 ```
 
 ### Create Identity and Access Management configuration.

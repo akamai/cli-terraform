@@ -16,15 +16,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type mockProcessor struct {
-	mock.Mock
-}
-
-func (m *mockProcessor) ProcessTemplates(i interface{}) error {
-	args := m.Called(i)
-	return args.Error(0)
-}
-
 var (
 	expectListUsers = func(client *mockiam) {
 		listUserReq := iam.ListUsersRequest{}
@@ -69,7 +60,7 @@ var (
 		client.On("GetUser", mock.Anything, getUserReq).Return(&user, nil).Once()
 	}
 
-	expectGetRole = func(client *mockiam) {
+	expectGetUserRole = func(client *mockiam) {
 		getRoleReq := iam.GetRoleRequest{
 			ID:           12345,
 			GrantedRoles: true,
@@ -83,7 +74,7 @@ var (
 		client.On("GetRole", mock.Anything, getRoleReq).Return(&role, nil).Once()
 	}
 
-	expectGetGroup = func(client *mockiam) {
+	expectGetUserGroup = func(client *mockiam) {
 		getGroupReq := iam.GetGroupRequest{
 			GroupID: 56789,
 		}
@@ -95,13 +86,16 @@ var (
 		client.On("GetGroup", mock.Anything, getGroupReq).Return(&group, nil).Once()
 	}
 
-	expectProcessTemplates = func(p *mockProcessor, section string) *mock.Call {
-		tfData := TFUserData{
-			IsLocked:        false,
-			AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role\"}]",
-			Section:         section,
-			TFUserBasicInfo: getTFUserBasicInfo(),
-			Roles: []TFRole{
+	expectUserByEmailProcessTemplates = func(p *mockProcessor, section string) *mock.Call {
+		tfData := TFData{
+			TFUsers: []*TFUser{
+				{
+					IsLocked:        false,
+					AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role\"}]",
+					TFUserBasicInfo: getTFUserBasicInfo(),
+				},
+			},
+			TFRoles: []TFRole{
 				{
 					RoleID:          12345,
 					RoleName:        "Custom role",
@@ -109,23 +103,25 @@ var (
 					GrantedRoles:    []int{},
 				},
 			},
-			Groups: []TFGroup{
+			TFGroups: []TFGroup{
 				{
 					GroupID:       56789,
 					ParentGroupID: 98765,
 					GroupName:     "Custom group",
 				},
 			},
+			Section:    section,
+			Subcommand: "user",
 		}
 		call := p.On(
 			"ProcessTemplates",
-			&tfData,
+			tfData,
 		)
 		return call.Return(nil)
 	}
 )
 
-func TestCreateIAMUser(t *testing.T) {
+func TestCreateIAMUserByEmail(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
@@ -135,9 +131,9 @@ func TestCreateIAMUser(t *testing.T) {
 			init: func(i *mockiam, p *mockProcessor) {
 				expectListUsers(i)
 				expectGetUser(i)
-				expectGetRole(i)
-				expectGetGroup(i)
-				expectProcessTemplates(p, section)
+				expectGetUserRole(i)
+				expectGetUserGroup(i)
+				expectUserByEmailProcessTemplates(p, section)
 			},
 		},
 	}
@@ -155,21 +151,24 @@ func TestCreateIAMUser(t *testing.T) {
 	}
 }
 
-func TestProcessIAMTemplates(t *testing.T) {
+func TestProcessIAMUserTemplates(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		givenData    TFUserData
+		givenData    TFData
 		dir          string
 		filesToCheck []string
 	}{
 		"basic user": {
-			givenData: TFUserData{
-				TFUserBasicInfo: getTFUserBasicInfo(),
-				IsLocked:        false,
-				AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role\"}]",
-				Section:         section,
-				Roles: []TFRole{
+			givenData: TFData{
+				TFUsers: []*TFUser{
+					{
+						TFUserBasicInfo: getTFUserBasicInfo(),
+						IsLocked:        false,
+						AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role\"}]",
+					},
+				},
+				TFRoles: []TFRole{
 					{
 						RoleID:          12345,
 						RoleName:        "Custom role",
@@ -177,25 +176,30 @@ func TestProcessIAMTemplates(t *testing.T) {
 						GrantedRoles:    []int{992, 707, 452, 677, 726, 296, 457, 987},
 					},
 				},
-				Groups: []TFGroup{
+				TFGroups: []TFGroup{
 					{
 						GroupID:       56789,
 						ParentGroupID: 98765,
 						GroupName:     "Custom group",
 					},
 				},
+				Section:    section,
+				Subcommand: "user",
 			},
-			dir:          "iam_user_by_id_basic",
+			dir:          "iam_user_by_email_basic",
 			filesToCheck: []string{"user.tf", "variables.tf", "import.sh", "roles.tf", "groups.tf"},
 		},
 		"user with multiple auth grants": {
-			givenData: TFUserData{
-				TFUserBasicInfo: getTFUserBasicInfo(),
-				IsLocked:        false,
-				AuthGrants: "[{\"groupId\":56789,\"groupName\":\"Custom group 56789\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role 12345\"}," +
-					"{\"groupId\":987,\"groupName\":\"Custom group 987\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":54321,\"roleName\":\"Custom role 54321\"}]",
-				Section: section,
-				Roles: []TFRole{
+			givenData: TFData{
+				TFUsers: []*TFUser{
+					{
+						TFUserBasicInfo: getTFUserBasicInfo(),
+						IsLocked:        false,
+						AuthGrants: "[{\"groupId\":56789,\"groupName\":\"Custom group 56789\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role 12345\"}," +
+							"{\"groupId\":987,\"groupName\":\"Custom group 987\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":54321,\"roleName\":\"Custom role 54321\"}]",
+					},
+				},
+				TFRoles: []TFRole{
 					{
 						RoleID:          12345,
 						RoleName:        "Custom role 12345",
@@ -209,7 +213,7 @@ func TestProcessIAMTemplates(t *testing.T) {
 						GrantedRoles:    []int{992, 707, 452, 677, 726, 296, 457, 987},
 					},
 				},
-				Groups: []TFGroup{
+				TFGroups: []TFGroup{
 					{
 						GroupID:       56789,
 						ParentGroupID: 98765,
@@ -221,8 +225,10 @@ func TestProcessIAMTemplates(t *testing.T) {
 						GroupName:     "Custom group 987",
 					},
 				},
+				Section:    section,
+				Subcommand: "user",
 			},
-			dir:          "iam_user_by_id_multiple_auth_grants",
+			dir:          "iam_user_by_email_multiple_auth_grants",
 			filesToCheck: []string{"groups.tf", "import.sh", "roles.tf", "user.tf", "variables.tf"},
 		},
 	}
@@ -236,7 +242,7 @@ func TestProcessIAMTemplates(t *testing.T) {
 					"groups.tmpl":    fmt.Sprintf("./testdata/res/%s/groups.tf", test.dir),
 					"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
 					"roles.tmpl":     fmt.Sprintf("./testdata/res/%s/roles.tf", test.dir),
-					"user.tmpl":      fmt.Sprintf("./testdata/res/%s/user.tf", test.dir),
+					"users.tmpl":     fmt.Sprintf("./testdata/res/%s/user.tf", test.dir),
 					"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
 				},
 			}
@@ -350,42 +356,6 @@ func TestGetUserAuthGrants(t *testing.T) {
 			actualAuthGrants, err := getUserAuthGrants(&test.user)
 			require.NoError(t, err)
 			assert.Equal(t, test.expectedAuthGrants, actualAuthGrants)
-		})
-	}
-}
-
-func TestGetGrantedRolesID(t *testing.T) {
-	tests := map[string]struct {
-		grantedRoles []iam.RoleGrantedRole
-		expectedIDs  []int
-	}{
-		"granted roles": {
-			grantedRoles: []iam.RoleGrantedRole{
-				{
-					RoleID: 123,
-				},
-				{
-					RoleID: 321,
-				},
-				{
-					RoleID: 456,
-				},
-			},
-			expectedIDs: []int{123, 321, 456},
-		},
-		"empty granted roles": {
-			grantedRoles: []iam.RoleGrantedRole{},
-			expectedIDs:  []int{},
-		},
-		"nil granted roles": {
-			grantedRoles: nil,
-			expectedIDs:  []int{},
-		},
-	}
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			grantedRolesIDs := getGrantedRolesID(test.grantedRoles)
-			assert.Equal(t, test.expectedIDs, grantedRolesIDs)
 		})
 	}
 }
