@@ -6,7 +6,7 @@
 {{- range .TFGroups -}}
     resource "akamai_iam_group" "group_id_{{.GroupID}}" {
       parent_group_id = {{.ParentGroupID}}
-      group_name      = "{{.GroupName}}"
+      name      = "{{.GroupName}}"
     }
 
 {{end -}}
