@@ -812,4 +812,5 @@ terraform import module.security.akamai_appsec_reputation_profile.scanning_tools
 terraform import module.security.akamai_appsec_reputation_profile.web_scrapers_low_threat 32641:2670514
 terraform import module.security.akamai_appsec_reputation_profile.web_scrapers_high_threat 32641:2670515
 terraform import module.security.akamai_appsec_siem_settings.siem 32641
+terraform import module.security.akamai_appsec_selected_hostnames.hostnames 32641
 terraform import module.activate-security.akamai_appsec_activations.appsecactivation 32641:45:STAGING

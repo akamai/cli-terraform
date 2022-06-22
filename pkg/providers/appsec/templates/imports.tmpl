@@ -130,6 +130,9 @@ terraform import module.security.akamai_appsec_reputation_profile.{{ escapeName 
 terraform import module.security.akamai_appsec_siem_settings.siem {{ $configID }}
 {{ end -}}
 {{ end -}}
+{{ if .SelectedHosts -}}
+terraform import module.security.akamai_appsec_selected_hostnames.hostnames {{ $configID }}
+{{ end -}}
 {{ if eq .Staging.Status "Active" -}}
 terraform import module.activate-security.akamai_appsec_activations.appsecactivation {{ $configID }}:{{ $version }}:STAGING
 {{ end -}}

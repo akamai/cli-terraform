@@ -209,4 +209,5 @@ terraform import module.security.akamai_appsec_reputation_profile.web_attackers_
 terraform import module.security.akamai_appsec_reputation_profile.web_scrapers_high_threat 79947:3017095
 terraform import module.security.akamai_appsec_reputation_profile.web_scrapers_low_threat 79947:3017096
 terraform import module.security.akamai_appsec_siem_settings.siem 79947
+terraform import module.security.akamai_appsec_selected_hostnames.hostnames 79947
 terraform import module.activate-security.akamai_appsec_activations.appsecactivation 79947:1:STAGING

@@ -319,6 +319,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"modules-security-rate-policy-actions.tmpl": filepath.Join(security, "rate-policy-actions.tf"),
 		"modules-security-reputation.tmpl":          filepath.Join(security, "reputation.tf"),
 		"modules-security-reputation-profiles.tmpl": filepath.Join(security, "reputation-profiles.tf"),
+		"modules-security-selected-hostnames.tmpl":  filepath.Join(security, "selected-hostnames.tf"),
 		"modules-security-siem.tmpl":                filepath.Join(security, "siem.tf"),
 		"modules-security-slow-post.tmpl":           filepath.Join(security, "slow-post.tf"),
 		"modules-security-variables.tmpl":           filepath.Join(security, "variables.tf"),
