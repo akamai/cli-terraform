@@ -86,7 +86,7 @@ var (
 		client.On("GetGroup", mock.Anything, getGroupReq).Return(&group, nil).Once()
 	}
 
-	expectUserByEmailProcessTemplates = func(p *mockProcessor, section string) *mock.Call {
+	expectProcessTemplates = func(p *mockProcessor, section string) *mock.Call {
 		tfData := TFData{
 			TFUsers: []*TFUser{
 				{
@@ -133,7 +133,7 @@ func TestCreateIAMUserByEmail(t *testing.T) {
 				expectGetUser(i)
 				expectGetUserRole(i)
 				expectGetUserGroup(i)
-				expectUserByEmailProcessTemplates(p, section)
+				expectProcessTemplates(p, section)
 			},
 		},
 	}

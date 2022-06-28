@@ -192,6 +192,45 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
+		Name:            "create-iam",
+		Description:     "Create Terraform Identity and Access Management Resources",
+		HideHelpCommand: true,
+		Action:          iam.CmdCreateIAM,
+		Subcommands: []*cli.Command{
+			{
+				Name:        "all",
+				Description: "Create all available Terraform Users, Groups and Roles",
+				Action:      iam.CmdCreateIAMAll,
+			},
+			{
+				Name:        "group",
+				Description: "Create Terraform Group resource with relevant users and roles resources",
+				ArgsUsage:   "<group_id>",
+				Action:      iam.CmdCreateIAMGroup,
+			},
+			{
+				Name:        "role",
+				Description: "Create Terraform Role resource with relevant users and groups resources",
+				ArgsUsage:   "<role_id>",
+				Action:      iam.CmdCreateIAMRole,
+			},
+			{
+				Name:        "user",
+				Description: "Create Terraform User resource with relevant groups and roles resources",
+				ArgsUsage:   "<user_email>",
+				Action:      iam.CmdCreateIAMUser,
+			},
+		},
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "tfworkpath",
+				Usage: "Path location for placement of created artifacts. Default: current directory",
+			},
+		},
+		BashComplete: autocomplete.Default,
+	})
+
+	commands = append(commands, &cli.Command{
 		Name:        "create-imaging",
 		Description: "Create Terraform Image and Video Manager resources",
 		Usage:       "create-imaging",
@@ -210,39 +249,6 @@ func CommandLocator() ([]*cli.Command, error) {
 				Name:        "schema",
 				Usage:       "Generate content of the policy using HCL instead of JSON file",
 				Destination: &tools.Schema,
-			},
-		},
-		BashComplete: autocomplete.Default,
-	})
-
-	commands = append(commands, &cli.Command{
-		Name:            "create-iam",
-		Description:     "Create Terraform Identity and Access Management Resources",
-		HideHelpCommand: true,
-		Action:          iam.CmdCreateIAM,
-		Subcommands: []*cli.Command{
-			{
-				Name:        "all",
-				Description: "Create all available Terraform Users, Groups and Roles",
-				Action:      iam.CmdCreateIAMAll,
-			},
-			{
-				Name:        "user",
-				Description: "Create Terraform User resource with relevant groups and roles resources",
-				ArgsUsage:   "<user_email>",
-				Action:      iam.CmdCreateIAMUser,
-			},
-			{
-				Name:        "group",
-				Description: "Create Terraform Group resource with relevant users and roles resources",
-				ArgsUsage:   "<group_id>",
-				Action:      iam.CmdCreateIAMGroup,
-			},
-		},
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,

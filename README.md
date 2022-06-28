@@ -45,10 +45,13 @@ Description:
 Built-In Commands:
   create-domain
   create-zone
+  create-appsec
   create-property
   create-cloudlets-policy
   create-edgekv
   create-edgeworker
+  create-iam
+  create-imaging
   list
   help
 
@@ -143,6 +146,16 @@ $ akamai terraform create-zone --importscript testprimaryzone.com
 2. segmentconfig - Generate a modularized configuration. 
 3. configonly - Generates a zone configuration without JSON itemization. The configuration generated varies based on which set of flags you use.
 
+## Appsec
+
+### Usage
+```
+   akamai terraform [global flags] create-appsec [flags] <name_of_security_config>
+   
+Flags:
+   --tfworkpath path      Path location for placement of created artifacts. Default: current directory
+```
+
 ## Property Manager Properties
 
 ### Usage
@@ -211,6 +224,29 @@ Flags:
 $ akamai terraform create-edgekv
 ```
 
+## Identity and Access Management
+
+### Create Identity and Access Management usage
+
+```
+   akamai terraform [global flags] create-iam [subcommand]
+
+Subcommands:
+    all                     Create all available Terraform Users, Groups and Roles
+    group [group id]        Exports group by id with relevant users and their roles
+    role [role id]          Exports role by id with relevant users and their groups
+    user [user's email]     Exports user by email with relevant user's groups and roles
+
+Flags:
+   --tfworkpath path        Path location for placement of created artifacts. Default: current directory
+```
+
+### Create Identity and Access Management configuration.
+
+```
+$ akamai terraform create-iam
+```
+
 ## Image and Video Manager
 
 ### Create Image and Video policy usage
@@ -227,36 +263,6 @@ Flags:
 
 ```
 $ akamai terraform create-imaging
-```
-
-## Appsec
-### Usage
-```
-   akamai terraform [global flags] create-appsec [flags] <name_of_security_config>
-   
-Flags:
-   --tfworkpath path      Path location for placement of created artifacts. Default: current directory
-```
-
-## Identity and Access Management
-
-### Create Identity and Access Management usage
-
-```
-   akamai terraform [global flags] create-iam [subcommand]
-
-Subcommands:
-    group [group id]        Exports group by id with relevant users and their roles      
-    user [user's email]     Exports user by email with relevant user's groups and roles
-    
-Flags:
-   --tfworkpath path        Path location for placement of created artifacts. Default: current directory
-```
-
-### Create Identity and Access Management configuration.
-
-```
-$ akamai terraform create-iam
 ```
 
 ## General Notes
