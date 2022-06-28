@@ -7,8 +7,8 @@ terraform import akamai_gtm_datacenter.{{normalize .Nickname}} "{{$.Name}}:{{.ID
 {{- range $name, $v := .Properties}}
 terraform import akamai_gtm_property.{{normalize $name}} "{{$.Name}}:{{$name}}"
 {{- end}}
-{{- range $name, $v := .Resources}}
-terraform import akamai_gtm_resource.{{normalize $name}} "{{$.Name}}:{{$name}}"
+{{- range .Resources}}
+terraform import akamai_gtm_resource.{{normalize .Name}} "{{$.Name}}:{{.Name}}"
 {{- end}}
 {{- range .CidrMaps}}
 terraform import akamai_gtm_cidrmap.{{normalize .Name}} "{{$.Name}}:{{.Name}}"

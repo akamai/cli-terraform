@@ -174,9 +174,13 @@ var (
 			123: "TEST1",
 			124: "TEST2",
 		},
-		Resources: map[string][]int{
-			"test resource1": {},
-			"test resource2": {},
+		Resources: []*gtm.Resource{
+			{
+				Name: "test resource1",
+			},
+			{
+				Name: "test resource2",
+			},
 		},
 		Properties: map[string][]int{
 			"test property1": {},
@@ -290,9 +294,13 @@ func TestProcessDomainTemplates(t *testing.T) {
 						ID:       125,
 					},
 				},
-				Resources: map[string][]int{
-					"test resource1": {},
-					"test resource2": {},
+				Resources: []*gtm.Resource{
+					{
+						Name: "test resource1",
+					},
+					{
+						Name: "test resource2",
+					},
 				},
 				Properties: map[string][]int{
 					"test property1": {},
@@ -488,6 +496,84 @@ func TestProcessDomainTemplates(t *testing.T) {
 			dir:          "with_maps",
 			filesToCheck: []string{"domain.tf", "variables.tf", "import.sh", "maps.tf"},
 		},
+		"simple domain with resources": {
+			givenData: TFDomainData{
+				Section:                 "test_section",
+				Name:                    "test.name.akadns.net",
+				NormalizedName:          "test_name",
+				Type:                    "basic",
+				Comment:                 "test",
+				EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+				DefaultTimeoutPenalty:   10,
+				LoadImbalancePercentage: 50,
+				DefaultErrorPenalty:     90,
+				CnameCoalescingEnabled:  true,
+				LoadFeedback:            true,
+				DefaultDatacenters: []TFDatacenterData{
+					{
+						Nickname: "DEFAULT",
+						ID:       5400,
+					},
+				},
+				Datacenters: []TFDatacenterData{
+					{
+						Nickname:        "TEST1",
+						ID:              123,
+						City:            "New York",
+						StateOrProvince: "NY",
+						Country:         "US",
+						Latitude:        40.71305,
+						Longitude:       -74.00723,
+						DefaultLoadObject: &gtm.LoadObject{
+							LoadObject:     "test load object",
+							LoadObjectPort: 111,
+							LoadServers:    []string{"loadServer1", "loadServer2", "loadServer3"},
+						},
+					},
+					{
+						Nickname:        "TEST2",
+						ID:              124,
+						City:            "Chicago",
+						StateOrProvince: "IL",
+						Country:         "US",
+						Latitude:        41.88323,
+						Longitude:       -87.6324,
+					},
+				},
+				Resources: []*gtm.Resource{
+					{
+						Type:                "XML load object via HTTP",
+						HostHeader:          "header",
+						LeastSquaresDecay:   30,
+						Description:         "some description",
+						LeaderString:        "leader",
+						ConstrainedProperty: "**",
+						ResourceInstances: []*gtm.ResourceInstance{
+							{
+								DatacenterId:         123,
+								UseDefaultLoadObject: false,
+								LoadObject: gtm.LoadObject{
+									LoadObject:     "load",
+									LoadObjectPort: 80,
+									LoadServers:    []string{"server"},
+								},
+							},
+						},
+						AggregationType:             "latest",
+						LoadImbalancePercentage:     51,
+						UpperBound:                  20,
+						Name:                        "test resource1",
+						MaxUMultiplicativeIncrement: 10,
+						DecayRate:                   5,
+					},
+					{
+						Name: "test resource2",
+					},
+				},
+			},
+			dir:          "with_resources",
+			filesToCheck: []string{"domain.tf", "variables.tf", "import.sh", "resources.tf"},
+		},
 	}
 
 	for name, test := range tests {
@@ -501,6 +587,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 					"domain.tmpl":      filepath.Join(outDir, "domain.tf"),
 					"imports.tmpl":     filepath.Join(outDir, "import.sh"),
 					"maps.tmpl":        filepath.Join(outDir, "maps.tf"),
+					"resources.tmpl":   filepath.Join(outDir, "resources.tf"),
 					"variables.tmpl":   filepath.Join(outDir, "variables.tf"),
 				},
 				AdditionalFuncs: template.FuncMap{

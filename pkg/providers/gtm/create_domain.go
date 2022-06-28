@@ -56,13 +56,13 @@ type (
 		DefaultDatacenters          []TFDatacenterData
 		DatacentersImportList       map[int]string // only for compatibility purpose, to be removed
 		Properties                  map[string][]int
-		Resources                   map[string][]int
+		Resources                   []*gtm.Resource
 		CidrMaps                    []*gtm.CidrMap
 		GeoMaps                     []*gtm.GeoMap
 		AsMaps                      []*gtm.AsMap
 	}
 
-	// TFDatacenterData represents the data used for processing a dataacenter
+	// TFDatacenterData represents the data used for processing a datacenter
 	TFDatacenterData struct {
 		ID                            int
 		Nickname                      string
@@ -98,8 +98,9 @@ const (
 
 // TODO: remove and declare those variables in CmdCreateDomain once there is no appending to those files (DXE-698)
 var (
-	domainPath string
-	importPath string
+	domainPath    string
+	importPath    string
+	resourcesPath string
 )
 
 var nullFieldMap = &gtm.NullFieldMapStruct{}
@@ -135,6 +136,7 @@ func CmdCreateDomain(c *cli.Context) error {
 	domainPath = filepath.Join(tools.TFWorkPath, "domain.tf")
 	importPath = filepath.Join(tools.TFWorkPath, "import.sh")
 	mapsPath := filepath.Join(tools.TFWorkPath, "maps.tf")
+	resourcesPath = filepath.Join(tools.TFWorkPath, "resources.tf")
 	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
 
 	templateToFile := map[string]string{
@@ -142,6 +144,7 @@ func CmdCreateDomain(c *cli.Context) error {
 		"domain.tmpl":      domainPath,
 		"imports.tmpl":     importPath,
 		"maps.tmpl":        mapsPath,
+		"resources.tmpl":   resourcesPath,
 		"variables.tmpl":   variablesPath,
 	}
 
@@ -192,6 +195,7 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, section strin
 		LoadFeedback:                domain.LoadFeedback,
 		DefaultSSLClientCertificate: domain.DefaultSslClientCertificate,
 		EndUserMappingEnabled:       domain.EndUserMappingEnabled,
+		Resources:                   domain.Resources,
 		CidrMaps:                    domain.CidrMaps,
 		GeoMaps:                     domain.GeographicMaps,
 		AsMaps:                      domain.AsMaps,
@@ -255,14 +259,6 @@ func getNullValuesList(objType string) map[string]gtm.NullPerObjectAttributeStru
 	switch objType {
 	case "Properties":
 		return nullFieldMap.Properties
-	case "Resources":
-		return nullFieldMap.Resources
-	case "CidrMaps":
-		return nullFieldMap.CidrMaps
-	case "GeoMaps":
-		return nullFieldMap.GeoMaps
-	case "AsMaps":
-		return nullFieldMap.AsMaps
 	}
 	// unknown
 	return map[string]gtm.NullPerObjectAttributeStruct{}
@@ -277,15 +273,6 @@ func createImportList(domain *gtm.Domain, tfData *TFDomainData) {
 			targets = append(targets, tt.DatacenterId)
 		}
 		tfData.Properties[p.Name] = targets
-	}
-	// inventory Resources
-	tfData.Resources = make(map[string][]int, len(domain.Resources))
-	for _, r := range domain.Resources {
-		targets := make([]int, 0, len(r.ResourceInstances))
-		for _, ri := range r.ResourceInstances {
-			targets = append(targets, ri.DatacenterId)
-		}
-		tfData.Resources[r.Name] = targets
 	}
 }
 
@@ -303,7 +290,6 @@ func createConfig(ctx context.Context, client gtm.GTM, domain *gtm.Domain, tfDat
 	}
 	// build tf file
 	tfConfig := processProperties(domain.Properties, tfData.Properties, tfData.DatacentersImportList, tfData.NormalizedName)
-	tfConfig += processResources(domain.Resources, tfData.Resources, tfData.DatacentersImportList, tfData.NormalizedName)
 	tfConfig += "\n"
 
 	_, err = domainTFfileHandle.Write([]byte(tfConfig))
