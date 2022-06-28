@@ -17,8 +17,6 @@ import (
 )
 
 var (
-	// ErrFetchingUsers is returned when fetching users fails
-	ErrFetchingUsers = errors.New("unable to fetch users under this account")
 	// ErrFetchingUser is returned when fetching user fails
 	ErrFetchingUser = errors.New("unable to fetch user by email")
 	// ErrUserNotExist is returned when user does not exist

@@ -1,8 +1,10 @@
 package iam
 
 import (
+	"context"
 	"embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/iam"
@@ -68,6 +70,11 @@ type (
 var (
 	//go:embed templates/*
 	templateFiles embed.FS
+
+	// ErrFetchingUsers is returned when fetching users fails
+	ErrFetchingUsers = errors.New("unable to fetch users under this account")
+	// ErrFetchingUserByID is returned when fetching user by id fails
+	ErrFetchingUserByID = errors.New("unable to fetch user by id")
 )
 
 // CmdCreateIAM is an entrypoint to create-iam command
@@ -109,6 +116,28 @@ func showHelpCommandWithErr(c *cli.Context, stringErr string) error {
 	return cli.Exit(color.RedString(stringErr), 1)
 }
 
+func getTFUsers(ctx context.Context, client iam.IAM, users []iam.UserListItem) ([]*TFUser, error) {
+	res := make([]*TFUser, 0)
+	for _, v := range users {
+		user, err := client.GetUser(ctx, iam.GetUserRequest{
+			IdentityID:    v.IdentityID,
+			Actions:       true,
+			AuthGrants:    true,
+			Notifications: true,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("%w: %s with error %s", ErrFetchingUserByID, v.IdentityID, err)
+		}
+		tfUser, err := getTFUser(user)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, tfUser)
+	}
+
+	return res, nil
+}
+
 func getTFUser(user *iam.User) (*TFUser, error) {
 	authGrants, err := getUserAuthGrants(user)
 	if err != nil {
@@ -141,6 +170,14 @@ func getTFUser(user *iam.User) (*TFUser, error) {
 	}, nil
 }
 
+func getTFGroup(group *iam.Group) TFGroup {
+	return TFGroup{
+		GroupID:       int(group.GroupID),
+		ParentGroupID: int(group.ParentGroupID),
+		GroupName:     group.GroupName,
+	}
+}
+
 func getUserAuthGrants(user *iam.User) (string, error) {
 	var authGrantsJSON []byte
 	var err error
@@ -151,6 +188,19 @@ func getUserAuthGrants(user *iam.User) (string, error) {
 		}
 	}
 	return string(authGrantsJSON), nil
+}
+
+func getTFRoles(roles []iam.Role) []TFRole {
+	tfRoles := make([]TFRole, 0)
+	for _, r := range roles {
+		tfRoles = append(tfRoles, TFRole{
+			RoleID:          r.RoleID,
+			RoleName:        r.RoleName,
+			RoleDescription: r.RoleDescription,
+			GrantedRoles:    getGrantedRolesID(r.GrantedRoles),
+		})
+	}
+	return tfRoles
 }
 
 func getGrantedRolesID(grantedRoles []iam.RoleGrantedRole) []int {

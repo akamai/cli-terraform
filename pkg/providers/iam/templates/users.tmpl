@@ -1,6 +1,6 @@
 {{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/iam.TFData*/ -}}
 
-{{ if eq .Subcommand "user" -}}
+{{ if or (eq .Subcommand "user") (eq .Subcommand "all") -}}
 {{template "terraform_config.tmpl"}}
 {{end}}
 {{- range .TFUsers -}}

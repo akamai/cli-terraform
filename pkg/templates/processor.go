@@ -46,11 +46,11 @@ var (
 // result of each template execution is persisted in location provided in FSTemplateProcessor.TemplateTargets
 func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
 	funcs := template.FuncMap{
-		"escape":     tools.EscapeQuotedStringLit,
+		"escape":        tools.EscapeQuotedStringLit,
 		"formatIntList": formatIntList,
-		"toJSON":     tools.ToJSON,
-		"escapeName": tools.EscapeName,
-		"toList":     tools.ToList,
+		"toJSON":        tools.ToJSON,
+		"escapeName":    tools.EscapeName,
+		"toList":        tools.ToList,
 	}
 	tmpl := template.Must(template.New("templates").Funcs(funcs).Funcs(t.AdditionalFuncs).ParseFS(t.TemplatesFS, "**/*.tmpl"))
 

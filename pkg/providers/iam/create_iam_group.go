@@ -18,8 +18,6 @@ import (
 )
 
 var (
-	// ErrFetchingUserByID is returned when fetching user by id fails
-	ErrFetchingUserByID = errors.New("unable to fetch user by id")
 	// ErrFetchingUsersWithinGroup is returned when fetching users within group fails
 	ErrFetchingUsersWithinGroup = errors.New("unable to fetch users within group")
 	// ErrFetchingRolesWithinGroup is returned when fetching roles within group fails
@@ -137,14 +135,6 @@ func createIAMGroupByID(ctx context.Context, groupID int, section string, client
 	return nil
 }
 
-func getTFGroup(group *iam.Group) TFGroup {
-	return TFGroup{
-		GroupID:       int(group.GroupID),
-		ParentGroupID: int(group.ParentGroupID),
-		GroupName:     group.GroupName,
-	}
-}
-
 func getUsersWithinGroup(ctx context.Context, client iam.IAM, groupID int) ([]*TFUser, error) {
 	users, err := client.ListUsers(ctx, iam.ListUsersRequest{
 		GroupID: tools.IntPtr(groupID),
@@ -153,25 +143,7 @@ func getUsersWithinGroup(ctx context.Context, client iam.IAM, groupID int) ([]*T
 		return nil, fmt.Errorf("%w: %v with error %s", ErrFetchingUsersWithinGroup, groupID, err)
 	}
 
-	res := make([]*TFUser, 0)
-	for _, v := range users {
-		user, err := client.GetUser(ctx, iam.GetUserRequest{
-			IdentityID:    v.IdentityID,
-			Actions:       true,
-			AuthGrants:    true,
-			Notifications: true,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("%w: %s with error %s", ErrFetchingUserByID, v.IdentityID, err)
-		}
-		tfUser, err := getTFUser(user)
-		if err != nil {
-			return nil, err
-		}
-		res = append(res, tfUser)
-	}
-
-	return res, nil
+	return getTFUsers(ctx, client, users)
 }
 
 func getRolesWithinGroup(ctx context.Context, client iam.IAM, groupID int) ([]TFRole, error) {
@@ -182,14 +154,5 @@ func getRolesWithinGroup(ctx context.Context, client iam.IAM, groupID int) ([]TF
 		return nil, fmt.Errorf("%w: %v with error %s", ErrFetchingRolesWithinGroup, groupID, err)
 	}
 
-	tfRoles := make([]TFRole, 0)
-	for _, r := range roles {
-		tfRoles = append(tfRoles, TFRole{
-			RoleID:          r.RoleID,
-			RoleName:        r.RoleName,
-			RoleDescription: r.RoleDescription,
-			GrantedRoles:    getGrantedRolesID(r.GrantedRoles),
-		})
-	}
-	return tfRoles, nil
+	return getTFRoles(roles), nil
 }

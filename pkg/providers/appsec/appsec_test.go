@@ -853,6 +853,26 @@ func (m *mockAppsec) GetPenaltyBox(ctx context.Context, req appsec.GetPenaltyBox
 	return args.Get(0).(*appsec.GetPenaltyBoxResponse), args.Error(1)
 }
 
+func (p *mockAppsec) GetEvalPenaltyBox(ctx context.Context, params appsec.GetPenaltyBoxRequest) (*appsec.GetPenaltyBoxResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.GetPenaltyBoxResponse), args.Error(1)
+}
+
+func (p *mockAppsec) UpdateEvalPenaltyBox(ctx context.Context, params appsec.UpdatePenaltyBoxRequest) (*appsec.UpdatePenaltyBoxResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.UpdatePenaltyBoxResponse), args.Error(1)
+}
+
 func (m *mockAppsec) GetNetworkLayerProtections(ctx context.Context, req appsec.GetNetworkLayerProtectionsRequest) (*appsec.GetNetworkLayerProtectionsResponse, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
