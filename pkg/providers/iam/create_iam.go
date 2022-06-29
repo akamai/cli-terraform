@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/iam"
+	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 )
@@ -116,7 +117,7 @@ func showHelpCommandWithErr(c *cli.Context, stringErr string) error {
 	return cli.Exit(color.RedString(stringErr), 1)
 }
 
-func getTFUsers(ctx context.Context, client iam.IAM, users []iam.UserListItem) ([]*TFUser, error) {
+func getTFUsers(ctx context.Context, client iam.IAM, users []iam.UserListItem, term terminal.Terminal) ([]*TFUser, error) {
 	res := make([]*TFUser, 0)
 	for _, v := range users {
 		user, err := client.GetUser(ctx, iam.GetUserRequest{
@@ -126,7 +127,11 @@ func getTFUsers(ctx context.Context, client iam.IAM, users []iam.UserListItem) (
 			Notifications: true,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("%w: %s with error %s", ErrFetchingUserByID, v.IdentityID, err)
+			_, err := term.Writeln(fmt.Sprintf("[WARN] Unable to fetch user of ID '%s' - skipping:\n%s", v.IdentityID, err))
+			if err != nil {
+				return nil, err
+			}
+			continue
 		}
 		tfUser, err := getTFUser(user)
 		if err != nil {

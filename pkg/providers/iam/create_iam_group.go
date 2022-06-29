@@ -96,7 +96,7 @@ func createIAMGroupByID(ctx context.Context, groupID int, section string, client
 	tfGroup := getTFGroup(group)
 
 	term.Spinner().Start("Fetching users within group with id " + strconv.Itoa(groupID))
-	tfUsers, err := getUsersWithinGroup(ctx, client, groupID)
+	tfUsers, err := getUsersWithinGroup(ctx, client, groupID, term)
 	if err != nil {
 		term.Spinner().Fail()
 		return err
@@ -135,7 +135,7 @@ func createIAMGroupByID(ctx context.Context, groupID int, section string, client
 	return nil
 }
 
-func getUsersWithinGroup(ctx context.Context, client iam.IAM, groupID int) ([]*TFUser, error) {
+func getUsersWithinGroup(ctx context.Context, client iam.IAM, groupID int, term terminal.Terminal) ([]*TFUser, error) {
 	users, err := client.ListUsers(ctx, iam.ListUsersRequest{
 		GroupID: tools.IntPtr(groupID),
 	})
@@ -143,7 +143,7 @@ func getUsersWithinGroup(ctx context.Context, client iam.IAM, groupID int) ([]*T
 		return nil, fmt.Errorf("%w: %v with error %s", ErrFetchingUsersWithinGroup, groupID, err)
 	}
 
-	return getTFUsers(ctx, client, users)
+	return getTFUsers(ctx, client, users, term)
 }
 
 func getRolesWithinGroup(ctx context.Context, client iam.IAM, groupID int) ([]TFRole, error) {

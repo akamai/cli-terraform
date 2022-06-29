@@ -19,16 +19,23 @@ import (
 
 var (
 	expectListAllUsers = func(client *mockiam) {
-		listUserReq := iam.ListUsersRequest{}
+		listUserReq := iam.ListUsersRequest{Actions: true}
 
 		users := []iam.UserListItem{
 			{
 				IdentityID: "001",
 				Email:      "001@akamai.com",
+				Actions:    &iam.UserActions{EditProfile: true},
 			},
 			{
 				IdentityID: "002",
 				Email:      "002@akamai.com",
+				Actions:    &iam.UserActions{EditProfile: true},
+			},
+			{
+				IdentityID: "003",
+				Email:      "003@akamai.com",
+				Actions:    &iam.UserActions{EditProfile: false},
 			},
 		}
 
@@ -155,12 +162,31 @@ func TestCreateIAMAll(t *testing.T) {
 			err: ErrFetchingUsers,
 		},
 
-		"fail get user": {
-			init: func(i *mockiam, _ *mockProcessor) {
+		"fail get one user": {
+			init: func(i *mockiam, p *mockProcessor) {
 				expectListAllUsers(i)
-				i.On("GetUser", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("oops")).Once()
+				expectGetUser001(i)
+
+				getUserReq := iam.GetUserRequest{
+					IdentityID:    "002",
+					Actions:       true,
+					AuthGrants:    true,
+					Notifications: true,
+				}
+				i.On("GetUser", mock.Anything, getUserReq).Return(nil, fmt.Errorf("oops")).Once()
+
+				expectListAllGroups(i)
+				expectListAllRoles(i)
+
+				expectedTestData := getTestData(section)
+				expectedTestData.TFUsers = []*TFUser{{
+					IsLocked:        false,
+					AuthGrants:      "[{\"groupId\":101,\"isBlocked\":false,\"roleId\":201}]",
+					TFUserBasicInfo: getTFUserBasicInfo(),
+				}}
+				expectedTestData.TFUsers[0].ID = "001"
+				p.On("ProcessTemplates", expectedTestData).Return(nil)
 			},
-			err: ErrFetchingUserByID,
 		},
 
 		"fail list groups": {

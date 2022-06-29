@@ -77,12 +77,12 @@ func createIAMAll(ctx context.Context, section string, client iam.IAM, templateP
 	}
 
 	term.Spinner().Start("Fetching all available users")
-	users, err := client.ListUsers(ctx, iam.ListUsersRequest{})
+	users, err := client.ListUsers(ctx, iam.ListUsersRequest{Actions: true})
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrFetchingUsers, err)
 	}
-	tfUsers, err := getTFUsers(ctx, client, users)
+	tfUsers, err := getTFUsers(ctx, client, filterUsers(users), term)
 	if err != nil {
 		term.Spinner().Fail()
 		return err
@@ -135,4 +135,14 @@ func createIAMAll(ctx context.Context, section string, client iam.IAM, templateP
 	}
 
 	return nil
+}
+
+func filterUsers(users []iam.UserListItem) []iam.UserListItem {
+	res := make([]iam.UserListItem, 0)
+	for _, user := range users {
+		if user.Actions != nil && user.Actions.EditProfile {
+			res = append(res, user)
+		}
+	}
+	return res
 }
