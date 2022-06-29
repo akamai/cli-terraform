@@ -21,6 +21,7 @@ var (
 
 	expectListUsersWithinGroup = func(client *mockiam) {
 		listUserReq := iam.ListUsersRequest{
+			Actions: true,
 			GroupID: tools.IntPtr(groupID),
 		}
 
@@ -28,6 +29,7 @@ var (
 			{
 				IdentityID: "123",
 				Email:      "terraform@akamai.com",
+				Actions:    &iam.UserActions{EditProfile: true},
 			},
 		}
 

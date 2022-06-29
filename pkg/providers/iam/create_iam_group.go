@@ -137,13 +137,14 @@ func createIAMGroupByID(ctx context.Context, groupID int, section string, client
 
 func getUsersWithinGroup(ctx context.Context, client iam.IAM, groupID int, term terminal.Terminal) ([]*TFUser, error) {
 	users, err := client.ListUsers(ctx, iam.ListUsersRequest{
+		Actions: true,
 		GroupID: tools.IntPtr(groupID),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v with error %s", ErrFetchingUsersWithinGroup, groupID, err)
 	}
 
-	return getTFUsers(ctx, client, users, term)
+	return getTFUsers(ctx, client, filterUsers(users), term)
 }
 
 func getRolesWithinGroup(ctx context.Context, client iam.IAM, groupID int) ([]TFRole, error) {
