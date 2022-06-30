@@ -248,7 +248,7 @@ func getTestData(section string) TFData {
 		TFUsers: []*TFUser{
 			{
 				IsLocked:        false,
-				AuthGrants:      "[{\"groupId\":101,\"groupName\":\"grp_101\",\"isBlocked\":false,\"roleDescription\":\"role 201 description\",\"roleId\":201,\"roleName\":\"role_201\"}]",
+				AuthGrants:      "[{\"groupId\":101,\"isBlocked\":false,\"roleId\":201}]",
 				TFUserBasicInfo: getTFUserBasicInfo(),
 			},
 			{

@@ -16,7 +16,7 @@ resource "akamai_iam_user" "iam_user_123" {
   zip_code           = "34567"
   preferred_language = "English"
   session_timeout    = 900
-  auth_grants_json   = "[{\"groupId\":56789,\"groupName\":\"Custom group 1\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role\"}]"
+  auth_grants_json   = "[{\"groupId\":56789,\"isBlocked\":false,\"roleId\":12345}]"
   lock               = false
 }
 

@@ -155,9 +155,8 @@ var (
 		tfData := TFData{
 			TFUsers: []*TFUser{
 				{
-					IsLocked: false,
-					AuthGrants: `[{"groupId":56789,"groupName":"Custom group 1","isBlocked":false,"roleDescription":"Custom role description",` +
-						`"roleId":12345,"roleName":"Custom role"}]`,
+					IsLocked:   false,
+					AuthGrants: `[{"groupId":56789,"isBlocked":false,"roleId":12345}]`,
 					TFUserBasicInfo: TFUserBasicInfo{
 						ID:                "123",
 						FirstName:         "John",
@@ -180,10 +179,8 @@ var (
 					},
 				},
 				{
-					IsLocked: false,
-					AuthGrants: `[{"groupId":56789,"groupName":"Custom group 1","isBlocked":false,"roleDescription":"Custom role description",` +
-						`"roleId":12345,"roleName":"Custom role"},{"groupId":98765,"groupName":"Custom group 2",` +
-						`"isBlocked":false,"roleDescription":"Other custom role description","roleId":54321,"roleName":"Other custom role"}]`,
+					IsLocked:   false,
+					AuthGrants: `[{"groupId":56789,"isBlocked":false,"roleId":12345},{"groupId":98765,"isBlocked":false,"roleId":54321}]`,
 					TFUserBasicInfo: TFUserBasicInfo{
 						ID:                "321",
 						FirstName:         "Steve",
@@ -283,9 +280,8 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 			givenData: TFData{
 				TFUsers: []*TFUser{
 					{
-						IsLocked: false,
-						AuthGrants: `[{"groupId":56789,"groupName":"Custom group 1","isBlocked":false,"roleDescription":"Custom role description",` +
-							`"roleId":12345,"roleName":"Custom role"}]`,
+						IsLocked:   false,
+						AuthGrants: `[{"groupId":56789,"isBlocked":false,"roleId":12345}]`,
 						TFUserBasicInfo: TFUserBasicInfo{
 							ID:                "123",
 							FirstName:         "John",
@@ -333,9 +329,8 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 			givenData: TFData{
 				TFUsers: []*TFUser{
 					{
-						IsLocked: false,
-						AuthGrants: `[{"groupId":56789,"groupName":"Custom group 1","isBlocked":false,"roleDescription":"Custom role description",` +
-							`"roleId":12345,"roleName":"Custom role"}]`,
+						IsLocked:   false,
+						AuthGrants: `[{"groupId":56789,"isBlocked":false,"roleId":12345}]`,
 						TFUserBasicInfo: TFUserBasicInfo{
 							ID:                "123",
 							FirstName:         "John",
@@ -358,10 +353,8 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 						},
 					},
 					{
-						IsLocked: false,
-						AuthGrants: `[{"groupId":56789,"groupName":"Custom group 1","isBlocked":false,"roleDescription":"Custom role description",` +
-							`"roleId":12345,"roleName":"Custom role"},{"groupId":98765,"groupName":"Custom group 2",` +
-							`"isBlocked":false,"roleDescription":"Other custom role description","roleId":54321,"roleName":"Other custom role"}]`,
+						IsLocked:   false,
+						AuthGrants: `[{"groupId":56789,"isBlocked":false,"roleId":12345},{"groupId":98765,"isBlocked":false,"roleId":54321}]`,
 						TFUserBasicInfo: TFUserBasicInfo{
 							ID:                "321",
 							FirstName:         "Steve",

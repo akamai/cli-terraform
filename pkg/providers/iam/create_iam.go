@@ -186,6 +186,18 @@ func getUserAuthGrants(user *iam.User) (string, error) {
 		if err != nil {
 			return "", err
 		}
+
+		var authGrants []iam.AuthGrantRequest
+		err = json.Unmarshal(authGrantsJSON, &authGrants)
+		if err != nil {
+			return "", err
+		}
+
+		authGrantsJSON, err = json.Marshal(authGrants)
+		if err != nil {
+			return "", err
+		}
+
 	}
 	return string(authGrantsJSON), nil
 }

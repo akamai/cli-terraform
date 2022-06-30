@@ -92,7 +92,7 @@ var (
 			TFUsers: []*TFUser{
 				{
 					IsLocked:        false,
-					AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role\"}]",
+					AuthGrants:      "[{\"groupId\":56789,\"isBlocked\":false,\"roleId\":12345}]",
 					TFUserBasicInfo: getTFUserBasicInfo(),
 				},
 			},
@@ -166,7 +166,7 @@ func TestProcessIAMGroupTemplates(t *testing.T) {
 					{
 						TFUserBasicInfo: getTFUserBasicInfo(),
 						IsLocked:        false,
-						AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role\"}]",
+						AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]",
 					},
 				},
 				TFGroups: []TFGroup{

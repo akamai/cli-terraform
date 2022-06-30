@@ -91,7 +91,7 @@ var (
 			TFUsers: []*TFUser{
 				{
 					IsLocked:        false,
-					AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role\"}]",
+					AuthGrants:      "[{\"groupId\":56789,\"isBlocked\":false,\"roleId\":12345}]",
 					TFUserBasicInfo: getTFUserBasicInfo(),
 				},
 			},
@@ -165,7 +165,7 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 					{
 						TFUserBasicInfo: getTFUserBasicInfo(),
 						IsLocked:        false,
-						AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role\"}]",
+						AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]",
 					},
 				},
 				TFRoles: []TFRole{
@@ -195,8 +195,7 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 					{
 						TFUserBasicInfo: getTFUserBasicInfo(),
 						IsLocked:        false,
-						AuthGrants: "[{\"groupId\":56789,\"groupName\":\"Custom group 56789\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role 12345\"}," +
-							"{\"groupId\":987,\"groupName\":\"Custom group 987\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":54321,\"roleName\":\"Custom role 54321\"}]",
+						AuthGrants:      "[{\"groupId\":56789,\"isBlocked\":false,\"roleId\":12345},{\"groupId\":987,\"isBlocked\":false,\"roleId\":54321}]",
 					},
 				},
 				TFRoles: []TFRole{
@@ -323,7 +322,7 @@ func TestGetUserAuthGrants(t *testing.T) {
 					},
 				},
 			},
-			expectedAuthGrants: "[{\"groupId\":12345,\"groupName\":\"Group name\",\"isBlocked\":false,\"roleDescription\":\"Role description\",\"roleId\":54321,\"roleName\":\"Custom role\"}]",
+			expectedAuthGrants: "[{\"groupId\":12345,\"isBlocked\":false,\"roleId\":54321}]",
 		},
 		"basic user with multiple auth grants": {
 			user: iam.User{
@@ -347,8 +346,8 @@ func TestGetUserAuthGrants(t *testing.T) {
 					},
 				},
 			},
-			expectedAuthGrants: "[{\"groupId\":56789,\"groupName\":\"Custom group 56789\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":12345,\"roleName\":\"Custom role 12345\"}," +
-				"{\"groupId\":987,\"groupName\":\"Custom group 987\",\"isBlocked\":false,\"roleDescription\":\"Custom role description\",\"roleId\":54321,\"roleName\":\"Custom role 54321\"}]",
+			expectedAuthGrants: "[{\"groupId\":56789,\"isBlocked\":false,\"roleId\":12345}," +
+				"{\"groupId\":987,\"isBlocked\":false,\"roleId\":54321}]",
 		},
 	}
 	for name, test := range tests {
