@@ -57,9 +57,9 @@ type (
 		DatacentersImportList       map[int]string // only for compatibility purpose, to be removed
 		Properties                  map[string][]int
 		Resources                   map[string][]int
-		Cidrmaps                    map[string][]int
-		Geomaps                     map[string][]int
-		Asmaps                      map[string][]int
+		CidrMaps                    []*gtm.CidrMap
+		GeoMaps                     []*gtm.GeoMap
+		AsMaps                      []*gtm.AsMap
 	}
 
 	// TFDatacenterData represents the data used for processing a dataacenter
@@ -134,12 +134,14 @@ func CmdCreateDomain(c *cli.Context) error {
 	datacentersPath := filepath.Join(tools.TFWorkPath, "datacenters.tf")
 	domainPath = filepath.Join(tools.TFWorkPath, "domain.tf")
 	importPath = filepath.Join(tools.TFWorkPath, "import.sh")
+	mapsPath := filepath.Join(tools.TFWorkPath, "maps.tf")
 	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
 
 	templateToFile := map[string]string{
 		"datacenters.tmpl": datacentersPath,
 		"domain.tmpl":      domainPath,
 		"imports.tmpl":     importPath,
+		"maps.tmpl":        mapsPath,
 		"variables.tmpl":   variablesPath,
 	}
 
@@ -190,6 +192,9 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, section strin
 		LoadFeedback:                domain.LoadFeedback,
 		DefaultSSLClientCertificate: domain.DefaultSslClientCertificate,
 		EndUserMappingEnabled:       domain.EndUserMappingEnabled,
+		CidrMaps:                    domain.CidrMaps,
+		GeoMaps:                     domain.GeographicMaps,
+		AsMaps:                      domain.AsMaps,
 	}
 
 	getDatacenters(domain, &tfDomainData)
@@ -282,33 +287,6 @@ func createImportList(domain *gtm.Domain, tfData *TFDomainData) {
 		}
 		tfData.Resources[r.Name] = targets
 	}
-	// inventory CidrMaps
-	tfData.Cidrmaps = make(map[string][]int, len(domain.CidrMaps))
-	for _, c := range domain.CidrMaps {
-		targets := make([]int, 0, len(c.Assignments))
-		for _, a := range c.Assignments {
-			targets = append(targets, a.DatacenterId)
-		}
-		tfData.Cidrmaps[c.Name] = targets
-	}
-	// inventory GeoMaps
-	tfData.Geomaps = make(map[string][]int, len(domain.GeographicMaps))
-	for _, g := range domain.GeographicMaps {
-		targets := make([]int, 0, len(g.Assignments))
-		for _, a := range g.Assignments {
-			targets = append(targets, a.DatacenterId)
-		}
-		tfData.Geomaps[g.Name] = targets
-	}
-	// inventory ASMaps
-	tfData.Asmaps = make(map[string][]int, len(domain.AsMaps))
-	for _, as := range domain.AsMaps {
-		targets := make([]int, 0, len(as.Assignments))
-		for _, a := range as.Assignments {
-			targets = append(targets, a.DatacenterId)
-		}
-		tfData.Asmaps[as.Name] = targets
-	}
 }
 
 func createConfig(ctx context.Context, client gtm.GTM, domain *gtm.Domain, tfData *TFDomainData) error {
@@ -326,9 +304,6 @@ func createConfig(ctx context.Context, client gtm.GTM, domain *gtm.Domain, tfDat
 	// build tf file
 	tfConfig := processProperties(domain.Properties, tfData.Properties, tfData.DatacentersImportList, tfData.NormalizedName)
 	tfConfig += processResources(domain.Resources, tfData.Resources, tfData.DatacentersImportList, tfData.NormalizedName)
-	tfConfig += processCidrmaps(domain.CidrMaps, tfData.Cidrmaps, tfData.DatacentersImportList, tfData.NormalizedName)
-	tfConfig += processGeomaps(domain.GeographicMaps, tfData.Geomaps, tfData.DatacentersImportList, tfData.NormalizedName)
-	tfConfig += processAsmaps(domain.AsMaps, tfData.Asmaps, tfData.DatacentersImportList, tfData.NormalizedName)
 	tfConfig += "\n"
 
 	_, err = domainTFfileHandle.Write([]byte(tfConfig))
@@ -348,4 +323,14 @@ func normalizeResourceName(key string) string {
 		key = fmt.Sprintf("_%s", key)
 	}
 	return key
+}
+
+// FindDatacenterResourceName finds and returns datacenter resource name with given id
+func (d TFDomainData) FindDatacenterResourceName(id int) (string, error) {
+	for _, dc := range d.Datacenters {
+		if dc.ID == id {
+			return normalizeResourceName(dc.Nickname), nil
+		}
+	}
+	return "", fmt.Errorf("cannot find datacenter resource with ID: %d", id)
 }

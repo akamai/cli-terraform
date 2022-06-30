@@ -143,6 +143,33 @@ var (
 				ID:       124,
 			},
 		},
+		AsMaps: []*gtm.AsMap{
+			{
+				Name: "test_asmap",
+				DefaultDatacenter: &gtm.DatacenterBase{
+					Nickname:     "default",
+					DatacenterId: 5004,
+				},
+			},
+		},
+		GeoMaps: []*gtm.GeoMap{
+			{
+				Name: "test_geomap",
+				DefaultDatacenter: &gtm.DatacenterBase{
+					Nickname:     "default",
+					DatacenterId: 5004,
+				},
+			},
+		},
+		CidrMaps: []*gtm.CidrMap{
+			{
+				Name: "test_cidrmap",
+				DefaultDatacenter: &gtm.DatacenterBase{
+					Nickname:     "default",
+					DatacenterId: 5004,
+				},
+			},
+		},
 		DatacentersImportList: map[int]string{
 			123: "TEST1",
 			124: "TEST2",
@@ -154,15 +181,6 @@ var (
 		Properties: map[string][]int{
 			"test property1": {},
 			"test property2": {},
-		},
-		Asmaps: map[string][]int{
-			"test_asmap": {},
-		},
-		Cidrmaps: map[string][]int{
-			"test_cidrmap": {},
-		},
-		Geomaps: map[string][]int{
-			"test_geomap": {},
 		},
 	}
 
@@ -280,14 +298,32 @@ func TestProcessDomainTemplates(t *testing.T) {
 					"test property1": {},
 					"test property2": {},
 				},
-				Asmaps: map[string][]int{
-					"test_asmap": {},
+				AsMaps: []*gtm.AsMap{
+					{
+						Name: "test_asmap",
+						DefaultDatacenter: &gtm.DatacenterBase{
+							Nickname:     "default",
+							DatacenterId: 123,
+						},
+					},
 				},
-				Cidrmaps: map[string][]int{
-					"test_cidrmap": {},
+				GeoMaps: []*gtm.GeoMap{
+					{
+						Name: "test_geomap",
+						DefaultDatacenter: &gtm.DatacenterBase{
+							Nickname:     "default",
+							DatacenterId: 124,
+						},
+					},
 				},
-				Geomaps: map[string][]int{
-					"test_geomap": {},
+				CidrMaps: []*gtm.CidrMap{
+					{
+						Name: "test_cidrmap",
+						DefaultDatacenter: &gtm.DatacenterBase{
+							Nickname:     "default",
+							DatacenterId: 125,
+						},
+					},
 				},
 			},
 			dir:          "import_script",
@@ -359,6 +395,99 @@ func TestProcessDomainTemplates(t *testing.T) {
 			dir:          "with_datacenters",
 			filesToCheck: []string{"domain.tf", "datacenters.tf", "variables.tf", "import.sh"},
 		},
+		"simple domain with maps": {
+			givenData: TFDomainData{
+				Section:                 "test_section",
+				Name:                    "test.name.akadns.net",
+				NormalizedName:          "test_name",
+				Type:                    "basic",
+				Comment:                 "test",
+				EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+				DefaultTimeoutPenalty:   10,
+				LoadImbalancePercentage: 50,
+				DefaultErrorPenalty:     90,
+				CnameCoalescingEnabled:  true,
+				LoadFeedback:            true,
+				DefaultDatacenters: []TFDatacenterData{
+					{
+						Nickname: "DEFAULT",
+						ID:       5400,
+					},
+				},
+				Datacenters: []TFDatacenterData{
+					{
+						Nickname:        "TEST1",
+						ID:              123,
+						City:            "New York",
+						StateOrProvince: "NY",
+						Country:         "US",
+						Latitude:        40.71305,
+						Longitude:       -74.00723,
+						DefaultLoadObject: &gtm.LoadObject{
+							LoadObject:     "test load object",
+							LoadObjectPort: 111,
+							LoadServers:    []string{"loadServer1", "loadServer2", "loadServer3"},
+						},
+					},
+					{
+						Nickname:        "TEST2",
+						ID:              124,
+						City:            "Chicago",
+						StateOrProvince: "IL",
+						Country:         "US",
+						Latitude:        41.88323,
+						Longitude:       -87.6324,
+					},
+				},
+				AsMaps: []*gtm.AsMap{
+					{
+						Name: "test_asmap",
+						Assignments: []*gtm.AsAssignment{
+							{
+								DatacenterBase: gtm.DatacenterBase{
+									Nickname:     "TEST1",
+									DatacenterId: 123,
+								},
+								AsNumbers: []int64{1, 2, 3},
+							},
+						},
+						DefaultDatacenter: &gtm.DatacenterBase{
+							Nickname:     "default",
+							DatacenterId: 123,
+						},
+					},
+				},
+				GeoMaps: []*gtm.GeoMap{
+					{
+						Name: "test_geomap",
+						Assignments: []*gtm.GeoAssignment{
+							{
+								DatacenterBase: gtm.DatacenterBase{
+									Nickname:     "TEST1",
+									DatacenterId: 123,
+								},
+								Countries: []string{"US"},
+							},
+						},
+						DefaultDatacenter: &gtm.DatacenterBase{
+							Nickname:     "default",
+							DatacenterId: 124,
+						},
+					},
+				},
+				CidrMaps: []*gtm.CidrMap{
+					{
+						Name: "test_cidrmap",
+						DefaultDatacenter: &gtm.DatacenterBase{
+							Nickname:     "default",
+							DatacenterId: 124,
+						},
+					},
+				},
+			},
+			dir:          "with_maps",
+			filesToCheck: []string{"domain.tf", "variables.tf", "import.sh", "maps.tf"},
+		},
 	}
 
 	for name, test := range tests {
@@ -371,6 +500,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 					"datacenters.tmpl": filepath.Join(outDir, "datacenters.tf"),
 					"domain.tmpl":      filepath.Join(outDir, "domain.tf"),
 					"imports.tmpl":     filepath.Join(outDir, "import.sh"),
+					"maps.tmpl":        filepath.Join(outDir, "maps.tf"),
 					"variables.tmpl":   filepath.Join(outDir, "variables.tf"),
 				},
 				AdditionalFuncs: template.FuncMap{

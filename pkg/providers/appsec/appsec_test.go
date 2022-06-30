@@ -1386,3 +1386,19 @@ func (m *mockAppsec) GetActivationHistory(ctx context.Context, req appsec.GetAct
 	}
 	return args.Get(0).(*appsec.GetActivationHistoryResponse), args.Error(1)
 }
+
+func (m *mockAppsec) GetEvalPenaltyBox(ctx context.Context, req appsec.GetPenaltyBoxRequest) (*appsec.GetPenaltyBoxResponse, error) {
+	args := m.Called(ctx, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*appsec.GetPenaltyBoxResponse), args.Error(1)
+}
+
+func (m *mockAppsec) UpdateEvalPenaltyBox(ctx context.Context, req appsec.UpdatePenaltyBoxRequest) (*appsec.UpdatePenaltyBoxResponse, error) {
+	args := m.Called(ctx, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*appsec.UpdatePenaltyBoxResponse), args.Error(1)
+}

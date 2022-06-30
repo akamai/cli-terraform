@@ -52,7 +52,8 @@ func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
 		"escapeName":    tools.EscapeName,
 		"toList":        tools.ToList,
 	}
-	tmpl := template.Must(template.New("templates").Funcs(funcs).Funcs(t.AdditionalFuncs).ParseFS(t.TemplatesFS, "**/*.tmpl"))
+	tmpl := template.Must(template.New("templates").Funcs(funcs).Funcs(t.AdditionalFuncs).
+		ParseFS(t.TemplatesFS, "*/*.tmpl", "*/*/*.tmpl"))
 
 	for templateName, targetPath := range t.TemplateTargets {
 		buf := bytes.Buffer{}

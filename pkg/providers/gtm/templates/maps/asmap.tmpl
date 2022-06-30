@@ -1,0 +1,29 @@
+{{ define "asmaps" -}}
+{{ range .AsMaps -}}
+resource "akamai_gtm_asmap" "{{normalize .Name}}" {
+    domain = akamai_gtm_domain.{{$.NormalizedName}}.name
+    default_datacenter {
+        nickname = "{{.DefaultDatacenter.Nickname}}"
+    {{- if eq .DefaultDatacenter.DatacenterId 5400 }}
+        datacenter_id = data.akamai_gtm_default_datacenter.default_datacenter_5400.datacenter_id
+    {{- else }}
+        datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DefaultDatacenter.DatacenterId}}.datacenter_id
+    {{- end }}
+    }
+    {{- range .Assignments }}
+    assignment {
+        nickname = "{{.Nickname}}"
+        datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}}.datacenter_id
+        as_numbers = [{{range $i, $n := .AsNumbers}}{{if $i}}, {{end}}{{$n}}{{end}}]
+    }
+    {{- end }}
+    name = "{{.Name}}"
+    depends_on = [
+    {{- range .Assignments }}
+        akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}},
+    {{- end }}
+        akamai_gtm_domain.{{$.NormalizedName}}
+    ]
+}
+{{ end -}}
+{{ end -}}
