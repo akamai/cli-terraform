@@ -155,5 +155,5 @@ func getRolesWithinGroup(ctx context.Context, client iam.IAM, groupID int) ([]TF
 		return nil, fmt.Errorf("%w: %v with error %s", ErrFetchingRolesWithinGroup, groupID, err)
 	}
 
-	return getTFRoles(roles), nil
+	return getTFRoles(ctx, client, roles)
 }

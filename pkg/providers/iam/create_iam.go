@@ -207,17 +207,25 @@ func getUserAuthGrants(user *iam.User) (string, error) {
 	return string(authGrantsJSON), nil
 }
 
-func getTFRoles(roles []iam.Role) []TFRole {
+func getTFRoles(ctx context.Context, client iam.IAM, roles []iam.Role) ([]TFRole, error) {
 	tfRoles := make([]TFRole, 0)
 	for _, r := range roles {
+		roleID := r.RoleID
+		role, err := client.GetRole(ctx, iam.GetRoleRequest{
+			ID:           roleID,
+			GrantedRoles: true,
+		})
+		if err != nil {
+			return nil, err
+		}
 		tfRoles = append(tfRoles, TFRole{
-			RoleID:          r.RoleID,
-			RoleName:        r.RoleName,
-			RoleDescription: r.RoleDescription,
-			GrantedRoles:    getGrantedRolesID(r.GrantedRoles),
+			RoleID:          role.RoleID,
+			RoleName:        role.RoleName,
+			RoleDescription: role.RoleDescription,
+			GrantedRoles:    getGrantedRolesID(role.GrantedRoles),
 		})
 	}
-	return tfRoles
+	return tfRoles, nil
 }
 
 func getGrantedRolesID(grantedRoles []iam.RoleGrantedRole) []int {

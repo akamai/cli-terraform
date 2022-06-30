@@ -111,7 +111,11 @@ func createIAMAll(ctx context.Context, section string, client iam.IAM, templateP
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrFetchingRoles, err)
 	}
-	tfRoles := getTFRoles(roles)
+	tfRoles, err := getTFRoles(ctx, client, roles)
+	if err != nil {
+		term.Spinner().Fail()
+		return fmt.Errorf("%w: %s", ErrFetchingRoles, err)
+	}
 	term.Spinner().OK()
 
 	tfData := TFData{

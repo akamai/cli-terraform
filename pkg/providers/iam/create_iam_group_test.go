@@ -89,6 +89,31 @@ var (
 		client.On("GetGroup", mock.Anything, getGroupReq).Return(&group, nil).Once()
 	}
 
+	expectGetRole = func(client *mockiam) {
+		getRoleReq := iam.GetRoleRequest{
+			ID:           12345,
+			GrantedRoles: true,
+		}
+		role := iam.Role{
+			RoleID:          12345,
+			RoleName:        "Custom role",
+			RoleDescription: "Custom role description",
+			GrantedRoles: []iam.RoleGrantedRole{
+				{
+					RoleID:      129,
+					RoleName:    "EdgeScape - Download EdgeScape Certificate",
+					Description: "Allows access to to download EdgeScape certificate",
+				},
+				{
+					RoleID:      385,
+					RoleName:    "Edge Diagnostics",
+					Description: "For customers without EC Advanced",
+				},
+			},
+		}
+		client.On("GetRole", mock.Anything, getRoleReq).Return(&role, nil).Once()
+	}
+
 	expectGroupByIDProcessTemplates = func(p *mockProcessor, section string) *mock.Call {
 		tfData := TFData{
 			TFUsers: []*TFUser{
@@ -103,7 +128,7 @@ var (
 					RoleID:          12345,
 					RoleName:        "Custom role",
 					RoleDescription: "Custom role description",
-					GrantedRoles:    []int{},
+					GrantedRoles:    []int{129, 385},
 				},
 			},
 			TFGroups: []TFGroup{
@@ -130,11 +155,12 @@ func TestCreateIAMGroupByID(t *testing.T) {
 	tests := map[string]struct {
 		init func(*mockiam, *mockProcessor)
 	}{
-		"fetch user": {
+		"fetch group": {
 			init: func(i *mockiam, p *mockProcessor) {
 				expectListUsersWithinGroup(i)
 				expectGetUserWithinGroup(i)
 				expectListRolesWithinGroup(i)
+				expectGetRole(i)
 				expectGetGroupWithinRole(i)
 				expectGroupByIDProcessTemplates(p, section)
 			},

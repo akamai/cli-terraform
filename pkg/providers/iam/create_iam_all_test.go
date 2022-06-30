@@ -127,6 +127,43 @@ var (
 		client.On("ListRoles", mock.Anything, listRolesReq).Return(roles, nil).Once()
 	}
 
+	expectGetRoles = func(client *mockiam) {
+		getRoleReq1 := iam.GetRoleRequest{
+			ID:           201,
+			GrantedRoles: true,
+		}
+		getRoleReq2 := iam.GetRoleRequest{
+			ID:           202,
+			GrantedRoles: true,
+		}
+
+		role1 := iam.Role{
+			RoleID:          201,
+			RoleName:        "role_201",
+			RoleDescription: "role 201 description",
+			GrantedRoles: []iam.RoleGrantedRole{
+				{
+					RoleID:      129,
+					RoleName:    "EdgeScape - Download EdgeScape Certificate",
+					Description: "Allows access to to download EdgeScape certificate",
+				},
+				{
+					RoleID:      385,
+					RoleName:    "Edge Diagnostics",
+					Description: "For customers without EC Advanced",
+				},
+			},
+		}
+		role2 := iam.Role{
+			RoleID:          202,
+			RoleName:        "role_202",
+			RoleDescription: "role 202 description",
+		}
+
+		client.On("GetRole", mock.Anything, getRoleReq1).Return(&role1, nil).Once()
+		client.On("GetRole", mock.Anything, getRoleReq2).Return(&role2, nil).Once()
+	}
+
 	expectAllProcessTemplates = func(p *mockProcessor, section string) *mock.Call {
 
 		call := p.On(
@@ -151,6 +188,7 @@ func TestCreateIAMAll(t *testing.T) {
 				expectGetUser002(i)
 				expectListAllGroups(i)
 				expectListAllRoles(i)
+				expectGetRoles(i)
 				expectAllProcessTemplates(p, section)
 			},
 		},
@@ -177,6 +215,7 @@ func TestCreateIAMAll(t *testing.T) {
 
 				expectListAllGroups(i)
 				expectListAllRoles(i)
+				expectGetRoles(i)
 
 				expectedTestData := getTestData(section)
 				expectedTestData.TFUsers = []*TFUser{{
@@ -300,7 +339,7 @@ func getTestData(section string) TFData {
 				RoleID:          201,
 				RoleName:        "role_201",
 				RoleDescription: "role 201 description",
-				GrantedRoles:    []int{},
+				GrantedRoles:    []int{129, 385},
 			},
 			{
 				RoleID:          202,
