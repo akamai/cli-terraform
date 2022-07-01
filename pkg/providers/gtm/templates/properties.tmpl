@@ -1,0 +1,151 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/gtm.TFDomainData*/ -}}
+{{- range .Properties -}}
+resource "akamai_gtm_property" "{{normalize .Name}}" {
+    domain = akamai_gtm_domain.{{$.NormalizedName}}.name
+    name = "{{.Name}}"
+    type = "{{.Type}}"
+    ipv6 = {{.Ipv6}}
+    score_aggregation_type = "{{.ScoreAggregationType}}"
+    stickiness_bonus_percentage = {{.StickinessBonusPercentage}}
+    stickiness_bonus_constant = {{.StickinessBonusConstant}}
+    {{- if .HealthThreshold}}
+    health_threshold = {{.HealthThreshold}}
+    {{- end}}
+    use_computed_targets = {{.UseComputedTargets}}
+    {{- if .BackupIp}}
+    backup_ip = "{{.BackupIp}}"
+    {{- end}}
+    balance_by_download_score = {{.BalanceByDownloadScore}}
+    {{- range .StaticRRSets}}
+    static_rr_set {
+        {{- if .Type}}
+        type = "{{.Type}}"
+        {{- end}}
+        {{- if .TTL}}
+        ttl = {{.TTL}}
+        {{- end}}
+        {{- if .Rdata}}
+        rdata = [{{range $i, $v := .Rdata}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+        {{- end}}
+    }
+    {{- end}}
+    {{- if .UnreachableThreshold}}
+    unreachable_threshold = {{.UnreachableThreshold}}
+    {{- end}}
+    {{- if .MinLiveFraction}}
+    min_live_fraction = {{.MinLiveFraction}}
+    {{- end}}
+    {{- if .HealthMultiplier}}
+    health_multiplier = {{.HealthMultiplier}}
+    {{- end}}
+    {{- if .DynamicTTL}}
+    dynamic_ttl = {{.DynamicTTL}}
+    {{- end}}
+    {{- if .MaxUnreachablePenalty}}
+    max_unreachable_penalty = {{.MaxUnreachablePenalty}}
+    {{- end}}
+    {{- if .MapName}}
+    map_name = "{{.MapName}}"
+    {{- end}}
+    handout_limit = {{.HandoutLimit}}
+    handout_mode = "{{.HandoutMode}}"
+    {{- if .BackupCName}}
+    backup_cname = "{{.BackupCName}}"
+    {{- end}}
+    failover_delay = {{.FailoverDelay}}
+    failback_delay = {{.FailbackDelay}}
+    {{- if .LoadImbalancePercentage}}
+    load_imbalance_percentage = {{.LoadImbalancePercentage}}
+    {{- end}}
+    {{- if .HealthMax}}
+    health_max = {{.HealthMax}}
+    {{- end}}
+    {{- if .CName}}
+    cname = "{{.CName}}"
+    {{- end}}
+    {{- if .Comments}}
+    comments = "{{.Comments}}"
+    {{- end}}
+    ghost_demand_reporting = {{.GhostDemandReporting}}
+    {{- if ne (.Type | toUpper) "STATIC"}}
+    {{- range .TrafficTargets}}
+    traffic_target {
+        datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}}.datacenter_id
+        enabled = {{.Enabled}}
+        weight = {{.Weight}}
+        servers = [{{range $i, $v := .Servers}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+        {{- if .Name}}
+        name = "{{.Name}}"
+        {{- end}}
+        {{- if .HandoutCName}}
+        handout_cname = "{{.HandoutCName}}"
+        {{- end}}
+    }
+    {{- end}}
+    {{- end}}
+    {{- range .LivenessTests}}
+    liveness_test {
+        name = "{{.Name}}"
+        {{- if .ErrorPenalty}}
+        error_penalty = {{.ErrrorPenalty}}
+        {{- end}}
+        peer_certificate_verification = {{.PeerCertificateVerification}}
+        test_interval = {{.TestInterval}}
+        test_object = "{{.TestObject}}"
+        {{- if .RequestString}}
+        request_string = "{{.RequestString}}"
+        {{- end}}
+        {{- if .ResponseString}}
+        response_string = "{{.ResponseString}}"
+        {{- end}}
+        http_error3xx = {{.HttpError3xx}}
+        http_error4xx = {{.HttpError4xx}}
+        http_error5xx = {{.HttpError5xx}}
+        disabled = {{.Disabled}}
+        test_object_protocol = "{{.TestObjectProtocol}}"
+        {{- if .TestObjectPassword}}
+        test_object_password = "{{.TestObjectPassword}}"
+        {{- end}}
+        test_object_port = {{.TestObjectPort}}
+        {{- if .SslClientPrivateKey}}
+        ssl_client_private_key = "{{.SslClientPrivateKey}}"
+        {{- end}}
+        {{- if .SslClientCertificate}}
+        ssl_client_certificate = "{{.SslClientCertificate}}"
+        {{- end}}
+        disable_nonstandard_port_warning = {{.DisableNonstandardPortWarning}}
+        {{- range .HttpHeaders}}
+        http_header {
+            {{- if .Name}}
+            name = "{{.Name}}"
+            {{- end}}
+            {{- if .Value}}
+            value = "{{.Value}}"
+            {{- end}}
+        }
+        {{- end}}
+        {{- if .TestObjectUsername}}
+        test_object_username = "{{.TestObjectUsername}}"
+        {{- end}}
+        {{- if .TestTimeout}}
+        test_timeout = {{.TestTimeout}}
+        {{- end}}
+        {{- if .TimeoutPenalty}}
+        timeout_penalty = {{.TimeoutPenalty}}
+        {{- end}}
+        answers_required = {{.AnswersRequired}}
+        {{- if .ResourceType}}
+        resource_type = "{{.ResourceType}}"
+        {{- end}}
+        recursion_requested = {{.RecursionRequested}}
+    }
+    {{- end}}
+    depends_on = [
+        {{- range $i, $v := .TrafficTargets}}
+        akamai_gtm_datacenter.{{$.FindDatacenterResourceName $v.DatacenterId}},
+        {{- end}}
+        akamai_gtm_domain.{{$.NormalizedName}}
+    ]
+}
+
+{{end}}

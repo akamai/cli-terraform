@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"text/template"
 
@@ -30,10 +31,6 @@ func (m *mockProcessor) ProcessTemplates(i interface{}) error {
 
 func TestMain(m *testing.M) {
 	if err := os.MkdirAll("./testdata/res", 0755); err != nil {
-		log.Fatal(err)
-	}
-	domainPath = "./testdata/res/testdata_domain.tf"
-	if _, err := os.Create(domainPath); err != nil {
 		log.Fatal(err)
 	}
 	exitCode := m.Run()
@@ -79,10 +76,84 @@ var (
 		},
 		Properties: []*gtm.Property{
 			{
-				Name: "test property1",
+				Name:                 "test property1",
+				Type:                 "performance",
+				ScoreAggregationType: "worst",
+				DynamicTTL:           60,
+				HandoutLimit:         8,
+				HandoutMode:          "normal",
+				TrafficTargets: []*gtm.TrafficTarget{
+					{
+						DatacenterId: 123,
+						Enabled:      true,
+						Weight:       1,
+						Servers:      []string{"1.2.3.4"},
+					},
+				},
+				LivenessTests: []*gtm.LivenessTest{
+					{
+						Name:               "HTTP",
+						TestInterval:       60,
+						TestObject:         "/",
+						HttpError3xx:       true,
+						HttpError4xx:       true,
+						HttpError5xx:       true,
+						TestObjectProtocol: "HTTP",
+						TestObjectPort:     80,
+						TestTimeout:        10,
+					},
+				},
 			},
 			{
-				Name: "test property2",
+				Name:                 "test property2",
+				Type:                 "performance",
+				ScoreAggregationType: "worst",
+				DynamicTTL:           60,
+				HandoutLimit:         8,
+				HandoutMode:          "normal",
+				StaticRRSets: []*gtm.StaticRRSet{
+					{
+						Type:  "test type",
+						Rdata: []string{"rdata1", "rdata2"},
+					},
+				},
+				TrafficTargets: []*gtm.TrafficTarget{
+					{
+						DatacenterId: 123,
+						Enabled:      true,
+						Weight:       1,
+						Servers:      []string{"1.2.3.4"},
+					},
+					{
+						DatacenterId: 124,
+						Enabled:      true,
+						Weight:       1,
+						Servers:      []string{"7.6.5.4"},
+					},
+				},
+				LivenessTests: []*gtm.LivenessTest{
+					{
+						Name:               "HTTP",
+						TestInterval:       60,
+						TestObject:         "/",
+						HttpError3xx:       true,
+						HttpError4xx:       true,
+						HttpError5xx:       true,
+						TestObjectProtocol: "HTTP",
+						TestObjectPort:     80,
+						TestTimeout:        10,
+						HttpHeaders: []*gtm.HttpHeader{
+							{
+								Name:  "header1",
+								Value: "header1Value",
+							},
+							{
+								Name:  "header2",
+								Value: "header2Value",
+							},
+						},
+					},
+				},
 			},
 		},
 		AsMaps: []*gtm.AsMap{
@@ -170,10 +241,6 @@ var (
 				},
 			},
 		},
-		DatacentersImportList: map[int]string{
-			123: "TEST1",
-			124: "TEST2",
-		},
 		Resources: []*gtm.Resource{
 			{
 				Name: "test resource1",
@@ -182,9 +249,87 @@ var (
 				Name: "test resource2",
 			},
 		},
-		Properties: map[string][]int{
-			"test property1": {},
-			"test property2": {},
+		Properties: []*gtm.Property{
+			{
+				Name:                 "test property1",
+				Type:                 "performance",
+				ScoreAggregationType: "worst",
+				DynamicTTL:           60,
+				HandoutLimit:         8,
+				HandoutMode:          "normal",
+				TrafficTargets: []*gtm.TrafficTarget{
+					{
+						DatacenterId: 123,
+						Enabled:      true,
+						Weight:       1,
+						Servers:      []string{"1.2.3.4"},
+					},
+				},
+				LivenessTests: []*gtm.LivenessTest{
+					{
+						Name:               "HTTP",
+						TestInterval:       60,
+						TestObject:         "/",
+						HttpError3xx:       true,
+						HttpError4xx:       true,
+						HttpError5xx:       true,
+						TestObjectProtocol: "HTTP",
+						TestObjectPort:     80,
+						TestTimeout:        10,
+					},
+				},
+			},
+			{
+				Name:                 "test property2",
+				Type:                 "performance",
+				ScoreAggregationType: "worst",
+				DynamicTTL:           60,
+				HandoutLimit:         8,
+				HandoutMode:          "normal",
+				StaticRRSets: []*gtm.StaticRRSet{
+					{
+						Type:  "test type",
+						Rdata: []string{"rdata1", "rdata2"},
+					},
+				},
+				TrafficTargets: []*gtm.TrafficTarget{
+					{
+						DatacenterId: 123,
+						Enabled:      true,
+						Weight:       1,
+						Servers:      []string{"1.2.3.4"},
+					},
+					{
+						DatacenterId: 124,
+						Enabled:      true,
+						Weight:       1,
+						Servers:      []string{"7.6.5.4"},
+					},
+				},
+				LivenessTests: []*gtm.LivenessTest{
+					{
+						Name:               "HTTP",
+						TestInterval:       60,
+						TestObject:         "/",
+						HttpError3xx:       true,
+						HttpError4xx:       true,
+						HttpError5xx:       true,
+						TestObjectProtocol: "HTTP",
+						TestObjectPort:     80,
+						TestTimeout:        10,
+						HttpHeaders: []*gtm.HttpHeader{
+							{
+								Name:  "header1",
+								Value: "header1Value",
+							},
+							{
+								Name:  "header2",
+								Value: "header2Value",
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 
@@ -203,10 +348,6 @@ var (
 		}
 		return call.Return(domain, nil)
 	}
-
-	expectNullFieldMap = func(mg *mockGTM, domain *gtm.Domain) *mock.Call {
-		return mg.On("NullFieldMap", mock.Anything, domain).Return(&gtm.NullFieldMapStruct{}, nil)
-	}
 )
 
 func TestCreateDomain(t *testing.T) {
@@ -220,7 +361,6 @@ func TestCreateDomain(t *testing.T) {
 		"fetch domain success": {
 			init: func(mg *mockGTM, mp *mockProcessor) {
 				expectGetDomain(mg, domainName, domain, nil).Once()
-				expectNullFieldMap(mg, domain).Once()
 				expectGTMProcessTemplates(mp, domainData, nil).Once()
 			},
 		},
@@ -302,9 +442,13 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Name: "test resource2",
 					},
 				},
-				Properties: map[string][]int{
-					"test property1": {},
-					"test property2": {},
+				Properties: []*gtm.Property{
+					{
+						Name: "test property1",
+					},
+					{
+						Name: "test property2",
+					},
 				},
 				AsMaps: []*gtm.AsMap{
 					{
@@ -574,6 +718,130 @@ func TestProcessDomainTemplates(t *testing.T) {
 			dir:          "with_resources",
 			filesToCheck: []string{"domain.tf", "variables.tf", "import.sh", "resources.tf"},
 		},
+		"simple domain with properties": {
+			givenData: TFDomainData{
+				Section:                 "test_section",
+				Name:                    "test.name.akadns.net",
+				NormalizedName:          "test_name",
+				Type:                    "basic",
+				Comment:                 "test",
+				EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+				DefaultTimeoutPenalty:   10,
+				LoadImbalancePercentage: 50,
+				DefaultErrorPenalty:     90,
+				CnameCoalescingEnabled:  true,
+				LoadFeedback:            true,
+				Datacenters: []TFDatacenterData{
+					{
+						Nickname:        "TEST1",
+						ID:              123,
+						City:            "New York",
+						StateOrProvince: "NY",
+						Country:         "US",
+						Latitude:        40.71305,
+						Longitude:       -74.00723,
+						DefaultLoadObject: &gtm.LoadObject{
+							LoadObject:     "test load object",
+							LoadObjectPort: 111,
+							LoadServers:    []string{"loadServer1", "loadServer2", "loadServer3"},
+						},
+					},
+					{
+						Nickname:        "TEST2",
+						ID:              124,
+						City:            "Chicago",
+						StateOrProvince: "IL",
+						Country:         "US",
+						Latitude:        41.88323,
+						Longitude:       -87.6324,
+					},
+				},
+				Properties: []*gtm.Property{
+					{
+						Name:                 "test property1",
+						Type:                 "static",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						TrafficTargets: []*gtm.TrafficTarget{
+							{
+								DatacenterId: 123,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"1.2.3.4"},
+							},
+						},
+						LivenessTests: []*gtm.LivenessTest{
+							{
+								Name:               "HTTP",
+								TestInterval:       60,
+								TestObject:         "/",
+								HttpError3xx:       true,
+								HttpError4xx:       true,
+								HttpError5xx:       true,
+								TestObjectProtocol: "HTTP",
+								TestObjectPort:     80,
+								TestTimeout:        10,
+							},
+						},
+					},
+					{
+						Name:                 "test property2",
+						Type:                 "performance",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						StaticRRSets: []*gtm.StaticRRSet{
+							{
+								Type:  "test type",
+								Rdata: []string{"rdata1", "rdata2"},
+							},
+						},
+						TrafficTargets: []*gtm.TrafficTarget{
+							{
+								DatacenterId: 123,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"1.2.3.4"},
+							},
+							{
+								DatacenterId: 124,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"7.6.5.4"},
+							},
+						},
+						LivenessTests: []*gtm.LivenessTest{
+							{
+								Name:               "HTTP",
+								TestInterval:       60,
+								TestObject:         "/",
+								HttpError3xx:       true,
+								HttpError4xx:       true,
+								HttpError5xx:       true,
+								TestObjectProtocol: "HTTP",
+								TestObjectPort:     80,
+								TestTimeout:        10,
+								HttpHeaders: []*gtm.HttpHeader{
+									{
+										Name:  "header1",
+										Value: "header1Value",
+									},
+									{
+										Name:  "header2",
+										Value: "header2Value",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			dir:          "with_properties",
+			filesToCheck: []string{"domain.tf", "properties.tf", "variables.tf", "import.sh"},
+		},
 	}
 
 	for name, test := range tests {
@@ -588,10 +856,12 @@ func TestProcessDomainTemplates(t *testing.T) {
 					"imports.tmpl":     filepath.Join(outDir, "import.sh"),
 					"maps.tmpl":        filepath.Join(outDir, "maps.tf"),
 					"resources.tmpl":   filepath.Join(outDir, "resources.tf"),
+					"properties.tmpl":  filepath.Join(outDir, "properties.tf"),
 					"variables.tmpl":   filepath.Join(outDir, "variables.tf"),
 				},
 				AdditionalFuncs: template.FuncMap{
 					"normalize": normalizeResourceName,
+					"toUpper":   strings.ToUpper,
 				},
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))

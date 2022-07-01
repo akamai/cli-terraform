@@ -19,7 +19,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -54,12 +53,11 @@ type (
 		Section                     string
 		Datacenters                 []TFDatacenterData
 		DefaultDatacenters          []TFDatacenterData
-		DatacentersImportList       map[int]string // only for compatibility purpose, to be removed
-		Properties                  map[string][]int
 		Resources                   []*gtm.Resource
 		CidrMaps                    []*gtm.CidrMap
 		GeoMaps                     []*gtm.GeoMap
 		AsMaps                      []*gtm.AsMap
+		Properties                  []*gtm.Property
 	}
 
 	// TFDatacenterData represents the data used for processing a datacenter
@@ -83,27 +81,6 @@ type (
 var templateFiles embed.FS
 
 var defaultDCs = map[int]struct{}{5400: {}, 5401: {}, 5402: {}}
-
-// Terraform resource names
-const (
-	domainResource              = "akamai_gtm_domain"
-	datacenterResource          = "akamai_gtm_datacenter"
-	defaultDatacenterDataSource = "akamai_gtm_default_datacenter"
-	propertyResource            = "akamai_gtm_property"
-	resourceResource            = "akamai_gtm_resource"
-	asResource                  = "akamai_gtm_asmap"
-	geoResource                 = "akamai_gtm_geomap"
-	cidrResource                = "akamai_gtm_cidrmap"
-)
-
-// TODO: remove and declare those variables in CmdCreateDomain once there is no appending to those files (DXE-698)
-var (
-	domainPath    string
-	importPath    string
-	resourcesPath string
-)
-
-var nullFieldMap = &gtm.NullFieldMapStruct{}
 
 var (
 	subWithUnderscoreRegexp               = regexp.MustCompile(`[^\w-_]`)
@@ -133,10 +110,11 @@ func CmdCreateDomain(c *cli.Context) error {
 	}
 
 	datacentersPath := filepath.Join(tools.TFWorkPath, "datacenters.tf")
-	domainPath = filepath.Join(tools.TFWorkPath, "domain.tf")
-	importPath = filepath.Join(tools.TFWorkPath, "import.sh")
+	domainPath := filepath.Join(tools.TFWorkPath, "domain.tf")
+	importPath := filepath.Join(tools.TFWorkPath, "import.sh")
 	mapsPath := filepath.Join(tools.TFWorkPath, "maps.tf")
-	resourcesPath = filepath.Join(tools.TFWorkPath, "resources.tf")
+	propertiesPath := filepath.Join(tools.TFWorkPath, "properties.tf")
+	resourcesPath := filepath.Join(tools.TFWorkPath, "resources.tf")
 	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
 
 	templateToFile := map[string]string{
@@ -144,11 +122,12 @@ func CmdCreateDomain(c *cli.Context) error {
 		"domain.tmpl":      domainPath,
 		"imports.tmpl":     importPath,
 		"maps.tmpl":        mapsPath,
+		"properties.tmpl":  propertiesPath,
 		"resources.tmpl":   resourcesPath,
 		"variables.tmpl":   variablesPath,
 	}
 
-	err := tools.CheckFiles(domainPath, variablesPath, importPath)
+	err := tools.CheckFiles(datacentersPath, domainPath, importPath, mapsPath, propertiesPath, resourcesPath, variablesPath)
 	if err != nil {
 		return cli.Exit(color.RedString(err.Error()), 1)
 	}
@@ -158,6 +137,7 @@ func CmdCreateDomain(c *cli.Context) error {
 		TemplateTargets: templateToFile,
 		AdditionalFuncs: template.FuncMap{
 			"normalize": normalizeResourceName,
+			"toUpper":   strings.ToUpper,
 		},
 	}
 
@@ -172,7 +152,7 @@ func CmdCreateDomain(c *cli.Context) error {
 func createDomain(ctx context.Context, client gtm.GTM, domainName, section string, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
-	fmt.Println("Configuring Domain")
+	term.Writeln("Configuring Domain")
 	term.Spinner().Start(fmt.Sprintf("Fetching domain %s", domainName))
 	domain, err := client.GetDomain(ctx, domainName)
 	if err != nil {
@@ -199,41 +179,32 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, section strin
 		CidrMaps:                    domain.CidrMaps,
 		GeoMaps:                     domain.GeographicMaps,
 		AsMaps:                      domain.AsMaps,
+		Properties:                  domain.Properties,
 	}
 
-	getDatacenters(domain, &tfDomainData)
-
-	createImportList(domain, &tfDomainData)
+	tfDomainData.getDatacenters(domain)
 	term.Spinner().OK()
 
-	term.Spinner().Start("Saving TF configurations ")
+	term.Spinner().Start("Saving TF configurations")
 	if err := templateProcessor.ProcessTemplates(tfDomainData); err != nil {
 		term.Spinner().Fail()
 		return err
 	}
 	term.Spinner().OK()
 
-	term.Spinner().Start("Creating domain configuration file ")
-	if err := createConfig(ctx, client, domain, &tfDomainData); err != nil {
-		term.Spinner().Fail()
-		return err
-	}
-	term.Spinner().OK()
-
-	fmt.Printf("Terraform configuration for policy '%s' was saved successfully\n", domain.Name)
+	term.Writeln(fmt.Sprintf("Terraform configuration for policy '%s' was saved successfully\n", domain.Name))
 
 	return nil
 }
 
-func getDatacenters(domain *gtm.Domain, tfData *TFDomainData) {
-	tfData.Datacenters = make([]TFDatacenterData, 0)
-	tfData.DefaultDatacenters = make([]TFDatacenterData, 0)
-	tfData.DatacentersImportList = make(map[int]string, len(domain.Datacenters))
+func (d *TFDomainData) getDatacenters(domain *gtm.Domain) {
+	d.Datacenters = make([]TFDatacenterData, 0)
+	d.DefaultDatacenters = make([]TFDatacenterData, 0)
 	for _, dc := range domain.Datacenters {
 		if _, ok := defaultDCs[dc.DatacenterId]; ok {
-			tfData.DefaultDatacenters = append(tfData.DefaultDatacenters, TFDatacenterData{Nickname: dc.Nickname, ID: dc.DatacenterId})
+			d.DefaultDatacenters = append(d.DefaultDatacenters, TFDatacenterData{Nickname: dc.Nickname, ID: dc.DatacenterId})
 		} else {
-			tfData.Datacenters = append(tfData.Datacenters, TFDatacenterData{
+			d.Datacenters = append(d.Datacenters, TFDatacenterData{
 				ID:                            dc.DatacenterId,
 				Nickname:                      dc.Nickname,
 				City:                          dc.City,
@@ -247,57 +218,8 @@ func getDatacenters(domain *gtm.Domain, tfData *TFDomainData) {
 				StateOrProvince:               dc.StateOrProvince,
 				DefaultLoadObject:             dc.DefaultLoadObject,
 			})
-
-			tfData.DatacentersImportList[dc.DatacenterId] = dc.Nickname
 		}
 	}
-}
-
-// retrieve Null Values for Object Type
-func getNullValuesList(objType string) map[string]gtm.NullPerObjectAttributeStruct {
-
-	switch objType {
-	case "Properties":
-		return nullFieldMap.Properties
-	}
-	// unknown
-	return map[string]gtm.NullPerObjectAttributeStruct{}
-}
-
-func createImportList(domain *gtm.Domain, tfData *TFDomainData) {
-	// inventory properties and targets
-	tfData.Properties = make(map[string][]int, len(domain.Properties))
-	for _, p := range domain.Properties {
-		targets := make([]int, 0, len(p.TrafficTargets))
-		for _, tt := range p.TrafficTargets {
-			targets = append(targets, tt.DatacenterId)
-		}
-		tfData.Properties[p.Name] = targets
-	}
-}
-
-func createConfig(ctx context.Context, client gtm.GTM, domain *gtm.Domain, tfData *TFDomainData) error {
-	domainTFfileHandle, err := os.OpenFile(domainPath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
-	if err != nil && err != io.EOF {
-		return err
-	}
-	defer domainTFfileHandle.Close()
-
-	//initialize Null Fields Struct
-	nullFieldMap, err = client.NullFieldMap(ctx, domain)
-	if err != nil {
-		return fmt.Errorf("failed to initialize Domain null fields map")
-	}
-	// build tf file
-	tfConfig := processProperties(domain.Properties, tfData.Properties, tfData.DatacentersImportList, tfData.NormalizedName)
-	tfConfig += "\n"
-
-	_, err = domainTFfileHandle.Write([]byte(tfConfig))
-	if err != nil {
-		return fmt.Errorf("failed to save domain configuration file")
-	}
-	domainTFfileHandle.Sync()
-	return nil
 }
 
 // normalizeResourceName is a utility function to normalize resource names.
