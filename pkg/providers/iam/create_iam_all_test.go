@@ -98,6 +98,8 @@ var (
 				GroupID:       102,
 				GroupName:     "grp_102",
 				ParentGroupID: 111,
+				SubGroups: []iam.Group{{GroupID: 112, GroupName: "grp_112", ParentGroupID: 102,
+					SubGroups: []iam.Group{{GroupID: 123, GroupName: "grp_123", ParentGroupID: 112}}}},
 			},
 		}
 
@@ -332,6 +334,16 @@ func getTestData(section string) TFData {
 				GroupID:       102,
 				ParentGroupID: 111,
 				GroupName:     "grp_102",
+			},
+			{
+				GroupID:       112,
+				ParentGroupID: 102,
+				GroupName:     "grp_112",
+			},
+			{
+				GroupID:       123,
+				ParentGroupID: 112,
+				GroupName:     "grp_123",
 			},
 		},
 		TFRoles: []TFRole{

@@ -183,22 +183,39 @@ func getTFUserRoles(ctx context.Context, client iam.IAM, authGrantsList []iam.Au
 }
 
 func getTFUserGroups(ctx context.Context, client iam.IAM, authGrantsList []iam.AuthGrant) ([]TFGroup, error) {
-	groups := make([]TFGroup, 0)
+	allGroups := make([]TFGroup, 0)
 	for i := range authGrantsList {
 		groupID := authGrantsList[i].GroupID
 		if groupID > 0 {
-			group, err := client.GetGroup(ctx, iam.GetGroupRequest{
-				GroupID: int64(groupID),
-			})
+			groups, err := getGroupsInSubtree(ctx, client, int64(groupID))
 			if err != nil {
 				return nil, err
 			}
-			groups = append(groups, TFGroup{
-				GroupID:       int(group.GroupID),
-				ParentGroupID: int(group.ParentGroupID),
-				GroupName:     group.GroupName,
-			})
+			allGroups = append(allGroups, groups...)
 		}
+	}
+	return allGroups, nil
+}
+
+func getGroupsInSubtree(ctx context.Context, client iam.IAM, groupID int64) ([]TFGroup, error) {
+	groups := make([]TFGroup, 0)
+	group, err := client.GetGroup(ctx, iam.GetGroupRequest{
+		GroupID: groupID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	groups = append(groups, TFGroup{
+		GroupID:       int(group.GroupID),
+		ParentGroupID: int(group.ParentGroupID),
+		GroupName:     group.GroupName,
+	})
+	for _, subGroup := range group.SubGroups {
+		subGroups, err := getGroupsInSubtree(ctx, client, subGroup.GroupID)
+		if err != nil {
+			return nil, err
+		}
+		groups = append(groups, subGroups...)
 	}
 	return groups, nil
 }

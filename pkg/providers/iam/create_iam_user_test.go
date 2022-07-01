@@ -75,15 +75,27 @@ var (
 	}
 
 	expectGetUserGroup = func(client *mockiam) {
-		getGroupReq := iam.GetGroupRequest{
+		getGroupReq1 := iam.GetGroupRequest{
 			GroupID: 56789,
 		}
-		group := iam.Group{
+		group1 := iam.Group{
 			GroupID:       56789,
 			ParentGroupID: 98765,
 			GroupName:     "Custom group",
+			SubGroups:     []iam.Group{{GroupID: 56473, GroupName: "the subgroup", ParentGroupID: 56789}},
 		}
-		client.On("GetGroup", mock.Anything, getGroupReq).Return(&group, nil).Once()
+		client.On("GetGroup", mock.Anything, getGroupReq1).Return(&group1, nil).Once()
+
+		getGroupReq2 := iam.GetGroupRequest{
+			GroupID: 56473,
+		}
+		group2 := iam.Group{
+			GroupID:       56473,
+			ParentGroupID: 56789,
+			GroupName:     "the subgroup",
+		}
+		client.On("GetGroup", mock.Anything, getGroupReq2).Return(&group2, nil).Once()
+
 	}
 
 	expectProcessTemplates = func(p *mockProcessor, section string) *mock.Call {
@@ -108,6 +120,11 @@ var (
 					GroupID:       56789,
 					ParentGroupID: 98765,
 					GroupName:     "Custom group",
+				},
+				{
+					GroupID:       56473,
+					ParentGroupID: 56789,
+					GroupName:     "the subgroup",
 				},
 			},
 			Section:    section,

@@ -97,7 +97,9 @@ func createIAMAll(ctx context.Context, section string, client iam.IAM, templateP
 	}
 	tfGroups := make([]TFGroup, 0)
 	for _, group := range groups {
-		tfGroups = append(tfGroups, getTFGroup(&group))
+		for _, innerGroup := range flattenSubgroups(&group) {
+			tfGroups = append(tfGroups, getTFGroup(&innerGroup))
+		}
 	}
 	term.Spinner().OK()
 
@@ -139,6 +141,15 @@ func createIAMAll(ctx context.Context, section string, client iam.IAM, templateP
 	}
 
 	return nil
+}
+
+func flattenSubgroups(group *iam.Group) []iam.Group {
+	groups := make([]iam.Group, 0)
+	groups = append(groups, *group)
+	for _, subGroup := range group.SubGroups {
+		groups = append(groups, flattenSubgroups(&subGroup)...)
+	}
+	return groups
 }
 
 func filterUsers(users []iam.UserListItem) []iam.UserListItem {
