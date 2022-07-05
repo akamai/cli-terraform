@@ -145,26 +145,16 @@ var (
 // CmdCreateProperty is an entrypoint to create-property command
 func CmdCreateProperty(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() != 1 {
-		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-			return cli.Exit(color.RedString("Error displaying help command"), 1)
-		}
-		return cli.Exit(color.RedString("Property name is required"), 1)
-	}
-
 	sess := edgegrid.GetSession(c.Context)
 	client := papi.Client(sess)
 	clientHapi := hapi.Client(sess)
+
 	if c.IsSet("tfworkpath") {
 		tools.TFWorkPath = c.String("tfworkpath")
 	}
 	var version string
 	if c.IsSet("version") {
 		version = c.String("version")
-	}
-	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
-	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
 	}
 
 	propertyPath := filepath.Join(tools.TFWorkPath, "property.tf")

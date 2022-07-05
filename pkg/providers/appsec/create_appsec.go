@@ -41,13 +41,6 @@ var (
 // CmdCreateAppsec is an entrypoint to create-appsec command
 func CmdCreateAppsec(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() == 0 {
-		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-			return cli.NewExitError(color.RedString("Error displaying help command"), 1)
-		}
-		return cli.NewExitError(color.RedString("Appsec configuration name is required"), 1)
-	}
-
 	sess := edgegrid.GetSession(ctx)
 	client = appsec.Client(sess)
 
@@ -55,10 +48,6 @@ func CmdCreateAppsec(c *cli.Context) error {
 
 	if c.IsSet("tfworkpath") {
 		tfWorkPath = c.String("tfworkpath")
-	}
-	tfWorkPath = filepath.FromSlash(tfWorkPath)
-	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
-		return cli.NewExitError(color.RedString("Destination work path is not accessible"), 1)
 	}
 
 	// Directory Paths

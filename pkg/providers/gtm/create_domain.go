@@ -19,7 +19,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -92,21 +91,11 @@ var (
 // CmdCreateDomain is an entrypoint to create-domain command
 func CmdCreateDomain(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() != 1 {
-		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-			return cli.Exit(color.RedString("Error displaying help command"), 1)
-		}
-		return cli.Exit(color.RedString("Domain is required"), 1)
-	}
-
 	sess := edgegrid.GetSession(ctx)
 	client := gtm.Client(sess)
+
 	if c.IsSet("tfworkpath") {
 		tools.TFWorkPath = c.String("tfworkpath")
-	}
-	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
-	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
 	}
 
 	datacentersPath := filepath.Join(tools.TFWorkPath, "datacenters.tf")

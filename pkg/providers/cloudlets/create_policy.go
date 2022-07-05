@@ -5,7 +5,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -69,23 +68,12 @@ var (
 // CmdCreatePolicy is an entrypoint to create-policy command
 func CmdCreatePolicy(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() != 1 {
-		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-			return cli.Exit(color.RedString("Error displaying help command"), 1)
-		}
-		return cli.Exit(color.RedString("Policy name is required"), 1)
-	}
-
 	sess := edgegrid.GetSession(c.Context)
 	client := cloudlets.Client(sess)
+
 	if c.IsSet("tfworkpath") {
 		tools.TFWorkPath = c.String("tfworkpath")
 	}
-	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
-	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
-	}
-
 	policyPath := filepath.Join(tools.TFWorkPath, "policy.tf")
 	matchRulesPath := filepath.Join(tools.TFWorkPath, "match-rules.tf")
 	loadBalancerPath := filepath.Join(tools.TFWorkPath, "load-balancer.tf")

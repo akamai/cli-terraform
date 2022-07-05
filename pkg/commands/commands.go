@@ -37,7 +37,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Name:        "create-domain",
 		Description: "Create Terraform Domain Resources",
 		ArgsUsage:   "<domain>",
-		Action:      gtm.CmdCreateDomain,
+		Action:      validatedAction(gtm.CmdCreateDomain, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "tfworkpath",
@@ -51,7 +51,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Name:        "create-zone",
 		Description: "Create Terraform Zone Resources",
 		ArgsUsage:   "<zone>",
-		Action:      dns.CmdCreateZone,
+		Action:      validatedAction(dns.CmdCreateZone, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "tfworkpath",
@@ -94,7 +94,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Description: "Create Terraform Application Security Resource",
 		Usage:       "create-appsec",
 		ArgsUsage:   "<security configuration name>",
-		Action:      appsec.CmdCreateAppsec,
+		Action:      validatedAction(appsec.CmdCreateAppsec, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "tfworkpath",
@@ -110,7 +110,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Description: "Create Terraform Property Resource",
 		Usage:       "create-property",
 		ArgsUsage:   "<property name>",
-		Action:      papi.CmdCreateProperty,
+		Action:      validatedAction(papi.CmdCreateProperty, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "tfworkpath",
@@ -131,7 +131,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Description: "Create Terraform Cloudlets Policy Resource",
 		Usage:       "create-cloudlets-policy",
 		ArgsUsage:   "<policy_name>",
-		Action:      cloudlets.CmdCreatePolicy,
+		Action:      validatedAction(cloudlets.CmdCreatePolicy, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "tfworkpath",
@@ -146,7 +146,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Description: "Create Terraform EdgeKV Resource",
 		Usage:       "create-edgekv",
 		ArgsUsage:   "<namespace_name> <network>",
-		Action:      edgeworkers.CmdCreateEdgeKV,
+		Action:      validatedAction(edgeworkers.CmdCreateEdgeKV, requireValidWorkpath, requireNArguments(2)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "tfworkpath",
@@ -161,7 +161,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Description: "Create Terraform EdgeWorker Resource",
 		Usage:       "create-edgeworker",
 		ArgsUsage:   "<edgeworker_id>",
-		Action:      edgeworkers.CmdCreateEdgeWorker,
+		Action:      validatedAction(edgeworkers.CmdCreateEdgeWorker, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "bundlepath",
@@ -219,7 +219,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Description: "Create Terraform Image and Video Manager resources",
 		Usage:       "create-imaging",
 		ArgsUsage:   "<contract_id> <policy_set_id>",
-		Action:      imaging.CmdCreateImaging,
+		Action:      validatedAction(imaging.CmdCreateImaging, requireValidWorkpath, requireNArguments(2)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "policy-json-dir",

@@ -5,7 +5,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -42,22 +41,12 @@ var (
 // CmdCreateEdgeKV is an entrypoint to create-edgekv command
 func CmdCreateEdgeKV(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() != 2 {
-		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-			return cli.Exit(color.RedString("Error displaying help command"), 1)
-		}
-		return cli.Exit(color.RedString("EdgeKV namespace_name and network are required"), 1)
-	}
 	sess := edgegrid.GetSession(c.Context)
 	client := edgeworkers.Client(sess)
+
 	if c.IsSet("tfworkpath") {
 		tools.TFWorkPath = c.String("tfworkpath")
 	}
-	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
-	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
-	}
-
 	edgeKVPath := filepath.Join(tools.TFWorkPath, "edgekv.tf")
 	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
 	importPath := filepath.Join(tools.TFWorkPath, "import.sh")
