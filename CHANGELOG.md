@@ -1,5 +1,14 @@
 # Release Notes
 
+## Version 0.9.0 (Jul 07, 2022)
+
+### Features / Enhancements
+
+* Identity and Access Management  (IAM)
+  * New `create-iam` command to export users, roles and/or groups
+* Application Security
+  * New `create-appsec` command to create Application Security resource
+
 ## Version 0.8.0 (Jun 02, 2022)
 
 ### Features / Enhancements
