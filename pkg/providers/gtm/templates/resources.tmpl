@@ -36,9 +36,7 @@ resource "akamai_gtm_resource" "{{normalize .Name}}" {
 
     resource_instance {
         datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}}.datacenter_id
-        {{- if .UseDefaultLoadObject}}
         use_default_load_object = {{.UseDefaultLoadObject}}
-        {{- end}}
         {{- if .LoadObject}}
         load_object = "{{.LoadObject.LoadObject}}"
         {{- end}}

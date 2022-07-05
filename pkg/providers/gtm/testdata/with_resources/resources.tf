@@ -14,10 +14,11 @@ resource "akamai_gtm_resource" "test_resource1" {
   decay_rate                     = 5
 
   resource_instance {
-    datacenter_id    = akamai_gtm_datacenter.TEST1.datacenter_id
-    load_object      = "load"
-    load_servers     = ["server"]
-    load_object_port = 80
+    datacenter_id           = akamai_gtm_datacenter.TEST1.datacenter_id
+    use_default_load_object = false
+    load_object             = "load"
+    load_servers            = ["server"]
+    load_object_port        = 80
   }
 
   depends_on = [

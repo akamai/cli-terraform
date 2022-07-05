@@ -53,4 +53,5 @@ data "akamai_gtm_default_datacenter" "default_datacenter_{{.ID}}" {
     domain = akamai_gtm_domain.{{$.NormalizedName}}.name
     datacenter = {{.ID}}
 }
-{{end}}
+
+{{end -}}
