@@ -200,6 +200,7 @@ func CommandLocator() ([]*cli.Command, error) {
 			{
 				Name:        "all",
 				Description: "Create all available Terraform Users, Groups and Roles",
+				ArgsUsage:   " ", //TODO change within implementation of DXE-1249
 				Action:      iam.CmdCreateIAMAll,
 			},
 			{
