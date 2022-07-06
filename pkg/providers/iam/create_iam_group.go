@@ -32,7 +32,8 @@ func CmdCreateIAMGroup(c *cli.Context) error {
 	}
 	sess := edgegrid.GetSession(ctx)
 	client := iam.Client(sess)
-	tfWorkPath := "." // default is current dir
+	// tfWorkPath is a target directory for generated terraform resources
+	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
 		tfWorkPath = c.String("tfworkpath")
 	}

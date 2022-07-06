@@ -40,8 +40,9 @@ func CommandLocator() ([]*cli.Command, error) {
 		Action:      validatedAction(gtm.CmdCreateDomain, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created and/or modified artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,
@@ -54,8 +55,9 @@ func CommandLocator() ([]*cli.Command, error) {
 		Action:      validatedAction(dns.CmdCreateZone, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created and/or modified artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 			&cli.BoolFlag{
 				Name:  "resources",
@@ -98,7 +100,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "tfworkpath",
-				Usage:       "Path location for placement of created artifacts",
+				Usage:       "Directory used to store files created when running commands.",
 				DefaultText: "current directory",
 			},
 		},
@@ -114,7 +116,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "tfworkpath",
-				Usage:       "Path location for placement of created artifacts",
+				Usage:       "Directory used to store files created when running commands.",
 				DefaultText: "current directory",
 			},
 			&cli.StringFlag{
@@ -134,8 +136,9 @@ func CommandLocator() ([]*cli.Command, error) {
 		Action:      validatedAction(cloudlets.CmdCreatePolicy, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,
@@ -149,8 +152,9 @@ func CommandLocator() ([]*cli.Command, error) {
 		Action:      validatedAction(edgeworkers.CmdCreateEdgeKV, requireValidWorkpath, requireNArguments(2)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,
@@ -168,8 +172,9 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage: "Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath",
 			},
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,
@@ -226,8 +231,9 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage: "Path location for placement of policy jsons. Default: same value as tfworkpath",
 			},
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 			&cli.BoolFlag{
 				Name:        "schema",

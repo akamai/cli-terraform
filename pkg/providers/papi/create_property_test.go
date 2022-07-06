@@ -1328,7 +1328,7 @@ func TestCreateProperty(t *testing.T) {
 			mp := new(mockProcessor)
 			test.init(mc, mh, mp, test.dir)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createProperty(ctx, "test.edgesuite.net", test.readVersion, section, fmt.Sprintf("./testdata/res/%s", test.jsonDir), mc, mh, mp)
+			err := createProperty(ctx, "test.edgesuite.net", test.readVersion, section, fmt.Sprintf("./testdata/res/%s", test.jsonDir), "./", mc, mh, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return

@@ -71,7 +71,7 @@ Global Flags:
    akamai terraform [global flags] create-domain [flags] <domain>
 
 Flags:
-   --tfworkpath path       Path location for placement of created and modified artifacts. Default: current directory
+   --tfworkpath path       Directory used to store files created when running commands. (default: current directory)
    --resources             Creates a JSON-formatted resource file for import: <domain>_resources.json. The createconfig flag uses this file as an input. (default: false)
    --createconfig          Creates these Terraform configuration files based on the values in <domain>_resources.json: <domain>.tf and gtmvars.tf. Also creates this import script: <domain>_import.script. (default: false)
 ```
@@ -100,7 +100,7 @@ $ akamai terraform create-domain --createconfig example.akadns.net
    akamai terraform [global flags] create-zone [flags] <zone>
 
 Flags: 
-   --tfworkpath path       Path location for placement of created and modified artifacts. Default: current directory
+   --tfworkpath path       Directory used to store files created when running commands. (default: current directory)
    --resources             Creates a JSON-formatted resource file for import: <zone>_resources.json. The createconfig flag uses this file as an input. (default: false)
    --createconfig          Creates these Terraform configuration files based on the values in <zone>_resources.json: <zone>.tf and gtmvars.tf. (default: false)
    --importscript          Creates import script for generated Terraform configuration script (<zone>_import.script) files. (default: false)
@@ -153,7 +153,7 @@ $ akamai terraform create-zone --importscript testprimaryzone.com
    akamai terraform [global flags] create-appsec [flags] <name_of_security_config>
    
 Flags:
-   --tfworkpath path      Path location for placement of created artifacts. Default: current directory
+   --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
 ## Property Manager Properties
@@ -164,7 +164,7 @@ Flags:
    akamai terraform [global flags] create-property [flags] <property name>
 
 Flags:
-   --tfworkpath path      Path location for placement of created artifacts (default: current directory)
+   --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
    --version value        Property version to import  (default: LATEST)
 ```
 
@@ -182,7 +182,7 @@ $ akamai terraform create-property
    akamai terraform [global flags] create-cloudlets-policy [flags] <policy_name>
 
 Flags:
-   --tfworkpath path      Path location for placement of created artifacts. Default: current directory
+   --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
 ### Create policy configuration.
@@ -199,7 +199,7 @@ $ akamai terraform create-cloudlets-policy
    akamai terraform [global flags] create-edgekv [flags] <namespace_name> <network>
 
 Flags:
-   --tfworkpath path      Path location for placement of created artifacts. Default: current directory
+   --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
 ### Create edgekv configuration.
@@ -215,7 +215,7 @@ $ akamai terraform create-edgekv
 
 Flags:
    --bundlepath path      Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath
-   --tfworkpath path      Path location for placement of created artifacts. Default: current directory
+   --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
 ### Create edgeworker configuration.
@@ -238,7 +238,7 @@ Subcommands:
     user [user's email]     Exports user by email with relevant user's groups and roles
 
 Flags:
-   --tfworkpath path        Path location for placement of created artifacts. Default: current directory
+   --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
 ### Create Identity and Access Management configuration.
@@ -255,7 +255,7 @@ $ akamai terraform create-iam
    akamai terraform [global flags] create-imaging [flags] <contract_id> <policy_set_id>
 
 Flags:
-   --tfworkpath path         Path location for placement of created artifacts. Default: current directory
+   --tfworkpath path         Directory used to store files created when running commands. (default: current directory)
    --policy-json-dir path    Path location for placement of policy jsons. Default: same value as tfworkpath
 ```
 

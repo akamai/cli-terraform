@@ -41,7 +41,8 @@ type zoneImportListStruct struct {
 	Recordsets map[string]Types // zone recordsets grouped by name
 }
 
-//var tfWorkPath = "./"
+// tfWorkPath is a target directory for generated terraform resources
+var tfWorkPath = "./"
 var createImportList = false
 var createConfig = false
 
@@ -86,9 +87,9 @@ func CmdCreateZone(c *cli.Context) error {
 	zoneName = strings.ToLower(c.Args().Get(0))
 
 	if c.IsSet("tfworkpath") {
-		tools.TFWorkPath = c.String("tfworkpath")
+		tfWorkPath = c.String("tfworkpath")
 	}
-	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
+	tfWorkPath = filepath.FromSlash(tfWorkPath)
 	if c.IsSet("resources") {
 		createImportList = true
 	}
@@ -152,7 +153,7 @@ func CmdCreateZone(c *cli.Context) error {
 		term.Spinner().OK()
 		term.Spinner().Start("Creating Zone Resources list file ")
 		// pathname and exists?
-		if stat, err := os.Stat(tools.TFWorkPath); err == nil && stat.IsDir() {
+		if stat, err := os.Stat(tfWorkPath); err == nil && stat.IsDir() {
 			importListFilename := createImportListFilename(resourceZoneName)
 			if _, err := os.Stat(importListFilename); err == nil {
 				term.Spinner().Fail()
@@ -195,7 +196,7 @@ func CmdCreateZone(c *cli.Context) error {
 		}
 		// if segmenting recordsets by name, make sure module folder exists
 		if fetchConfig.ModSegment {
-			modulePath = filepath.Join(tools.TFWorkPath, moduleFolder)
+			modulePath = filepath.Join(tfWorkPath, moduleFolder)
 			if !createDirectory(modulePath) {
 				term.Spinner().Fail()
 				return cli.Exit(color.RedString("Failed to create modules folder."), 1)
@@ -269,7 +270,7 @@ func CmdCreateZone(c *cli.Context) error {
 		f.Sync()
 
 		// Need create dnsvars.tf dependency
-		dnsvarsFilename := filepath.Join(tools.TFWorkPath, "dnsvars.tf")
+		dnsvarsFilename := filepath.Join(tfWorkPath, "dnsvars.tf")
 		// see if exists already.
 		//if _, err := os.Stat(dnsvarsFilename); err != nil {
 		dnsvarsHandle, err := os.Create(dnsvarsFilename)
@@ -291,7 +292,7 @@ func CmdCreateZone(c *cli.Context) error {
 	if importScript {
 		term.Spinner().Start("Creating zone import script file")
 		fullZoneConfigMap, _ = retrieveZoneResourceConfig(resourceZoneName)
-		importScriptFilename := filepath.Join(tools.TFWorkPath, resourceZoneName+"_resource_import.script")
+		importScriptFilename := filepath.Join(tfWorkPath, resourceZoneName+"_resource_import.script")
 		if _, err := os.Stat(importScriptFilename); err == nil {
 			// File exists. Bail
 			term.Spinner().OK()
@@ -325,14 +326,14 @@ func CmdCreateZone(c *cli.Context) error {
 // Utility method to create full resource config file path
 func createResourceConfigFilename(resourceName string) string {
 
-	return filepath.Join(tools.TFWorkPath, resourceName+"_zoneconfig.json")
+	return filepath.Join(tfWorkPath, resourceName+"_zoneconfig.json")
 
 }
 
 // util func. create named module path
 func createNamedModulePath(modName string) string {
 
-	fpath := filepath.Join(tools.TFWorkPath, moduleFolder, normalizeResourceName(modName))
+	fpath := filepath.Join(tfWorkPath, moduleFolder, normalizeResourceName(modName))
 	if fpath[0:1] != "./" && fpath[0:2] != "../" {
 		fpath = filepath.FromSlash("./" + fpath)
 	}
@@ -376,7 +377,7 @@ func reconcileZoneResourceTargets(zoneImportList *zoneImportListStruct, zoneName
 	zoneTypeMap := make(map[string]map[string]bool)
 	// populate zoneTypeMap
 
-	tfFilename := tools.CreateTFFilename(zoneName)
+	tfFilename := tools.CreateTFFilename(zoneName, tfWorkPath)
 	var tfHandle *os.File
 	tfHandle, err := os.OpenFile(tfFilename, os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil && err != io.EOF {

@@ -55,7 +55,6 @@ type (
 var templateFiles embed.FS
 
 var (
-
 	// RemoveSymbols is a regexp used to remove special characters from policy json file names.
 	RemoveSymbols = regexp.MustCompile(`[^\w]`)
 	// ErrFetchingPolicySet is returned when fetching policy set fails
@@ -75,7 +74,8 @@ func CmdCreateImaging(c *cli.Context) error {
 	sess := edgegrid.GetSession(ctx)
 	client := imaging.Client(sess)
 
-	tfWorkPath := "." // default is current dir
+	// tfWorkPath is a target directory for generated terraform resources
+	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
 		tfWorkPath = c.String("tfworkpath")
 	}

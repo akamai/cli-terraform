@@ -44,8 +44,8 @@ func CmdCreateAppsec(c *cli.Context) error {
 	sess := edgegrid.GetSession(ctx)
 	client = appsec.Client(sess)
 
-	tfWorkPath := "." // default is current directory
-
+	// tfWorkPath is a target directory for generated terraform resources
+	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
 		tfWorkPath = c.String("tfworkpath")
 	}

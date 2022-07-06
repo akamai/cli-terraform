@@ -19,6 +19,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -94,17 +95,24 @@ func CmdCreateDomain(c *cli.Context) error {
 	sess := edgegrid.GetSession(ctx)
 	client := gtm.Client(sess)
 
+	// tfWorkPath is a target directory for generated terraform resources
+	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
-		tools.TFWorkPath = c.String("tfworkpath")
+		tfWorkPath = c.String("tfworkpath")
 	}
 
-	datacentersPath := filepath.Join(tools.TFWorkPath, "datacenters.tf")
-	domainPath := filepath.Join(tools.TFWorkPath, "domain.tf")
-	importPath := filepath.Join(tools.TFWorkPath, "import.sh")
-	mapsPath := filepath.Join(tools.TFWorkPath, "maps.tf")
-	propertiesPath := filepath.Join(tools.TFWorkPath, "properties.tf")
-	resourcesPath := filepath.Join(tools.TFWorkPath, "resources.tf")
-	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
+	tfWorkPath = filepath.FromSlash(tfWorkPath)
+	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
+		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
+	}
+
+	datacentersPath := filepath.Join(tfWorkPath, "datacenters.tf")
+	domainPath := filepath.Join(tfWorkPath, "domain.tf")
+	importPath := filepath.Join(tfWorkPath, "import.sh")
+	mapsPath := filepath.Join(tfWorkPath, "maps.tf")
+	propertiesPath := filepath.Join(tfWorkPath, "properties.tf")
+	resourcesPath := filepath.Join(tfWorkPath, "resources.tf")
+	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 
 	templateToFile := map[string]string{
 		"datacenters.tmpl": datacentersPath,

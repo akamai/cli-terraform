@@ -44,14 +44,22 @@ func CmdCreateEdgeWorker(c *cli.Context) error {
 	sess := edgegrid.GetSession(c.Context)
 	client := edgeworkers.Client(sess)
 
+	// tfWorkPath is a target directory for generated terraform resources
+	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
-		tools.TFWorkPath = c.String("tfworkpath")
+		tfWorkPath = c.String("tfworkpath")
 	}
-	edgeWorkerPath := filepath.Join(tools.TFWorkPath, "edgeworker.tf")
-	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
-	importPath := filepath.Join(tools.TFWorkPath, "import.sh")
 
-	bundleDir := tools.TFWorkPath
+	tfWorkPath = filepath.FromSlash(tfWorkPath)
+	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
+		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
+	}
+
+	edgeWorkerPath := filepath.Join(tfWorkPath, "edgeworker.tf")
+	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
+	importPath := filepath.Join(tfWorkPath, "import.sh")
+
+	bundleDir := tfWorkPath
 	if c.IsSet("bundlepath") {
 		bundleDir = c.String("bundlepath")
 	}
