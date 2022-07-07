@@ -7,10 +7,11 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/template"
-	"unicode"
 
+	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 )
 
@@ -45,7 +46,11 @@ var (
 // result of each template execution is persisted in location provided in FSTemplateProcessor.TemplateTargets
 func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
 	funcs := template.FuncMap{
-		"escape": escapeQuotedStringLit,
+		"escape":        tools.EscapeQuotedStringLit,
+		"formatIntList": formatIntList,
+		"toJSON":        tools.ToJSON,
+		"escapeName":    tools.EscapeName,
+		"toList":        tools.ToList,
 	}
 	tmpl := template.Must(template.New("templates").Funcs(funcs).Funcs(t.AdditionalFuncs).ParseFS(t.TemplatesFS, "**/*.tmpl"))
 
@@ -69,46 +74,14 @@ func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
 	return nil
 }
 
-// escapeQuotedStringLit returns escaped terraform string literal
-// https://www.terraform.io/docs/language/expressions/strings.html#escape-sequences
-// This function is based on https://github.com/hashicorp/hcl/blob/c7ee8b78101c33b4dfed2641d78cf5e9651eabb8/hclwrite/generate.go#L207-L246
-func escapeQuotedStringLit(s string) string {
-	if len(s) == 0 {
-		return ""
+func formatIntList(items []int) string {
+	if len(items) == 0 {
+		return "[]"
 	}
-	buf := strings.Builder{}
-	for i, r := range s {
-		switch r {
-		case '\n':
-			buf.Write([]byte{'\\', 'n'})
-		case '\r':
-			buf.Write([]byte{'\\', 'r'})
-		case '\t':
-			buf.Write([]byte{'\\', 't'})
-		case '"':
-			buf.Write([]byte{'\\', '"'})
-		case '\\':
-			buf.Write([]byte{'\\', '\\'})
-		case '$', '%':
-			buf.WriteRune(r)
-			remain := s[i+1:]
-			if len(remain) > 0 && remain[0] == '{' {
-				// Double up our template introducer symbol to escape it.
-				buf.WriteRune(r)
-			}
-		default:
-			if !unicode.IsPrint(r) {
-				var fmted string
-				if r < 65536 {
-					fmted = fmt.Sprintf("\\u%04x", r)
-				} else {
-					fmted = fmt.Sprintf("\\U%08x", r)
-				}
-				buf.WriteString(fmted)
-			} else {
-				buf.WriteRune(r)
-			}
-		}
+	var list []string
+	for _, v := range items {
+		list = append(list, strconv.Itoa(v))
 	}
-	return buf.String()
+	output := strings.Join(list, ", ")
+	return "[" + output + "]"
 }

@@ -1,0 +1,18 @@
+{{ range .SecurityPolicies -}}
+{{ $policyName := escapeName .Name -}}
+
+{{ if .RatePolicyActions -}}
+// Rate Policy Actions
+{{ range .RatePolicyActions -}}
+resource "akamai_appsec_rate_policy_action" "{{ $policyName}}_{{ getRateNameByID $ .ID }}" {
+    config_id          = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_rate_protection.{{ $policyName}}.security_policy_id
+    rate_policy_id     = akamai_appsec_rate_policy.{{ getRateNameByID $ .ID }}.rate_policy_id
+    ipv4_action        = "{{ .Ipv4Action }}"
+    ipv6_action        = "{{ .Ipv6Action }}"
+}
+
+{{ end -}}
+{{ end -}}
+
+{{ end -}}

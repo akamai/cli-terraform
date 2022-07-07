@@ -8,9 +8,7 @@ import (
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
 	"github.com/akamai/cli/pkg/log"
-
 	"github.com/stretchr/testify/assert"
-
 	"github.com/urfave/cli/v2"
 )
 
@@ -40,6 +38,30 @@ func Test_sessionRequired(t *testing.T) {
 		"help": {
 			c: func() *cli.Context {
 				return newContextFromStringSlice([]string{"help"}, newTemplateApp())
+			},
+			expected: false,
+		},
+		"help for command": {
+			c: func() *cli.Context {
+				return newContextFromStringSlice([]string{"help", "create-something"}, newTemplateApp())
+			},
+			expected: false,
+		},
+		"help for subcommand": {
+			c: func() *cli.Context {
+				return newContextFromStringSlice([]string{"help", "create-something", "subcommand"}, newTemplateApp())
+			},
+			expected: false,
+		},
+		"--help for command": {
+			c: func() *cli.Context {
+				return newContextFromStringSlice([]string{"create-something", "--help"}, newTemplateApp())
+			},
+			expected: false,
+		},
+		"--help for subcommand": {
+			c: func() *cli.Context {
+				return newContextFromStringSlice([]string{"create-something", "subcommand", "--help"}, newTemplateApp())
 			},
 			expected: false,
 		},

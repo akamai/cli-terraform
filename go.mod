@@ -3,8 +3,8 @@ module github.com/akamai/cli-terraform
 go 1.17
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang v1.1.1
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 v2.13.0
+	github.com/akamai/AkamaiOPEN-edgegrid-golang v1.2.0
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 v2.14.0
 	github.com/akamai/cli v1.5.0
 	github.com/fatih/color v1.13.0
 	github.com/hashicorp/hcl/v2 v2.11.1
@@ -21,6 +21,7 @@ require (
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apex/log v1.9.0 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
+	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
 	github.com/briandowns/spinner v1.16.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d // indirect
 	github.com/creack/pty v1.1.9 // indirect

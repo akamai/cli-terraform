@@ -15,10 +15,12 @@
 package commands
 
 import (
+	"github.com/akamai/cli-terraform/pkg/providers/appsec"
 	"github.com/akamai/cli-terraform/pkg/providers/cloudlets"
 	"github.com/akamai/cli-terraform/pkg/providers/dns"
 	"github.com/akamai/cli-terraform/pkg/providers/edgeworkers"
 	"github.com/akamai/cli-terraform/pkg/providers/gtm"
+	"github.com/akamai/cli-terraform/pkg/providers/iam"
 	"github.com/akamai/cli-terraform/pkg/providers/imaging"
 	"github.com/akamai/cli-terraform/pkg/providers/papi"
 	"github.com/akamai/cli-terraform/pkg/tools"
@@ -104,6 +106,22 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
+		Name:        "create-appsec",
+		Description: "Create Terraform Application Security Resource",
+		Usage:       "create-appsec",
+		ArgsUsage:   "<security configuration name>",
+		Action:      appsec.CmdCreateAppsec,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "tfworkpath",
+				Usage:       "Path location for placement of created artifacts",
+				DefaultText: "current directory",
+			},
+		},
+		BashComplete: autocomplete.Default,
+	})
+
+	commands = append(commands, &cli.Command{
 		Name:        "create-property",
 		Description: "Create Terraform Property Resource",
 		Usage:       "create-property",
@@ -165,6 +183,46 @@ func CommandLocator() ([]*cli.Command, error) {
 				Name:  "bundlepath",
 				Usage: "Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath",
 			},
+			&cli.StringFlag{
+				Name:  "tfworkpath",
+				Usage: "Path location for placement of created artifacts. Default: current directory",
+			},
+		},
+		BashComplete: autocomplete.Default,
+	})
+
+	commands = append(commands, &cli.Command{
+		Name:            "create-iam",
+		Description:     "Create Terraform Identity and Access Management Resources",
+		HideHelpCommand: true,
+		Action:          iam.CmdCreateIAM,
+		Subcommands: []*cli.Command{
+			{
+				Name:        "all",
+				Description: "Create all available Terraform Users, Groups and Roles",
+				ArgsUsage:   " ", //TODO change within implementation of DXE-1249
+				Action:      iam.CmdCreateIAMAll,
+			},
+			{
+				Name:        "group",
+				Description: "Create Terraform Group resource with relevant users and roles resources",
+				ArgsUsage:   "<group_id>",
+				Action:      iam.CmdCreateIAMGroup,
+			},
+			{
+				Name:        "role",
+				Description: "Create Terraform Role resource with relevant users and groups resources",
+				ArgsUsage:   "<role_id>",
+				Action:      iam.CmdCreateIAMRole,
+			},
+			{
+				Name:        "user",
+				Description: "Create Terraform User resource with relevant groups and roles resources",
+				ArgsUsage:   "<user_email>",
+				Action:      iam.CmdCreateIAMUser,
+			},
+		},
+		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "tfworkpath",
 				Usage: "Path location for placement of created artifacts. Default: current directory",

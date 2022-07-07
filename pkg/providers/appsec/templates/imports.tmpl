@@ -1,0 +1,138 @@
+terraform init
+{{ $configID:= .ConfigID -}}
+{{ $version:= .Version -}}
+terraform import module.security.akamai_appsec_configuration.config {{ $configID }}
+terraform import module.security.akamai_appsec_advanced_settings_logging.logging {{ $configID }}
+{{ if .AdvancedOptions -}}
+{{ if .AdvancedOptions.Prefetch -}}
+terraform import module.security.akamai_appsec_advanced_settings_prefetch.prefetch {{ $configID }}
+{{ end -}}
+{{ if .AdvancedOptions.PragmaHeader -}}
+terraform import module.security.akamai_appsec_advanced_settings_pragma_header.pragma_header {{ $configID }}
+{{ end -}}
+{{ if .AdvancedOptions.EvasivePathMatch -}}
+terraform import module.security.akamai_appsec_advanced_settings_evasive_path_match.evasive_path_match {{ $configID }}
+{{ end -}}
+{{ end -}}
+{{ if .CustomRules  -}}
+{{ range .CustomRules  -}}
+{{ if .Tag -}}
+terraform import module.security.akamai_appsec_custom_rule.{{escapeName .Name}}_{{ .ID }} {{ $configID }}:{{ .ID }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .CustomDenyList  -}}
+{{ range .CustomDenyList  -}}
+terraform import module.security.akamai_appsec_custom_deny.{{escapeName .Name}}_{{ .ID }} {{ $configID }}:{{ .ID }}
+{{ end -}}
+{{ end -}}
+{{ if .MatchTargets -}}
+{{ if .MatchTargets.WebsiteTargets -}}
+{{ range .MatchTargets.WebsiteTargets -}}
+terraform import module.security.akamai_appsec_match_target.website_{{ .ID }} {{ $configID }}:{{ .ID }}
+{{ end -}}
+{{ end -}}
+{{ if .MatchTargets.APITargets -}}
+{{ range .MatchTargets.APITargets -}}
+terraform import module.security.akamai_appsec_match_target.api_{{ .ID }} {{ $configID }}:{{ .ID }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ range .SecurityPolicies -}}
+{{ $policyName:= escapeName .Name -}}
+{{ $policyID:= .ID -}}
+{{ $wafMode:= getWAFMode $configID $version .ID -}}
+terraform import module.security.akamai_appsec_security_policy.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+terraform import module.security.akamai_appsec_waf_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+terraform import module.security.akamai_appsec_api_constraints_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+terraform import module.security.akamai_appsec_ip_geo_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+terraform import module.security.akamai_appsec_rate_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+terraform import module.security.akamai_appsec_reputation_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+terraform import module.security.akamai_appsec_slowpost_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+terraform import module.security.akamai_appsec_waf_mode.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ if or (eq $wafMode "KRS") (eq $wafMode "ASE_MANUAL") -}}
+{{ if .WebApplicationFirewall -}}
+{{ if .WebApplicationFirewall.RuleActions -}}
+{{ range .WebApplicationFirewall.RuleActions -}}
+terraform import module.security.akamai_appsec_rule.{{ $policyName}}_{{ getRuleNameByID $ .ID }}_{{ .ID }} {{ $configID }}:{{ $policyID }}:{{ .ID }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .CustomRuleActions -}}
+{{ range .CustomRuleActions -}}
+{{ if isStructuredRule $ .ID -}}
+terraform import module.security.akamai_appsec_custom_rule_action.{{ $policyName}}_{{ .ID }} {{ $configID }}:{{ $policyID }}:{{ .ID }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .WebApplicationFirewall -}}
+{{ if .WebApplicationFirewall.AttackGroupActions -}}
+{{ range .WebApplicationFirewall.AttackGroupActions -}}
+terraform import module.security.akamai_appsec_attack_group.{{ $policyName}}_{{ .Group }} {{ $configID }}:{{ $policyID }}:{{ .Group }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .APIRequestConstraints -}}
+{{ if .APIRequestConstraints.APIEndpoints -}}
+{{ range .APIRequestConstraints.APIEndpoints -}}
+terraform import module.security.akamai_appsec_api_request_constraints.{{ $policyName}}_{{ .ID }} {{ $configID }}:{{ $policyID }}:{{ .ID }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .ClientReputation -}}
+{{ if .ClientReputation.ReputationProfileActions -}}
+{{ range .ClientReputation.ReputationProfileActions -}}
+terraform import module.security.akamai_appsec_reputation_profile_action.{{ $policyName}}_{{ .ID }} {{ $configID }}:{{ $policyID }}:{{ .ID }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .RatePolicyActions -}}
+{{ range .RatePolicyActions -}}
+terraform import module.security.akamai_appsec_rate_policy_action.{{ $policyName}}_{{ getRateNameByID $ .ID }} {{ $configID }}:{{ $policyID }}:{{ .ID }}
+{{ end -}}
+{{ end -}}
+{{ if .IPGeoFirewall -}}
+terraform import module.security.akamai_appsec_ip_geo.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ if .PenaltyBox -}}
+terraform import module.security.akamai_appsec_penalty_box.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ if .SlowPost -}}
+terraform import module.security.akamai_appsec_slow_post.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ if .LoggingOverrides -}}
+terraform import module.security.akamai_appsec_advanced_settings_logging.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ if .PragmaHeader -}}
+{{ if .PragmaHeader.Action -}}
+terraform import module.security.akamai_appsec_advanced_settings_pragma_header.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ end -}}
+{{ if .EvasivePathMatch -}}
+terraform import module.security.akamai_appsec_advanced_settings_evasive_path_match.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ end -}}
+{{ if .RatePolicies -}}
+{{ range .RatePolicies -}}
+{{ if eq .Type "WAF" }}
+terraform import module.security.akamai_appsec_rate_policy.{{ escapeName .Name}} {{ $configID }}:{{ .ID }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .ReputationProfiles  -}}
+{{ range .ReputationProfiles  -}}
+terraform import module.security.akamai_appsec_reputation_profile.{{ escapeName .Name}} {{ $configID }}:{{ .ID }}
+{{ end -}}
+{{ end -}}
+{{ if .Siem -}}
+{{ if .Siem.EnableSiem -}}
+terraform import module.security.akamai_appsec_siem_settings.siem {{ $configID }}
+{{ end -}}
+{{ end -}}
+{{ if .SelectedHosts -}}
+terraform import module.security.akamai_appsec_selected_hostnames.hostnames {{ $configID }}
+{{ end -}}
+{{ if eq .Staging.Status "Active" -}}
+terraform import module.activate-security.akamai_appsec_activations.appsecactivation {{ $configID }}:{{ $version }}:STAGING
+{{ end -}}

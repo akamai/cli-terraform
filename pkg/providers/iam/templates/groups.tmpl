@@ -1,0 +1,12 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/iam.TFData*/ -}}
+
+{{ if eq .Subcommand "group" -}}
+{{template "terraform_config.tmpl"}}
+{{end}}
+{{- range .TFGroups -}}
+    resource "akamai_iam_group" "group_id_{{.GroupID}}" {
+      parent_group_id = {{.ParentGroupID}}
+      name      = "{{.GroupName}}"
+    }
+
+{{end -}}

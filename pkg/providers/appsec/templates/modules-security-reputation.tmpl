@@ -1,0 +1,16 @@
+{{ range .SecurityPolicies -}}
+{{ $policyName := escapeName .Name -}}
+{{ if .ClientReputation -}}
+{{ if .ClientReputation.ReputationProfileActions -}}
+// Client Reputation Actions
+{{ range .ClientReputation.ReputationProfileActions -}}
+resource "akamai_appsec_reputation_profile_action" "{{ $policyName}}_{{ .ID }}" {
+    config_id             = akamai_appsec_configuration.config.config_id
+    security_policy_id    = akamai_appsec_reputation_protection.{{ $policyName}}.security_policy_id
+    reputation_profile_id = akamai_appsec_reputation_profile.{{ getRepNameByID $ .ID }}.reputation_profile_id
+    action                = "{{ .Action }}"
+}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}

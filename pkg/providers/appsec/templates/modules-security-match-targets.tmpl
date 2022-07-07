@@ -1,0 +1,46 @@
+{{ if .MatchTargets -}}
+{{ if .MatchTargets.WebsiteTargets -}}
+{{ range .MatchTargets.WebsiteTargets -}}
+resource "akamai_appsec_match_target" "website_{{ .ID }}" {
+    config_id    = akamai_appsec_configuration.config.config_id
+    match_target = jsonencode(
+{
+    "defaultFile": "{{ .DefaultFile }}",
+    "filePaths": {{ toJSON .FilePaths }},
+    "hostnames": {{ toJSON .Hostnames }},
+    {{ if .FileExtensions -}}
+    "fileExtesions": {{ toJSON .FileExtensions }},
+    {{ end -}}
+    "isNegativeFileExtensionMatch": {{ .IsNegativeFileExtensionMatch }},
+    "isNegativePathMatch": {{ .IsNegativePathMatch }},
+    {{ if .BypassNetworkLists -}}
+    "bypassNetworkLists": {{ toJSON .BypassNetworkLists }},
+    {{ end -}}
+    "securityPolicy": {
+        "policyId": "${akamai_appsec_security_policy.{{ getPolicyNameByID $ .SecurityPolicy.PolicyID }}.security_policy_id}"
+    },
+    "sequence": {{ .Sequence }},
+    "type": "website"
+}
+)
+}
+{{ end -}}
+{{ end -}}
+{{ if .MatchTargets.APITargets -}}
+{{ range .MatchTargets.APITargets }}
+resource "akamai_appsec_match_target" "api_{{ .ID }}" {
+    config_id    = akamai_appsec_configuration.config.config_id
+    match_target = jsonencode(
+{
+    "apis": {{ toJSON .Apis }},
+    "securityPolicy": {
+        "policyId": "${akamai_appsec_security_policy.{{ getPolicyNameByID $ .SecurityPolicy.PolicyID }}.security_policy_id}"
+    },
+    "sequence": {{ .Sequence }},
+    "type": "api"
+}
+)
+}
+{{ end -}}
+{{ end -}}
+{{ end -}}

@@ -1,0 +1,13 @@
+{{ if .CustomRules  -}}
+{{ range .CustomRules  -}}
+{{ if isStructuredRule $ .ID -}}
+resource "akamai_appsec_custom_rule" "{{escapeName .Name}}_{{ .ID }}" {
+    config_id   = akamai_appsec_configuration.config.config_id
+    custom_rule = jsonencode(
+{{ exportJSON . }}
+)
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}

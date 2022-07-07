@@ -79,6 +79,11 @@ func sessionRequired(c *cli.Context) bool {
 		}
 	}
 
+	tail := c.Args().Tail()
+	if len(tail) > 0 && tail[len(tail)-1] == "--help" {
+		return false
+	}
+
 	for _, cmd := range c.App.Commands {
 		if cmd.Name == command {
 			return true

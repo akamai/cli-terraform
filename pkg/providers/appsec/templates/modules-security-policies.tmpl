@@ -1,0 +1,9 @@
+{{ range .SecurityPolicies -}}
+resource "akamai_appsec_security_policy" "{{ escapeName .Name }}" {
+    config_id              = akamai_appsec_configuration.config.config_id
+    default_settings       = true
+    security_policy_name   = "{{ .Name }}"
+    security_policy_prefix = "{{ getPrefixFromID .ID }}"
+}
+
+{{ end -}}

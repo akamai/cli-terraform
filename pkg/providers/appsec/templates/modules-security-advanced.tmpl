@@ -1,0 +1,65 @@
+// Global Advanced
+resource "akamai_appsec_advanced_settings_logging" "logging" {
+    config_id = akamai_appsec_configuration.config.config_id
+    logging   = jsonencode(
+{{toJSON .AdvancedOptions.Logging }}
+)
+}
+{{ if .AdvancedOptions -}}
+{{ if .AdvancedOptions.Prefetch }}
+resource "akamai_appsec_advanced_settings_prefetch" "prefetch" {
+    config_id        = akamai_appsec_configuration.config.config_id
+    enable_app_layer = {{ .AdvancedOptions.Prefetch.EnableAppLayer }}
+    all_extensions = {{ .AdvancedOptions.Prefetch.AllExtensions }}
+    enable_rate_controls = {{ .AdvancedOptions.Prefetch.EnableRateControls }}
+    extensions = [{{toList .AdvancedOptions.Prefetch.Extensions }}]
+}
+{{ end -}}
+{{ if .AdvancedOptions.PragmaHeader }}
+resource "akamai_appsec_advanced_settings_pragma_header" "pragma_header" {
+    config_id = akamai_appsec_configuration.config.config_id
+    pragma_header = jsonencode(
+{{ toJSON .AdvancedOptions.PragmaHeader }}
+)
+}
+{{ end -}}
+{{ if .AdvancedOptions.EvasivePathMatch }}
+resource "akamai_appsec_advanced_settings_evasive_path_match" "evasive_path_match" {
+  config_id = akamai_appsec_configuration.config.config_id
+  enable_path_match = {{ .AdvancedOptions.EvasivePathMatch.EnablePathMatch }}
+}
+{{ end -}}
+{{ end -}}
+{{ range .SecurityPolicies -}}
+{{ $policyName := .Name -}}
+{{ if .LoggingOverrides }}
+// Logging Overides
+resource "akamai_appsec_advanced_settings_logging" "{{ escapeName $policyName}}" {
+    config_id = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_security_policy.{{ escapeName $policyName }}.security_policy_id
+    logging = jsonencode(
+{{ toJSON .LoggingOverrides }}
+)
+}
+{{ end -}}
+{{ if .PragmaHeader -}}
+{{ if .PragmaHeader.Action }}
+// Pragma Header
+resource "akamai_appsec_advanced_settings_pragma_header" "{{ escapeName $policyName}}" {
+    config_id = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_security_policy.{{ escapeName $policyName }}.security_policy_id
+    pragma_header = jsonencode(
+{{ toJSON .PragmaHeader }}
+)
+}
+{{ end -}}
+{{ end -}}
+{{ if .EvasivePathMatch }}
+// Evasive Path Match
+resource "akamai_appsec_advanced_settings_evasive_path_match" "{{ escapeName $policyName}}" {
+    config_id = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_security_policy.{{ escapeName $policyName }}.security_policy_id
+    enable_path_match = {{ .EvasivePathMatch.EnablePathMatch }}
+}
+{{ end -}}
+{{ end -}}

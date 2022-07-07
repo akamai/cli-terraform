@@ -114,44 +114,27 @@ func TestProcessTemplates(t *testing.T) {
 	}
 }
 
-func TestEscapeQuotedStringLit(t *testing.T) {
+func TestFormatIntList(t *testing.T) {
 	tests := map[string]struct {
-		data   string
+		data   []int
 		expect string
 	}{
-		"string": {
-			data:   "foo",
-			expect: "foo",
+		"list of ints": {
+			data:   []int{123, 345},
+			expect: "[123, 345]",
 		},
-		"string with quotes": {
-			data:   `"foo"`,
-			expect: `\"foo\"`,
+		"empty list of ints": {
+			data:   []int{},
+			expect: "[]",
 		},
-		"new line character": {
-			data:   "hello\nworld\n",
-			expect: `hello\nworld\n`,
-		},
-		"new line and carriage return": {
-			data:   "hello\r\nworld\r\n",
-			expect: `hello\r\nworld\r\n`,
-		},
-		"backslash": {
-			data:   `what\what`,
-			expect: `what\\what`,
-		},
-		"unicode char": {
-			data:   "𝄞",
-			expect: "𝄞",
-		},
-		"non backslash escape sequence": {
-			data:   "%{",
-			expect: "%%{",
+		"nil list of ints": {
+			data:   nil,
+			expect: "[]",
 		},
 	}
-
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			got := escapeQuotedStringLit(test.data)
+			got := formatIntList(test.data)
 			assert.Equal(t, got, test.expect)
 		})
 	}
