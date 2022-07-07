@@ -212,8 +212,9 @@ func CommandLocator() ([]*cli.Command, error) {
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,
