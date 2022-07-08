@@ -31,7 +31,7 @@ import (
 
 var (
 	// Version holds current version of cli-terraform
-	Version = "0.9.0"
+	Version = "dev"
 )
 
 // Run initializes the cli and runs it
