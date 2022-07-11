@@ -14,5 +14,15 @@ variable "name" {
 output "zonename" {
     value = akamai_dns_zone.{{.BlockName}}.name
 }
-{{template "locals" "var.name"}}
-{{template "resource" .}}
+
+locals {
+    zone = var.name
+}
+
+resource "akamai_dns_zone" "{{.BlockName}}" {
+    contract = var.contractid
+    group = var.groupid
+    {{- range $name, $value := .ResourceFields}}
+    {{$name}} = {{$value}}
+    {{- end}}
+}

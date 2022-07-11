@@ -1,6 +1,17 @@
 {{- /*gotype: cli-terraform/pkg/providers/dns/dns.Data*/ -}}
-{{template "terraform"}}
-{{template "locals" printf "%q" .Zone}}
+terraform {
+    required_version = ">= 0.13"
+    required_providers {
+        akamai = {
+            source = "akamai/akamai"
+            version = "~> 1.6.1"
+        }
+    }
+}
+
+locals {
+    zone = {{printf "%q" .Zone}}
+}
 
 module "{{.BlockName}}" {
     source = "{{namedModulePath .BlockName}}"

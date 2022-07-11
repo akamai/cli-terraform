@@ -156,19 +156,12 @@ func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourc
 			}
 			modName := createUniqueRecordsetName(resourceZoneName, rs.Name, rs.Type)
 			data := Data{BlockName: modName, ResourceFields: recordMap}
-			if fetchConfig.ModSegment {
-				// process as module
-				if err := fileUtils.appendRootModuleTF(useTemplate(&data, "module-set.tmpl", false)); err != nil {
-					return nil, err
-				}
-				if err := fileUtils.createModuleTF(ctx, modName, useTemplate(&data, "recordset-modsegment.tmpl", true)); err != nil {
-					return nil, err
-				}
-			} else {
-				// add to toplevel TF
-				if err := fileUtils.appendRootModuleTF(useTemplate(&data, "resource-set.tmpl", false)); err != nil {
-					return nil, err
-				}
+			// process as module
+			if err := fileUtils.appendRootModuleTF(useTemplate(&data, "module-set.tmpl", false)); err != nil {
+				return nil, err
+			}
+			if err := fileUtils.createModuleTF(ctx, modName, useTemplate(&data, "recordset-modsegment.tmpl", true)); err != nil {
+				return nil, err
 			}
 		}
 

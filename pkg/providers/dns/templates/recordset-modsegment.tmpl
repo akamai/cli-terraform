@@ -5,4 +5,10 @@ variable "zonename" {
 locals {
     zone = var.zonename
 }
-{{template "resource-set" .}}
+
+resource "akamai_dns_record" "{{.BlockName}}" {
+    zone = local.zone
+    {{- range $name, $value := .ResourceFields}}
+    {{$name}} = {{$value}}
+    {{- end}}
+}

@@ -47,15 +47,13 @@ var createImportList = false
 var createConfig = false
 
 var recordNames []string
-var importScript = false
 
 type fetchConfigStruct struct {
 	ConfigOnly bool
-	ModSegment bool
 	NamesOnly  bool
 }
 
-var fetchConfig = fetchConfigStruct{ConfigOnly: false, ModSegment: false, NamesOnly: false}
+var fetchConfig = fetchConfigStruct{ConfigOnly: false, NamesOnly: false}
 
 var zoneName string
 var contractid string
@@ -104,12 +102,6 @@ func CmdCreateZone(c *cli.Context) error {
 	}
 	if c.IsSet("recordname") {
 		recordNames = c.StringSlice("recordname")
-	}
-	if c.IsSet("segmentconfig") {
-		fetchConfig.ModSegment = true
-	}
-	if c.IsSet("importscript") {
-		importScript = true
 	}
 
 	term := terminal.Get(ctx)
@@ -195,13 +187,12 @@ func CmdCreateZone(c *cli.Context) error {
 			return cli.Exit(color.RedString("Failed to read json zone resources file"), 1)
 		}
 		// if segmenting recordsets by name, make sure module folder exists
-		if fetchConfig.ModSegment {
-			modulePath = filepath.Join(tfWorkPath, moduleFolder)
-			if !createDirectory(modulePath) {
-				term.Spinner().Fail()
-				return cli.Exit(color.RedString("Failed to create modules folder."), 1)
-			}
+		modulePath = filepath.Join(tfWorkPath, moduleFolder)
+		if !createDirectory(modulePath) {
+			term.Spinner().Fail()
+			return cli.Exit(color.RedString("Failed to create modules folder."), 1)
 		}
+
 		term.Spinner().Start("Creating zone configuration file ")
 		// see if configuration file already exists and exclude any resources already represented.
 		var configImportList *zoneImportListStruct
@@ -216,20 +207,14 @@ func CmdCreateZone(c *cli.Context) error {
 
 		// build tf file if none
 		if len(zonetfConfig) > 0 {
-			if strings.Contains(zonetfConfig, "module") && strings.Contains(zonetfConfig, "zonename") {
-				if !fetchConfig.ModSegment {
-					// already have a top level zone config and its modularized!
-					term.Spinner().Fail()
-					return cli.Exit(color.RedString("Failed. Existing zone config is modularized"), 1)
-				}
-			} else if fetchConfig.ModSegment {
+			if !strings.Contains(zonetfConfig, "module") || !strings.Contains(zonetfConfig, "zonename") {
 				// already have a top level zone config and its not mudularized!
 				term.Spinner().Fail()
 				return cli.Exit(color.RedString("Failed. Existing zone config is not modularized"), 1)
 			}
 		} else {
 			// if tf pre existed, zone has to exist by definition
-			zonetfConfig, err = processZone(ctx, zoneObject, resourceZoneName, fetchConfig.ModSegment, fileUtils)
+			zonetfConfig, err = processZone(ctx, zoneObject, resourceZoneName, fileUtils)
 			if err != nil {
 				term.Spinner().Fail()
 				fmt.Println(err.Error())
@@ -287,9 +272,7 @@ func CmdCreateZone(c *cli.Context) error {
 		}
 		dnsvarsHandle.Sync()
 		term.Spinner().OK()
-	}
 
-	if importScript {
 		term.Spinner().Start("Creating zone import script file")
 		fullZoneConfigMap, _ = retrieveZoneResourceConfig(resourceZoneName)
 		importScriptFilename := filepath.Join(tfWorkPath, resourceZoneName+"_resource_import.script")
@@ -303,18 +286,18 @@ func CmdCreateZone(c *cli.Context) error {
 			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Import script content generation failed"), 1)
 		}
-		f, err := os.Create(importScriptFilename)
+		importFile, err := os.Create(importScriptFilename)
 		if err != nil {
 			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Unable to create import script file"), 1)
 		}
-		defer f.Close()
-		_, err = f.WriteString(scriptContent)
+		defer importFile.Close()
+		_, err = importFile.WriteString(scriptContent)
 		if err != nil {
 			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Unable to write import script file"), 1)
 		}
-		f.Sync()
+		importFile.Sync()
 		term.Spinner().OK()
 	}
 
