@@ -27,18 +27,22 @@ var ignoredZoneKeys = map[string]int{"LastActivationDate": 0, "LastModifiedBy": 
 	"AliasCount": 0, "ActivationState": 0, "VersionId": 0}
 
 // process zone
-func processZone(ctx context.Context, zone *dns.ZoneResponse, resourceZoneName string, fileUtils fileUtils) (string, error) {
+func processZone(ctx context.Context, zone *dns.ZoneResponse, resourceZoneName string, modSegment bool, fileUtils fileUtils) (string, error) {
 	data := Data{
 		Zone:           zone.Zone,
 		BlockName:      resourceZoneName,
 		ResourceFields: gatherResourceFields(zone),
 	}
 	var zoneTF string
-	err := fileUtils.createModuleTF(ctx, resourceZoneName, useTemplate(&data, "config.tmpl", true))
-	if err != nil {
-		return "", err
+	if modSegment {
+		err := fileUtils.createModuleTF(ctx, resourceZoneName, useTemplate(&data, "config.tmpl", true))
+		if err != nil {
+			return "", err
+		}
+		zoneTF = useTemplate(&data, "zone.tmpl", true)
+	} else {
+		zoneTF = useTemplate(&data, "full_zone.tmpl", true)
 	}
-	zoneTF = useTemplate(&data, "zone.tmpl", true)
 
 	return zoneTF, nil
 

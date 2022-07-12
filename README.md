@@ -102,8 +102,11 @@ $ akamai terraform create-domain --createconfig example.akadns.net
 Flags: 
    --tfworkpath path       Directory used to store files created when running commands. (default: current directory)
    --resources             Creates a JSON-formatted resource file for import: <zone>_resources.json. The createconfig flag uses this file as an input. (default: false)
-   --createconfig          Creates these Terraform configuration files based on the values in <zone>_resources.json: <zone>.tf and dnsvars.tf. Additionally creates import script for generated Terraform configuration (<zone>_import.script) files. (default: false)
-   --configonly            Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Additionally creates import script. Ignores any existing resource JSON file. (default: false)
+   --createconfig          Creates these Terraform configuration files based on the values in <zone>_resources.json: <zone>.tf and gtmvars.tf. (default: false)
+   --importscript          Creates import script for generated Terraform configuration script (<zone>_import.script) files. (default: false)
+   --segmentconfig         Use with the createconfig flag to group and segment records by name into separate config files. (default: false)
+   --configonly            Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Saves zone config for 
+                           importscript. Ignores any existing resource JSON file. (default: false)
    --namesonly             Directive for both resource gathering and config generation. All record set types assumed. (default: false)
    --recordname value      Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.
 ```
@@ -114,16 +117,23 @@ Flags:
 $ akamai terraform create-zone --resources testprimaryzone.com
 ```
 
-### Generate Terraform Zone configuration file and Zone import script. Default args create <zone>.tf, vars config file, dnsvars.tf and <zone>_resource_import.script
+### Generate Terraform Zone configuration file. Default args create <zone>.tf, vars config file, dnsvars.tf
 
 ```
 $ akamai terraform create-zone --createconfig testprimaryzone.com
+```
+
+### Generate Zone import script, <zone>_resource_import.script
+
+```
+$ akamai terraform create-zone --importscript testprimaryzone.com
 ```
 
 
 ### Zone Notes
 
 1. The resources directive generates a <zone>_resources.json file for consumption by createconfig
+2. The createconfig directive generates a <zone>_zoneconfig.json file for consumption by importscript
 
 ####  Advanced options for --resources
 
@@ -133,7 +143,8 @@ $ akamai terraform create-zone --createconfig testprimaryzone.com
 #### Advanced options for --createconfig
 
 1. namesonly - Resources for all associated Types will be generated
-2. configonly - Generates a zone configuration without JSON itemization. The configuration generated varies based on which set of flags you use.
+2. segmentconfig - Generate a modularized configuration. 
+3. configonly - Generates a zone configuration without JSON itemization. The configuration generated varies based on which set of flags you use.
 
 ## Appsec
 

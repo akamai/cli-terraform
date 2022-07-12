@@ -65,11 +65,19 @@ func CommandLocator() ([]*cli.Command, error) {
 			},
 			&cli.BoolFlag{
 				Name:  "createconfig",
-				Usage: "Create Terraform configuration (<zone>.tf), dnsvars.tf from generated resources file. Additionally creates import script for generated Terraform configuration (<zone>_import.script) files.",
+				Usage: "Create Terraform configuration (<zone>.tf), dnsvars.tf from generated resources file. Saves zone config for import.",
+			},
+			&cli.BoolFlag{
+				Name:  "importscript",
+				Usage: "Create import script for generated Terraform configuration script (<zone>_import.script) files",
+			},
+			&cli.BoolFlag{
+				Name:  "segmentconfig",
+				Usage: "Directive for createconfig. Group and segment records by name into separate config files.",
 			},
 			&cli.BoolFlag{
 				Name:  "configonly",
-				Usage: "Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Additionally creates import script. Ignores any existing resource json file.",
+				Usage: "Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Saves zone config for importscript. Ignores any existing resource json file.",
 			},
 			&cli.BoolFlag{
 				Name:  "namesonly",
