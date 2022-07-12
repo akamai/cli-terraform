@@ -103,7 +103,7 @@ func createIAMRoleByID(ctx context.Context, roleID int64, section string, client
 	}
 
 	term.Spinner().Start(fmt.Sprintf("Fetching users with the given role %d", roleID))
-	users, err := getUsersByRole(ctx, role, client)
+	users, err := getUsersByRole(ctx, term, role.Users, client)
 	if err != nil {
 		term.Spinner().Fail()
 		return err
@@ -178,18 +178,22 @@ func appendUniqueGroups(tfGroups []TFGroup, groupsData []TFGroup) []TFGroup {
 	return tfGroups
 }
 
-func getUsersByRole(ctx context.Context, role *iam.Role, client iam.IAM) ([]*iam.User, error) {
+func getUsersByRole(ctx context.Context, term terminal.Terminal, roleUsers []iam.RoleUser, client iam.IAM) ([]*iam.User, error) {
 	users := make([]*iam.User, 0)
 
-	for i := range role.Users {
+	for _, roleUser := range roleUsers {
 		user, err := client.GetUser(ctx, iam.GetUserRequest{
-			IdentityID:    role.Users[i].UIIdentityID,
+			IdentityID:    roleUser.UIIdentityID,
 			Actions:       true,
 			AuthGrants:    true,
 			Notifications: true,
 		})
 		if err != nil {
-			return nil, err
+			_, err := term.Writeln(fmt.Sprintf("[WARN] Unable to fetch user of ID '%s' - skipping:\n%s", roleUser.UIIdentityID, err))
+			if err != nil {
+				return nil, err
+			}
+			continue
 		}
 
 		users = append(users, user)

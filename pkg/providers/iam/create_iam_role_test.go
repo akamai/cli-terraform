@@ -2,6 +2,7 @@ package iam
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -132,7 +133,7 @@ var (
 		client.On("GetRole", mock.Anything, getRoleReq).Return(&role, nil).Once()
 	}
 
-	expectRoleGetUser = func(client *mockiam, user iam.User) {
+	expectRoleGetUser = func(client *mockiam, user iam.User, err error) {
 		getUserReq := iam.GetUserRequest{
 			IdentityID:    user.IdentityID,
 			Actions:       true,
@@ -140,7 +141,11 @@ var (
 			Notifications: true,
 		}
 
-		client.On("GetUser", mock.Anything, getUserReq).Return(&user, nil).Once()
+		if err != nil {
+			client.On("GetUser", mock.Anything, getUserReq).Return(nil, err).Once()
+		}
+
+		client.On("GetUser", mock.Anything, getUserReq).Return(&user, err).Once()
 	}
 
 	expectRoleGetGroup = func(client *mockiam, group iam.Group) {
@@ -234,6 +239,125 @@ var (
 	}
 )
 
+func TestGetUsersByRole(t *testing.T) {
+	tests := map[string]struct {
+		roleUsers    []iam.RoleUser
+		init         func(*mockiam, *terminal.Mock)
+		expectResult []*iam.User
+		withError    error
+	}{
+		"ok no errors": {
+			roleUsers: []iam.RoleUser{
+				{
+					UIIdentityID: "a",
+				},
+			},
+			expectResult: []*iam.User{
+				{IdentityID: "a", AuthGrants: []iam.AuthGrant{
+					{
+						GroupID: 12345,
+						RoleID:  tools.IntPtr(54321),
+					},
+				}},
+			},
+			init: func(m *mockiam, t *terminal.Mock) {
+				m.On("GetUser", mock.Anything, iam.GetUserRequest{
+					IdentityID:    "a",
+					Actions:       true,
+					AuthGrants:    true,
+					Notifications: true,
+				}).Return(&iam.User{IdentityID: "a", AuthGrants: []iam.AuthGrant{
+					{
+						GroupID: 12345,
+						RoleID:  tools.IntPtr(54321),
+					},
+				}}, nil).Once()
+			},
+		},
+		"fail first": {
+			roleUsers: []iam.RoleUser{
+				{
+					UIIdentityID: "a",
+				},
+				{
+					UIIdentityID: "b",
+				},
+			},
+			expectResult: []*iam.User{
+				{IdentityID: "b", AuthGrants: []iam.AuthGrant{
+					{
+						GroupID: 12345,
+						RoleID:  tools.IntPtr(54321),
+					},
+				}},
+			},
+			init: func(m *mockiam, t *terminal.Mock) {
+				m.On("GetUser", mock.Anything, iam.GetUserRequest{
+					IdentityID:    "a",
+					Actions:       true,
+					AuthGrants:    true,
+					Notifications: true,
+				}).Return(nil, fmt.Errorf("an error")).Once()
+				t.On("Writeln", []interface{}{"[WARN] Unable to fetch user of ID 'a' - skipping:\nan error"}).Return(0, nil).Once()
+				m.On("GetUser", mock.Anything, iam.GetUserRequest{
+					IdentityID:    "b",
+					Actions:       true,
+					AuthGrants:    true,
+					Notifications: true,
+				}).Return(&iam.User{IdentityID: "b", AuthGrants: []iam.AuthGrant{
+					{
+						GroupID: 12345,
+						RoleID:  tools.IntPtr(54321),
+					},
+				}}, nil).Once()
+			},
+		},
+		"fail all": {
+			roleUsers: []iam.RoleUser{
+				{
+					UIIdentityID: "a",
+				},
+				{
+					UIIdentityID: "b",
+				},
+			},
+			expectResult: []*iam.User{},
+			init: func(m *mockiam, t *terminal.Mock) {
+				m.On("GetUser", mock.Anything, iam.GetUserRequest{
+					IdentityID:    "a",
+					Actions:       true,
+					AuthGrants:    true,
+					Notifications: true,
+				}).Return(nil, fmt.Errorf("an error")).Once()
+				t.On("Writeln", []interface{}{"[WARN] Unable to fetch user of ID 'a' - skipping:\nan error"}).Return(0, nil).Once()
+				m.On("GetUser", mock.Anything, iam.GetUserRequest{
+					IdentityID:    "b",
+					Actions:       true,
+					AuthGrants:    true,
+					Notifications: true,
+				}).Return(nil, fmt.Errorf("another error")).Once()
+				t.On("Writeln", []interface{}{"[WARN] Unable to fetch user of ID 'b' - skipping:\nanother error"}).Return(0, nil).Once()
+			},
+		},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			client := mockiam{}
+			term := terminal.Mock{}
+			test.init(&client, &term)
+
+			result, err := getUsersByRole(context.Background(), &term, test.roleUsers, &client)
+			if test.withError != nil {
+				require.Error(t, err)
+				assert.True(t, errors.Is(err, test.withError))
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, test.expectResult, result)
+		})
+	}
+}
+
 func TestCreateIAMRole(t *testing.T) {
 	section := "test_section"
 
@@ -243,8 +367,8 @@ func TestCreateIAMRole(t *testing.T) {
 		"fetch role": {
 			init: func(i *mockiam, p *mockProcessor) {
 				expectGetRoleWithUsers(i)
-				expectRoleGetUser(i, user1)
-				expectRoleGetUser(i, user2)
+				expectRoleGetUser(i, user1, nil)
+				expectRoleGetUser(i, user2, nil)
 				// user1's groups
 				expectRoleGetGroup(i, group1)
 				// user2's groups

@@ -188,7 +188,7 @@ func getTFUserGroups(ctx context.Context, client iam.IAM, authGrantsList []iam.A
 	for i := range authGrantsList {
 		groupID := authGrantsList[i].GroupID
 		if groupID > 0 {
-			groups, err := getGroupsInSubtree(ctx, client, int64(groupID))
+			groups, err := getGroupsInSubtree(ctx, client, groupID)
 			if err != nil {
 				return nil, err
 			}
