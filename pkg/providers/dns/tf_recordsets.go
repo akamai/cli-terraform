@@ -155,7 +155,7 @@ func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourc
 				}
 			}
 			modName := createUniqueRecordsetName(resourceZoneName, rs.Name, rs.Type)
-			data := Data{BlockName: modName, ResourceFields: recordMap}
+			data := RecordsetData{BlockName: modName, ResourceFields: recordMap}
 			if fetchConfig.ModSegment {
 				// process as module
 				if err := fileUtils.appendRootModuleTF(useTemplate(&data, "module-set.tmpl", false)); err != nil {
