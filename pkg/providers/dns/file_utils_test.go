@@ -18,9 +18,9 @@ type fileutilsmock struct {
 	appendRootArg   string
 }
 
-func (m *fileutilsmock) createModuleTF(_ context.Context, modName string, content string) error {
+func (m *fileutilsmock) createModuleTF(_ context.Context, modName string, content string, tfWorkPath string) error {
 	m.createModuleArg = content
-	args := m.Called(modName, content)
+	args := m.Called(modName, content, tfWorkPath)
 	return args.Error(0)
 }
 func (m *fileutilsmock) appendRootModuleTF(configText string) error {

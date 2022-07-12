@@ -42,7 +42,7 @@ type Resource struct {
 var tfState *tfStateStruct
 
 // Utility method to read in tfstate content
-func readTfState() error {
+func readTfState(tfWorkPath string) error {
 	// TFWorkPath global var
 	tfStateFilename := filepath.Join(tfWorkPath, "terraform.tfstate")
 	if _, err := os.Stat(tfStateFilename); err != nil {

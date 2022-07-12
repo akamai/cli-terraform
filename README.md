@@ -102,7 +102,7 @@ $ akamai terraform export-domain --createconfig example.akadns.net
 Flags: 
    --tfworkpath path       Directory used to store files created when running commands. (default: current directory)
    --resources             Creates a JSON-formatted resource file for import: <zone>_resources.json. The createconfig flag uses this file as an input. (default: false)
-   --createconfig          Creates these Terraform configuration files based on the values in <zone>_resources.json: <zone>.tf and gtmvars.tf. (default: false)
+   --createconfig          Creates these Terraform configuration files based on the values in <zone>_resources.json: <zone>.tf and dnsvars.tf. (default: false)
    --importscript          Creates import script for generated Terraform configuration script (<zone>_import.script) files. (default: false)
    --segmentconfig         Use with the createconfig flag to group and segment records by name into separate config files. (default: false)
    --configonly            Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Saves zone config for 

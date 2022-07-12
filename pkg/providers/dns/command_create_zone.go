@@ -15,6 +15,7 @@
 package dns
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -41,21 +42,20 @@ type zoneImportListStruct struct {
 	Recordsets map[string]Types // zone recordsets grouped by name
 }
 
-// tfWorkPath is a target directory for generated terraform resources
-var tfWorkPath = "./"
-var createImportList = false
-var createConfig = false
-
-var recordNames []string
-var importScript = false
+type configStruct struct {
+	fetchConfig            fetchConfigStruct
+	tfWorkPath             string
+	shouldCreateImportList bool
+	createConfig           bool
+	recordNames            []string
+	importScript           bool
+}
 
 type fetchConfigStruct struct {
 	ConfigOnly bool
 	ModSegment bool
 	NamesOnly  bool
 }
-
-var fetchConfig = fetchConfigStruct{ConfigOnly: false, ModSegment: false, NamesOnly: false}
 
 var zoneName string
 var contractid string
@@ -65,7 +65,6 @@ var fullZoneConfigMap map[string]Types
 
 // work defs
 var moduleFolder = "modules"
-var modulePath = ""
 
 // text for root module construction
 var zoneTFfileHandle *os.File
@@ -75,46 +74,18 @@ var zonetfConfig = ""
 func CmdCreateZone(c *cli.Context) error {
 	ctx := c.Context
 	log.SetOutput(ioutil.Discard)
-	if c.NArg() != 1 {
-		cli.ShowCommandHelp(c, c.Command.Name)
-		return cli.Exit(color.RedString("zone is required"), 1)
-	}
 
 	sess := edgegrid.GetSession(ctx)
-	configdns := dns.Client(sess)
+	configDNS := dns.Client(sess)
 
 	// uppercase characters cause issues with TF and the generated config
 	zoneName = strings.ToLower(c.Args().Get(0))
 
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
-	}
-	tfWorkPath = filepath.FromSlash(tfWorkPath)
-	if c.IsSet("resources") {
-		createImportList = true
-	}
-	if c.IsSet("createconfig") {
-		createConfig = true
-	}
-	if c.IsSet("configonly") {
-		fetchConfig.ConfigOnly = true
-	}
-	if c.IsSet("namesonly") {
-		fetchConfig.NamesOnly = true
-	}
-	if c.IsSet("recordname") {
-		recordNames = c.StringSlice("recordname")
-	}
-	if c.IsSet("segmentconfig") {
-		fetchConfig.ModSegment = true
-	}
-	if c.IsSet("importscript") {
-		importScript = true
-	}
+	configuration := setConfiguration(c)
 
 	term := terminal.Get(ctx)
 	fmt.Println("Configuring Zone")
-	zoneObject, err := configdns.GetZone(ctx, zoneName)
+	zoneObject, err := configDNS.GetZone(ctx, zoneName)
 	if err != nil {
 		term.Spinner().Fail()
 		fmt.Println("Error: " + err.Error())
@@ -123,198 +94,50 @@ func CmdCreateZone(c *cli.Context) error {
 	contractid = zoneObject.ContractID // grab for use later
 	// normalize zone name for zone resource name
 	resourceZoneName := normalizeResourceName(zoneName)
-	if createImportList {
-
-		term.Spinner().Start("Inventorying zone and recordsets ")
-		recordsets := make(map[string]Types)
-		// Retrieve all zone names
-		if len(recordNames) == 0 {
-			recordsetNames, err := configdns.GetZoneNames(ctx, zoneName)
-			if err != nil {
-				term.Spinner().Fail()
-				fmt.Println("Error: " + err.Error())
-				return cli.Exit(color.RedString("Zone Name retrieval failed"), 1)
-			}
-			recordNames = recordsetNames.Names
-		}
-		for _, zname := range recordNames {
-			if fetchConfig.NamesOnly {
-				recordsets[zname] = make([]string, 0, 0)
-			} else {
-				nameTypesResp, err := configdns.GetZoneNameTypes(ctx, zname, zoneName)
-				if err != nil {
-					term.Spinner().Fail()
-					fmt.Println("Error: " + err.Error())
-					return cli.Exit(color.RedString("Zone Name types retrieval failed"), 1)
-				}
-				recordsets[zname] = nameTypesResp.Types
-			}
-		}
-		term.Spinner().OK()
-		term.Spinner().Start("Creating Zone Resources list file ")
-		// pathname and exists?
-		if stat, err := os.Stat(tfWorkPath); err == nil && stat.IsDir() {
-			importListFilename := createImportListFilename(resourceZoneName)
-			if _, err := os.Stat(importListFilename); err == nil {
-				term.Spinner().Fail()
-				return cli.Exit(color.RedString("Resource list file exists. Remove to continue."), 1)
-			}
-			fullZoneImportList = &zoneImportListStruct{}
-			fullZoneImportList.Zone = zoneName
-			fullZoneImportList.Recordsets = recordsets
-			json, err := json.MarshalIndent(fullZoneImportList, "", "  ")
-			if err != nil {
-				term.Spinner().Fail()
-				return cli.Exit(color.RedString("Unable to generate json formatted zone resource list"), 1)
-			}
-			f, err := os.Create(importListFilename)
-			if err != nil {
-				term.Spinner().Fail()
-				return cli.Exit(color.RedString("Unable to create zone resources file"), 1)
-			}
-			defer f.Close()
-			_, err = f.WriteString(string(json))
-			if err != nil {
-				term.Spinner().Fail()
-				return cli.Exit(color.RedString("Unable to write zone resources file"), 1)
-			}
-			f.Sync()
-		} else {
-			// Path doesnt exist. Bail
-			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Destination work path is not accessible."), 1)
+	if configuration.shouldCreateImportList {
+		err := createImportList(ctx, term, configDNS, resourceZoneName, configuration)
+		if err != nil {
+			return err
 		}
 		term.Spinner().OK()
 	}
 
-	if createConfig {
+	if configuration.createConfig {
 		// Read in resources list
-		zoneImportList, err := retrieveZoneImportList(resourceZoneName)
+		zoneImportList, err := retrieveZoneImportList(resourceZoneName, configuration)
 		if err != nil {
 			term.Spinner().Fail()
 			return cli.Exit(color.RedString("Failed to read json zone resources file"), 1)
 		}
 		// if segmenting recordsets by name, make sure module folder exists
-		if fetchConfig.ModSegment {
-			modulePath = filepath.Join(tfWorkPath, moduleFolder)
+		if configuration.fetchConfig.ModSegment {
+			modulePath := filepath.Join(configuration.tfWorkPath, moduleFolder)
 			if !createDirectory(modulePath) {
 				term.Spinner().Fail()
 				return cli.Exit(color.RedString("Failed to create modules folder."), 1)
 			}
 		}
 		term.Spinner().Start("Creating zone configuration file ")
-		// see if configuration file already exists and exclude any resources already represented.
-		var configImportList *zoneImportListStruct
-		var zoneTypeMap map[string]map[string]bool
-		zoneTFfileHandle, zonetfConfig, configImportList, zoneTypeMap, err = reconcileZoneResourceTargets(zoneImportList, resourceZoneName)
+		err = createZoneConfigFile(ctx, zoneImportList, resourceZoneName, zoneObject, configDNS, configuration)
 		if err != nil {
 			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Failed to open/create zone config file."), 1)
-		}
-		defer zoneTFfileHandle.Close()
-		fileUtils := fileUtilsProcessor{}
-
-		// build tf file if none
-		if len(zonetfConfig) > 0 {
-			if strings.Contains(zonetfConfig, "module") && strings.Contains(zonetfConfig, "zonename") {
-				if !fetchConfig.ModSegment {
-					// already have a top level zone config and its modularized!
-					term.Spinner().Fail()
-					return cli.Exit(color.RedString("Failed. Existing zone config is modularized"), 1)
-				}
-			} else if fetchConfig.ModSegment {
-				// already have a top level zone config and its not mudularized!
-				term.Spinner().Fail()
-				return cli.Exit(color.RedString("Failed. Existing zone config is not modularized"), 1)
-			}
-		} else {
-			// if tf pre existed, zone has to exist by definition
-			zonetfConfig, err = processZone(ctx, zoneObject, resourceZoneName, fetchConfig.ModSegment, fileUtils)
-			if err != nil {
-				term.Spinner().Fail()
-				fmt.Println(err.Error())
-				return cli.Exit(color.RedString("Failed. Couldn't initialize zone config"), 1)
-			}
-		}
-		err = fileUtils.appendRootModuleTF(zonetfConfig)
-		if err != nil {
-			term.Spinner().Fail()
-			fmt.Println(err.Error())
-			return cli.Exit(color.RedString("Failed. Couldn't write to zone config"), 1)
+			return err
 		}
 
-		// process Recordsets.
-		fullZoneConfigMap, err = processRecordsets(ctx, configdns, configImportList.Zone, resourceZoneName, zoneTypeMap, fetchConfig, fileUtils)
+		err = createDNSVarsConfig(err, term, configuration.tfWorkPath)
 		if err != nil {
-			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Failed to process recordsets."), 1)
+			return err
 		}
-		// Save config map for import script generation
-		resourceConfigFilename := createResourceConfigFilename(resourceZoneName)
-		json, err := json.MarshalIndent(&fullZoneConfigMap, "", "  ")
-		if err != nil {
-			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Unable to generate json formatted zone config"), 1)
-		}
-		f, err := os.Create(resourceConfigFilename)
-		if err != nil {
-			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Unable to create resource config file"), 1)
-		}
-		defer f.Close()
-		_, err = f.WriteString(string(json))
-		if err != nil {
-			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Unable to write zone resource config file"), 1)
-		}
-		f.Sync()
-
-		// Need create dnsvars.tf dependency
-		dnsvarsFilename := filepath.Join(tfWorkPath, "dnsvars.tf")
-		// see if exists already.
-		//if _, err := os.Stat(dnsvarsFilename); err != nil {
-		dnsvarsHandle, err := os.Create(dnsvarsFilename)
-		//}
-		if err != nil {
-			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Unable to create gtmvars config file"), 1)
-		}
-		defer dnsvarsHandle.Close()
-		_, err = dnsvarsHandle.WriteString(fmt.Sprintf(useTemplate(nil, "dnsvars.tmpl", true), contractid))
-		if err != nil {
-			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Unable to write gtmvars config file"), 1)
-		}
-		dnsvarsHandle.Sync()
 		term.Spinner().OK()
 	}
 
-	if importScript {
+	if configuration.importScript {
 		term.Spinner().Start("Creating zone import script file")
-		fullZoneConfigMap, _ = retrieveZoneResourceConfig(resourceZoneName)
-		importScriptFilename := filepath.Join(tfWorkPath, resourceZoneName+"_resource_import.script")
-		if _, err := os.Stat(importScriptFilename); err == nil {
-			// File exists. Bail
-			term.Spinner().OK()
-		}
-		scriptContent, err := buildZoneImportScript(zoneName, fullZoneConfigMap, resourceZoneName)
-
+		err := createImportScript(resourceZoneName, term, configuration)
 		if err != nil {
 			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Import script content generation failed"), 1)
+			return err
 		}
-		f, err := os.Create(importScriptFilename)
-		if err != nil {
-			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Unable to create import script file"), 1)
-		}
-		defer f.Close()
-		_, err = f.WriteString(scriptContent)
-		if err != nil {
-			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Unable to write import script file"), 1)
-		}
-		f.Sync()
 		term.Spinner().OK()
 	}
 
@@ -323,15 +146,263 @@ func CmdCreateZone(c *cli.Context) error {
 	return nil
 }
 
+func createImportList(ctx context.Context, term terminal.Terminal, configDNS dns.DNS, resourceZoneName string, configuration configStruct) error {
+	term.Spinner().Start("Inventorying zone and recordsets ")
+	recordsets, err := inventorZone(ctx, configDNS, configuration)
+	if err != nil {
+		term.Spinner().Fail()
+		fmt.Println("Error: " + err.Error())
+		return err
+	}
+	term.Spinner().OK()
+
+	term.Spinner().Start("Creating Zone Resources list file ")
+	// pathname and exists?
+	err = createZoneResourceListFile(resourceZoneName, recordsets, configuration.tfWorkPath)
+	if err != nil {
+		term.Spinner().Fail()
+		return err
+	}
+	return nil
+}
+
+func setConfiguration(c *cli.Context) configStruct {
+	var executionConfig = configStruct{
+		tfWorkPath: "./",
+	}
+
+	if c.IsSet("tfworkpath") {
+		executionConfig.tfWorkPath = c.String("tfworkpath")
+	}
+	executionConfig.tfWorkPath = filepath.FromSlash(executionConfig.tfWorkPath)
+	if c.IsSet("resources") {
+		executionConfig.shouldCreateImportList = true
+	}
+	if c.IsSet("createconfig") {
+		executionConfig.createConfig = true
+	}
+	if c.IsSet("configonly") {
+		executionConfig.fetchConfig.ConfigOnly = true
+	}
+	if c.IsSet("namesonly") {
+		executionConfig.fetchConfig.NamesOnly = true
+	}
+	if c.IsSet("recordname") {
+		executionConfig.recordNames = c.StringSlice("recordname")
+	}
+	if c.IsSet("segmentconfig") {
+		executionConfig.fetchConfig.ModSegment = true
+	}
+	if c.IsSet("importscript") {
+		executionConfig.importScript = true
+	}
+
+	return executionConfig
+}
+
+func createZoneConfigFile(ctx context.Context, zoneImportList *zoneImportListStruct, resourceZoneName string, zoneObject *dns.ZoneResponse, configDNS dns.DNS, configuration configStruct) error {
+	// see if configuration file already exists and exclude any resources already represented.
+	var configImportList *zoneImportListStruct
+	var zoneTypeMap map[string]map[string]bool
+	var err error
+	zoneTFfileHandle, zonetfConfig, err = openZoneConfigFile(resourceZoneName, configuration.tfWorkPath)
+	if err != nil {
+		return cli.Exit(color.RedString("Failed to open/create zone config file."), 1)
+	}
+	configImportList, zoneTypeMap = reconcileZoneResourceTargets(zoneImportList, resourceZoneName, zonetfConfig)
+	defer zoneTFfileHandle.Close()
+	fileUtils := fileUtilsProcessor{}
+
+	err = calculateTfConfig(ctx, zoneObject, resourceZoneName, fileUtils, configuration)
+	if err != nil {
+		return err
+	}
+	err = fileUtils.appendRootModuleTF(zonetfConfig)
+	if err != nil {
+		fmt.Println(err.Error())
+		return cli.Exit(color.RedString("Failed. Couldn't write to zone config"), 1)
+	}
+
+	// process Recordsets.
+	fullZoneConfigMap, err = processRecordsets(ctx, configDNS, configImportList.Zone, resourceZoneName, zoneTypeMap, fileUtils, configuration)
+	if err != nil {
+		return cli.Exit(color.RedString("Failed to process recordsets."), 1)
+	}
+	// Save config map for import script generation
+	resourceConfigFilename := createResourceConfigFilename(resourceZoneName, configuration.tfWorkPath)
+	err = saveResourceConfigFile(err, resourceConfigFilename)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func calculateTfConfig(ctx context.Context, zoneObject *dns.ZoneResponse, resourceZoneName string, fileUtils fileUtilsProcessor, config configStruct) error {
+	// build tf file if none
+	var err error
+	if len(zonetfConfig) > 0 {
+		if strings.Contains(zonetfConfig, "module") && strings.Contains(zonetfConfig, "zonename") {
+			if !config.fetchConfig.ModSegment {
+				// already have a top level zone config and its modularized!
+				return cli.Exit(color.RedString("Failed. Existing zone config is modularized"), 1)
+			}
+		} else if config.fetchConfig.ModSegment {
+			// already have a top level zone config and its not modularized!
+			return cli.Exit(color.RedString("Failed. Existing zone config is not modularized"), 1)
+		}
+	} else {
+		// if tf pre existed, zone has to exist by definition
+		zonetfConfig, err = processZone(ctx, zoneObject, resourceZoneName, config.fetchConfig.ModSegment, fileUtils, config.tfWorkPath)
+		if err != nil {
+			fmt.Println(err.Error())
+			return cli.Exit(color.RedString("Failed. Couldn't initialize zone config"), 1)
+		}
+	}
+	return nil
+}
+
+func saveResourceConfigFile(err error, resourceConfigFilename string) error {
+	resourceConfigJSON, err := json.MarshalIndent(&fullZoneConfigMap, "", "  ")
+	if err != nil {
+		return cli.Exit(color.RedString("Unable to generate json formatted zone config"), 1)
+	}
+	f, err := os.Create(resourceConfigFilename)
+	if err != nil {
+		return cli.Exit(color.RedString("Unable to create resource config file"), 1)
+	}
+	defer f.Close()
+	_, err = f.WriteString(string(resourceConfigJSON))
+	if err != nil {
+		return cli.Exit(color.RedString("Unable to write zone resource config file"), 1)
+	}
+	err = f.Sync()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createDNSVarsConfig(err error, term terminal.Terminal, tfWorkPath string) error {
+	// Need create dnsvars.tf dependency
+	dnsvarsFilename := filepath.Join(tfWorkPath, "dnsvars.tf")
+	// see if exists already.
+	//if _, err := os.Stat(dnsvarsFilename); err != nil {
+	dnsvarsHandle, err := os.Create(dnsvarsFilename)
+	//}
+	if err != nil {
+		term.Spinner().Fail()
+		return cli.Exit(color.RedString("Unable to create dnsvars config file"), 1)
+	}
+	defer dnsvarsHandle.Close()
+	_, err = dnsvarsHandle.WriteString(fmt.Sprintf(useTemplate(nil, "dnsvars.tmpl", true), contractid))
+	if err != nil {
+		term.Spinner().Fail()
+		return cli.Exit(color.RedString("Unable to write dnsvars config file"), 1)
+	}
+	err = dnsvarsHandle.Sync()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createImportScript(resourceZoneName string, term terminal.Terminal, configuration configStruct) error {
+	fullZoneConfigMap, _ = retrieveZoneResourceConfig(resourceZoneName, configuration)
+	importScriptFilename := filepath.Join(configuration.tfWorkPath, resourceZoneName+"_resource_import.script")
+	if _, err := os.Stat(importScriptFilename); err == nil {
+		// File exists. Bail
+		term.Spinner().OK()
+	}
+	scriptContent, err := buildZoneImportScript(zoneName, fullZoneConfigMap, resourceZoneName)
+
+	if err != nil {
+		return cli.Exit(color.RedString("Import script content generation failed"), 1)
+	}
+	f, err := os.Create(importScriptFilename)
+	if err != nil {
+		return cli.Exit(color.RedString("Unable to create import script file"), 1)
+	}
+	defer f.Close()
+	_, err = f.WriteString(scriptContent)
+	if err != nil {
+		return cli.Exit(color.RedString("Unable to write import script file"), 1)
+	}
+	err = f.Sync()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createZoneResourceListFile(resourceZoneName string, recordsets map[string]Types, tfWorkPath string) error {
+	importListFilename := createImportListFilename(resourceZoneName, tfWorkPath)
+	if _, err := os.Stat(importListFilename); err == nil {
+		return cli.Exit(color.RedString("Resource list file exists. Remove to continue."), 1)
+	}
+	fullZoneImportList = &zoneImportListStruct{}
+	fullZoneImportList.Zone = zoneName
+	fullZoneImportList.Recordsets = recordsets
+	err := saveImportListToFile(importListFilename)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func saveImportListToFile(importListFilename string) error {
+	importListJSON, err := json.MarshalIndent(fullZoneImportList, "", "  ")
+	if err != nil {
+		return cli.Exit(color.RedString("Unable to generate json formatted zone resource list"), 1)
+	}
+	f, err := os.Create(importListFilename)
+	if err != nil {
+		return cli.Exit(color.RedString("Unable to create zone resources file"), 1)
+	}
+	defer f.Close()
+	_, err = f.WriteString(string(importListJSON))
+	if err != nil {
+		return cli.Exit(color.RedString("Unable to write zone resources file"), 1)
+	}
+	err = f.Sync()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func inventorZone(ctx context.Context, configDNS dns.DNS, configuration configStruct) (map[string]Types, error) {
+	recordsets := make(map[string]Types)
+	// Retrieve all zone names
+	if len(configuration.recordNames) == 0 {
+		recordsetNames, err := configDNS.GetZoneNames(ctx, zoneName)
+		if err != nil {
+			return nil, cli.Exit(color.RedString("Zone Name retrieval failed"), 1)
+		}
+		configuration.recordNames = recordsetNames.Names
+	}
+	for _, zname := range configuration.recordNames {
+		if configuration.fetchConfig.NamesOnly {
+			recordsets[zname] = make([]string, 0, 0)
+		} else {
+			nameTypesResp, err := configDNS.GetZoneNameTypes(ctx, zname, zoneName)
+			if err != nil {
+				return nil, cli.Exit(color.RedString("Zone Name types retrieval failed"), 1)
+			}
+			recordsets[zname] = nameTypesResp.Types
+		}
+	}
+	return recordsets, nil
+}
+
 // Utility method to create full resource config file path
-func createResourceConfigFilename(resourceName string) string {
+func createResourceConfigFilename(resourceName, tfWorkPath string) string {
 
 	return filepath.Join(tfWorkPath, resourceName+"_zoneconfig.json")
 
 }
 
 // util func. create named module path
-func createNamedModulePath(modName string) string {
+func createNamedModulePath(modName, tfWorkPath string) string {
 
 	fpath := filepath.Join(tfWorkPath, moduleFolder, normalizeResourceName(modName))
 	if fpath[0:1] != "./" && fpath[0:2] != "../" {
@@ -372,45 +443,18 @@ func buildZoneImportScript(zone string, zoneConfigMap map[string]Types, resource
 }
 
 // remove any resources already present in existing zone tf configuration
-func reconcileZoneResourceTargets(zoneImportList *zoneImportListStruct, zoneName string) (*os.File, string, *zoneImportListStruct, map[string]map[string]bool, error) {
+func reconcileZoneResourceTargets(zoneImportList *zoneImportListStruct, zoneName, tfConfig string) (*zoneImportListStruct, map[string]map[string]bool) {
 
 	zoneTypeMap := make(map[string]map[string]bool)
 	// populate zoneTypeMap
 
-	tfFilename := tools.CreateTFFilename(zoneName, tfWorkPath)
-	var tfHandle *os.File
-	tfHandle, err := os.OpenFile(tfFilename, os.O_CREATE|os.O_RDWR, 0644)
-	if err != nil && err != io.EOF {
-		fmt.Println(err.Error())
-		return nil, "", zoneImportList, zoneTypeMap, err
-	}
-	tfInfo, err := os.Stat(tfFilename)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, "", zoneImportList, zoneTypeMap, err
-	}
-	tfScratch := make([]byte, tfInfo.Size())
-	charsRead, err := tfHandle.Read(tfScratch)
-	if err != nil && err != io.EOF {
-		fmt.Println(err.Error())
-		return nil, "", zoneImportList, zoneTypeMap, err
-	}
-	_, err = tfHandle.Seek(0, 0)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, "", zoneImportList, zoneTypeMap, err
-	}
-	tfConfig := ""
-	if charsRead > 0 {
-		tfConfig = fmt.Sprintf("%s", tfScratch[0:charsRead-1])
-	}
 	// need walk thru each resource type
 	for zname, typeList := range zoneImportList.Recordsets {
 		typeMap := make(map[string]bool)
 		revisedTypeList := make([]string, 0, len(typeList))
 		for _, ntype := range typeList {
 			normalName := createUniqueRecordsetName(zoneName, zname, ntype)
-			if !strings.Contains(tfConfig, "\""+normalName+"\"") {
+			if !strings.Contains(tfConfig, `"`+normalName+`"`) {
 				typeMap[ntype] = true
 				revisedTypeList = append(revisedTypeList, ntype)
 			} else {
@@ -421,22 +465,54 @@ func reconcileZoneResourceTargets(zoneImportList *zoneImportListStruct, zoneName
 		zoneTypeMap[zname] = typeMap
 	}
 
-	return tfHandle, tfConfig, zoneImportList, zoneTypeMap, err
+	return zoneImportList, zoneTypeMap
 
 }
 
-func retrieveZoneImportList(rscName string) (*zoneImportListStruct, error) {
+func openZoneConfigFile(zoneName string, tfWorkPath string) (*os.File, string, error) {
+	tfFilename := tools.CreateTFFilename(zoneName, tfWorkPath)
+	var tfHandle *os.File
+	tfHandle, err := os.OpenFile(tfFilename, os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil && err != io.EOF {
+		fmt.Println(err.Error())
+		return nil, "", err
+	}
+	tfInfo, err := os.Stat(tfFilename)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, "", err
+	}
+	tfScratch := make([]byte, tfInfo.Size())
+	charsRead, err := tfHandle.Read(tfScratch)
+	if err != nil && err != io.EOF {
+		fmt.Println(err.Error())
+		return nil, "", err
+	}
+	_, err = tfHandle.Seek(0, 0)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, "", err
+	}
+	tfConfig := ""
+	if charsRead > 0 {
+		tfConfig = fmt.Sprintf("%s", tfScratch[0:charsRead-1])
+	}
 
-	// check if createImportList set. If so, already have ....
-	if createImportList {
+	return tfHandle, tfConfig, nil
+}
+
+func retrieveZoneImportList(rscName string, configuration configStruct) (*zoneImportListStruct, error) {
+
+	// check if shouldCreateImportList set. If so, already have ....
+	if configuration.shouldCreateImportList {
 		return fullZoneImportList, nil
 	}
-	if fetchConfig.ConfigOnly {
+	if configuration.fetchConfig.ConfigOnly {
 		fullZoneImportList := &zoneImportListStruct{Zone: zoneName}
 		fullZoneImportList.Recordsets = make(map[string]Types)
 		return fullZoneImportList, nil
 	}
-	importListFilename := createImportListFilename(rscName)
+	importListFilename := createImportListFilename(rscName, configuration.tfWorkPath)
 	if _, err := os.Stat(importListFilename); err != nil {
 		return nil, err
 	}
@@ -454,14 +530,14 @@ func retrieveZoneImportList(rscName string) (*zoneImportListStruct, error) {
 
 }
 
-func retrieveZoneResourceConfig(rscName string) (map[string]Types, error) {
+func retrieveZoneResourceConfig(rscName string, config configStruct) (map[string]Types, error) {
 
 	configList := make(map[string]Types)
 	// check if createConfig set. If so, already have ....
-	if createConfig {
+	if config.createConfig {
 		return fullZoneConfigMap, nil
 	}
-	resourceConfigFilename := createResourceConfigFilename(rscName)
+	resourceConfigFilename := createResourceConfigFilename(rscName, config.tfWorkPath)
 	if _, err := os.Stat(resourceConfigFilename); err != nil {
 		return configList, err
 	}
