@@ -57,8 +57,6 @@ func TestProcessRecordset(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			fetchConfig.ModSegment = test.mod
-			defer func() { fetchConfig.ModSegment = false }()
 			m := new(mockdns)
 
 			ctx := context.Background()
@@ -80,12 +78,12 @@ func TestProcessRecordset(t *testing.T) {
 			fus := new(fileutilsmock)
 			fus.On("appendRootModuleTF", mock.Anything).Return(nil).Once()
 			if test.mod {
-				fus.On("createModuleTF", "zoneName_someName_someType", mock.Anything).Return(nil).Once()
+				fus.On("createModuleTF", "zoneName_someName_someType", mock.Anything, mock.Anything).Return(nil).Once()
 			}
 			zoneTypeMap := make(map[string]map[string]bool)
 			zoneTypeMap["someName"] = map[string]bool{"someType": true}
-			processingResult, _ := processRecordsets(ctx, m, zone,
-				"zoneName", zoneTypeMap, fetchConfigStruct{}, fus)
+			config := configStruct{fetchConfig: fetchConfigStruct{ModSegment: test.mod}}
+			processingResult, _ := processRecordsets(ctx, m, zone, "zoneName", zoneTypeMap, fus, config)
 
 			assert.Equal(t, 1, len(processingResult))
 			types, nameExist := processingResult[recordset.Name]

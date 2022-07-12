@@ -26,7 +26,7 @@ resource "akamai_dns_zone" "{{.BlockName}}" {
     sign_and_serve = {{.SignAndServe}}
     sign_and_serve_algorithm = "{{.SignAndServeAlgorithm}}"
     {{- with .TsigKey}}
-        tsig_key = {
+    tsig_key = {
         name = "{{.Name}}"
         algorithm = "{{.Algorithm}}"
         secret = "{{.Secret}}"

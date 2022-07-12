@@ -10,7 +10,7 @@ import (
 )
 
 type fileUtils interface {
-	createModuleTF(ctx context.Context, modName string, content string) error
+	createModuleTF(ctx context.Context, modName string, content string, tfWorkPath string) error
 	appendRootModuleTF(configText string) error
 }
 
@@ -18,10 +18,10 @@ type fileUtilsProcessor struct {
 }
 
 // Work routine to create module TF file
-func (fileUtilsProcessor) createModuleTF(ctx context.Context, modName string, content string) error {
+func (fileUtilsProcessor) createModuleTF(ctx context.Context, modName, content, tfWorkPath string) error {
 	term := terminal.Get(ctx)
 	term.Printf("Creating zone name %s module configuration file...", modName)
-	namedmodulePath := createNamedModulePath(modName)
+	namedmodulePath := createNamedModulePath(modName, tfWorkPath)
 	if !createDirectory(namedmodulePath) {
 		return fmt.Errorf("failed to create name module folder: %s", namedmodulePath)
 	}

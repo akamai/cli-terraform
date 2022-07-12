@@ -18,6 +18,7 @@ type (
 		Zone           string
 		ResourceFields map[string]string
 		BlockName      string
+		TfWorkPath     string
 	}
 
 	// ZoneData represents a struct passed to zone-creation template
@@ -32,6 +33,7 @@ type (
 		TsigKey               *dns.TSIGKey
 		Target                string
 		EndCustomerID         string
+		TfWorkPath            string
 	}
 
 	// ImportData represents a struct passed to import script template
@@ -39,6 +41,7 @@ type (
 		Zone          string
 		ZoneConfigMap map[string]Types
 		ResourceName  string
+		TfWorkPath    string
 	}
 )
 
@@ -65,10 +68,10 @@ func useTemplate(data interface{}, templateName string, trimBeginning bool) stri
 }
 
 // check if resource present in state
-func checkForResource(rtype string, name string) bool {
+func checkForResource(rtype, name, tfWorkPath string) bool {
 
 	if tfState == nil {
-		if err := readTfState(); err != nil {
+		if err := readTfState(tfWorkPath); err != nil {
 			// not differentiating between not exists and file error
 			return false
 		}

@@ -32,7 +32,7 @@ func TestProcessZone(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			m := new(fileutilsmock)
 			if test.modSegment {
-				m.On("createModuleTF", test.modName, mock.Anything).Return(nil).Once()
+				m.On("createModuleTF", test.modName, mock.Anything, mock.Anything).Return(nil).Once()
 			}
 			zoneResponse := dns.ZoneResponse{
 				Zone:               "0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin.com",
@@ -45,7 +45,7 @@ func TestProcessZone(t *testing.T) {
 				VersionId:          "fd858f59-6014-4ce4-8372-c08389d809e8",
 				TsigKey:            &dns.TSIGKey{Name: "some-name", Algorithm: "some-algorithm", Secret: "some-secret"},
 			}
-			zone, err := processZone(context.Background(), &zoneResponse, "_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com", test.modSegment, m)
+			zone, err := processZone(context.Background(), &zoneResponse, "_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com", test.modSegment, m, "./")
 			require.NoError(t, err)
 			m.AssertExpectations(t)
 
