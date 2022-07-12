@@ -5,17 +5,33 @@ import (
 	"embed"
 	"strings"
 	"text/template"
+
+	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configdns"
 )
 
 //go:embed templates/*
 var templateFiles embed.FS
 
 type (
-	// Data represents a struct passed to template
-	Data struct {
+	// RecordsetData represents a struct passed to recordset template
+	RecordsetData struct {
 		Zone           string
 		ResourceFields map[string]string
 		BlockName      string
+	}
+
+	// ZoneData represents a struct passed to zone-creation template
+	ZoneData struct {
+		Zone                  string
+		BlockName             string
+		Type                  string
+		Masters               []string
+		Comment               string
+		SignAndServe          bool
+		SignAndServeAlgorithm string
+		TsigKey               *dns.TSIGKey
+		Target                string
+		EndCustomerID         string
 	}
 
 	// ImportData represents a struct passed to import script template
