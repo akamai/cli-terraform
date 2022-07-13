@@ -5,7 +5,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -76,11 +75,6 @@ func CmdCreatePolicy(c *cli.Context) error {
 	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
 		tfWorkPath = c.String("tfworkpath")
-	}
-
-	tfWorkPath = filepath.FromSlash(tfWorkPath)
-	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
 	}
 
 	policyPath := filepath.Join(tfWorkPath, "policy.tf")

@@ -19,7 +19,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -101,11 +100,6 @@ func CmdCreateDomain(c *cli.Context) error {
 		tfWorkPath = c.String("tfworkpath")
 	}
 
-	tfWorkPath = filepath.FromSlash(tfWorkPath)
-	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
-	}
-
 	datacentersPath := filepath.Join(tfWorkPath, "datacenters.tf")
 	domainPath := filepath.Join(tfWorkPath, "domain.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
@@ -133,8 +127,9 @@ func CmdCreateDomain(c *cli.Context) error {
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
 		AdditionalFuncs: template.FuncMap{
-			"normalize": normalizeResourceName,
-			"toUpper":   strings.ToUpper,
+			"normalize":   normalizeResourceName,
+			"toUpper":     strings.ToUpper,
+			"isDefaultDC": isDefaultDatacenter,
 		},
 	}
 
@@ -198,7 +193,7 @@ func (d *TFDomainData) getDatacenters(domain *gtm.Domain) {
 	d.Datacenters = make([]TFDatacenterData, 0)
 	d.DefaultDatacenters = make([]TFDatacenterData, 0)
 	for _, dc := range domain.Datacenters {
-		if _, ok := defaultDCs[dc.DatacenterId]; ok {
+		if isDefaultDatacenter(dc.DatacenterId) {
 			d.DefaultDatacenters = append(d.DefaultDatacenters, TFDatacenterData{Nickname: dc.Nickname, ID: dc.DatacenterId})
 		} else {
 			d.Datacenters = append(d.Datacenters, TFDatacenterData{
@@ -238,4 +233,9 @@ func (d TFDomainData) FindDatacenterResourceName(id int) (string, error) {
 		}
 	}
 	return "", fmt.Errorf("cannot find datacenter resource with ID: %d", id)
+}
+
+func isDefaultDatacenter(id int) bool {
+	_, ok := defaultDCs[id]
+	return ok
 }

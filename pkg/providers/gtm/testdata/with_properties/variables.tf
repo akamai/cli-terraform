@@ -8,12 +8,12 @@ variable "config_section" {
   default = "test_section"
 }
 
-// Notice: contractid unknown at time of import. Please update.
 variable "contractid" {
-  default = ""
+  type        = string
+  description = "Value unknown at the time of import. Please update."
 }
 
-// Notice: groupid unknown at time of import. Please update.
 variable "groupid" {
-  default = ""
+  type        = string
+  description = "Value unknown at the time of import. Please update."
 }

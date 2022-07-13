@@ -158,10 +158,6 @@ func CmdCreateProperty(c *cli.Context) error {
 	if c.IsSet("version") {
 		version = c.String("version")
 	}
-	tfWorkPath = filepath.FromSlash(tfWorkPath)
-	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
-	}
 
 	propertyPath := filepath.Join(tfWorkPath, "property.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")

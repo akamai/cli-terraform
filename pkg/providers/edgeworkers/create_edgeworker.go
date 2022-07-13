@@ -50,11 +50,6 @@ func CmdCreateEdgeWorker(c *cli.Context) error {
 		tfWorkPath = c.String("tfworkpath")
 	}
 
-	tfWorkPath = filepath.FromSlash(tfWorkPath)
-	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
-	}
-
 	edgeWorkerPath := filepath.Join(tfWorkPath, "edgeworker.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")

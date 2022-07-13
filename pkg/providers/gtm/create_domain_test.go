@@ -842,6 +842,115 @@ func TestProcessDomainTemplates(t *testing.T) {
 			dir:          "with_properties",
 			filesToCheck: []string{"domain.tf", "properties.tf", "variables.tf", "import.sh"},
 		},
+		"simple domain with property of type 'qtr'": {
+			givenData: TFDomainData{
+				Section:                 "test_section",
+				Name:                    "test.name.akadns.net",
+				NormalizedName:          "test_name",
+				Type:                    "basic",
+				Comment:                 "test",
+				EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+				DefaultTimeoutPenalty:   10,
+				LoadImbalancePercentage: 50,
+				DefaultErrorPenalty:     90,
+				CnameCoalescingEnabled:  true,
+				LoadFeedback:            true,
+				Datacenters: []TFDatacenterData{
+					{
+						Nickname:        "TEST1",
+						ID:              123,
+						City:            "New York",
+						StateOrProvince: "NY",
+						Country:         "US",
+						Latitude:        40.71305,
+						Longitude:       -74.00723,
+						DefaultLoadObject: &gtm.LoadObject{
+							LoadObject:     "test load object",
+							LoadObjectPort: 111,
+							LoadServers:    []string{"loadServer1", "loadServer2", "loadServer3"},
+						},
+					},
+				},
+				DefaultDatacenters: []TFDatacenterData{
+					{
+						Nickname: "DEFAULT_5401",
+						ID:       5401,
+					},
+					{
+						Nickname: "DEFAULT_5402",
+						ID:       5402,
+					},
+				},
+				Properties: []*gtm.Property{
+					{
+						Name:                 "test property1",
+						Type:                 "qtr",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						TrafficTargets: []*gtm.TrafficTarget{
+							{
+								DatacenterId: 5401,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"1.2.3.4"},
+							},
+						},
+						LivenessTests: []*gtm.LivenessTest{
+							{
+								Name:               "HTTP",
+								TestInterval:       60,
+								TestObject:         "/",
+								HttpError3xx:       true,
+								HttpError4xx:       true,
+								HttpError5xx:       true,
+								TestObjectProtocol: "HTTP",
+								TestObjectPort:     80,
+								TestTimeout:        10,
+							},
+						},
+					},
+					{
+						Name:                 "test property2",
+						Type:                 "qtr",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						TrafficTargets: []*gtm.TrafficTarget{
+							{
+								DatacenterId: 123,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"1.2.3.4"},
+							},
+							{
+								DatacenterId: 5402,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"7.6.5.4"},
+							},
+						},
+						LivenessTests: []*gtm.LivenessTest{
+							{
+								Name:               "HTTP",
+								TestInterval:       60,
+								TestObject:         "/",
+								HttpError3xx:       true,
+								HttpError4xx:       true,
+								HttpError5xx:       true,
+								TestObjectProtocol: "HTTP",
+								TestObjectPort:     80,
+								TestTimeout:        10,
+							},
+						},
+					},
+				},
+			},
+			dir:          "with_qtr_properties",
+			filesToCheck: []string{"domain.tf", "properties.tf", "variables.tf", "import.sh"},
+		},
 	}
 
 	for name, test := range tests {
@@ -860,8 +969,9 @@ func TestProcessDomainTemplates(t *testing.T) {
 					"variables.tmpl":   filepath.Join(outDir, "variables.tf"),
 				},
 				AdditionalFuncs: template.FuncMap{
-					"normalize": normalizeResourceName,
-					"toUpper":   strings.ToUpper,
+					"normalize":   normalizeResourceName,
+					"toUpper":     strings.ToUpper,
+					"isDefaultDC": isDefaultDatacenter,
 				},
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))

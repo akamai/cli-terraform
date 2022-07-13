@@ -68,9 +68,14 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
     {{- end}}
     ghost_demand_reporting = {{.GhostDemandReporting}}
     {{- if ne (.Type | toUpper) "STATIC"}}
+    {{- $type := .Type}}
     {{- range .TrafficTargets}}
     traffic_target {
+        {{- if and (eq $type "qtr") (isDefaultDC .DatacenterId)}}
+        datacenter_id = data.akamai_gtm_default_datacenter.default_datacenter_{{.DatacenterId}}.datacenter_id
+        {{- else}}
         datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}}.datacenter_id
+        {{- end}}
         enabled = {{.Enabled}}
         weight = {{.Weight}}
         servers = [{{range $i, $v := .Servers}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
@@ -141,8 +146,13 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
     }
     {{- end}}
     depends_on = [
-        {{- range $i, $v := .TrafficTargets}}
-        akamai_gtm_datacenter.{{$.FindDatacenterResourceName $v.DatacenterId}},
+        {{- $type := .Type}}
+        {{- range .TrafficTargets}}
+        {{- if and (eq $type "qtr") (isDefaultDC .DatacenterId)}}
+        data.akamai_gtm_default_datacenter.default_datacenter_{{.DatacenterId}},
+        {{- else}}
+        akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}},
+        {{- end}}
         {{- end}}
         akamai_gtm_domain.{{$.NormalizedName}}
     ]
