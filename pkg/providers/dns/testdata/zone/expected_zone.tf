@@ -23,7 +23,7 @@ resource "akamai_dns_zone" "_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin
   target                   = ""
   type                     = "PRIMARY"
   zone                     = local.zone
-  tsig_key = {
+  tsig_key {
     name      = "some-name"
     algorithm = "some-algorithm"
     secret    = "some-secret"
