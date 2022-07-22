@@ -20,7 +20,7 @@ func newContextFromStringSlice(ss []string, app *cli.App) *cli.Context {
 
 func newTemplateApp() *cli.App {
 	app := cli.NewApp()
-	app.Commands = []*cli.Command{{Name: "some-command"}, {Name: "help"}, {Name: "list"}}
+	app.Commands = []*cli.Command{{Name: "some-command", Aliases: []string{"other-command"}}, {Name: "help"}, {Name: "list"}}
 	return app
 }
 
@@ -80,6 +80,12 @@ func Test_sessionRequired(t *testing.T) {
 		"some command which requires auth": {
 			c: func() *cli.Context {
 				return newContextFromStringSlice([]string{"some-command"}, newTemplateApp())
+			},
+			expected: true,
+		},
+		"use alias": {
+			c: func() *cli.Context {
+				return newContextFromStringSlice([]string{"other-command"}, newTemplateApp())
 			},
 			expected: true,
 		},

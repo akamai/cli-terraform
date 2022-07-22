@@ -85,11 +85,20 @@ func sessionRequired(c *cli.Context) bool {
 	}
 
 	for _, cmd := range c.App.Commands {
-		if cmd.Name == command {
+		if cmd.Name == command || sliceContains(cmd.Aliases, command) {
 			return true
 		}
 	}
 
+	return false
+}
+
+func sliceContains(slc []string, c string) bool {
+	for _, s := range slc {
+		if s == c {
+			return true
+		}
+	}
 	return false
 }
 
