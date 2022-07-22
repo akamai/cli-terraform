@@ -43,15 +43,15 @@ Description:
    Administer and manage available Akamai resources with Terraform
 
 Built-In Commands:
-  create-domain
-  create-zone
-  create-appsec
-  create-property
-  create-cloudlets-policy
-  create-edgekv
-  create-edgeworker
-  create-iam
-  create-imaging
+  export-domain (alias: create-domain)
+  export-zone (alias: create-zone)
+  export-appsec (alias: create-appsec)
+  export-property (alias: create-property)
+  export-cloudlets-policy (alias: create-cloudlets-policy)
+  export-edgekv (alias: create-edgekv)
+  export-edgeworker (alias: create-edgeworker)
+  export-iam (alias: create-iam)
+  export-imaging (alias: create-imaging)
   list
   help
 
@@ -68,7 +68,7 @@ Global Flags:
 ### Usage
 
 ```
-   akamai terraform [global flags] create-domain [flags] <domain>
+   akamai terraform [global flags] export-domain [flags] <domain>
 
 Flags:
    --tfworkpath path       Directory used to store files created when running commands. (default: current directory)
@@ -76,16 +76,16 @@ Flags:
    --createconfig          Creates these Terraform configuration files based on the values in <domain>_resources.json: <domain>.tf and gtmvars.tf. Also creates this import script: <domain>_import.script. (default: false)
 ```
 
-### Create list of all domain objects. Written in json format to <domain>_resources.json
+### Export list of all domain objects. Written in json format to <domain>_resources.json
 
 ```
-$ akamai terraform create-domain --resources example.akadns.net
+$ akamai terraform export-domain --resources example.akadns.net
 ```
 
 ### Generate Terraform GTM Domain configuration file <domain>.tf, vars config file, gtmvars.tf, and import script, <domain>_resource_import.script
 
 ```
-$ akamai terraform create-domain --createconfig example.akadns.net
+$ akamai terraform export-domain --createconfig example.akadns.net
 ```
 
 ### Domain Notes:
@@ -97,7 +97,7 @@ $ akamai terraform create-domain --createconfig example.akadns.net
 ### Usage
 
 ```
-   akamai terraform [global flags] create-zone [flags] <zone>
+   akamai terraform [global flags] export-zone [flags] <zone>
 
 Flags: 
    --tfworkpath path       Directory used to store files created when running commands. (default: current directory)
@@ -111,22 +111,22 @@ Flags:
    --recordname value      Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.
 ```
 
-### Create List of Zone Recordsets. Written in json format to <zone>_resources.json
+### Export List of Zone Recordsets. Written in json format to <zone>_resources.json
 
 ```
-$ akamai terraform create-zone --resources testprimaryzone.com
+$ akamai terraform export-zone --resources testprimaryzone.com
 ```
 
 ### Generate Terraform Zone configuration file. Default args create <zone>.tf, vars config file, dnsvars.tf
 
 ```
-$ akamai terraform create-zone --createconfig testprimaryzone.com
+$ akamai terraform export-zone --createconfig testprimaryzone.com
 ```
 
 ### Generate Zone import script, <zone>_resource_import.script
 
 ```
-$ akamai terraform create-zone --importscript testprimaryzone.com
+$ akamai terraform export-zone --importscript testprimaryzone.com
 ```
 
 
@@ -150,7 +150,7 @@ $ akamai terraform create-zone --importscript testprimaryzone.com
 
 ### Usage
 ```
-   akamai terraform [global flags] create-appsec [flags] <name_of_security_config>
+   akamai terraform [global flags] export-appsec [flags] <name_of_security_config>
    
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
@@ -161,17 +161,17 @@ Flags:
 ### Usage
 
 ```
-   akamai terraform [global flags] create-property [flags] <property name>
+   akamai terraform [global flags] export-property [flags] <property name>
 
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
    --version value        Property version to import  (default: LATEST)
 ```
 
-### Create property manager property configuration.
+### Export property manager property configuration.
 
 ```
-$ akamai terraform create-property
+$ akamai terraform export-property
 ```
 
 ## Cloudlets
@@ -179,60 +179,60 @@ $ akamai terraform create-property
 ### Usage
 
 ```
-   akamai terraform [global flags] create-cloudlets-policy [flags] <policy_name>
+   akamai terraform [global flags] export-cloudlets-policy [flags] <policy_name>
 
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
-### Create policy configuration.
+### Export Cloudlets Policy configuration.
 
 ```
-$ akamai terraform create-cloudlets-policy
+$ akamai terraform export-cloudlets-policy
 ```
 
 ## Edgeworkers
 
-### Create EdgeKV Usage
+### Export EdgeKV Usage
 
 ```
-   akamai terraform [global flags] create-edgekv [flags] <namespace_name> <network>
+   akamai terraform [global flags] export-edgekv [flags] <namespace_name> <network>
 
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
-### Create edgekv configuration.
+### Export edgekv configuration.
 
 ```
-$ akamai terraform create-edgekv
+$ akamai terraform export-edgekv
 ```
 
-### Create EdgeWorker Usage
+### Export EdgeWorker Usage
 
 ```
-   akamai terraform [global flags] create-edgeworker [flags] <edgeworker_id>
+   akamai terraform [global flags] export-edgeworker [flags] <edgeworker_id>
 
 Flags:
    --bundlepath path      Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
-### Create edgeworker configuration.
+### Export edgeworker configuration.
 
 ```
-$ akamai terraform create-edgekv
+$ akamai terraform export-edgekv
 ```
 
 ## Identity and Access Management
 
-### Create Identity and Access Management usage
+### Export Identity and Access Management usage
 
 ```
-   akamai terraform [global flags] create-iam [subcommand]
+   akamai terraform [global flags] export-iam [subcommand]
 
 Subcommands:
-    all                     Create all available Terraform Users, Groups and Roles
+    all                     Export all available Terraform Users, Groups and Roles
     group [group id]        Exports group by id with relevant users and their roles
     role [role id]          Exports role by id with relevant users and their groups
     user [user's email]     Exports user by email with relevant user's groups and roles
@@ -241,28 +241,28 @@ Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
-### Create Identity and Access Management configuration.
+### Export Identity and Access Management configuration.
 
 ```
-$ akamai terraform create-iam
+$ akamai terraform export-iam
 ```
 
 ## Image and Video Manager
 
-### Create Image and Video policy usage
+### Export Image and Video policy usage
 
 ```
-   akamai terraform [global flags] create-imaging [flags] <contract_id> <policy_set_id>
+   akamai terraform [global flags] export-imaging [flags] <contract_id> <policy_set_id>
 
 Flags:
    --tfworkpath path         Directory used to store files created when running commands. (default: current directory)
    --policy-json-dir path    Path location for placement of policy jsons. Default: same value as tfworkpath
 ```
 
-### Create Image and Video policy configuration.
+### Export Image and Video policy configuration.
 
 ```
-$ akamai terraform create-imaging
+$ akamai terraform export-imaging
 ```
 
 ## General Notes

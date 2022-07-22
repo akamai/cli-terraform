@@ -34,8 +34,10 @@ func CommandLocator() ([]*cli.Command, error) {
 	var commands []*cli.Command
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-domain",
-		Description: "Create Terraform Domain Resources",
+		Name:        "export-domain",
+		Aliases:     []string{"create-domain"},
+		Description: "Generates Terraform configuration for Domain resources",
+		Usage:       "export-domain",
 		ArgsUsage:   "<domain>",
 		Action:      validatedAction(gtm.CmdCreateDomain, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
@@ -49,8 +51,10 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-zone",
-		Description: "Create Terraform Zone Resources",
+		Name:        "export-zone",
+		Aliases:     []string{"create-zone"},
+		Description: "Generates Terraform configuration for Zone resources",
+		Usage:       "export-zone",
 		ArgsUsage:   "<zone>",
 		Action:      validatedAction(dns.CmdCreateZone, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
@@ -92,9 +96,10 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-appsec",
-		Description: "Create Terraform Application Security Resource",
-		Usage:       "create-appsec",
+		Name:        "export-appsec",
+		Aliases:     []string{"create-appsec"},
+		Description: "Generates Terraform configuration for Application Security resources",
+		Usage:       "export-appsec",
 		ArgsUsage:   "<security configuration name>",
 		Action:      validatedAction(appsec.CmdCreateAppsec, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
@@ -108,9 +113,10 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-property",
-		Description: "Create Terraform Property Resource",
-		Usage:       "create-property",
+		Name:        "export-property",
+		Aliases:     []string{"create-property"},
+		Description: "Generates Terraform configuration for Property resources",
+		Usage:       "export-property",
 		ArgsUsage:   "<property name>",
 		Action:      validatedAction(papi.CmdCreateProperty, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
@@ -129,9 +135,10 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-cloudlets-policy",
-		Description: "Create Terraform Cloudlets Policy Resource",
-		Usage:       "create-cloudlets-policy",
+		Name:        "export-cloudlets-policy",
+		Aliases:     []string{"create-cloudlets-policy"},
+		Description: "Generates Terraform configuration for Cloudlets Policy resources",
+		Usage:       "export-cloudlets-policy",
 		ArgsUsage:   "<policy_name>",
 		Action:      validatedAction(cloudlets.CmdCreatePolicy, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
@@ -145,9 +152,10 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-edgekv",
-		Description: "Create Terraform EdgeKV Resource",
-		Usage:       "create-edgekv",
+		Name:        "export-edgekv",
+		Aliases:     []string{"create-edgekv"},
+		Description: "Generates Terraform configuration for EdgeKV resources",
+		Usage:       "export-edgekv",
 		ArgsUsage:   "<namespace_name> <network>",
 		Action:      validatedAction(edgeworkers.CmdCreateEdgeKV, requireValidWorkpath, requireNArguments(2)),
 		Flags: []cli.Flag{
@@ -161,9 +169,10 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-edgeworker",
-		Description: "Create Terraform EdgeWorker Resource",
-		Usage:       "create-edgeworker",
+		Name:        "export-edgeworker",
+		Aliases:     []string{"create-edgeworker"},
+		Description: "Generates Terraform configuration for EdgeWorker resources",
+		Usage:       "export-edgeworker",
 		ArgsUsage:   "<edgeworker_id>",
 		Action:      validatedAction(edgeworkers.CmdCreateEdgeWorker, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
@@ -181,8 +190,10 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:            "create-iam",
-		Description:     "Create Terraform Identity and Access Management Resources",
+		Name:            "export-iam",
+		Aliases:         []string{"create-iam"},
+		Description:     "Generates Terraform configuration for Identity and Access Management resources",
+		Usage:           "export-iam",
 		HideHelpCommand: true,
 		Action:          iam.CmdCreateIAM,
 		Subcommands: []*cli.Command{
@@ -221,9 +232,10 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-imaging",
-		Description: "Create Terraform Image and Video Manager resources",
-		Usage:       "create-imaging",
+		Name:        "export-imaging",
+		Aliases:     []string{"create-imaging"},
+		Description: "Generates Terraform configuration for Image and Video Manager resources",
+		Usage:       "export-imaging",
 		ArgsUsage:   "<contract_id> <policy_set_id>",
 		Action:      validatedAction(imaging.CmdCreateImaging, requireValidWorkpath, requireNArguments(2)),
 		Flags: []cli.Flag{

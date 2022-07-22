@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version 1.0.0 (Jul 28, 2022)
+
+### Deprecations
+
+* General
+  * `create-*` command names are now deprecated, use `export-*` instead
+
+
 ## Version 0.9.0 (Jul 07, 2022)
 
 ### Features / Enhancements

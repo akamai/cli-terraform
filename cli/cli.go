@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
 	"github.com/akamai/cli-terraform/pkg/commands"
@@ -53,8 +54,7 @@ func Run() error {
 		app.Commands = append(cmds, app.Commands...)
 	}
 
-	app.Before = ensureBefore(putSessionInContext, putLoggerInContext)
-
+	app.Before = ensureBefore(putSessionInContext, putLoggerInContext, deprecationInfoForCreateCommands)
 	return app.RunContext(ctx, os.Args)
 }
 
@@ -110,5 +110,13 @@ func putLoggerInContext(c *cli.Context) error {
 	c.Context = log.SetupContext(c.Context, c.App.Writer)
 	c.Context = session.ContextWithOptions(c.Context, session.WithContextLog(log.FromContext(c.Context)))
 
+	return nil
+}
+
+func deprecationInfoForCreateCommands(c *cli.Context) error {
+	if c.NArg() > 0 && strings.HasPrefix(c.Args().First(), "create-") {
+		fmt.Fprintln(c.App.Writer, color.HiYellowString("Warning:"), "create command names are now deprecated, use export commands instead.")
+		fmt.Fprintln(c.App.Writer)
+	}
 	return nil
 }
