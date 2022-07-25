@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/iam"
@@ -34,9 +33,6 @@ func CmdCreateIAMAll(c *cli.Context) error {
 		tfWorkPath = c.String("tfworkpath")
 	}
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
-	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString(fmt.Sprintf("Destination work path is not available: %s", err)), 1)
-	}
 
 	groupsPath := filepath.Join(tfWorkPath, "groups.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")

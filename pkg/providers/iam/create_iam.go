@@ -9,7 +9,6 @@ import (
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/iam"
 	"github.com/akamai/cli/pkg/terminal"
-	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 )
 
@@ -74,47 +73,11 @@ var (
 
 	// ErrFetchingUsers is returned when fetching users fails
 	ErrFetchingUsers = errors.New("unable to fetch users under this account")
-	// ErrFetchingUserByID is returned when fetching user by id fails
-	ErrFetchingUserByID = errors.New("unable to fetch user by id")
 )
 
-// CmdCreateIAM is an entrypoint to create-iam command
-func CmdCreateIAM(c *cli.Context) error {
-	if c.NArg() == 0 {
-		return showHelpCommandWithErr(c, fmt.Sprintf("One of the subcommands is required : %s", getSubcommandsNames(c)))
-	}
-	if !isSubcommandValid(c, c.Args().First()) {
-		return showHelpCommandWithErr(c, fmt.Sprintf("Subcommand '%v' is invalid. Use one of valid subcommand: %s", c.Args().First(), getSubcommandsNames(c)))
-	}
+// CmdCreateIAM is an entrypoint to create-iam command. This is only for action validation purpose
+func CmdCreateIAM(_ *cli.Context) error {
 	return nil
-}
-
-func isSubcommandValid(ctx *cli.Context, subcommand string) bool {
-	commands := ctx.App.Commands
-	if len(commands) == 0 {
-		return false
-	}
-	for _, c := range commands {
-		if c.Name == subcommand {
-			return true
-		}
-	}
-	return false
-}
-
-func getSubcommandsNames(ctx *cli.Context) []string {
-	var names []string
-	for _, c := range ctx.App.Commands {
-		names = append(names, c.Name)
-	}
-	return names
-}
-
-func showHelpCommandWithErr(c *cli.Context, stringErr string) error {
-	if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-		return cli.Exit(color.RedString("Error displaying help command"), 1)
-	}
-	return cli.Exit(color.RedString(stringErr), 1)
 }
 
 func getTFUsers(ctx context.Context, client iam.IAM, users []iam.UserListItem, term terminal.Terminal) ([]*TFUser, error) {

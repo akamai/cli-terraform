@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 
@@ -25,9 +24,6 @@ var (
 // CmdCreateIAMRole is an entrypoint to create-iam role command
 func CmdCreateIAMRole(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() != 1 {
-		return showHelpCommandWithErr(c, "Role ID is required")
-	}
 	sess := edgegrid.GetSession(ctx)
 	client := iam.Client(sess)
 	// tfWorkPath is a target directory for generated terraform resources
@@ -36,9 +32,6 @@ func CmdCreateIAMRole(c *cli.Context) error {
 		tfWorkPath = c.String("tfworkpath")
 	}
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
-	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
-	}
 
 	groupPath := filepath.Join(tfWorkPath, "groups.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")

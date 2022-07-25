@@ -195,30 +195,30 @@ func CommandLocator() ([]*cli.Command, error) {
 		Description:     "Generates Terraform configuration for Identity and Access Management resources",
 		Usage:           "export-iam",
 		HideHelpCommand: true,
-		Action:          iam.CmdCreateIAM,
+		Action:          validatedAction(iam.CmdCreateIAM, requireValidWorkpath, validateSubCommands),
 		Subcommands: []*cli.Command{
 			{
 				Name:        "all",
 				Description: "Create all available Terraform Users, Groups and Roles",
-				Action:      iam.CmdCreateIAMAll,
+				Action:      validatedAction(iam.CmdCreateIAMAll, requireValidWorkpath),
 			},
 			{
 				Name:        "group",
 				Description: "Create Terraform Group resource with relevant users and roles resources",
 				ArgsUsage:   "<group_id>",
-				Action:      iam.CmdCreateIAMGroup,
+				Action:      validatedAction(iam.CmdCreateIAMGroup, requireValidWorkpath, requireNArguments(1)),
 			},
 			{
 				Name:        "role",
 				Description: "Create Terraform Role resource with relevant users and groups resources",
 				ArgsUsage:   "<role_id>",
-				Action:      iam.CmdCreateIAMRole,
+				Action:      validatedAction(iam.CmdCreateIAMRole, requireValidWorkpath, requireNArguments(1)),
 			},
 			{
 				Name:        "user",
 				Description: "Create Terraform User resource with relevant groups and roles resources",
 				ArgsUsage:   "<user_email>",
-				Action:      iam.CmdCreateIAMUser,
+				Action:      validatedAction(iam.CmdCreateIAMUser, requireValidWorkpath, requireNArguments(1)),
 			},
 		},
 		Flags: []cli.Flag{
