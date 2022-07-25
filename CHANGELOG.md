@@ -2,6 +2,11 @@
 
 ## Version 1.0.0 (Jul 28, 2022)
 
+### Deprecations
+
+* [IMPORTANT] General
+  * `create-*` command names are now deprecated, use `export-*` instead
+
 ### Features/Enhancements
 
 * GTM
@@ -16,11 +21,6 @@
   * Fix default flag values in help output
 * Identity and Access Management (IAM)
   * Fix IAM role export failures with broken user
-
-### Deprecations
-
-* [IMPORTANT] General
-  * `create-*` command names are now deprecated, use `export-*` instead
 
 ## Version 0.9.0 (Jul 07, 2022)
 
