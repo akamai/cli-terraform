@@ -232,7 +232,7 @@ $ akamai terraform export-edgekv
    akamai terraform [global flags] export-iam [subcommand]
 
 Subcommands:
-    all                     Export all available Terraform Users, Groups and Roles
+    all                     Exports all available Terraform Users, Groups and Roles
     group [group id]        Exports group by id with relevant users and their roles
     role [role id]          Exports role by id with relevant users and their groups
     user [user's email]     Exports user by email with relevant user's groups and roles
