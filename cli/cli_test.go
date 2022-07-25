@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"flag"
+	"io"
 	"testing"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
@@ -124,4 +125,50 @@ func TestPutLoggerInContext(t *testing.T) {
 	buffer.Reset()
 	logger.Info("oops")
 	assert.Contains(t, buffer.String(), "oops")
+}
+
+func TestDeprecationInfo(t *testing.T) {
+	app := cli.NewApp()
+	app.Commands = []*cli.Command{{Name: "export-command", Aliases: []string{"create-command"}}, {Name: "help"}, {Name: "list"}}
+
+	buf := &bytes.Buffer{}
+	app.Writer = buf
+	app.ErrWriter = io.Discard
+	app.Before = ensureBefore(deprecationInfoForCreateCommands)
+
+	tests := map[string]struct {
+		args          []string
+		expectWarning bool
+	}{
+		"create": {
+			args:          []string{"cmd", "create-command"},
+			expectWarning: true,
+		},
+		"export": {
+			args:          []string{"cmd", "export-command"},
+			expectWarning: false,
+		},
+		"help create": {
+			args:          []string{"cmd", "help", "create-command"},
+			expectWarning: true,
+		},
+		"help export": {
+			args:          []string{"cmd", "help", "export-command"},
+			expectWarning: false,
+		},
+	}
+
+	for name, test := range tests {
+		buf.Reset()
+		t.Run(name, func(t *testing.T) {
+			err := app.Run(test.args)
+			assert.NoError(t, err)
+
+			if test.expectWarning {
+				assert.Contains(t, buf.String(), "Warning: create command names are now deprecated, use export commands instead")
+			} else {
+				assert.NotContains(t, buf.String(), "Warning")
+			}
+		})
+	}
 }

@@ -123,7 +123,14 @@ func putLoggerInContext(c *cli.Context) error {
 }
 
 func deprecationInfoForCreateCommands(c *cli.Context) error {
-	if c.NArg() > 0 && strings.HasPrefix(c.Args().First(), "create-") {
+	if !c.Args().Present() {
+		return nil
+	}
+	command := c.Args().First()
+	if command == "help" {
+		command = c.Args().Get(1)
+	}
+	if strings.HasPrefix(command, "create-") {
 		fmt.Fprintln(c.App.Writer, color.HiYellowString("Warning:"), "create command names are now deprecated, use export commands instead.")
 		fmt.Fprintln(c.App.Writer)
 	}
