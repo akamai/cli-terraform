@@ -6,9 +6,6 @@ import (
 	"path/filepath"
 )
 
-// TFWorkPath is a target directory for generated terraform resources
-var TFWorkPath = "./"
-
 // CheckFiles verifies if all given files doesn't exist in filesystem
 func CheckFiles(files ...string) error {
 	for _, file := range files {
@@ -21,6 +18,6 @@ func CheckFiles(files ...string) error {
 }
 
 // CreateTFFilename creates full tf file path
-func CreateTFFilename(resourceName string) string {
-	return filepath.Join(TFWorkPath, resourceName+".tf")
+func CreateTFFilename(resourceName string, tfWorkPath string) string {
+	return filepath.Join(tfWorkPath, resourceName+".tf")
 }

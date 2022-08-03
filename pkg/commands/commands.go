@@ -34,67 +34,57 @@ func CommandLocator() ([]*cli.Command, error) {
 	var commands []*cli.Command
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-domain",
-		Description: "Create Terraform Domain Resources",
+		Name:        "export-domain",
+		Aliases:     []string{"create-domain"},
+		Description: "Generates Terraform configuration for Domain resources",
+		Usage:       "export-domain",
 		ArgsUsage:   "<domain>",
-		Action:      gtm.CmdCreateDomain,
+		Action:      validatedAction(gtm.CmdCreateDomain, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created and/or modified artifacts. Default: current directory",
-			},
-			&cli.BoolFlag{
-				Name:  "resources",
-				Value: true,
-				Usage: "Create json formatted resource import list file, <domain>_resources.json. Used as input by createconfig.",
-			},
-			&cli.BoolFlag{
-				Name:  "createconfig",
-				Value: true,
-				Usage: "Create Terraform configuration (<domain>.tf), gtmvars.tf, and import command script (<domain>_import.script) files using resources json",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-zone",
-		Description: "Create Terraform Zone Resources",
+		Name:        "export-zone",
+		Aliases:     []string{"create-zone"},
+		Description: "Generates Terraform configuration for Zone resources",
+		Usage:       "export-zone",
 		ArgsUsage:   "<zone>",
-		Action:      dns.CmdCreateZone,
+		Action:      validatedAction(dns.CmdCreateZone, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created and/or modified artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 			&cli.BoolFlag{
 				Name:  "resources",
-				Value: true,
 				Usage: "Create json formatted resource import list file, <zone>_resources.json. Used as input by createconfig.",
 			},
 			&cli.BoolFlag{
 				Name:  "createconfig",
-				Value: true,
 				Usage: "Create Terraform configuration (<zone>.tf), dnsvars.tf from generated resources file. Saves zone config for import.",
 			},
 			&cli.BoolFlag{
 				Name:  "importscript",
-				Value: true,
 				Usage: "Create import script for generated Terraform configuration script (<zone>_import.script) files",
 			},
 			&cli.BoolFlag{
 				Name:  "segmentconfig",
-				Value: true,
 				Usage: "Directive for createconfig. Group and segment records by name into separate config files.",
 			},
 			&cli.BoolFlag{
 				Name:  "configonly",
-				Value: true,
 				Usage: "Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Saves zone config for importscript. Ignores any existing resource json file.",
 			},
 			&cli.BoolFlag{
 				Name:  "namesonly",
-				Value: true,
 				Usage: "Directive for both resource gathering and config generation. All record set types assumed.",
 			},
 			&cli.StringSliceFlag{
@@ -106,15 +96,16 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-appsec",
-		Description: "Create Terraform Application Security Resource",
-		Usage:       "create-appsec",
+		Name:        "export-appsec",
+		Aliases:     []string{"create-appsec"},
+		Description: "Generates Terraform configuration for Application Security resources",
+		Usage:       "export-appsec",
 		ArgsUsage:   "<security configuration name>",
-		Action:      appsec.CmdCreateAppsec,
+		Action:      validatedAction(appsec.CmdCreateAppsec, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "tfworkpath",
-				Usage:       "Path location for placement of created artifacts",
+				Usage:       "Directory used to store files created when running commands.",
 				DefaultText: "current directory",
 			},
 		},
@@ -122,15 +113,16 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-property",
-		Description: "Create Terraform Property Resource",
-		Usage:       "create-property",
+		Name:        "export-property",
+		Aliases:     []string{"create-property"},
+		Description: "Generates Terraform configuration for Property resources",
+		Usage:       "export-property",
 		ArgsUsage:   "<property name>",
-		Action:      papi.CmdCreateProperty,
+		Action:      validatedAction(papi.CmdCreateProperty, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "tfworkpath",
-				Usage:       "Path location for placement of created artifacts",
+				Usage:       "Directory used to store files created when running commands.",
 				DefaultText: "current directory",
 			},
 			&cli.StringFlag{
@@ -143,108 +135,118 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-cloudlets-policy",
-		Description: "Create Terraform Cloudlets Policy Resource",
-		Usage:       "create-cloudlets-policy",
+		Name:        "export-cloudlets-policy",
+		Aliases:     []string{"create-cloudlets-policy"},
+		Description: "Generates Terraform configuration for Cloudlets Policy resources",
+		Usage:       "export-cloudlets-policy",
 		ArgsUsage:   "<policy_name>",
-		Action:      cloudlets.CmdCreatePolicy,
+		Action:      validatedAction(cloudlets.CmdCreatePolicy, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-edgekv",
-		Description: "Create Terraform EdgeKV Resource",
-		Usage:       "create-edgekv",
+		Name:        "export-edgekv",
+		Aliases:     []string{"create-edgekv"},
+		Description: "Generates Terraform configuration for EdgeKV resources",
+		Usage:       "export-edgekv",
 		ArgsUsage:   "<namespace_name> <network>",
-		Action:      edgeworkers.CmdCreateEdgeKV,
+		Action:      validatedAction(edgeworkers.CmdCreateEdgeKV, requireValidWorkpath, requireNArguments(2)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-edgeworker",
-		Description: "Create Terraform EdgeWorker Resource",
-		Usage:       "create-edgeworker",
+		Name:        "export-edgeworker",
+		Aliases:     []string{"create-edgeworker"},
+		Description: "Generates Terraform configuration for EdgeWorker resources",
+		Usage:       "export-edgeworker",
 		ArgsUsage:   "<edgeworker_id>",
-		Action:      edgeworkers.CmdCreateEdgeWorker,
+		Action:      validatedAction(edgeworkers.CmdCreateEdgeWorker, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "bundlepath",
 				Usage: "Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath",
 			},
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:            "create-iam",
-		Description:     "Create Terraform Identity and Access Management Resources",
+		Name:            "export-iam",
+		Aliases:         []string{"create-iam"},
+		Description:     "Generates Terraform configuration for Identity and Access Management resources",
+		Usage:           "export-iam",
 		HideHelpCommand: true,
-		Action:          iam.CmdCreateIAM,
+		Action:          validatedAction(iam.CmdCreateIAM, requireValidWorkpath, validateSubCommands),
 		Subcommands: []*cli.Command{
 			{
 				Name:        "all",
-				Description: "Create all available Terraform Users, Groups and Roles",
-				ArgsUsage:   " ", //TODO change within implementation of DXE-1249
-				Action:      iam.CmdCreateIAMAll,
+				Description: "Exports all available Terraform Users, Groups and Roles",
+				Action:      validatedAction(iam.CmdCreateIAMAll, requireValidWorkpath),
 			},
 			{
 				Name:        "group",
-				Description: "Create Terraform Group resource with relevant users and roles resources",
+				Description: "Exports Terraform Group resource with relevant users and roles resources",
 				ArgsUsage:   "<group_id>",
-				Action:      iam.CmdCreateIAMGroup,
+				Action:      validatedAction(iam.CmdCreateIAMGroup, requireValidWorkpath, requireNArguments(1)),
 			},
 			{
 				Name:        "role",
-				Description: "Create Terraform Role resource with relevant users and groups resources",
+				Description: "Exports Terraform Role resource with relevant users and groups resources",
 				ArgsUsage:   "<role_id>",
-				Action:      iam.CmdCreateIAMRole,
+				Action:      validatedAction(iam.CmdCreateIAMRole, requireValidWorkpath, requireNArguments(1)),
 			},
 			{
 				Name:        "user",
-				Description: "Create Terraform User resource with relevant groups and roles resources",
+				Description: "Exports Terraform User resource with relevant groups and roles resources",
 				ArgsUsage:   "<user_email>",
-				Action:      iam.CmdCreateIAMUser,
+				Action:      validatedAction(iam.CmdCreateIAMUser, requireValidWorkpath, requireNArguments(1)),
 			},
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:        "create-imaging",
-		Description: "Create Terraform Image and Video Manager resources",
-		Usage:       "create-imaging",
+		Name:        "export-imaging",
+		Aliases:     []string{"create-imaging"},
+		Description: "Generates Terraform configuration for Image and Video Manager resources",
+		Usage:       "export-imaging",
 		ArgsUsage:   "<contract_id> <policy_set_id>",
-		Action:      imaging.CmdCreateImaging,
+		Action:      validatedAction(imaging.CmdCreateImaging, requireValidWorkpath, requireNArguments(2)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "policy-json-dir",
 				Usage: "Path location for placement of policy jsons. Default: same value as tfworkpath",
 			},
 			&cli.StringFlag{
-				Name:  "tfworkpath",
-				Usage: "Path location for placement of created artifacts. Default: current directory",
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 			&cli.BoolFlag{
 				Name:        "schema",

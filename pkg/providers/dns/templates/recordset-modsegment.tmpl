@@ -1,0 +1,8 @@
+variable "zonename" {
+    description = "zone name for this name record set config"
+}
+
+locals {
+    zone = var.zonename
+}
+{{template "resource-set" .}}

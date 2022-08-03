@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -52,7 +53,13 @@ func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
 		"escapeName":    tools.EscapeName,
 		"toList":        tools.ToList,
 	}
-	tmpl := template.Must(template.New("templates").Funcs(funcs).Funcs(t.AdditionalFuncs).ParseFS(t.TemplatesFS, "**/*.tmpl"))
+	files, err := findTemplateFiles(t.TemplatesFS)
+	if err != nil {
+		return fmt.Errorf("%s: %s", "error filtering template files", err)
+	}
+
+	tmpl := template.Must(template.New("templates").Funcs(funcs).Funcs(t.AdditionalFuncs).
+		ParseFS(t.TemplatesFS, files...))
 
 	for templateName, targetPath := range t.TemplateTargets {
 		buf := bytes.Buffer{}
@@ -84,4 +91,23 @@ func formatIntList(items []int) string {
 	}
 	output := strings.Join(list, ", ")
 	return "[" + output + "]"
+}
+
+func findTemplateFiles(dirFS fs.FS) ([]string, error) {
+	var files []string
+
+	err := fs.WalkDir(dirFS, ".", func(filePath string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() && path.Ext(filePath) == ".tmpl" {
+			files = append(files, filePath)
+		}
+		return nil
+	})
+	if err != nil {
+		return []string{}, err
+	}
+
+	return files, nil
 }

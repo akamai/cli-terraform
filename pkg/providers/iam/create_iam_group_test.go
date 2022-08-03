@@ -17,12 +17,12 @@ import (
 )
 
 var (
-	groupID = 56789
+	groupID = int64(56789)
 
 	expectListUsersWithinGroup = func(client *mockiam) {
 		listUserReq := iam.ListUsersRequest{
 			Actions: true,
-			GroupID: tools.IntPtr(groupID),
+			GroupID: tools.Int64Ptr(groupID),
 		}
 
 		users := []iam.UserListItem{

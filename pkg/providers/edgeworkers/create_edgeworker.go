@@ -41,27 +41,20 @@ var (
 // CmdCreateEdgeWorker is an entrypoint to create-edgeworker command
 func CmdCreateEdgeWorker(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() != 1 {
-		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-			return cli.Exit(color.RedString("Error displaying help command"), 1)
-		}
-		return cli.Exit(color.RedString("EdgeWorker id is required"), 1)
-	}
 	sess := edgegrid.GetSession(c.Context)
 	client := edgeworkers.Client(sess)
+
+	// tfWorkPath is a target directory for generated terraform resources
+	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
-		tools.TFWorkPath = c.String("tfworkpath")
-	}
-	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
-	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
+		tfWorkPath = c.String("tfworkpath")
 	}
 
-	edgeWorkerPath := filepath.Join(tools.TFWorkPath, "edgeworker.tf")
-	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
-	importPath := filepath.Join(tools.TFWorkPath, "import.sh")
+	edgeWorkerPath := filepath.Join(tfWorkPath, "edgeworker.tf")
+	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
+	importPath := filepath.Join(tfWorkPath, "import.sh")
 
-	bundleDir := tools.TFWorkPath
+	bundleDir := tfWorkPath
 	if c.IsSet("bundlepath") {
 		bundleDir = c.String("bundlepath")
 	}
@@ -134,7 +127,7 @@ func createEdgeWorker(ctx context.Context, edgeWorkerID int, bundleDir, section 
 	term.Spinner().Start("Saving TF configurations ", "")
 	if err := templateProcessor.ProcessTemplates(tfEdgeWorkerData); err != nil {
 		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
+		return fmt.Errorf("%w: %s", templates.ErrSavingFiles, err)
 	}
 	term.Spinner().OK()
 	fmt.Printf("Terraform configuration for edgeworker '%s' with edgeworker_id '%d' was saved successfully\n", edgeWorker.Name, edgeWorkerID)

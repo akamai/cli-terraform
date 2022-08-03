@@ -178,7 +178,7 @@ func TestCreateEdgeWorker(t *testing.T) {
 				expectListEdgeWorkerVersions(e, 123, true, nil).Once()
 				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, "", section, fmt.Errorf("error")).Once()
 			},
-			withError: ErrSavingFiles,
+			withError: templates.ErrSavingFiles,
 		},
 	}
 

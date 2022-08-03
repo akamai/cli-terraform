@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/iam"
@@ -28,19 +27,14 @@ var (
 // CmdCreateIAMUser is an entrypoint to create-iam user command
 func CmdCreateIAMUser(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() != 1 {
-		return showHelpCommandWithErr(c, "User's email is required")
-	}
 	sess := edgegrid.GetSession(ctx)
 	client := iam.Client(sess)
-	tfWorkPath := "." // default is current dir
+	// tfWorkPath is a target directory for generated terraform resources
+	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
 		tfWorkPath = c.String("tfworkpath")
 	}
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
-	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
-	}
 
 	groupPath := filepath.Join(tfWorkPath, "groups.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
@@ -187,7 +181,7 @@ func getTFUserGroups(ctx context.Context, client iam.IAM, authGrantsList []iam.A
 	for i := range authGrantsList {
 		groupID := authGrantsList[i].GroupID
 		if groupID > 0 {
-			groups, err := getGroupsInSubtree(ctx, client, int64(groupID))
+			groups, err := getGroupsInSubtree(ctx, client, groupID)
 			if err != nil {
 				return nil, err
 			}

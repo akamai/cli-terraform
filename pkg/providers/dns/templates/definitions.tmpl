@@ -1,0 +1,46 @@
+{{- /*gotype: cli-terraform/pkg/providers/dns/dns.Data*/ -}}
+{{- define "terraform"}}
+terraform {
+  required_version = ">= 0.13"
+  required_providers {
+    akamai = {
+      source = "akamai/akamai"
+      version = "~> 1.6.1"
+    }
+  }
+}
+{{- end}}
+{{- define "locals"}}
+locals {
+    zone = {{.}}
+}
+{{- end}}
+{{- define "resource"}}
+resource "akamai_dns_zone" "{{.BlockName}}" {
+    contract = var.contractid
+    group = var.groupid
+    zone = local.zone
+    type = "{{.Type}}"
+    masters = [{{range $i, $v := .Masters}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+    comment = "{{.Comment}}"
+    sign_and_serve = {{.SignAndServe}}
+    sign_and_serve_algorithm = "{{.SignAndServeAlgorithm}}"
+    {{- with .TsigKey}}
+    tsig_key {
+        name = "{{.Name}}"
+        algorithm = "{{.Algorithm}}"
+        secret = "{{.Secret}}"
+        }
+    {{- end}}
+    target = "{{.Target}}"
+    end_customer_id = "{{.EndCustomerID}}"
+}
+{{end}}
+{{define "resource-set"}}
+resource "akamai_dns_record" "{{.BlockName}}" {
+    zone = local.zone
+    {{- range $name, $value := .ResourceFields}}
+    {{$name}} = {{$value}}
+    {{- end}}
+}
+{{end}}

@@ -1,0 +1,18 @@
+{{- /*gotype: cli-terraform/pkg/providers/dns/dns.Data*/ -}}
+variable "contract" {
+    description = "contract id for zone creation"
+}
+
+variable "group" {
+    description = "group id for zone creation"
+}
+
+variable "name" {
+    description = "zone name"
+}
+
+output "zonename" {
+    value = akamai_dns_zone.{{.BlockName}}.name
+}
+{{template "locals" "var.name"}}
+{{template "resource" .}}

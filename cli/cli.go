@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
 	"github.com/akamai/cli-terraform/pkg/commands"
@@ -53,8 +54,7 @@ func Run() error {
 		app.Commands = append(cmds, app.Commands...)
 	}
 
-	app.Before = ensureBefore(putSessionInContext, putLoggerInContext)
-
+	app.Before = ensureBefore(putSessionInContext, putLoggerInContext, deprecationInfoForCreateCommands)
 	return app.RunContext(ctx, os.Args)
 }
 
@@ -85,11 +85,20 @@ func sessionRequired(c *cli.Context) bool {
 	}
 
 	for _, cmd := range c.App.Commands {
-		if cmd.Name == command {
+		if cmd.Name == command || sliceContains(cmd.Aliases, command) {
 			return true
 		}
 	}
 
+	return false
+}
+
+func sliceContains(slc []string, c string) bool {
+	for _, s := range slc {
+		if s == c {
+			return true
+		}
+	}
 	return false
 }
 
@@ -110,5 +119,20 @@ func putLoggerInContext(c *cli.Context) error {
 	c.Context = log.SetupContext(c.Context, c.App.Writer)
 	c.Context = session.ContextWithOptions(c.Context, session.WithContextLog(log.FromContext(c.Context)))
 
+	return nil
+}
+
+func deprecationInfoForCreateCommands(c *cli.Context) error {
+	if !c.Args().Present() {
+		return nil
+	}
+	command := c.Args().First()
+	if command == "help" {
+		command = c.Args().Get(1)
+	}
+	if strings.HasPrefix(command, "create-") {
+		fmt.Fprintln(c.App.Writer, color.HiYellowString("Warning:"), "create command names are now deprecated, use export commands instead.")
+		fmt.Fprintln(c.App.Writer)
+	}
 	return nil
 }

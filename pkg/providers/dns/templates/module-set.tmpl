@@ -1,0 +1,7 @@
+{{- /*gotype: cli-terraform/pkg/providers/dns/dns.Data*/ -}}
+{{``}}
+module "{{.BlockName}}" {
+    source = "{{namedModulePath .BlockName .TfWorkPath}}"
+
+    zonename = local.zone
+}

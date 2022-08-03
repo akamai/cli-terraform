@@ -55,7 +55,6 @@ type (
 var templateFiles embed.FS
 
 var (
-
 	// RemoveSymbols is a regexp used to remove special characters from policy json file names.
 	RemoveSymbols = regexp.MustCompile(`[^\w]`)
 	// ErrFetchingPolicySet is returned when fetching policy set fails
@@ -72,27 +71,14 @@ const maxDepth = 7
 // CmdCreateImaging is an entrypoint to create-imaging command
 func CmdCreateImaging(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() < 2 {
-		if c.NArg() == 0 {
-			if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-				return cli.Exit(color.RedString("Error displaying help command"), 1)
-			}
-		}
-		return cli.Exit(color.RedString("Contract id and policy set id are required"), 1)
-	}
-
 	sess := edgegrid.GetSession(ctx)
 	client := imaging.Client(sess)
 
-	tfWorkPath := "." // default is current dir
+	// tfWorkPath is a target directory for generated terraform resources
+	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
 		tfWorkPath = c.String("tfworkpath")
 	}
-	tfWorkPath = filepath.FromSlash(tfWorkPath)
-	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
-	}
-
 	imagingPath := filepath.Join(tfWorkPath, "imaging.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")

@@ -5,7 +5,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -37,32 +36,23 @@ var (
 
 	// ErrFetchingEdgeKV is returned when fetching edgekv fails
 	ErrFetchingEdgeKV = errors.New("unable to fetch edgekv with given namespace_name and network")
-	// ErrSavingFiles is returned when an issue with processing templates occurs
-	ErrSavingFiles = errors.New("saving terraform project files")
 )
 
 // CmdCreateEdgeKV is an entrypoint to create-edgekv command
 func CmdCreateEdgeKV(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() != 2 {
-		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-			return cli.Exit(color.RedString("Error displaying help command"), 1)
-		}
-		return cli.Exit(color.RedString("EdgeKV namespace_name and network are required"), 1)
-	}
 	sess := edgegrid.GetSession(c.Context)
 	client := edgeworkers.Client(sess)
+
+	// tfWorkPath is a target directory for generated terraform resources
+	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
-		tools.TFWorkPath = c.String("tfworkpath")
-	}
-	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
-	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
+		tfWorkPath = c.String("tfworkpath")
 	}
 
-	edgeKVPath := filepath.Join(tools.TFWorkPath, "edgekv.tf")
-	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
-	importPath := filepath.Join(tools.TFWorkPath, "import.sh")
+	edgeKVPath := filepath.Join(tfWorkPath, "edgekv.tf")
+	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
+	importPath := filepath.Join(tfWorkPath, "import.sh")
 
 	err := tools.CheckFiles(edgeKVPath, variablesPath, importPath)
 	if err != nil {
@@ -122,7 +112,7 @@ func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.Nam
 	term.Spinner().Start("Saving TF configurations ")
 	if err := templateProcessor.ProcessTemplates(tfEdgeKVData); err != nil {
 		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
+		return fmt.Errorf("%w: %s", templates.ErrSavingFiles, err)
 	}
 	term.Spinner().OK()
 	fmt.Printf("Terraform configuration for edgeKV '%s' on network '%s' was saved successfully\n", edgeKV.Name, network)

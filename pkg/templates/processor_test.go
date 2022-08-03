@@ -139,3 +139,12 @@ func TestFormatIntList(t *testing.T) {
 		})
 	}
 }
+
+func TestFindTemplateFiles(t *testing.T) {
+	templateDir := os.DirFS("./testdata/findtemplatefiles")
+	got, err := findTemplateFiles(templateDir)
+	assert.NoError(t, err)
+	expected := []string{"empty.tmpl", "subdir/empty.tmpl", "subdir/subdir/empty.tmpl", "subdir/subdir2/empty.tmpl"}
+
+	assert.Equal(t, expected, got)
+}

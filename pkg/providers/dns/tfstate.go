@@ -19,8 +19,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	"github.com/akamai/cli-terraform/pkg/tools"
 )
 
 type tfStateStruct struct {
@@ -44,9 +42,9 @@ type Resource struct {
 var tfState *tfStateStruct
 
 // Utility method to read in tfstate content
-func readTfState() error {
+func readTfState(tfWorkPath string) error {
 	// TFWorkPath global var
-	tfStateFilename := filepath.Join(tools.TFWorkPath, "terraform.tfstate")
+	tfStateFilename := filepath.Join(tfWorkPath, "terraform.tfstate")
 	if _, err := os.Stat(tfStateFilename); err != nil {
 		return err
 	}
@@ -61,22 +59,4 @@ func readTfState() error {
 	}
 
 	return nil
-}
-
-// check if resource present in state
-func checkForResource(rtype string, name string) bool {
-
-	if tfState == nil {
-		if err := readTfState(); err != nil {
-			// not differentiating between not exists and file error
-			return false
-		}
-	}
-	for _, r := range tfState.Resources {
-		if r.Type == rtype && r.Name == name {
-			return true
-		}
-	}
-
-	return false
 }

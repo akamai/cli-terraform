@@ -145,31 +145,23 @@ var (
 // CmdCreateProperty is an entrypoint to create-property command
 func CmdCreateProperty(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() != 1 {
-		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-			return cli.Exit(color.RedString("Error displaying help command"), 1)
-		}
-		return cli.Exit(color.RedString("Property name is required"), 1)
-	}
-
 	sess := edgegrid.GetSession(c.Context)
 	client := papi.Client(sess)
 	clientHapi := hapi.Client(sess)
+
+	// tfWorkPath is a target directory for generated terraform resources
+	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
-		tools.TFWorkPath = c.String("tfworkpath")
+		tfWorkPath = c.String("tfworkpath")
 	}
 	var version string
 	if c.IsSet("version") {
 		version = c.String("version")
 	}
-	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
-	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
-	}
 
-	propertyPath := filepath.Join(tools.TFWorkPath, "property.tf")
-	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
-	importPath := filepath.Join(tools.TFWorkPath, "import.sh")
+	propertyPath := filepath.Join(tfWorkPath, "property.tf")
+	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
+	importPath := filepath.Join(tfWorkPath, "import.sh")
 
 	err := tools.CheckFiles(propertyPath, variablesPath, importPath)
 	if err != nil {
@@ -188,13 +180,13 @@ func CmdCreateProperty(c *cli.Context) error {
 
 	propertyName := c.Args().First()
 	section := edgegrid.GetEdgercSection(c)
-	if err = createProperty(ctx, propertyName, version, section, "property-snippets", client, clientHapi, processor); err != nil {
+	if err = createProperty(ctx, propertyName, version, section, "property-snippets", tfWorkPath, client, clientHapi, processor); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting property: %s", err)), 1)
 	}
 	return nil
 }
 
-func createProperty(ctx context.Context, propertyName, readVersion, section, jsonDir string, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
+func createProperty(ctx context.Context, propertyName, readVersion, section, jsonDir, tfWorkPath string, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
 	var tfData TFData
@@ -310,7 +302,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	}
 
 	// Save snippets
-	if err = saveSnippets(jsonDir, rules); err != nil {
+	if err = saveSnippets(jsonDir, rules, tfWorkPath); err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
 	}
@@ -367,9 +359,8 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 
 		edgeHostname, err := clientHAPI.GetEdgeHostname(ctx, edgeHostnameID)
 		if err != nil {
-			return nil, nil, fmt.Errorf("edge hostname not found: %s", err)
+			return nil, nil, fmt.Errorf("edge hostname %d not found: %s", edgeHostnameID, err)
 		}
-
 		papiEdgeHostnames, err := clientPAPI.GetEdgeHostnames(ctx, papi.GetEdgeHostnamesRequest{
 			ContractID: property.ContractID,
 			GroupID:    property.GroupID,
@@ -437,7 +428,7 @@ func getContactEmails(activation *papi.Activation) []string {
 }
 
 // saveSnippets saves given property rules into files under jsonDir directory
-func saveSnippets(jsonDir string, rules *papi.GetRuleTreeResponse) error {
+func saveSnippets(jsonDir string, rules *papi.GetRuleTreeResponse, tfWorkPath string) error {
 
 	// Set up template structure
 	ruleTemplate := RuleTemplate{
@@ -465,7 +456,7 @@ func saveSnippets(jsonDir string, rules *papi.GetRuleTreeResponse) error {
 		Rule:            &ruleTemplate,
 	}
 
-	snippetsPath := filepath.Join(tools.TFWorkPath, jsonDir)
+	snippetsPath := filepath.Join(tfWorkPath, jsonDir)
 	err := os.MkdirAll(snippetsPath, 0755)
 	if err != nil {
 		return fmt.Errorf("can't create directory for rule snippets: %s", err)

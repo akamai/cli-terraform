@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 
@@ -27,19 +26,14 @@ var (
 // CmdCreateIAMGroup is an entrypoint to create-iam group command
 func CmdCreateIAMGroup(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() != 1 {
-		return showHelpCommandWithErr(c, "Group id is required")
-	}
 	sess := edgegrid.GetSession(ctx)
 	client := iam.Client(sess)
-	tfWorkPath := "." // default is current dir
+	// tfWorkPath is a target directory for generated terraform resources
+	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
 		tfWorkPath = c.String("tfworkpath")
 	}
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
-	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
-	}
 
 	groupPath := filepath.Join(tfWorkPath, "group.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
@@ -66,7 +60,7 @@ func CmdCreateIAMGroup(c *cli.Context) error {
 	}
 
 	section := edgegrid.GetEdgercSection(c)
-	groupID, err := strconv.Atoi(c.Args().First())
+	groupID, err := strconv.ParseInt(c.Args().First(), 10, 64)
 	if err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Wrong format of group id %v must be a number: %s", groupID, err)), 1)
 	}
@@ -76,16 +70,16 @@ func CmdCreateIAMGroup(c *cli.Context) error {
 	return nil
 }
 
-func createIAMGroupByID(ctx context.Context, groupID int, section string, client iam.IAM, templateProcessor templates.TemplateProcessor) error {
+func createIAMGroupByID(ctx context.Context, groupID int64, section string, client iam.IAM, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 	_, err := term.Writeln("Exporting Identity and Access Management group configuration with related users and groups")
 	if err != nil {
 		return err
 	}
 
-	term.Spinner().Start("Fetching group by id " + strconv.Itoa(groupID))
+	term.Spinner().Start("Fetching group by id " + strconv.FormatInt(groupID, 10))
 	group, err := client.GetGroup(ctx, iam.GetGroupRequest{
-		GroupID: int64(groupID),
+		GroupID: groupID,
 	})
 	if err != nil {
 		term.Spinner().Fail()
@@ -95,7 +89,7 @@ func createIAMGroupByID(ctx context.Context, groupID int, section string, client
 
 	tfGroup := getTFGroup(group)
 
-	term.Spinner().Start("Fetching users within group with id " + strconv.Itoa(groupID))
+	term.Spinner().Start("Fetching users within group with id " + strconv.FormatInt(groupID, 10))
 	tfUsers, err := getUsersWithinGroup(ctx, client, groupID, term)
 	if err != nil {
 		term.Spinner().Fail()
@@ -103,7 +97,7 @@ func createIAMGroupByID(ctx context.Context, groupID int, section string, client
 	}
 	term.Spinner().OK()
 
-	term.Spinner().Start("Fetching user's relative roles within group " + strconv.Itoa(groupID))
+	term.Spinner().Start("Fetching user's relative roles within group " + strconv.FormatInt(groupID, 10))
 	tfRoles, err := getRolesWithinGroup(ctx, client, groupID)
 	if err != nil {
 		term.Spinner().Fail()
@@ -135,10 +129,10 @@ func createIAMGroupByID(ctx context.Context, groupID int, section string, client
 	return nil
 }
 
-func getUsersWithinGroup(ctx context.Context, client iam.IAM, groupID int, term terminal.Terminal) ([]*TFUser, error) {
+func getUsersWithinGroup(ctx context.Context, client iam.IAM, groupID int64, term terminal.Terminal) ([]*TFUser, error) {
 	users, err := client.ListUsers(ctx, iam.ListUsersRequest{
 		Actions: true,
-		GroupID: tools.IntPtr(groupID),
+		GroupID: tools.Int64Ptr(groupID),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v with error %s", ErrFetchingUsersWithinGroup, groupID, err)
@@ -147,9 +141,9 @@ func getUsersWithinGroup(ctx context.Context, client iam.IAM, groupID int, term 
 	return getTFUsers(ctx, client, filterUsers(users), term)
 }
 
-func getRolesWithinGroup(ctx context.Context, client iam.IAM, groupID int) ([]TFRole, error) {
+func getRolesWithinGroup(ctx context.Context, client iam.IAM, groupID int64) ([]TFRole, error) {
 	roles, err := client.ListRoles(ctx, iam.ListRolesRequest{
-		GroupID: tools.Int64Ptr(int64(groupID)),
+		GroupID: tools.Int64Ptr(groupID),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v with error %s", ErrFetchingRolesWithinGroup, groupID, err)

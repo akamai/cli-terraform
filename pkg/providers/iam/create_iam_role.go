@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 
@@ -25,19 +24,14 @@ var (
 // CmdCreateIAMRole is an entrypoint to create-iam role command
 func CmdCreateIAMRole(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() != 1 {
-		return showHelpCommandWithErr(c, "Role ID is required")
-	}
 	sess := edgegrid.GetSession(ctx)
 	client := iam.Client(sess)
-	tfWorkPath := "." // default is current dir
+	// tfWorkPath is a target directory for generated terraform resources
+	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
 		tfWorkPath = c.String("tfworkpath")
 	}
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
-	if stat, err := os.Stat(tfWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
-	}
 
 	groupPath := filepath.Join(tfWorkPath, "groups.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
@@ -102,7 +96,7 @@ func createIAMRoleByID(ctx context.Context, roleID int64, section string, client
 	}
 
 	term.Spinner().Start(fmt.Sprintf("Fetching users with the given role %d", roleID))
-	users, err := getUsersByRole(ctx, role, client)
+	users, err := getUsersByRole(ctx, term, role.Users, client)
 	if err != nil {
 		term.Spinner().Fail()
 		return err
@@ -177,18 +171,22 @@ func appendUniqueGroups(tfGroups []TFGroup, groupsData []TFGroup) []TFGroup {
 	return tfGroups
 }
 
-func getUsersByRole(ctx context.Context, role *iam.Role, client iam.IAM) ([]*iam.User, error) {
+func getUsersByRole(ctx context.Context, term terminal.Terminal, roleUsers []iam.RoleUser, client iam.IAM) ([]*iam.User, error) {
 	users := make([]*iam.User, 0)
 
-	for i := range role.Users {
+	for _, roleUser := range roleUsers {
 		user, err := client.GetUser(ctx, iam.GetUserRequest{
-			IdentityID:    role.Users[i].UIIdentityID,
+			IdentityID:    roleUser.UIIdentityID,
 			Actions:       true,
 			AuthGrants:    true,
 			Notifications: true,
 		})
 		if err != nil {
-			return nil, err
+			_, err := term.Writeln(fmt.Sprintf("[WARN] Unable to fetch user of ID '%s' - skipping:\n%s", roleUser.UIIdentityID, err))
+			if err != nil {
+				return nil, err
+			}
+			continue
 		}
 
 		users = append(users, user)

@@ -27,7 +27,6 @@ resource "akamai_appsec_custom_rule" "custom_rule_1_60088542" {
         }
       ],
       "name" : "Custom Rule 1",
-      "structured" : true,
       "tag" : [
         "Login"
       ]

@@ -1,5 +1,27 @@
 # Release Notes
 
+## Version 1.0.0 (Aug 3, 2022)
+
+### Deprecations
+
+* [IMPORTANT] General
+  * `create-*` command names are now deprecated, use `export-*` instead
+
+### Features/Enhancements
+
+* GTM
+  * Improve formatting of output configurations
+* DNS
+  * Add support for additional default datacenters
+  * Improve formatting of output configurations
+
+### Fixes
+
+* General
+  * Fix default flag values in help output
+* Identity and Access Management (IAM)
+  * Fix IAM role export failures with broken user
+
 ## Version 0.9.0 (Jul 07, 2022)
 
 ### Features / Enhancements

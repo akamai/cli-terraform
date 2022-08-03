@@ -1,0 +1,58 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/gtm.TFDomainData*/ -}}
+{{- range .Resources -}}
+resource "akamai_gtm_resource" "{{normalize .Name}}" {
+    domain = akamai_gtm_domain.{{$.NormalizedName}}.name
+    name = "{{.Name}}"
+    {{- if .HostHeader}}
+    host_header = "{{.HostHeader}}"
+    {{- end}}
+    type = "{{.Type}}"
+    aggregation_type = "{{.AggregationType}}"
+    {{- if .LeastSquaresDecay}}
+    least_squares_decay = {{.LeastSquaresDecay}}
+    {{- end}}
+    {{- if .UpperBound}}
+    upper_bound = {{.UpperBound}}
+    {{- end}}
+    {{- if .Description}}
+    description = "{{.Description}}"
+    {{- end}}
+    {{- if .LeaderString}}
+    leader_string = "{{.LeaderString}}"
+    {{- end}}
+    {{- if .ConstrainedProperty}}
+    constrained_property = "{{.ConstrainedProperty}}"
+    {{- end}}
+    {{- if .LoadImbalancePercentage}}
+    load_imbalance_percentage = {{.LoadImbalancePercentage}}
+    {{- end}}
+    {{- if .MaxUMultiplicativeIncrement}}
+    max_u_multiplicative_increment = {{.MaxUMultiplicativeIncrement}}
+    {{- end}}
+    {{- if .DecayRate}}
+    decay_rate = {{.DecayRate}}
+    {{- end}}
+    {{- range .ResourceInstances}}
+
+    resource_instance {
+        datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}}.datacenter_id
+        use_default_load_object = {{.UseDefaultLoadObject}}
+        {{- if .LoadObject}}
+        load_object = "{{.LoadObject.LoadObject}}"
+        {{- end}}
+        load_servers = [{{range $i, $v := .LoadObject.LoadServers}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+        {{- if .LoadObject.LoadObjectPort}}
+        load_object_port = {{.LoadObject.LoadObjectPort}}
+        {{- end}}
+    }
+    {{- end}}
+
+    depends_on = [
+        {{- range .ResourceInstances }}
+        akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}},
+        {{- end }}
+        akamai_gtm_domain.{{$.NormalizedName}}
+    ]
+}
+
+{{end -}}

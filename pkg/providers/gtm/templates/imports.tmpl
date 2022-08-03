@@ -1,0 +1,21 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/gtm.TFDomainData*/ -}}
+terraform init
+terraform import akamai_gtm_domain.{{.NormalizedName}} "{{.Name}}"
+{{- range .Datacenters}}
+terraform import akamai_gtm_datacenter.{{normalize .Nickname}} "{{$.Name}}:{{.ID}}"
+{{- end}}
+{{- range .Properties}}
+terraform import akamai_gtm_property.{{normalize .Name}} "{{$.Name}}:{{.Name}}"
+{{- end}}
+{{- range .Resources}}
+terraform import akamai_gtm_resource.{{normalize .Name}} "{{$.Name}}:{{.Name}}"
+{{- end}}
+{{- range .CidrMaps}}
+terraform import akamai_gtm_cidrmap.{{normalize .Name}} "{{$.Name}}:{{.Name}}"
+{{- end}}
+{{- range .GeoMaps}}
+terraform import akamai_gtm_geomap.{{normalize .Name}} "{{$.Name}}:{{.Name}}"
+{{- end}}
+{{- range .AsMaps}}
+terraform import akamai_gtm_asmap.{{normalize .Name}} "{{$.Name}}:{{.Name}}"
+{{- end}}

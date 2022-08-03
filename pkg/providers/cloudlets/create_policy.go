@@ -5,7 +5,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -66,33 +65,25 @@ var (
 	ErrCloudletTypeNotSupported = errors.New("cloudlet type not supported")
 )
 
-// CmdCreatePolicy is an entrypoint to create-cloudlets-policy command
+// CmdCreatePolicy is an entrypoint to create-policy command
 func CmdCreatePolicy(c *cli.Context) error {
 	ctx := c.Context
-	if c.NArg() != 1 {
-		if err := cli.ShowCommandHelp(c, c.Command.Name); err != nil {
-			return cli.Exit(color.RedString("Error displaying help command"), 1)
-		}
-		return cli.Exit(color.RedString("Policy name is required"), 1)
-	}
-
 	sess := edgegrid.GetSession(c.Context)
 	client := cloudlets.Client(sess)
+
+	// tfWorkPath is a target directory for generated terraform resources
+	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
-		tools.TFWorkPath = c.String("tfworkpath")
-	}
-	tools.TFWorkPath = filepath.FromSlash(tools.TFWorkPath)
-	if stat, err := os.Stat(tools.TFWorkPath); err != nil || !stat.IsDir() {
-		return cli.Exit(color.RedString("Destination work path is not accessible"), 1)
+		tfWorkPath = c.String("tfworkpath")
 	}
 
-	policyPath := filepath.Join(tools.TFWorkPath, "policy.tf")
-	matchRulesPath := filepath.Join(tools.TFWorkPath, "match-rules.tf")
-	loadBalancerPath := filepath.Join(tools.TFWorkPath, "load-balancer.tf")
-	variablesPath := filepath.Join(tools.TFWorkPath, "variables.tf")
-	importPath := filepath.Join(tools.TFWorkPath, "import.sh")
+	policyPath := filepath.Join(tfWorkPath, "policy.tf")
+	matchRulesPath := filepath.Join(tfWorkPath, "match-rules.tf")
+	loadBalancerPath := filepath.Join(tfWorkPath, "load-balancer.tf")
+	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
+	importPath := filepath.Join(tfWorkPath, "import.sh")
 
-	err := tools.CheckFiles(policyPath, variablesPath, importPath)
+	err := tools.CheckFiles(policyPath, matchRulesPath, loadBalancerPath, variablesPath, importPath)
 	if err != nil {
 		return cli.Exit(color.RedString(err.Error()), 1)
 	}
