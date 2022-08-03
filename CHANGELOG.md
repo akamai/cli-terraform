@@ -1,6 +1,6 @@
 # Release Notes
 
-## Version 1.0.0 (Jul 28, 2022)
+## Version 1.0.0 (Aug 3, 2022)
 
 ### Deprecations
 
