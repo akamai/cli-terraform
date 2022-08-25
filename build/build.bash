@@ -11,7 +11,7 @@ clean() {
 }
 
 list_branches() {
-  git log --pretty=format:'%D' | sed 's@HEAD -> @@' | grep . | sed 's@origin/@@g' | sed -E $'s@master, (.+)@\\1, master@g' | sed -e $'s@, @\\\n@g' | grep -v HEAD
+  git log --pretty=format:'%D' | sed 's@HEAD -> @@' | grep . | sed 's@origin/@@g' | sed 's@release/.*@@g' | sed -E $'s@master, (.+)@\\1, master@g' | sed -e $'s@, @\\\n@g' | grep -v HEAD
 }
 
 find_edgegrid_branch() {
@@ -28,6 +28,14 @@ find_edgegrid_branch() {
     do
       echo "Checking branch '${branch}'"
       EDGEGRID_BRANCH=$branch
+
+      if [[ "$index" -eq "5" ]]; then
+        echo "Exceeding limit of checks, fallback to default branch 'v2'"
+        EDGEGRID_BRANCH="v2"
+        break
+      fi
+      index=$((index + 1))
+
       if [[ "$EDGEGRID_BRANCH" == "develop" || "$EDGEGRID_BRANCH" == "master" ]]; then
         EDGEGRID_BRANCH="v2"
       fi
