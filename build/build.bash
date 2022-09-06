@@ -11,7 +11,7 @@ clean() {
 }
 
 list_branches() {
-  git log --pretty=format:'%D' | sed 's@HEAD -> @@' | grep . | sed 's@origin/@@g' | sed 's@release/.*@@g' | sed -E $'s@master, (.+)@\\1, master@g' | sed -e $'s@, @\\\n@g' | grep -v HEAD
+  git log --pretty=format:'%D' | sed 's@HEAD -> @@' | grep . | sed 's@origin/@@g' | sed 's@release/.*@@g' | sed -E $'s@master, (.+)@\\1, master@g' | tr ', ' '\n' | grep -v 'tag:' | sed -E 's@v([0-9]+\.?){2,}(-rc\.[0-9]+)?@@g' | grep -v release/ | grep -v HEAD | sed '/^$/d'
 }
 
 find_edgegrid_branch() {
@@ -60,6 +60,14 @@ find_provider_branch() {
     do
       echo "Checking Terraform branch '${branch}'"
       PROVIDER_BRANCH=$branch
+
+      if [[ "$index" -eq "5" ]]; then
+        echo "Exceeding limit of checks, fallback to default branch 'develop'"
+        PROVIDER_BRANCH="develop"
+        break
+      fi
+      index=$((index + 1))
+
       git -C ./terraform-provider-akamai branch -r | grep $PROVIDER_BRANCH > /dev/null
       if [[ $? -eq 0 ]]; then
         echo "There is matching Terraform Provider branch '${PROVIDER_BRANCH}'"
@@ -81,6 +89,14 @@ find_cli_branch() {
     do
       echo "Checking Cli branch '${branch}'"
       CLI_BRANCH=$branch
+
+      if [[ "$index" -eq "5" ]]; then
+        echo "Exceeding limit of checks, fallback to default branch 'develop'"
+        CLI_BRANCH="develop"
+        break
+      fi
+      index=$((index + 1))
+
       git -C ./cli-clone branch -r | grep $CLI_BRANCH > /dev/null
       if [[ $? -eq 0 ]]; then
         echo "There is matching Cli branch '${CLI_BRANCH}'"
