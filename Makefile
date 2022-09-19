@@ -27,6 +27,7 @@ $(BIN)/go-junit-report: PACKAGE=github.com/jstemmer/go-junit-report
 TFLINT = $(BIN)/tflint
 $(BIN)/tflint: $(BIN) ; $(info $(M) Installing tflint...)
 	@export TFLINT_INSTALL_PATH=$(BIN); \
+	export TFLINT_VERSION=v0.39.3 && \
 	curl -sSfL https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh  | bash
 
 GOLANGCILINT = $(BIN)/golangci-lint
