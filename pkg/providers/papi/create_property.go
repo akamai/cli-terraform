@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -210,24 +209,6 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 
 	term.Spinner().OK()
 
-	// Get Property Rules
-	term.Spinner().Start("Fetching property rules ")
-	rules, err := getPropertyRules(ctx, client, property)
-	if err != nil {
-		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrPropertyRulesNotFound, err)
-	}
-
-	tfData.IsSecure = "false"
-	if rules.Rules.Options.IsSecure {
-		tfData.IsSecure = "true"
-	}
-
-	// Get Rule Format
-	tfData.RuleFormat = rules.RuleFormat
-
-	term.Spinner().OK()
-
 	// Get Group
 	term.Spinner().Start("Fetching group ")
 	group, err := getGroup(ctx, client, property.GroupID)
@@ -255,6 +236,24 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 
 	tfData.ProductID = version.Version.ProductID
 	tfData.Version = readVersion
+
+	term.Spinner().OK()
+
+	// Get Property Rules
+	term.Spinner().Start("Fetching property rules ")
+	rules, err := getPropertyRules(ctx, client, version)
+	if err != nil {
+		term.Spinner().Fail()
+		return fmt.Errorf("%w: %s", ErrPropertyRulesNotFound, err)
+	}
+
+	tfData.IsSecure = "false"
+	if rules.Rules.Options.IsSecure {
+		tfData.IsSecure = "true"
+	}
+
+	// Get Rule Format
+	tfData.RuleFormat = rules.RuleFormat
 
 	term.Spinner().OK()
 
@@ -470,7 +469,7 @@ func saveSnippets(jsonDir string, rules *papi.GetRuleTreeResponse, tfWorkPath st
 		}
 		name := nameNormalizer(rule.Name)
 		rulesNamePath := filepath.Join(snippetsPath, fmt.Sprintf("%s.json", name))
-		err = ioutil.WriteFile(rulesNamePath, jsonBody, 0644)
+		err = os.WriteFile(rulesNamePath, jsonBody, 0644)
 		if err != nil {
 			return fmt.Errorf("can't write property rule snippets: %s", err)
 		}
@@ -482,7 +481,7 @@ func saveSnippets(jsonDir string, rules *papi.GetRuleTreeResponse, tfWorkPath st
 		return fmt.Errorf("can't marshall rule template: %s", err)
 	}
 	templatePath := filepath.Join(snippetsPath, "main.json")
-	err = ioutil.WriteFile(templatePath, jsonBody, 0644)
+	err = os.WriteFile(templatePath, jsonBody, 0644)
 	if err != nil {
 		return fmt.Errorf("can't write property rule template: %s", err)
 	}
@@ -490,11 +489,11 @@ func saveSnippets(jsonDir string, rules *papi.GetRuleTreeResponse, tfWorkPath st
 	return nil
 }
 
-// getUseCases finds UseCases for given egdehostnameID
-func getUseCases(edgeHostnames *papi.GetEdgeHostnamesResponse, edgehostnameID string) (string, error) {
-	for _, edgehostname := range edgeHostnames.EdgeHostnames.Items {
-		if edgehostname.ID == edgehostnameID && edgehostname.UseCases != nil {
-			useCasesJSON, err := json.MarshalIndent(edgehostname.UseCases, "", "  ")
+// getUseCases finds UseCases for given edgeHostnameID
+func getUseCases(edgeHostnames *papi.GetEdgeHostnamesResponse, edgeHostnameID string) (string, error) {
+	for _, edgeHostname := range edgeHostnames.EdgeHostnames.Items {
+		if edgeHostname.ID == edgeHostnameID && edgeHostname.UseCases != nil {
+			useCasesJSON, err := json.MarshalIndent(edgeHostname.UseCases, "", "  ")
 			if err != nil {
 				return "", fmt.Errorf("error marshaling Use Cases: %s", err)
 			}
@@ -505,11 +504,11 @@ func getUseCases(edgeHostnames *papi.GetEdgeHostnamesResponse, edgehostnameID st
 	return "", nil
 }
 
-// getIPv6 find IPVersionBehavior for given egdehostnameID
-func getIPv6(edgeHostnames *papi.GetEdgeHostnamesResponse, edgehostnameID string) string {
-	for _, edgehostname := range edgeHostnames.EdgeHostnames.Items {
-		if edgehostname.ID == edgehostnameID {
-			return edgehostname.IPVersionBehavior
+// getIPv6 find IPVersionBehavior for given edgeHostnameID
+func getIPv6(edgeHostnames *papi.GetEdgeHostnamesResponse, edgeHostnameID string) string {
+	for _, edgeHostname := range edgeHostnames.EdgeHostnames.Items {
+		if edgeHostname.ID == edgeHostnameID {
+			return edgeHostname.IPVersionBehavior
 		}
 	}
 	return ""
@@ -541,18 +540,19 @@ func findProperty(ctx context.Context, client papi.PAPI, name string) (*papi.Pro
 	return response.Property, nil
 }
 
-// getPropertyRules fetches property rules for given property
-func getPropertyRules(ctx context.Context, client papi.PAPI, property *papi.Property) (*papi.GetRuleTreeResponse, error) {
+// getPropertyRules fetches property rules for given property version
+func getPropertyRules(ctx context.Context, client papi.PAPI, version *papi.GetPropertyVersionsResponse) (*papi.GetRuleTreeResponse, error) {
+
 	return client.GetRuleTree(ctx, papi.GetRuleTreeRequest{
-		PropertyID:      property.PropertyID,
-		PropertyVersion: property.LatestVersion,
-		ContractID:      property.ContractID,
-		GroupID:         property.GroupID,
-		RuleFormat:      property.RuleFormat,
+		PropertyID:      version.PropertyID,
+		PropertyVersion: version.Version.PropertyVersion,
+		ContractID:      version.ContractID,
+		GroupID:         version.GroupID,
+		RuleFormat:      version.Version.RuleFormat,
 	})
 }
 
-// getVersion gets latest property version for given property from api
+// getVersion gets property version for given property from api
 func getVersion(ctx context.Context, client papi.PAPI, property *papi.Property, readVersion string) (*papi.GetPropertyVersionsResponse, error) {
 	versions, err := client.GetPropertyVersions(ctx, papi.GetPropertyVersionsRequest{
 		PropertyID: property.PropertyID,
@@ -581,14 +581,16 @@ func getVersion(ctx context.Context, client papi.PAPI, property *papi.Property, 
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrPropertyVersionNotValid, err)
 	}
-
 	for _, item := range versions.Versions.Items {
 		if item.PropertyVersion == v {
 			return &papi.GetPropertyVersionsResponse{
-				Version: papi.PropertyVersionGetItem{
-					ProductID:       item.ProductID,
-					PropertyVersion: item.PropertyVersion,
-				},
+				PropertyID:   versions.PropertyID,
+				PropertyName: versions.PropertyName,
+				AccountID:    versions.AccountID,
+				ContractID:   versions.ContractID,
+				GroupID:      versions.GroupID,
+				AssetID:      versions.AssetID,
+				Version:      item,
 			}, nil
 		}
 	}
