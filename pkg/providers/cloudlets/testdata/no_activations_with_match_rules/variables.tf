@@ -8,7 +8,9 @@ variable "config_section" {
   default = "test_section"
 }
 
+/*
 variable "env" {
   type    = string
   default = "staging"
 }
+*/

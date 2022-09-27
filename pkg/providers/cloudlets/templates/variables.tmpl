@@ -1,15 +1,48 @@
 {{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/cloudlets.TFPolicyData*/ -}}
 variable "edgerc_path" {
-  type = string
+  type    = string
   default = "~/.edgerc"
 }
 
 variable "config_section" {
-  type = string
+  type    = string
   default = "{{.Section}}"
 }
-
+{{``}}
+{{- define "env_variable"}}
 variable "env" {
-  type = string
+  type    = string
   default = "staging"
 }
+{{- end}}
+{{- define "comment_env_variable"}}
+/*
+variable "env" {
+  type    = string
+  default = "staging"
+}
+*/
+{{- end}}
+{{- with .PolicyActivations}}
+{{- if (and .prod .staging) -}}
+  {{- /* PRODUCTION and STAGING*/}}
+  {{- if (deepequal .prod.Properties .staging.Properties) }}
+    {{- /* PRODUCTION.prop == STAGING.prop => res block */}}
+    {{- template "env_variable" .prod}}
+  {{- else }}
+    {{- /* PRODUCTION.prop != STAGING.prop => comment block*/}}
+    {{- template "comment_env_variable" .}}
+  {{- end}}
+{{- else if .prod }}
+  {{- /* PRODUCTION and not STAGING => res block*/}}
+  {{- template "env_variable" .prod}}
+{{- else if .staging }}
+  {{- /* STAGING and not PRODUCTION => res block*/}}
+  {{- template "env_variable" .staging}}
+{{- else }}
+  {{- /* not PRODUCTION and not STAGING => comment block*/}}
+  {{- template "comment_env_variable" .}}
+{{- end}}
+{{- else}}
+  {{- template "comment_env_variable" .}}
+{{- end}}

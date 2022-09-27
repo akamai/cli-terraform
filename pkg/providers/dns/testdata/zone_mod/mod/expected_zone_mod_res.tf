@@ -1,12 +1,15 @@
-variable "contract" {
+variable "contractid" {
+  type        = string
   description = "contract id for zone creation"
 }
 
-variable "group" {
+variable "groupid" {
+  type        = string
   description = "group id for zone creation"
 }
 
 variable "name" {
+  type        = string
   description = "zone name"
 }
 

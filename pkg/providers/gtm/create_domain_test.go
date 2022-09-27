@@ -405,11 +405,6 @@ func TestProcessDomainTemplates(t *testing.T) {
 		dir          string
 		filesToCheck []string
 	}{
-		"variables file correct": {
-			givenData:    TFDomainData{Section: "test_section"},
-			dir:          "only_variables",
-			filesToCheck: []string{"variables.tf"},
-		},
 		"import script correct": {
 			givenData: TFDomainData{
 				Name:           "test.name.akadns.net",
@@ -543,9 +538,40 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Longitude:       -87.6324,
 					},
 				},
+				Properties: []*gtm.Property{
+					{
+						Name:                 "test property1",
+						Type:                 "qtr",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						TrafficTargets: []*gtm.TrafficTarget{
+							{
+								DatacenterId: 5400,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"1.2.3.4"},
+							},
+						},
+						LivenessTests: []*gtm.LivenessTest{
+							{
+								Name:               "HTTP",
+								TestInterval:       60,
+								TestObject:         "/",
+								HttpError3xx:       true,
+								HttpError4xx:       true,
+								HttpError5xx:       true,
+								TestObjectProtocol: "HTTP",
+								TestObjectPort:     80,
+								TestTimeout:        10,
+							},
+						},
+					},
+				},
 			},
 			dir:          "with_datacenters",
-			filesToCheck: []string{"domain.tf", "datacenters.tf", "variables.tf", "import.sh"},
+			filesToCheck: []string{"domain.tf", "datacenters.tf", "properties.tf", "variables.tf", "import.sh"},
 		},
 		"simple domain with maps": {
 			givenData: TFDomainData{
@@ -840,7 +866,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 				},
 			},
 			dir:          "with_properties",
-			filesToCheck: []string{"domain.tf", "properties.tf", "variables.tf", "import.sh"},
+			filesToCheck: []string{"domain.tf", "datacenters.tf", "properties.tf", "variables.tf", "import.sh"},
 		},
 		"simple domain with property of type 'qtr'": {
 			givenData: TFDomainData{
@@ -949,7 +975,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 				},
 			},
 			dir:          "with_qtr_properties",
-			filesToCheck: []string{"domain.tf", "properties.tf", "variables.tf", "import.sh"},
+			filesToCheck: []string{"domain.tf", "datacenters.tf", "properties.tf", "variables.tf", "import.sh"},
 		},
 	}
 

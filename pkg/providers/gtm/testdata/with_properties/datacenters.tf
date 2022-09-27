@@ -8,6 +8,11 @@ resource "akamai_gtm_datacenter" "TEST1" {
   longitude                         = -74.00723
   cloud_server_host_header_override = false
   cloud_server_targeting            = false
+  default_load_object {
+    load_object      = "test load object"
+    load_object_port = 111
+    load_servers     = ["loadServer1", "loadServer2", "loadServer3"]
+  }
   depends_on = [
     akamai_gtm_domain.test_name
   ]
@@ -27,3 +32,4 @@ resource "akamai_gtm_datacenter" "TEST2" {
     akamai_gtm_domain.test_name
   ]
 }
+
