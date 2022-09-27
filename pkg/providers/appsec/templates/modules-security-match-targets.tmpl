@@ -33,6 +33,9 @@ resource "akamai_appsec_match_target" "api_{{ .ID }}" {
     match_target = jsonencode(
 {
     "apis": {{ toJSON .Apis }},
+    {{ if .BypassNetworkLists -}}
+    "bypassNetworkLists": {{ toJSON .BypassNetworkLists }},
+    {{ end -}}
     "securityPolicy": {
         "policyId": akamai_appsec_security_policy.{{ getPolicyNameByID $ .SecurityPolicy.PolicyID }}.security_policy_id
     },

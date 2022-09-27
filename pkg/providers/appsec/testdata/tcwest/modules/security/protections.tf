@@ -17,9 +17,15 @@ resource "akamai_appsec_ip_geo_protection" "policy2" {
   enabled            = true
 }
 
-resource "akamai_appsec_rate_protection" "policy2" {
+resource "akamai_appsec_malware_protection" "policy2" {
   config_id          = akamai_appsec_configuration.config.config_id
   security_policy_id = akamai_appsec_ip_geo_protection.policy2.security_policy_id
+  enabled            = true
+}
+
+resource "akamai_appsec_rate_protection" "policy2" {
+  config_id          = akamai_appsec_configuration.config.config_id
+  security_policy_id = akamai_appsec_malware_protection.policy2.security_policy_id
   enabled            = true
 }
 
@@ -54,9 +60,15 @@ resource "akamai_appsec_ip_geo_protection" "andrew" {
   enabled            = true
 }
 
-resource "akamai_appsec_rate_protection" "andrew" {
+resource "akamai_appsec_malware_protection" "andrew" {
   config_id          = akamai_appsec_configuration.config.config_id
   security_policy_id = akamai_appsec_ip_geo_protection.andrew.security_policy_id
+  enabled            = true
+}
+
+resource "akamai_appsec_rate_protection" "andrew" {
+  config_id          = akamai_appsec_configuration.config.config_id
+  security_policy_id = akamai_appsec_malware_protection.andrew.security_policy_id
   enabled            = true
 }
 
@@ -91,9 +103,15 @@ resource "akamai_appsec_ip_geo_protection" "policy1" {
   enabled            = true
 }
 
-resource "akamai_appsec_rate_protection" "policy1" {
+resource "akamai_appsec_malware_protection" "policy1" {
   config_id          = akamai_appsec_configuration.config.config_id
   security_policy_id = akamai_appsec_ip_geo_protection.policy1.security_policy_id
+  enabled            = true
+}
+
+resource "akamai_appsec_rate_protection" "policy1" {
+  config_id          = akamai_appsec_configuration.config.config_id
+  security_policy_id = akamai_appsec_malware_protection.policy1.security_policy_id
   enabled            = true
 }
 

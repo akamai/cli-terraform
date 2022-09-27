@@ -95,7 +95,7 @@ resource "akamai_appsec_match_target" "api_4124908" {
       "securityPolicy" : {
         "policyId" : akamai_appsec_security_policy.andrew.security_policy_id
       },
-      "sequence" : 0,
+      "sequence" : 4,
       "type" : "api"
     }
   )

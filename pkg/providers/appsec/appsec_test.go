@@ -44,6 +44,16 @@ func (m *mockAppsec) UpdateVersionNotes(ctx context.Context, req appsec.UpdateVe
 	return args.Get(0).(*appsec.UpdateVersionNotesResponse), args.Error(1)
 }
 
+func (p *mockAppsec) GetRuleRecommendations(ctx context.Context, params appsec.GetRuleRecommendationsRequest) (*appsec.GetRuleRecommendationsResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.GetRuleRecommendationsResponse), args.Error(1)
+}
+
 func (m *mockAppsec) UpdateThreatIntel(ctx context.Context, req appsec.UpdateThreatIntelRequest) (*appsec.UpdateThreatIntelResponse, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
@@ -1385,4 +1395,118 @@ func (m *mockAppsec) GetActivationHistory(ctx context.Context, req appsec.GetAct
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*appsec.GetActivationHistoryResponse), args.Error(1)
+}
+
+func (p *mockAppsec) GetMalwareProtection(ctx context.Context, params appsec.GetMalwareProtectionRequest) (*appsec.GetMalwareProtectionResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.GetMalwareProtectionResponse), args.Error(1)
+}
+
+func (p *mockAppsec) GetMalwareProtections(ctx context.Context, params appsec.GetMalwareProtectionsRequest) (*appsec.GetMalwareProtectionsResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.GetMalwareProtectionsResponse), args.Error(1)
+}
+
+func (p *mockAppsec) UpdateMalwareProtection(ctx context.Context, params appsec.UpdateMalwareProtectionRequest) (*appsec.UpdateMalwareProtectionResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.UpdateMalwareProtectionResponse), args.Error(1)
+}
+
+func (p *mockAppsec) GetMalwareContentTypes(ctx context.Context, params appsec.GetMalwareContentTypesRequest) (*appsec.GetMalwareContentTypesResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.GetMalwareContentTypesResponse), args.Error(1)
+}
+
+func (p *mockAppsec) CreateMalwarePolicy(ctx context.Context, params appsec.CreateMalwarePolicyRequest) (*appsec.MalwarePolicyResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.MalwarePolicyResponse), args.Error(1)
+}
+
+func (p *mockAppsec) GetMalwarePolicy(ctx context.Context, params appsec.GetMalwarePolicyRequest) (*appsec.MalwarePolicyResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.MalwarePolicyResponse), args.Error(1)
+}
+
+func (p *mockAppsec) GetMalwarePolicies(ctx context.Context, params appsec.GetMalwarePoliciesRequest) (*appsec.MalwarePoliciesResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.MalwarePoliciesResponse), args.Error(1)
+}
+
+func (p *mockAppsec) UpdateMalwarePolicy(ctx context.Context, params appsec.UpdateMalwarePolicyRequest) (*appsec.MalwarePolicyResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.MalwarePolicyResponse), args.Error(1)
+}
+
+func (p *mockAppsec) RemoveMalwarePolicy(_ context.Context, _ appsec.RemoveMalwarePolicyRequest) error {
+	return nil
+}
+
+func (p *mockAppsec) GetMalwarePolicyActions(ctx context.Context, params appsec.GetMalwarePolicyActionsRequest) (*appsec.GetMalwarePolicyActionsResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.GetMalwarePolicyActionsResponse), args.Error(1)
+}
+
+func (p *mockAppsec) UpdateMalwarePolicyAction(ctx context.Context, params appsec.UpdateMalwarePolicyActionRequest) (*appsec.UpdateMalwarePolicyActionResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.UpdateMalwarePolicyActionResponse), args.Error(1)
+}
+
+func (p *mockAppsec) UpdateMalwarePolicyActions(ctx context.Context, params appsec.UpdateMalwarePolicyActionsRequest) (*appsec.UpdateMalwarePolicyActionsResponse, error) {
+	args := p.Called(ctx, params)
+
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*appsec.UpdateMalwarePolicyActionsResponse), args.Error(1)
 }
