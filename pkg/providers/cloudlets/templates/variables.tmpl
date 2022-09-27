@@ -28,21 +28,25 @@ variable "env" {
   {{- /* PRODUCTION and STAGING*/}}
   {{- if (deepequal .prod.Properties .staging.Properties) }}
     {{- /* PRODUCTION.prop == STAGING.prop => res block */}}
-    {{- template "env_variable" .prod}}
+    {{- template "env_variable" .}}
   {{- else }}
     {{- /* PRODUCTION.prop != STAGING.prop => comment block*/}}
     {{- template "comment_env_variable" .}}
   {{- end}}
 {{- else if .prod }}
   {{- /* PRODUCTION and not STAGING => res block*/}}
-  {{- template "env_variable" .prod}}
+  {{- template "env_variable" .}}
 {{- else if .staging }}
   {{- /* STAGING and not PRODUCTION => res block*/}}
-  {{- template "env_variable" .staging}}
+  {{- template "env_variable" .}}
 {{- else }}
   {{- /* not PRODUCTION and not STAGING => comment block*/}}
   {{- template "comment_env_variable" .}}
 {{- end}}
 {{- else}}
-  {{- template "comment_env_variable" .}}
+  {{- if .LoadBalancers }}
+    {{- template "env_variable" .}}
+  {{- else }}
+    {{- template "comment_env_variable" .}}
+  {{- end}}
 {{- end}}
