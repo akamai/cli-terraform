@@ -265,6 +265,25 @@ Flags:
 $ akamai terraform export-imaging
 ```
 
+## Certificate Provisioning System (CPS)
+
+### Export CPS usage
+
+```
+   akamai terraform [global flags] export-cps [flags] <enrollment_id> <contract_id>
+
+Flags:
+   --tfworkpath path                        Directory used to store files created when running commands. (default: current directory)
+   --acknowledge-pre-verification-warnings  If set, we automatically acknowledge all pre-verification warnings. Not recommended.
+   --allow-duplicate-common-name            When set, it allows to duplicate common name.
+```
+
+### Export CPS configuration.
+
+```
+$ akamai terraform export-cps
+```
+
 ## General Notes
 
 1. Terraform variable configuration is generated in a separately named TF file for each Akamai entity type. These files

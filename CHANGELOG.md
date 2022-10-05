@@ -1,5 +1,12 @@
 # Release Notes
 
+## Version 1.2.0 (Oct XX, 2022)
+
+### Features/Enhancements
+
+* CPS
+  * New `export-cps` command to export DV enrollment (`akamai_cps_dv_enrollment`)
+  
 ## Version 1.1.1 (Oct 27, 2022)
 
 ### Fixes

@@ -1,0 +1,3 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/cps.TFCPSData*/ -}}
+terraform init
+terraform import akamai_cps_dv_enrollment.enrollment_id_{{.EnrollmentID}} {{.EnrollmentID}},{{.ContractID}}
