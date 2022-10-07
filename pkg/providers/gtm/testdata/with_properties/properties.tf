@@ -99,3 +99,38 @@ resource "akamai_gtm_property" "test_property2" {
   ]
 }
 
+resource "akamai_gtm_property" "test_property3" {
+  domain                      = akamai_gtm_domain.test_name.name
+  name                        = "test property3"
+  type                        = "asmapping"
+  ipv6                        = false
+  score_aggregation_type      = "worst"
+  stickiness_bonus_percentage = 0
+  stickiness_bonus_constant   = 0
+  use_computed_targets        = false
+  balance_by_download_score   = false
+  dynamic_ttl                 = 60
+  handout_limit               = 8
+  handout_mode                = "normal"
+  failover_delay              = 0
+  failback_delay              = 0
+  ghost_demand_reporting      = false
+  traffic_target {
+    datacenter_id = data.akamai_gtm_default_datacenter.default_datacenter_5400.datacenter_id
+    enabled       = true
+    weight        = 0
+    servers       = []
+  }
+  traffic_target {
+    datacenter_id = akamai_gtm_datacenter.TEST2.datacenter_id
+    enabled       = true
+    weight        = 1
+    servers       = []
+  }
+  depends_on = [
+    data.akamai_gtm_default_datacenter.default_datacenter_5400,
+    akamai_gtm_datacenter.TEST2,
+    akamai_gtm_domain.test_name
+  ]
+}
+

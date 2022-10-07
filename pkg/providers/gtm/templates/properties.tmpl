@@ -71,7 +71,7 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
     {{- $type := .Type}}
     {{- range .TrafficTargets}}
     traffic_target {
-        {{- if and (eq $type "qtr") (isDefaultDC .DatacenterId)}}
+        {{- if isDefaultDC .DatacenterId}}
         datacenter_id = data.akamai_gtm_default_datacenter.default_datacenter_{{.DatacenterId}}.datacenter_id
         {{- else}}
         datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}}.datacenter_id
@@ -148,7 +148,7 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
     depends_on = [
         {{- $type := .Type}}
         {{- range .TrafficTargets}}
-        {{- if and (eq $type "qtr") (isDefaultDC .DatacenterId)}}
+        {{- if isDefaultDC .DatacenterId}}
         data.akamai_gtm_default_datacenter.default_datacenter_{{.DatacenterId}},
         {{- else}}
         akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}},

@@ -33,3 +33,8 @@ resource "akamai_gtm_datacenter" "TEST2" {
   ]
 }
 
+data "akamai_gtm_default_datacenter" "default_datacenter_5400" {
+  domain     = akamai_gtm_domain.test_name.name
+  datacenter = 5400
+}
+
