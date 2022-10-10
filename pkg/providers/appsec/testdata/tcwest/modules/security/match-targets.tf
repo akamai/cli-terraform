@@ -13,7 +13,7 @@ resource "akamai_appsec_match_target" "website_4092331" {
       "isNegativeFileExtensionMatch" : false,
       "isNegativePathMatch" : false,
       "securityPolicy" : {
-        "policyId" : "${akamai_appsec_security_policy.andrew.security_policy_id}"
+        "policyId" : akamai_appsec_security_policy.andrew.security_policy_id
       },
       "sequence" : 0,
       "type" : "website"
@@ -40,7 +40,7 @@ resource "akamai_appsec_match_target" "website_2034325" {
         }
       ],
       "securityPolicy" : {
-        "policyId" : "${akamai_appsec_security_policy.policy1.security_policy_id}"
+        "policyId" : akamai_appsec_security_policy.policy1.security_policy_id
       },
       "sequence" : 0,
       "type" : "website"
@@ -74,7 +74,7 @@ resource "akamai_appsec_match_target" "website_4092261" {
         }
       ],
       "securityPolicy" : {
-        "policyId" : "${akamai_appsec_security_policy.policy2.security_policy_id}"
+        "policyId" : akamai_appsec_security_policy.policy2.security_policy_id
       },
       "sequence" : 0,
       "type" : "website"
@@ -93,9 +93,9 @@ resource "akamai_appsec_match_target" "api_4124908" {
         }
       ],
       "securityPolicy" : {
-        "policyId" : "${akamai_appsec_security_policy.andrew.security_policy_id}"
+        "policyId" : akamai_appsec_security_policy.andrew.security_policy_id
       },
-      "sequence" : 0,
+      "sequence" : 4,
       "type" : "api"
     }
   )

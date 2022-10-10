@@ -12,7 +12,7 @@ resource "akamai_appsec_match_target" "website_4262513" {
       "isNegativeFileExtensionMatch" : false,
       "isNegativePathMatch" : false,
       "securityPolicy" : {
-        "policyId" : "${akamai_appsec_security_policy.default_policy.security_policy_id}"
+        "policyId" : akamai_appsec_security_policy.default_policy.security_policy_id
       },
       "sequence" : 0,
       "type" : "website"

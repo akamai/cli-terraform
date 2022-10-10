@@ -14,6 +14,7 @@ terraform import module.security.akamai_appsec_security_policy.policy2 32641:har
 terraform import module.security.akamai_appsec_waf_protection.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_api_constraints_protection.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_ip_geo_protection.policy2 32641:hard_150670
+terraform import module.security.akamai_appsec_malware_protection.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_rate_protection.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_reputation_protection.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_slowpost_protection.policy2 32641:hard_150670
@@ -304,12 +305,16 @@ terraform import module.security.akamai_appsec_attack_group.policy2_IN 32641:har
 terraform import module.security.akamai_appsec_attack_group.policy2_OUT 32641:hard_150670:OUT
 terraform import module.security.akamai_appsec_rate_policy_action.policy2_high_rate 32641:hard_150670:172320
 terraform import module.security.akamai_appsec_rate_policy_action.policy2_low_rate 32641:hard_150670:172321
+terraform import module.security.akamai_appsec_malware_policy_action.policy2_fms_configuration_1 32641:hard_150670:1187
+terraform import module.security.akamai_appsec_malware_policy_action.policy2_fms_configuration_2 32641:hard_150670:1186
+terraform import module.security.akamai_appsec_malware_policy_action.policy2_fms_configuration_3 32641:hard_150670:1185
 terraform import module.security.akamai_appsec_ip_geo.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_slow_post.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_security_policy.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_waf_protection.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_api_constraints_protection.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_ip_geo_protection.andrew 32641:last_150674
+terraform import module.security.akamai_appsec_malware_protection.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_rate_protection.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_reputation_protection.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_slowpost_protection.andrew 32641:last_150674
@@ -498,6 +503,7 @@ terraform import module.security.akamai_appsec_security_policy.policy1 32641:eas
 terraform import module.security.akamai_appsec_waf_protection.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_api_constraints_protection.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_ip_geo_protection.policy1 32641:easy_80433
+terraform import module.security.akamai_appsec_malware_protection.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_rate_protection.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_reputation_protection.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_slowpost_protection.policy1 32641:easy_80433
@@ -814,3 +820,6 @@ terraform import module.security.akamai_appsec_reputation_profile.web_scrapers_h
 terraform import module.security.akamai_appsec_siem_settings.siem 32641
 terraform import module.security.akamai_appsec_selected_hostnames.hostnames 32641
 terraform import module.activate-security.akamai_appsec_activations.appsecactivation 32641:45:STAGING
+terraform import module.security.akamai_appsec_malware_policy.fms_configuration_1 32641:1187
+terraform import module.security.akamai_appsec_malware_policy.fms_configuration_2 32641:1186
+terraform import module.security.akamai_appsec_malware_policy.fms_configuration_3 32641:1185

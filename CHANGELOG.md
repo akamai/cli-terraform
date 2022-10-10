@@ -1,5 +1,24 @@
 # Release Notes
 
+## Version 1.1.0 (Oct 10, 2022)
+
+### Features/Enhancements
+
+* Application Security
+  * Add import support for `malware_policy` and `malware_policy_action`
+
+### Fixes
+
+* General
+  * Resolve all the tflint warnings which were introduced with the tflint version v0.40.0
+
+* Application Security
+  * Fix incorrect policy ID for malware protection
+  * Fix drift on match targets & malware protection resources
+
+* PAPI
+  * Fix ignoring property version for property-snippets during exporting some property
+
 ## Version 1.0.0 (Aug 3, 2022)
 
 ### Deprecations

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -124,7 +123,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		}}}
 
-	getPropetyVersionResponse := papi.GetPropertyVersionsResponse{
+	getPropertyVersionsResponse := papi.GetPropertyVersionsResponse{
 		PropertyID:   "prp_445968",
 		PropertyName: "test.edgesuite.net",
 		AccountID:    "act_1-599K",
@@ -399,7 +398,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				var ruleResponse papi.GetRuleTreeResponse
-				rules, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
 				assert.NoError(t, err)
 				err = json.Unmarshal(rules, &ruleResponse)
 				assert.NoError(t, err)
@@ -413,7 +412,7 @@ func TestCreateProperty(t *testing.T) {
 					PropertyID: "prp_445968",
 					ContractID: "ctr_1",
 					GroupID:    "grp_18420",
-				}).Return(&getPropetyVersionResponse, nil).Once()
+				}).Return(&getPropertyVersionsResponse, nil).Once()
 
 				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
 					PropertyID:  "prp_445968",
@@ -528,7 +527,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				var ruleResponse papi.GetRuleTreeResponse
-				rules, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
 				assert.NoError(t, err)
 				err = json.Unmarshal(rules, &ruleResponse)
 				assert.NoError(t, err)
@@ -542,7 +541,7 @@ func TestCreateProperty(t *testing.T) {
 					PropertyID: "prp_445968",
 					ContractID: "ctr_1",
 					GroupID:    "grp_18420",
-				}).Return(&getPropetyVersionResponse, nil).Once()
+				}).Return(&getPropertyVersionsResponse, nil).Once()
 
 				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
 					PropertyID:  "prp_445968",
@@ -648,7 +647,7 @@ func TestCreateProperty(t *testing.T) {
 				"Dynamic_Content.json",
 			},
 		},
-		"import property version == 1": {
+		"import not the latest property version": {
 			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
@@ -657,11 +656,11 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				var ruleResponse papi.GetRuleTreeResponse
-				rules, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
 				assert.NoError(t, err)
 				err = json.Unmarshal(rules, &ruleResponse)
 				assert.NoError(t, err)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_445968", PropertyVersion: 5, ContractID: "ctr_1", GroupID: "grp_18420", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_445968", PropertyVersion: 1, ContractID: "ctr_1", GroupID: "grp_18420", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
 					Return(&ruleResponse, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -671,7 +670,7 @@ func TestCreateProperty(t *testing.T) {
 					PropertyID: "prp_445968",
 					ContractID: "ctr_1",
 					GroupID:    "grp_18420",
-				}).Return(&getPropetyVersionResponse, nil).Once()
+				}).Return(&getPropertyVersionsResponse, nil).Once()
 
 				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
 					ContractID: "ctr_1",
@@ -780,7 +779,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				var ruleResponse papi.GetRuleTreeResponse
-				rules, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
 				assert.NoError(t, err)
 				err = json.Unmarshal(rules, &ruleResponse)
 				assert.NoError(t, err)
@@ -794,7 +793,7 @@ func TestCreateProperty(t *testing.T) {
 					PropertyID: "prp_445968",
 					ContractID: "ctr_1",
 					GroupID:    "grp_18420",
-				}).Return(&getPropetyVersionResponse, nil).Once()
+				}).Return(&getPropertyVersionsResponse, nil).Once()
 
 				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
 					PropertyID:  "prp_445968",
@@ -903,7 +902,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				var ruleResponse papi.GetRuleTreeResponse
-				rules, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
 				assert.NoError(t, err)
 				err = json.Unmarshal(rules, &ruleResponse)
 				assert.NoError(t, err)
@@ -917,7 +916,7 @@ func TestCreateProperty(t *testing.T) {
 					PropertyID: "prp_445968",
 					ContractID: "ctr_1",
 					GroupID:    "grp_18420",
-				}).Return(&getPropetyVersionResponse, nil).Once()
+				}).Return(&getPropertyVersionsResponse, nil).Once()
 
 				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
 					PropertyID:  "prp_445968",
@@ -1048,6 +1047,22 @@ func TestCreateProperty(t *testing.T) {
 				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "ctr_1", GroupID: "grp_18420", PropertyID: "prp_445968"}).
 					Return(&getPropertyResponse, nil).Once()
 
+				c.On("GetGroups", mock.Anything).
+					Return(&getGroupsResponse, nil).Once()
+
+				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
+					PropertyID:  "prp_445968",
+					ActivatedOn: "",
+					ContractID:  "ctr_1",
+					GroupID:     "grp_18420",
+				}).Return(&getLatestVersionResponse, nil).Once()
+
+				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
+					PropertyID: "prp_445968",
+					ContractID: "ctr_1",
+					GroupID:    "grp_18420",
+				}).Return(&getPropertyVersionsResponse, nil).Once()
+
 				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_445968", PropertyVersion: 5, ContractID: "ctr_1", GroupID: "grp_18420", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
 					Return(nil, fmt.Errorf("oops")).Once()
 
@@ -1095,7 +1110,7 @@ func TestCreateProperty(t *testing.T) {
 					PropertyID: "prp_445968",
 					ContractID: "ctr_1",
 					GroupID:    "grp_18420",
-				}).Return(&getPropetyVersionResponse, nil).Once()
+				}).Return(&getPropertyVersionsResponse, nil).Once()
 
 				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
 					PropertyID:  "prp_445968",
@@ -1129,7 +1144,7 @@ func TestCreateProperty(t *testing.T) {
 					PropertyID: "prp_445968",
 					ContractID: "ctr_1",
 					GroupID:    "grp_18420",
-				}).Return(&getPropetyVersionResponse, nil).Once()
+				}).Return(&getPropertyVersionsResponse, nil).Once()
 
 				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
 					PropertyID:  "prp_445968",
@@ -1170,7 +1185,7 @@ func TestCreateProperty(t *testing.T) {
 					PropertyID: "prp_445968",
 					ContractID: "ctr_1",
 					GroupID:    "grp_18420",
-				}).Return(&getPropetyVersionResponse, nil).Once()
+				}).Return(&getPropertyVersionsResponse, nil).Once()
 
 				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
 					PropertyID:  "prp_445968",
@@ -1205,7 +1220,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				var ruleResponse papi.GetRuleTreeResponse
-				rules, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
 				assert.NoError(t, err)
 				err = json.Unmarshal(rules, &ruleResponse)
 				assert.NoError(t, err)
@@ -1219,7 +1234,7 @@ func TestCreateProperty(t *testing.T) {
 					PropertyID: "prp_445968",
 					ContractID: "ctr_1",
 					GroupID:    "grp_18420",
-				}).Return(&getPropetyVersionResponse, nil).Once()
+				}).Return(&getPropertyVersionsResponse, nil).Once()
 
 				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
 					PropertyID:  "prp_445968",
@@ -1334,9 +1349,9 @@ func TestCreateProperty(t *testing.T) {
 				return
 			}
 			for _, f := range test.snippetFilesToCheck {
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.jsonDir, f))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.jsonDir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.jsonDir, f))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.jsonDir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}
@@ -1496,9 +1511,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 
 			for _, f := range test.filesToCheck {
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}

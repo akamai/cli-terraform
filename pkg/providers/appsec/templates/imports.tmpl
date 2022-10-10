@@ -46,6 +46,7 @@ terraform import module.security.akamai_appsec_security_policy.{{ $policyName}} 
 terraform import module.security.akamai_appsec_waf_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 terraform import module.security.akamai_appsec_api_constraints_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 terraform import module.security.akamai_appsec_ip_geo_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+terraform import module.security.akamai_appsec_malware_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 terraform import module.security.akamai_appsec_rate_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 terraform import module.security.akamai_appsec_reputation_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 terraform import module.security.akamai_appsec_slowpost_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
@@ -92,6 +93,11 @@ terraform import module.security.akamai_appsec_reputation_profile_action.{{ $pol
 terraform import module.security.akamai_appsec_rate_policy_action.{{ $policyName}}_{{ getRateNameByID $ .ID }} {{ $configID }}:{{ $policyID }}:{{ .ID }}
 {{ end -}}
 {{ end -}}
+{{ if .MalwarePolicyActions -}}
+{{ range .MalwarePolicyActions -}}
+terraform import module.security.akamai_appsec_malware_policy_action.{{ $policyName}}_{{ getMalwareNameByID $ .MalwarePolicyID }} {{ $configID }}:{{ $policyID }}:{{ .MalwarePolicyID }}
+{{ end -}}
+{{ end -}}
 {{ if .IPGeoFirewall -}}
 terraform import module.security.akamai_appsec_ip_geo.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 {{ end -}}
@@ -135,4 +141,9 @@ terraform import module.security.akamai_appsec_selected_hostnames.hostnames {{ $
 {{ end -}}
 {{ if eq .Staging.Status "Active" -}}
 terraform import module.activate-security.akamai_appsec_activations.appsecactivation {{ $configID }}:{{ $version }}:STAGING
+{{ end -}}
+{{ if .MalwarePolicies -}}
+{{ range .MalwarePolicies -}}
+terraform import module.security.akamai_appsec_malware_policy.{{ escapeName .Name}} {{ $configID }}:{{ .MalwarePolicyID }}
+{{ end -}}
 {{ end -}}

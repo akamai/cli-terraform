@@ -7,8 +7,10 @@ variable "config_section" {
   type    = string
   default = "{{.Section}}"
 }
+{{- if ne .LocalBundle ""}}
 
 variable "env" {
   type    = string
   default = "STAGING"
 }
+{{- end }}

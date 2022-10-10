@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+
 	"path/filepath"
 	"testing"
 	"text/template"
@@ -225,6 +226,13 @@ func TestGetRateNameByID(t *testing.T) {
 	assert.Equal(t, "page_view_requests", desc)
 }
 
+func TestGetMalwareNameByID(t *testing.T) {
+	getExportConfigurationResponse := getExportConfiguratonResponse("ase")
+	desc, err := getMalwareNameByID(getExportConfigurationResponse, 1187)
+	assert.NoError(t, err)
+	assert.Equal(t, "fms_configuration_1", desc)
+}
+
 func TestGetCustomRuleNameByID(t *testing.T) {
 	getExportConfigurationResponse := getExportConfiguratonResponse("ase")
 	desc, err := getCustomRuleNameByID(getExportConfigurationResponse, 60088542)
@@ -284,6 +292,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"getRuleNameByID":       getRuleNameByID,
 		"getRuleDescByID":       getRuleDescByID,
 		"getRateNameByID":       getRateNameByID,
+		"getMalwareNameByID":    getMalwareNameByID,
 		"getPolicyNameByID":     getPolicyNameByID,
 		"getWAFMode":            getWAFMode,
 		"getConfigDescription":  getConfigDescription,
@@ -296,6 +305,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 	// Template to path mappings
 	security := filepath.Join("modules", "security")
 	activateSecurity := filepath.Join("modules", "activate-security")
+
 	tests := map[string]string{
 		"appsec.tmpl":                         "appsec.tf",
 		"imports.tmpl":                        "appsec-import.sh",
@@ -303,28 +313,30 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"variables.tmpl":                      "appsec-variables.tf",
 		"versions.tmpl":                       "appsec-versions.tf",
 		"modules-activate-security-main.tmpl": filepath.Join(activateSecurity, "main.tf"),
-		"modules-activate-security-variables.tmpl":  filepath.Join(activateSecurity, "variables.tf"),
-		"modules-activate-security-versions.tmpl":   filepath.Join(activateSecurity, "versions.tf"),
-		"modules-security-advanced.tmpl":            filepath.Join(security, "advanced.tf"),
-		"modules-security-api.tmpl":                 filepath.Join(security, "api.tf"),
-		"modules-security-custom-rules.tmpl":        filepath.Join(security, "custom-rules.tf"),
-		"modules-security-custom-deny.tmpl":         filepath.Join(security, "custom-deny.tf"),
-		"modules-security-firewall.tmpl":            filepath.Join(security, "firewall.tf"),
-		"modules-security-main.tmpl":                filepath.Join(security, "main.tf"),
-		"modules-security-match-targets.tmpl":       filepath.Join(security, "match-targets.tf"),
-		"modules-security-penalty-box.tmpl":         filepath.Join(security, "penalty-box.tf"),
-		"modules-security-policies.tmpl":            filepath.Join(security, "policies.tf"),
-		"modules-security-protections.tmpl":         filepath.Join(security, "protections.tf"),
-		"modules-security-rate-policies.tmpl":       filepath.Join(security, "rate-policies.tf"),
-		"modules-security-rate-policy-actions.tmpl": filepath.Join(security, "rate-policy-actions.tf"),
-		"modules-security-reputation.tmpl":          filepath.Join(security, "reputation.tf"),
-		"modules-security-reputation-profiles.tmpl": filepath.Join(security, "reputation-profiles.tf"),
-		"modules-security-selected-hostnames.tmpl":  filepath.Join(security, "selected-hostnames.tf"),
-		"modules-security-siem.tmpl":                filepath.Join(security, "siem.tf"),
-		"modules-security-slow-post.tmpl":           filepath.Join(security, "slow-post.tf"),
-		"modules-security-variables.tmpl":           filepath.Join(security, "variables.tf"),
-		"modules-security-versions.tmpl":            filepath.Join(security, "versions.tf"),
-		"modules-security-waf.tmpl":                 filepath.Join(security, "waf.tf"),
+		"modules-activate-security-variables.tmpl":     filepath.Join(activateSecurity, "variables.tf"),
+		"modules-activate-security-versions.tmpl":      filepath.Join(activateSecurity, "versions.tf"),
+		"modules-security-advanced.tmpl":               filepath.Join(security, "advanced.tf"),
+		"modules-security-api.tmpl":                    filepath.Join(security, "api.tf"),
+		"modules-security-custom-rules.tmpl":           filepath.Join(security, "custom-rules.tf"),
+		"modules-security-custom-deny.tmpl":            filepath.Join(security, "custom-deny.tf"),
+		"modules-security-firewall.tmpl":               filepath.Join(security, "firewall.tf"),
+		"modules-security-main.tmpl":                   filepath.Join(security, "main.tf"),
+		"modules-security-malware-policies.tmpl":       filepath.Join(security, "malware-policies.tf"),
+		"modules-security-malware-policy-actions.tmpl": filepath.Join(security, "malware-policy-actions.tf"),
+		"modules-security-match-targets.tmpl":          filepath.Join(security, "match-targets.tf"),
+		"modules-security-penalty-box.tmpl":            filepath.Join(security, "penalty-box.tf"),
+		"modules-security-policies.tmpl":               filepath.Join(security, "policies.tf"),
+		"modules-security-protections.tmpl":            filepath.Join(security, "protections.tf"),
+		"modules-security-rate-policies.tmpl":          filepath.Join(security, "rate-policies.tf"),
+		"modules-security-rate-policy-actions.tmpl":    filepath.Join(security, "rate-policy-actions.tf"),
+		"modules-security-reputation.tmpl":             filepath.Join(security, "reputation.tf"),
+		"modules-security-reputation-profiles.tmpl":    filepath.Join(security, "reputation-profiles.tf"),
+		"modules-security-selected-hostnames.tmpl":     filepath.Join(security, "selected-hostnames.tf"),
+		"modules-security-siem.tmpl":                   filepath.Join(security, "siem.tf"),
+		"modules-security-slow-post.tmpl":              filepath.Join(security, "slow-post.tf"),
+		"modules-security-variables.tmpl":              filepath.Join(security, "variables.tf"),
+		"modules-security-versions.tmpl":               filepath.Join(security, "versions.tf"),
+		"modules-security-waf.tmpl":                    filepath.Join(security, "waf.tf"),
 	}
 
 	// Let's run our tests

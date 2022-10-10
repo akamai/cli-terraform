@@ -80,30 +80,32 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"imports.tmpl":                        filepath.Join(tfWorkPath, "appsec-import.sh"),
 		"main.tmpl":                           filepath.Join(tfWorkPath, "appsec-main.tf"),
 		"modules-activate-security-main.tmpl": filepath.Join(activateSecurityModulePath, "main.tf"),
-		"modules-activate-security-variables.tmpl":  filepath.Join(activateSecurityModulePath, "variables.tf"),
-		"modules-activate-security-versions.tmpl":   filepath.Join(activateSecurityModulePath, "versions.tf"),
-		"modules-security-advanced.tmpl":            filepath.Join(securityModulePath, "advanced.tf"),
-		"modules-security-api.tmpl":                 filepath.Join(securityModulePath, "api.tf"),
-		"modules-security-custom-deny.tmpl":         filepath.Join(securityModulePath, "custom-deny.tf"),
-		"modules-security-custom-rules.tmpl":        filepath.Join(securityModulePath, "custom-rules.tf"),
-		"modules-security-firewall.tmpl":            filepath.Join(securityModulePath, "firewall.tf"),
-		"modules-security-main.tmpl":                filepath.Join(securityModulePath, "main.tf"),
-		"modules-security-match-targets.tmpl":       filepath.Join(securityModulePath, "match-targets.tf"),
-		"modules-security-penalty-box.tmpl":         filepath.Join(securityModulePath, "penalty-box.tf"),
-		"modules-security-policies.tmpl":            filepath.Join(securityModulePath, "policies.tf"),
-		"modules-security-protections.tmpl":         filepath.Join(securityModulePath, "protections.tf"),
-		"modules-security-rate-policies.tmpl":       filepath.Join(securityModulePath, "rate-policies.tf"),
-		"modules-security-rate-policy-actions.tmpl": filepath.Join(securityModulePath, "rate-policy-actions.tf"),
-		"modules-security-reputation-profiles.tmpl": filepath.Join(securityModulePath, "reputation-profiles.tf"),
-		"modules-security-reputation.tmpl":          filepath.Join(securityModulePath, "reputation.tf"),
-		"modules-security-selected-hostnames.tmpl":  filepath.Join(securityModulePath, "selected-hostnames.tf"),
-		"modules-security-siem.tmpl":                filepath.Join(securityModulePath, "siem.tf"),
-		"modules-security-slow-post.tmpl":           filepath.Join(securityModulePath, "slow-post.tf"),
-		"modules-security-variables.tmpl":           filepath.Join(securityModulePath, "variables.tf"),
-		"modules-security-versions.tmpl":            filepath.Join(securityModulePath, "versions.tf"),
-		"modules-security-waf.tmpl":                 filepath.Join(securityModulePath, "waf.tf"),
-		"variables.tmpl":                            filepath.Join(tfWorkPath, "appsec-variables.tf"),
-		"versions.tmpl":                             filepath.Join(tfWorkPath, "appsec-versions.tf"),
+		"modules-activate-security-variables.tmpl":     filepath.Join(activateSecurityModulePath, "variables.tf"),
+		"modules-activate-security-versions.tmpl":      filepath.Join(activateSecurityModulePath, "versions.tf"),
+		"modules-security-advanced.tmpl":               filepath.Join(securityModulePath, "advanced.tf"),
+		"modules-security-api.tmpl":                    filepath.Join(securityModulePath, "api.tf"),
+		"modules-security-custom-deny.tmpl":            filepath.Join(securityModulePath, "custom-deny.tf"),
+		"modules-security-custom-rules.tmpl":           filepath.Join(securityModulePath, "custom-rules.tf"),
+		"modules-security-firewall.tmpl":               filepath.Join(securityModulePath, "firewall.tf"),
+		"modules-security-main.tmpl":                   filepath.Join(securityModulePath, "main.tf"),
+		"modules-security-malware-policies.tmpl":       filepath.Join(securityModulePath, "malware-policies.tf"),
+		"modules-security-malware-policy-actions.tmpl": filepath.Join(securityModulePath, "malware-policy-actions.tf"),
+		"modules-security-match-targets.tmpl":          filepath.Join(securityModulePath, "match-targets.tf"),
+		"modules-security-penalty-box.tmpl":            filepath.Join(securityModulePath, "penalty-box.tf"),
+		"modules-security-policies.tmpl":               filepath.Join(securityModulePath, "policies.tf"),
+		"modules-security-protections.tmpl":            filepath.Join(securityModulePath, "protections.tf"),
+		"modules-security-rate-policies.tmpl":          filepath.Join(securityModulePath, "rate-policies.tf"),
+		"modules-security-rate-policy-actions.tmpl":    filepath.Join(securityModulePath, "rate-policy-actions.tf"),
+		"modules-security-reputation-profiles.tmpl":    filepath.Join(securityModulePath, "reputation-profiles.tf"),
+		"modules-security-reputation.tmpl":             filepath.Join(securityModulePath, "reputation.tf"),
+		"modules-security-selected-hostnames.tmpl":     filepath.Join(securityModulePath, "selected-hostnames.tf"),
+		"modules-security-siem.tmpl":                   filepath.Join(securityModulePath, "siem.tf"),
+		"modules-security-slow-post.tmpl":              filepath.Join(securityModulePath, "slow-post.tf"),
+		"modules-security-variables.tmpl":              filepath.Join(securityModulePath, "variables.tf"),
+		"modules-security-versions.tmpl":               filepath.Join(securityModulePath, "versions.tf"),
+		"modules-security-waf.tmpl":                    filepath.Join(securityModulePath, "waf.tf"),
+		"variables.tmpl":                               filepath.Join(tfWorkPath, "appsec-variables.tf"),
+		"versions.tmpl":                                filepath.Join(tfWorkPath, "appsec-versions.tf"),
 	}
 
 	// Provide custom helper functions to get data that does not exist in the security config export
@@ -111,6 +113,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"exportJSON":            exportJSON,
 		"getConfigDescription":  getConfigDescription,
 		"getCustomRuleNameByID": getCustomRuleNameByID,
+		"getMalwareNameByID":    getMalwareNameByID,
 		"getPolicyNameByID":     getPolicyNameByID,
 		"getPrefixFromID":       getPrefixFromID,
 		"getRateNameByID":       getRateNameByID,
@@ -325,6 +328,17 @@ func getRateNameByID(configuration *appsec.GetExportConfigurationResponse, id in
 	}
 
 	return "", errors.New("Can't find rate control name")
+}
+
+// Get the malware policy name by id
+func getMalwareNameByID(configuration *appsec.GetExportConfigurationResponse, id int) (string, error) {
+	for _, element := range configuration.MalwarePolicies {
+		if element.MalwarePolicyID == id {
+			return tools.EscapeName(element.Name)
+		}
+	}
+
+	return "", errors.New("Can't find malware policy name")
 }
 
 // Get the custom rule name by id

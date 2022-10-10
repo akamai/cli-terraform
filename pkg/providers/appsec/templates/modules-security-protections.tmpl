@@ -19,9 +19,15 @@ resource "akamai_appsec_ip_geo_protection" "{{ $policyName }}" {
     enabled            = {{ .SecurityControls.ApplyNetworkLayerControls }}
 }
 
-resource "akamai_appsec_rate_protection" "{{ $policyName }}" {
+resource "akamai_appsec_malware_protection" "{{ $policyName }}" {
     config_id          = akamai_appsec_configuration.config.config_id
     security_policy_id = akamai_appsec_ip_geo_protection.{{ $policyName }}.security_policy_id
+    enabled            = {{ .SecurityControls.ApplyMalwareControls }}
+}
+
+resource "akamai_appsec_rate_protection" "{{ $policyName }}" {
+    config_id          = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_malware_protection.{{ $policyName }}.security_policy_id
     enabled            = {{ .SecurityControls.ApplyRateControls }}
 }
 

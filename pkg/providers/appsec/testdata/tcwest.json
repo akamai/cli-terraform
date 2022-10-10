@@ -7041,6 +7041,7 @@
                 "applyApiConstraints": true,
                 "applyApplicationLayerControls": true,
                 "applyBotmanControls": true,
+                "applyMalwareControls": true,
                 "applyNetworkLayerControls": true,
                 "applyRateControls": true,
                 "applyReputationControls": true,
@@ -8515,6 +8516,23 @@
                     "ipv6Action": "deny"
                 }
             ],
+            "malwarePolicyActions": [
+                {
+                    "id": 1187,
+                    "action": "alert",
+                    "unscannedAction": "deny"
+                },
+                {
+                    "id": 1186,
+                    "action": "alert",
+                    "unscannedAction": "deny"
+                },
+                {
+                    "id": 1185,
+                    "action": "deny",
+                    "unscannedAction": "deny"
+                }
+            ],
             "ipGeoFirewall": {
                 "block": "blockSpecificIPGeo",
                 "geoControls": {
@@ -8559,6 +8577,7 @@
                 "applyApiConstraints": true,
                 "applyApplicationLayerControls": true,
                 "applyBotmanControls": true,
+                "applyMalwareControls": true,
                 "applyNetworkLayerControls": true,
                 "applyRateControls": true,
                 "applyReputationControls": true,
@@ -9490,6 +9509,7 @@
                 "applyApiConstraints": true,
                 "applyApplicationLayerControls": true,
                 "applyBotmanControls": true,
+                "applyMalwareControls": true,
                 "applyNetworkLayerControls": true,
                 "applyRateControls": true,
                 "applyReputationControls": true,
@@ -11028,6 +11048,57 @@
             "requestBody": {
                 "requestBodyInspectionLimitInKB": "default"
             }
+        }
+    ],
+    "malwarePolicies": [
+        {
+            "contentTypes" : [
+                "application/xml",
+                "audio/x-wav",
+                "application/json"
+            ],
+            "description" : "Malware configuration details",
+            "hostnames" : [
+                "test.akamai.com",
+                "sample.akamai.com"
+            ],
+            "id": 1187,
+            "name" : "FMS Configuration 1",
+            "paths" : [
+                "/base-path",
+                "/test"
+            ]
+        },
+        {
+            "contentTypes" : [
+                "application/msword",
+                "application/x-mswrite",
+                "application/rtf"
+            ],
+            "description" : "Malware configuration details",
+            "hostnames" : [
+                "test.akamai.com"
+            ],
+            "id": 1186,
+            "name" : "FMS Configuration 2",
+            "paths" : [
+                "/base-path"
+            ]
+        },
+        {
+            "contentTypes" : [
+                "application/xml",
+                "application/json"
+            ],
+            "description" : "Malware configuration details",
+            "hostnames" : [
+                "sample.akamai.com"
+            ],
+            "id": 1185,
+            "name" : "FMS Configuration 3",
+            "paths" : [
+                "/test"
+            ]
         }
     ],
     "siem": {
