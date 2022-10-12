@@ -267,16 +267,6 @@ func CommandLocator() ([]*cli.Command, error) {
 		ArgsUsage:   "<enrollment_id> <contract_id>",
 		Action:      validatedAction(cps.CmdCreateCPS, requireValidWorkpath, requireNArguments(2)),
 		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:    "acknowledge-pre-verification-warnings",
-				Usage:   "If set, we automatically acknowledge all pre-verification warnings. Default: false",
-				Aliases: []string{"ack-pre-warnings"},
-			},
-			&cli.BoolFlag{
-				Name:    "allow-duplicate-common-name",
-				Usage:   "When set, it allows to duplicate common name. Default: false",
-				Aliases: []string{"allow-dup-cn"},
-			},
 			&cli.StringFlag{
 				Name:        "tfworkpath",
 				Usage:       "Directory used to store files created when running commands.",

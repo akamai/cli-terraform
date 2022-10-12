@@ -274,8 +274,6 @@ $ akamai terraform export-imaging
 
 Flags:
    --tfworkpath path                        Directory used to store files created when running commands. (default: current directory)
-   --acknowledge-pre-verification-warnings  If set, we automatically acknowledge all pre-verification warnings. Not recommended.
-   --allow-duplicate-common-name            When set, it allows to duplicate common name.
 ```
 
 ### Export CPS configuration.

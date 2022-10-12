@@ -14,9 +14,11 @@ provider "akamai" {
 }
 
 resource "akamai_cps_dv_enrollment" "enrollment_id_1" {
-  common_name    = "test.akamai.com"
-  secure_network = "enhanced-tls"
-  sni_only       = true
+  common_name                           = "test.akamai.com"
+  allow_duplicate_common_name           = false
+  secure_network                        = "enhanced-tls"
+  sni_only                              = true
+  acknowledge_pre_verification_warnings = false
   admin_contact {
     first_name       = "R1"
     last_name        = "D1"

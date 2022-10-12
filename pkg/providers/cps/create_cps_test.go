@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -289,27 +288,23 @@ func TestCreateCPS(t *testing.T) {
 		withError                          error
 		schema                             bool
 	}{
-		"export enrollment without flags": {
+		"export enrollment with minimum fields": {
 			init: func(i *mockcps) {
 				expectGetEnrollment(i, 1, enrollmentMin, nil).Once()
 			},
-			enrollmentID:                       1,
-			contractID:                         "ctr_1",
-			acknowledgePreVerificationWarnings: false,
-			allowDuplicateCommonName:           false,
-			dataDir:                            "enrollment_min",
-			filesToCheck:                       []string{"enrollment.tf", "import.sh", "variables.tf"},
+			enrollmentID: 1,
+			contractID:   "ctr_1",
+			dataDir:      "enrollment_min",
+			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
-		"export enrollment with flags": {
+		"export enrollment": {
 			init: func(i *mockcps) {
 				expectGetEnrollment(i, 1, enrollmentAll, nil).Once()
 			},
-			enrollmentID:                       1,
-			contractID:                         "ctr_1",
-			acknowledgePreVerificationWarnings: true,
-			allowDuplicateCommonName:           true,
-			dataDir:                            "enrollment_all_fields",
-			filesToCheck:                       []string{"enrollment.tf", "import.sh", "variables.tf"},
+			enrollmentID: 1,
+			contractID:   "ctr_1",
+			dataDir:      "enrollment_all_fields",
+			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
 		"error fetching enrollment": {
 			init: func(i *mockcps) {
@@ -327,7 +322,7 @@ func TestCreateCPS(t *testing.T) {
 			mp := processor(test.dataDir)
 			test.init(mi)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createCPS(ctx, test.contractID, test.enrollmentID, test.acknowledgePreVerificationWarnings, test.allowDuplicateCommonName, section, mi, mp)
+			err := createCPS(ctx, test.contractID, test.enrollmentID, section, mi, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -336,9 +331,9 @@ func TestCreateCPS(t *testing.T) {
 
 			if test.filesToCheck != nil {
 				for _, f := range test.filesToCheck {
-					expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dataDir, f))
+					expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dataDir, f))
 					require.NoError(t, err)
-					result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dataDir, f))
+					result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dataDir, f))
 					require.NoError(t, err)
 					assert.Equal(t, string(expected), string(result))
 				}
@@ -366,12 +361,10 @@ func TestProcessEnrollmentTemplates(t *testing.T) {
 		},
 		"enrollment with all fields set": {
 			givenData: TFCPSData{
-				Enrollment:                         enrollmentAll,
-				EnrollmentID:                       1,
-				ContractID:                         "ctr_1",
-				AllowDuplicateCommonName:           true,
-				AcknowledgePreVerificationWarnings: true,
-				Section:                            "test_section",
+				Enrollment:   enrollmentAll,
+				EnrollmentID: 1,
+				ContractID:   "ctr_1",
+				Section:      "test_section",
 			},
 			dir:          "enrollment_all_fields",
 			filesToCheck: []string{"enrollment.tf", "variables.tf", "import.sh"},
@@ -394,9 +387,9 @@ func TestProcessEnrollmentTemplates(t *testing.T) {
 			require.NoError(t, processor(test.dir).ProcessTemplates(test.givenData))
 
 			for _, f := range test.filesToCheck {
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}

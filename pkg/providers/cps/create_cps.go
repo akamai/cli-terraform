@@ -20,12 +20,10 @@ import (
 type (
 	// TFCPSData represents the data used in CPS templates
 	TFCPSData struct {
-		Enrollment                         cps.Enrollment
-		EnrollmentID                       int
-		ContractID                         string
-		AllowDuplicateCommonName           bool
-		AcknowledgePreVerificationWarnings bool
-		Section                            string
+		Enrollment   cps.Enrollment
+		EnrollmentID int
+		ContractID   string
+		Section      string
 	}
 )
 
@@ -47,14 +45,6 @@ func CmdCreateCPS(c *cli.Context) error {
 	var tfWorkPath = "./"
 	if c.IsSet("tfworkpath") {
 		tfWorkPath = c.String("tfworkpath")
-	}
-	var acknowledgePreVerificationWarnings bool
-	if c.IsSet("acknowledge-pre-verification-warnings") {
-		acknowledgePreVerificationWarnings = c.Bool("acknowledge-pre-verification-warnings")
-	}
-	var allowDuplicateCommonName bool
-	if c.IsSet("allow-duplicate-common-name") {
-		allowDuplicateCommonName = c.Bool("allow-duplicate-common-name")
 	}
 	enrollmentPath := filepath.Join(tfWorkPath, "enrollment.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
@@ -82,13 +72,13 @@ func CmdCreateCPS(c *cli.Context) error {
 	}
 	contractID := c.Args().Get(1)
 	section := edgegrid.GetEdgercSection(c)
-	if err = createCPS(ctx, contractID, enrollmentID, acknowledgePreVerificationWarnings, allowDuplicateCommonName, section, client, processor); err != nil {
+	if err = createCPS(ctx, contractID, enrollmentID, section, client, processor); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting enrollment HCL: %s", err)), 1)
 	}
 	return nil
 }
 
-func createCPS(ctx context.Context, contractID string, enrollmentID int, acknowledgePreVerificationWarnings bool, allowDuplicateCommonName bool,
+func createCPS(ctx context.Context, contractID string, enrollmentID int,
 	section string, client cps.CPS, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
@@ -106,12 +96,10 @@ func createCPS(ctx context.Context, contractID string, enrollmentID int, acknowl
 	term.Spinner().OK()
 
 	tfData := TFCPSData{
-		Enrollment:                         *enrollment,
-		EnrollmentID:                       enrollmentID,
-		ContractID:                         contractID,
-		AcknowledgePreVerificationWarnings: acknowledgePreVerificationWarnings,
-		AllowDuplicateCommonName:           allowDuplicateCommonName,
-		Section:                            section,
+		Enrollment:   *enrollment,
+		EnrollmentID: enrollmentID,
+		ContractID:   contractID,
+		Section:      section,
 	}
 
 	term.Spinner().Start("Saving TF configurations ")

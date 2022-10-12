@@ -18,17 +18,13 @@ provider "akamai" {
     resource "akamai_cps_dv_enrollment" "enrollment_id_{{$data.EnrollmentID}}" {
     {{- $cn := .CSR.CN}}
     common_name = "{{$cn}}"
-    {{- if $data.AllowDuplicateCommonName}}
-        allow_duplicate_common_name = {{$data.AllowDuplicateCommonName}}
-    {{- end}}
+    allow_duplicate_common_name = false
     {{- if .CSR.SANS}}
         sans = [{{range .CSR.SANS}}{{if ne $cn .}}"{{.}}", {{end}}{{end}}]
     {{- end}}
     secure_network = "{{.NetworkConfiguration.SecureNetwork}}"
     sni_only       = {{.NetworkConfiguration.SNIOnly}}
-    {{- if $data.AcknowledgePreVerificationWarnings}}
-        acknowledge_pre_verification_warnings = {{$data.AcknowledgePreVerificationWarnings}}
-    {{- end}}
+    acknowledge_pre_verification_warnings = false
     {{- with .AdminContact}}
         admin_contact {
         first_name       = "{{.FirstName}}"
