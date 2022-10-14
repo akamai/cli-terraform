@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/cps"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
@@ -20,10 +21,15 @@ import (
 type (
 	// TFCPSData represents the data used in CPS templates
 	TFCPSData struct {
-		Enrollment   cps.Enrollment
-		EnrollmentID int
-		ContractID   string
-		Section      string
+		Enrollment          cps.Enrollment
+		EnrollmentID        int
+		ContractID          string
+		Section             string
+		CertificateECDSA    string
+		TrustChainECDSA     string
+		CertificateRSA      string
+		TrustChainRSA       string
+		NoUploadCertificate bool
 	}
 )
 
@@ -33,6 +39,8 @@ var templateFiles embed.FS
 var (
 	// ErrFetchingEnrollment is returned when fetching enrollment fails
 	ErrFetchingEnrollment = errors.New("unable to fetch enrollment with given id")
+	// ErrFetchingCertificateHistory is returned when fetching certificate history fails
+	ErrFetchingCertificateHistory = errors.New("unable to fetch certificate history with given id")
 )
 
 // CmdCreateCPS is an entrypoint to create-cps command
@@ -102,6 +110,24 @@ func createCPS(ctx context.Context, contractID string, enrollmentID int,
 		Section:      section,
 	}
 
+	if enrollment.ValidationType == "third-party" {
+		term.Spinner().Start("Retrieving certificate history ")
+		certHistory, err := client.GetChangeHistory(ctx, cps.GetChangeHistoryRequest{EnrollmentID: enrollmentID})
+		if err != nil {
+			term.Spinner().Fail()
+			return fmt.Errorf("%w: %s", ErrFetchingCertificateHistory, err)
+		}
+		certificateECDSA, trustChainECDSA, certificateRSA, trustChainRSA := getCertificatesFromChangeHistory(certHistory)
+		tfData.CertificateECDSA = strings.ReplaceAll(certificateECDSA, "\n", "\\n")
+		tfData.TrustChainECDSA = strings.ReplaceAll(trustChainECDSA, "\n", "\\n")
+		tfData.CertificateRSA = strings.ReplaceAll(certificateRSA, "\n", "\\n")
+		tfData.TrustChainRSA = strings.ReplaceAll(trustChainRSA, "\n", "\\n")
+		if certificateECDSA == "" && certificateRSA == "" {
+			tfData.NoUploadCertificate = true
+		}
+		term.Spinner().OK()
+	}
+
 	term.Spinner().Start("Saving TF configurations ")
 	if err := templateProcessor.ProcessTemplates(tfData); err != nil {
 		term.Spinner().Fail()
@@ -111,4 +137,31 @@ func createCPS(ctx context.Context, contractID string, enrollmentID int,
 	fmt.Printf("Terraform configuration for enrollment '%d' was saved successfully\n", enrollmentID)
 
 	return nil
+}
+
+// getCertificatesFromChangeHistory creates attributes for a resource form GetChangeHistoryResponse
+func getCertificatesFromChangeHistory(changeHistory *cps.GetChangeHistoryResponse) (string, string, string, string) {
+	var certificateECDSA, certificateRSA, trustChainECDSA, trustChainRSA string
+	for _, change := range changeHistory.Changes {
+		if change.PrimaryCertificate.KeyAlgorithm == "RSA" {
+			certificateRSA = change.PrimaryCertificate.Certificate
+			trustChainRSA = change.PrimaryCertificate.TrustChain
+		} else {
+			certificateECDSA = change.PrimaryCertificate.Certificate
+			trustChainECDSA = change.PrimaryCertificate.TrustChain
+		}
+		if len(change.MultiStackedCertificates) != 0 {
+			if change.MultiStackedCertificates[0].KeyAlgorithm == "RSA" {
+				certificateRSA = change.MultiStackedCertificates[0].Certificate
+				trustChainRSA = change.MultiStackedCertificates[0].TrustChain
+			} else {
+				certificateECDSA = change.MultiStackedCertificates[0].Certificate
+				trustChainECDSA = change.MultiStackedCertificates[0].TrustChain
+			}
+		}
+		if certificateECDSA != "" || certificateRSA != "" {
+			break
+		}
+	}
+	return certificateECDSA, trustChainECDSA, certificateRSA, trustChainRSA
 }

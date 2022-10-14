@@ -47,7 +47,14 @@ var (
 		}
 	}
 
-	enrollment = cps.Enrollment{
+	certECDSAForTests       = "-----BEGIN CERTIFICATE ECDSA REQUEST-----\n...\n-----END CERTIFICATE ECDSA REQUEST-----"
+	certRSAForTests         = "-----BEGIN CERTIFICATE RSA REQUEST-----\n...\n-----END CERTIFICATE RSA REQUEST-----"
+	trustChainRSAForTests   = "-----BEGIN CERTIFICATE TRUST-CHAIN RSA REQUEST-----\n...\n-----END CERTIFICATE TRUST-CHAIN RSA REQUEST-----"
+	trustChainECDSAForTests = "-----BEGIN CERTIFICATE TRUST-CHAIN ECDSA REQUEST-----\n...\n-----END CERTIFICATE TRUST-CHAIN ECDSA REQUEST-----"
+	RSA                     = "RSA"
+	ECDSA                   = "ECDSA"
+
+	enrollmentDV = cps.Enrollment{
 		AdminContact: &cps.Contact{
 			AddressLineOne:   "150 Broadway",
 			City:             "Cambridge",
@@ -113,7 +120,7 @@ var (
 		ValidationType: "dv",
 	}
 
-	enrollmentMin = cps.Enrollment{
+	enrollmentDVMin = cps.Enrollment{
 		AdminContact: &cps.Contact{
 			AddressLineOne:   "150 Broadway",
 			City:             "Cambridge",
@@ -175,7 +182,7 @@ var (
 		ValidationType: "dv",
 	}
 
-	enrollmentAll = cps.Enrollment{
+	enrollmentDVAll = cps.Enrollment{
 		AdminContact: &cps.Contact{
 			AddressLineOne:   "150 Broadway",
 			AddressLineTwo:   "Aka",
@@ -200,7 +207,7 @@ var (
 			L:    "Cambridge",
 			O:    "Akamai",
 			OU:   "WebEx",
-			SANS: []string{"san.test.akamai.com"},
+			SANS: []string{"test.akamai.com", "san.test.akamai.com"},
 			ST:   "MA",
 		},
 		EnableMultiStackedCertificates: true,
@@ -259,8 +266,94 @@ var (
 		ValidationType: "dv",
 	}
 
-	expectGetEnrollment = func(i *mockcps, enrollmentID int, enrollment cps.Enrollment, err error) *mock.Call {
-		call := i.On(
+	enrollmentThirdPartyAll = cps.Enrollment{
+		AdminContact: &cps.Contact{
+			AddressLineOne:   "150 Broadway",
+			AddressLineTwo:   "Aka",
+			City:             "Cambridge",
+			Country:          "US",
+			Email:            "r1d1@akamai.com",
+			FirstName:        "R1",
+			LastName:         "D1",
+			OrganizationName: "Akamai",
+			Phone:            "123123123",
+			PostalCode:       "12345",
+			Region:           "MA",
+			Title:            "title",
+		},
+		AutoRenewalStartTime: "2022-10-03",
+		CertificateChainType: "default",
+		CertificateType:      "san",
+		ChangeManagement:     true,
+		CSR: &cps.CSR{
+			C:    "US",
+			CN:   "test.akamai.com",
+			L:    "Cambridge",
+			O:    "Akamai",
+			OU:   "WebEx",
+			SANS: []string{"test.akamai.com", "san.test.akamai.com"},
+			ST:   "MA",
+		},
+		EnableMultiStackedCertificates: true,
+		Location:                       "loc",
+		MaxAllowedSanNames:             10,
+		MaxAllowedWildcardSanNames:     20,
+		NetworkConfiguration: &cps.NetworkConfiguration{
+			ClientMutualAuthentication: &cps.ClientMutualAuthentication{
+				AuthenticationOptions: &cps.AuthenticationOptions{
+					OCSP: &cps.OCSP{
+						Enabled: tools.BoolPtr(true),
+					},
+					SendCAListToClient: tools.BoolPtr(true),
+				},
+				SetID: "2",
+			},
+			DisallowedTLSVersions: []string{"TLSv1", "TLSv1_1"},
+			DNSNameSettings: &cps.DNSNameSettings{
+				CloneDNSNames: true,
+				DNSNames:      []string{"san.test.akamai.com"},
+			},
+			Geography:        "core",
+			MustHaveCiphers:  "ak-akamai-default",
+			OCSPStapling:     "on",
+			PreferredCiphers: "ak-akamai-default",
+			QuicEnabled:      true,
+			SecureNetwork:    "enhanced-tls",
+			SNIOnly:          true,
+		},
+		Org: &cps.Org{
+			AddressLineOne: "150 Broadway",
+			AddressLineTwo: "Aka",
+			City:           "Cambridge",
+			Country:        "US",
+			Name:           "Akamai",
+			Phone:          "321321321",
+			PostalCode:     "12345",
+			Region:         "MA",
+		},
+		PendingChanges:     []string{"change"},
+		RA:                 "lets-encrypt",
+		SignatureAlgorithm: "SHA-256",
+		TechContact: &cps.Contact{
+			AddressLineOne:   "150 Broadway",
+			City:             "Cambridge",
+			Country:          "US",
+			Email:            "r2d2@akamai.com",
+			FirstName:        "R2",
+			LastName:         "D2",
+			OrganizationName: "Akamai",
+			Phone:            "123123123",
+			PostalCode:       "12345",
+			Region:           "MA",
+		},
+		ThirdParty: &cps.ThirdParty{
+			ExcludeSANS: true,
+		},
+		ValidationType: "third-party",
+	}
+
+	expectGetEnrollment = func(m *mockcps, enrollmentID int, enrollment cps.Enrollment, err error) *mock.Call {
+		call := m.On(
 			"GetEnrollment",
 			mock.Anything,
 			cps.GetEnrollmentRequest{
@@ -272,43 +365,191 @@ var (
 		}
 		return call.Return(&enrollment, nil)
 	}
+
+	expectGetChangeHistory = func(m *mockcps, enrollmentID int, response cps.GetChangeHistoryResponse, err error) *mock.Call {
+		call := m.On(
+			"GetChangeHistory",
+			mock.Anything,
+			cps.GetChangeHistoryRequest{
+				EnrollmentID: enrollmentID,
+			},
+		)
+		if err != nil {
+			return call.Return(nil, err)
+		}
+		return call.Return(&response, nil)
+	}
 )
 
 func TestCreateCPS(t *testing.T) {
 	section := "test_section"
 	tests := map[string]struct {
-		init                               func(*mockcps)
-		enrollmentID                       int
-		contractID                         string
-		acknowledgePreVerificationWarnings bool
-		allowDuplicateCommonName           bool
-		filesToCheck                       []string
-		dataDir                            string
-		jsonDir                            string
-		withError                          error
-		schema                             bool
+		init         func(*mockcps)
+		enrollmentID int
+		contractID   string
+		filesToCheck []string
+		dataDir      string
+		jsonDir      string
+		withError    error
+		schema       bool
 	}{
-		"export enrollment with minimum fields": {
-			init: func(i *mockcps) {
-				expectGetEnrollment(i, 1, enrollmentMin, nil).Once()
+		"export DV enrollment with minimum fields": {
+			init: func(m *mockcps) {
+				expectGetEnrollment(m, 1, enrollmentDVMin, nil).Once()
 			},
 			enrollmentID: 1,
 			contractID:   "ctr_1",
-			dataDir:      "enrollment_min",
+			dataDir:      "dv_enrollment_min",
 			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
-		"export enrollment": {
-			init: func(i *mockcps) {
-				expectGetEnrollment(i, 1, enrollmentAll, nil).Once()
+		"export DV enrollment": {
+			init: func(m *mockcps) {
+				expectGetEnrollment(m, 1, enrollmentDVAll, nil).Once()
 			},
 			enrollmentID: 1,
 			contractID:   "ctr_1",
-			dataDir:      "enrollment_all_fields",
+			dataDir:      "dv_enrollment_all_fields",
+			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
+		},
+		"export third party enrollment ecdsa": {
+			init: func(m *mockcps) {
+				expectGetEnrollment(m, 1, enrollmentThirdPartyAll, nil).Once()
+				response := cps.GetChangeHistoryResponse{
+					Changes: []cps.ChangeHistory{
+						{
+							PrimaryCertificate: cps.CertificateChangeHistory{
+								Certificate:  certECDSAForTests,
+								KeyAlgorithm: ECDSA,
+								TrustChain:   trustChainECDSAForTests,
+							},
+							Status: "inactive",
+						},
+						{
+							PrimaryCertificate: cps.CertificateChangeHistory{
+								Certificate:  certRSAForTests,
+								KeyAlgorithm: RSA,
+								TrustChain:   trustChainRSAForTests,
+							},
+							Status: "active",
+						},
+					},
+				}
+				expectGetChangeHistory(m, 1, response, nil).Once()
+			},
+			enrollmentID: 1,
+			contractID:   "ctr_1",
+			dataDir:      "third_party_enrollment_all_fields_ecdsa",
+			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
+		},
+		"export third party enrollment rsa": {
+			init: func(m *mockcps) {
+				expectGetEnrollment(m, 1, enrollmentThirdPartyAll, nil).Once()
+				response := cps.GetChangeHistoryResponse{
+					Changes: []cps.ChangeHistory{
+						{
+							PrimaryCertificate: cps.CertificateChangeHistory{
+								Certificate:  certRSAForTests,
+								KeyAlgorithm: RSA,
+								TrustChain:   trustChainRSAForTests,
+							},
+							Status: "active",
+						},
+					},
+				}
+				expectGetChangeHistory(m, 1, response, nil).Once()
+			},
+			enrollmentID: 1,
+			contractID:   "ctr_1",
+			dataDir:      "third_party_enrollment_all_fields_rsa",
+			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
+		},
+		"export third party enrollment ecdsa+rsa": {
+			init: func(m *mockcps) {
+				expectGetEnrollment(m, 1, enrollmentThirdPartyAll, nil).Once()
+				response := cps.GetChangeHistoryResponse{
+					Changes: []cps.ChangeHistory{
+						{
+							PrimaryCertificate: cps.CertificateChangeHistory{
+								Certificate:  certECDSAForTests,
+								KeyAlgorithm: ECDSA,
+								TrustChain:   trustChainECDSAForTests,
+							},
+							MultiStackedCertificates: []cps.CertificateChangeHistory{
+								{
+									Certificate:  certRSAForTests,
+									KeyAlgorithm: RSA,
+									TrustChain:   trustChainRSAForTests,
+								},
+							},
+							Status: "active",
+						},
+					},
+				}
+				expectGetChangeHistory(m, 1, response, nil).Once()
+			},
+			enrollmentID: 1,
+			contractID:   "ctr_1",
+			dataDir:      "third_party_enrollment_all_fields_ecdsa_rsa",
+			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
+		},
+		"export third party enrollment renewal": {
+			init: func(m *mockcps) {
+				expectGetEnrollment(m, 1, enrollmentThirdPartyAll, nil).Once()
+				response := cps.GetChangeHistoryResponse{
+					Changes: []cps.ChangeHistory{
+						{
+							Action:            "renew",
+							ActionDescription: "Renew Certificate",
+							Status:            "incomplete",
+							RA:                "third-party",
+						},
+						{
+							PrimaryCertificate: cps.CertificateChangeHistory{
+								Certificate:  certECDSAForTests,
+								KeyAlgorithm: ECDSA,
+								TrustChain:   trustChainECDSAForTests,
+							},
+							MultiStackedCertificates: []cps.CertificateChangeHistory{
+								{
+									Certificate:  certRSAForTests,
+									KeyAlgorithm: RSA,
+									TrustChain:   trustChainRSAForTests,
+								},
+							},
+							Status: "active",
+						},
+					},
+				}
+				expectGetChangeHistory(m, 1, response, nil).Once()
+			},
+			enrollmentID: 1,
+			contractID:   "ctr_1",
+			dataDir:      "third_party_enrollment_all_fields_renewal",
+			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
+		},
+		"export third party enrollment new certificate": {
+			init: func(m *mockcps) {
+				expectGetEnrollment(m, 1, enrollmentThirdPartyAll, nil).Once()
+				response := cps.GetChangeHistoryResponse{
+					Changes: []cps.ChangeHistory{
+						{
+							Action:            "new-certificate",
+							ActionDescription: "Create New Certificate",
+							Status:            "incomplete",
+							RA:                "third-party",
+						},
+					},
+				}
+				expectGetChangeHistory(m, 1, response, nil).Once()
+			},
+			enrollmentID: 1,
+			contractID:   "ctr_1",
+			dataDir:      "third_party_enrollment_all_fields_new_certificate",
 			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
 		"error fetching enrollment": {
-			init: func(i *mockcps) {
-				expectGetEnrollment(i, 2, enrollment, fmt.Errorf("oops")).Once()
+			init: func(m *mockcps) {
+				expectGetEnrollment(m, 2, enrollmentDV, fmt.Errorf("oops")).Once()
 			},
 			enrollmentID: 2,
 			withError:    ErrFetchingEnrollment,
@@ -349,34 +590,48 @@ func TestProcessEnrollmentTemplates(t *testing.T) {
 		dir          string
 		filesToCheck []string
 	}{
-		"enrollment": {
+		"dv enrollment": {
 			givenData: TFCPSData{
-				Enrollment:   enrollment,
+				Enrollment:   enrollmentDV,
 				EnrollmentID: 1,
 				ContractID:   "ctr_1",
 				Section:      "test_section",
 			},
-			dir:          "enrollment",
+			dir:          "dv_enrollment",
 			filesToCheck: []string{"enrollment.tf", "variables.tf", "import.sh"},
 		},
-		"enrollment with all fields set": {
+		"dv enrollment with all fields set": {
 			givenData: TFCPSData{
-				Enrollment:   enrollmentAll,
+				Enrollment:   enrollmentDVAll,
 				EnrollmentID: 1,
 				ContractID:   "ctr_1",
 				Section:      "test_section",
 			},
-			dir:          "enrollment_all_fields",
+			dir:          "dv_enrollment_all_fields",
 			filesToCheck: []string{"enrollment.tf", "variables.tf", "import.sh"},
 		},
-		"enrollment with required only fields": {
+		"dv enrollment with required only fields": {
 			givenData: TFCPSData{
-				Enrollment:   enrollmentMin,
+				Enrollment:   enrollmentDVMin,
 				EnrollmentID: 1,
 				ContractID:   "ctr_1",
 				Section:      "test_section",
 			},
-			dir:          "enrollment_min",
+			dir:          "dv_enrollment_min",
+			filesToCheck: []string{"enrollment.tf", "variables.tf", "import.sh"},
+		},
+		"third party enrollment with all fields set": {
+			givenData: TFCPSData{
+				Enrollment:       enrollmentThirdPartyAll,
+				EnrollmentID:     1,
+				ContractID:       "ctr_1",
+				Section:          "test_section",
+				CertificateECDSA: "-----BEGIN CERTIFICATE ECDSA REQUEST-----\\n...\\n-----END CERTIFICATE ECDSA REQUEST-----",
+				CertificateRSA:   "-----BEGIN CERTIFICATE RSA REQUEST-----\\n...\\n-----END CERTIFICATE RSA REQUEST-----",
+				TrustChainECDSA:  "-----BEGIN CERTIFICATE TRUST-CHAIN ECDSA REQUEST-----\\n...\\n-----END CERTIFICATE TRUST-CHAIN ECDSA REQUEST-----",
+				TrustChainRSA:    "-----BEGIN CERTIFICATE TRUST-CHAIN RSA REQUEST-----\\n...\\n-----END CERTIFICATE TRUST-CHAIN RSA REQUEST-----",
+			},
+			dir:          "third_party_enrollment_all_fields_ecdsa_rsa",
 			filesToCheck: []string{"enrollment.tf", "variables.tf", "import.sh"},
 		},
 	}

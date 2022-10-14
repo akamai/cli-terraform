@@ -15,16 +15,27 @@ provider "akamai" {
 }
 {{$data := .}}
 {{- with .Enrollment}}
+    {{- if eq .ValidationType "dv" }}
     resource "akamai_cps_dv_enrollment" "enrollment_id_{{$data.EnrollmentID}}" {
+    {{- else if eq .ValidationType "third-party" }}
+    resource "akamai_cps_third_party_enrollment" "enrollment_id_{{$data.EnrollmentID}}" {
+    {{- end}}
     {{- $cn := .CSR.CN}}
     common_name = "{{$cn}}"
     allow_duplicate_common_name = false
     {{- if .CSR.SANS}}
-        sans = [{{range .CSR.SANS}}{{if ne $cn .}}"{{.}}", {{end}}{{end}}]
+      {{- if eq .ValidationType "dv" }}
+    sans = [{{range .CSR.SANS}}{{if ne $cn .}}"{{.}}", {{end}}{{end}}]
+      {{- else if eq .ValidationType "third-party" }}
+    sans = [{{range .CSR.SANS}}"{{.}}", {{end}}]
+      {{- end}}
     {{- end}}
     secure_network = "{{.NetworkConfiguration.SecureNetwork}}"
     sni_only       = {{.NetworkConfiguration.SNIOnly}}
     acknowledge_pre_verification_warnings = false
+    {{- if eq .ValidationType "third-party" }}
+    auto_approve_warnings                 = []
+    {{- end}}
     {{- with .AdminContact}}
         admin_contact {
         first_name       = "{{.FirstName}}"
@@ -56,9 +67,6 @@ provider "akamai" {
         organizational_unit = "{{.OU}}"
         state               = "{{.ST}}"
         }
-    {{- end}}
-    {{- if .EnableMultiStackedCertificates}}
-        enable_multi_stacked_certificates = {{.EnableMultiStackedCertificates}}
     {{- end}}
     {{- with .NetworkConfiguration}}
         network_configuration {
@@ -132,5 +140,41 @@ provider "akamai" {
         }
     {{- end}}
     contract_id = "{{$data.ContractID}}"
-    }
+    {{- if eq .ValidationType "third-party" }}
+    change_management = {{.ChangeManagement}}
+    {{- if .ThirdParty.ExcludeSANS}}
+    exclude_sans = {{.ThirdParty.ExcludeSANS}}
+    {{- end}}
+    {{- end}}
+}
+{{- end}}
+{{- if eq .Enrollment.ValidationType "third-party" }}
+
+/*
+data "akamai_cps_csr" "enrollment_id_{{.EnrollmentID}}" {
+  enrollment_id = {{.EnrollmentID}}
+}
+*/
+{{- if ne .NoUploadCertificate true }}
+
+resource "akamai_cps_upload_certificate" "enrollment_id_{{.EnrollmentID}}" {
+  enrollment_id                          = {{.EnrollmentID}}
+  {{- if .CertificateECDSA}}
+  certificate_ecdsa_pem                  = "{{.CertificateECDSA}}"
+  {{- end}}
+  {{- if .CertificateRSA}}
+  certificate_rsa_pem                    = "{{.CertificateRSA}}"
+  {{- end}}
+  {{- if .TrustChainECDSA}}
+  trust_chain_ecdsa_pem                  = "{{.TrustChainECDSA}}"
+  {{- end}}
+  {{- if .TrustChainRSA}}
+  trust_chain_rsa_pem                    = "{{.TrustChainRSA}}"
+  {{- end}}
+  acknowledge_post_verification_warnings = false
+  auto_approve_warnings                  = []
+  acknowledge_change_management          = false
+  wait_for_deployment                    = false
+}
+{{- end}}
 {{- end}}

@@ -13,13 +13,14 @@ provider "akamai" {
   config_section = var.config_section
 }
 
-resource "akamai_cps_dv_enrollment" "enrollment_id_1" {
+resource "akamai_cps_third_party_enrollment" "enrollment_id_1" {
   common_name                           = "test.akamai.com"
   allow_duplicate_common_name           = false
-  sans                                  = ["san.test.akamai.com", ]
+  sans                                  = ["test.akamai.com", "san.test.akamai.com", ]
   secure_network                        = "enhanced-tls"
   sni_only                              = true
   acknowledge_pre_verification_warnings = false
+  auto_approve_warnings                 = []
   admin_contact {
     first_name       = "R1"
     last_name        = "D1"
@@ -79,5 +80,23 @@ resource "akamai_cps_dv_enrollment" "enrollment_id_1" {
     postal_code      = "12345"
     country_code     = "US"
   }
-  contract_id = "ctr_1"
+  contract_id       = "ctr_1"
+  change_management = true
+  exclude_sans      = true
+}
+
+/*
+data "akamai_cps_csr" "enrollment_id_1" {
+  enrollment_id = 1
+}
+*/
+
+resource "akamai_cps_upload_certificate" "enrollment_id_1" {
+  enrollment_id                          = 1
+  certificate_ecdsa_pem                  = "-----BEGIN CERTIFICATE ECDSA REQUEST-----\n...\n-----END CERTIFICATE ECDSA REQUEST-----"
+  trust_chain_ecdsa_pem                  = "-----BEGIN CERTIFICATE TRUST-CHAIN ECDSA REQUEST-----\n...\n-----END CERTIFICATE TRUST-CHAIN ECDSA REQUEST-----"
+  acknowledge_post_verification_warnings = false
+  auto_approve_warnings                  = []
+  acknowledge_change_management          = false
+  wait_for_deployment                    = false
 }
