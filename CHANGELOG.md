@@ -1,5 +1,15 @@
 # Release Notes
 
+## Version 1.1.1 (Oct 27, 2022)
+
+### Fixes
+
+* GTM
+  * Fix exporting GTM property with default datacenter ([I#31](https://github.com/akamai/cli-terraform/issues/31))
+
+* PAPI
+  * Fix `cert_provisioning_type` field exporting ([I#15](https://github.com/akamai/cli-terraform/issues/15))
+
 ## Version 1.1.0 (Oct 10, 2022)
 
 ### Features/Enhancements
