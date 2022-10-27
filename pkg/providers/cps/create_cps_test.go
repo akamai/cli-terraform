@@ -352,6 +352,72 @@ var (
 		ValidationType: "third-party",
 	}
 
+	enrollmentOV = cps.Enrollment{
+		AdminContact: &cps.Contact{
+			AddressLineOne:   "150 Broadway",
+			City:             "Cambridge",
+			Country:          "US",
+			Email:            "r1d1@akamai.com",
+			FirstName:        "R1",
+			LastName:         "D1",
+			OrganizationName: "Akamai",
+			Phone:            "123123123",
+			PostalCode:       "12345",
+			Region:           "MA",
+		},
+		CertificateChainType: "default",
+		CertificateType:      "san",
+		ChangeManagement:     false,
+		CSR: &cps.CSR{
+			C:    "US",
+			CN:   "test.akamai.com",
+			L:    "Cambridge",
+			O:    "Akamai",
+			OU:   "WebEx",
+			SANS: []string{"test.akamai.com"},
+			ST:   "MA",
+		},
+		EnableMultiStackedCertificates: false,
+		NetworkConfiguration: &cps.NetworkConfiguration{
+			DisallowedTLSVersions: []string{"TLSv1", "TLSv1_1"},
+			DNSNameSettings: &cps.DNSNameSettings{
+				CloneDNSNames: false,
+				DNSNames:      []string{},
+			},
+			Geography:        "core",
+			MustHaveCiphers:  "ak-akamai-default",
+			OCSPStapling:     "on",
+			PreferredCiphers: "ak-akamai-default",
+			QuicEnabled:      false,
+			SecureNetwork:    "enhanced-tls",
+			SNIOnly:          true,
+		},
+		Org: &cps.Org{
+			AddressLineOne: "150 Broadway",
+			City:           "Cambridge",
+			Country:        "US",
+			Name:           "Akamai",
+			Phone:          "321321321",
+			PostalCode:     "12345",
+			Region:         "MA",
+		},
+		RA:                 "symantec",
+		SignatureAlgorithm: "SHA-256",
+		TechContact: &cps.Contact{
+			AddressLineOne:   "150 Broadway",
+			City:             "Cambridge",
+			Country:          "US",
+			Email:            "r2d2@akamai.com",
+			FirstName:        "R2",
+			LastName:         "D2",
+			OrganizationName: "Akamai",
+			Phone:            "123123123",
+			PostalCode:       "12345",
+			Region:           "MA",
+		},
+		ValidationType: "ov",
+	}
+
 	expectGetEnrollment = func(m *cps.Mock, enrollmentID int, enrollment cps.Enrollment, err error) *mock.Call {
 		call := m.On(
 			"GetEnrollment",
@@ -553,6 +619,13 @@ func TestCreateCPS(t *testing.T) {
 			},
 			enrollmentID: 2,
 			withError:    ErrFetchingEnrollment,
+		},
+		"provided ov enrollment": {
+			init: func(m *cps.Mock) {
+				expectGetEnrollment(m, 3, enrollmentOV, nil).Once()
+			},
+			enrollmentID: 3,
+			withError:    ErrUnsupportedEnrollmentType,
 		},
 	}
 

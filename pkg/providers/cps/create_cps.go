@@ -41,6 +41,8 @@ var (
 	ErrFetchingEnrollment = errors.New("unable to fetch enrollment with given id")
 	// ErrFetchingCertificateHistory is returned when fetching certificate history fails
 	ErrFetchingCertificateHistory = errors.New("unable to fetch certificate history with given id")
+	// ErrUnsupportedEnrollmentType is returned when user try to export OV or EV enrollments
+	ErrUnsupportedEnrollmentType = errors.New("supporting export of dv and third-party enrollments but got")
 )
 
 // CmdCreateCPS is an entrypoint to create-cps command
@@ -99,6 +101,11 @@ func createCPS(ctx context.Context, contractID string, enrollmentID int,
 	if err != nil || enrollment == nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrFetchingEnrollment, err)
+	}
+
+	if enrollment.ValidationType != "third-party" && enrollment.ValidationType != "dv" {
+		term.Spinner().Fail()
+		return fmt.Errorf("%w: %s", ErrUnsupportedEnrollmentType, enrollment.ValidationType)
 	}
 
 	term.Spinner().OK()
