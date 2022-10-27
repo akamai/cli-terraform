@@ -57,6 +57,7 @@ type EdgeHostname struct {
 type Hostname struct {
 	Hostname                 string
 	EdgeHostnameResourceName string
+	CertProvisioningType     string
 }
 
 // TFData holds template data
@@ -391,9 +392,14 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			UseCases:                 useCases,
 		}
 
+		certProvisioningType := "CPS_MANAGED"
+		if hostname.CertProvisioningType != "" {
+			certProvisioningType = hostname.CertProvisioningType
+		}
 		hostnamesMap[cnameFrom] = Hostname{
 			Hostname:                 cnameFrom,
 			EdgeHostnameResourceName: cnameToResource,
+			CertProvisioningType:     certProvisioningType,
 		}
 	}
 

@@ -50,7 +50,7 @@ resource "akamai_property" "{{.PropertyResourceName}}" {
   hostnames {
     cname_from = "{{.Hostname}}"
     cname_to = akamai_edge_hostname.{{.EdgeHostnameResourceName}}.edge_hostname
-    cert_provisioning_type = "CPS_MANAGED"
+    cert_provisioning_type = "{{.CertProvisioningType}}"
   }
 {{- end}}
   rules = data.akamai_property_rules_template.rules.json

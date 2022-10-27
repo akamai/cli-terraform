@@ -412,7 +412,7 @@ func createNamedModulePath(modName, tfWorkPath string) string {
 	return fpath
 }
 
-//Utility func
+// Utility func
 func createDirectory(dirName string) bool {
 
 	stat, err := os.Stat(dirName)

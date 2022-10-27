@@ -757,6 +757,12 @@ func TestProcessDomainTemplates(t *testing.T) {
 				DefaultErrorPenalty:     90,
 				CnameCoalescingEnabled:  true,
 				LoadFeedback:            true,
+				DefaultDatacenters: []TFDatacenterData{
+					{
+						Nickname: "DEFAULT",
+						ID:       5400,
+					},
+				},
 				Datacenters: []TFDatacenterData{
 					{
 						Nickname:        "TEST1",
@@ -860,6 +866,28 @@ func TestProcessDomainTemplates(t *testing.T) {
 										Value: "header2Value",
 									},
 								},
+							},
+						},
+					},
+					{
+						Name:                 "test property3",
+						Type:                 "asmapping",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						TrafficTargets: []*gtm.TrafficTarget{
+							{
+								DatacenterId: 5400,
+								Enabled:      true,
+								Weight:       0,
+								Servers:      []string{},
+							},
+							{
+								DatacenterId: 124,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{},
 							},
 						},
 					},
