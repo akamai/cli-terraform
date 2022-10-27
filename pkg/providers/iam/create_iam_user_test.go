@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	expectListUsers = func(client *mockiam) {
+	expectListUsers = func(client *iam.Mock) {
 		listUserReq := iam.ListUsersRequest{}
 
 		users := []iam.UserListItem{
@@ -34,7 +34,7 @@ var (
 		client.On("ListUsers", mock.Anything, listUserReq).Return(users, nil).Once()
 	}
 
-	expectGetUser = func(client *mockiam) {
+	expectGetUser = func(client *iam.Mock) {
 		getUserReq := iam.GetUserRequest{
 			IdentityID:    "123",
 			Actions:       true,
@@ -60,7 +60,7 @@ var (
 		client.On("GetUser", mock.Anything, getUserReq).Return(&user, nil).Once()
 	}
 
-	expectGetUserRole = func(client *mockiam) {
+	expectGetUserRole = func(client *iam.Mock) {
 		getRoleReq := iam.GetRoleRequest{
 			ID:           12345,
 			GrantedRoles: true,
@@ -74,7 +74,7 @@ var (
 		client.On("GetRole", mock.Anything, getRoleReq).Return(&role, nil).Once()
 	}
 
-	expectGetUserGroup = func(client *mockiam) {
+	expectGetUserGroup = func(client *iam.Mock) {
 		getGroupReq1 := iam.GetGroupRequest{
 			GroupID: 56789,
 		}
@@ -142,10 +142,10 @@ func TestCreateIAMUserByEmail(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		init func(*mockiam, *mockProcessor)
+		init func(*iam.Mock, *mockProcessor)
 	}{
 		"fetch user": {
-			init: func(i *mockiam, p *mockProcessor) {
+			init: func(i *iam.Mock, p *mockProcessor) {
 				expectListUsers(i)
 				expectGetUser(i)
 				expectGetUserRole(i)
@@ -156,7 +156,7 @@ func TestCreateIAMUserByEmail(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			mi := new(mockiam)
+			mi := new(iam.Mock)
 			mp := new(mockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))

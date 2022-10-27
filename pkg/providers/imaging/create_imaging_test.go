@@ -618,7 +618,7 @@ var (
 		}
 	}
 
-	expectGetPolicySet = func(i *mockimaging, policySetID, contractID, name, policyType string, region imaging.Region,
+	expectGetPolicySet = func(i *imaging.Mock, policySetID, contractID, name, policyType string, region imaging.Region,
 		err error) *mock.Call {
 		call := i.On(
 			"GetPolicySet",
@@ -640,7 +640,7 @@ var (
 			}, nil)
 	}
 
-	expectGetPolicy = func(i *mockimaging, policyRequest imaging.GetPolicyRequest, policyOutput imaging.PolicyOutput, err error) *mock.Call {
+	expectGetPolicy = func(i *imaging.Mock, policyRequest imaging.GetPolicyRequest, policyOutput imaging.PolicyOutput, err error) *mock.Call {
 		call := i.On(
 			"GetPolicy",
 			mock.Anything,
@@ -652,7 +652,7 @@ var (
 		return call.Return(policyOutput, nil)
 	}
 
-	expectListPolicies = func(i *mockimaging, policySetID, contractID, itemKind string, network imaging.PolicyNetwork,
+	expectListPolicies = func(i *imaging.Mock, policySetID, contractID, itemKind string, network imaging.PolicyNetwork,
 		items imaging.PolicyOutputs, totalItems int, err error) *mock.Call {
 		call := i.On(
 			"ListPolicies",
@@ -678,7 +678,7 @@ var (
 func TestCreateImaging(t *testing.T) {
 	section := "test_section"
 	tests := map[string]struct {
-		init         func(*mockimaging)
+		init         func(*imaging.Mock)
 		filesToCheck []string
 		dataDir      string
 		jsonDir      string
@@ -686,7 +686,7 @@ func TestCreateImaging(t *testing.T) {
 		schema       bool
 	}{
 		"fetch policy set with given id and contract and no policies": {
-			init: func(i *mockimaging) {
+			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
 				// getPolicies returns zero policies
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -696,7 +696,7 @@ func TestCreateImaging(t *testing.T) {
 			filesToCheck: []string{"imaging.tf", "import.sh", "variables.tf"},
 		},
 		"fetch policy set with image policies same on production": {
-			init: func(i *mockimaging) {
+			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -711,7 +711,7 @@ func TestCreateImaging(t *testing.T) {
 			filesToCheck: []string{"_auto.json", "test_policy_image.json", "imaging.tf", "import.sh", "variables.tf"},
 		},
 		"fetch policy set with image policies same on production with jsondir": {
-			init: func(i *mockimaging) {
+			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -728,7 +728,7 @@ func TestCreateImaging(t *testing.T) {
 		},
 
 		"fetch policy set with image policies same on production as schema": {
-			init: func(i *mockimaging) {
+			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -744,7 +744,7 @@ func TestCreateImaging(t *testing.T) {
 			schema:       true,
 		},
 		"fetch policy set with image policies same on production as schema, too many levels": {
-			init: func(i *mockimaging) {
+			init: func(i *imaging.Mock) {
 				policy, err := convertPolicyInputImage(&veryDeepPolicy)
 				require.NoError(t, err)
 				policy.ID = ".auto"
@@ -764,7 +764,7 @@ func TestCreateImaging(t *testing.T) {
 			schema:    true,
 		},
 		"fetch policy set with image policies different on production": {
-			init: func(i *mockimaging) {
+			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -780,7 +780,7 @@ func TestCreateImaging(t *testing.T) {
 		},
 
 		"fetch policy set with video policies same on production": {
-			init: func(i *mockimaging) {
+			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "VIDEO", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -795,7 +795,7 @@ func TestCreateImaging(t *testing.T) {
 			filesToCheck: []string{"_auto.json", "test_policy_video.json", "imaging.tf", "import.sh", "variables.tf"},
 		},
 		"fetch policy set with video policies same on production with jsondir": {
-			init: func(i *mockimaging) {
+			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "VIDEO", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -812,7 +812,7 @@ func TestCreateImaging(t *testing.T) {
 		},
 
 		"fetch policy set with video policies same on production as schema": {
-			init: func(i *mockimaging) {
+			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "VIDEO", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -828,7 +828,7 @@ func TestCreateImaging(t *testing.T) {
 			filesToCheck: []string{"imaging.tf", "import.sh", "variables.tf"},
 		},
 		"fetch policy set with video policies different on production": {
-			init: func(i *mockimaging) {
+			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "VIDEO", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -843,13 +843,13 @@ func TestCreateImaging(t *testing.T) {
 			filesToCheck: []string{"_auto.json", "test_policy_video.json", "imaging.tf", "import.sh", "variables.tf"},
 		},
 		"error fetching policy set": {
-			init: func(i *mockimaging) {
+			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "VIDEO", "EMEA", fmt.Errorf("oops")).Once()
 			},
 			withError: ErrFetchingPolicySet,
 		},
 		"error fetching policies": {
-			init: func(i *mockimaging) {
+			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
 				// getPolicies
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -858,7 +858,7 @@ func TestCreateImaging(t *testing.T) {
 			withError: ErrFetchingPolicy,
 		},
 		"error fetching policy": {
-			init: func(i *mockimaging) {
+			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
 				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
@@ -875,7 +875,7 @@ func TestCreateImaging(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("testdata/res/%s/%s", test.dataDir, test.jsonDir), 0755))
 			tfWorkPath := fmt.Sprintf("testdata/res/%s", test.dataDir)
-			mi := new(mockimaging)
+			mi := new(imaging.Mock)
 			mp := processor(test.dataDir)
 			test.init(mi)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))

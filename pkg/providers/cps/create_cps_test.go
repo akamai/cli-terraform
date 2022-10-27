@@ -352,7 +352,7 @@ var (
 		ValidationType: "third-party",
 	}
 
-	expectGetEnrollment = func(m *mockcps, enrollmentID int, enrollment cps.Enrollment, err error) *mock.Call {
+	expectGetEnrollment = func(m *cps.Mock, enrollmentID int, enrollment cps.Enrollment, err error) *mock.Call {
 		call := m.On(
 			"GetEnrollment",
 			mock.Anything,
@@ -366,7 +366,7 @@ var (
 		return call.Return(&enrollment, nil)
 	}
 
-	expectGetChangeHistory = func(m *mockcps, enrollmentID int, response cps.GetChangeHistoryResponse, err error) *mock.Call {
+	expectGetChangeHistory = func(m *cps.Mock, enrollmentID int, response cps.GetChangeHistoryResponse, err error) *mock.Call {
 		call := m.On(
 			"GetChangeHistory",
 			mock.Anything,
@@ -384,7 +384,7 @@ var (
 func TestCreateCPS(t *testing.T) {
 	section := "test_section"
 	tests := map[string]struct {
-		init         func(*mockcps)
+		init         func(*cps.Mock)
 		enrollmentID int
 		contractID   string
 		filesToCheck []string
@@ -394,7 +394,7 @@ func TestCreateCPS(t *testing.T) {
 		schema       bool
 	}{
 		"export DV enrollment with minimum fields": {
-			init: func(m *mockcps) {
+			init: func(m *cps.Mock) {
 				expectGetEnrollment(m, 1, enrollmentDVMin, nil).Once()
 			},
 			enrollmentID: 1,
@@ -403,7 +403,7 @@ func TestCreateCPS(t *testing.T) {
 			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
 		"export DV enrollment": {
-			init: func(m *mockcps) {
+			init: func(m *cps.Mock) {
 				expectGetEnrollment(m, 1, enrollmentDVAll, nil).Once()
 			},
 			enrollmentID: 1,
@@ -412,7 +412,7 @@ func TestCreateCPS(t *testing.T) {
 			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
 		"export third party enrollment ecdsa": {
-			init: func(m *mockcps) {
+			init: func(m *cps.Mock) {
 				expectGetEnrollment(m, 1, enrollmentThirdPartyAll, nil).Once()
 				response := cps.GetChangeHistoryResponse{
 					Changes: []cps.ChangeHistory{
@@ -442,7 +442,7 @@ func TestCreateCPS(t *testing.T) {
 			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
 		"export third party enrollment rsa": {
-			init: func(m *mockcps) {
+			init: func(m *cps.Mock) {
 				expectGetEnrollment(m, 1, enrollmentThirdPartyAll, nil).Once()
 				response := cps.GetChangeHistoryResponse{
 					Changes: []cps.ChangeHistory{
@@ -464,7 +464,7 @@ func TestCreateCPS(t *testing.T) {
 			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
 		"export third party enrollment ecdsa+rsa": {
-			init: func(m *mockcps) {
+			init: func(m *cps.Mock) {
 				expectGetEnrollment(m, 1, enrollmentThirdPartyAll, nil).Once()
 				response := cps.GetChangeHistoryResponse{
 					Changes: []cps.ChangeHistory{
@@ -493,7 +493,7 @@ func TestCreateCPS(t *testing.T) {
 			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
 		"export third party enrollment renewal": {
-			init: func(m *mockcps) {
+			init: func(m *cps.Mock) {
 				expectGetEnrollment(m, 1, enrollmentThirdPartyAll, nil).Once()
 				response := cps.GetChangeHistoryResponse{
 					Changes: []cps.ChangeHistory{
@@ -528,7 +528,7 @@ func TestCreateCPS(t *testing.T) {
 			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
 		"export third party enrollment new certificate": {
-			init: func(m *mockcps) {
+			init: func(m *cps.Mock) {
 				expectGetEnrollment(m, 1, enrollmentThirdPartyAll, nil).Once()
 				response := cps.GetChangeHistoryResponse{
 					Changes: []cps.ChangeHistory{
@@ -548,7 +548,7 @@ func TestCreateCPS(t *testing.T) {
 			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
 		"error fetching enrollment": {
-			init: func(m *mockcps) {
+			init: func(m *cps.Mock) {
 				expectGetEnrollment(m, 2, enrollmentDV, fmt.Errorf("oops")).Once()
 			},
 			enrollmentID: 2,
@@ -559,7 +559,7 @@ func TestCreateCPS(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("testdata/res/%s/%s", test.dataDir, test.jsonDir), 0755))
-			mi := new(mockcps)
+			mi := new(cps.Mock)
 			mp := processor(test.dataDir)
 			test.init(mi)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))

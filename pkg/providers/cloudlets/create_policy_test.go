@@ -44,11 +44,11 @@ func TestCreatePolicy(t *testing.T) {
 	section := "test_section"
 	pageSize := 1000
 	tests := map[string]struct {
-		init      func(*mockCloudlets, *mockProcessor)
+		init      func(*cloudlets.Mock, *mockProcessor)
 		withError error
 	}{
 		"fetch latest version of policy and produce output ALB": {
-			init: func(c *mockCloudlets, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -160,7 +160,7 @@ func TestCreatePolicy(t *testing.T) {
 			},
 		},
 		"fetch latest version of policy and produce output with activations ER": {
-			init: func(c *mockCloudlets, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -269,7 +269,7 @@ func TestCreatePolicy(t *testing.T) {
 			},
 		},
 		"fetch latest version of policy and produce output with activations CD": {
-			init: func(c *mockCloudlets, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -378,7 +378,7 @@ func TestCreatePolicy(t *testing.T) {
 			},
 		},
 		"fetch latest version of policy and produce output without activations": {
-			init: func(c *mockCloudlets, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -447,7 +447,7 @@ func TestCreatePolicy(t *testing.T) {
 			},
 		},
 		"fetch latest version of policy and produce output without activations AP": {
-			init: func(c *mockCloudlets, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -520,7 +520,7 @@ func TestCreatePolicy(t *testing.T) {
 			},
 		},
 		"fetch latest version of policy and produce output without activations AS": {
-			init: func(c *mockCloudlets, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -591,13 +591,13 @@ func TestCreatePolicy(t *testing.T) {
 			},
 		},
 		"error fetching policy": {
-			init: func(c *mockCloudlets, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return(nil, fmt.Errorf("oops")).Once()
 			},
 			withError: ErrFetchingPolicy,
 		},
 		"error policy not found": {
-			init: func(c *mockCloudlets, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -611,7 +611,7 @@ func TestCreatePolicy(t *testing.T) {
 			withError: ErrFetchingPolicy,
 		},
 		"unsupported cloudlet type": {
-			init: func(c *mockCloudlets, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -633,7 +633,7 @@ func TestCreatePolicy(t *testing.T) {
 			withError: ErrCloudletTypeNotSupported,
 		},
 		"error listing versions": {
-			init: func(c *mockCloudlets, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -656,7 +656,7 @@ func TestCreatePolicy(t *testing.T) {
 			withError: ErrFetchingVersion,
 		},
 		"error fetching latest version": {
-			init: func(c *mockCloudlets, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -694,7 +694,7 @@ func TestCreatePolicy(t *testing.T) {
 			withError: ErrFetchingVersion,
 		},
 		"error processing template": {
-			init: func(c *mockCloudlets, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *mockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -767,7 +767,7 @@ func TestCreatePolicy(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			mc := new(mockCloudlets)
+			mc := new(cloudlets.Mock)
 			mp := new(mockProcessor)
 			test.init(mc, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
@@ -1991,13 +1991,13 @@ func TestFindPolicy(t *testing.T) {
 	}
 	tests := map[string]struct {
 		policyName string
-		init       func(m *mockCloudlets)
+		init       func(m *cloudlets.Mock)
 		expectedID int64
 		withError  bool
 	}{
 		"policy found in first iteration": {
 			policyName: "test_policy",
-			init: func(m *mockCloudlets) {
+			init: func(m *cloudlets.Mock) {
 				m.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{PolicyID: 9999999, Name: "some_policy"},
 					{PolicyID: 1234567, Name: "test_policy"},
@@ -2007,7 +2007,7 @@ func TestFindPolicy(t *testing.T) {
 		},
 		"policy found on 3rd page": {
 			policyName: "test_policy",
-			init: func(m *mockCloudlets) {
+			init: func(m *cloudlets.Mock) {
 				m.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).
 					Return(preparePoliciesPage(1000, 0), nil).Once()
 				m.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 1000}).
@@ -2022,7 +2022,7 @@ func TestFindPolicy(t *testing.T) {
 		},
 		"policy not found": {
 			policyName: "test_policy",
-			init: func(m *mockCloudlets) {
+			init: func(m *cloudlets.Mock) {
 				m.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).
 					Return(preparePoliciesPage(1000, 0), nil).Once()
 				m.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 1000}).
@@ -2035,7 +2035,7 @@ func TestFindPolicy(t *testing.T) {
 		},
 		"error listing policies": {
 			policyName: "test_policy",
-			init: func(m *mockCloudlets) {
+			init: func(m *cloudlets.Mock) {
 				m.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).
 					Return(preparePoliciesPage(1000, 0), nil).Once()
 				m.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 1000}).
@@ -2047,7 +2047,7 @@ func TestFindPolicy(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			m := new(mockCloudlets)
+			m := new(cloudlets.Mock)
 			test.init(m)
 			policy, err := findPolicyByName(context.Background(), test.policyName, m)
 			m.AssertExpectations(t)
@@ -2072,13 +2072,13 @@ func TestGetLatestPolicyVersion(t *testing.T) {
 	}
 	tests := map[string]struct {
 		policyID  int64
-		init      func(m *mockCloudlets)
+		init      func(m *cloudlets.Mock)
 		expected  int64
 		withError bool
 	}{
 		"policy version found in first iteration": {
 			policyID: 123,
-			init: func(m *mockCloudlets) {
+			init: func(m *cloudlets.Mock) {
 				m.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 123, PageSize: &pageSize, Offset: 0}).
 					Return(prepareVersionsPage(500, 0), nil).Once()
 				m.On("GetPolicyVersion", mock.Anything, cloudlets.GetPolicyVersionRequest{PolicyID: 123, Version: 499}).
@@ -2088,7 +2088,7 @@ func TestGetLatestPolicyVersion(t *testing.T) {
 		},
 		"policy version found on 3rd page": {
 			policyID: 123,
-			init: func(m *mockCloudlets) {
+			init: func(m *cloudlets.Mock) {
 				m.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 123, PageSize: &pageSize, Offset: 0}).
 					Return(prepareVersionsPage(1000, 0), nil).Once()
 				m.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 123, PageSize: &pageSize, Offset: 1000}).
@@ -2102,7 +2102,7 @@ func TestGetLatestPolicyVersion(t *testing.T) {
 		},
 		"no policy versions found": {
 			policyID: 123,
-			init: func(m *mockCloudlets) {
+			init: func(m *cloudlets.Mock) {
 				m.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 123, PageSize: &pageSize, Offset: 0}).
 					Return([]cloudlets.PolicyVersion{}, nil).Once()
 			},
@@ -2110,7 +2110,7 @@ func TestGetLatestPolicyVersion(t *testing.T) {
 		},
 		"error listing policy versions": {
 			policyID: 123,
-			init: func(m *mockCloudlets) {
+			init: func(m *cloudlets.Mock) {
 				m.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 123, PageSize: &pageSize, Offset: 0}).
 					Return(nil, fmt.Errorf("oops")).Once()
 			},
@@ -2118,7 +2118,7 @@ func TestGetLatestPolicyVersion(t *testing.T) {
 		},
 		"error fetching latest policy version": {
 			policyID: 123,
-			init: func(m *mockCloudlets) {
+			init: func(m *cloudlets.Mock) {
 				m.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 123, PageSize: &pageSize, Offset: 0}).
 					Return(prepareVersionsPage(500, 0), nil).Once()
 				m.On("GetPolicyVersion", mock.Anything, cloudlets.GetPolicyVersionRequest{PolicyID: 123, Version: 499}).
@@ -2129,7 +2129,7 @@ func TestGetLatestPolicyVersion(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			m := new(mockCloudlets)
+			m := new(cloudlets.Mock)
 			test.init(m)
 			policyVersion, err := getLatestPolicyVersion(context.Background(), test.policyID, m)
 			m.AssertExpectations(t)
