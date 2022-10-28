@@ -1,3 +1,4 @@
+// Package edgegrid contains code for manipulating edgegrid access settings
 package edgegrid
 
 import (

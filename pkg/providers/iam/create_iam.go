@@ -1,3 +1,4 @@
+// Package iam contains code for exporting identity access manager configuration
 package iam
 
 import (

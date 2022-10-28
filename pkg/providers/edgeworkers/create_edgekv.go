@@ -1,3 +1,4 @@
+// Package edgeworkers contains code for exporting edge workers and edge kv configuration
 package edgeworkers
 
 import (

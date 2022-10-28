@@ -1,3 +1,4 @@
+// Package templates allows processing multiple templates which use common data
 package templates
 
 import (

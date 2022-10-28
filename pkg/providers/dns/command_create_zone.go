@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package dns contains code for exporting dns configuration
 package dns
 
 import (

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// Package papi contains code for exporting properties
 package papi
 
 import (

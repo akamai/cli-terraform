@@ -1,3 +1,4 @@
+// Package appsec contains code for exporting application security configuration
 package appsec
 
 import (

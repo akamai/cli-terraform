@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package gtm contains code for exporting global traffic manager configuration
 package gtm
 
 import (

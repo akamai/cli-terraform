@@ -1,3 +1,4 @@
+// Package imaging contains code for exporting policies for images and videos
 package imaging
 
 import (

@@ -1,3 +1,4 @@
+// Package cloudlets contains code for exporting cloudlets configuration
 package cloudlets
 
 import (
