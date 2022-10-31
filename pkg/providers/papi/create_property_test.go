@@ -541,7 +541,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 		"basic property with cert provisioning type": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
