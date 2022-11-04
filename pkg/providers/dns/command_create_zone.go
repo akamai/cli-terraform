@@ -26,12 +26,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configdns"
+	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/configdns"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
-	"github.com/urfave/cli/v2"
 )
 
 // Types contains list of Name Types to organize types by name

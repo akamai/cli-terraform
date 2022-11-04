@@ -11,7 +11,7 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/appsec"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/appsec"
 	"github.com/akamai/cli-terraform/pkg/templates"
 
 	"github.com/stretchr/testify/assert"

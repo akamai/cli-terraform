@@ -29,14 +29,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/hapi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/hapi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/papi"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
-	"github.com/urfave/cli/v2"
 )
 
 // EdgeHostname represents EdgeHostname resource

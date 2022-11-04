@@ -12,7 +12,7 @@ import (
 	"testing"
 	"text/template"
 
-	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configgtm"
+	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/configgtm"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"

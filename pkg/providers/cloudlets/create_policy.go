@@ -11,13 +11,12 @@ import (
 	"sort"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/cloudlets"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/cloudlets"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
-	"github.com/urfave/cli/v2"
 )
 
 type (

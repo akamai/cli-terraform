@@ -20,7 +20,7 @@ import (
 	"regexp"
 	"strings"
 
-	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configdns"
+	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/configdns"
 	"github.com/shirou/gopsutil/mem"
 )
 

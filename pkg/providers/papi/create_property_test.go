@@ -10,8 +10,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/hapi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/hapi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/papi"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/assert"
