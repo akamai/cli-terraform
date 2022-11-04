@@ -16,8 +16,10 @@ list_branches() {
 
 find_edgegrid_branch() {
   CURRENT_BRANCH=$GIT_BRANCH
-  if [[ "$CURRENT_BRANCH" == "develop" || "$CURRENT_BRANCH" == "master" ]]; then
-    EDGEGRID_BRANCH="v2"
+  if [[ "$CURRENT_BRANCH" == "develop" ]]; then
+    EDGEGRID_BRANCH="develop"
+  elif [[ "$CURRENT_BRANCH" == "master" ]]; then
+    EDGEGRID_BRANCH="master"
   elif [[ $CURRENT_BRANCH =~ .*/sp-.* ]]; then
     echo Current branch is '${CURRENT_BRANCH}'
     EDGEGRID_BRANCH=${CURRENT_BRANCH//origin\//}
@@ -30,15 +32,12 @@ find_edgegrid_branch() {
       EDGEGRID_BRANCH=$branch
 
       if [[ "$index" -eq "5" ]]; then
-        echo "Exceeding limit of checks, fallback to default branch 'v2'"
-        EDGEGRID_BRANCH="v2"
+        echo "Exceeding limit of checks, fallback to default branch 'develop'"
+        EDGEGRID_BRANCH="develop"
         break
       fi
       index=$((index + 1))
 
-      if [[ "$EDGEGRID_BRANCH" == "develop" || "$EDGEGRID_BRANCH" == "master" ]]; then
-        EDGEGRID_BRANCH="v2"
-      fi
       git -C ./akamaiopen-edgegrid-golang branch -r | grep $EDGEGRID_BRANCH > /dev/null
       if [[ $? -eq 0 ]]; then
         echo "There is matching EdgeGrid branch '${EDGEGRID_BRANCH}'"

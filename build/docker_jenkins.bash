@@ -10,7 +10,7 @@ set -e
 
 CLI_TERRAFORM_BRANCH_NAME="${1:-develop}"
 PROVIDER_BRANCH_NAME="${2:-develop}"
-EDGEGRID_BRANCH_NAME="${3:-v2}"
+EDGEGRID_BRANCH_NAME="${3:-develop}"
 CLI_BRANCH_NAME="${4:-develop}"
 RELOAD_DOCKER_IMAGE="${5:-false}"
 
