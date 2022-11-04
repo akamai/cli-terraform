@@ -3,7 +3,6 @@ module github.com/akamai/cli-terraform
 go 1.17
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang v1.2.1
 	github.com/akamai/AkamaiOPEN-edgegrid-golang/v2 v2.17.0
 	github.com/akamai/cli v1.5.2
 	github.com/fatih/color v1.13.0
@@ -31,19 +30,16 @@ require (
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
-	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
-	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/stretchr/objx v0.4.0 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
