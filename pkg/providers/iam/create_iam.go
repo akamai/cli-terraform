@@ -10,6 +10,7 @@ import (
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/iam"
 	"github.com/akamai/cli/pkg/terminal"
+	"github.com/urfave/cli/v2"
 )
 
 type (

@@ -28,6 +28,7 @@ import (
 	"github.com/akamai/cli/pkg/log"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
+	"github.com/urfave/cli/v2"
 )
 
 var (

@@ -3,6 +3,7 @@ package edgegrid
 
 import (
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/edgegrid"
+	"github.com/urfave/cli/v2"
 )
 
 // GetEdgegridConfig gets configuration from .edgerc file

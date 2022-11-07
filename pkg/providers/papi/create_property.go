@@ -36,6 +36,7 @@ import (
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
+	"github.com/urfave/cli/v2"
 )
 
 // EdgeHostname represents EdgeHostname resource

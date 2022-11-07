@@ -8,6 +8,7 @@ import (
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/edgegrid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/urfave/cli/v2"
 )
 
 func TestGetEdgegridConfig(t *testing.T) {

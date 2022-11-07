@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/session"
+	"github.com/urfave/cli/v2"
 )
 
 type ctxType string
