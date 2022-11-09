@@ -16,11 +16,7 @@ list_branches() {
 
 find_edgegrid_branch() {
   CURRENT_BRANCH=$GIT_BRANCH
-  if [[ "$CURRENT_BRANCH" == "develop" ]]; then
-    EDGEGRID_BRANCH="develop"
-  elif [[ "$CURRENT_BRANCH" == "master" ]]; then
-    EDGEGRID_BRANCH="master"
-  elif [[ $CURRENT_BRANCH =~ .*/sp-.* ]]; then
+  if [[ "$CURRENT_BRANCH" == "develop" || "$CURRENT_BRANCH" == "master" || $CURRENT_BRANCH =~ .*/sp-.* ]]; then
     echo Current branch is '${CURRENT_BRANCH}'
     EDGEGRID_BRANCH=${CURRENT_BRANCH//origin\//}
   else
