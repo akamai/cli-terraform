@@ -25,7 +25,7 @@ import (
 	"strings"
 	"text/template"
 
-	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/configgtm"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/gtm"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
