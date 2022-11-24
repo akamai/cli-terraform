@@ -63,6 +63,31 @@ type Hostname struct {
 
 // TFData holds template data
 type TFData struct {
+	Includes []TFIncludeData
+	Property TFPropertyData
+	Section  string
+}
+
+// TFIncludeData holds template data for an include
+type TFIncludeData struct {
+	ActivationNoteProduction   string
+	ActivationNoteStaging      string
+	ContractID                 string
+	ActivationEmailsProduction []string
+	ActivationEmailsStaging    []string
+	GroupID                    string
+	IncludeID                  string
+	IncludeName                string
+	IncludeType                string
+	Networks                   []string
+	ProductID                  string
+	RuleFormat                 string
+	VersionProduction          string
+	VersionStaging             string
+}
+
+// TFPropertyData holds template data for property
+type TFPropertyData struct {
 	GroupName            string
 	GroupID              string
 	ContractID           string
@@ -75,7 +100,6 @@ type TFData struct {
 	IsSecure             string
 	EdgeHostnames        map[string]EdgeHostname
 	Hostnames            map[string]Hostname
-	Section              string
 	Emails               []string
 	ActivationNote       string
 	Version              string
@@ -86,8 +110,11 @@ type RulesTemplate struct {
 	AccountID       string        `json:"accountId"`
 	ContractID      string        `json:"contractId"`
 	GroupID         string        `json:"groupId"`
-	PropertyID      string        `json:"propertyId"`
-	PropertyVersion int           `json:"propertyVersion"`
+	PropertyID      string        `json:"propertyId,omitempty"`
+	IncludeID       string        `json:"includeId,omitempty"`
+	PropertyVersion int           `json:"propertyVersion,omitempty"`
+	IncludeVersion  int           `json:"includeVersion,omitempty"`
+	IncludeType     string        `json:"includeType,omitempty"`
 	Etag            string        `json:"etag"`
 	RuleFormat      string        `json:"ruleFormat"`
 	Rule            *RuleTemplate `json:"rules"`
@@ -191,9 +218,9 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	term := terminal.Get(ctx)
 
 	var tfData TFData
-	tfData.EdgeHostnames = make(map[string]EdgeHostname)
-	tfData.Hostnames = make(map[string]Hostname)
-	tfData.Emails = make([]string, 0)
+	tfData.Property.EdgeHostnames = make(map[string]EdgeHostname)
+	tfData.Property.Hostnames = make(map[string]Hostname)
+	tfData.Property.Emails = make([]string, 0)
 	tfData.Section = section
 
 	// Get Property
@@ -204,10 +231,10 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		return fmt.Errorf("%w: %s", ErrPropertyNotFound, err)
 	}
 
-	tfData.ContractID = property.ContractID
-	tfData.PropertyName = property.PropertyName
-	tfData.PropertyID = property.PropertyID
-	tfData.PropertyResourceName = strings.Replace(property.PropertyName, ".", "-", -1)
+	tfData.Property.ContractID = property.ContractID
+	tfData.Property.PropertyName = property.PropertyName
+	tfData.Property.PropertyID = property.PropertyID
+	tfData.Property.PropertyResourceName = strings.Replace(property.PropertyName, ".", "-", -1)
 
 	term.Spinner().OK()
 
@@ -219,8 +246,8 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		return fmt.Errorf("%w: %s", ErrGroupNotFound, err)
 	}
 
-	tfData.GroupName = group.GroupName
-	tfData.GroupID = group.GroupID
+	tfData.Property.GroupName = group.GroupName
+	tfData.Property.GroupID = group.GroupID
 
 	term.Spinner().OK()
 
@@ -236,8 +263,8 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		return fmt.Errorf("%w: %s", ErrPropertyVersionNotFound, err)
 	}
 
-	tfData.ProductID = version.Version.ProductID
-	tfData.Version = readVersion
+	tfData.Property.ProductID = version.Version.ProductID
+	tfData.Property.Version = readVersion
 
 	term.Spinner().OK()
 
@@ -249,25 +276,25 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		return fmt.Errorf("%w: %s", ErrPropertyRulesNotFound, err)
 	}
 
-	tfData.IsSecure = "false"
+	tfData.Property.IsSecure = "false"
 	if rules.Rules.Options.IsSecure {
-		tfData.IsSecure = "true"
+		tfData.Property.IsSecure = "true"
 	}
 
 	// Get Rule Format
-	tfData.RuleFormat = rules.RuleFormat
+	tfData.Property.RuleFormat = rules.RuleFormat
 
 	term.Spinner().OK()
 
 	// Get Product
 	term.Spinner().Start("Fetching product name ")
-	product, err := getProduct(ctx, client, tfData.ProductID, property.ContractID)
+	product, err := getProduct(ctx, client, tfData.Property.ProductID, property.ContractID)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrProductNameNotFound, err)
 	}
 
-	tfData.ProductName = product.ProductName
+	tfData.Property.ProductName = product.ProductName
 
 	term.Spinner().OK()
 
@@ -279,7 +306,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		return fmt.Errorf("%w: %s", ErrHostnamesNotFound, err)
 	}
 
-	tfData.Hostnames, tfData.EdgeHostnames, err =
+	tfData.Property.Hostnames, tfData.Property.EdgeHostnames, err =
 		getEdgeHostnameDetail(ctx, client, clientHapi, hostnames, product.ProductName, property)
 	if err != nil {
 		term.Spinner().Fail()
@@ -291,8 +318,8 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	term.Spinner().Start("Fetching activation details ")
 	latestActivation, err := fetchLatestActivation(ctx, client, property)
 	if err == nil {
-		tfData.ActivationNote = latestActivation.Note
-		tfData.Emails = getContactEmails(latestActivation)
+		tfData.Property.ActivationNote = latestActivation.Note
+		tfData.Property.Emails = getContactEmails(latestActivation)
 	}
 	term.Spinner().OK()
 
@@ -303,7 +330,8 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	}
 
 	// Save snippets
-	if err = saveSnippets(jsonDir, rules, tfWorkPath); err != nil {
+	ruleTemplate, rulesTemplate := setPropertyRuleTemplates(rules)
+	if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), "main.json"); err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
 	}
@@ -433,9 +461,8 @@ func getContactEmails(activation *papi.Activation) []string {
 	return activation.NotifyEmails
 }
 
-// saveSnippets saves given property rules into files under jsonDir directory
-func saveSnippets(jsonDir string, rules *papi.GetRuleTreeResponse, tfWorkPath string) error {
-
+// setPropertyRuleTemplates creates templates based on RuleTemplate and RulesTemplate for given property rule tree response
+func setPropertyRuleTemplates(rules *papi.GetRuleTreeResponse) (RuleTemplate, RulesTemplate) {
 	// Set up template structure
 	ruleTemplate := RuleTemplate{
 		Name:                rules.Rules.Name,
@@ -459,17 +486,20 @@ func saveSnippets(jsonDir string, rules *papi.GetRuleTreeResponse, tfWorkPath st
 		PropertyVersion: rules.PropertyVersion,
 		Etag:            rules.Etag,
 		RuleFormat:      rules.RuleFormat,
-		Rule:            &ruleTemplate,
 	}
 
-	snippetsPath := filepath.Join(tfWorkPath, jsonDir)
+	return ruleTemplate, rulesTemplate
+}
+
+// saveSnippets saves given property rules into files under jsonDir directory
+func saveSnippets(rules papi.Rules, ruleTemplate RuleTemplate, rulesTemplate RulesTemplate, snippetsPath, templateFileName string) error {
 	err := os.MkdirAll(snippetsPath, 0755)
 	if err != nil {
 		return fmt.Errorf("can't create directory for rule snippets: %s", err)
 	}
 
 	nameNormalizer := ruleNameNormalizer()
-	for _, rule := range rules.Rules.Children {
+	for _, rule := range rules.Children {
 		jsonBody, err := json.MarshalIndent(rule, "", "  ")
 		if err != nil {
 			return fmt.Errorf("can't marshall property rule snippets: %s", err)
@@ -483,11 +513,13 @@ func saveSnippets(jsonDir string, rules *papi.GetRuleTreeResponse, tfWorkPath st
 		ruleTemplate.Children = append(ruleTemplate.Children, fmt.Sprintf("#include:%s.json", name))
 	}
 
+	rulesTemplate.Rule = &ruleTemplate
+
 	jsonBody, err := json.MarshalIndent(rulesTemplate, "", "  ")
 	if err != nil {
 		return fmt.Errorf("can't marshall rule template: %s", err)
 	}
-	templatePath := filepath.Join(snippetsPath, "main.json")
+	templatePath := filepath.Join(snippetsPath, templateFileName)
 	err = os.WriteFile(templatePath, jsonBody, 0644)
 	if err != nil {
 		return fmt.Errorf("can't write property rule template: %s", err)

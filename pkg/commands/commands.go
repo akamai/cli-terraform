@@ -120,7 +120,15 @@ func CommandLocator() ([]*cli.Command, error) {
 		Description: "Generates Terraform configuration for Property resources",
 		Usage:       "export-property",
 		ArgsUsage:   "<property name>",
-		Action:      validatedAction(papi.CmdCreateProperty, requireValidWorkpath, requireNArguments(1)),
+		Action:      validatedAction(papi.CmdCreateProperty, requireValidWorkpath, requireNArguments(1), validateSubCommands),
+		Subcommands: []*cli.Command{
+			{
+				Name:        "include",
+				Description: "Generates Terraform configuration for Include resources",
+				ArgsUsage:   "<contract_id> <include_name>",
+				Action:      validatedAction(papi.CmdCreateInclude, requireValidWorkpath, requireNArguments(2)),
+			},
+		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "tfworkpath",

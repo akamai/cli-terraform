@@ -1,6 +1,14 @@
 {{- /*gotype: github.com/akamai/cli-terraform/papi.TFData*/ -}}
 terraform init
-{{- range .EdgeHostnames}}
+{{- range .Property.EdgeHostnames}}
 terraform import akamai_edge_hostname.{{.EdgeHostnameResourceName}} {{.EdgeHostnameID}},{{.ContractID}},{{.GroupID}}
 {{- end}}
-terraform import akamai_property.{{.PropertyResourceName}} {{.PropertyID}},{{.ContractID}},{{.GroupID}},{{.Version}}
+{{- if .Property.PropertyID}}
+terraform import akamai_property.{{.Property.PropertyResourceName}} {{.Property.PropertyID}},{{.Property.ContractID}},{{.Property.GroupID}},{{.Property.Version}}
+{{- end}}
+{{- range $include := .Includes}}
+terraform import akamai_property_include.{{.IncludeName}} {{.ContractID}}:{{.GroupID}}:{{.IncludeID}}
+{{- range $network := .Networks}}
+terraform import akamai_property_include_activation.{{$include.IncludeName}}_{{$network}} {{$include.ContractID}}:{{$include.GroupID}}:{{$include.IncludeID}}:{{$network}}
+{{- end}}
+{{- end}}

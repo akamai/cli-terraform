@@ -14,8 +14,8 @@ provider "akamai" {
 }
 
 data "akamai_group" "group" {
-  group_name = "{{.GroupName}}"
-  contract_id = "{{.ContractID}}"
+  group_name = "{{.Property.GroupName}}"
+  contract_id = "{{.Property.ContractID}}"
 }
 
 data "akamai_contract" "contract" {
@@ -25,7 +25,7 @@ data "akamai_contract" "contract" {
 data "akamai_property_rules_template" "rules" {
   template_file = abspath("${path.module}/property-snippets/main.json")
 }
-{{range .EdgeHostnames}}
+{{range .Property.EdgeHostnames}}
 resource "akamai_edge_hostname" "{{.EdgeHostnameResourceName}}" {
   product_id  = "prd_{{.ProductName}}"
   contract_id = data.akamai_contract.contract.id
@@ -40,13 +40,13 @@ resource "akamai_edge_hostname" "{{.EdgeHostnameResourceName}}" {
 {{- end}}
 }
 {{end}}
-resource "akamai_property" "{{.PropertyResourceName}}" {
-  name = "{{.PropertyName}}"
+resource "akamai_property" "{{.Property.PropertyResourceName}}" {
+  name = "{{.Property.PropertyName}}"
   contract_id = data.akamai_contract.contract.id
   group_id = data.akamai_group.group.id
-  product_id = "prd_{{.ProductName}}"
-  rule_format = "{{.RuleFormat}}"
-{{- range .Hostnames}}
+  product_id = "prd_{{.Property.ProductName}}"
+  rule_format = "{{.Property.RuleFormat}}"
+{{- range .Property.Hostnames}}
   hostnames {
     cname_from = "{{.Hostname}}"
     cname_to = akamai_edge_hostname.{{.EdgeHostnameResourceName}}.edge_hostname
@@ -56,12 +56,12 @@ resource "akamai_property" "{{.PropertyResourceName}}" {
   rules = data.akamai_property_rules_template.rules.json
 }
 
-resource "akamai_property_activation" "{{.PropertyResourceName}}" {
-  property_id = akamai_property.{{.PropertyResourceName}}.id
-  contact = [{{range $index, $element := .Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
-  version = akamai_property.{{.PropertyResourceName}}.latest_version
+resource "akamai_property_activation" "{{.Property.PropertyResourceName}}" {
+  property_id = akamai_property.{{.Property.PropertyResourceName}}.id
+  contact = [{{range $index, $element := .Property.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+  version = akamai_property.{{.Property.PropertyResourceName}}.latest_version
   network = upper(var.env)
-{{- if .ActivationNote}}
-  note = "{{.ActivationNote}}"
+{{- if .Property.ActivationNote}}
+  note = "{{.Property.ActivationNote}}"
 {{- end}}
 }

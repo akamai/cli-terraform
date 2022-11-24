@@ -1,0 +1,62 @@
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 3.1.0"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
+provider "akamai" {
+  edgerc = var.edgerc_path
+  config_section = var.config_section
+}
+{{ range $include := .Includes}}
+data "akamai_property_rules_template" "rules" {
+  template_file = abspath("${path.module}/property-snippets/{{.IncludeName}}.json")
+}
+
+/*
+data "akamai_property_include_parents" "include_parents" {
+  contract_id = "{{.ContractID}}"
+  group_id    = "{{.GroupID}}"
+  include_id  = "{{.IncludeID}}"
+}
+*/
+
+resource "akamai_property_include" "{{.IncludeName}}" {
+  contract_id = "{{.ContractID}}"
+  group_id = "{{.GroupID}}"
+  product_id = "{{.ProductID}}"
+  name = "{{.IncludeName}}"
+  rule_format = "{{.RuleFormat}}"
+  type = "{{.IncludeType}}"
+  rules = data.akamai_property_rules_template.rules.json
+}
+{{- range $network := .Networks}}
+
+resource "akamai_property_include_activation" "{{$include.IncludeName}}_{{$network}}" {
+  contract_id = akamai_property_include.{{$include.IncludeName}}.contract_id
+  group_id = akamai_property_include.{{$include.IncludeName}}.group_id
+  include_id = akamai_property_include.{{$include.IncludeName}}.id
+  network = "{{$network}}"
+  auto_acknowledge_rule_warnings = false
+{{- if eq $network "staging"}}
+  version = "{{$include.VersionStaging}}"
+{{- if $include.ActivationNoteStaging}}
+  note = "{{$include.ActivationNoteStaging}}"
+{{- end}}
+  notify_emails = [{{range $index, $element := $include.ActivationEmailsStaging}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+{{- end}}
+{{- if eq $network "production"}}
+  version = "{{$include.VersionProduction}}"
+{{- if $include.ActivationNoteProduction}}
+  note = "{{$include.ActivationNoteProduction}}"
+{{- end}}
+  notify_emails = [{{range $index, $element := $include.ActivationEmailsProduction}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+  compliance_record = {}
+{{- end}}
+}
+{{- end}}
+{{- end}}
