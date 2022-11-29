@@ -1,6 +1,6 @@
 # Release Notes
 
-## Version 1.2.0 (Oct XX, 2022)
+## Version 1.2.0 (Dec 1, 2022)
 
 ### Features/Enhancements
 
