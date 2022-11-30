@@ -21,7 +21,7 @@ var (
 	section    = "test_section"
 	contractID = "test_contract"
 
-	expectListIncludes = func(client *mockpapi) {
+	expectListIncludes = func(client *papi.Mock) {
 		listIncludesReq := papi.ListIncludesRequest{
 			ContractID: "test_contract",
 		}
@@ -59,7 +59,7 @@ var (
 		client.On("ListIncludes", mock.Anything, listIncludesReq).Return(&includes, nil).Once()
 	}
 
-	expectGetIncludeVersion = func(client *mockpapi) {
+	expectGetIncludeVersion = func(client *papi.Mock) {
 		getIncludeVersionReq := papi.GetIncludeVersionRequest{
 			ContractID: "test_contract",
 			GroupID:    "test_group",
@@ -112,7 +112,7 @@ var (
 		RuleFormat:     "v2020-11-02",
 	}
 
-	expectListIncludeActivations = func(client *mockpapi) {
+	expectListIncludeActivations = func(client *papi.Mock) {
 		listIncludeActivationsReq := papi.ListIncludeActivationsRequest{
 			ContractID: "test_contract",
 			GroupID:    "test_group",
@@ -232,7 +232,7 @@ var (
 
 func TestCreateInclude(t *testing.T) {
 	tests := map[string]struct {
-		init                func(*mockpapi, *mockProcessor, string)
+		init                func(*papi.Mock, *mockProcessor, string)
 		includeName         string
 		dir                 string
 		snippetFilesToCheck []string
@@ -240,7 +240,7 @@ func TestCreateInclude(t *testing.T) {
 		withError           error
 	}{
 		"include basic": {
-			init: func(c *mockpapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, p *mockProcessor, dir string) {
 				expectListIncludes(c)
 				expectGetIncludeVersion(c)
 
@@ -266,14 +266,14 @@ func TestCreateInclude(t *testing.T) {
 			},
 		},
 		"error include not found": {
-			init: func(c *mockpapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, p *mockProcessor, dir string) {
 				c.On("ListIncludes", mock.Anything, papi.ListIncludesRequest{ContractID: "test_contract"}).
 					Return(nil, fmt.Errorf("oops")).Once()
 			},
 			withError: ErrIncludeNotFound,
 		},
 		"error fetching include version": {
-			init: func(c *mockpapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, p *mockProcessor, dir string) {
 				expectListIncludes(c)
 				c.On("GetIncludeVersion", mock.Anything, papi.GetIncludeVersionRequest{
 					ContractID: "test_contract",
@@ -286,7 +286,7 @@ func TestCreateInclude(t *testing.T) {
 			includeName: "test_include",
 		},
 		"error include rules not found": {
-			init: func(c *mockpapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, p *mockProcessor, dir string) {
 				expectListIncludes(c)
 				expectGetIncludeVersion(c)
 				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReq).Return(nil, fmt.Errorf("oops")).Once()
@@ -295,7 +295,7 @@ func TestCreateInclude(t *testing.T) {
 			includeName: "test_include",
 		},
 		"error fetching activations": {
-			init: func(c *mockpapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, p *mockProcessor, dir string) {
 				expectListIncludes(c)
 				expectGetIncludeVersion(c)
 
@@ -317,7 +317,7 @@ func TestCreateInclude(t *testing.T) {
 			dir:         "include_basic",
 		},
 		"error saving files": {
-			init: func(c *mockpapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, p *mockProcessor, dir string) {
 				expectListIncludes(c)
 				expectGetIncludeVersion(c)
 
@@ -341,7 +341,7 @@ func TestCreateInclude(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			mc := new(mockpapi)
+			mc := new(papi.Mock)
 			mp := new(mockProcessor)
 			test.init(mc, mp, test.dir)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
