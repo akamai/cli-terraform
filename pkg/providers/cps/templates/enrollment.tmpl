@@ -1,0 +1,180 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/cps.TFCPSData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 3.1.0"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
+provider "akamai" {
+  edgerc         = var.edgerc_path
+  config_section = var.config_section
+}
+{{$data := .}}
+{{- with .Enrollment}}
+    {{- if eq .ValidationType "dv" }}
+    resource "akamai_cps_dv_enrollment" "enrollment_id_{{$data.EnrollmentID}}" {
+    {{- else if eq .ValidationType "third-party" }}
+    resource "akamai_cps_third_party_enrollment" "enrollment_id_{{$data.EnrollmentID}}" {
+    {{- end}}
+    {{- $cn := .CSR.CN}}
+    common_name = "{{$cn}}"
+    allow_duplicate_common_name = false
+    {{- if .CSR.SANS}}
+      {{- if eq .ValidationType "dv" }}
+    sans = [{{range .CSR.SANS}}{{if ne $cn .}}"{{.}}", {{end}}{{end}}]
+      {{- else if eq .ValidationType "third-party" }}
+    sans = [{{range .CSR.SANS}}"{{.}}", {{end}}]
+      {{- end}}
+    {{- end}}
+    secure_network = "{{.NetworkConfiguration.SecureNetwork}}"
+    sni_only       = {{.NetworkConfiguration.SNIOnly}}
+    acknowledge_pre_verification_warnings = false
+    {{- if eq .ValidationType "third-party" }}
+    auto_approve_warnings                 = []
+    {{- end}}
+    {{- with .AdminContact}}
+        admin_contact {
+        first_name       = "{{.FirstName}}"
+        last_name        = "{{.LastName}}"
+        {{- if .Title}}
+            title            = "{{.Title}}"
+        {{- end}}
+        organization     = "{{.OrganizationName}}"
+        email            = "{{.Email}}"
+        phone            = "{{.Phone}}"
+        address_line_one = "{{.AddressLineOne}}"
+        {{- if .AddressLineTwo}}
+            address_line_two = "{{.AddressLineTwo}}"
+        {{- end}}
+        city             = "{{.City}}"
+        region           = "{{.Region}}"
+        postal_code      = "{{.PostalCode}}"
+        country_code     = "{{.Country}}"
+        }
+    {{- end}}
+    {{- if .CertificateChainType}}
+        certificate_chain_type = "{{.CertificateChainType}}"
+    {{- end}}
+    {{- with .CSR}}
+        csr {
+        country_code        = "{{.C}}"
+        city                = "{{.L}}"
+        organization        = "{{.O}}"
+        organizational_unit = "{{.OU}}"
+        state               = "{{.ST}}"
+        }
+    {{- end}}
+    {{- with .NetworkConfiguration}}
+        network_configuration {
+        {{- with .ClientMutualAuthentication}}
+            client_mutual_authentication {
+            {{- if .AuthenticationOptions.SendCAListToClient}}
+                send_ca_list_to_client  = {{.AuthenticationOptions.SendCAListToClient}}
+            {{- end}}
+            {{- if .AuthenticationOptions.OCSP.Enabled}}
+                ocsp_enabled            = {{.AuthenticationOptions.OCSP.Enabled}}
+            {{- end}}
+            {{- if .SetID}}
+                set_id                  = "{{.SetID}}"
+            {{- end}}
+            }
+        {{- end}}
+        {{- if .DisallowedTLSVersions}}
+            disallowed_tls_versions = [{{range .DisallowedTLSVersions}}"{{.}}",{{end}}]
+        {{- end}}
+        {{- if .DNSNameSettings.CloneDNSNames}}
+            clone_dns_names         = {{.DNSNameSettings.CloneDNSNames}}
+        {{- end}}
+        geography               = "{{.Geography}}"
+        {{- if .MustHaveCiphers}}
+            must_have_ciphers       = "{{.MustHaveCiphers}}"
+        {{- end}}
+        {{- if .OCSPStapling}}
+            ocsp_stapling           = "{{.OCSPStapling}}"
+        {{- end}}
+        {{- if .PreferredCiphers}}
+            preferred_ciphers       = "{{.PreferredCiphers}}"
+        {{- end}}
+        {{- if .QuicEnabled}}
+            quic_enabled            = {{.QuicEnabled}}
+        {{- end}}
+        }
+    {{- end}}
+    signature_algorithm = "{{.SignatureAlgorithm}}"
+    {{- with .TechContact}}
+        tech_contact {
+        first_name       = "{{.FirstName}}"
+        last_name        = "{{.LastName}}"
+        {{- if .Title}}
+            title            = "{{.Title}}"
+        {{- end}}
+        organization     = "{{.OrganizationName}}"
+        email            = "{{.Email}}"
+        phone            = "{{.Phone}}"
+        address_line_one = "{{.AddressLineOne}}"
+        {{- if .AddressLineTwo}}
+            address_line_two = "{{.AddressLineTwo}}"
+        {{- end}}
+        city             = "{{.City}}"
+        region           = "{{.Region}}"
+        postal_code      = "{{.PostalCode}}"
+        country_code     = "{{.Country}}"
+        }
+    {{- end}}
+    {{- with .Org}}
+        organization {
+        name             = "{{.Name}}"
+        phone            = "{{.Phone}}"
+        address_line_one = "{{.AddressLineOne}}"
+        {{- if .AddressLineTwo}}
+            address_line_two = "{{.AddressLineTwo}}"
+        {{- end}}
+        city             = "{{.City}}"
+        region           = "{{.Region}}"
+        postal_code      = "{{.PostalCode}}"
+        country_code     = "{{.Country}}"
+        }
+    {{- end}}
+    contract_id = "{{$data.ContractID}}"
+    {{- if eq .ValidationType "third-party" }}
+    change_management = {{.ChangeManagement}}
+    {{- if .ThirdParty.ExcludeSANS}}
+    exclude_sans = {{.ThirdParty.ExcludeSANS}}
+    {{- end}}
+    {{- end}}
+}
+{{- end}}
+{{- if eq .Enrollment.ValidationType "third-party" }}
+
+/*
+data "akamai_cps_csr" "enrollment_id_{{.EnrollmentID}}" {
+  enrollment_id = {{.EnrollmentID}}
+}
+*/
+{{- if ne .NoUploadCertificate true }}
+
+resource "akamai_cps_upload_certificate" "enrollment_id_{{.EnrollmentID}}" {
+  enrollment_id                          = {{.EnrollmentID}}
+  {{- if .CertificateECDSA}}
+  certificate_ecdsa_pem                  = "{{.CertificateECDSA}}"
+  {{- end}}
+  {{- if .CertificateRSA}}
+  certificate_rsa_pem                    = "{{.CertificateRSA}}"
+  {{- end}}
+  {{- if .TrustChainECDSA}}
+  trust_chain_ecdsa_pem                  = "{{.TrustChainECDSA}}"
+  {{- end}}
+  {{- if .TrustChainRSA}}
+  trust_chain_rsa_pem                    = "{{.TrustChainRSA}}"
+  {{- end}}
+  acknowledge_post_verification_warnings = false
+  auto_approve_warnings                  = []
+  acknowledge_change_management          = false
+  wait_for_deployment                    = false
+}
+{{- end}}
+{{- end}}

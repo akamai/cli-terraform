@@ -12,7 +12,7 @@ import (
 	"testing"
 	"text/template"
 
-	gtm "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configgtm"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/gtm"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"
@@ -341,7 +341,7 @@ var (
 		return call.Return(nil)
 	}
 
-	expectGetDomain = func(mg *mockGTM, domainName string, domain *gtm.Domain, err error) *mock.Call {
+	expectGetDomain = func(mg *gtm.Mock, domainName string, domain *gtm.Domain, err error) *mock.Call {
 		call := mg.On("GetDomain", mock.Anything, domainName)
 		if err != nil {
 			return call.Return(nil, err)
@@ -355,23 +355,23 @@ func TestCreateDomain(t *testing.T) {
 	domainName := "test.name.net"
 
 	tests := map[string]struct {
-		init      func(*mockGTM, *mockProcessor)
+		init      func(*gtm.Mock, *mockProcessor)
 		withError error
 	}{
 		"fetch domain success": {
-			init: func(mg *mockGTM, mp *mockProcessor) {
+			init: func(mg *gtm.Mock, mp *mockProcessor) {
 				expectGetDomain(mg, domainName, domain, nil).Once()
 				expectGTMProcessTemplates(mp, domainData, nil).Once()
 			},
 		},
 		"error fetching domain": {
-			init: func(mg *mockGTM, mp *mockProcessor) {
+			init: func(mg *gtm.Mock, mp *mockProcessor) {
 				expectGetDomain(mg, domainName, domain, fmt.Errorf("oops")).Once()
 			},
 			withError: ErrFetchingDomain,
 		},
 		"error processing template": {
-			init: func(mg *mockGTM, mp *mockProcessor) {
+			init: func(mg *gtm.Mock, mp *mockProcessor) {
 				expectGetDomain(mg, domainName, domain, nil).Once()
 				expectGTMProcessTemplates(mp, domainData, templates.ErrSavingFiles).Once()
 			},
@@ -381,7 +381,7 @@ func TestCreateDomain(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			mgtm := new(mockGTM)
+			mgtm := new(gtm.Mock)
 			mp := new(mockProcessor)
 			test.init(mgtm, mp)
 

@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/iam"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
@@ -19,7 +19,7 @@ import (
 var (
 	groupID = int64(56789)
 
-	expectListUsersWithinGroup = func(client *mockiam) {
+	expectListUsersWithinGroup = func(client *iam.Mock) {
 		listUserReq := iam.ListUsersRequest{
 			Actions: true,
 			GroupID: tools.Int64Ptr(groupID),
@@ -36,7 +36,7 @@ var (
 		client.On("ListUsers", mock.Anything, listUserReq).Return(users, nil).Once()
 	}
 
-	expectGetUserWithinGroup = func(client *mockiam) {
+	expectGetUserWithinGroup = func(client *iam.Mock) {
 		getUserReq := iam.GetUserRequest{
 			IdentityID:    "123",
 			Actions:       true,
@@ -62,7 +62,7 @@ var (
 		client.On("GetUser", mock.Anything, getUserReq).Return(&user, nil).Once()
 	}
 
-	expectListRolesWithinGroup = func(client *mockiam) {
+	expectListRolesWithinGroup = func(client *iam.Mock) {
 		listRolesReq := iam.ListRolesRequest{
 			GroupID: tools.Int64Ptr(int64(groupID)),
 		}
@@ -77,7 +77,7 @@ var (
 		client.On("ListRoles", mock.Anything, listRolesReq).Return(roles, nil).Once()
 	}
 
-	expectGetGroupWithinRole = func(client *mockiam) {
+	expectGetGroupWithinRole = func(client *iam.Mock) {
 		getGroupReq := iam.GetGroupRequest{
 			GroupID: 56789,
 		}
@@ -89,7 +89,7 @@ var (
 		client.On("GetGroup", mock.Anything, getGroupReq).Return(&group, nil).Once()
 	}
 
-	expectGetRole = func(client *mockiam) {
+	expectGetRole = func(client *iam.Mock) {
 		getRoleReq := iam.GetRoleRequest{
 			ID:           12345,
 			GrantedRoles: true,
@@ -153,10 +153,10 @@ func TestCreateIAMGroupByID(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		init func(*mockiam, *mockProcessor)
+		init func(*iam.Mock, *mockProcessor)
 	}{
 		"fetch group": {
-			init: func(i *mockiam, p *mockProcessor) {
+			init: func(i *iam.Mock, p *mockProcessor) {
 				expectListUsersWithinGroup(i)
 				expectGetUserWithinGroup(i)
 				expectListRolesWithinGroup(i)
@@ -168,7 +168,7 @@ func TestCreateIAMGroupByID(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			mi := new(mockiam)
+			mi := new(iam.Mock)
 			mp := new(mockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))

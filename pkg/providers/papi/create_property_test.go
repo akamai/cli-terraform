@@ -10,8 +10,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/hapi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/hapi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/papi"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/assert"
@@ -403,7 +403,7 @@ func TestCreateProperty(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		init                func(*mockpapi, *mockhapi, *mockProcessor, string)
+		init                func(*papi.Mock, *hapi.Mock, *mockProcessor, string)
 		dir                 string
 		snippetFilesToCheck []string
 		jsonDir             string
@@ -411,7 +411,7 @@ func TestCreateProperty(t *testing.T) {
 		readVersion         string
 	}{
 		"basic property": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
@@ -541,7 +541,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 		"basic property with cert provisioning type": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
@@ -671,7 +671,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 		"import LATEST property version": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
@@ -801,7 +801,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 		"import not the latest property version": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
@@ -925,7 +925,7 @@ func TestCreateProperty(t *testing.T) {
 			readVersion: "1",
 		},
 		"property activation with note": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
@@ -1049,7 +1049,7 @@ func TestCreateProperty(t *testing.T) {
 			dir: "basic",
 		},
 		"property activation with empty emails": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
@@ -1173,14 +1173,14 @@ func TestCreateProperty(t *testing.T) {
 			dir: "basic",
 		},
 		"error property not found": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(nil, fmt.Errorf("oops")).Once()
 			},
 			withError: ErrPropertyNotFound,
 		},
 		"error group not found": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
@@ -1196,7 +1196,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrGroupNotFound,
 		},
 		"error property rules not found": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
@@ -1226,7 +1226,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrPropertyRulesNotFound,
 		},
 		"error property version not found": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
@@ -1249,7 +1249,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrPropertyVersionNotFound,
 		},
 		"error product name not found": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
@@ -1283,7 +1283,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrProductNameNotFound,
 		},
 		"error hostnames not found": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
@@ -1324,7 +1324,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrHostnamesNotFound,
 		},
 		"error hostname details": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
@@ -1368,7 +1368,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrFetchingHostnameDetails,
 		},
 		"error saving files": {
-			init: func(c *mockpapi, h *mockhapi, p *mockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
 					Return(&searchPropertiesResponse, nil).Once()
 
@@ -1495,8 +1495,8 @@ func TestCreateProperty(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			mc := new(mockpapi)
-			mh := new(mockhapi)
+			mc := new(papi.Mock)
+			mh := new(hapi.Mock)
 			mp := new(mockProcessor)
 			test.init(mc, mh, mp, test.dir)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))

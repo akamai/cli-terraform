@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/iam"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
@@ -123,7 +123,7 @@ var (
 		},
 	}
 
-	expectGetRoleWithUsers = func(client *mockiam) {
+	expectGetRoleWithUsers = func(client *iam.Mock) {
 		getRoleReq := iam.GetRoleRequest{
 			ID:           role.RoleID,
 			GrantedRoles: true,
@@ -133,7 +133,7 @@ var (
 		client.On("GetRole", mock.Anything, getRoleReq).Return(&role, nil).Once()
 	}
 
-	expectRoleGetUser = func(client *mockiam, user iam.User, err error) {
+	expectRoleGetUser = func(client *iam.Mock, user iam.User, err error) {
 		getUserReq := iam.GetUserRequest{
 			IdentityID:    user.IdentityID,
 			Actions:       true,
@@ -148,7 +148,7 @@ var (
 		client.On("GetUser", mock.Anything, getUserReq).Return(&user, err).Once()
 	}
 
-	expectRoleGetGroup = func(client *mockiam, group iam.Group) {
+	expectRoleGetGroup = func(client *iam.Mock, group iam.Group) {
 		getGroupReq := iam.GetGroupRequest{
 			GroupID: group.GroupID,
 		}
@@ -242,7 +242,7 @@ var (
 func TestGetUsersByRole(t *testing.T) {
 	tests := map[string]struct {
 		roleUsers    []iam.RoleUser
-		init         func(*mockiam, *terminal.Mock)
+		init         func(*iam.Mock, *terminal.Mock)
 		expectResult []*iam.User
 		withError    error
 	}{
@@ -260,7 +260,7 @@ func TestGetUsersByRole(t *testing.T) {
 					},
 				}},
 			},
-			init: func(m *mockiam, t *terminal.Mock) {
+			init: func(m *iam.Mock, t *terminal.Mock) {
 				m.On("GetUser", mock.Anything, iam.GetUserRequest{
 					IdentityID:    "a",
 					Actions:       true,
@@ -291,7 +291,7 @@ func TestGetUsersByRole(t *testing.T) {
 					},
 				}},
 			},
-			init: func(m *mockiam, t *terminal.Mock) {
+			init: func(m *iam.Mock, t *terminal.Mock) {
 				m.On("GetUser", mock.Anything, iam.GetUserRequest{
 					IdentityID:    "a",
 					Actions:       true,
@@ -322,7 +322,7 @@ func TestGetUsersByRole(t *testing.T) {
 				},
 			},
 			expectResult: []*iam.User{},
-			init: func(m *mockiam, t *terminal.Mock) {
+			init: func(m *iam.Mock, t *terminal.Mock) {
 				m.On("GetUser", mock.Anything, iam.GetUserRequest{
 					IdentityID:    "a",
 					Actions:       true,
@@ -342,7 +342,7 @@ func TestGetUsersByRole(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			client := mockiam{}
+			client := iam.Mock{}
 			term := terminal.Mock{}
 			test.init(&client, &term)
 
@@ -362,10 +362,10 @@ func TestCreateIAMRole(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		init func(*mockiam, *mockProcessor)
+		init func(*iam.Mock, *mockProcessor)
 	}{
 		"fetch role": {
-			init: func(i *mockiam, p *mockProcessor) {
+			init: func(i *iam.Mock, p *mockProcessor) {
 				expectGetRoleWithUsers(i)
 				expectRoleGetUser(i, user1, nil)
 				expectRoleGetUser(i, user2, nil)
@@ -380,7 +380,7 @@ func TestCreateIAMRole(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			mi := new(mockiam)
+			mi := new(iam.Mock)
 			mp := new(mockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))

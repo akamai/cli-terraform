@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/iam"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	expectListAllUsers = func(client *mockiam) {
+	expectListAllUsers = func(client *iam.Mock) {
 		listUserReq := iam.ListUsersRequest{Actions: true}
 
 		users := []iam.UserListItem{
@@ -42,7 +42,7 @@ var (
 		client.On("ListUsers", mock.Anything, listUserReq).Return(users, nil).Once()
 	}
 
-	expectGetUser001 = func(client *mockiam) {
+	expectGetUser001 = func(client *iam.Mock) {
 		getUserReq := iam.GetUserRequest{
 			IdentityID:    "001",
 			Actions:       true,
@@ -67,7 +67,7 @@ var (
 
 		client.On("GetUser", mock.Anything, getUserReq).Return(&user, nil).Once()
 	}
-	expectGetUser002 = func(client *mockiam) {
+	expectGetUser002 = func(client *iam.Mock) {
 		getUserReq := iam.GetUserRequest{
 			IdentityID:    "002",
 			Actions:       true,
@@ -85,7 +85,7 @@ var (
 		client.On("GetUser", mock.Anything, getUserReq).Return(&user, nil).Once()
 	}
 
-	expectListAllGroups = func(client *mockiam) {
+	expectListAllGroups = func(client *iam.Mock) {
 		listGroupsReq := iam.ListGroupsRequest{Actions: true}
 
 		groups := []iam.Group{
@@ -106,7 +106,7 @@ var (
 		client.On("ListGroups", mock.Anything, listGroupsReq).Return(groups, nil).Once()
 	}
 
-	expectListAllRoles = func(client *mockiam) {
+	expectListAllRoles = func(client *iam.Mock) {
 		listRolesReq := iam.ListRolesRequest{
 			Actions:       true,
 			IgnoreContext: true,
@@ -129,7 +129,7 @@ var (
 		client.On("ListRoles", mock.Anything, listRolesReq).Return(roles, nil).Once()
 	}
 
-	expectGetRoles = func(client *mockiam) {
+	expectGetRoles = func(client *iam.Mock) {
 		getRoleReq1 := iam.GetRoleRequest{
 			ID:           201,
 			GrantedRoles: true,
@@ -180,11 +180,11 @@ func TestCreateIAMAll(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		init func(*mockiam, *mockProcessor)
+		init func(*iam.Mock, *mockProcessor)
 		err  error
 	}{
 		"fetch user": {
-			init: func(i *mockiam, p *mockProcessor) {
+			init: func(i *iam.Mock, p *mockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
 				expectGetUser002(i)
@@ -196,14 +196,14 @@ func TestCreateIAMAll(t *testing.T) {
 		},
 
 		"fail list users": {
-			init: func(i *mockiam, _ *mockProcessor) {
+			init: func(i *iam.Mock, _ *mockProcessor) {
 				i.On("ListUsers", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("oops")).Once()
 			},
 			err: ErrFetchingUsers,
 		},
 
 		"fail get one user": {
-			init: func(i *mockiam, p *mockProcessor) {
+			init: func(i *iam.Mock, p *mockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
 
@@ -231,7 +231,7 @@ func TestCreateIAMAll(t *testing.T) {
 		},
 
 		"fail list groups": {
-			init: func(i *mockiam, _ *mockProcessor) {
+			init: func(i *iam.Mock, _ *mockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
 				expectGetUser002(i)
@@ -241,7 +241,7 @@ func TestCreateIAMAll(t *testing.T) {
 		},
 
 		"fail list roles": {
-			init: func(i *mockiam, _ *mockProcessor) {
+			init: func(i *iam.Mock, _ *mockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
 				expectGetUser002(i)
@@ -253,7 +253,7 @@ func TestCreateIAMAll(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			mi := new(mockiam)
+			mi := new(iam.Mock)
 			mp := new(mockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))

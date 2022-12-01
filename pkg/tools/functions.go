@@ -1,3 +1,4 @@
+// Package tools contains various functions to help with processing of the templates
 package tools
 
 import (
@@ -40,13 +41,13 @@ func EscapeName(s string) (string, error) {
 // ToList returns a list as a comma delimited string
 // USAGE EXAMPLE: security_policy_ids = [ {{ tolist .Siem.FirewallPolicyIds }} ]
 func ToList(l []string) string {
-	new := []string{}
+	n := []string{}
 	for _, v := range l {
 		v = strconv.Quote(EscapeQuotedStringLit(v))
-		new = append(new, v)
+		n = append(n, v)
 
 	}
-	return strings.Join(new, ", ")
+	return strings.Join(n, ", ")
 }
 
 // ToJSON returns a JSON representation of the given object

@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package commands contains code defining export commands
 package commands
 
 import (
 	"github.com/akamai/cli-terraform/pkg/providers/appsec"
 	"github.com/akamai/cli-terraform/pkg/providers/cloudlets"
+	"github.com/akamai/cli-terraform/pkg/providers/cps"
 	"github.com/akamai/cli-terraform/pkg/providers/dns"
 	"github.com/akamai/cli-terraform/pkg/providers/edgeworkers"
 	"github.com/akamai/cli-terraform/pkg/providers/gtm"
@@ -252,6 +254,23 @@ func CommandLocator() ([]*cli.Command, error) {
 				Name:        "schema",
 				Usage:       "Generate content of the policy using HCL instead of JSON file",
 				Destination: &tools.Schema,
+			},
+		},
+		BashComplete: autocomplete.Default,
+	})
+
+	commands = append(commands, &cli.Command{
+		Name:        "export-cps",
+		Aliases:     []string{"create-cps"},
+		Description: "Generates Terraform configuration for CPS (Certificate Provisioning System) resources",
+		Usage:       "export-cps",
+		ArgsUsage:   "<enrollment_id> <contract_id>",
+		Action:      validatedAction(cps.CmdCreateCPS, requireValidWorkpath, requireNArguments(2)),
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,

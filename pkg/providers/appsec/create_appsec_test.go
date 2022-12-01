@@ -11,7 +11,7 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/appsec"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/appsec"
 	"github.com/akamai/cli-terraform/pkg/templates"
 
 	"github.com/stretchr/testify/assert"
@@ -29,12 +29,12 @@ func (m *mockProcessor) ProcessTemplates(i interface{}) error {
 }
 
 func TestGetConfigDescription(t *testing.T) {
-	mocks := func(c *mockAppsec) {
+	mocks := func(c *appsec.Mock) {
 		c.On("GetConfiguration", mock.Anything, appsec.GetConfigurationRequest{ConfigID: 12345}).Return(&appsec.GetConfigurationResponse{Description: "description"}, nil)
 		c.On("GetConfiguration", mock.Anything, appsec.GetConfigurationRequest{ConfigID: 12346}).Return(&appsec.GetConfigurationResponse{Description: ""}, nil)
 	}
 
-	ma := new(mockAppsec)
+	ma := new(appsec.Mock)
 	mocks(ma)
 
 	client = ma
@@ -49,11 +49,11 @@ func TestGetConfigDescription(t *testing.T) {
 }
 
 func TestGetWAFMode(t *testing.T) {
-	mocks := func(c *mockAppsec) {
+	mocks := func(c *appsec.Mock) {
 		c.On("GetWAFMode", mock.Anything, appsec.GetWAFModeRequest{ConfigID: 12345, Version: 1, PolicyID: "ASE1_156138"}).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)
 	}
 
-	ma := new(mockAppsec)
+	ma := new(appsec.Mock)
 	mocks(ma)
 
 	client = ma
@@ -87,7 +87,7 @@ func TestExportCustomDenyList(t *testing.T) {
 }`
 
 	var i map[string]interface{}
-	assert.NoError(t, json.Unmarshal([]byte(string(testdata)), &i))
+	assert.NoError(t, json.Unmarshal([]byte(testdata), &i))
 
 	actual, err := exportJSON(i)
 	assert.NoError(t, err)
@@ -112,7 +112,7 @@ func TestExportReputationProfile(t *testing.T) {
 }`
 
 	var i map[string]interface{}
-	assert.NoError(t, json.Unmarshal([]byte(string(testdata)), &i))
+	assert.NoError(t, json.Unmarshal([]byte(testdata), &i))
 
 	actual, err := exportJSON(i)
 	assert.NoError(t, err)
@@ -153,7 +153,7 @@ func TestExportRatePolicy(t *testing.T) {
 }`
 
 	var i map[string]interface{}
-	assert.NoError(t, json.Unmarshal([]byte(string(testdata)), &i))
+	assert.NoError(t, json.Unmarshal([]byte(testdata), &i))
 
 	actual, err := exportJSON(i)
 	assert.NoError(t, err)
@@ -198,7 +198,7 @@ func TestExportCustomRule(t *testing.T) {
 }`
 
 	var i map[string]interface{}
-	assert.NoError(t, json.Unmarshal([]byte(string(testdata)), &i))
+	assert.NoError(t, json.Unmarshal([]byte(testdata), &i))
 
 	actual, err := exportJSON(i)
 	assert.NoError(t, err)
@@ -278,7 +278,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 	configs := []string{"ase", "tcwest"}
 
 	// Mocked API calls
-	mocks := func(c *mockAppsec, p *mockProcessor) {
+	mocks := func(c *appsec.Mock, p *mockProcessor) {
 		//c.On("GetWAFMode", mock.Anything, appsec.GetWAFModeRequest{ConfigID: 79947, Version: 1, PolicyID: "ASE1_156138"}).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)
 		c.On("GetWAFMode", mock.Anything, mock.Anything).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)
 		//c.On("GetConfiguration", mock.Anything, appsec.GetConfigurationRequest{ConfigID: 79947}).Return(&appsec.GetConfigurationResponse{Description: "A security config for demo"}, nil)
@@ -345,7 +345,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			t.Run(name, func(t *testing.T) {
 
 				// Create mock client
-				ma := new(mockAppsec)
+				ma := new(appsec.Mock)
 				mp := new(mockProcessor)
 				mocks(ma, mp)
 				client = ma

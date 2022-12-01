@@ -1,3 +1,4 @@
+// Package iam contains code for exporting identity access manager configuration
 package iam
 
 import (
@@ -7,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/iam"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )

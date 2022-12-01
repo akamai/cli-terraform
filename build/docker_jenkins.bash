@@ -10,14 +10,14 @@ set -e
 
 CLI_TERRAFORM_BRANCH_NAME="${1:-develop}"
 PROVIDER_BRANCH_NAME="${2:-develop}"
-EDGEGRID_BRANCH_NAME="${3:-v2}"
+EDGEGRID_BRANCH_NAME="${3:-develop}"
 CLI_BRANCH_NAME="${4:-develop}"
 RELOAD_DOCKER_IMAGE="${5:-false}"
 
 
 TIMEOUT="20m"
 # Recalculate DOCKER_IMAGE_SIZE if any changes to dockerfile.
-DOCKER_IMAGE_SIZE="642345946"
+DOCKER_IMAGE_SIZE="551598576"
 
 SSH_PRV_KEY="$(cat ~/.ssh/id_rsa)"
 SSH_PUB_KEY="$(cat ~/.ssh/id_rsa.pub)"
@@ -25,7 +25,7 @@ SSH_KNOWN_HOSTS="$(cat ~/.ssh/known_hosts)"
 
 WORKDIR="${WORKDIR-$(pwd)}"
 echo "WORKDIR is $WORKDIR"
-TERRAFORM_VERSION="1.0.4"
+TERRAFORM_VERSION="1.2.5"
 
 STASH_SERVER=git.source.akamai.com
 GIT_IP=$(dig +short $STASH_SERVER)
@@ -91,12 +91,12 @@ docker exec akatf-container sh -c 'git clone ssh://git@git.source.akamai.com:799
 echo "Checkout branches"
 docker exec akatf-container sh -c 'cd edgegrid; git checkout ${EDGEGRID_BRANCH_NAME};
                                    cd ../terraform-provider-akamai; git checkout ${PROVIDER_BRANCH_NAME};
-                                   go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v2=../edgegrid;
+                                   go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v3=../edgegrid;
                                    go mod tidy;
                                    cd ../cli; git checkout ${CLI_BRANCH_NAME};
                                    go mod tidy;
                                    cd ../cli-terraform; git checkout ${CLI_TERRAFORM_BRANCH_NAME};
-                                   go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v2=../edgegrid;
+                                   go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v3=../edgegrid;
                                    go mod edit -replace github.com/akamai/cli=../cli;
                                    go mod tidy'
 

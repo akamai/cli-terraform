@@ -1,0 +1,2 @@
+terraform init
+terraform import akamai_cps_dv_enrollment.enrollment_id_1 1,ctr_1

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/edgeworkers"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/edgeworkers"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"
@@ -32,7 +32,7 @@ var (
 		return &i
 	}
 
-	expectGetEdgeKVNamespace = func(e *mockEdgeworkers, network edgeworkers.NamespaceNetwork, name string, geoLocation string,
+	expectGetEdgeKVNamespace = func(e *edgeworkers.Mock, network edgeworkers.NamespaceNetwork, name string, geoLocation string,
 		retention *int, groupID *int, err error) *mock.Call {
 		call := e.On(
 			"GetEdgeKVNamespace",
@@ -83,29 +83,29 @@ func TestCreateEdgeKV(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		init      func(*mockEdgeworkers, *mockProcessor)
+		init      func(*edgeworkers.Mock, *mockProcessor)
 		withError error
 	}{
 		"fetch edgekv based on namespace and network": {
-			init: func(e *mockEdgeworkers, p *mockProcessor) {
+			init: func(e *edgeworkers.Mock, p *mockProcessor) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), nil).Once()
 				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), section, nil).Once()
 			},
 		},
 		"fetch edgekv based on namespace and network with no group_id returned": {
-			init: func(e *mockEdgeworkers, p *mockProcessor) {
+			init: func(e *edgeworkers.Mock, p *mockProcessor) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), nil, nil).Once()
 				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, nil, section, nil).Once()
 			},
 		},
 		"error fetching edgekv": {
-			init: func(e *mockEdgeworkers, p *mockProcessor) {
+			init: func(e *edgeworkers.Mock, p *mockProcessor) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), fmt.Errorf("error")).Once()
 			},
 			withError: ErrFetchingEdgeKV,
 		},
 		"error processing template": {
-			init: func(e *mockEdgeworkers, p *mockProcessor) {
+			init: func(e *edgeworkers.Mock, p *mockProcessor) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), nil).Once()
 				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), section, fmt.Errorf("error")).Once()
 			},
@@ -115,7 +115,7 @@ func TestCreateEdgeKV(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			me := new(mockEdgeworkers)
+			me := new(edgeworkers.Mock)
 			mp := new(mockProcessor)
 			test.init(me, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))

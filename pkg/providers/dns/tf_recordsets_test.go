@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	dns "github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/configdns"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/dns"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -57,7 +57,7 @@ func TestProcessRecordset(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			m := new(mockdns)
+			m := new(dns.Mock)
 
 			ctx := context.Background()
 			zone := "0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin.com"
