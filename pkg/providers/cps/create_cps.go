@@ -1,3 +1,4 @@
+// Package cps contains code for exporting Certificate Provisioning System (CPS) configuration
 package cps
 
 import (
