@@ -79,7 +79,16 @@ func createInclude(ctx context.Context, contractID, includeName, section, jsonDi
 		Section:  section,
 	}
 
-	includeData, err := getIncludeData(ctx, contractID, includeName, jsonDir, tfWorkPath, client)
+	// Get Include
+	term.Spinner().Start("Fetching include " + includeName)
+	include, err := findIncludeByName(ctx, client, contractID, includeName)
+	if err != nil {
+		term.Spinner().Fail()
+		return fmt.Errorf("%w: %s", ErrIncludeNotFound, err)
+	}
+	term.Spinner().OK()
+
+	includeData, err := getIncludeData(ctx, include, jsonDir, tfWorkPath, client)
 	if err != nil {
 		return err
 	}
@@ -98,17 +107,8 @@ func createInclude(ctx context.Context, contractID, includeName, section, jsonDi
 	return nil
 }
 
-func getIncludeData(ctx context.Context, contractID, includeName, jsonDir, tfWorkPath string, client papi.PAPI) (*TFIncludeData, error) {
+func getIncludeData(ctx context.Context, include *papi.Include, jsonDir, tfWorkPath string, client papi.PAPI) (*TFIncludeData, error) {
 	term := terminal.Get(ctx)
-
-	// Get Include
-	term.Spinner().Start("Fetching include " + includeName)
-	include, err := findIncludeByName(ctx, client, contractID, includeName)
-	if err != nil {
-		term.Spinner().Fail()
-		return nil, fmt.Errorf("%w: %s", ErrIncludeNotFound, err)
-	}
-	term.Spinner().OK()
 
 	// Get the latest version of include
 	term.Spinner().Start("Fetching the latest version of include ")

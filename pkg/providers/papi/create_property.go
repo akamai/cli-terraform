@@ -148,7 +148,7 @@ var templateFiles embed.FS
 var normalizeRuleNameRegexp = regexp.MustCompile(`[^\w-.]`)
 
 var (
-	// ErrHostnamesNotFound is returned when hostnames cloudnt be found
+	// ErrHostnamesNotFound is returned when hostnames couldn't be found
 	ErrHostnamesNotFound = errors.New("hostnames not found")
 	// ErrPropertyVersionNotFound is returned when property version couldn't be found
 	ErrPropertyVersionNotFound = errors.New("property version not found")
@@ -156,8 +156,10 @@ var (
 	ErrPropertyVersionNotValid = errors.New("property version not valid")
 	// ErrProductNameNotFound is returned when product couldn't be found
 	ErrProductNameNotFound = errors.New("product name not found")
-	// ErrFetchingHostnameDetails is returned when fetching hsotname details request failed
+	// ErrFetchingHostnameDetails is returned when fetching hostname details request failed
 	ErrFetchingHostnameDetails = errors.New("fetching hostnames")
+	// ErrFetchingReferencedIncludes is returned when fetching referenced includes request failed
+	ErrFetchingReferencedIncludes = errors.New("fetching referenced includes")
 	// ErrSavingSnippets is returned when error appeared while saving property snippet JSON files
 	ErrSavingSnippets = errors.New("saving snippets")
 	// ErrPropertyRulesNotFound is returned when property rules couldn't be found
@@ -201,6 +203,14 @@ func CmdCreateProperty(c *cli.Context) error {
 		"imports.tmpl":   importPath,
 	}
 
+	var withIncludes bool
+	if c.IsSet("with-includes") {
+		withIncludes = c.Bool("with-includes")
+		if withIncludes {
+			templateToFile["includes.tmpl"] = filepath.Join(tfWorkPath, "includes.tf")
+		}
+	}
+
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
@@ -208,20 +218,22 @@ func CmdCreateProperty(c *cli.Context) error {
 
 	propertyName := c.Args().First()
 	section := edgegrid.GetEdgercSection(c)
-	if err = createProperty(ctx, propertyName, version, section, "property-snippets", tfWorkPath, client, clientHapi, processor); err != nil {
+	if err = createProperty(ctx, propertyName, version, section, "property-snippets", tfWorkPath, withIncludes, client, clientHapi, processor); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting property: %s", err)), 1)
 	}
 	return nil
 }
 
-func createProperty(ctx context.Context, propertyName, readVersion, section, jsonDir, tfWorkPath string, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
+func createProperty(ctx context.Context, propertyName, readVersion, section, jsonDir, tfWorkPath string, withIncludes bool, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
-	var tfData TFData
-	tfData.Property.EdgeHostnames = make(map[string]EdgeHostname)
-	tfData.Property.Hostnames = make(map[string]Hostname)
-	tfData.Property.Emails = make([]string, 0)
-	tfData.Section = section
+	tfData := TFData{
+		Property: TFPropertyData{
+			EdgeHostnames: make(map[string]EdgeHostname),
+			Emails:        make([]string, 0),
+		},
+		Section: section,
+	}
 
 	// Get Property
 	term.Spinner().Start("Fetching property " + propertyName)
@@ -267,6 +279,31 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	tfData.Property.Version = readVersion
 
 	term.Spinner().OK()
+
+	// Get Includes if withIncludes is set
+	if withIncludes {
+		term.Spinner().Start("Fetching referenced includes with property " + propertyName)
+		includes, err := client.ListReferencedIncludes(ctx, papi.ListReferencedIncludesRequest{
+			PropertyID:      property.PropertyID,
+			ContractID:      property.ContractID,
+			GroupID:         property.GroupID,
+			PropertyVersion: version.Version.PropertyVersion,
+		})
+		if err != nil {
+			term.Spinner().Fail()
+			return fmt.Errorf("%w: %s", ErrFetchingReferencedIncludes, err)
+		}
+		term.Spinner().OK()
+
+		tfData.Includes = make([]TFIncludeData, 0)
+		for _, include := range includes.Includes.Items {
+			includeData, err := getIncludeData(ctx, &include, jsonDir, tfWorkPath, client)
+			if err != nil {
+				return err
+			}
+			tfData.Includes = append(tfData.Includes, *includeData)
+		}
+	}
 
 	// Get Property Rules
 	term.Spinner().Start("Fetching property rules ")

@@ -2,16 +2,18 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 3.1.0"
+      version = ">= 3.2.0"
     }
   }
   required_version = ">= 0.13"
 }
+{{- if not .Property.PropertyID}}
 
 provider "akamai" {
   edgerc = var.edgerc_path
   config_section = var.config_section
 }
+{{- end}}
 {{ range $include := .Includes}}
 data "akamai_property_rules_template" "rules" {
   template_file = abspath("${path.module}/property-snippets/{{.IncludeName}}.json")
