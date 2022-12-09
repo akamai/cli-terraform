@@ -8,7 +8,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"testing"
+	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/hapi"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/papi"
@@ -675,8 +677,7 @@ func TestCreateProperty(t *testing.T) {
 							IncludeID:                  "inc_123456",
 							IncludeName:                "test_include",
 							IncludeType:                string(papi.IncludeTypeMicroServices),
-							Networks:                   []string{"staging", "production"},
-							ProductID:                  "prd_Site_Defender",
+							Networks:                   []string{"STAGING", "PRODUCTION"},
 							RuleFormat:                 "v2020-11-02",
 							VersionProduction:          "1",
 							VersionStaging:             "1",
@@ -1793,8 +1794,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						IncludeID:                  "inc_123456",
 						IncludeName:                "test_include",
 						IncludeType:                string(papi.IncludeTypeMicroServices),
-						Networks:                   []string{"staging", "production"},
-						ProductID:                  "prd_Site_Defender",
+						Networks:                   []string{"STAGING", "PRODUCTION"},
 						RuleFormat:                 "v2020-11-02",
 						VersionProduction:          "1",
 						VersionStaging:             "1",
@@ -1941,6 +1941,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			processor := templates.FSTemplateProcessor{
 				TemplatesFS:     templateFiles,
 				TemplateTargets: templateToFile,
+				AdditionalFuncs: template.FuncMap{
+					"ToLower": strings.ToLower,
+				},
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 

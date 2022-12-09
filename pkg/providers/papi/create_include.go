@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/papi"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
@@ -58,6 +59,9 @@ func CmdCreateInclude(c *cli.Context) error {
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
+		AdditionalFuncs: template.FuncMap{
+			"ToLower": strings.ToLower,
+		},
 	}
 
 	contractID := c.Args().First()
@@ -169,7 +173,6 @@ func getIncludeData(ctx context.Context, include *papi.Include, jsonDir, tfWorkP
 		IncludeName: include.IncludeName,
 		IncludeType: string(include.IncludeType),
 		Networks:    getActivatedNetworks(include),
-		ProductID:   latestVersion.IncludeVersion.ProductID,
 		RuleFormat:  latestVersion.IncludeVersion.RuleFormat,
 	}
 
@@ -293,11 +296,11 @@ func getActivatedNetworks(include *papi.Include) []string {
 	var result []string
 
 	if include.StagingVersion != nil {
-		result = append(result, strings.ToLower(string(papi.ActivationNetworkStaging)))
+		result = append(result, string(papi.ActivationNetworkStaging))
 	}
 
 	if include.ProductionVersion != nil {
-		result = append(result, strings.ToLower(string(papi.ActivationNetworkProduction)))
+		result = append(result, string(papi.ActivationNetworkProduction))
 	}
 
 	return result

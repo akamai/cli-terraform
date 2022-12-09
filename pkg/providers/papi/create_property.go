@@ -28,6 +28,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/hapi"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/papi"
@@ -80,7 +81,6 @@ type TFIncludeData struct {
 	IncludeName                string
 	IncludeType                string
 	Networks                   []string
-	ProductID                  string
 	RuleFormat                 string
 	VersionProduction          string
 	VersionStaging             string
@@ -214,6 +214,9 @@ func CmdCreateProperty(c *cli.Context) error {
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
+		AdditionalFuncs: template.FuncMap{
+			"ToLower": strings.ToLower,
+		},
 	}
 
 	propertyName := c.Args().First()

@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
+	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/papi"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/tools"
@@ -82,7 +84,6 @@ var (
 						UpdatedDate:      "2022-08-22T07:17:48Z",
 						ProductionStatus: papi.VersionStatusInactive,
 						Etag:             "1d8ed19bce0833a3fe93e62ae5d5579a38cc2dbe",
-						ProductID:        "prd_Site_Defender",
 						RuleFormat:       "v2020-11-02",
 						IncludeVersion:   2,
 						StagingStatus:    papi.VersionStatusInactive,
@@ -94,7 +95,6 @@ var (
 				UpdatedDate:      "2022-08-22T07:17:48Z",
 				ProductionStatus: papi.VersionStatusInactive,
 				Etag:             "1d8ed19bce0833a3fe93e62ae5d5579a38cc2dbe",
-				ProductID:        "prd_Site_Defender",
 				RuleFormat:       "v2020-11-02",
 				IncludeVersion:   2,
 				StagingStatus:    papi.VersionStatusInactive,
@@ -396,6 +396,9 @@ func TestProcessIncludeTemplates(t *testing.T) {
 					"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
 					"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
 				},
+				AdditionalFuncs: template.FuncMap{
+					"ToLower": strings.ToLower,
+				},
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 
@@ -426,8 +429,7 @@ func getTestData(key string) TFData {
 					IncludeID:                  "inc_123456",
 					IncludeName:                "test_include",
 					IncludeType:                string(papi.IncludeTypeMicroServices),
-					Networks:                   []string{"staging", "production"},
-					ProductID:                  "prd_Site_Defender",
+					Networks:                   []string{"STAGING", "PRODUCTION"},
 					RuleFormat:                 "v2020-11-02",
 					VersionProduction:          "1",
 					VersionStaging:             "1",
@@ -444,8 +446,7 @@ func getTestData(key string) TFData {
 					IncludeID:               "inc_123456",
 					IncludeName:             "test_include",
 					IncludeType:             string(papi.IncludeTypeMicroServices),
-					Networks:                []string{"staging"},
-					ProductID:               "prd_Site_Defender",
+					Networks:                []string{"STAGING"},
 					RuleFormat:              "v2020-11-02",
 					VersionStaging:          "3",
 				},
@@ -460,7 +461,6 @@ func getTestData(key string) TFData {
 					IncludeID:   "inc_123456",
 					IncludeName: "test_include",
 					IncludeType: string(papi.IncludeTypeMicroServices),
-					ProductID:   "prd_Site_Defender",
 					RuleFormat:  "v2020-11-02",
 				},
 			},

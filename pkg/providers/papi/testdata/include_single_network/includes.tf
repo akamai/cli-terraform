@@ -13,7 +13,7 @@ provider "akamai" {
   config_section = var.config_section
 }
 
-data "akamai_property_rules_template" "rules" {
+data "akamai_property_rules_template" "rules_test_include" {
   template_file = abspath("${path.module}/property-snippets/test_include.json")
 }
 
@@ -28,18 +28,17 @@ data "akamai_property_include_parents" "include_parents" {
 resource "akamai_property_include" "test_include" {
   contract_id = "test_contract"
   group_id    = "test_group"
-  product_id  = "prd_Site_Defender"
   name        = "test_include"
   rule_format = "v2020-11-02"
   type        = "MICROSERVICES"
-  rules       = data.akamai_property_rules_template.rules.json
+  rules       = data.akamai_property_rules_template.rules_test_include.json
 }
 
 resource "akamai_property_include_activation" "test_include_staging" {
   contract_id                    = akamai_property_include.test_include.contract_id
   group_id                       = akamai_property_include.test_include.group_id
   include_id                     = akamai_property_include.test_include.id
-  network                        = "staging"
+  network                        = "STAGING"
   auto_acknowledge_rule_warnings = false
   version                        = "3"
   notify_emails                  = ["test@example.com"]

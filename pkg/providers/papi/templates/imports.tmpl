@@ -9,6 +9,6 @@ terraform import akamai_property.{{.Property.PropertyResourceName}} {{.Property.
 {{- range $include := .Includes}}
 terraform import akamai_property_include.{{.IncludeName}} {{.ContractID}}:{{.GroupID}}:{{.IncludeID}}
 {{- range $network := .Networks}}
-terraform import akamai_property_include_activation.{{$include.IncludeName}}_{{$network}} {{$include.ContractID}}:{{$include.GroupID}}:{{$include.IncludeID}}:{{$network}}
+terraform import akamai_property_include_activation.{{$include.IncludeName}}_{{$network | ToLower}} {{$include.ContractID}}:{{$include.GroupID}}:{{$include.IncludeID}}:{{$network}}
 {{- end}}
 {{- end}}
