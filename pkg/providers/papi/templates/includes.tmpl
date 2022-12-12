@@ -15,7 +15,7 @@ provider "akamai" {
 }
 
 {{ end }}
-{{- range $include := .Includes -}}
+{{- range $include := .Includes }}
 data "akamai_property_rules_template" "rules_{{.IncludeName}}" {
   template_file = abspath("${path.module}/property-snippets/{{.IncludeName}}.json")
 }

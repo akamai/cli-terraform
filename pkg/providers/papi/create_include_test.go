@@ -104,6 +104,49 @@ var (
 		client.On("GetIncludeVersion", mock.Anything, getIncludeVersionReq).Return(&version, nil).Once()
 	}
 
+	expectGetSeconIncludeVersion = func(client *papi.Mock) {
+		getIncludeVersionReq := papi.GetIncludeVersionRequest{
+			ContractID: "test_contract",
+			GroupID:    "test_group",
+			IncludeID:  "inc_78910",
+			Version:    2,
+		}
+
+		version := papi.GetIncludeVersionResponse{
+			AccountID:   "test_account",
+			AssetID:     "test_asset",
+			ContractID:  "test_contract",
+			GroupID:     "test_group",
+			IncludeID:   "inc_78910",
+			IncludeName: "test_include_1",
+			IncludeType: papi.IncludeTypeMicroServices,
+			IncludeVersions: papi.Versions{
+				Items: []papi.IncludeVersion{
+					{
+						UpdatedByUser:    "test_user",
+						UpdatedDate:      "2022-08-22T07:17:48Z",
+						ProductionStatus: papi.VersionStatusInactive,
+						Etag:             "1d8ed19bce0833a3fe93e62ae5d5579a38cc2dbe",
+						RuleFormat:       "v2020-11-02",
+						IncludeVersion:   2,
+						StagingStatus:    papi.VersionStatusInactive,
+					},
+				},
+			},
+			IncludeVersion: papi.IncludeVersion{
+				UpdatedByUser:    "test_user",
+				UpdatedDate:      "2022-08-22T07:17:48Z",
+				ProductionStatus: papi.VersionStatusInactive,
+				Etag:             "1d8ed19bce0833a3fe93e62ae5d5579a38cc2dbe",
+				RuleFormat:       "v2020-11-02",
+				IncludeVersion:   2,
+				StagingStatus:    papi.VersionStatusInactive,
+			},
+		}
+
+		client.On("GetIncludeVersion", mock.Anything, getIncludeVersionReq).Return(&version, nil).Once()
+	}
+
 	getIncludeRuleTreeReq = papi.GetIncludeRuleTreeRequest{
 		ContractID:     "test_contract",
 		GroupID:        "test_group",
@@ -210,6 +253,48 @@ var (
 						},
 						IncludeID:      "inc_123456",
 						IncludeName:    "test_include",
+						IncludeType:    papi.IncludeTypeMicroServices,
+						IncludeVersion: 1,
+					},
+				},
+			},
+		}
+
+		client.On("ListIncludeActivations", mock.Anything, listIncludeActivationsReq).Return(&activations, nil).Once()
+	}
+
+	expectListSecondIncludeActivations = func(client *papi.Mock) {
+		listIncludeActivationsReq := papi.ListIncludeActivationsRequest{
+			ContractID: "test_contract",
+			GroupID:    "test_group",
+			IncludeID:  "inc_78910",
+		}
+
+		activations := papi.ListIncludeActivationsResponse{
+			AccountID:  "test_account",
+			ContractID: "test_contract",
+			GroupID:    "test_group",
+			Activations: papi.IncludeActivationsRes{
+				Items: []papi.IncludeActivation{
+					{
+						ActivationID:       "atv_12344",
+						Network:            papi.ActivationNetworkStaging,
+						ActivationType:     papi.ActivationTypeActivate,
+						Status:             papi.ActivationStatusActive,
+						SubmitDate:         "2022-10-27T12:27:54Z",
+						UpdateDate:         "2022-10-27T12:28:54Z",
+						Note:               "test staging activation",
+						NotifyEmails:       []string{"test@example.com"},
+						FMAActivationState: "steady",
+						FallbackInfo: &papi.ActivationFallbackInfo{
+							FastFallbackAttempted:      false,
+							FallbackVersion:            1,
+							CanFastFallback:            false,
+							SteadyStateTime:            1666873734,
+							FastFallbackExpirationTime: 1666877334,
+						},
+						IncludeID:      "inc_78910",
+						IncludeName:    "test_include_1",
 						IncludeType:    papi.IncludeTypeMicroServices,
 						IncludeVersion: 1,
 					},

@@ -13,6 +13,7 @@ provider "akamai" {
   config_section = var.config_section
 }
 
+
 data "akamai_property_rules_template" "rules_test_include" {
   template_file = abspath("${path.module}/property-snippets/test_include.json")
 }
