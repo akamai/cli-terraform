@@ -1,5 +1,14 @@
 # Release Notes
 
+## Version 1.3.0 (Dec 15, 2022)
+
+### Features/Enhancements
+
+* PAPI
+  * New `export-property include` subcommand to export Property Manager Include `akamai_property_include` with accompanying resources and data sources:
+  `akamai_property_include_activation`, `akamai_property_include_parents` and `akamai_property_rules_template`
+  * New `--with-includes` flag available with `export-property` command to export resources and data sources for the Property Manager Includes that are referenced by the Property which is being exported
+
 ## Version 1.2.0 (Dec 1, 2022)
 
 ### Features/Enhancements

@@ -1,0 +1,2 @@
+terraform init
+terraform import akamai_property_include.test_include test_contract:test_group:inc_123456

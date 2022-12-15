@@ -121,6 +121,14 @@ func CommandLocator() ([]*cli.Command, error) {
 		Usage:       "export-property",
 		ArgsUsage:   "<property name>",
 		Action:      validatedAction(papi.CmdCreateProperty, requireValidWorkpath, requireNArguments(1)),
+		Subcommands: []*cli.Command{
+			{
+				Name:        "include",
+				Description: "Generates Terraform configuration for Include resources",
+				ArgsUsage:   "<contract_id> <include_name>",
+				Action:      validatedAction(papi.CmdCreateInclude, requireValidWorkpath, requireNArguments(2)),
+			},
+		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "tfworkpath",
@@ -131,6 +139,10 @@ func CommandLocator() ([]*cli.Command, error) {
 				Name:        "version",
 				Usage:       "Property version to import",
 				DefaultText: "LATEST",
+			},
+			&cli.BoolFlag{
+				Name:  "with-includes",
+				Usage: "Referenced includes will also be exported along with property",
 			},
 		},
 		BashComplete: autocomplete.Default,
