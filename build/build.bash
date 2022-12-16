@@ -22,6 +22,7 @@ find_edgegrid_branch() {
   else
     # find parent branch from which this branch was created, iterate over the list of branches from the history of commits
     branches=($(list_branches))
+    branches+=("develop") # guard to fallback to safe value if less branches than 5
     for branch in ${branches[*]}
     do
       echo "Checking branch '${branch}'"
@@ -51,6 +52,7 @@ find_provider_branch() {
   else
     # find parent branch from which this branch was created, iterate over the list of branches from the history of commits
     branches=($(list_branches))
+    branches+=("develop") # guard to fallback to safe value if less branches than 5
     for branch in ${branches[*]}
     do
       echo "Checking Terraform branch '${branch}'"
@@ -80,6 +82,7 @@ find_cli_branch() {
   else
     # find parent branch from which this branch was created, iterate over the list of branches from the history of commits
     branches=($(list_branches))
+    branches+=("develop") # guard to fallback to safe value if less branches than 5
     for branch in ${branches[*]}
     do
       echo "Checking Cli branch '${branch}'"
