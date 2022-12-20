@@ -405,12 +405,8 @@ func createResourceConfigFilename(resourceName, tfWorkPath string) string {
 // util func. create named module path
 func createNamedModulePath(modName, tfWorkPath string) string {
 
-	fpath := filepath.Join(tfWorkPath, moduleFolder, normalizeResourceName(modName))
-	if fpath[0:1] != "./" && fpath[0:2] != "../" {
-		fpath = filepath.FromSlash("./" + fpath)
-	}
+	return filepath.Join(tfWorkPath, moduleFolder, normalizeResourceName(modName))
 
-	return fpath
 }
 
 // Utility func
