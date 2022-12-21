@@ -45,32 +45,6 @@ find_edgegrid_branch() {
   echo "Current branch is '${CURRENT_BRANCH}', matching EdgeGrid branch is '${EDGEGRID_BRANCH}'"
 }
 
-find_provider_branch() {
-  CURRENT_BRANCH=$GIT_BRANCH
-  # find parent branch from which this branch was created, iterate over the list of branches from the history of commits
-  branches=($(list_branches))
-  branches+=("develop") # guard to fallback to safe value if less branches than 5
-  for branch in ${branches[*]}
-  do
-    echo "Checking Terraform branch '${branch}'"
-    PROVIDER_BRANCH=$branch
-
-    if [[ "$index" -eq "5" ]]; then
-      echo "Exceeding limit of checks, fallback to default branch 'develop'"
-      PROVIDER_BRANCH="develop"
-      break
-    fi
-    index=$((index + 1))
-
-    git -C ./terraform-provider-akamai branch -r | grep $PROVIDER_BRANCH > /dev/null
-    if [[ $? -eq 0 ]]; then
-      echo "There is matching Terraform Provider branch '${PROVIDER_BRANCH}'"
-      break
-    fi
-  done
-  echo "Current branch is '${CURRENT_BRANCH}', matching Terraform Provider branch is '${PROVIDER_BRANCH}'"
-}
-
 find_cli_branch() {
   CURRENT_BRANCH=$GIT_BRANCH
   # find parent branch from which this branch was created, iterate over the list of branches from the history of commits
@@ -129,12 +103,10 @@ clone_repository() {
 
 clean
 clone_repository edgegrid
-clone_repository provider
 clone_repository cli cli-clone
 find_edgegrid_branch
-find_provider_branch
 find_cli_branch
 
-if ! ./build/docker_jenkins.bash "$CURRENT_BRANCH" "$PROVIDER_BRANCH" "$EDGEGRID_BRANCH" "$CLI_BRANCH"; then
+if ! ./build/docker_jenkins.bash "$CURRENT_BRANCH" "$EDGEGRID_BRANCH" "$CLI_BRANCH"; then
     exit 1
 fi

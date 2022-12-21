@@ -94,8 +94,8 @@ validate-testdata: ; $(info $(M) Validating testdata agains terraform-provider-a
 	@for dir in $(shell find . -type f -name "*.tf" -exec dirname "{}" \; |sort -u); do \
 		pushd $${dir} && \
 		echo Validating directory: $(shell pwd) && \
-		terraform init && \
-		terraform validate && \
+		terraform init -upgrade -no-color && \
+		terraform validate -no-color && \
 		rm -r .terraform* ; \
 		popd ; \
 	done
