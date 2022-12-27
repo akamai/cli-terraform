@@ -1182,6 +1182,7 @@ func convertPolicyInputImage(policy imaging.PolicyInput) (*imaging.PolicyOutputI
 func TestEnsureDirExists(t *testing.T) {
 	t.Run("no json dir specified", func(t *testing.T) {
 		tfDir, err := ioutil.TempDir("", "tfworkpath")
+		assert.NoError(t, err)
 		defer func() { assert.NoError(t, os.RemoveAll(tfDir)) }()
 		jsonDirPath := path.Join(tfDir, ".")
 

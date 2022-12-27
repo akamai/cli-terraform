@@ -45,7 +45,7 @@ all: clean fmt-check lint terraform-fmt terraform-lint coverage create-junit-rep
 
 .PHONY: test
 test: ; $(info $(M) Running tests...) ## Run all unit tests
-	$(GOTEST) -count=1 ./...
+	$(GOTEST) -v -count=1 ./...
 
 .PHONY: coverage
 coverage: ; $(info $(M) Running tests with coverage...) @ ## Run tests and generate coverage profile

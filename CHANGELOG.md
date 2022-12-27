@@ -1,5 +1,11 @@
 # Release Notes
 
+## Version X.X.X (X X, X)
+
+### Features/Enhancements
+
+* Add badges to readme and improve code quality based on golangci-lint
+
 ## Version 1.3.0 (Dec 15, 2022)
 
 ### Features/Enhancements
