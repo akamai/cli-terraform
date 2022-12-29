@@ -2,6 +2,10 @@
 
 ## Version X.X.X (X X, X)
 
+### BREAKING CHANGES:
+
+* Migrate to go 1.18
+
 ### Features/Enhancements
 
 * Add badges to readme and improve code quality based on golangci-lint
