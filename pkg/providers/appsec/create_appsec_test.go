@@ -269,6 +269,10 @@ func getExportConfiguratonResponse(filename string) *appsec.GetExportConfigurati
 
 	var getExportConfigurationResponse appsec.GetExportConfigurationResponse
 	err = json.Unmarshal(byteValue, &getExportConfigurationResponse)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return &getExportConfigurationResponse
 }
 

@@ -26,7 +26,9 @@ resource "akamai_appsec_rule" "policy2_akamaipragma_deflection_699989" {
     { "conditions" : [
       {
         "type" : "requestHeaderMatch",
+        "name" : "User-Agent",
         "positiveMatch" : true,
+        "value" : "*Slackbot-LinkExpanding*",
         "valueWildcard" : true
       }
     ] }

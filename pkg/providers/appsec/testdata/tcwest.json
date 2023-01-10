@@ -7051,33 +7051,29 @@
                 "ruleActions": [
                     {
                         "action": "alert",
-                            "exception": {
-                                "specificHeaderCookieParamXmlOrJsonNames": [
-                                    {
-                                        "names": [
-                                            "value",
-                                            "body%5B0%5D%5Bvalue%5D"
-                                        ],
-                                        "selector": "ARGS",
-                                        "wildcard": false
-                                    }
-                                ]
-                            },
-			"conditions": [
-				{
-				    "type": "requestHeaderMatch",
-				    "name": [
-					"User-Agent"
-				    ],
-				    "nameWildcard": false,
-				    "positiveMatch": true,
-				    "value": [
-					"*Slackbot-LinkExpanding*"
-				    ],
-				    "valueCase": false,
-				    "valueWildcard": true
-				}
-			    ],
+                        "exception": {
+                            "specificHeaderCookieParamXmlOrJsonNames": [
+                                {
+                                    "names": [
+                                        "value",
+                                        "body%5B0%5D%5Bvalue%5D"
+                                    ],
+                                    "selector": "ARGS",
+                                    "wildcard": false
+                                }
+                            ]
+                        },
+                        "conditions": [
+                            {
+                                "type": "requestHeaderMatch",
+                                "name": "User-Agent",
+                                "nameWildcard": false,
+                                "positiveMatch": true,
+                                "value": "*Slackbot-LinkExpanding*",
+                                "valueCase": false,
+                                "valueWildcard": true
+                            }
+                        ],
                         "id": 699989,
                         "rulesetVersionId": 7337
                     },
@@ -11052,51 +11048,51 @@
     ],
     "malwarePolicies": [
         {
-            "contentTypes" : [
+            "contentTypes": [
                 "application/xml",
                 "audio/x-wav",
                 "application/json"
             ],
-            "description" : "Malware configuration details",
-            "hostnames" : [
+            "description": "Malware configuration details",
+            "hostnames": [
                 "test.akamai.com",
                 "sample.akamai.com"
             ],
             "id": 1187,
-            "name" : "FMS Configuration 1",
-            "paths" : [
+            "name": "FMS Configuration 1",
+            "paths": [
                 "/base-path",
                 "/test"
             ]
         },
         {
-            "contentTypes" : [
+            "contentTypes": [
                 "application/msword",
                 "application/x-mswrite",
                 "application/rtf"
             ],
-            "description" : "Malware configuration details",
-            "hostnames" : [
+            "description": "Malware configuration details",
+            "hostnames": [
                 "test.akamai.com"
             ],
             "id": 1186,
-            "name" : "FMS Configuration 2",
-            "paths" : [
+            "name": "FMS Configuration 2",
+            "paths": [
                 "/base-path"
             ]
         },
         {
-            "contentTypes" : [
+            "contentTypes": [
                 "application/xml",
                 "application/json"
             ],
-            "description" : "Malware configuration details",
-            "hostnames" : [
+            "description": "Malware configuration details",
+            "hostnames": [
                 "sample.akamai.com"
             ],
             "id": 1185,
-            "name" : "FMS Configuration 3",
-            "paths" : [
+            "name": "FMS Configuration 3",
+            "paths": [
                 "/test"
             ]
         }
