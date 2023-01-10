@@ -36,11 +36,12 @@ resource "akamai_cps_dv_enrollment" "enrollment_id_1" {
   }
   certificate_chain_type = "default"
   csr {
-    country_code        = "US"
-    city                = "Cambridge"
-    organization        = "Akamai"
-    organizational_unit = "WebEx"
-    state               = "MA"
+    country_code          = "US"
+    city                  = "Cambridge"
+    organization          = "Akamai"
+    organizational_unit   = "WebEx"
+    preferred_trust_chain = "intermediate-a"
+    state                 = "MA"
   }
   network_configuration {
     client_mutual_authentication {

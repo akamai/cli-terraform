@@ -61,11 +61,14 @@ provider "akamai" {
     {{- end}}
     {{- with .CSR}}
         csr {
-        country_code        = "{{.C}}"
-        city                = "{{.L}}"
-        organization        = "{{.O}}"
-        organizational_unit = "{{.OU}}"
-        state               = "{{.ST}}"
+        country_code          = "{{.C}}"
+        city                  = "{{.L}}"
+        organization          = "{{.O}}"
+        organizational_unit   = "{{.OU}}"
+        {{- if .PreferredTrustChain}}
+        preferred_trust_chain = "{{.PreferredTrustChain}}"
+        {{- end}}
+        state                 = "{{.ST}}"
         }
     {{- end}}
     {{- with .NetworkConfiguration}}

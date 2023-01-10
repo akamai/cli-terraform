@@ -71,13 +71,14 @@ var (
 		CertificateType:      "san",
 		ChangeManagement:     false,
 		CSR: &cps.CSR{
-			C:    "US",
-			CN:   "test.akamai.com",
-			L:    "Cambridge",
-			O:    "Akamai",
-			OU:   "WebEx",
-			SANS: []string{"test.akamai.com"},
-			ST:   "MA",
+			C:                   "US",
+			CN:                  "test.akamai.com",
+			L:                   "Cambridge",
+			O:                   "Akamai",
+			OU:                  "WebEx",
+			PreferredTrustChain: "intermediate-a",
+			SANS:                []string{"test.akamai.com"},
+			ST:                  "MA",
 		},
 		EnableMultiStackedCertificates: false,
 		NetworkConfiguration: &cps.NetworkConfiguration{
@@ -163,7 +164,12 @@ var (
 			PostalCode:     "12345",
 			Region:         "MA",
 		},
-		PendingChanges:     []string{"change"},
+		PendingChanges: []cps.PendingChange{
+			{
+				Location:   "change",
+				ChangeType: "new-certificate",
+			},
+		},
 		RA:                 "lets-encrypt",
 		SignatureAlgorithm: "SHA-256",
 		TechContact: &cps.Contact{
@@ -202,13 +208,14 @@ var (
 		CertificateType:      "san",
 		ChangeManagement:     true,
 		CSR: &cps.CSR{
-			C:    "US",
-			CN:   "test.akamai.com",
-			L:    "Cambridge",
-			O:    "Akamai",
-			OU:   "WebEx",
-			SANS: []string{"test.akamai.com", "san.test.akamai.com"},
-			ST:   "MA",
+			C:                   "US",
+			CN:                  "test.akamai.com",
+			L:                   "Cambridge",
+			O:                   "Akamai",
+			OU:                  "WebEx",
+			PreferredTrustChain: "intermediate-a",
+			SANS:                []string{"test.akamai.com", "san.test.akamai.com"},
+			ST:                  "MA",
 		},
 		EnableMultiStackedCertificates: true,
 		Location:                       "loc",
@@ -247,7 +254,12 @@ var (
 			PostalCode:     "12345",
 			Region:         "MA",
 		},
-		PendingChanges:     []string{"change"},
+		PendingChanges: []cps.PendingChange{
+			{
+				Location:   "change",
+				ChangeType: "new-certificate",
+			},
+		},
 		RA:                 "lets-encrypt",
 		SignatureAlgorithm: "SHA-256",
 		TechContact: &cps.Contact{
@@ -331,7 +343,12 @@ var (
 			PostalCode:     "12345",
 			Region:         "MA",
 		},
-		PendingChanges:     []string{"change"},
+		PendingChanges: []cps.PendingChange{
+			{
+				Location:   "change",
+				ChangeType: "new-certificate",
+			},
+		},
 		RA:                 "lets-encrypt",
 		SignatureAlgorithm: "SHA-256",
 		TechContact: &cps.Contact{

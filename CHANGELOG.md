@@ -8,7 +8,10 @@
 
 ### Features/Enhancements
 
-* Add badges to readme and improve code quality based on golangci-lint
+* General
+  * Add badges to readme and improve code quality based on golangci-lint
+* CPS
+  * Add `preferred_trust_chain` in `csr` set attribute
 
 ## Version 1.3.0 (Dec 15, 2022)
 
