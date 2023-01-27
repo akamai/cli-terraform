@@ -11,7 +11,7 @@ import (
 	"sort"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/cloudlets"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/cloudlets"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"

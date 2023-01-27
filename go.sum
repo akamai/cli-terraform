@@ -9,8 +9,6 @@ github.com/StackExchange/wmi v1.2.1 h1:VIkavFPXSjcnS+O8yTq7NI32k0R5Aj+v39y29VYDO
 github.com/StackExchange/wmi v1.2.1/go.mod h1:rcmrprowKIVzvc+NUiLncP2uuArMWLCbu9SBzvHz7e8=
 github.com/agext/levenshtein v1.2.1 h1:QmvMAjj2aEICytGiWzmxoE0x2KZvE0fvmqMOfy2tjT8=
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
-github.com/akamai/AkamaiOPEN-edgegrid-golang/v3 v3.1.0 h1:g36PlHu63yKKnRhD2UGTlooHyRJJ6dR19NQLRAanDQw=
-github.com/akamai/AkamaiOPEN-edgegrid-golang/v3 v3.1.0/go.mod h1:f1CMqE+oVW+kutfkS1VHaeUfGIdGr7LzpR74CCYP6+E=
 github.com/akamai/cli v1.5.2 h1:tFDbi5vn8iUWBE0IorqagBY0imxSgm16WR8FdZcXVoE=
 github.com/akamai/cli v1.5.2/go.mod h1:q3O6dzGfVrAmghn2eaxm0olfKs7h2aIXuY3R5oHqUrs=
 github.com/apex/log v1.9.0 h1:FHtw/xuaM8AgmvDDTI9fiwoAL25Sq2cxojnZICUU8l0=

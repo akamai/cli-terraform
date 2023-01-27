@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/iam"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"

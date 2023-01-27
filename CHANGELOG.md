@@ -1,6 +1,6 @@
 # Release Notes
 
-## Version X.X.X (X X, X)
+## Version 1.3.1 (Feb 2, 2023)
 
 ### BREAKING CHANGES:
 

@@ -7,7 +7,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/session"
 	"github.com/akamai/cli/pkg/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
