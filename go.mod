@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/akamai/AkamaiOPEN-edgegrid-golang/v4 v4.0.0
-	github.com/akamai/cli v1.5.2
+	github.com/akamai/cli v1.5.3
 	github.com/fatih/color v1.13.0
 	github.com/hashicorp/hcl/v2 v2.11.1
 	github.com/shirou/gopsutil v2.20.4+incompatible
