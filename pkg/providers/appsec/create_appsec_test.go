@@ -11,7 +11,7 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/appsec"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/appsec"
 	"github.com/akamai/cli-terraform/pkg/templates"
 
 	"github.com/stretchr/testify/assert"
@@ -269,6 +269,10 @@ func getExportConfiguratonResponse(filename string) *appsec.GetExportConfigurati
 
 	var getExportConfigurationResponse appsec.GetExportConfigurationResponse
 	err = json.Unmarshal(byteValue, &getExportConfigurationResponse)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return &getExportConfigurationResponse
 }
 

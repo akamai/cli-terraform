@@ -10,7 +10,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/edgeworkers"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/edgeworkers"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"

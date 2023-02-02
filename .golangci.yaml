@@ -1,8 +1,14 @@
 linters:
   disable-all: true
   enable:
-  - errcheck
-  - revive
+    - errcheck
+    - gocyclo
+    - gofmt
+    - goimports
+    - govet
+    - ineffassign
+    - misspell
+    - revive
 
 output:
   sort-results: true
@@ -11,13 +17,6 @@ issues:
   exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
-  exclude-rules:
-    - path: pkg/providers/dns/
-      linters:
-        - errcheck
-    - path: pkg/providers/gtm/
-      linters:
-        - errcheck
 
 linters-settings:
   revive:

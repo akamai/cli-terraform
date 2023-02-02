@@ -18,7 +18,7 @@ type fileUtilsProcessor struct {
 }
 
 // Work routine to create module TF file
-func (fileUtilsProcessor) createModuleTF(ctx context.Context, modName, content, tfWorkPath string) error {
+func (fileUtilsProcessor) createModuleTF(ctx context.Context, modName, content, tfWorkPath string) (err error) {
 	term := terminal.Get(ctx)
 	term.Printf("Creating zone name %s module configuration file...", modName)
 	namedmodulePath := createNamedModulePath(modName, tfWorkPath)
@@ -34,14 +34,18 @@ func (fileUtilsProcessor) createModuleTF(ctx context.Context, modName, content, 
 	if err != nil {
 		return fmt.Errorf("failed to create name module configuration file: %s", namedmodulePath)
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		if e := f.Close(); e != nil {
+			err = e
+		}
+	}(f)
 	_, err = f.WriteString(content)
 	if err != nil {
 		return fmt.Errorf("failed to write name module configuration: %s", namedmodulePath)
 	}
-	f.Sync()
+	err = f.Sync()
 
-	return nil
+	return err
 }
 
 // Flush string to root module TF file
@@ -52,7 +56,10 @@ func (fileUtilsProcessor) appendRootModuleTF(configText string) error {
 	if err != nil {
 		return fmt.Errorf("failed to save zone configuration file")
 	}
-	zoneTFfileHandle.Sync()
+	err = zoneTFfileHandle.Sync()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

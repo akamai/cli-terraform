@@ -25,7 +25,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/gtm"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/gtm"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
@@ -145,7 +145,10 @@ func CmdCreateDomain(c *cli.Context) error {
 func createDomain(ctx context.Context, client gtm.GTM, domainName, section string, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
-	term.Writeln("Configuring Domain")
+	if _, err := term.Writeln("Configuring Domain"); err != nil {
+		return err
+	}
+
 	term.Spinner().Start(fmt.Sprintf("Fetching domain %s", domainName))
 	domain, err := client.GetDomain(ctx, domainName)
 	if err != nil {
@@ -185,7 +188,9 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, section strin
 	}
 	term.Spinner().OK()
 
-	term.Writeln(fmt.Sprintf("Terraform configuration for policy '%s' was saved successfully\n", domain.Name))
+	if _, err = term.Writeln(fmt.Sprintf("Terraform configuration for policy '%s' was saved successfully\n", domain.Name)); err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -26,7 +26,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/dns"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/dns"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
@@ -125,7 +125,7 @@ func CmdCreateZone(c *cli.Context) error {
 			return err
 		}
 
-		err = createDNSVarsConfig(err, term, configuration.tfWorkPath)
+		err = createDNSVarsConfig(term, configuration.tfWorkPath)
 		if err != nil {
 			return err
 		}
@@ -201,17 +201,22 @@ func setConfiguration(c *cli.Context) configStruct {
 	return executionConfig
 }
 
-func createZoneConfigFile(ctx context.Context, zoneImportList *zoneImportListStruct, resourceZoneName string, zoneObject *dns.ZoneResponse, configDNS dns.DNS, configuration configStruct) error {
+func createZoneConfigFile(ctx context.Context, zoneImportList *zoneImportListStruct, resourceZoneName string, zoneObject *dns.ZoneResponse, configDNS dns.DNS, configuration configStruct) (err error) {
 	// see if configuration file already exists and exclude any resources already represented.
 	var configImportList *zoneImportListStruct
 	var zoneTypeMap map[string]map[string]bool
-	var err error
+
 	zoneTFfileHandle, zonetfConfig, err = openZoneConfigFile(resourceZoneName, configuration.tfWorkPath)
 	if err != nil {
 		return cli.Exit(color.RedString("Failed to open/create zone config file."), 1)
 	}
 	configImportList, zoneTypeMap = reconcileZoneResourceTargets(zoneImportList, resourceZoneName, zonetfConfig)
-	defer zoneTFfileHandle.Close()
+
+	defer func(zoneTFfileHandle *os.File) {
+		if e := zoneTFfileHandle.Close(); e != nil {
+			err = e
+		}
+	}(zoneTFfileHandle)
 	fileUtils := fileUtilsProcessor{}
 
 	err = calculateTfConfig(ctx, zoneObject, resourceZoneName, fileUtils, configuration)
@@ -231,11 +236,9 @@ func createZoneConfigFile(ctx context.Context, zoneImportList *zoneImportListStr
 	}
 	// Save config map for import script generation
 	resourceConfigFilename := createResourceConfigFilename(resourceZoneName, configuration.tfWorkPath)
-	err = saveResourceConfigFile(err, resourceConfigFilename)
-	if err != nil {
-		return err
-	}
-	return nil
+	err = saveResourceConfigFile(resourceConfigFilename)
+
+	return err
 }
 
 func calculateTfConfig(ctx context.Context, zoneObject *dns.ZoneResponse, resourceZoneName string, fileUtils fileUtilsProcessor, config configStruct) error {
@@ -262,7 +265,7 @@ func calculateTfConfig(ctx context.Context, zoneObject *dns.ZoneResponse, resour
 	return nil
 }
 
-func saveResourceConfigFile(err error, resourceConfigFilename string) error {
+func saveResourceConfigFile(resourceConfigFilename string) (err error) {
 	resourceConfigJSON, err := json.MarshalIndent(&fullZoneConfigMap, "", "  ")
 	if err != nil {
 		return cli.Exit(color.RedString("Unable to generate json formatted zone config"), 1)
@@ -271,7 +274,12 @@ func saveResourceConfigFile(err error, resourceConfigFilename string) error {
 	if err != nil {
 		return cli.Exit(color.RedString("Unable to create resource config file"), 1)
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		if e := f.Close(); e != nil {
+			err = e
+		}
+	}(f)
+
 	_, err = f.WriteString(string(resourceConfigJSON))
 	if err != nil {
 		return cli.Exit(color.RedString("Unable to write zone resource config file"), 1)
@@ -283,7 +291,7 @@ func saveResourceConfigFile(err error, resourceConfigFilename string) error {
 	return nil
 }
 
-func createDNSVarsConfig(err error, term terminal.Terminal, tfWorkPath string) error {
+func createDNSVarsConfig(term terminal.Terminal, tfWorkPath string) (err error) {
 	// Need create dnsvars.tf dependency
 	dnsvarsFilename := filepath.Join(tfWorkPath, "dnsvars.tf")
 	// see if exists already.
@@ -294,20 +302,22 @@ func createDNSVarsConfig(err error, term terminal.Terminal, tfWorkPath string) e
 		term.Spinner().Fail()
 		return cli.Exit(color.RedString("Unable to create dnsvars config file"), 1)
 	}
-	defer dnsvarsHandle.Close()
+	defer func(dnsvarsHandle *os.File) {
+		if e := dnsvarsHandle.Close(); e != nil {
+			err = e
+		}
+	}(dnsvarsHandle)
 	_, err = dnsvarsHandle.WriteString(fmt.Sprintf(useTemplate(nil, "dnsvars.tmpl", true), contractid))
 	if err != nil {
 		term.Spinner().Fail()
 		return cli.Exit(color.RedString("Unable to write dnsvars config file"), 1)
 	}
 	err = dnsvarsHandle.Sync()
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
-func createImportScript(resourceZoneName string, term terminal.Terminal, configuration configStruct) error {
+func createImportScript(resourceZoneName string, term terminal.Terminal, configuration configStruct) (err error) {
 	fullZoneConfigMap, _ = retrieveZoneResourceConfig(resourceZoneName, configuration)
 	importScriptFilename := filepath.Join(configuration.tfWorkPath, resourceZoneName+"_resource_import.script")
 	if _, err := os.Stat(importScriptFilename); err == nil {
@@ -323,16 +333,18 @@ func createImportScript(resourceZoneName string, term terminal.Terminal, configu
 	if err != nil {
 		return cli.Exit(color.RedString("Unable to create import script file"), 1)
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		if e := f.Close(); e != nil {
+			err = e
+		}
+	}(f)
 	_, err = f.WriteString(scriptContent)
 	if err != nil {
 		return cli.Exit(color.RedString("Unable to write import script file"), 1)
 	}
 	err = f.Sync()
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 func createZoneResourceListFile(resourceZoneName string, recordsets map[string]Types, tfWorkPath string) error {
@@ -350,7 +362,7 @@ func createZoneResourceListFile(resourceZoneName string, recordsets map[string]T
 	return nil
 }
 
-func saveImportListToFile(importListFilename string) error {
+func saveImportListToFile(importListFilename string) (err error) {
 	importListJSON, err := json.MarshalIndent(fullZoneImportList, "", "  ")
 	if err != nil {
 		return cli.Exit(color.RedString("Unable to generate json formatted zone resource list"), 1)
@@ -359,16 +371,18 @@ func saveImportListToFile(importListFilename string) error {
 	if err != nil {
 		return cli.Exit(color.RedString("Unable to create zone resources file"), 1)
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		if e := f.Close(); e != nil {
+			err = e
+		}
+	}(f)
 	_, err = f.WriteString(string(importListJSON))
 	if err != nil {
 		return cli.Exit(color.RedString("Unable to write zone resources file"), 1)
 	}
 	err = f.Sync()
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 func inventorZone(ctx context.Context, configDNS dns.DNS, configuration configStruct) (map[string]Types, error) {
@@ -405,12 +419,8 @@ func createResourceConfigFilename(resourceName, tfWorkPath string) string {
 // util func. create named module path
 func createNamedModulePath(modName, tfWorkPath string) string {
 
-	fpath := filepath.Join(tfWorkPath, moduleFolder, normalizeResourceName(modName))
-	if fpath[0:1] != "./" && fpath[0:2] != "../" {
-		fpath = filepath.FromSlash("./" + fpath)
-	}
+	return filepath.Join(tfWorkPath, moduleFolder, normalizeResourceName(modName))
 
-	return fpath
 }
 
 // Utility func

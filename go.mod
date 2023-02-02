@@ -1,10 +1,10 @@
 module github.com/akamai/cli-terraform
 
-go 1.17
+go 1.18
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v3 v3.1.0
-	github.com/akamai/cli v1.5.2
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v4 v4.0.0
+	github.com/akamai/cli v1.5.3
 	github.com/fatih/color v1.13.0
 	github.com/hashicorp/hcl/v2 v2.11.1
 	github.com/shirou/gopsutil v2.20.4+incompatible
@@ -51,5 +51,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v3 => ../akamaiopen-edgegrid-golang
+//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v4 => ../akamaiopen-edgegrid-golang
 //replace github.com/akamai/cli => ../cli

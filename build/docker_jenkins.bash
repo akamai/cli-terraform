@@ -9,10 +9,9 @@
 set -e
 
 CLI_TERRAFORM_BRANCH_NAME="${1:-develop}"
-PROVIDER_BRANCH_NAME="${2:-develop}"
-EDGEGRID_BRANCH_NAME="${3:-develop}"
-CLI_BRANCH_NAME="${4:-develop}"
-RELOAD_DOCKER_IMAGE="${5:-false}"
+EDGEGRID_BRANCH_NAME="${2:-develop}"
+CLI_BRANCH_NAME="${3:-develop}"
+RELOAD_DOCKER_IMAGE="${4:-false}"
 
 
 TIMEOUT="20m"
@@ -32,8 +31,8 @@ GIT_IP=$(dig +short $STASH_SERVER)
 [ -z "$GIT_IP" ] && echo "Aborting - Can not reach $STASH_SERVER." && exit 1 || echo "Resolved $STASH_SERVER, preparing build"
 
 eTAG="$(git describe --tags --always)"
-PROVIDER_BRANCH_HASH="$(git rev-parse --short HEAD)"
-echo "Making build on branch $PROVIDER_BRANCH_NAME at hash $PROVIDER_BRANCH_HASH with tag $eTAG"
+CLI_TERRAFORM_BRANCH_HASH="$(git rev-parse --short HEAD)"
+echo "Making build on branch $CLI_TERRAFORM_BRANCH_NAME at hash $CLI_TERRAFORM_BRANCH_HASH with tag $eTAG"
 
 cp "$HOME"/.edgerc "$WORKDIR"/.edgerc
 sed -i -e "1s/^.*$/[default]/" "$WORKDIR"/.edgerc
@@ -63,7 +62,6 @@ docker run -d -it --name akatf-container --entrypoint "/usr/bin/tail" \
         -e COVERMODE="atomic" \
         -e CLI_TERRAFORM_BRANCH_NAME="$CLI_TERRAFORM_BRANCH_NAME" \
         -e EDGEGRID_BRANCH_NAME="$EDGEGRID_BRANCH_NAME" \
-        -e PROVIDER_BRANCH_NAME="$PROVIDER_BRANCH_NAME" \
         -e CLI_BRANCH_NAME="$CLI_BRANCH_NAME" \
         -e SSH_PUB_KEY="${SSH_PUB_KEY}" \
         -e SSH_PRV_KEY="${SSH_PRV_KEY}" \
@@ -83,29 +81,18 @@ docker exec akatf-container sh -c 'echo "$SSH_KNOWN_HOSTS" > /root/.ssh/known_ho
                                    chmod 600 /root/.ssh/id_rsa;
                                    chmod 644 /root/.ssh/id_rsa.pub /root/.ssh/known_hosts'
 echo "Cloning repos"
-docker exec akatf-container sh -c 'git clone ssh://git@git.source.akamai.com:7999/devexp/terraform-provider-akamai.git;
-                                   git clone ssh://git@git.source.akamai.com:7999/devexp/akamaiopen-edgegrid-golang.git edgegrid;
+docker exec akatf-container sh -c 'git clone ssh://git@git.source.akamai.com:7999/devexp/akamaiopen-edgegrid-golang.git edgegrid;
                                    git clone ssh://git@git.source.akamai.com:7999/devexp/cli-terraform.git;
                                    git clone ssh://git@git.source.akamai.com:7999/devexp/cli.git'
 
 echo "Checkout branches"
 docker exec akatf-container sh -c 'cd edgegrid; git checkout ${EDGEGRID_BRANCH_NAME};
-                                   cd ../terraform-provider-akamai; git checkout ${PROVIDER_BRANCH_NAME};
-                                   go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v3=../edgegrid;
-                                   go mod tidy;
                                    cd ../cli; git checkout ${CLI_BRANCH_NAME};
                                    go mod tidy;
                                    cd ../cli-terraform; git checkout ${CLI_TERRAFORM_BRANCH_NAME};
-                                   go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v3=../edgegrid;
+                                   go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v4=../edgegrid;
                                    go mod edit -replace github.com/akamai/cli=../cli;
                                    go mod tidy'
-
-
-
-echo "Creating docker build for terraform-provider-akamai"
-docker exec akatf-container sh -c 'cd terraform-provider-akamai; go install -tags all;
-                                   mkdir -p /root/.terraform.d/plugins/registry.terraform.io/akamai/akamai/${PROVIDER_VERSION}/linux_amd64;
-                                   cp /go/bin/terraform-provider-akamai /root/.terraform.d/plugins/registry.terraform.io/akamai/akamai/${PROVIDER_VERSION}/linux_amd64/terraform-provider-akamai_v${PROVIDER_VERSION}'
 
 echo "Running checks"
 docker exec akatf-container sh -c 'cd cli-terraform; make all'

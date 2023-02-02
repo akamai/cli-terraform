@@ -45,7 +45,7 @@ all: clean fmt-check lint terraform-fmt terraform-lint coverage create-junit-rep
 
 .PHONY: test
 test: ; $(info $(M) Running tests...) ## Run all unit tests
-	$(GOTEST) -count=1 ./...
+	$(GOTEST) -v -count=1 ./...
 
 .PHONY: coverage
 coverage: ; $(info $(M) Running tests with coverage...) @ ## Run tests and generate coverage profile
@@ -94,8 +94,8 @@ validate-testdata: ; $(info $(M) Validating testdata agains terraform-provider-a
 	@for dir in $(shell find . -type f -name "*.tf" -exec dirname "{}" \; |sort -u); do \
 		pushd $${dir} && \
 		echo Validating directory: $(shell pwd) && \
-		terraform init && \
-		terraform validate && \
+		terraform init -upgrade -no-color && \
+		terraform validate -no-color && \
 		rm -r .terraform* ; \
 		popd ; \
 	done

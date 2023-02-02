@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.0-experimental
 # This script was copied from 'terraform-provider-akamai'
-FROM golang:1.17.3-alpine3.13
+FROM golang:1.18-alpine3.16
 ENV PROVIDER_VERSION="1.0.0" \
     GO111MODULE="on" \
     CGO_ENABLED=0 \

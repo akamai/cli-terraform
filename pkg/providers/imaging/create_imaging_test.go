@@ -13,8 +13,8 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/imaging"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/tools"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/imaging"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/tools"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/assert"
@@ -1182,6 +1182,7 @@ func convertPolicyInputImage(policy imaging.PolicyInput) (*imaging.PolicyOutputI
 func TestEnsureDirExists(t *testing.T) {
 	t.Run("no json dir specified", func(t *testing.T) {
 		tfDir, err := ioutil.TempDir("", "tfworkpath")
+		assert.NoError(t, err)
 		defer func() { assert.NoError(t, os.RemoveAll(tfDir)) }()
 		jsonDirPath := path.Join(tfDir, ".")
 

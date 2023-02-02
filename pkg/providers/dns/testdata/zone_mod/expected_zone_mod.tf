@@ -13,7 +13,7 @@ locals {
 }
 
 module "_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com" {
-  source = "./modules/_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com"
+  source = "modules/_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com"
 
   contract = var.contractid
   group    = var.groupid

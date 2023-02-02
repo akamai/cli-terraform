@@ -260,40 +260,40 @@
         }
     ],
     "customRules": [
-    {
-      "conditions": [
         {
-          "type": "requestMethodMatch",
-          "positiveMatch": true,
-          "value": [
-            "POST"
-          ]
+            "conditions": [
+                {
+                    "type": "requestMethodMatch",
+                    "positiveMatch": true,
+                    "value": [
+                        "POST"
+                    ]
+                },
+                {
+                    "type": "pathMatch",
+                    "positiveMatch": true,
+                    "value": [
+                        "/login"
+                    ]
+                },
+                {
+                    "type": "argsPostMatch",
+                    "name": "email",
+                    "positiveMatch": true,
+                    "value": [
+                        "me@email.com"
+                    ]
+                }
+            ],
+            "id": 60088542,
+            "name": "Custom Rule 1",
+            "ruleActivated": false,
+            "structured": true,
+            "tag": [
+                "Login"
+            ],
+            "version": 1
         },
-        {
-          "type": "pathMatch",
-          "positiveMatch": true,
-          "value": [
-            "/login"
-          ]
-        },
-        {
-          "type": "argsPostMatch",
-          "name": "email",
-          "positiveMatch": true,
-          "value": [
-            "me@email.com"
-          ]
-        }
-      ],
-      "id": 60088542,
-      "name": "Custom Rule 1",
-      "ruleActivated": false,
-      "structured": true,
-      "tag": [
-        "Login"
-      ],
-      "version": 1
-    },
         {
             "description": "Mimicked rule 950103 minus REQUEST_FILENAME",
             "id": 60039230,
@@ -305,7 +305,7 @@
             "structured": false,
             "version": 3
         }
-],
+    ],
     "rulesets": [
         {
             "id": 103,
@@ -3453,17 +3453,16 @@
             },
             "apiRequestConstraints": {
                 "apiEndpoints": [
-                {
-                    "action": "alert",
-                    "id": 12345
-                },
-                {
-                    "action": "alert",
-                    "id": 12346
-                }
+                    {
+                        "action": "alert",
+                        "id": 12345
+                    },
+                    {
+                        "action": "alert",
+                        "id": 12346
+                    }
                 ]
             },
-
             "requestBody": {
                 "requestBodyInspectionLimitInKB": "default"
             }
@@ -3471,51 +3470,51 @@
     ],
     "malwarePolicies": [
         {
-            "contentTypes" : [
+            "contentTypes": [
                 "application/xml",
                 "audio/x-wav",
                 "application/json"
             ],
-            "description" : "Malware configuration details",
-            "hostnames" : [
+            "description": "Malware configuration details",
+            "hostnames": [
                 "test.akamai.com",
                 "sample.akamai.com"
             ],
             "id": 1187,
-            "name" : "FMS Configuration 1",
-            "paths" : [
+            "name": "FMS Configuration 1",
+            "paths": [
                 "/base-path",
                 "/test"
             ]
         },
         {
-            "contentTypes" : [
+            "contentTypes": [
                 "application/msword",
                 "application/x-mswrite",
                 "application/rtf"
             ],
-            "description" : "Malware configuration details",
-            "hostnames" : [
+            "description": "Malware configuration details",
+            "hostnames": [
                 "test.akamai.com"
             ],
             "id": 1186,
-            "name" : "FMS Configuration 2",
-            "paths" : [
+            "name": "FMS Configuration 2",
+            "paths": [
                 "/base-path"
             ]
         },
         {
-            "contentTypes" : [
+            "contentTypes": [
                 "application/xml",
                 "application/json"
             ],
-            "description" : "Malware configuration details",
-            "hostnames" : [
+            "description": "Malware configuration details",
+            "hostnames": [
                 "sample.akamai.com"
             ],
             "id": 1185,
-            "name" : "FMS Configuration 3",
-            "paths" : [
+            "name": "FMS Configuration 3",
+            "paths": [
                 "/test"
             ]
         }
@@ -3561,8 +3560,10 @@
         "EnableForAllPolicies": false,
         "EnableSiem": true,
         "EnableBotmanSiemEvents": false,
-        "FirewallPolicyIds": [ "ASE1_156138" ],
-	"SiemDefinitionID": 1
+        "FirewallPolicyIds": [
+            "ASE1_156138"
+        ],
+        "SiemDefinitionID": 1
     },
     "customDenyList": [
         {
