@@ -2,13 +2,10 @@
 
 ## Version 1.3.1 (Feb 2, 2023)
 
-### BREAKING CHANGES:
-
-* Migrate to go 1.18
-
 ### Features/Enhancements
 
 * General
+  * Migrate to go 1.18
   * Add badges to readme and improve code quality based on golangci-lint
 * CPS
   * Add `preferred_trust_chain` in `csr` set attribute
