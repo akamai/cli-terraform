@@ -1,6 +1,7 @@
 terraform init
 terraform import module.security.akamai_appsec_configuration.config 32641
 terraform import module.security.akamai_appsec_advanced_settings_logging.logging 32641
+terraform import module.security.akamai_appsec_advanced_settings_attack_payload_logging.attack_payload_logging 32641
 terraform import module.security.akamai_appsec_advanced_settings_prefetch.prefetch 32641
 terraform import module.security.akamai_appsec_advanced_settings_pragma_header.pragma_header 32641
 terraform import module.security.akamai_appsec_custom_rule.custom_rule_1_60088542 32641:60088542
@@ -805,6 +806,7 @@ terraform import module.security.akamai_appsec_rate_policy_action.policy1_low_ra
 terraform import module.security.akamai_appsec_ip_geo.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_slow_post.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_advanced_settings_logging.policy1 32641:easy_80433
+terraform import module.security.akamai_appsec_advanced_settings_attack_payload_logging.policy1 32641:easy_80433
 
 terraform import module.security.akamai_appsec_rate_policy.high_rate 32641:172320
 

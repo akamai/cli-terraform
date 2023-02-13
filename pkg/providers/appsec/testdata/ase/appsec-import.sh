@@ -1,6 +1,7 @@
 terraform init
 terraform import module.security.akamai_appsec_configuration.config 79947
 terraform import module.security.akamai_appsec_advanced_settings_logging.logging 79947
+terraform import module.security.akamai_appsec_advanced_settings_attack_payload_logging.attack_payload_logging 79947
 terraform import module.security.akamai_appsec_advanced_settings_prefetch.prefetch 79947
 terraform import module.security.akamai_appsec_advanced_settings_pragma_header.pragma_header 79947
 terraform import module.security.akamai_appsec_custom_rule.custom_rule_1_60088542 79947:60088542

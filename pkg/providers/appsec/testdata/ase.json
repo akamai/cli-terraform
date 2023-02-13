@@ -3523,6 +3523,15 @@
         "enableSiem": false
     },
     "advancedOptions": {
+        "attackPayloadLogging": {
+            "enabled": true,
+            "requestBody": {
+                "type": "NONE"
+            },
+            "responseBody": {
+                "type": "ATTACK_PAYLOAD"
+            }
+        },
         "logging": {
             "allowSampling": true,
             "cookies": {

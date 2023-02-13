@@ -49,6 +49,21 @@ resource "akamai_appsec_advanced_settings_pragma_header" "pragma_header" {
   )
 }
 
+resource "akamai_appsec_advanced_settings_attack_payload_logging" "attack_payload_logging" {
+  config_id = akamai_appsec_configuration.config.config_id
+  attack_payload_logging = jsonencode(
+    {
+      "enabled" : true,
+      "requestBody" : {
+        "type" : "NONE"
+      },
+      "responseBody" : {
+        "type" : "ATTACK_PAYLOAD"
+      }
+    }
+  )
+}
+
 // Logging Overides
 resource "akamai_appsec_advanced_settings_logging" "policy1" {
   config_id          = akamai_appsec_configuration.config.config_id
@@ -69,6 +84,24 @@ resource "akamai_appsec_advanced_settings_logging" "policy1" {
           "Accept-Charset"
         ]
       }
+    }
+  )
+}
+
+// AttackPayloadLogging Overrides
+resource "akamai_appsec_advanced_settings_attack_payload_logging" "policy1" {
+  config_id          = akamai_appsec_configuration.config.config_id
+  security_policy_id = akamai_appsec_security_policy.policy1.security_policy_id
+  logging = jsonencode(
+    {
+      "enabled" : true,
+      "requestBody" : {
+        "type" : "ATTACK_PAYLOAD"
+      },
+      "responseBody" : {
+        "type" : "NONE"
+      },
+      "override" : true
     }
   )
 }

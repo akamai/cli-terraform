@@ -33,3 +33,18 @@ resource "akamai_appsec_advanced_settings_pragma_header" "pragma_header" {
     }
   )
 }
+
+resource "akamai_appsec_advanced_settings_attack_payload_logging" "attack_payload_logging" {
+  config_id = akamai_appsec_configuration.config.config_id
+  attack_payload_logging = jsonencode(
+    {
+      "enabled" : true,
+      "requestBody" : {
+        "type" : "NONE"
+      },
+      "responseBody" : {
+        "type" : "ATTACK_PAYLOAD"
+      }
+    }
+  )
+}

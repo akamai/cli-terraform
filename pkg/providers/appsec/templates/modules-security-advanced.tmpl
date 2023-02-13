@@ -29,6 +29,14 @@ resource "akamai_appsec_advanced_settings_evasive_path_match" "evasive_path_matc
   enable_path_match = {{ .AdvancedOptions.EvasivePathMatch.EnablePathMatch }}
 }
 {{ end -}}
+{{ if .AdvancedOptions.AttackPayloadLogging }}
+resource "akamai_appsec_advanced_settings_attack_payload_logging" "attack_payload_logging" {
+  config_id = akamai_appsec_configuration.config.config_id
+  attack_payload_logging   = jsonencode(
+{{toJSON .AdvancedOptions.AttackPayloadLogging }}
+)
+}
+{{ end -}}
 {{ end -}}
 {{ range .SecurityPolicies -}}
 {{ $policyName := .Name -}}
@@ -60,6 +68,16 @@ resource "akamai_appsec_advanced_settings_evasive_path_match" "{{ escapeName $po
     config_id = akamai_appsec_configuration.config.config_id
     security_policy_id = akamai_appsec_security_policy.{{ escapeName $policyName }}.security_policy_id
     enable_path_match = {{ .EvasivePathMatch.EnablePathMatch }}
+}
+{{ end -}}
+{{ if .AttackPayloadLoggingOverrides }}
+// AttackPayloadLogging Overrides
+resource "akamai_appsec_advanced_settings_attack_payload_logging" "{{ escapeName $policyName}}" {
+    config_id = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_security_policy.{{ escapeName $policyName }}.security_policy_id
+    logging = jsonencode(
+{{ toJSON .AttackPayloadLoggingOverrides }}
+)
 }
 {{ end -}}
 {{ end -}}
