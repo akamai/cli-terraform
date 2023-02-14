@@ -75,7 +75,7 @@ resource "akamai_appsec_advanced_settings_evasive_path_match" "{{ escapeName $po
 resource "akamai_appsec_advanced_settings_attack_payload_logging" "{{ escapeName $policyName}}" {
     config_id = akamai_appsec_configuration.config.config_id
     security_policy_id = akamai_appsec_security_policy.{{ escapeName $policyName }}.security_policy_id
-    logging = jsonencode(
+    attack_payload_logging = jsonencode(
 {{ toJSON .AttackPayloadLoggingOverrides }}
 )
 }

@@ -92,7 +92,7 @@ resource "akamai_appsec_advanced_settings_logging" "policy1" {
 resource "akamai_appsec_advanced_settings_attack_payload_logging" "policy1" {
   config_id          = akamai_appsec_configuration.config.config_id
   security_policy_id = akamai_appsec_security_policy.policy1.security_policy_id
-  logging = jsonencode(
+  attack_payload_logging = jsonencode(
     {
       "enabled" : true,
       "requestBody" : {
