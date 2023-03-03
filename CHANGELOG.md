@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version x.x.x (x x, 2023)
+
+### Fixes
+
+* Property Manager
+  * Change exported attribute value in configuration of `akamai_contract` data source from deprecated `name`
+  to `group_name` when exporting property
+
 ## Version 1.3.1 (Feb 2, 2023)
 
 ### BREAKING CHANGES:

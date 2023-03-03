@@ -19,7 +19,7 @@ data "akamai_group" "group" {
 }
 
 data "akamai_contract" "contract" {
-  group_name = data.akamai_group.group.name
+  group_name = data.akamai_group.group.group_name
 }
 
 data "akamai_property_rules_template" "rules" {
