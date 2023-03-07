@@ -306,6 +306,26 @@ func TestCreateProperty(t *testing.T) {
 		},
 	}
 
+	getPropertyVersionEmptyHostnameIDResponse := papi.GetPropertyVersionHostnamesResponse{
+		AccountID:       "test_account",
+		ContractID:      "test_contract",
+		GroupID:         "grp_12345",
+		PropertyID:      "prp_12345",
+		PropertyVersion: 5,
+		Etag:            "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
+		Hostnames: papi.HostnameResponseItems{
+			Items: []papi.Hostname{
+				{
+					CnameType:            "EDGE_HOSTNAME",
+					EdgeHostnameID:       "",
+					CnameFrom:            "test.edgesuite.net",
+					CnameTo:              "test.edgesuite.net",
+					CertProvisioningType: "CPS_MANAGED",
+				},
+			},
+		},
+	}
+
 	getPropertyVersion1HostnamesResponse := papi.GetPropertyVersionHostnamesResponse{
 		AccountID:       "test_account",
 		ContractID:      "test_contract",
@@ -588,6 +608,90 @@ func TestCreateProperty(t *testing.T) {
 			},
 			dir:     "basic",
 			jsonDir: "basic/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+		},
+		"basic property with empty hostname id": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *mockProcessor, dir string) {
+				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
+					Return(&searchPropertiesResponse, nil).Once()
+
+				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
+					Return(&getPropertyResponse, nil).Once()
+
+				var ruleResponse papi.GetRuleTreeResponse
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				assert.NoError(t, err)
+				err = json.Unmarshal(rules, &ruleResponse)
+				assert.NoError(t, err)
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+					Return(&ruleResponse, nil).Once()
+
+				c.On("GetGroups", mock.Anything).
+					Return(&getGroupsResponse, nil).Once()
+
+				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
+					PropertyID: "prp_12345",
+					ContractID: "test_contract",
+					GroupID:    "grp_12345",
+				}).Return(&getPropertyVersionsResponse, nil).Once()
+
+				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
+					PropertyID:  "prp_12345",
+					ActivatedOn: "",
+					ContractID:  "test_contract",
+					GroupID:     "grp_12345",
+				}).Return(&getLatestVersionResponse, nil).Once()
+
+				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
+					ContractID: "test_contract",
+				}).Return(&getProductsResponse, nil).Once()
+
+				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
+					PropertyID:      "prp_12345",
+					PropertyVersion: 5,
+					ContractID:      "test_contract",
+					GroupID:         "grp_12345",
+				}).Return(&getPropertyVersionEmptyHostnameIDResponse, nil).Once()
+
+				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
+					PropertyID: "prp_12345",
+					ContractID: "test_contract",
+					GroupID:    "grp_12345",
+				}).Return(&getActivationsResponse, nil).Once()
+
+				p.On("ProcessTemplates", TFData{
+					Property: TFPropertyData{
+						GroupName:            "test_group",
+						GroupID:              "grp_12345",
+						ContractID:           "test_contract",
+						PropertyResourceName: "test-edgesuite-net",
+						PropertyName:         "test.edgesuite.net",
+						PropertyID:           "prp_12345",
+						ProductID:            "prd_HTTP_Content_Del",
+						ProductName:          "HTTP_Content_Del",
+						RuleFormat:           "latest",
+						IsSecure:             "false",
+						EdgeHostnames:        map[string]EdgeHostname{},
+						Hostnames: map[string]Hostname{
+							"test.edgesuite.net": {
+								Hostname:                 "test.edgesuite.net",
+								EdgeHostnameResourceName: "test-edgesuite-net",
+								CertProvisioningType:     "CPS_MANAGED",
+							},
+						},
+						Emails:  []string{"jsmith@akamai.com"},
+						Version: "LATEST",
+					},
+					Section: "test_section",
+				}).Return(nil).Once()
+			},
+			dir:     "basic_property_with_empty_hostname_id",
+			jsonDir: "basic_property_with_empty_hostname_id/property-snippets",
 			snippetFilesToCheck: []string{
 				"main.json",
 				"Content_Compression.json",

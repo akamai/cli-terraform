@@ -416,49 +416,47 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 	hostnamesMap := map[string]Hostname{}
 
 	for _, hostname := range hostnames.Items {
-		if hostname.EdgeHostnameID == "" {
-			continue
-		}
-
-		// Get slot details
-		edgeHostnameID, err := strconv.Atoi(strings.Replace(hostname.EdgeHostnameID, "ehn_", "", 1))
-		if err != nil {
-			return nil, nil, fmt.Errorf("invalid Hostname id: %s", err)
-		}
-
-		edgeHostname, err := clientHAPI.GetEdgeHostname(ctx, edgeHostnameID)
-		if err != nil {
-			return nil, nil, fmt.Errorf("edge hostname %d not found: %s", edgeHostnameID, err)
-		}
-		papiEdgeHostnames, err := clientPAPI.GetEdgeHostnames(ctx, papi.GetEdgeHostnamesRequest{
-			ContractID: property.ContractID,
-			GroupID:    property.GroupID,
-			Options:    nil,
-		})
-		if err != nil {
-			return nil, nil, fmt.Errorf("cannot list edge hostnames: %s", err)
-		}
-
-		useCases, err := getUseCases(papiEdgeHostnames, hostname.EdgeHostnameID)
-		if err != nil {
-			return nil, nil, fmt.Errorf("cannot get use cases: %s", err)
-		}
-
 		cnameTo := hostname.CnameTo
 		cnameFrom := hostname.CnameFrom
 		cnameToResource := strings.Replace(cnameTo, ".", "-", -1)
 
-		edgeHostnamesMap[cnameToResource] = EdgeHostname{
-			EdgeHostname:             cnameTo,
-			EdgeHostnameID:           hostname.EdgeHostnameID,
-			ProductName:              productName,
-			ContractID:               property.ContractID,
-			GroupID:                  property.GroupID,
-			IPv6:                     getIPv6(papiEdgeHostnames, hostname.EdgeHostnameID),
-			EdgeHostnameResourceName: cnameToResource,
-			SlotNumber:               edgeHostname.SlotNumber,
-			SecurityType:             edgeHostname.SecurityType,
-			UseCases:                 useCases,
+		if hostname.EdgeHostnameID != "" {
+			// Get slot details
+			edgeHostnameID, err := strconv.Atoi(strings.Replace(hostname.EdgeHostnameID, "ehn_", "", 1))
+			if err != nil {
+				return nil, nil, fmt.Errorf("invalid Hostname id: %s", err)
+			}
+
+			edgeHostname, err := clientHAPI.GetEdgeHostname(ctx, edgeHostnameID)
+			if err != nil {
+				return nil, nil, fmt.Errorf("edge hostname %d not found: %s", edgeHostnameID, err)
+			}
+			papiEdgeHostnames, err := clientPAPI.GetEdgeHostnames(ctx, papi.GetEdgeHostnamesRequest{
+				ContractID: property.ContractID,
+				GroupID:    property.GroupID,
+				Options:    nil,
+			})
+			if err != nil {
+				return nil, nil, fmt.Errorf("cannot list edge hostnames: %s", err)
+			}
+
+			useCases, err := getUseCases(papiEdgeHostnames, hostname.EdgeHostnameID)
+			if err != nil {
+				return nil, nil, fmt.Errorf("cannot get use cases: %s", err)
+			}
+
+			edgeHostnamesMap[cnameToResource] = EdgeHostname{
+				EdgeHostname:             cnameTo,
+				EdgeHostnameID:           hostname.EdgeHostnameID,
+				ProductName:              productName,
+				ContractID:               property.ContractID,
+				GroupID:                  property.GroupID,
+				IPv6:                     getIPv6(papiEdgeHostnames, hostname.EdgeHostnameID),
+				EdgeHostnameResourceName: cnameToResource,
+				SlotNumber:               edgeHostname.SlotNumber,
+				SecurityType:             edgeHostname.SecurityType,
+				UseCases:                 useCases,
+			}
 		}
 
 		certProvisioningType := "CPS_MANAGED"

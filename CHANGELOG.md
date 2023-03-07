@@ -4,9 +4,11 @@
 
 ### Fixes
 
+* PAPI
+  * Fix property export with empty EdgeHostnameID ([I#41](https://github.com/akamai/cli-terraform/issues/41))
 * Property Manager
   * Change exported attribute value in configuration of `akamai_contract` data source from deprecated `name`
-  to `group_name` when exporting property
+    to `group_name` when exporting property
 
 ## Version 1.3.1 (Feb 2, 2023)
 
