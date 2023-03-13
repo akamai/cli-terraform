@@ -180,7 +180,7 @@ func getTFRoles(ctx context.Context, client iam.IAM, roles []iam.Role) ([]TFRole
 			GrantedRoles: true,
 		})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("could not get role of ID '%v': %w", roleID, err)
 		}
 		tfRoles = append(tfRoles, TFRole{
 			RoleID:          role.RoleID,

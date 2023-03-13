@@ -84,7 +84,7 @@ func createIAMRoleByID(ctx context.Context, roleID int64, section string, client
 	})
 	if err != nil {
 		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrFetchingRole, err)
+		return fmt.Errorf("%w: could not fetch role with roleID '%v': %s", ErrFetchingRole, roleID, err)
 	}
 	term.Spinner().OK()
 

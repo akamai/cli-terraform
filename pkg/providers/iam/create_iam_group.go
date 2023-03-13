@@ -83,7 +83,7 @@ func createIAMGroupByID(ctx context.Context, groupID int64, section string, clie
 	})
 	if err != nil {
 		term.Spinner().Fail()
-		return err
+		return fmt.Errorf("could not get group with ID '%v': %w", groupID, err)
 	}
 	term.Spinner().OK()
 

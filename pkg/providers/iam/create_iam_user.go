@@ -163,7 +163,7 @@ func getTFUserRoles(ctx context.Context, client iam.IAM, authGrantsList []iam.Au
 				GrantedRoles: true,
 			})
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("could not get role with roleID '%v': %w", roleID, err)
 			}
 			roles = append(roles, TFRole{
 				RoleID:          role.RoleID,
@@ -197,7 +197,7 @@ func getGroupsInSubtree(ctx context.Context, client iam.IAM, groupID int64) ([]T
 		GroupID: groupID,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not get group with groupID '%v': %w", groupID, err)
 	}
 	groups = append(groups, TFGroup{
 		GroupID:       int(group.GroupID),
