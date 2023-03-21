@@ -102,6 +102,7 @@ type TFPropertyData struct {
 	Hostnames            map[string]Hostname
 	Emails               []string
 	ActivationNote       string
+	HasStagingActivation bool
 	Version              string
 }
 
@@ -360,6 +361,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	if err == nil {
 		tfData.Property.ActivationNote = latestActivation.Note
 		tfData.Property.Emails = getContactEmails(latestActivation)
+		tfData.Property.HasStagingActivation = true
 	}
 	term.Spinner().OK()
 

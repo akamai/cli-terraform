@@ -56,6 +56,8 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
   rules = data.akamai_property_rules_template.rules.json
 }
 
+{{- if .Property.HasStagingActivation}}
+
 resource "akamai_property_activation" "{{.Property.PropertyResourceName}}" {
   property_id = akamai_property.{{.Property.PropertyResourceName}}.id
   contact = [{{range $index, $element := .Property.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
@@ -65,3 +67,15 @@ resource "akamai_property_activation" "{{.Property.PropertyResourceName}}" {
   note = "{{.Property.ActivationNote}}"
 {{- end}}
 }
+{{ else}}
+
+#resource "akamai_property_activation" "{{.Property.PropertyResourceName}}" {
+#  property_id = akamai_property.{{.Property.PropertyResourceName}}.id
+#  contact = [{{range $index, $element := .Property.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+#  version = akamai_property.{{.Property.PropertyResourceName}}.latest_version
+#  network = upper(var.env)
+{{- if .Property.ActivationNote}}
+#  note = "{{.Property.ActivationNote}}"
+{{- end}}
+#}
+{{ end}}
