@@ -21,10 +21,11 @@ data "akamai_group" "group" {
 data "akamai_contract" "contract" {
   group_name = data.akamai_group.group.group_name
 }
+{{- if not .RulesAsSchema}}
 
 data "akamai_property_rules_template" "rules" {
   template_file = abspath("${path.module}/property-snippets/main.json")
-}
+}{{end}}
 {{range .Property.EdgeHostnames}}
 resource "akamai_edge_hostname" "{{.EdgeHostnameResourceName}}" {
   product_id  = "prd_{{.ProductName}}"
@@ -53,7 +54,11 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
     cert_provisioning_type = "{{.CertProvisioningType}}"
   }
 {{- end}}
+{{- if .RulesAsSchema}}
+  rules = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.json
+{{- else}}
   rules = data.akamai_property_rules_template.rules.json
+{{- end}}
 }
 
 {{- if .Property.HasStagingActivation}}

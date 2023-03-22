@@ -5,13 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
-
-type mockProcessor struct {
-	mock.Mock
-}
 
 func TestToJSON(t *testing.T) {
 	test := `{"context":"DOSATCK","id":2670509,"name":"DoS Attackers (High Threat)","sharedIpHandling":"NON_SHARED","threshold":9}`

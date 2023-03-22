@@ -98,7 +98,7 @@ var (
 
 	}
 
-	expectProcessTemplates = func(p *mockProcessor, section string) *mock.Call {
+	expectProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
 		tfData := TFData{
 			TFUsers: []*TFUser{
 				{
@@ -142,10 +142,10 @@ func TestCreateIAMUserByEmail(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		init func(*iam.Mock, *mockProcessor)
+		init func(*iam.Mock, *templates.MockProcessor)
 	}{
 		"fetch user": {
-			init: func(i *iam.Mock, p *mockProcessor) {
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListUsers(i)
 				expectGetUser(i)
 				expectGetUserRole(i)
@@ -157,7 +157,7 @@ func TestCreateIAMUserByEmail(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			mi := new(iam.Mock)
-			mp := new(mockProcessor)
+			mp := new(templates.MockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
 			err := createIAMUserByEmail(ctx, "terraform@akamai.com", section, mi, mp)

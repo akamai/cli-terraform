@@ -166,7 +166,7 @@ var (
 		client.On("GetRole", mock.Anything, getRoleReq2).Return(&role2, nil).Once()
 	}
 
-	expectAllProcessTemplates = func(p *mockProcessor, section string) *mock.Call {
+	expectAllProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
 
 		call := p.On(
 			"ProcessTemplates",
@@ -180,11 +180,11 @@ func TestCreateIAMAll(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		init func(*iam.Mock, *mockProcessor)
+		init func(*iam.Mock, *templates.MockProcessor)
 		err  error
 	}{
 		"fetch user": {
-			init: func(i *iam.Mock, p *mockProcessor) {
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
 				expectGetUser002(i)
@@ -196,14 +196,14 @@ func TestCreateIAMAll(t *testing.T) {
 		},
 
 		"fail list users": {
-			init: func(i *iam.Mock, _ *mockProcessor) {
+			init: func(i *iam.Mock, _ *templates.MockProcessor) {
 				i.On("ListUsers", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("oops")).Once()
 			},
 			err: ErrFetchingUsers,
 		},
 
 		"fail get one user": {
-			init: func(i *iam.Mock, p *mockProcessor) {
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
 
@@ -231,7 +231,7 @@ func TestCreateIAMAll(t *testing.T) {
 		},
 
 		"fail list groups": {
-			init: func(i *iam.Mock, _ *mockProcessor) {
+			init: func(i *iam.Mock, _ *templates.MockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
 				expectGetUser002(i)
@@ -241,7 +241,7 @@ func TestCreateIAMAll(t *testing.T) {
 		},
 
 		"fail list roles": {
-			init: func(i *iam.Mock, _ *mockProcessor) {
+			init: func(i *iam.Mock, _ *templates.MockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
 				expectGetUser002(i)
@@ -254,7 +254,7 @@ func TestCreateIAMAll(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			mi := new(iam.Mock)
-			mp := new(mockProcessor)
+			mp := new(templates.MockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
 			err := createIAMAll(ctx, section, mi, mp)

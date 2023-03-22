@@ -60,7 +60,10 @@ func CmdCreateInclude(c *cli.Context) error {
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
 		AdditionalFuncs: template.FuncMap{
-			"ToLower": strings.ToLower,
+			"ToLower":       strings.ToLower,
+			"TerraformName": TerraformName,
+			"AsInt":         AsInt,
+			"Escape":        Escape,
 		},
 	}
 

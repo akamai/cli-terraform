@@ -20,15 +20,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type mockProcessor struct {
-	mock.Mock
-}
-
-func (m *mockProcessor) ProcessTemplates(i interface{}) error {
-	args := m.Called(i)
-	return args.Error(0)
-}
-
 func TestMain(m *testing.M) {
 	if err := os.MkdirAll("./testdata/res", 0755); err != nil {
 		log.Fatal(err)
@@ -44,11 +35,11 @@ func TestCreatePolicy(t *testing.T) {
 	section := "test_section"
 	pageSize := 1000
 	tests := map[string]struct {
-		init      func(*cloudlets.Mock, *mockProcessor)
+		init      func(*cloudlets.Mock, *templates.MockProcessor)
 		withError error
 	}{
 		"fetch latest version of policy and produce output ALB": {
-			init: func(c *cloudlets.Mock, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -160,7 +151,7 @@ func TestCreatePolicy(t *testing.T) {
 			},
 		},
 		"fetch latest version of policy and produce output with activations ER": {
-			init: func(c *cloudlets.Mock, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -269,7 +260,7 @@ func TestCreatePolicy(t *testing.T) {
 			},
 		},
 		"fetch latest version of policy and produce output with activations CD": {
-			init: func(c *cloudlets.Mock, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -378,7 +369,7 @@ func TestCreatePolicy(t *testing.T) {
 			},
 		},
 		"fetch latest version of policy and produce output without activations": {
-			init: func(c *cloudlets.Mock, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -447,7 +438,7 @@ func TestCreatePolicy(t *testing.T) {
 			},
 		},
 		"fetch latest version of policy and produce output without activations AP": {
-			init: func(c *cloudlets.Mock, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -520,7 +511,7 @@ func TestCreatePolicy(t *testing.T) {
 			},
 		},
 		"fetch latest version of policy and produce output without activations AS": {
-			init: func(c *cloudlets.Mock, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -591,13 +582,13 @@ func TestCreatePolicy(t *testing.T) {
 			},
 		},
 		"error fetching policy": {
-			init: func(c *cloudlets.Mock, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return(nil, fmt.Errorf("oops")).Once()
 			},
 			withError: ErrFetchingPolicy,
 		},
 		"error policy not found": {
-			init: func(c *cloudlets.Mock, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -611,7 +602,7 @@ func TestCreatePolicy(t *testing.T) {
 			withError: ErrFetchingPolicy,
 		},
 		"unsupported cloudlet type": {
-			init: func(c *cloudlets.Mock, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -633,7 +624,7 @@ func TestCreatePolicy(t *testing.T) {
 			withError: ErrCloudletTypeNotSupported,
 		},
 		"error listing versions": {
-			init: func(c *cloudlets.Mock, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -656,7 +647,7 @@ func TestCreatePolicy(t *testing.T) {
 			withError: ErrFetchingVersion,
 		},
 		"error fetching latest version": {
-			init: func(c *cloudlets.Mock, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -694,7 +685,7 @@ func TestCreatePolicy(t *testing.T) {
 			withError: ErrFetchingVersion,
 		},
 		"error processing template": {
-			init: func(c *cloudlets.Mock, p *mockProcessor) {
+			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
 						PolicyID:     1,
@@ -768,7 +759,7 @@ func TestCreatePolicy(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			mc := new(cloudlets.Mock)
-			mp := new(mockProcessor)
+			mp := new(templates.MockProcessor)
 			test.init(mc, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
 			err := createPolicy(ctx, "test_policy", section, mc, mp)

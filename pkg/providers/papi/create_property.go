@@ -62,14 +62,23 @@ type Hostname struct {
 	CertProvisioningType     string
 }
 
-// TFData holds template data
-type TFData struct {
-	Includes []TFIncludeData
-	Property TFPropertyData
-	Section  string
+// WrappedRules is a wrapper around Rule which simplifies flattening rule tree into list and adjust names of the datasources
+type WrappedRules struct {
+	Rule          papi.Rules
+	TerraformName string
+	Children      []*WrappedRules
 }
 
-// TFIncludeData holds template data for an include
+// TFData holds template data
+type TFData struct {
+	Includes      []TFIncludeData
+	Property      TFPropertyData
+	Section       string
+	Rules         []*WrappedRules
+	RulesAsSchema bool
+}
+
+// TFIncludeData holds template data for include
 type TFIncludeData struct {
 	ActivationNoteProduction   string
 	ActivationNoteStaging      string
@@ -171,6 +180,8 @@ var (
 	ErrPropertyNotFound = errors.New("property not found")
 	// ErrSavingFiles is returned when an issue with processing templates occurs
 	ErrSavingFiles = errors.New("saving terraform project files")
+	// ErrUnsupportedRuleFormat is returned when there is no template for provided rule format
+	ErrUnsupportedRuleFormat = errors.New("unsupported rule format")
 )
 
 // CmdCreateProperty is an entrypoint to create-property command
@@ -212,23 +223,30 @@ func CmdCreateProperty(c *cli.Context) error {
 		}
 	}
 
+	var schema bool
+	if c.IsSet("schema") {
+		schema = c.Bool("schema")
+	}
+
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
 		AdditionalFuncs: template.FuncMap{
 			"ToLower": strings.ToLower,
+			"AsInt":   AsInt,
+			"Escape":  Escape,
 		},
 	}
 
 	propertyName := c.Args().First()
 	section := edgegrid.GetEdgercSection(c)
-	if err = createProperty(ctx, propertyName, version, section, "property-snippets", tfWorkPath, withIncludes, client, clientHapi, processor); err != nil {
+	if err = createProperty(ctx, propertyName, version, section, "property-snippets", tfWorkPath, withIncludes, schema, client, clientHapi, processor); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting property: %s", err)), 1)
 	}
 	return nil
 }
 
-func createProperty(ctx context.Context, propertyName, readVersion, section, jsonDir, tfWorkPath string, withIncludes bool, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
+func createProperty(ctx context.Context, propertyName, readVersion, section, jsonDir, tfWorkPath string, withIncludes, schema bool, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
 	tfData := TFData{
@@ -236,7 +254,8 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 			EdgeHostnames: make(map[string]EdgeHostname),
 			Emails:        make([]string, 0),
 		},
-		Section: section,
+		Section:       section,
+		RulesAsSchema: schema,
 	}
 
 	// Get Property
@@ -365,23 +384,73 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	}
 	term.Spinner().OK()
 
+	if schema {
+		ruleTemplate := fmt.Sprintf("rules_%s.tmpl", rules.RuleFormat)
+		if !templateProcessor.TemplateExists(ruleTemplate) {
+			return fmt.Errorf("%w: %s", ErrUnsupportedRuleFormat, rules.RuleFormat)
+		}
+		templateProcessor.AddTemplateTarget(ruleTemplate, filepath.Join(tfWorkPath, "rules.tf"))
+		tfData.Rules = flattenRules(tfData.Property.PropertyName, rules.Rules)
+	}
 	term.Spinner().Start("Saving TF configurations ")
 	if err = templateProcessor.ProcessTemplates(tfData); err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
 	}
 
-	// Save snippets
-	ruleTemplate, rulesTemplate := setPropertyRuleTemplates(rules)
-	if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), "main.json"); err != nil {
-		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
+	if !schema {
+		// Save snippets
+		ruleTemplate, rulesTemplate := setPropertyRuleTemplates(rules)
+		if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), "main.json"); err != nil {
+			term.Spinner().Fail()
+			return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
+		}
 	}
 
 	term.Spinner().OK()
 	term.Printf("Terraform configuration for property '%s' was saved successfully\n", property.PropertyName)
 
 	return nil
+}
+
+func flattenRules(property string, rule papi.Rules) []*WrappedRules {
+	var result []*WrappedRules
+	wrappedRules := wrapRules(rule)
+	result = append(result, wrappedRules)
+	result = append(result, flattenWrappedRules(wrappedRules)...)
+	var names = map[string]int{}
+	for _, wrappedRules := range result {
+		name := TerraformName(wrappedRules.Rule.Name)
+		names[name]++
+		if count := names[name]; count > 1 {
+			name = fmt.Sprintf("%s%d", name, count-1)
+		}
+		wrappedRules.TerraformName = fmt.Sprintf("%s_rule_%s", TerraformName(property), name)
+	}
+	return result
+}
+func wrapRules(rule papi.Rules) *WrappedRules {
+	var children []*WrappedRules
+	for _, child := range rule.Children {
+		children = append(children, wrapRules(child))
+	}
+
+	return &WrappedRules{
+		Rule:          rule,
+		TerraformName: rule.Name,
+		Children:      children,
+	}
+}
+
+func flattenWrappedRules(rule *WrappedRules) []*WrappedRules {
+	var result = make([]*WrappedRules, 0)
+
+	result = append(result, rule.Children...)
+
+	for _, child := range rule.Children {
+		result = append(result, flattenWrappedRules(child)...)
+	}
+	return result
 }
 
 func getHostnames(ctx context.Context, client papi.PAPI, property *papi.Property, version *papi.GetPropertyVersionsResponse) (*papi.HostnameResponseItems, error) {
@@ -787,4 +856,37 @@ func ruleNameNormalizer() func(string) string {
 
 func normalizeRuleName(name string) string {
 	return normalizeRuleNameRegexp.ReplaceAllString(name, "_")
+}
+
+var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+
+// ToSnakeCase returns name using snake case notation - SomeName -> some_name
+func ToSnakeCase(str string) string {
+	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
+	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
+	snake = strings.Replace(snake, " ", "", -1)
+	return strings.ToLower(snake)
+}
+
+var nameRegexp = regexp.MustCompile(`[^\p{L}\p{Nl}\p{Mn}\p{Mc}\p{Nd}\p{Pc}\d\-_ ]`)
+
+// TerraformName is used to convert rule name into valid name of the exported data source
+// Current implementation is not covering all the cases defined in the terraform specification
+// https://github.com/hashicorp/hcl/blob/main/hclsyntax/spec.md#identifiers and http://unicode.org/reports/tr31/ ,
+// but only a reasonable subset.
+func TerraformName(str string) string {
+	str = nameRegexp.ReplaceAllString(str, "-")
+	return ToSnakeCase(str)
+}
+
+// AsInt provides proper conversion of values which are integers in reality
+func AsInt(f any) int64 {
+	return int64(f.(float64))
+}
+
+// Escape is correcting values stored in terraform fields by escaping special characters
+func Escape(str string) string {
+	str = strings.ReplaceAll(str, `\`, `\\`)
+	return strings.ReplaceAll(str, `"`, `\"`)
 }

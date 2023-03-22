@@ -23,6 +23,10 @@ type (
 		// ProcessTemplates is used to parse given template/templates using the given data as input
 		// If template execution fails, ProcessTemplates should return ErrTemplateExecution
 		ProcessTemplates(interface{}) error
+		// AddTemplateTarget provides ability to specify additional template target after the processor was created
+		AddTemplateTarget(string, string)
+		// TemplateExists returns information if given template exists
+		TemplateExists(string) bool
 	}
 
 	// FSTemplateProcessor allows working with templates stored as fs.FS
@@ -42,6 +46,8 @@ var (
 	ErrTemplateExecution = errors.New("executing template")
 	// ErrSavingFiles is returned when an issue with processing templates occurs
 	ErrSavingFiles = errors.New("saving processed terraform file")
+	// ErrNoFile is returned when there is no template file
+	ErrNoFile = errors.New("no template file")
 )
 
 // ProcessTemplates parses templates located in fs.FS and executes them using the provided data
@@ -80,6 +86,26 @@ func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
 		}
 	}
 	return nil
+}
+
+// AddTemplateTarget provides ability to specify additional template target after the processor was created
+func (t FSTemplateProcessor) AddTemplateTarget(templateName, targetPath string) {
+	t.TemplateTargets[templateName] = targetPath
+}
+
+// TemplateExists returns information if given template exists
+func (t FSTemplateProcessor) TemplateExists(fileName string) bool {
+	files, err := findTemplateFiles(t.TemplatesFS)
+	if err != nil {
+		return false
+	}
+
+	for _, file := range files {
+		if _, name := path.Split(file); name == fileName {
+			return true
+		}
+	}
+	return false
 }
 
 func formatIntList(items []int) string {

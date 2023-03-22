@@ -113,6 +113,49 @@ func TestProcessTemplates(t *testing.T) {
 		})
 	}
 }
+func TestCheckTemplate(t *testing.T) {
+	tests := map[string]struct {
+		templateDir     string
+		templateTargets map[string]string
+		data            string
+		exists          bool
+	}{
+		"check existing template": {
+			templateDir: "./testdata",
+			templateTargets: map[string]string{
+				"1.tmpl": "./testdata/res/1.tf",
+				"2.tmpl": "./testdata/res/2.tf",
+			},
+			data:   "1.tmpl",
+			exists: true,
+		},
+		"check non-existing template": {
+			templateDir: "./testdata",
+			templateTargets: map[string]string{
+				"1.tmpl": "./testdata/res/1.tf",
+				"2.tmpl": "./testdata/res/2.tf",
+			},
+			data:   "3.tmpl",
+			exists: false,
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			templateFS := os.DirFS(test.templateDir)
+			processor := FSTemplateProcessor{
+				TemplatesFS:     templateFS,
+				TemplateTargets: test.templateTargets,
+			}
+			ok := processor.TemplateExists(test.data)
+			if test.exists {
+				assert.True(t, ok)
+			} else {
+				require.False(t, ok)
+			}
+		})
+	}
+}
 
 func TestFormatIntList(t *testing.T) {
 	tests := map[string]struct {
