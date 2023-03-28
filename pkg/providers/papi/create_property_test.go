@@ -483,7 +483,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&ruleResponse, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -616,7 +616,7 @@ func TestCreateProperty(t *testing.T) {
 				assert.NoError(t, err)
 				err = json.Unmarshal(rules, &ruleResponse)
 				assert.NoError(t, err)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&ruleResponse, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -697,7 +697,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&ruleResponse, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -826,7 +826,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&ruleResponse, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -955,7 +955,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&ruleResponse, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -1118,7 +1118,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&ruleResponse, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -1309,7 +1309,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&ruleResponse, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -1438,7 +1438,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&ruleResponse, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -1567,7 +1567,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 1, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 1, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&ruleResponse, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -1690,7 +1690,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&ruleResponse, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -1813,7 +1813,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&ruleResponse, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -1942,7 +1942,7 @@ func TestCreateProperty(t *testing.T) {
 				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
 					Return(&getPropertyResponse, nil).Once()
 
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&papi.GetRuleTreeResponse{}, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -1974,7 +1974,7 @@ func TestCreateProperty(t *testing.T) {
 					GroupID:    "grp_12345",
 				}).Return(&getPropertyVersionsResponse, nil).Once()
 
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(nil, fmt.Errorf("oops")).Once()
 
 			},
@@ -1988,7 +1988,7 @@ func TestCreateProperty(t *testing.T) {
 				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
 					Return(&getPropertyResponse, nil).Once()
 
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&papi.GetRuleTreeResponse{}, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -2011,7 +2011,7 @@ func TestCreateProperty(t *testing.T) {
 				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
 					Return(&getPropertyResponse, nil).Once()
 
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&papi.GetRuleTreeResponse{}, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -2045,7 +2045,7 @@ func TestCreateProperty(t *testing.T) {
 				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
 					Return(&getPropertyResponse, nil).Once()
 
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&papi.GetRuleTreeResponse{}, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -2086,7 +2086,7 @@ func TestCreateProperty(t *testing.T) {
 				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
 					Return(&getPropertyResponse, nil).Once()
 
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&papi.GetRuleTreeResponse{}, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -2131,7 +2131,7 @@ func TestCreateProperty(t *testing.T) {
 					Return(&getPropertyResponse, nil).Once()
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: false, RuleFormat: "latest"}).
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
 					Return(&ruleResponse, nil).Once()
 
 				c.On("GetGroups", mock.Anything).
@@ -2756,6 +2756,40 @@ func TestRuleNameNormalizer(t *testing.T) {
 				normalizer(n)
 			}
 			assert.Equal(t, test.expected, normalizer(test.given))
+		})
+	}
+}
+
+func TestTerraformName(t *testing.T) {
+	tests := map[string]struct {
+		given    string
+		expected string
+	}{
+		"with spaces": {
+			given:    "this is test name",
+			expected: "this_is_test_name",
+		},
+		"strange characters": {
+			given:    "test@name1ą",
+			expected: "test-name1ą",
+		},
+		"Deny by Location": {
+			given:    "Deny by Location",
+			expected: "deny_by_location",
+		},
+		"redirect to language specific section": {
+			given:    "redirect to language specific section",
+			expected: "redirect_to_language_specific_section",
+		},
+		"mPulse": {
+			given:    "mPulse",
+			expected: "m_pulse",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, test.expected, TerraformName(test.given))
 		})
 	}
 }

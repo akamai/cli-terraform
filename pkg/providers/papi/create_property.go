@@ -697,6 +697,7 @@ func getPropertyRules(ctx context.Context, client papi.PAPI, version *papi.GetPr
 		ContractID:      version.ContractID,
 		GroupID:         version.GroupID,
 		RuleFormat:      version.Version.RuleFormat,
+		ValidateRules:   true,
 	})
 }
 
@@ -858,14 +859,14 @@ func normalizeRuleName(name string) string {
 	return normalizeRuleNameRegexp.ReplaceAllString(name, "_")
 }
 
-var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+var matchFirstCap = regexp.MustCompile("([^ _])([A-Z][a-z]+)")
 var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
 
 // ToSnakeCase returns name using snake case notation - SomeName -> some_name
 func ToSnakeCase(str string) string {
-	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
+	snake := strings.Replace(str, " ", "_", -1)
+	snake = matchFirstCap.ReplaceAllString(snake, "${1}_${2}")
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
-	snake = strings.Replace(snake, " ", "", -1)
 	return strings.ToLower(snake)
 }
 

@@ -179,6 +179,14 @@
       {
         "behaviors": [
           {
+            "name": "advanced",
+            "options": {
+              "description": "extract inputs",
+              "xml": "\n\txxx yyyy\n\n"
+            },
+            "uuid": "feeaeff9-fe7e-4e27-ba0c-7b1dcecdba8b"
+          },
+          {
             "name": "gzipResponse",
             "options": {
               "behavior": "ALWAYS"
@@ -384,6 +392,22 @@
       },
       {
         "name": "new rule",
+        "children": [],
+        "behaviors": [],
+        "criteria": [],
+        "criteriaMustSatisfy": "any",
+        "comments": ""
+      },
+      {
+        "name": "Deny by Location",
+        "children": [],
+        "behaviors": [],
+        "criteria": [],
+        "criteriaMustSatisfy": "any",
+        "comments": ""
+      },
+      {
+        "name": "redirect to language specific section",
         "children": [],
         "behaviors": [],
         "criteria": [],

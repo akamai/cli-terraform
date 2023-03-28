@@ -324,14 +324,26 @@ adaptive_acceleration {
 {{- if and (eq $k "source") (ne $v nil)}}
 		source = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "titleHttp2ServerPush") (ne $v nil)}}
+		title_http2_server_push = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "enablePush") (ne $v nil)}}
 		enable_push = {{$v}}
+{{- end}}
+{{- if and (eq $k "titlePreconnect") (ne $v nil)}}
+		title_preconnect = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "enablePreconnect") (ne $v nil)}}
 		enable_preconnect = {{$v}}
 {{- end}}
+{{- if and (eq $k "titlePreload") (ne $v nil)}}
+		title_preload = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "preloadEnable") (ne $v nil)}}
 		preload_enable = {{$v}}
+{{- end}}
+{{- if and (eq $k "abTesting") (ne $v nil)}}
+		ab_testing = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "abLogic") (ne $v nil)}}
 		ab_logic = "{{$v | Escape}}"
@@ -339,8 +351,17 @@ adaptive_acceleration {
 {{- if and (eq $k "cookieName") (ne $v nil)}}
 		cookie_name = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "compression") (ne $v nil)}}
+		compression = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "titleRo") (ne $v nil)}}
+		title_ro = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "enableRo") (ne $v nil)}}
 		enable_ro = {{$v}}
+{{- end}}
+{{- if and (eq $k "titleBrotli") (ne $v nil)}}
+		title_brotli = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "enableBrotliCompression") (ne $v nil)}}
 		enable_brotli_compression = {{$v}}
@@ -364,6 +385,9 @@ adaptive_image_compression {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "title_aic_mobile") (ne $v nil)}}
+		title_aic_mobile = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "compressMobile") (ne $v nil)}}
 		compress_mobile = {{$v}}
 {{- end}}
@@ -384,6 +408,9 @@ adaptive_image_compression {
 {{- end}}
 {{- if and (eq $k "tier3MobileCompressionValue") (ne $v nil)}}
 		tier3_mobile_compression_value = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "title_aic_nonmobile") (ne $v nil)}}
+		title_aic_nonmobile = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "compressStandard") (ne $v nil)}}
 		compress_standard = {{$v}}
@@ -425,11 +452,11 @@ advanced {
 {{- if and (eq $k "description") (ne $v nil)}}
 		description = "{{$v | Escape}}"
 {{- end}}
-{{- if eq $k "xml"}}
-{{- if $v}}
-		xml = <<-EOT
+{{- if and (eq $k "xml") (ne $v nil)}}
+		xml = <<EOT
 {{$v}}
-EOT{{end}}
+%{~if false}trim redundant new line%{endif~}
+EOT
 {{- end}}
 {{- end}}
 }
@@ -788,6 +815,35 @@ api_prioritization {
 {{- if and (eq $k "id") (ne $v nil)}}
 		id = {{$v | AsInt}}
 {{- end}}
+{{- if and (eq $k "name") (ne $v nil)}}
+		name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "createdDate") (ne $v nil)}}
+		created_date = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "description") (ne $v nil)}}
+		description = "{{$v | Escape}}"
+{{- end}}
+{{- if eq $k "products"}}
+		products = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "cpCodeLimits" }}
+		{{- if $v}}
+		cp_code_limits {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "currentCapacity") (ne $v nil)}}
+		current_capacity = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limit") (ne $v nil)}}
+		limit = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limitType") (ne $v nil)}}
+		limit_type = "{{$v | Escape}}"
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
 {{- end}}
 		}
 		{{- end}}
@@ -807,6 +863,9 @@ api_prioritization {
 {{- end}}
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
 		download_domain_name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "g2oToken") (ne $v nil)}}
+		g2o_token = "{{$v | Escape}}"
 {{- end}}
 {{- end}}
 		}
@@ -854,6 +913,9 @@ application_load_balancer {
 {{- if and (eq $k "label") (ne $v nil)}}
 		label = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "stickinessTitle") (ne $v nil)}}
+		stickiness_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "stickinessCookieType") (ne $v nil)}}
 		stickiness_cookie_type = "{{$v | Escape}}"
 {{- end}}
@@ -884,6 +946,9 @@ application_load_balancer {
 {{- if and (eq $k "stickinessCookieSetHttpOnlyFlag") (ne $v nil)}}
 		stickiness_cookie_set_http_only_flag = {{$v}}
 {{- end}}
+{{- if and (eq $k "allDownTitle") (ne $v nil)}}
+		all_down_title = "{{$v | Escape}}"
+{{- end}}
 {{- if eq $k "allDownNetStorage" }}
 		{{- if $v}}
 		all_down_net_storage {
@@ -894,6 +959,9 @@ application_load_balancer {
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
 		download_domain_name = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "g2oToken") (ne $v nil)}}
+		g2o_token = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 		}
 		{{- end}}
@@ -903,6 +971,9 @@ application_load_balancer {
 {{- end}}
 {{- if and (eq $k "allDownStatusCode") (ne $v nil)}}
 		all_down_status_code = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "failoverTitle") (ne $v nil)}}
+		failover_title = "{{$v | Escape}}"
 {{- end}}
 {{- if eq $k "failoverStatusCodes"}}
 		failover_status_codes = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -926,6 +997,9 @@ application_load_balancer {
 {{- end}}
 {{- if and (eq $k "failoverAttemptsThreshold") (ne $v nil)}}
 		failover_attempts_threshold = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "cachedContentTitle") (ne $v nil)}}
+		cached_content_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "allowCachePrefresh") (ne $v nil)}}
 		allow_cache_prefresh = {{$v}}
@@ -972,6 +1046,9 @@ audience_segmentation {
 {{- if and (eq $k "label") (ne $v nil)}}
 		label = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "segmentTrackingTitle") (ne $v nil)}}
+		segment_tracking_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "segmentTrackingMethod") (ne $v nil)}}
 		segment_tracking_method = "{{$v | Escape}}"
 {{- end}}
@@ -983,6 +1060,9 @@ audience_segmentation {
 {{- end}}
 {{- if and (eq $k "segmentTrackingCustomHeader") (ne $v nil)}}
 		segment_tracking_custom_header = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "populationTitle") (ne $v nil)}}
+		population_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "populationCookieType") (ne $v nil)}}
 		population_cookie_type = "{{$v | Escape}}"
@@ -1024,6 +1104,9 @@ auto_domain_validation {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "autodv") (ne $v nil)}}
+		autodv = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -1372,8 +1455,14 @@ caching {
 {{- if and (eq $k "defaultTtl") (ne $v nil)}}
 		default_ttl = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "cacheControlDirectives") (ne $v nil)}}
+		cache_control_directives = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "enhancedRfcSupport") (ne $v nil)}}
 		enhanced_rfc_support = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheabilitySettings") (ne $v nil)}}
+		cacheability_settings = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "honorNoStore") (ne $v nil)}}
 		honor_no_store = {{$v}}
@@ -1384,11 +1473,17 @@ caching {
 {{- if and (eq $k "honorNoCache") (ne $v nil)}}
 		honor_no_cache = {{$v}}
 {{- end}}
+{{- if and (eq $k "expirationSettings") (ne $v nil)}}
+		expiration_settings = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "honorMaxAge") (ne $v nil)}}
 		honor_max_age = {{$v}}
 {{- end}}
 {{- if and (eq $k "honorSMaxage") (ne $v nil)}}
 		honor_s_maxage = {{$v}}
+{{- end}}
+{{- if and (eq $k "revalidationSettings") (ne $v nil)}}
+		revalidation_settings = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "honorMustRevalidate") (ne $v nil)}}
 		honor_must_revalidate = {{$v}}
@@ -1566,11 +1661,11 @@ construct_response {
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
-{{- if eq $k "body"}}
-{{- if $v}}
-		body = <<-EOT
+{{- if and (eq $k "body") (ne $v nil)}}
+		body = <<EOT
 {{$v}}
-EOT{{end}}
+%{~if false}trim redundant new line%{endif~}
+EOT
 {{- end}}
 {{- if and (eq $k "responseCode") (ne $v nil)}}
 		response_code = {{$v | AsInt}}
@@ -1913,6 +2008,9 @@ content_targeting_protection {
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
+{{- if and (eq $k "geoProtectionTitle") (ne $v nil)}}
+		geo_protection_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "enableGeoProtection") (ne $v nil)}}
 		enable_geo_protection = {{$v}}
 {{- end}}
@@ -1937,6 +2035,9 @@ content_targeting_protection {
 {{- if and (eq $k "geoRedirectUrl") (ne $v nil)}}
 		geo_redirect_url = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "ipProtectionTitle") (ne $v nil)}}
+		ip_protection_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "enableIPProtection") (ne $v nil)}}
 		enable_ip_protection = {{$v}}
 {{- end}}
@@ -1951,6 +2052,9 @@ content_targeting_protection {
 {{- end}}
 {{- if and (eq $k "ipRedirectUrl") (ne $v nil)}}
 		ip_redirect_url = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "referrerProtectionTitle") (ne $v nil)}}
+		referrer_protection_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "enableReferrerProtection") (ne $v nil)}}
 		enable_referrer_protection = {{$v}}
@@ -2033,6 +2137,35 @@ cp_code {
 {{- if and (eq $k "id") (ne $v nil)}}
 		id = {{$v | AsInt}}
 {{- end}}
+{{- if and (eq $k "name") (ne $v nil)}}
+		name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "createdDate") (ne $v nil)}}
+		created_date = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "description") (ne $v nil)}}
+		description = "{{$v | Escape}}"
+{{- end}}
+{{- if eq $k "products"}}
+		products = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "cpCodeLimits" }}
+		{{- if $v}}
+		cp_code_limits {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "currentCapacity") (ne $v nil)}}
+		current_capacity = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limit") (ne $v nil)}}
+		limit = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limitType") (ne $v nil)}}
+		limit_type = "{{$v | Escape}}"
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
 {{- end}}
 		}
 		{{- end}}
@@ -2075,11 +2208,17 @@ datastream {
 {{- if and (eq $k "streamType") (ne $v nil)}}
 		stream_type = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "beaconStreamTitle") (ne $v nil)}}
+		beacon_stream_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "datastreamIds") (ne $v nil)}}
 		datastream_ids = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "logStreamTitle") (ne $v nil)}}
+		log_stream_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "logEnabled") (ne $v nil)}}
 		log_enabled = {{$v}}
@@ -2309,6 +2448,9 @@ delivery_receipt {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "enabled") (ne $v nil)}}
+		enabled = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -2347,6 +2489,9 @@ deny_direct_failover_access {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "enabled") (ne $v nil)}}
+		enabled = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -2467,6 +2612,9 @@ download_complete_marker {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "enabled") (ne $v nil)}}
+		enabled = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -2483,6 +2631,9 @@ download_notification {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "enabled") (ne $v nil)}}
+		enabled = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -2742,11 +2893,11 @@ edge_load_balancing_advanced {
 {{- if and (eq $k "description") (ne $v nil)}}
 		description = "{{$v | Escape}}"
 {{- end}}
-{{- if eq $k "xml"}}
-{{- if $v}}
-		xml = <<-EOT
+{{- if and (eq $k "xml") (ne $v nil)}}
+		xml = <<EOT
 {{$v}}
-EOT{{end}}
+%{~if false}trim redundant new line%{endif~}
+EOT
 {{- end}}
 {{- end}}
 }
@@ -2775,6 +2926,9 @@ edge_load_balancing_data_center {
 {{- end}}
 {{- if and (eq $k "cookieName") (ne $v nil)}}
 		cookie_name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "failoverTitle") (ne $v nil)}}
+		failover_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "enableFailover") (ne $v nil)}}
 		enable_failover = {{$v}}
@@ -2829,6 +2983,9 @@ edge_load_balancing_origin {
 {{- end}}
 {{- if and (eq $k "hostname") (ne $v nil)}}
 		hostname = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "sessionPersistenceTitle") (ne $v nil)}}
+		session_persistence_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "enableSessionPersistence") (ne $v nil)}}
 		enable_session_persistence = {{$v}}
@@ -2978,8 +3135,14 @@ edge_worker {
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
+{{- if and (eq $k "createEdgeWorker") (ne $v nil)}}
+		create_edge_worker = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "edgeWorkerId") (ne $v nil)}}
 		edge_worker_id = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "resourceTier") (ne $v nil)}}
+		resource_tier = "{{$v | Escape}}"
 {{- end}}
 {{- end}}
 }
@@ -2997,6 +3160,9 @@ enhanced_akamai_protocol {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "display") (ne $v nil)}}
+		display = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -3028,6 +3194,9 @@ enhanced_proxy_detection {
 {{- if and (eq $k "bestPracticeRedirecturl") (ne $v nil)}}
 		best_practice_redirecturl = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "anonymousVpn") (ne $v nil)}}
+		anonymous_vpn = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "detectAnonymousVpn") (ne $v nil)}}
 		detect_anonymous_vpn = {{$v}}
 {{- end}}
@@ -3036,6 +3205,9 @@ enhanced_proxy_detection {
 {{- end}}
 {{- if and (eq $k "detectAnonymousVpnRedirecturl") (ne $v nil)}}
 		detect_anonymous_vpn_redirecturl = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "publicProxy") (ne $v nil)}}
+		public_proxy = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "detectPublicProxy") (ne $v nil)}}
 		detect_public_proxy = {{$v}}
@@ -3046,6 +3218,9 @@ enhanced_proxy_detection {
 {{- if and (eq $k "detectPublicProxyRedirecturl") (ne $v nil)}}
 		detect_public_proxy_redirecturl = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "torExitNode") (ne $v nil)}}
+		tor_exit_node = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "detectTorExitNode") (ne $v nil)}}
 		detect_tor_exit_node = {{$v}}
 {{- end}}
@@ -3054,6 +3229,9 @@ enhanced_proxy_detection {
 {{- end}}
 {{- if and (eq $k "detectTorExitNodeRedirecturl") (ne $v nil)}}
 		detect_tor_exit_node_redirecturl = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "smartDNSProxy") (ne $v nil)}}
+		smart_dns_proxy = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "detectSmartDNSProxy") (ne $v nil)}}
 		detect_smart_dns_proxy = {{$v}}
@@ -3064,6 +3242,9 @@ enhanced_proxy_detection {
 {{- if and (eq $k "detectSmartDNSProxyRedirecturl") (ne $v nil)}}
 		detect_smart_dns_proxy_redirecturl = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "hostingProvider") (ne $v nil)}}
+		hosting_provider = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "detectHostingProvider") (ne $v nil)}}
 		detect_hosting_provider = {{$v}}
 {{- end}}
@@ -3073,6 +3254,9 @@ enhanced_proxy_detection {
 {{- if and (eq $k "detectHostingProviderRedirecturl") (ne $v nil)}}
 		detect_hosting_provider_redirecturl = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "vpnDataCenter") (ne $v nil)}}
+		vpn_data_center = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "detectVpnDataCenter") (ne $v nil)}}
 		detect_vpn_data_center = {{$v}}
 {{- end}}
@@ -3081,6 +3265,9 @@ enhanced_proxy_detection {
 {{- end}}
 {{- if and (eq $k "detectVpnDataCenterRedirecturl") (ne $v nil)}}
 		detect_vpn_data_center_redirecturl = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "residentialProxy") (ne $v nil)}}
+		residential_proxy = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "detectResidentialProxy") (ne $v nil)}}
 		detect_residential_proxy = {{$v}}
@@ -3199,6 +3386,9 @@ fail_action {
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
 		download_domain_name = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "g2oToken") (ne $v nil)}}
+		g2o_token = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 		}
 		{{- end}}
@@ -3221,6 +3411,35 @@ fail_action {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "id") (ne $v nil)}}
 		id = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "name") (ne $v nil)}}
+		name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "createdDate") (ne $v nil)}}
+		created_date = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "description") (ne $v nil)}}
+		description = "{{$v | Escape}}"
+{{- end}}
+{{- if eq $k "products"}}
+		products = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "cpCodeLimits" }}
+		{{- if $v}}
+		cp_code_limits {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "currentCapacity") (ne $v nil)}}
+		current_capacity = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limit") (ne $v nil)}}
+		limit = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limitType") (ne $v nil)}}
+		limit_type = "{{$v | Escape}}"
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
 {{- end}}
 {{- end}}
 		}
@@ -3502,6 +3721,9 @@ graphql_caching {
 {{- if and (eq $k "cacheResponsesWithErrors") (ne $v nil)}}
 		cache_responses_with_errors = {{$v}}
 {{- end}}
+{{- if and (eq $k "advanced") (ne $v nil)}}
+		advanced = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "postRequestProcessingErrorHandling") (ne $v nil)}}
 		post_request_processing_error_handling = "{{$v | Escape}}"
 {{- end}}
@@ -3549,11 +3771,11 @@ hd_data_advanced {
 {{- if and (eq $k "description") (ne $v nil)}}
 		description = "{{$v | Escape}}"
 {{- end}}
-{{- if eq $k "xml"}}
-{{- if $v}}
-		xml = <<-EOT
+{{- if and (eq $k "xml") (ne $v nil)}}
+		xml = <<EOT
 {{$v}}
-EOT{{end}}
+%{~if false}trim redundant new line%{endif~}
+EOT
 {{- end}}
 {{- end}}
 }
@@ -3627,6 +3849,9 @@ http2 {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "enabled") (ne $v nil)}}
+		enabled = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -3696,6 +3921,9 @@ http_to_https_upgrade {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "upgrade") (ne $v nil)}}
+		upgrade = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -3789,6 +4017,35 @@ image_and_video_manager {
 {{- if and (eq $k "id") (ne $v nil)}}
 		id = {{$v | AsInt}}
 {{- end}}
+{{- if and (eq $k "name") (ne $v nil)}}
+		name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "createdDate") (ne $v nil)}}
+		created_date = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "description") (ne $v nil)}}
+		description = "{{$v | Escape}}"
+{{- end}}
+{{- if eq $k "products"}}
+		products = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "cpCodeLimits" }}
+		{{- if $v}}
+		cp_code_limits {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "currentCapacity") (ne $v nil)}}
+		current_capacity = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limit") (ne $v nil)}}
+		limit = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limitType") (ne $v nil)}}
+		limit_type = "{{$v | Escape}}"
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
 {{- end}}
 		}
 		{{- end}}
@@ -3799,6 +4056,35 @@ image_and_video_manager {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "id") (ne $v nil)}}
 		id = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "name") (ne $v nil)}}
+		name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "createdDate") (ne $v nil)}}
+		created_date = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "description") (ne $v nil)}}
+		description = "{{$v | Escape}}"
+{{- end}}
+{{- if eq $k "products"}}
+		products = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "cpCodeLimits" }}
+		{{- if $v}}
+		cp_code_limits {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "currentCapacity") (ne $v nil)}}
+		current_capacity = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limit") (ne $v nil)}}
+		limit = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limitType") (ne $v nil)}}
+		limit_type = "{{$v | Escape}}"
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
 {{- end}}
 {{- end}}
 		}
@@ -3826,6 +4112,9 @@ image_manager {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "settingsTitle") (ne $v nil)}}
+		settings_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
@@ -3838,12 +4127,44 @@ image_manager {
 {{- if and (eq $k "superCacheRegion") (ne $v nil)}}
 		super_cache_region = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "trafficTitle") (ne $v nil)}}
+		traffic_title = "{{$v | Escape}}"
+{{- end}}
 {{- if eq $k "cpCodeOriginal" }}
 		{{- if $v}}
 		cp_code_original {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "id") (ne $v nil)}}
 		id = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "name") (ne $v nil)}}
+		name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "createdDate") (ne $v nil)}}
+		created_date = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "description") (ne $v nil)}}
+		description = "{{$v | Escape}}"
+{{- end}}
+{{- if eq $k "products"}}
+		products = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "cpCodeLimits" }}
+		{{- if $v}}
+		cp_code_limits {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "currentCapacity") (ne $v nil)}}
+		current_capacity = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limit") (ne $v nil)}}
+		limit = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limitType") (ne $v nil)}}
+		limit_type = "{{$v | Escape}}"
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
 {{- end}}
 {{- end}}
 		}
@@ -3856,9 +4177,41 @@ image_manager {
 {{- if and (eq $k "id") (ne $v nil)}}
 		id = {{$v | AsInt}}
 {{- end}}
+{{- if and (eq $k "name") (ne $v nil)}}
+		name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "createdDate") (ne $v nil)}}
+		created_date = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "description") (ne $v nil)}}
+		description = "{{$v | Escape}}"
+{{- end}}
+{{- if eq $k "products"}}
+		products = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "cpCodeLimits" }}
+		{{- if $v}}
+		cp_code_limits {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "currentCapacity") (ne $v nil)}}
+		current_capacity = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limit") (ne $v nil)}}
+		limit = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limitType") (ne $v nil)}}
+		limit_type = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 		}
 		{{- end}}
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
+{{- if and (eq $k "apiReferenceTitle") (ne $v nil)}}
+		api_reference_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "useExistingPolicySet") (ne $v nil)}}
 		use_existing_policy_set = {{$v}}
@@ -3891,6 +4244,9 @@ image_manager_video {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "settingsTitle") (ne $v nil)}}
+		settings_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
@@ -3903,12 +4259,44 @@ image_manager_video {
 {{- if and (eq $k "superCacheRegion") (ne $v nil)}}
 		super_cache_region = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "trafficTitle") (ne $v nil)}}
+		traffic_title = "{{$v | Escape}}"
+{{- end}}
 {{- if eq $k "cpCodeOriginal" }}
 		{{- if $v}}
 		cp_code_original {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "id") (ne $v nil)}}
 		id = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "name") (ne $v nil)}}
+		name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "createdDate") (ne $v nil)}}
+		created_date = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "description") (ne $v nil)}}
+		description = "{{$v | Escape}}"
+{{- end}}
+{{- if eq $k "products"}}
+		products = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "cpCodeLimits" }}
+		{{- if $v}}
+		cp_code_limits {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "currentCapacity") (ne $v nil)}}
+		current_capacity = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limit") (ne $v nil)}}
+		limit = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limitType") (ne $v nil)}}
+		limit_type = "{{$v | Escape}}"
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
 {{- end}}
 {{- end}}
 		}
@@ -3921,9 +4309,41 @@ image_manager_video {
 {{- if and (eq $k "id") (ne $v nil)}}
 		id = {{$v | AsInt}}
 {{- end}}
+{{- if and (eq $k "name") (ne $v nil)}}
+		name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "createdDate") (ne $v nil)}}
+		created_date = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "description") (ne $v nil)}}
+		description = "{{$v | Escape}}"
+{{- end}}
+{{- if eq $k "products"}}
+		products = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "cpCodeLimits" }}
+		{{- if $v}}
+		cp_code_limits {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "currentCapacity") (ne $v nil)}}
+		current_capacity = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limit") (ne $v nil)}}
+		limit = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limitType") (ne $v nil)}}
+		limit_type = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 		}
 		{{- end}}
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
+{{- if and (eq $k "apiReferenceTitle") (ne $v nil)}}
+		api_reference_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "useExistingPolicySet") (ne $v nil)}}
 		use_existing_policy_set = {{$v}}
@@ -3995,6 +4415,9 @@ input_validation {
 {{- if and (eq $k "label") (ne $v nil)}}
 		label = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "userIdentificationTitle") (ne $v nil)}}
+		user_identification_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "userIdentificationByCookie") (ne $v nil)}}
 		user_identification_by_cookie = {{$v}}
 {{- end}}
@@ -4015,6 +4438,9 @@ input_validation {
 {{- end}}
 {{- if eq $k "userIdentificationKeyParams"}}
 		user_identification_key_params = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "validationTitle") (ne $v nil)}}
+		validation_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "allowLargePostBody") (ne $v nil)}}
 		allow_large_post_body = {{$v}}
@@ -4037,6 +4463,9 @@ input_validation {
 {{- if and (eq $k "failure302Uri") (ne $v nil)}}
 		failure302_uri = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "penaltyTitle") (ne $v nil)}}
+		penalty_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "penaltyThreshold") (ne $v nil)}}
 		penalty_threshold = {{$v | AsInt}}
 {{- end}}
@@ -4055,6 +4484,9 @@ input_validation {
 {{- end}}
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
 		download_domain_name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "g2oToken") (ne $v nil)}}
+		g2o_token = "{{$v | Escape}}"
 {{- end}}
 {{- end}}
 		}
@@ -4272,17 +4704,20 @@ m_pulse {
 {{- if and (eq $k "loaderVersion") (ne $v nil)}}
 		loader_version = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "titleOptional") (ne $v nil)}}
+		title_optional = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "apiKey") (ne $v nil)}}
 		api_key = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "bufferSize") (ne $v nil)}}
 		buffer_size = "{{$v | Escape}}"
 {{- end}}
-{{- if eq $k "configOverride"}}
-{{- if $v}}
-		config_override = <<-EOT
+{{- if and (eq $k "configOverride") (ne $v nil)}}
+		config_override = <<EOT
 {{$v}}
-EOT{{end}}
+%{~if false}trim redundant new line%{endif~}
+EOT
 {{- end}}
 {{- end}}
 }
@@ -4302,6 +4737,9 @@ manifest_personalization {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
+{{- end}}
+{{- if and (eq $k "hlsTitle") (ne $v nil)}}
+		hls_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "hlsEnabled") (ne $v nil)}}
 		hls_enabled = {{$v}}
@@ -4409,6 +4847,9 @@ media_acceleration_quic_optout {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "optout") (ne $v nil)}}
+		optout = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -4469,6 +4910,9 @@ media_origin_failover {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "detectOriginUnresponsiveTitle") (ne $v nil)}}
+		detect_origin_unresponsive_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "detectOriginUnresponsive") (ne $v nil)}}
 		detect_origin_unresponsive = {{$v}}
 {{- end}}
@@ -4510,6 +4954,9 @@ media_origin_failover {
 {{- end}}
 {{- if and (eq $k "originUnresponsiveProtocol") (ne $v nil)}}
 		origin_unresponsive_protocol = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "detectOriginUnavailableTitle") (ne $v nil)}}
+		detect_origin_unavailable_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "detectOriginUnavailable") (ne $v nil)}}
 		detect_origin_unavailable = {{$v}}
@@ -4556,6 +5003,9 @@ media_origin_failover {
 {{- if and (eq $k "originUnavailableProtocol") (ne $v nil)}}
 		origin_unavailable_protocol = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "detectObjectUnavailableTitle") (ne $v nil)}}
+		detect_object_unavailable_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "detectObjectUnavailable") (ne $v nil)}}
 		detect_object_unavailable = {{$v}}
 {{- end}}
@@ -4600,6 +5050,9 @@ media_origin_failover {
 {{- end}}
 {{- if and (eq $k "objectUnavailableProtocol") (ne $v nil)}}
 		object_unavailable_protocol = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "otherOptions") (ne $v nil)}}
+		other_options = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "clientResponseCode") (ne $v nil)}}
 		client_response_code = "{{$v | Escape}}"
@@ -4889,6 +5342,9 @@ origin {
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
 		download_domain_name = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "g2oToken") (ne $v nil)}}
+		g2o_token = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 		}
 		{{- end}}
@@ -4959,6 +5415,9 @@ origin {
 {{- if and (eq $k "trueClientIpClientSetting") (ne $v nil)}}
 		true_client_ip_client_setting = {{$v}}
 {{- end}}
+{{- if and (eq $k "originCertificate") (ne $v nil)}}
+		origin_certificate = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "verificationMode") (ne $v nil)}}
 		verification_mode = "{{$v | Escape}}"
 {{- end}}
@@ -5002,6 +5461,9 @@ origin {
 		}
 {{- end}}
 {{- end}}
+{{- if and (eq $k "ports") (ne $v nil)}}
+		ports = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "httpPort") (ne $v nil)}}
 		http_port = {{$v | AsInt}}
 {{- end}}
@@ -5027,8 +5489,14 @@ origin_characteristics {
 {{- if and (eq $k "country") (ne $v nil)}}
 		country = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "adcTitle") (ne $v nil)}}
+		adc_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "directConnectGeo") (ne $v nil)}}
 		direct_connect_geo = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "authenticationMethodTitle") (ne $v nil)}}
+		authentication_method_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "authenticationMethod") (ne $v nil)}}
 		authentication_method = "{{$v | Escape}}"
@@ -5144,6 +5612,9 @@ origin_failure_recovery_policy {
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
+{{- if and (eq $k "tuningParameters") (ne $v nil)}}
+		tuning_parameters = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "enableIPAvoidance") (ne $v nil)}}
 		enable_ip_avoidance = {{$v}}
 {{- end}}
@@ -5155,6 +5626,9 @@ origin_failure_recovery_policy {
 {{- end}}
 {{- if and (eq $k "binaryEquivalentContent") (ne $v nil)}}
 		binary_equivalent_content = {{$v}}
+{{- end}}
+{{- if and (eq $k "originResponsivenessMonitoring") (ne $v nil)}}
+		origin_responsiveness_monitoring = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "monitorOriginResponsiveness") (ne $v nil)}}
 		monitor_origin_responsiveness = {{$v}}
@@ -5174,6 +5648,9 @@ origin_failure_recovery_policy {
 {{- if and (eq $k "originResponsivenessRecoveryConfigName") (ne $v nil)}}
 		origin_responsiveness_recovery_config_name = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "statusCodeMonitoring1") (ne $v nil)}}
+		status_code_monitoring1 = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "monitorStatusCodes1") (ne $v nil)}}
 		monitor_status_codes1 = {{$v}}
 {{- end}}
@@ -5189,6 +5666,9 @@ origin_failure_recovery_policy {
 {{- if and (eq $k "monitorStatusCodes1RecoveryConfigName") (ne $v nil)}}
 		monitor_status_codes1_recovery_config_name = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "statusCodeMonitoring2") (ne $v nil)}}
+		status_code_monitoring2 = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "monitorStatusCodes2") (ne $v nil)}}
 		monitor_status_codes2 = {{$v}}
 {{- end}}
@@ -5203,6 +5683,9 @@ origin_failure_recovery_policy {
 {{- end}}
 {{- if and (eq $k "monitorStatusCodes2RecoveryConfigName") (ne $v nil)}}
 		monitor_status_codes2_recovery_config_name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "statusCodeMonitoring3") (ne $v nil)}}
+		status_code_monitoring3 = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "monitorStatusCodes3") (ne $v nil)}}
 		monitor_status_codes3 = {{$v}}
@@ -5337,6 +5820,9 @@ phased_release {
 {{- if and (eq $k "label") (ne $v nil)}}
 		label = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "populationTitle") (ne $v nil)}}
+		population_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "populationCookieType") (ne $v nil)}}
 		population_cookie_type = "{{$v | Escape}}"
 {{- end}}
@@ -5348,6 +5834,9 @@ phased_release {
 {{- end}}
 {{- if and (eq $k "populationRefresh") (ne $v nil)}}
 		population_refresh = {{$v}}
+{{- end}}
+{{- if and (eq $k "failoverTitle") (ne $v nil)}}
+		failover_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "failoverEnabled") (ne $v nil)}}
 		failover_enabled = {{$v}}
@@ -5494,14 +5983,23 @@ quality {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "origin_settings") (ne $v nil)}}
+		origin_settings = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "country") (ne $v nil)}}
 		country = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "audienceSettings") (ne $v nil)}}
+		audience_settings = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "endUserLocation") (ne $v nil)}}
 		end_user_location = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "maximumConcurrentUsers") (ne $v nil)}}
 		maximum_concurrent_users = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "contentSettings") (ne $v nil)}}
+		content_settings = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "contentType") (ne $v nil)}}
 		content_type = "{{$v | Escape}}"
@@ -5903,6 +6401,9 @@ request_control {
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
 		download_domain_name = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "g2oToken") (ne $v nil)}}
+		g2o_token = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 		}
 		{{- end}}
@@ -6075,6 +6576,9 @@ restrict_object_caching {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "maximumSize") (ne $v nil)}}
+		maximum_size = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -6175,6 +6679,9 @@ saas_definitions {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "customerTitle") (ne $v nil)}}
+		customer_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "customerAction") (ne $v nil)}}
 		customer_action = "{{$v | Escape}}"
 {{- end}}
@@ -6196,6 +6703,9 @@ saas_definitions {
 {{- if and (eq $k "customerReplace") (ne $v nil)}}
 		customer_replace = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "applicationTitle") (ne $v nil)}}
+		application_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "applicationAction") (ne $v nil)}}
 		application_action = "{{$v | Escape}}"
 {{- end}}
@@ -6216,6 +6726,9 @@ saas_definitions {
 {{- end}}
 {{- if and (eq $k "applicationReplace") (ne $v nil)}}
 		application_replace = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "usersTitle") (ne $v nil)}}
+		users_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "usersAction") (ne $v nil)}}
 		users_action = "{{$v | Escape}}"
@@ -6401,6 +6914,9 @@ segmented_content_protection {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "tokenAuthenticationTitle") (ne $v nil)}}
+		token_authentication_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
@@ -6419,6 +6935,9 @@ segmented_content_protection {
 {{- if eq $k "headerForSalt"}}
 		header_for_salt = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
+{{- if and (eq $k "fieldCarryOver") (ne $v nil)}}
+		field_carry_over = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "sessionId") (ne $v nil)}}
 		session_id = {{$v}}
 {{- end}}
@@ -6431,17 +6950,26 @@ segmented_content_protection {
 {{- if and (eq $k "acl") (ne $v nil)}}
 		acl = {{$v}}
 {{- end}}
+{{- if and (eq $k "tokenAuthHLSTitle") (ne $v nil)}}
+		token_auth_hls_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "enableTokenInURI") (ne $v nil)}}
 		enable_token_in_uri = {{$v}}
 {{- end}}
 {{- if eq $k "hlsMasterManifestFiles"}}
 		hls_master_manifest_files = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
+{{- if and (eq $k "tokenRevocationTitle") (ne $v nil)}}
+		token_revocation_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "tokenRevocationEnabled") (ne $v nil)}}
 		token_revocation_enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "revokedListId") (ne $v nil)}}
 		revoked_list_id = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "mediaEncryptionTitle") (ne $v nil)}}
+		media_encryption_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "hlsMediaEncryption") (ne $v nil)}}
 		hls_media_encryption = {{$v}}
@@ -6672,6 +7200,9 @@ shutr {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "status") (ne $v nil)}}
+		status = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -6726,6 +7257,9 @@ site_shield {
 {{- end}}
 		}
 		{{- end}}
+{{- end}}
+{{- if and (eq $k "nossmap") (ne $v nil)}}
+		nossmap = "{{$v | Escape}}"
 {{- end}}
 {{- end}}
 }
@@ -6792,6 +7326,9 @@ standard_tls_migration_override {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "info") (ne $v nil)}}
+		info = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -6915,6 +7452,9 @@ sure_route {
 {{- if and (eq $k "testObjectUrl") (ne $v nil)}}
 		test_object_url = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "srDownloadLinkTitle") (ne $v nil)}}
+		sr_download_link_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "toHostStatus") (ne $v nil)}}
 		to_host_status = "{{$v | Escape}}"
 {{- end}}
@@ -6952,6 +7492,9 @@ tcp_optimization {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "display") (ne $v nil)}}
+		display = "{{$v | Escape}}"
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -7046,6 +7589,9 @@ tiered_distribution_customization {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "tier1Title") (ne $v nil)}}
+		tier1_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "customMapEnabled") (ne $v nil)}}
 		custom_map_enabled = {{$v}}
 {{- end}}
@@ -7060,6 +7606,9 @@ tiered_distribution_customization {
 {{- end}}
 {{- if and (eq $k "hashAlgorithm") (ne $v nil)}}
 		hash_algorithm = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "cloudwrapperMapMigrationTitle") (ne $v nil)}}
+		cloudwrapper_map_migration_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "mapMigrationEnabled") (ne $v nil)}}
 		map_migration_enabled = {{$v}}
@@ -7111,6 +7660,9 @@ uid_configuration {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "legalText") (ne $v nil)}}
+		legal_text = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
@@ -7308,11 +7860,17 @@ virtual_waiting_room {
 {{- if and (eq $k "customCookieDomain") (ne $v nil)}}
 		custom_cookie_domain = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "waitingRoomTitle") (ne $v nil)}}
+		waiting_room_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "waitingRoomPath") (ne $v nil)}}
 		waiting_room_path = "{{$v | Escape}}"
 {{- end}}
 {{- if eq $k "waitingRoomAssetsPaths"}}
 		waiting_room_assets_paths = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "accessTitle") (ne $v nil)}}
+		access_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "sessionDuration") (ne $v nil)}}
 		session_duration = {{$v | AsInt}}
@@ -7369,6 +7927,9 @@ visitor_prioritization {
 		}
 		{{- end}}
 {{- end}}
+{{- if and (eq $k "userIdentificationTitle") (ne $v nil)}}
+		user_identification_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "userIdentificationByCookie") (ne $v nil)}}
 		user_identification_by_cookie = {{$v}}
 {{- end}}
@@ -7389,6 +7950,9 @@ visitor_prioritization {
 {{- end}}
 {{- if eq $k "userIdentificationKeyParams"}}
 		user_identification_key_params = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "allowedUserCookieManagementTitle") (ne $v nil)}}
+		allowed_user_cookie_management_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "allowedUserCookieEnabled") (ne $v nil)}}
 		allowed_user_cookie_enabled = {{$v}}
@@ -7420,6 +7984,9 @@ visitor_prioritization {
 {{- if and (eq $k "allowedUserCookieHttpOnly") (ne $v nil)}}
 		allowed_user_cookie_http_only = {{$v}}
 {{- end}}
+{{- if and (eq $k "waitingRoomCookieManagementTitle") (ne $v nil)}}
+		waiting_room_cookie_management_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "waitingRoomCookieEnabled") (ne $v nil)}}
 		waiting_room_cookie_enabled = {{$v}}
 {{- end}}
@@ -7450,6 +8017,9 @@ visitor_prioritization {
 {{- if and (eq $k "waitingRoomCookieHttpOnly") (ne $v nil)}}
 		waiting_room_cookie_http_only = {{$v}}
 {{- end}}
+{{- if and (eq $k "waitingRoomManagementTitle") (ne $v nil)}}
+		waiting_room_management_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "waitingRoomStatusCode") (ne $v nil)}}
 		waiting_room_status_code = {{$v | AsInt}}
 {{- end}}
@@ -7462,6 +8032,35 @@ visitor_prioritization {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "id") (ne $v nil)}}
 		id = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "name") (ne $v nil)}}
+		name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "createdDate") (ne $v nil)}}
+		created_date = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "description") (ne $v nil)}}
+		description = "{{$v | Escape}}"
+{{- end}}
+{{- if eq $k "products"}}
+		products = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "cpCodeLimits" }}
+		{{- if $v}}
+		cp_code_limits {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "currentCapacity") (ne $v nil)}}
+		current_capacity = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limit") (ne $v nil)}}
+		limit = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limitType") (ne $v nil)}}
+		limit_type = "{{$v | Escape}}"
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
 {{- end}}
 {{- end}}
 		}
@@ -7476,6 +8075,9 @@ visitor_prioritization {
 {{- end}}
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
 		download_domain_name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "g2oToken") (ne $v nil)}}
+		g2o_token = "{{$v | Escape}}"
 {{- end}}
 {{- end}}
 		}
@@ -7512,11 +8114,17 @@ visitor_prioritization_fifo {
 {{- if and (eq $k "customCookieDomain") (ne $v nil)}}
 		custom_cookie_domain = "{{$v | Escape}}"
 {{- end}}
+{{- if and (eq $k "waitingRoomTitle") (ne $v nil)}}
+		waiting_room_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "waitingRoomPath") (ne $v nil)}}
 		waiting_room_path = "{{$v | Escape}}"
 {{- end}}
 {{- if eq $k "waitingRoomAssetsPaths"}}
 		waiting_room_assets_paths = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "accessTitle") (ne $v nil)}}
+		access_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "sessionDuration") (ne $v nil)}}
 		session_duration = {{$v | AsInt}}
@@ -7559,26 +8167,32 @@ watermarking {
 {{- if and (eq $k "enable") (ne $v nil)}}
 		enable = {{$v}}
 {{- end}}
+{{- if and (eq $k "tokenSigningTitle") (ne $v nil)}}
+		token_signing_title = "{{$v | Escape}}"
+{{- end}}
 {{- if and (eq $k "signatureVerificationEnable") (ne $v nil)}}
 		signature_verification_enable = {{$v}}
 {{- end}}
 {{- if and (eq $k "verificationKeyId1") (ne $v nil)}}
 		verification_key_id1 = "{{$v | Escape}}"
 {{- end}}
-{{- if eq $k "verificationPublicKey1"}}
-{{- if $v}}
-		verification_public_key1 = <<-EOT
+{{- if and (eq $k "verificationPublicKey1") (ne $v nil)}}
+		verification_public_key1 = <<EOT
 {{$v}}
-EOT{{end}}
+%{~if false}trim redundant new line%{endif~}
+EOT
 {{- end}}
 {{- if and (eq $k "verificationKeyId2") (ne $v nil)}}
 		verification_key_id2 = "{{$v | Escape}}"
 {{- end}}
-{{- if eq $k "verificationPublicKey2"}}
-{{- if $v}}
-		verification_public_key2 = <<-EOT
+{{- if and (eq $k "verificationPublicKey2") (ne $v nil)}}
+		verification_public_key2 = <<EOT
 {{$v}}
-EOT{{end}}
+%{~if false}trim redundant new line%{endif~}
+EOT
+{{- end}}
+{{- if and (eq $k "patternEncryptionTitle") (ne $v nil)}}
+		pattern_encryption_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "patternDecryptionEnable") (ne $v nil)}}
 		pattern_decryption_enable = {{$v}}
@@ -7594,6 +8208,9 @@ EOT{{end}}
 {{- end}}
 {{- if and (eq $k "decryptionPassword2") (ne $v nil)}}
 		decryption_password2 = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "miscellaneousSettingsTitle") (ne $v nil)}}
+		miscellaneous_settings_title = "{{$v | Escape}}"
 {{- end}}
 {{- if and (eq $k "useOriginalAsA") (ne $v nil)}}
 		use_original_as_a = {{$v}}
@@ -7617,8 +8234,31 @@ web_application_firewall {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
-{{- if eq $k "firewallConfiguration"}}
-		firewall_configuration = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- if eq $k "firewallConfiguration" }}
+		{{- if $v}}
+		firewall_configuration {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "configId") (ne $v nil)}}
+		config_id = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "productionStatus") (ne $v nil)}}
+		production_status = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "stagingStatus") (ne $v nil)}}
+		staging_status = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "productionVersion") (ne $v nil)}}
+		production_version = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "stagingVersion") (ne $v nil)}}
+		staging_version = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "fileName") (ne $v nil)}}
+		file_name = "{{$v | Escape}}"
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
 {{- end}}
 {{- end}}
 }
@@ -8121,17 +8761,17 @@ match_advanced {
 {{- if and (eq $k "description") (ne $v nil)}}
 		description = "{{$v | Escape}}"
 {{- end}}
-{{- if eq $k "openXml"}}
-{{- if $v}}
-		open_xml = <<-EOT
+{{- if and (eq $k "openXml") (ne $v nil)}}
+		open_xml = <<EOT
 {{$v}}
-EOT{{end}}
+%{~if false}trim redundant new line%{endif~}
+EOT
 {{- end}}
-{{- if eq $k "closeXml"}}
-{{- if $v}}
-		close_xml = <<-EOT
+{{- if and (eq $k "closeXml") (ne $v nil)}}
+		close_xml = <<EOT
 {{$v}}
-EOT{{end}}
+%{~if false}trim redundant new line%{endif~}
+EOT
 {{- end}}
 {{- end}}
 }
@@ -8155,6 +8795,35 @@ match_cp_code {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "id") (ne $v nil)}}
 		id = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "name") (ne $v nil)}}
+		name = "{{$v | Escape}}"
+{{- end}}
+{{- if and (eq $k "createdDate") (ne $v nil)}}
+		created_date = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "description") (ne $v nil)}}
+		description = "{{$v | Escape}}"
+{{- end}}
+{{- if eq $k "products"}}
+		products = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "cpCodeLimits" }}
+		{{- if $v}}
+		cp_code_limits {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "currentCapacity") (ne $v nil)}}
+		current_capacity = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limit") (ne $v nil)}}
+		limit = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limitType") (ne $v nil)}}
+		limit_type = "{{$v | Escape}}"
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
 {{- end}}
 {{- end}}
 		}

@@ -22,6 +22,10 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
     criterion {
       match_advanced {
         uuid        = "fa27bc4d-bfff-4541-8eb7-ade156a57256"
+        close_xml   = <<EOT
+
+%{~if false}trim redundant new line%{endif~}
+EOT
         description = ""
       }
     }
@@ -37,7 +41,9 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
       application_load_balancer {
         all_down_net_storage_file   = ""
         all_down_status_code        = ""
+        all_down_title              = ""
         allow_cache_prefresh        = true
+        cached_content_title        = ""
         enabled                     = true
         failover_attempts_threshold = 5
         failover_mode               = "MANUAL"
@@ -54,10 +60,12 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
           to_origin_ids  = ["zzzzzz", ]
         }
         failover_status_codes                = ["500", "501", "502", "503", "504", "505", "506", "507", "508", "509", ]
+        failover_title                       = ""
         label                                = ""
         stickiness_cookie_automatic_salt     = true
         stickiness_cookie_set_http_only_flag = true
         stickiness_cookie_type               = "ON_BROWSER_CLOSE"
+        stickiness_title                     = ""
       }
     }
     behavior {
@@ -78,7 +86,11 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
     behavior {
       cp_code {
         value {
-          id = 1047836
+          created_date = 1506429558000
+          description  = "Test-NewHire"
+          id           = 1047836
+          name         = "Test-NewHire"
+          products     = ["Site_Defender", ]
         }
       }
     }
@@ -107,7 +119,7 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
       advanced {
         uuid        = "feeaeff9-fe7e-4e27-ba0c-7b1dcecdba8b"
         description = "extract inputs"
-        xml         = <<-EOT
+        xml         = <<EOT
 <assign:extract-value>
    <variable-name>ENDUSER</variable-name>
    <location>Query_String</location>
@@ -144,6 +156,7 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
       <name>Distance</name>
       <value>%(DISTANCE)</value>
    </edgeservices:modify-outgoing-response.add-header>
+%{~if false}trim redundant new line%{endif~}
 EOT
       }
     }
@@ -151,7 +164,11 @@ EOT
       fail_action {
         action_type = "RECREATED_NS"
         cp_code {
-          id = 192729
+          created_date = 1351012965000
+          description  = "Ion Express 6"
+          id           = 192729
+          name         = "Ion Express 6"
+          products     = ["Fina", ]
         }
         enabled = true
         net_storage_hostname {
@@ -166,8 +183,10 @@ EOT
       data.akamai_property_rules_builder.test-edgesuite-net_rule_strange_characters--a-------------ą.json,
       data.akamai_property_rules_builder.test-edgesuite-net_rule_static_content.json,
       data.akamai_property_rules_builder.test-edgesuite-net_rule_dynamic_content.json,
-      data.akamai_property_rules_builder.test-edgesuite-net_rule_newrule.json,
-      data.akamai_property_rules_builder.test-edgesuite-net_rule_newrule1.json,
+      data.akamai_property_rules_builder.test-edgesuite-net_rule_new_rule.json,
+      data.akamai_property_rules_builder.test-edgesuite-net_rule_new_rule1.json,
+      data.akamai_property_rules_builder.test-edgesuite-net_rule_deny_by_location.json,
+      data.akamai_property_rules_builder.test-edgesuite-net_rule_redirect_to_language_specific_section.json,
     ]
   }
 }
@@ -186,13 +205,26 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters
       }
     }
     behavior {
+      advanced {
+        uuid        = "feeaeff9-fe7e-4e27-ba0c-7b1dcecdba8b"
+        description = "extract inputs"
+        xml         = <<EOT
+
+	xxx yyyy
+
+
+%{~if false}trim redundant new line%{endif~}
+EOT
+      }
+    }
+    behavior {
       gzip_response {
         behavior = "ALWAYS"
       }
     }
     children = [
-      data.akamai_property_rules_builder.test-edgesuite-net_rule_newrule2.json,
-      data.akamai_property_rules_builder.test-edgesuite-net_rule_newrule3.json,
+      data.akamai_property_rules_builder.test-edgesuite-net_rule_new_rule2.json,
+      data.akamai_property_rules_builder.test-edgesuite-net_rule_new_rule3.json,
       data.akamai_property_rules_builder.test-edgesuite-net_rule_strange_characters--a-------------ą1.json,
       data.akamai_property_rules_builder.test-edgesuite-net_rule_m_pulse.json,
     ]
@@ -247,7 +279,7 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_dynamic_content" {
   }
 }
 
-data "akamai_property_rules_builder" "test-edgesuite-net_rule_newrule" {
+data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule" {
   rules_v2023_01_05 {
     name                  = "new rule"
     is_secure             = false
@@ -255,7 +287,7 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_newrule" {
   }
 }
 
-data "akamai_property_rules_builder" "test-edgesuite-net_rule_newrule1" {
+data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule1" {
   rules_v2023_01_05 {
     name                  = "new rule"
     is_secure             = false
@@ -263,7 +295,23 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_newrule1" {
   }
 }
 
-data "akamai_property_rules_builder" "test-edgesuite-net_rule_newrule2" {
+data "akamai_property_rules_builder" "test-edgesuite-net_rule_deny_by_location" {
+  rules_v2023_01_05 {
+    name                  = "Deny by Location"
+    is_secure             = false
+    criteria_must_satisfy = "any"
+  }
+}
+
+data "akamai_property_rules_builder" "test-edgesuite-net_rule_redirect_to_language_specific_section" {
+  rules_v2023_01_05 {
+    name                  = "redirect to language specific section"
+    is_secure             = false
+    criteria_must_satisfy = "any"
+  }
+}
+
+data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule2" {
   rules_v2023_01_05 {
     name                  = "new rule"
     is_secure             = false
@@ -271,7 +319,7 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_newrule2" {
   }
 }
 
-data "akamai_property_rules_builder" "test-edgesuite-net_rule_newrule3" {
+data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule3" {
   rules_v2023_01_05 {
     name                  = "new rule"
     is_secure             = false
@@ -296,12 +344,14 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_m_pulse" {
     behavior {
       m_pulse {
         buffer_size     = ""
-        config_override = <<-EOT
+        config_override = <<EOT
 {"name":"John", "age":30, "car":null}
+%{~if false}trim redundant new line%{endif~}
 EOT
         enabled         = true
         loader_version  = "V12"
         require_pci     = true
+        title_optional  = ""
       }
     }
   }
