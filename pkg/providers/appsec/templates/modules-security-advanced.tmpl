@@ -37,6 +37,12 @@ resource "akamai_appsec_advanced_settings_attack_payload_logging" "attack_payloa
 )
 }
 {{ end -}}
+{{ if .AdvancedOptions.RequestBody }}
+resource "akamai_appsec_advanced_settings_request_body" "config_settings" {
+  config_id = akamai_appsec_configuration.config.config_id
+  request_body_inspection_limit = "{{ .AdvancedOptions.RequestBody.RequestBodyInspectionLimitInKB }}"
+}
+{{ end -}}
 {{ end -}}
 {{ range .SecurityPolicies -}}
 {{ $policyName := .Name -}}
@@ -78,6 +84,14 @@ resource "akamai_appsec_advanced_settings_attack_payload_logging" "{{ escapeName
     attack_payload_logging = jsonencode(
 {{ toJSON .AttackPayloadLoggingOverrides }}
 )
+}
+{{ end -}}
+{{ if .RequestBody }}
+// RequestBody Overrides
+resource "akamai_appsec_advanced_settings_request_body" "{{ escapeName $policyName}}" {
+    config_id = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_security_policy.{{ escapeName $policyName }}.security_policy_id
+    request_body_inspection_limit = "{{ .RequestBody.RequestBodyInspectionLimitInKB }}"
 }
 {{ end -}}
 {{ end -}}

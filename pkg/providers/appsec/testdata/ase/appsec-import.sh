@@ -4,6 +4,7 @@ terraform import module.security.akamai_appsec_advanced_settings_logging.logging
 terraform import module.security.akamai_appsec_advanced_settings_attack_payload_logging.attack_payload_logging 79947
 terraform import module.security.akamai_appsec_advanced_settings_prefetch.prefetch 79947
 terraform import module.security.akamai_appsec_advanced_settings_pragma_header.pragma_header 79947
+terraform import module.security.akamai_appsec_advanced_settings_request_body.config_settings 79947
 terraform import module.security.akamai_appsec_custom_rule.custom_rule_1_60088542 79947:60088542
 terraform import module.security.akamai_appsec_custom_deny.deny_message_deny_custom_78842 79947:deny_custom_78842
 terraform import module.security.akamai_appsec_match_target.website_4262513 79947:4262513
@@ -199,6 +200,7 @@ terraform import module.security.akamai_appsec_malware_policy_action.default_pol
 terraform import module.security.akamai_appsec_ip_geo.default_policy 79947:ASE1_156138
 terraform import module.security.akamai_appsec_penalty_box.default_policy 79947:ASE1_156138
 terraform import module.security.akamai_appsec_slow_post.default_policy 79947:ASE1_156138
+terraform import module.security.akamai_appsec_advanced_settings_request_body.default_policy 79947:ASE1_156138
 
 terraform import module.security.akamai_appsec_rate_policy.page_view_requests 79947:177906
 

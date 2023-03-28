@@ -8562,7 +8562,7 @@
                 "override": false
             },
             "requestBody": {
-                "requestBodyInspectionLimitInKB": "default"
+                "requestBodyInspectionLimitInKB": "32"
             }
         },
         {
@@ -11169,7 +11169,7 @@
             ]
         },
         "requestBody": {
-            "requestBodyInspectionLimitInKB": "default"
+            "requestBodyInspectionLimitInKB": "16"
         }
     },
     "customDenyList": [

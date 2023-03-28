@@ -4,6 +4,7 @@ terraform import module.security.akamai_appsec_advanced_settings_logging.logging
 terraform import module.security.akamai_appsec_advanced_settings_attack_payload_logging.attack_payload_logging 32641
 terraform import module.security.akamai_appsec_advanced_settings_prefetch.prefetch 32641
 terraform import module.security.akamai_appsec_advanced_settings_pragma_header.pragma_header 32641
+terraform import module.security.akamai_appsec_advanced_settings_request_body.config_settings 32641
 terraform import module.security.akamai_appsec_custom_rule.custom_rule_1_60088542 32641:60088542
 terraform import module.security.akamai_appsec_custom_deny.deny_message_deny_custom_78842 32641:deny_custom_78842
 terraform import module.security.akamai_appsec_custom_deny.deny_message_2_deny_custom_80270 32641:deny_custom_80270
@@ -311,6 +312,7 @@ terraform import module.security.akamai_appsec_malware_policy_action.policy2_fms
 terraform import module.security.akamai_appsec_malware_policy_action.policy2_fms_configuration_3 32641:hard_150670:1185
 terraform import module.security.akamai_appsec_ip_geo.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_slow_post.policy2 32641:hard_150670
+terraform import module.security.akamai_appsec_advanced_settings_request_body.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_security_policy.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_waf_protection.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_api_constraints_protection.andrew 32641:last_150674
@@ -500,6 +502,7 @@ terraform import module.security.akamai_appsec_reputation_profile_action.andrew_
 terraform import module.security.akamai_appsec_ip_geo.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_penalty_box.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_slow_post.andrew 32641:last_150674
+terraform import module.security.akamai_appsec_advanced_settings_request_body.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_security_policy.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_waf_protection.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_api_constraints_protection.policy1 32641:easy_80433
@@ -807,6 +810,7 @@ terraform import module.security.akamai_appsec_ip_geo.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_slow_post.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_advanced_settings_logging.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_advanced_settings_attack_payload_logging.policy1 32641:easy_80433
+terraform import module.security.akamai_appsec_advanced_settings_request_body.policy1 32641:easy_80433
 
 terraform import module.security.akamai_appsec_rate_policy.high_rate 32641:172320
 

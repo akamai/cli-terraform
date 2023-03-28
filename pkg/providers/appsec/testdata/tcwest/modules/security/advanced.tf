@@ -64,6 +64,25 @@ resource "akamai_appsec_advanced_settings_attack_payload_logging" "attack_payloa
   )
 }
 
+resource "akamai_appsec_advanced_settings_request_body" "config_settings" {
+  config_id                     = akamai_appsec_configuration.config.config_id
+  request_body_inspection_limit = "16"
+}
+
+// RequestBody Overrides
+resource "akamai_appsec_advanced_settings_request_body" "policy2" {
+  config_id                     = akamai_appsec_configuration.config.config_id
+  security_policy_id            = akamai_appsec_security_policy.policy2.security_policy_id
+  request_body_inspection_limit = "32"
+}
+
+// RequestBody Overrides
+resource "akamai_appsec_advanced_settings_request_body" "andrew" {
+  config_id                     = akamai_appsec_configuration.config.config_id
+  security_policy_id            = akamai_appsec_security_policy.andrew.security_policy_id
+  request_body_inspection_limit = "default"
+}
+
 // Logging Overides
 resource "akamai_appsec_advanced_settings_logging" "policy1" {
   config_id          = akamai_appsec_configuration.config.config_id
@@ -104,4 +123,11 @@ resource "akamai_appsec_advanced_settings_attack_payload_logging" "policy1" {
       "override" : true
     }
   )
+}
+
+// RequestBody Overrides
+resource "akamai_appsec_advanced_settings_request_body" "policy1" {
+  config_id                     = akamai_appsec_configuration.config.config_id
+  security_policy_id            = akamai_appsec_security_policy.policy1.security_policy_id
+  request_body_inspection_limit = "default"
 }
