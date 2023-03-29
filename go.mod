@@ -3,7 +3,7 @@ module github.com/akamai/cli-terraform
 go 1.18
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v4 v4.0.0
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v5 v5.0.0
 	github.com/akamai/cli v1.5.3
 	github.com/fatih/color v1.13.0
 	github.com/hashicorp/hcl/v2 v2.11.1
@@ -18,6 +18,7 @@ require (
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
+	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/apex/log v1.9.0 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
@@ -43,6 +44,7 @@ require (
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/stretchr/objx v0.4.0 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
+	go.uber.org/ratelimit v0.2.0 // indirect
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	golang.org/x/term v0.0.0-20210503060354-a79de5458b56 // indirect
 	golang.org/x/text v0.3.8 // indirect
@@ -51,5 +53,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v4 => ../akamaiopen-edgegrid-golang
+//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v5 => ../akamaiopen-edgegrid-golang
 //replace github.com/akamai/cli => ../cli

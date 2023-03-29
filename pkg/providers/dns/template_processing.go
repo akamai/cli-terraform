@@ -6,7 +6,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/dns"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/dns"
 )
 
 //go:embed templates/*

@@ -2,7 +2,7 @@
 package edgegrid
 
 import (
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/edgegrid"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/edgegrid"
 	"github.com/urfave/cli/v2"
 )
 

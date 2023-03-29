@@ -11,7 +11,7 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/edgeworkers"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/edgeworkers"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"
