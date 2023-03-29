@@ -27,6 +27,10 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
 %{~if false}trim redundant new line%{endif~}
 EOT
         description = ""
+        open_xml    = <<EOT
+
+%{~if false}trim redundant new line%{endif~}
+EOT
       }
     }
     criterion {

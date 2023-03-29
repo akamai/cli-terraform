@@ -163,11 +163,16 @@ Flags:
 ### Usage
 
 ```
-   akamai terraform [global flags] export-property [flags] <property name>
+   akamai terraform [global flags] export-property [subcommand] [flags] <property name>
+
+Subcommand:
+    include <contract_id> <include_name>    Generates Terraform configuration for Include resources
 
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
    --version value        Property version to import  (default: LATEST)
+   --with-includes        Referenced includes will also be exported along with property
+   --schema               Referenced rules will be exported as `akamai_property_rules_builder` data source
 ```
 
 ### Export property manager property configuration.
