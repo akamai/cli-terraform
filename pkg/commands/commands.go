@@ -144,6 +144,10 @@ func CommandLocator() ([]*cli.Command, error) {
 				Name:  "with-includes",
 				Usage: "Referenced includes will also be exported along with property",
 			},
+			&cli.BoolFlag{
+				Name:  "schema",
+				Usage: "Referenced rules will be exported as data source",
+			},
 		},
 		BashComplete: autocomplete.Default,
 	})

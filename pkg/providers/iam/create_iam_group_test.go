@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/iam"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
@@ -114,7 +114,7 @@ var (
 		client.On("GetRole", mock.Anything, getRoleReq).Return(&role, nil).Once()
 	}
 
-	expectGroupByIDProcessTemplates = func(p *mockProcessor, section string) *mock.Call {
+	expectGroupByIDProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
 		tfData := TFData{
 			TFUsers: []*TFUser{
 				{
@@ -153,10 +153,10 @@ func TestCreateIAMGroupByID(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		init func(*iam.Mock, *mockProcessor)
+		init func(*iam.Mock, *templates.MockProcessor)
 	}{
 		"fetch group": {
-			init: func(i *iam.Mock, p *mockProcessor) {
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListUsersWithinGroup(i)
 				expectGetUserWithinGroup(i)
 				expectListRolesWithinGroup(i)
@@ -169,7 +169,7 @@ func TestCreateIAMGroupByID(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			mi := new(iam.Mock)
-			mp := new(mockProcessor)
+			mp := new(templates.MockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
 			err := createIAMGroupByID(ctx, groupID, section, mi, mp)

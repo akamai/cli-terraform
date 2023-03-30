@@ -4,6 +4,9 @@ terraform init
 terraform import module.security.akamai_appsec_configuration.config {{ $configID }}
 terraform import module.security.akamai_appsec_advanced_settings_logging.logging {{ $configID }}
 {{ if .AdvancedOptions -}}
+{{ if .AdvancedOptions.AttackPayloadLogging -}}
+terraform import module.security.akamai_appsec_advanced_settings_attack_payload_logging.attack_payload_logging {{ $configID }}
+{{ end -}}
 {{ if .AdvancedOptions.Prefetch -}}
 terraform import module.security.akamai_appsec_advanced_settings_prefetch.prefetch {{ $configID }}
 {{ end -}}
@@ -12,6 +15,9 @@ terraform import module.security.akamai_appsec_advanced_settings_pragma_header.p
 {{ end -}}
 {{ if .AdvancedOptions.EvasivePathMatch -}}
 terraform import module.security.akamai_appsec_advanced_settings_evasive_path_match.evasive_path_match {{ $configID }}
+{{ end -}}
+{{ if .AdvancedOptions.RequestBody -}}
+terraform import module.security.akamai_appsec_advanced_settings_request_body.config_settings {{ $configID }}
 {{ end -}}
 {{ end -}}
 {{ if .CustomRules  -}}
@@ -117,6 +123,12 @@ terraform import module.security.akamai_appsec_advanced_settings_pragma_header.{
 {{ end -}}
 {{ if .EvasivePathMatch -}}
 terraform import module.security.akamai_appsec_advanced_settings_evasive_path_match.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ if .AttackPayloadLoggingOverrides -}}
+terraform import module.security.akamai_appsec_advanced_settings_attack_payload_logging.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ if .RequestBody -}}
+terraform import module.security.akamai_appsec_advanced_settings_request_body.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 {{ end -}}
 {{ end -}}
 {{ if .RatePolicies -}}

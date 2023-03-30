@@ -12,22 +12,13 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/gtm"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/gtm"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/tj/assert"
 )
-
-type mockProcessor struct {
-	mock.Mock
-}
-
-func (m *mockProcessor) ProcessTemplates(i interface{}) error {
-	args := m.Called(i)
-	return args.Error(0)
-}
 
 func TestMain(m *testing.M) {
 	if err := os.MkdirAll("./testdata/res", 0755); err != nil {
@@ -333,7 +324,7 @@ var (
 		},
 	}
 
-	expectGTMProcessTemplates = func(mp *mockProcessor, data TFDomainData, err error) *mock.Call {
+	expectGTMProcessTemplates = func(mp *templates.MockProcessor, data TFDomainData, err error) *mock.Call {
 		call := mp.On("ProcessTemplates", data)
 		if err != nil {
 			return call.Return(err)
@@ -355,23 +346,23 @@ func TestCreateDomain(t *testing.T) {
 	domainName := "test.name.net"
 
 	tests := map[string]struct {
-		init      func(*gtm.Mock, *mockProcessor)
+		init      func(*gtm.Mock, *templates.MockProcessor)
 		withError error
 	}{
 		"fetch domain success": {
-			init: func(mg *gtm.Mock, mp *mockProcessor) {
+			init: func(mg *gtm.Mock, mp *templates.MockProcessor) {
 				expectGetDomain(mg, domainName, domain, nil).Once()
 				expectGTMProcessTemplates(mp, domainData, nil).Once()
 			},
 		},
 		"error fetching domain": {
-			init: func(mg *gtm.Mock, mp *mockProcessor) {
+			init: func(mg *gtm.Mock, mp *templates.MockProcessor) {
 				expectGetDomain(mg, domainName, domain, fmt.Errorf("oops")).Once()
 			},
 			withError: ErrFetchingDomain,
 		},
 		"error processing template": {
-			init: func(mg *gtm.Mock, mp *mockProcessor) {
+			init: func(mg *gtm.Mock, mp *templates.MockProcessor) {
 				expectGetDomain(mg, domainName, domain, nil).Once()
 				expectGTMProcessTemplates(mp, domainData, templates.ErrSavingFiles).Once()
 			},
@@ -382,7 +373,7 @@ func TestCreateDomain(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			mgtm := new(gtm.Mock)
-			mp := new(mockProcessor)
+			mp := new(templates.MockProcessor)
 			test.init(mgtm, mp)
 
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))

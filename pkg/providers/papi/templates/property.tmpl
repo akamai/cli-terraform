@@ -19,12 +19,13 @@ data "akamai_group" "group" {
 }
 
 data "akamai_contract" "contract" {
-  group_name = data.akamai_group.group.name
+  group_name = data.akamai_group.group.group_name
 }
+{{- if not .RulesAsSchema}}
 
 data "akamai_property_rules_template" "rules" {
   template_file = abspath("${path.module}/property-snippets/main.json")
-}
+}{{end}}
 {{range .Property.EdgeHostnames}}
 resource "akamai_edge_hostname" "{{.EdgeHostnameResourceName}}" {
   product_id  = "prd_{{.ProductName}}"
@@ -53,8 +54,14 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
     cert_provisioning_type = "{{.CertProvisioningType}}"
   }
 {{- end}}
+{{- if .RulesAsSchema}}
+  rules = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.json
+{{- else}}
   rules = data.akamai_property_rules_template.rules.json
+{{- end}}
 }
+
+{{- if .Property.HasStagingActivation}}
 
 resource "akamai_property_activation" "{{.Property.PropertyResourceName}}" {
   property_id = akamai_property.{{.Property.PropertyResourceName}}.id
@@ -65,3 +72,15 @@ resource "akamai_property_activation" "{{.Property.PropertyResourceName}}" {
   note = "{{.Property.ActivationNote}}"
 {{- end}}
 }
+{{ else}}
+
+#resource "akamai_property_activation" "{{.Property.PropertyResourceName}}" {
+#  property_id = akamai_property.{{.Property.PropertyResourceName}}.id
+#  contact = [{{range $index, $element := .Property.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+#  version = akamai_property.{{.Property.PropertyResourceName}}.latest_version
+#  network = upper(var.env)
+{{- if .Property.ActivationNote}}
+#  note = "{{.Property.ActivationNote}}"
+{{- end}}
+#}
+{{ end}}

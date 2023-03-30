@@ -11,7 +11,7 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/edgeworkers"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/edgeworkers"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"
@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	expectEdgeWorkerProcessTemplates = func(p *mockProcessor, edgeWorkerID int, name string, groupID int64, resourceTierID int,
+	expectEdgeWorkerProcessTemplates = func(p *templates.MockProcessor, edgeWorkerID int, name string, groupID int64, resourceTierID int,
 		localBundle, section string, err error) *mock.Call {
 		tfData := TFEdgeWorkerData{
 			EdgeWorkerID:   edgeWorkerID,
@@ -131,19 +131,19 @@ func TestCreateEdgeWorker(t *testing.T) {
 	versionContent := bytes.NewBuffer(bundleBytes)
 
 	tests := map[string]struct {
-		init       func(*edgeworkers.Mock, *mockProcessor)
+		init       func(*edgeworkers.Mock, *templates.MockProcessor)
 		withError  error
 		withBundle bool
 	}{
 		"fetch edgeworker with no version": {
-			init: func(e *edgeworkers.Mock, p *mockProcessor) {
+			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, true, nil).Once()
 				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, "", section, nil).Once()
 			},
 		},
 		"fetch edgeworker with version": {
-			init: func(e *edgeworkers.Mock, p *mockProcessor) {
+			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, false, nil).Once()
 				expectGetEdgeWorkerVersionContent(e, 123, "1.24.5", versionContent, nil).Once()
@@ -152,20 +152,20 @@ func TestCreateEdgeWorker(t *testing.T) {
 			withBundle: true,
 		},
 		"error fetching edgeworker": {
-			init: func(e *edgeworkers.Mock, p *mockProcessor) {
+			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, fmt.Errorf("error")).Once()
 			},
 			withError: ErrFetchingEdgeWorker,
 		},
 		"error fetching edgeworker versions": {
-			init: func(e *edgeworkers.Mock, p *mockProcessor) {
+			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, false, fmt.Errorf("error")).Once()
 			},
 			withError: ErrFetchingEdgeWorker,
 		},
 		"error fetching edgeworker version content": {
-			init: func(e *edgeworkers.Mock, p *mockProcessor) {
+			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, false, nil).Once()
 				expectGetEdgeWorkerVersionContent(e, 123, "1.24.5", versionContent, fmt.Errorf("error")).Once()
@@ -173,7 +173,7 @@ func TestCreateEdgeWorker(t *testing.T) {
 			withError: ErrFetchingEdgeWorker,
 		},
 		"error processing template": {
-			init: func(e *edgeworkers.Mock, p *mockProcessor) {
+			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, true, nil).Once()
 				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, "", section, fmt.Errorf("error")).Once()
@@ -187,7 +187,7 @@ func TestCreateEdgeWorker(t *testing.T) {
 			require.NoError(t, os.MkdirAll(localBundlePath, 0755))
 
 			me := new(edgeworkers.Mock)
-			mp := new(mockProcessor)
+			mp := new(templates.MockProcessor)
 			test.init(me, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
 			err := createEdgeWorker(ctx, 123, localBundlePath, section, me, mp)

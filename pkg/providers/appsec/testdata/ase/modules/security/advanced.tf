@@ -33,3 +33,30 @@ resource "akamai_appsec_advanced_settings_pragma_header" "pragma_header" {
     }
   )
 }
+
+resource "akamai_appsec_advanced_settings_attack_payload_logging" "attack_payload_logging" {
+  config_id = akamai_appsec_configuration.config.config_id
+  attack_payload_logging = jsonencode(
+    {
+      "enabled" : true,
+      "requestBody" : {
+        "type" : "NONE"
+      },
+      "responseBody" : {
+        "type" : "ATTACK_PAYLOAD"
+      }
+    }
+  )
+}
+
+resource "akamai_appsec_advanced_settings_request_body" "config_settings" {
+  config_id                     = akamai_appsec_configuration.config.config_id
+  request_body_inspection_limit = "default"
+}
+
+// RequestBody Overrides
+resource "akamai_appsec_advanced_settings_request_body" "default_policy" {
+  config_id                     = akamai_appsec_configuration.config.config_id
+  security_policy_id            = akamai_appsec_security_policy.default_policy.security_policy_id
+  request_body_inspection_limit = "default"
+}

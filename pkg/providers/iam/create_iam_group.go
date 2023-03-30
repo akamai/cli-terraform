@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/iam"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
@@ -83,7 +83,7 @@ func createIAMGroupByID(ctx context.Context, groupID int64, section string, clie
 	})
 	if err != nil {
 		term.Spinner().Fail()
-		return err
+		return fmt.Errorf("could not get group with ID '%v': %w", groupID, err)
 	}
 	term.Spinner().OK()
 

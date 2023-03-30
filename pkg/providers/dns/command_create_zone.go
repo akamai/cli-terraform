@@ -26,7 +26,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/dns"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/dns"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"

@@ -1,5 +1,23 @@
 # Release Notes
 
+## Version 1.4.0 (Mar 30, 2023)
+
+### Features/Enhancements
+
+* APPSEC
+  * Support for exporting `akamai_appsec_advanced_settings_request_body` resource
+
+* PAPI
+  * New `--schema` flag available with `export-property` command to export rule tree as `akamai_property_rules_builder` data source (Beta)
+
+### Fixes
+
+* PAPI
+  * Fix property export with empty EdgeHostnameID ([I#41](https://github.com/akamai/cli-terraform/issues/41))
+  * Change exported attribute value in configuration of `akamai_contract` data source from deprecated `name`
+    to `group_name` when exporting property
+  * Comment out `akamai_property_activation` resource if there is no currently active version
+
 ## Version 1.3.1 (Feb 2, 2023)
 
 ### Features/Enhancements

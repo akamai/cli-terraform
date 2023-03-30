@@ -10,7 +10,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/papi"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
@@ -60,7 +60,10 @@ func CmdCreateInclude(c *cli.Context) error {
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
 		AdditionalFuncs: template.FuncMap{
-			"ToLower": strings.ToLower,
+			"ToLower":       strings.ToLower,
+			"TerraformName": TerraformName,
+			"AsInt":         AsInt,
+			"Escape":        Escape,
 		},
 	}
 

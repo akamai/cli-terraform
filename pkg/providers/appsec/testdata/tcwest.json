@@ -8562,7 +8562,7 @@
                 "override": false
             },
             "requestBody": {
-                "requestBodyInspectionLimitInKB": "default"
+                "requestBodyInspectionLimitInKB": "32"
             }
         },
         {
@@ -11038,6 +11038,16 @@
                     ]
                 }
             },
+            "attackPayloadLoggingOverrides": {
+                "enabled": true,
+                "requestBody": {
+                    "type": "ATTACK_PAYLOAD"
+                },
+                "responseBody": {
+                    "type": "NONE"
+                },
+                "override": true
+            },
             "pragmaHeader": {
                 "override": false
             },
@@ -11107,6 +11117,15 @@
         "siemDefinitionId": 1
     },
     "advancedOptions": {
+        "attackPayloadLogging": {
+            "enabled": true,
+            "requestBody": {
+                "type": "NONE"
+            },
+            "responseBody": {
+                "type": "ATTACK_PAYLOAD"
+            }
+        },
         "logging": {
             "allowSampling": true,
             "cookies": {
@@ -11150,7 +11169,7 @@
             ]
         },
         "requestBody": {
-            "requestBodyInspectionLimitInKB": "default"
+            "requestBodyInspectionLimitInKB": "16"
         }
     },
     "customDenyList": [

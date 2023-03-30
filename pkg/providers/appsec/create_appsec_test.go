@@ -11,22 +11,13 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v4/pkg/appsec"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/appsec"
 	"github.com/akamai/cli-terraform/pkg/templates"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
-
-type mockProcessor struct {
-	mock.Mock
-}
-
-func (m *mockProcessor) ProcessTemplates(i interface{}) error {
-	args := m.Called(i)
-	return args.Error(0)
-}
 
 func TestGetConfigDescription(t *testing.T) {
 	mocks := func(c *appsec.Mock) {
@@ -282,7 +273,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 	configs := []string{"ase", "tcwest"}
 
 	// Mocked API calls
-	mocks := func(c *appsec.Mock, p *mockProcessor) {
+	mocks := func(c *appsec.Mock, p *templates.MockProcessor) {
 		//c.On("GetWAFMode", mock.Anything, appsec.GetWAFModeRequest{ConfigID: 79947, Version: 1, PolicyID: "ASE1_156138"}).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)
 		c.On("GetWAFMode", mock.Anything, mock.Anything).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)
 		//c.On("GetConfiguration", mock.Anything, appsec.GetConfigurationRequest{ConfigID: 79947}).Return(&appsec.GetConfigurationResponse{Description: "A security config for demo"}, nil)
@@ -350,7 +341,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 
 				// Create mock client
 				ma := new(appsec.Mock)
-				mp := new(mockProcessor)
+				mp := new(templates.MockProcessor)
 				mocks(ma, mp)
 				client = ma
 
