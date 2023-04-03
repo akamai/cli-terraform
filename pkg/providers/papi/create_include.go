@@ -64,6 +64,8 @@ func CmdCreateInclude(c *cli.Context) error {
 			"TerraformName": TerraformName,
 			"AsInt":         AsInt,
 			"Escape":        Escape,
+			"ReportError":   ReportError,
+			"CheckErrors":   CheckErrors,
 		},
 	}
 
