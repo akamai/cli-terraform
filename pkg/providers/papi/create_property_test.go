@@ -946,6 +946,136 @@ func TestCreateProperty(t *testing.T) {
 			dir:       "basic",
 			schema:    true,
 		},
+		"basic property with rules as datasource with unsupported behaviors and criteria": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
+					Return(&searchPropertiesResponse, nil).Once()
+
+				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
+					Return(&getPropertyResponse, nil).Once()
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
+					Return(&ruleResponse, nil).Once()
+
+				c.On("GetGroups", mock.Anything).
+					Return(&getGroupsResponse, nil).Once()
+
+				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
+					PropertyID: "prp_12345",
+					ContractID: "test_contract",
+					GroupID:    "grp_12345",
+				}).Return(&getPropertyVersionsResponse, nil).Once()
+
+				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
+					PropertyID:  "prp_12345",
+					ActivatedOn: "",
+					ContractID:  "test_contract",
+					GroupID:     "grp_12345",
+				}).Return(&getLatestVersionResponse, nil).Once()
+
+				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
+					ContractID: "test_contract",
+				}).Return(&getProductsResponse, nil).Once()
+
+				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
+					PropertyID:      "prp_12345",
+					PropertyVersion: 5,
+					ContractID:      "test_contract",
+					GroupID:         "grp_12345",
+				}).Return(&getPropertyVersionHostnamesResponse, nil).Once()
+
+				h.On("GetEdgeHostname", mock.Anything, 2867480).
+					Return(&hapi.GetEdgeHostnameResponse{
+						EdgeHostnameID:    2867480,
+						RecordName:        "test",
+						DNSZone:           "edgesuite.net",
+						SecurityType:      "STANDARD-TLS",
+						UseDefaultTTL:     false,
+						UseDefaultMap:     false,
+						IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
+						ProductID:         "",
+						TTL:               21600,
+						Map:               "a;test.akamai.net",
+						SerialNumber:      1461,
+					}, nil).Once()
+
+				c.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
+					ContractID: "test_contract",
+					GroupID:    "grp_12345",
+				}).Return(&papi.GetEdgeHostnamesResponse{
+					EdgeHostnames: papi.EdgeHostnameItems{
+						Items: []papi.EdgeHostnameGetItem{
+							{
+								ID:                "ehn_2867480",
+								Domain:            "test.edgesuite.net",
+								ProductID:         "",
+								DomainPrefix:      "test",
+								DomainSuffix:      "edgesuite.net",
+								Status:            "CREATED",
+								Secure:            false,
+								IPVersionBehavior: "IPV6_COMPLIANCE",
+								UseCases:          []papi.UseCase(nil),
+							},
+						},
+					},
+				}, nil).Once()
+
+				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
+					PropertyID: "prp_12345",
+					ContractID: "test_contract",
+					GroupID:    "grp_12345",
+				}).Return(&getActivationsResponse, nil).Once()
+
+				p.On("AddTemplateTarget", "rules_v2023-01-05.tmpl", "rules.tf")
+
+				p.On("TemplateExists", "rules_v2023-01-05.tmpl").Return(true).Once()
+
+				p.On("ProcessTemplates", TFData{
+					Property: TFPropertyData{
+						GroupName:            "test_group",
+						GroupID:              "grp_12345",
+						ContractID:           "test_contract",
+						PropertyResourceName: "test-edgesuite-net",
+						PropertyName:         "test.edgesuite.net",
+						PropertyID:           "prp_12345",
+						ProductID:            "prd_HTTP_Content_Del",
+						ProductName:          "HTTP_Content_Del",
+						RuleFormat:           "v2023-01-05",
+						IsSecure:             "false",
+						EdgeHostnames: map[string]EdgeHostname{
+							"test-edgesuite-net": {
+								EdgeHostname:             "test.edgesuite.net",
+								EdgeHostnameID:           "ehn_2867480",
+								ProductName:              "HTTP_Content_Del",
+								ContractID:               "test_contract",
+								GroupID:                  "grp_12345",
+								ID:                       "",
+								IPv6:                     "IPV6_COMPLIANCE",
+								SecurityType:             "STANDARD-TLS",
+								EdgeHostnameResourceName: "test-edgesuite-net",
+							},
+						},
+						Hostnames: map[string]Hostname{
+							"test.edgesuite.net": {
+								Hostname:                 "test.edgesuite.net",
+								EdgeHostnameResourceName: "test-edgesuite-net",
+								CertProvisioningType:     "CPS_MANAGED",
+							},
+						},
+						Emails:               []string{"jsmith@akamai.com"},
+						Version:              "LATEST",
+						HasStagingActivation: true,
+					},
+					Section:       "test_section",
+					Rules:         flattenRules("test.edgesuite.net", ruleResponse.Rules),
+					RulesAsSchema: true,
+				}).Return(ErrSavingFiles).Once()
+			},
+			withError: ErrSavingFiles,
+			dir:       "basic-rules-datasource-unknown",
+			schema:    true,
+		},
 		"basic property with include": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
 				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
@@ -2303,6 +2433,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		withIncludes bool
 		schema       bool
 		ruleResponse papi.GetRuleTreeResponse
+		withError    string
 	}{
 		"property": {
 			givenData: TFData{
@@ -2388,6 +2519,50 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "basic-rules-datasource",
 			schema:       true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+		},
+		"property with rules as datasource with unknown behaviors and criteria": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "v2023-01-05",
+					IsSecure:             "false",
+					Version:              "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ProductName:              "HTTP_Content_Del",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							Hostname:                 "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+						},
+					},
+					Emails:               []string{"jsmith@akamai.com"},
+					HasStagingActivation: true,
+				},
+				Section: "test_section",
+			},
+			dir:          "basic-rules-datasource-unknown",
+			schema:       true,
+			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+			withError:    "there were errors reported: Unknown criterion 'matchAdvanced-unsupported', Unknown behavior 'caching-unknown', Unknown behavior 'allowPost-unknown'",
 		},
 		"property with include": {
 			givenData: TFData{
@@ -2673,12 +2848,21 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				TemplatesFS:     templateFiles,
 				TemplateTargets: templateToFile,
 				AdditionalFuncs: template.FuncMap{
-					"ToLower": strings.ToLower,
-					"AsInt":   AsInt,
-					"Escape":  Escape,
+					"ToLower":     strings.ToLower,
+					"AsInt":       AsInt,
+					"Escape":      Escape,
+					"ReportError": ReportError,
+					"CheckErrors": CheckErrors,
 				},
 			}
-			require.NoError(t, processor.ProcessTemplates(test.givenData))
+			err := processor.ProcessTemplates(test.givenData)
+			reportedErrors = []string{}
+			if test.withError != "" {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), test.withError)
+				return
+			}
+			require.NoError(t, err)
 
 			for _, f := range test.filesToCheck {
 				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))

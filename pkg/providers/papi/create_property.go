@@ -232,9 +232,11 @@ func CmdCreateProperty(c *cli.Context) error {
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
 		AdditionalFuncs: template.FuncMap{
-			"ToLower": strings.ToLower,
-			"AsInt":   AsInt,
-			"Escape":  Escape,
+			"ToLower":     strings.ToLower,
+			"AsInt":       AsInt,
+			"Escape":      Escape,
+			"ReportError": ReportError,
+			"CheckErrors": CheckErrors,
 		},
 	}
 
@@ -395,9 +397,11 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	term.Spinner().Start("Saving TF configurations ")
 	if err = templateProcessor.ProcessTemplates(tfData); err != nil {
 		term.Spinner().Fail()
+		if len(reportedErrors) > 0 {
+			return fmt.Errorf("%w: %v", ErrSavingFiles, err)
+		}
 		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
 	}
-
 	if !schema {
 		// Save snippets
 		ruleTemplate, rulesTemplate := setPropertyRuleTemplates(rules)
@@ -890,4 +894,23 @@ func AsInt(f any) int64 {
 func Escape(str string) string {
 	str = strings.ReplaceAll(str, `\`, `\\`)
 	return strings.ReplaceAll(str, `"`, `\"`)
+}
+
+// as go templates do not support well pointers in receivers and function arguments, global variable seems to be the only
+// solution to accumulate all issues
+var reportedErrors []string
+
+// ReportError is used to report unknown behaviors or criteria during processing the template
+func ReportError(format string, a ...any) string {
+	message := fmt.Sprintf(format, a...)
+	reportedErrors = append(reportedErrors, message)
+	return message
+}
+
+// CheckErrors is used to fail the processing of the template in case of any unknown behaviors or criteria
+func CheckErrors() (string, error) {
+	if len(reportedErrors) > 0 {
+		return "", fmt.Errorf("there were errors reported: %v", strings.Join(reportedErrors, ", "))
+	}
+	return "", nil
 }
