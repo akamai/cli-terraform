@@ -582,9 +582,11 @@ func TestCreateProperty(t *testing.T) {
 						},
 						Hostnames: map[string]Hostname{
 							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
+								CnameFrom:                "test.edgesuite.net",
+								CnameTo:                  "test.edgesuite.net",
 								EdgeHostnameResourceName: "test-edgesuite-net",
 								CertProvisioningType:     "CPS_MANAGED",
+								IsActive:                 true,
 							},
 						},
 						Emails:               []string{"jsmith@akamai.com"},
@@ -667,9 +669,11 @@ func TestCreateProperty(t *testing.T) {
 						EdgeHostnames:        map[string]EdgeHostname{},
 						Hostnames: map[string]Hostname{
 							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
+								CnameFrom:                "test.edgesuite.net",
+								CnameTo:                  "test.edgesuite.net",
 								EdgeHostnameResourceName: "test-edgesuite-net",
 								CertProvisioningType:     "CPS_MANAGED",
+								IsActive:                 false,
 							},
 						},
 						Emails:               []string{"jsmith@akamai.com"},
@@ -800,9 +804,11 @@ func TestCreateProperty(t *testing.T) {
 						},
 						Hostnames: map[string]Hostname{
 							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
+								CnameFrom:                "test.edgesuite.net",
+								CnameTo:                  "test.edgesuite.net",
 								EdgeHostnameResourceName: "test-edgesuite-net",
 								CertProvisioningType:     "CPS_MANAGED",
+								IsActive:                 true,
 							},
 						},
 						Emails:               []string{"jsmith@akamai.com"},
@@ -929,9 +935,11 @@ func TestCreateProperty(t *testing.T) {
 						},
 						Hostnames: map[string]Hostname{
 							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
+								CnameFrom:                "test.edgesuite.net",
+								CnameTo:                  "test.edgesuite.net",
 								EdgeHostnameResourceName: "test-edgesuite-net",
 								CertProvisioningType:     "CPS_MANAGED",
+								IsActive:                 false,
 							},
 						},
 						Emails:  []string{"jsmith@akamai.com"},
@@ -1058,9 +1066,11 @@ func TestCreateProperty(t *testing.T) {
 						},
 						Hostnames: map[string]Hostname{
 							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
+								CnameFrom:                "test.edgesuite.net",
+								CnameTo:                  "test.edgesuite.net",
 								EdgeHostnameResourceName: "test-edgesuite-net",
 								CertProvisioningType:     "CPS_MANAGED",
+								IsActive:                 true,
 							},
 						},
 						Emails:               []string{"jsmith@akamai.com"},
@@ -1216,9 +1226,11 @@ func TestCreateProperty(t *testing.T) {
 						},
 						Hostnames: map[string]Hostname{
 							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
+								CnameFrom:                "test.edgesuite.net",
+								CnameTo:                  "test.edgesuite.net",
 								EdgeHostnameResourceName: "test-edgesuite-net",
 								CertProvisioningType:     "CPS_MANAGED",
+								IsActive:                 true,
 							},
 						},
 						Emails:               []string{"jsmith@akamai.com"},
@@ -1406,9 +1418,11 @@ func TestCreateProperty(t *testing.T) {
 						},
 						Hostnames: map[string]Hostname{
 							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
+								CnameFrom:                "test.edgesuite.net",
+								CnameTo:                  "test.edgesuite.net",
 								EdgeHostnameResourceName: "test-edgesuite-net",
 								CertProvisioningType:     "CPS_MANAGED",
+								IsActive:                 true,
 							},
 						},
 						Emails:               []string{"jsmith@akamai.com"},
@@ -1538,9 +1552,11 @@ func TestCreateProperty(t *testing.T) {
 						},
 						Hostnames: map[string]Hostname{
 							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
+								CnameFrom:                "test.edgesuite.net",
+								CnameTo:                  "test.edgesuite.net",
 								EdgeHostnameResourceName: "test-edgesuite-net",
 								CertProvisioningType:     "DEFAULT",
+								IsActive:                 true,
 							},
 						},
 						Emails:               []string{"jsmith@akamai.com"},
@@ -1667,9 +1683,11 @@ func TestCreateProperty(t *testing.T) {
 						},
 						Hostnames: map[string]Hostname{
 							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
+								CnameFrom:                "test.edgesuite.net",
+								CnameTo:                  "test.edgesuite.net",
 								EdgeHostnameResourceName: "test-edgesuite-net",
 								CertProvisioningType:     "CPS_MANAGED",
+								IsActive:                 true,
 							},
 						},
 						Emails:               []string{"jsmith@akamai.com"},
@@ -1789,9 +1807,11 @@ func TestCreateProperty(t *testing.T) {
 						},
 						Hostnames: map[string]Hostname{
 							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
+								CnameFrom:                "test.edgesuite.net",
+								CnameTo:                  "test.edgesuite.net",
 								EdgeHostnameResourceName: "test-edgesuite-net",
 								CertProvisioningType:     "CPS_MANAGED",
+								IsActive:                 true,
 							},
 						},
 						Emails:               []string{"jsmith@akamai.com"},
@@ -1919,9 +1939,11 @@ func TestCreateProperty(t *testing.T) {
 						},
 						Hostnames: map[string]Hostname{
 							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
+								CnameFrom:                "test.edgesuite.net",
+								CnameTo:                  "test.edgesuite.net",
 								EdgeHostnameResourceName: "test-edgesuite-net",
 								CertProvisioningType:     "CPS_MANAGED",
+								IsActive:                 true,
 							},
 						},
 						Emails:               []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
@@ -2043,9 +2065,11 @@ func TestCreateProperty(t *testing.T) {
 						},
 						Hostnames: map[string]Hostname{
 							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
+								CnameFrom:                "test.edgesuite.net",
+								CnameTo:                  "test.edgesuite.net",
 								EdgeHostnameResourceName: "test-edgesuite-net",
 								CertProvisioningType:     "CPS_MANAGED",
+								IsActive:                 true,
 							},
 						},
 						Emails:               []string{""},
@@ -2362,9 +2386,11 @@ func TestCreateProperty(t *testing.T) {
 						},
 						Hostnames: map[string]Hostname{
 							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
+								CnameFrom:                "test.edgesuite.net",
+								CnameTo:                  "test.edgesuite.net",
 								EdgeHostnameResourceName: "test-edgesuite-net",
 								CertProvisioningType:     "CPS_MANAGED",
+								IsActive:                 true,
 							},
 						},
 						Emails:               []string{"jsmith@akamai.com"},
@@ -2464,9 +2490,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 					Emails:               []string{"jsmith@akamai.com"},
@@ -2506,9 +2533,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 					Emails:               []string{"jsmith@akamai.com"},
@@ -2549,7 +2577,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameTo:                  "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
 						},
@@ -2610,9 +2638,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 					Emails:               []string{"jsmith@akamai.com"},
@@ -2682,9 +2711,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 					Emails:               []string{"jsmith@akamai.com"},
@@ -2726,9 +2756,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 					Emails:               []string{"jsmith@akamai.com"},
@@ -2768,9 +2799,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 					Emails:               []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
@@ -2811,9 +2843,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 				},

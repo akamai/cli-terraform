@@ -57,9 +57,11 @@ type EdgeHostname struct {
 
 // Hostname represents edge hostname resource
 type Hostname struct {
-	Hostname                 string
+	CnameFrom                string
+	CnameTo                  string
 	EdgeHostnameResourceName string
 	CertProvisioningType     string
+	IsActive                 bool
 }
 
 // WrappedRules is a wrapper around Rule which simplifies flattening rule tree into list and adjust names of the datasources
@@ -362,7 +364,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 
 	// Get Hostnames
 	term.Spinner().Start("Fetching hostnames ")
-	hostnames, err := getHostnames(ctx, client, property, version)
+	hostnames, err := getPropertyVersionHostnames(ctx, client, property, version)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrHostnamesNotFound, err)
@@ -457,7 +459,7 @@ func flattenWrappedRules(rule *WrappedRules) []*WrappedRules {
 	return result
 }
 
-func getHostnames(ctx context.Context, client papi.PAPI, property *papi.Property, version *papi.GetPropertyVersionsResponse) (*papi.HostnameResponseItems, error) {
+func getPropertyVersionHostnames(ctx context.Context, client papi.PAPI, property *papi.Property, version *papi.GetPropertyVersionsResponse) (*papi.HostnameResponseItems, error) {
 	if version == nil {
 		var err error
 		version, err = client.GetLatestVersion(ctx, papi.GetLatestVersionRequest{
@@ -539,9 +541,11 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			certProvisioningType = hostname.CertProvisioningType
 		}
 		hostnamesMap[cnameFrom] = Hostname{
-			Hostname:                 cnameFrom,
+			CnameFrom:                cnameFrom,
+			CnameTo:                  cnameTo,
 			EdgeHostnameResourceName: cnameToResource,
 			CertProvisioningType:     certProvisioningType,
+			IsActive:                 len(hostname.EdgeHostnameID) > 0,
 		}
 	}
 

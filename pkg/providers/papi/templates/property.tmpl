@@ -49,8 +49,12 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
   rule_format = "{{.Property.RuleFormat}}"
 {{- range .Property.Hostnames}}
   hostnames {
-    cname_from = "{{.Hostname}}"
-    cname_to = akamai_edge_hostname.{{.EdgeHostnameResourceName}}.edge_hostname
+    cname_from = "{{.CnameFrom}}"
+    {{- if .IsActive}}
+      cname_to = akamai_edge_hostname.{{.EdgeHostnameResourceName}}.edge_hostname
+    {{- else}}
+      cname_to = "{{.CnameTo}}"
+    {{- end}}
     cert_provisioning_type = "{{.CertProvisioningType}}"
   }
 {{- end}}
