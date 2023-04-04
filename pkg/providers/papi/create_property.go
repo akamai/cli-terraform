@@ -397,8 +397,8 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	term.Spinner().Start("Saving TF configurations ")
 	if err = templateProcessor.ProcessTemplates(tfData); err != nil {
 		term.Spinner().Fail()
-		if len(reportedErrors) > 0 {
-			return fmt.Errorf("%w: %v", ErrSavingFiles, err)
+		if _, err := CheckErrors(); err != nil {
+			return fmt.Errorf("%w", err)
 		}
 		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
 	}
