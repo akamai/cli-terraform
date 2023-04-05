@@ -1,5 +1,12 @@
 # Release Notes
 
+## Version 1.X.X (XX XX, 20XX)
+
+### Fixes
+
+* GTM
+  * Remove deprecated field `name` of `traffic_target` during export  ([I#374](https://github.com/akamai/terraform-provider-akamai/issues/374))
+
 ## Version 1.4.0 (Mar 30, 2023)
 
 ### Features/Enhancements
