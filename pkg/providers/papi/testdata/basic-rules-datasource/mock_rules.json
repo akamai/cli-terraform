@@ -358,7 +358,8 @@
         ],
         "name": "Static Content",
         "options": {},
-        "criteriaMustSatisfy": "all"
+        "criteriaMustSatisfy": "all",
+        "comments": "comment\nnewline in the middle only"
       },
       {
         "behaviors": [
@@ -380,7 +381,8 @@
         ],
         "name": "Dynamic Content",
         "options": {},
-        "criteriaMustSatisfy": "all"
+        "criteriaMustSatisfy": "all",
+        "comments": "comment\nnewline\nand\nEOT\ninside\n"
       },
       {
         "name": "new rule",

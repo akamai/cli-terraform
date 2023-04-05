@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
-	"strings"
-	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/papi"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
@@ -59,14 +57,7 @@ func CmdCreateInclude(c *cli.Context) error {
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
-		AdditionalFuncs: template.FuncMap{
-			"ToLower":       strings.ToLower,
-			"TerraformName": TerraformName,
-			"AsInt":         AsInt,
-			"Escape":        Escape,
-			"ReportError":   ReportError,
-			"CheckErrors":   CheckErrors,
-		},
+		AdditionalFuncs: additionalFuncs,
 	}
 
 	contractID := c.Args().First()

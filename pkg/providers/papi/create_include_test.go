@@ -6,9 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 	"testing"
-	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/papi"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/tools"
@@ -481,11 +479,7 @@ func TestProcessIncludeTemplates(t *testing.T) {
 					"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
 					"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
 				},
-				AdditionalFuncs: template.FuncMap{
-					"ToLower": strings.ToLower,
-					"AsInt":   AsInt,
-					"Escape":  Escape,
-				},
+				AdditionalFuncs: additionalFuncs,
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 

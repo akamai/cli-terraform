@@ -1,4 +1,14 @@
 {{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/papi.TFData*/ -}}
+{{- define "Text"}}
+	{{- if . | IsMultiline}}<<{{. | GetEOT}}
+{{. | RemoveLastNewline}}
+		{{- if . | NoNewlineAtTheEnd}}
+%{~if false}trim redundant new line%{endif~}
+		{{- end}}
+{{. | GetEOT}}
+		{{- else}}"{{. | Escape}}"
+        {{- end}}
+{{- end}}
 
 
 {{- define "Criteria"}}
@@ -290,22 +300,22 @@ ad_scaler_circuit_breaker {
 		response_delay_based = {{$v}}
 {{- end}}
 {{- if and (eq $k "responseDelayThreshold") (ne $v nil)}}
-		response_delay_threshold = "{{$v | Escape}}"
+        response_delay_threshold = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "responseCodeBased") (ne $v nil)}}
 		response_code_based = {{$v}}
 {{- end}}
 {{- if and (eq $k "responseCodes") (ne $v nil)}}
-		response_codes = "{{$v | Escape}}"
+        response_codes = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "fallbackActionResponseCodeBased") (ne $v nil)}}
-		fallback_action_response_code_based = "{{$v | Escape}}"
+        fallback_action_response_code_based = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "returnErrorResponseCodeBased") (ne $v nil)}}
-		return_error_response_code_based = "{{$v | Escape}}"
+        return_error_response_code_based = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "specifyYourOwnResponseCodeBased") (ne $v nil)}}
-		specify_your_own_response_code_based = "{{$v | Escape}}"
+        specify_your_own_response_code_based = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -324,46 +334,46 @@ adaptive_acceleration {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "source") (ne $v nil)}}
-		source = "{{$v | Escape}}"
+        source = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "titleHttp2ServerPush") (ne $v nil)}}
-		title_http2_server_push = "{{$v | Escape}}"
+        title_http2_server_push = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enablePush") (ne $v nil)}}
 		enable_push = {{$v}}
 {{- end}}
 {{- if and (eq $k "titlePreconnect") (ne $v nil)}}
-		title_preconnect = "{{$v | Escape}}"
+        title_preconnect = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enablePreconnect") (ne $v nil)}}
 		enable_preconnect = {{$v}}
 {{- end}}
 {{- if and (eq $k "titlePreload") (ne $v nil)}}
-		title_preload = "{{$v | Escape}}"
+        title_preload = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "preloadEnable") (ne $v nil)}}
 		preload_enable = {{$v}}
 {{- end}}
 {{- if and (eq $k "abTesting") (ne $v nil)}}
-		ab_testing = "{{$v | Escape}}"
+        ab_testing = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "abLogic") (ne $v nil)}}
-		ab_logic = "{{$v | Escape}}"
+        ab_logic = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "cookieName") (ne $v nil)}}
-		cookie_name = "{{$v | Escape}}"
+        cookie_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "compression") (ne $v nil)}}
-		compression = "{{$v | Escape}}"
+        compression = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "titleRo") (ne $v nil)}}
-		title_ro = "{{$v | Escape}}"
+        title_ro = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enableRo") (ne $v nil)}}
 		enable_ro = {{$v}}
 {{- end}}
 {{- if and (eq $k "titleBrotli") (ne $v nil)}}
-		title_brotli = "{{$v | Escape}}"
+        title_brotli = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enableBrotliCompression") (ne $v nil)}}
 		enable_brotli_compression = {{$v}}
@@ -388,49 +398,49 @@ adaptive_image_compression {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "title_aic_mobile") (ne $v nil)}}
-		title_aic_mobile = "{{$v | Escape}}"
+        title_aic_mobile = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "compressMobile") (ne $v nil)}}
 		compress_mobile = {{$v}}
 {{- end}}
 {{- if and (eq $k "tier1MobileCompressionMethod") (ne $v nil)}}
-		tier1_mobile_compression_method = "{{$v | Escape}}"
+        tier1_mobile_compression_method = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "tier1MobileCompressionValue") (ne $v nil)}}
 		tier1_mobile_compression_value = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "tier2MobileCompressionMethod") (ne $v nil)}}
-		tier2_mobile_compression_method = "{{$v | Escape}}"
+        tier2_mobile_compression_method = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "tier2MobileCompressionValue") (ne $v nil)}}
 		tier2_mobile_compression_value = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "tier3MobileCompressionMethod") (ne $v nil)}}
-		tier3_mobile_compression_method = "{{$v | Escape}}"
+        tier3_mobile_compression_method = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "tier3MobileCompressionValue") (ne $v nil)}}
 		tier3_mobile_compression_value = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "title_aic_nonmobile") (ne $v nil)}}
-		title_aic_nonmobile = "{{$v | Escape}}"
+        title_aic_nonmobile = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "compressStandard") (ne $v nil)}}
 		compress_standard = {{$v}}
 {{- end}}
 {{- if and (eq $k "tier1StandardCompressionMethod") (ne $v nil)}}
-		tier1_standard_compression_method = "{{$v | Escape}}"
+        tier1_standard_compression_method = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "tier1StandardCompressionValue") (ne $v nil)}}
 		tier1_standard_compression_value = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "tier2StandardCompressionMethod") (ne $v nil)}}
-		tier2_standard_compression_method = "{{$v | Escape}}"
+        tier2_standard_compression_method = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "tier2StandardCompressionValue") (ne $v nil)}}
 		tier2_standard_compression_value = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "tier3StandardCompressionMethod") (ne $v nil)}}
-		tier3_standard_compression_method = "{{$v | Escape}}"
+        tier3_standard_compression_method = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "tier3StandardCompressionValue") (ne $v nil)}}
 		tier3_standard_compression_value = {{$v | AsInt}}
@@ -452,13 +462,10 @@ advanced {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "xml") (ne $v nil)}}
-		xml = <<EOT
-{{$v}}
-%{~if false}trim redundant new line%{endif~}
-EOT
+        xml = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -480,22 +487,22 @@ aggregated_reporting {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "reportName") (ne $v nil)}}
-		report_name = "{{$v | Escape}}"
+        report_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "attributesCount") (ne $v nil)}}
 		attributes_count = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "attribute1") (ne $v nil)}}
-		attribute1 = "{{$v | Escape}}"
+        attribute1 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "attribute2") (ne $v nil)}}
-		attribute2 = "{{$v | Escape}}"
+        attribute2 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "attribute3") (ne $v nil)}}
-		attribute3 = "{{$v | Escape}}"
+        attribute3 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "attribute4") (ne $v nil)}}
-		attribute4 = "{{$v | Escape}}"
+        attribute4 = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -533,16 +540,16 @@ akamaizer_tag {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchHostname") (ne $v nil)}}
-		match_hostname = "{{$v | Escape}}"
+        match_hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "replacementHostname") (ne $v nil)}}
-		replacement_hostname = "{{$v | Escape}}"
+        replacement_hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "scope") (ne $v nil)}}
-		scope = "{{$v | Escape}}"
+        scope = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "tagsAttribute") (ne $v nil)}}
-		tags_attribute = "{{$v | Escape}}"
+        tags_attribute = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "replaceAll") (ne $v nil)}}
 		replace_all = {{$v}}
@@ -592,7 +599,7 @@ allow_cloudlets_origins {
 		honor_base_directory = {{$v}}
 {{- end}}
 {{- if and (eq $k "purgeOriginQueryParameter") (ne $v nil)}}
-		purge_origin_query_parameter = "{{$v | Escape}}"
+        purge_origin_query_parameter = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -798,14 +805,14 @@ api_prioritization {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "label") (ne $v nil)}}
-		label = "{{$v | Escape}}"
+        label = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "useThrottledCpCode") (ne $v nil)}}
 		use_throttled_cp_code = {{$v}}
@@ -818,13 +825,13 @@ api_prioritization {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "createdDate") (ne $v nil)}}
 		created_date = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "products"}}
 		products = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -840,7 +847,7 @@ api_prioritization {
 		limit = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "limitType") (ne $v nil)}}
-		limit_type = "{{$v | Escape}}"
+        limit_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -864,17 +871,17 @@ api_prioritization {
 		cp_code = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
-		download_domain_name = "{{$v | Escape}}"
+        download_domain_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "g2oToken") (ne $v nil)}}
-		g2o_token = "{{$v | Escape}}"
+        g2o_token = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "netStoragePath") (ne $v nil)}}
-		net_storage_path = "{{$v | Escape}}"
+        net_storage_path = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "alternateResponseCacheTtl") (ne $v nil)}}
 		alternate_response_cache_ttl = {{$v | AsInt}}
@@ -906,50 +913,50 @@ application_load_balancer {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "label") (ne $v nil)}}
-		label = "{{$v | Escape}}"
+        label = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "stickinessTitle") (ne $v nil)}}
-		stickiness_title = "{{$v | Escape}}"
+        stickiness_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "stickinessCookieType") (ne $v nil)}}
-		stickiness_cookie_type = "{{$v | Escape}}"
+        stickiness_cookie_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "stickinessExpirationDate") (ne $v nil)}}
-		stickiness_expiration_date = "{{$v | Escape}}"
+        stickiness_expiration_date = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "stickinessDuration") (ne $v nil)}}
-		stickiness_duration = "{{$v | Escape}}"
+        stickiness_duration = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "stickinessRefresh") (ne $v nil)}}
 		stickiness_refresh = {{$v}}
 {{- end}}
 {{- if and (eq $k "originCookieName") (ne $v nil)}}
-		origin_cookie_name = "{{$v | Escape}}"
+        origin_cookie_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "specifyStickinessCookieDomain") (ne $v nil)}}
 		specify_stickiness_cookie_domain = {{$v}}
 {{- end}}
 {{- if and (eq $k "stickinessCookieDomain") (ne $v nil)}}
-		stickiness_cookie_domain = "{{$v | Escape}}"
+        stickiness_cookie_domain = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "stickinessCookieAutomaticSalt") (ne $v nil)}}
 		stickiness_cookie_automatic_salt = {{$v}}
 {{- end}}
 {{- if and (eq $k "stickinessCookieSalt") (ne $v nil)}}
-		stickiness_cookie_salt = "{{$v | Escape}}"
+        stickiness_cookie_salt = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "stickinessCookieSetHttpOnlyFlag") (ne $v nil)}}
 		stickiness_cookie_set_http_only_flag = {{$v}}
 {{- end}}
 {{- if and (eq $k "allDownTitle") (ne $v nil)}}
-		all_down_title = "{{$v | Escape}}"
+        all_down_title = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "allDownNetStorage" }}
 		{{- if $v}}
@@ -959,36 +966,36 @@ application_load_balancer {
 		cp_code = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
-		download_domain_name = "{{$v | Escape}}"
+        download_domain_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "g2oToken") (ne $v nil)}}
-		g2o_token = "{{$v | Escape}}"
+        g2o_token = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "allDownNetStorageFile") (ne $v nil)}}
-		all_down_net_storage_file = "{{$v | Escape}}"
+        all_down_net_storage_file = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "allDownStatusCode") (ne $v nil)}}
-		all_down_status_code = "{{$v | Escape}}"
+        all_down_status_code = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "failoverTitle") (ne $v nil)}}
-		failover_title = "{{$v | Escape}}"
+        failover_title = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "failoverStatusCodes"}}
 		failover_status_codes = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "failoverMode") (ne $v nil)}}
-		failover_mode = "{{$v | Escape}}"
+        failover_mode = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "failoverOriginMap" }}
 		{{- range $v := $v}}
 		failover_origin_map {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "fromOriginId") (ne $v nil)}}
-		from_origin_id = "{{$v | Escape}}"
+        from_origin_id = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "toOriginIds"}}
 		to_origin_ids = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -1001,7 +1008,7 @@ application_load_balancer {
 		failover_attempts_threshold = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "cachedContentTitle") (ne $v nil)}}
-		cached_content_title = "{{$v | Escape}}"
+        cached_content_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "allowCachePrefresh") (ne $v nil)}}
 		allow_cache_prefresh = {{$v}}
@@ -1036,7 +1043,7 @@ audience_segmentation {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -1046,31 +1053,31 @@ audience_segmentation {
 		cloudlet_shared_policy = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "label") (ne $v nil)}}
-		label = "{{$v | Escape}}"
+        label = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentTrackingTitle") (ne $v nil)}}
-		segment_tracking_title = "{{$v | Escape}}"
+        segment_tracking_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentTrackingMethod") (ne $v nil)}}
-		segment_tracking_method = "{{$v | Escape}}"
+        segment_tracking_method = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentTrackingQueryParam") (ne $v nil)}}
-		segment_tracking_query_param = "{{$v | Escape}}"
+        segment_tracking_query_param = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentTrackingCookieName") (ne $v nil)}}
-		segment_tracking_cookie_name = "{{$v | Escape}}"
+        segment_tracking_cookie_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentTrackingCustomHeader") (ne $v nil)}}
-		segment_tracking_custom_header = "{{$v | Escape}}"
+        segment_tracking_custom_header = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "populationTitle") (ne $v nil)}}
-		population_title = "{{$v | Escape}}"
+        population_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "populationCookieType") (ne $v nil)}}
-		population_cookie_type = "{{$v | Escape}}"
+        population_cookie_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "populationDuration") (ne $v nil)}}
-		population_duration = "{{$v | Escape}}"
+        population_duration = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "populationRefresh") (ne $v nil)}}
 		population_refresh = {{$v}}
@@ -1079,13 +1086,13 @@ audience_segmentation {
 		specify_population_cookie_domain = {{$v}}
 {{- end}}
 {{- if and (eq $k "populationCookieDomain") (ne $v nil)}}
-		population_cookie_domain = "{{$v | Escape}}"
+        population_cookie_domain = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "populationCookieAutomaticSalt") (ne $v nil)}}
 		population_cookie_automatic_salt = {{$v}}
 {{- end}}
 {{- if and (eq $k "populationCookieSalt") (ne $v nil)}}
-		population_cookie_salt = "{{$v | Escape}}"
+        population_cookie_salt = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "populationCookieIncludeRuleName") (ne $v nil)}}
 		population_cookie_include_rule_name = {{$v}}
@@ -1107,7 +1114,7 @@ auto_domain_validation {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "autodv") (ne $v nil)}}
-		autodv = "{{$v | Escape}}"
+        autodv = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1126,7 +1133,7 @@ base_directory {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1148,25 +1155,25 @@ boss_beaconing {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "cpcodes") (ne $v nil)}}
-		cpcodes = "{{$v | Escape}}"
+        cpcodes = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "requestType") (ne $v nil)}}
-		request_type = "{{$v | Escape}}"
+        request_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "forwardType") (ne $v nil)}}
-		forward_type = "{{$v | Escape}}"
+        forward_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "samplingFrequency") (ne $v nil)}}
-		sampling_frequency = "{{$v | Escape}}"
+        sampling_frequency = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "conditionalSamplingFrequency") (ne $v nil)}}
-		conditional_sampling_frequency = "{{$v | Escape}}"
+        conditional_sampling_frequency = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "conditionalHTTPStatus"}}
 		conditional_http_status = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "conditionalErrorPattern") (ne $v nil)}}
-		conditional_error_pattern = "{{$v | Escape}}"
+        conditional_error_pattern = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1251,7 +1258,7 @@ cache_error {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "ttl") (ne $v nil)}}
-		ttl = "{{$v | Escape}}"
+        ttl = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "preserveStale") (ne $v nil)}}
 		preserve_stale = {{$v}}
@@ -1273,7 +1280,7 @@ cache_id {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "rule") (ne $v nil)}}
-		rule = "{{$v | Escape}}"
+        rule = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "includeValue") (ne $v nil)}}
 		include_value = {{$v}}
@@ -1285,7 +1292,7 @@ cache_id {
 		elements = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "variableName") (ne $v nil)}}
-		variable_name = "{{$v | Escape}}"
+        variable_name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1323,7 +1330,7 @@ cache_key_query_params {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "behavior") (ne $v nil)}}
-		behavior = "{{$v | Escape}}"
+        behavior = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "parameters"}}
 		parameters = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -1348,7 +1355,7 @@ cache_key_rewrite {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "purgeKey") (ne $v nil)}}
-		purge_key = "{{$v | Escape}}"
+        purge_key = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1370,7 +1377,7 @@ cache_post {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "useBody") (ne $v nil)}}
-		use_body = "{{$v | Escape}}"
+        use_body = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1389,7 +1396,7 @@ cache_redirect {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = "{{$v | Escape}}"
+        enabled = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1408,7 +1415,7 @@ cache_tag {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "tag") (ne $v nil)}}
-		tag = "{{$v | Escape}}"
+        tag = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1427,7 +1434,7 @@ cache_tag_visible {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "behavior") (ne $v nil)}}
-		behavior = "{{$v | Escape}}"
+        behavior = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1446,25 +1453,25 @@ caching {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "behavior") (ne $v nil)}}
-		behavior = "{{$v | Escape}}"
+        behavior = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "mustRevalidate") (ne $v nil)}}
 		must_revalidate = {{$v}}
 {{- end}}
 {{- if and (eq $k "ttl") (ne $v nil)}}
-		ttl = "{{$v | Escape}}"
+        ttl = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "defaultTtl") (ne $v nil)}}
-		default_ttl = "{{$v | Escape}}"
+        default_ttl = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "cacheControlDirectives") (ne $v nil)}}
-		cache_control_directives = "{{$v | Escape}}"
+        cache_control_directives = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enhancedRfcSupport") (ne $v nil)}}
 		enhanced_rfc_support = {{$v}}
 {{- end}}
 {{- if and (eq $k "cacheabilitySettings") (ne $v nil)}}
-		cacheability_settings = "{{$v | Escape}}"
+        cacheability_settings = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "honorNoStore") (ne $v nil)}}
 		honor_no_store = {{$v}}
@@ -1476,7 +1483,7 @@ caching {
 		honor_no_cache = {{$v}}
 {{- end}}
 {{- if and (eq $k "expirationSettings") (ne $v nil)}}
-		expiration_settings = "{{$v | Escape}}"
+        expiration_settings = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "honorMaxAge") (ne $v nil)}}
 		honor_max_age = {{$v}}
@@ -1485,7 +1492,7 @@ caching {
 		honor_s_maxage = {{$v}}
 {{- end}}
 {{- if and (eq $k "revalidationSettings") (ne $v nil)}}
-		revalidation_settings = "{{$v | Escape}}"
+        revalidation_settings = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "honorMustRevalidate") (ne $v nil)}}
 		honor_must_revalidate = {{$v}}
@@ -1532,7 +1539,7 @@ chase_redirects {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "limit") (ne $v nil)}}
-		limit = "{{$v | Escape}}"
+        limit = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "serve404") (ne $v nil)}}
 		serve404 = {{$v}}
@@ -1554,7 +1561,7 @@ client_characteristics {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "country") (ne $v nil)}}
-		country = "{{$v | Escape}}"
+        country = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1598,7 +1605,7 @@ cloud_wrapper {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "location") (ne $v nil)}}
-		location = "{{$v | Escape}}"
+        location = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1620,10 +1627,10 @@ cloud_wrapper_advanced {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "failoverMap") (ne $v nil)}}
-		failover_map = "{{$v | Escape}}"
+        failover_map = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customFailoverMap") (ne $v nil)}}
-		custom_failover_map = "{{$v | Escape}}"
+        custom_failover_map = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1642,7 +1649,7 @@ conditional_origin {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "originId") (ne $v nil)}}
-		origin_id = "{{$v | Escape}}"
+        origin_id = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1664,10 +1671,7 @@ construct_response {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "body") (ne $v nil)}}
-		body = <<EOT
-{{$v}}
-%{~if false}trim redundant new line%{endif~}
-EOT
+        body = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "responseCode") (ne $v nil)}}
 		response_code = {{$v | AsInt}}
@@ -1695,16 +1699,16 @@ content_characteristics {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "objectSize") (ne $v nil)}}
-		object_size = "{{$v | Escape}}"
+        object_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "popularityDistribution") (ne $v nil)}}
-		popularity_distribution = "{{$v | Escape}}"
+        popularity_distribution = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "catalogSize") (ne $v nil)}}
-		catalog_size = "{{$v | Escape}}"
+        catalog_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "contentType") (ne $v nil)}}
-		content_type = "{{$v | Escape}}"
+        content_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1723,61 +1727,61 @@ content_characteristics_amd {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "catalogSize") (ne $v nil)}}
-		catalog_size = "{{$v | Escape}}"
+        catalog_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "contentType") (ne $v nil)}}
-		content_type = "{{$v | Escape}}"
+        content_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "popularityDistribution") (ne $v nil)}}
-		popularity_distribution = "{{$v | Escape}}"
+        popularity_distribution = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hls") (ne $v nil)}}
 		hls = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationHLS") (ne $v nil)}}
-		segment_duration_hls = "{{$v | Escape}}"
+        segment_duration_hls = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationHLSCustom") (ne $v nil)}}
 		segment_duration_hls_custom = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentSizeHLS") (ne $v nil)}}
-		segment_size_hls = "{{$v | Escape}}"
+        segment_size_hls = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hds") (ne $v nil)}}
 		hds = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationHDS") (ne $v nil)}}
-		segment_duration_hds = "{{$v | Escape}}"
+        segment_duration_hds = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationHDSCustom") (ne $v nil)}}
 		segment_duration_hds_custom = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "segmentSizeHDS") (ne $v nil)}}
-		segment_size_hds = "{{$v | Escape}}"
+        segment_size_hds = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "dash") (ne $v nil)}}
 		dash = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationDASH") (ne $v nil)}}
-		segment_duration_dash = "{{$v | Escape}}"
+        segment_duration_dash = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationDASHCustom") (ne $v nil)}}
 		segment_duration_dash_custom = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "segmentSizeDASH") (ne $v nil)}}
-		segment_size_dash = "{{$v | Escape}}"
+        segment_size_dash = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "smooth") (ne $v nil)}}
 		smooth = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationSmooth") (ne $v nil)}}
-		segment_duration_smooth = "{{$v | Escape}}"
+        segment_duration_smooth = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationSmoothCustom") (ne $v nil)}}
 		segment_duration_smooth_custom = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentSizeSmooth") (ne $v nil)}}
-		segment_size_smooth = "{{$v | Escape}}"
+        segment_size_smooth = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1796,16 +1800,16 @@ content_characteristics_dd {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "objectSize") (ne $v nil)}}
-		object_size = "{{$v | Escape}}"
+        object_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "popularityDistribution") (ne $v nil)}}
-		popularity_distribution = "{{$v | Escape}}"
+        popularity_distribution = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "catalogSize") (ne $v nil)}}
-		catalog_size = "{{$v | Escape}}"
+        catalog_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "contentType") (ne $v nil)}}
-		content_type = "{{$v | Escape}}"
+        content_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "optimizeOption") (ne $v nil)}}
 		optimize_option = {{$v}}
@@ -1827,16 +1831,16 @@ content_characteristics_wsd_large_file {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "objectSize") (ne $v nil)}}
-		object_size = "{{$v | Escape}}"
+        object_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "popularityDistribution") (ne $v nil)}}
-		popularity_distribution = "{{$v | Escape}}"
+        popularity_distribution = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "catalogSize") (ne $v nil)}}
-		catalog_size = "{{$v | Escape}}"
+        catalog_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "contentType") (ne $v nil)}}
-		content_type = "{{$v | Escape}}"
+        content_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1855,49 +1859,49 @@ content_characteristics_wsd_live {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "catalogSize") (ne $v nil)}}
-		catalog_size = "{{$v | Escape}}"
+        catalog_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "contentType") (ne $v nil)}}
-		content_type = "{{$v | Escape}}"
+        content_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "popularityDistribution") (ne $v nil)}}
-		popularity_distribution = "{{$v | Escape}}"
+        popularity_distribution = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hls") (ne $v nil)}}
 		hls = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationHLS") (ne $v nil)}}
-		segment_duration_hls = "{{$v | Escape}}"
+        segment_duration_hls = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentSizeHLS") (ne $v nil)}}
-		segment_size_hls = "{{$v | Escape}}"
+        segment_size_hls = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hds") (ne $v nil)}}
 		hds = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationHDS") (ne $v nil)}}
-		segment_duration_hds = "{{$v | Escape}}"
+        segment_duration_hds = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentSizeHDS") (ne $v nil)}}
-		segment_size_hds = "{{$v | Escape}}"
+        segment_size_hds = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "dash") (ne $v nil)}}
 		dash = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationDASH") (ne $v nil)}}
-		segment_duration_dash = "{{$v | Escape}}"
+        segment_duration_dash = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentSizeDASH") (ne $v nil)}}
-		segment_size_dash = "{{$v | Escape}}"
+        segment_size_dash = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "smooth") (ne $v nil)}}
 		smooth = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationSmooth") (ne $v nil)}}
-		segment_duration_smooth = "{{$v | Escape}}"
+        segment_duration_smooth = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentSizeSmooth") (ne $v nil)}}
-		segment_size_smooth = "{{$v | Escape}}"
+        segment_size_smooth = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1916,49 +1920,49 @@ content_characteristics_wsd_vod {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "catalogSize") (ne $v nil)}}
-		catalog_size = "{{$v | Escape}}"
+        catalog_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "contentType") (ne $v nil)}}
-		content_type = "{{$v | Escape}}"
+        content_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "popularityDistribution") (ne $v nil)}}
-		popularity_distribution = "{{$v | Escape}}"
+        popularity_distribution = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hls") (ne $v nil)}}
 		hls = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationHLS") (ne $v nil)}}
-		segment_duration_hls = "{{$v | Escape}}"
+        segment_duration_hls = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentSizeHLS") (ne $v nil)}}
-		segment_size_hls = "{{$v | Escape}}"
+        segment_size_hls = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hds") (ne $v nil)}}
 		hds = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationHDS") (ne $v nil)}}
-		segment_duration_hds = "{{$v | Escape}}"
+        segment_duration_hds = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentSizeHDS") (ne $v nil)}}
-		segment_size_hds = "{{$v | Escape}}"
+        segment_size_hds = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "dash") (ne $v nil)}}
 		dash = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationDASH") (ne $v nil)}}
-		segment_duration_dash = "{{$v | Escape}}"
+        segment_duration_dash = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentSizeDASH") (ne $v nil)}}
-		segment_size_dash = "{{$v | Escape}}"
+        segment_size_dash = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "smooth") (ne $v nil)}}
 		smooth = {{$v}}
 {{- end}}
 {{- if and (eq $k "segmentDurationSmooth") (ne $v nil)}}
-		segment_duration_smooth = "{{$v | Escape}}"
+        segment_duration_smooth = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentSizeSmooth") (ne $v nil)}}
-		segment_size_smooth = "{{$v | Escape}}"
+        segment_size_smooth = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -1980,16 +1984,16 @@ content_pre_position {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "sourceType") (ne $v nil)}}
-		source_type = "{{$v | Escape}}"
+        source_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "targets") (ne $v nil)}}
-		targets = "{{$v | Escape}}"
+        targets = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "firstLocation") (ne $v nil)}}
-		first_location = "{{$v | Escape}}"
+        first_location = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "secondLocation") (ne $v nil)}}
-		second_location = "{{$v | Escape}}"
+        second_location = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2011,13 +2015,13 @@ content_targeting_protection {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "geoProtectionTitle") (ne $v nil)}}
-		geo_protection_title = "{{$v | Escape}}"
+        geo_protection_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enableGeoProtection") (ne $v nil)}}
 		enable_geo_protection = {{$v}}
 {{- end}}
 {{- if and (eq $k "geoProtectionMode") (ne $v nil)}}
-		geo_protection_mode = "{{$v | Escape}}"
+        geo_protection_mode = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "countries"}}
 		countries = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -2035,16 +2039,16 @@ content_targeting_protection {
 		enable_geo_redirect_on_deny = {{$v}}
 {{- end}}
 {{- if and (eq $k "geoRedirectUrl") (ne $v nil)}}
-		geo_redirect_url = "{{$v | Escape}}"
+        geo_redirect_url = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "ipProtectionTitle") (ne $v nil)}}
-		ip_protection_title = "{{$v | Escape}}"
+        ip_protection_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enableIPProtection") (ne $v nil)}}
 		enable_ip_protection = {{$v}}
 {{- end}}
 {{- if and (eq $k "ipProtectionMode") (ne $v nil)}}
-		ip_protection_mode = "{{$v | Escape}}"
+        ip_protection_mode = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "ipAddresses"}}
 		ip_addresses = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -2053,16 +2057,16 @@ content_targeting_protection {
 		enable_ip_redirect_on_deny = {{$v}}
 {{- end}}
 {{- if and (eq $k "ipRedirectUrl") (ne $v nil)}}
-		ip_redirect_url = "{{$v | Escape}}"
+        ip_redirect_url = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "referrerProtectionTitle") (ne $v nil)}}
-		referrer_protection_title = "{{$v | Escape}}"
+        referrer_protection_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enableReferrerProtection") (ne $v nil)}}
 		enable_referrer_protection = {{$v}}
 {{- end}}
 {{- if and (eq $k "referrerProtectionMode") (ne $v nil)}}
-		referrer_protection_mode = "{{$v | Escape}}"
+        referrer_protection_mode = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "referrerDomains"}}
 		referrer_domains = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -2071,7 +2075,7 @@ content_targeting_protection {
 		enable_referrer_redirect_on_deny = {{$v}}
 {{- end}}
 {{- if and (eq $k "referrerRedirectUrl") (ne $v nil)}}
-		referrer_redirect_url = "{{$v | Escape}}"
+        referrer_redirect_url = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2093,7 +2097,7 @@ cors_support {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "allowOrigins") (ne $v nil)}}
-		allow_origins = "{{$v | Escape}}"
+        allow_origins = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "origins"}}
 		origins = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -2102,7 +2106,7 @@ cors_support {
 		allow_credentials = {{$v}}
 {{- end}}
 {{- if and (eq $k "allowHeaders") (ne $v nil)}}
-		allow_headers = "{{$v | Escape}}"
+        allow_headers = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "headers"}}
 		headers = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -2114,7 +2118,7 @@ cors_support {
 		expose_headers = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "preflightMaxAge") (ne $v nil)}}
-		preflight_max_age = "{{$v | Escape}}"
+        preflight_max_age = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2140,13 +2144,13 @@ cp_code {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "createdDate") (ne $v nil)}}
 		created_date = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "products"}}
 		products = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -2162,7 +2166,7 @@ cp_code {
 		limit = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "limitType") (ne $v nil)}}
-		limit_type = "{{$v | Escape}}"
+        limit_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -2189,7 +2193,7 @@ custom_behavior {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "behaviorId") (ne $v nil)}}
-		behavior_id = "{{$v | Escape}}"
+        behavior_id = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2208,19 +2212,19 @@ datastream {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "streamType") (ne $v nil)}}
-		stream_type = "{{$v | Escape}}"
+        stream_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "beaconStreamTitle") (ne $v nil)}}
-		beacon_stream_title = "{{$v | Escape}}"
+        beacon_stream_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "datastreamIds") (ne $v nil)}}
-		datastream_ids = "{{$v | Escape}}"
+        datastream_ids = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "logStreamTitle") (ne $v nil)}}
-		log_stream_title = "{{$v | Escape}}"
+        log_stream_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "logEnabled") (ne $v nil)}}
 		log_enabled = {{$v}}
@@ -2254,7 +2258,7 @@ dcp {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "namespaceId") (ne $v nil)}}
-		namespace_id = "{{$v | Escape}}"
+        namespace_id = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "tlsenabled") (ne $v nil)}}
 		tlsenabled = {{$v}}
@@ -2285,10 +2289,10 @@ dcp_auth_hmac_transformation {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "hashConversionAlgorithm") (ne $v nil)}}
-		hash_conversion_algorithm = "{{$v | Escape}}"
+        hash_conversion_algorithm = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hashConversionKey") (ne $v nil)}}
-		hash_conversion_key = "{{$v | Escape}}"
+        hash_conversion_key = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2307,7 +2311,7 @@ dcp_auth_regex_transformation {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "regexPattern") (ne $v nil)}}
-		regex_pattern = "{{$v | Escape}}"
+        regex_pattern = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2326,10 +2330,10 @@ dcp_auth_substring_transformation {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "substringStart") (ne $v nil)}}
-		substring_start = "{{$v | Escape}}"
+        substring_start = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "substringEnd") (ne $v nil)}}
-		substring_end = "{{$v | Escape}}"
+        substring_end = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2348,10 +2352,10 @@ dcp_auth_variable_extractor {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "certificateField") (ne $v nil)}}
-		certificate_field = "{{$v | Escape}}"
+        certificate_field = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "dcpMutualAuthProcessingVariableId") (ne $v nil)}}
-		dcp_mutual_auth_processing_variable_id = "{{$v | Escape}}"
+        dcp_mutual_auth_processing_variable_id = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2395,10 +2399,10 @@ dcp_dev_relations {
 		custom_values = {{$v}}
 {{- end}}
 {{- if and (eq $k "hostname") (ne $v nil)}}
-		hostname = "{{$v | Escape}}"
+        hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "path") (ne $v nil)}}
-		path = "{{$v | Escape}}"
+        path = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2420,19 +2424,19 @@ dcp_real_time_auth {
 		extract_namespace = {{$v}}
 {{- end}}
 {{- if and (eq $k "namespaceClaim") (ne $v nil)}}
-		namespace_claim = "{{$v | Escape}}"
+        namespace_claim = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "extractJurisdiction") (ne $v nil)}}
 		extract_jurisdiction = {{$v}}
 {{- end}}
 {{- if and (eq $k "jurisdictionClaim") (ne $v nil)}}
-		jurisdiction_claim = "{{$v | Escape}}"
+        jurisdiction_claim = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "extractHostname") (ne $v nil)}}
 		extract_hostname = {{$v}}
 {{- end}}
 {{- if and (eq $k "hostnameClaim") (ne $v nil)}}
-		hostname_claim = "{{$v | Escape}}"
+        hostname_claim = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2451,7 +2455,7 @@ delivery_receipt {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = "{{$v | Escape}}"
+        enabled = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2470,7 +2474,7 @@ deny_access {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "reason") (ne $v nil)}}
-		reason = "{{$v | Escape}}"
+        reason = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
@@ -2492,7 +2496,7 @@ deny_direct_failover_access {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = "{{$v | Escape}}"
+        enabled = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2552,7 +2556,7 @@ dns_async_refresh {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "timeout") (ne $v nil)}}
-		timeout = "{{$v | Escape}}"
+        timeout = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2574,10 +2578,10 @@ dns_prefresh {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "delay") (ne $v nil)}}
-		delay = "{{$v | Escape}}"
+        delay = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "timeout") (ne $v nil)}}
-		timeout = "{{$v | Escape}}"
+        timeout = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2615,7 +2619,7 @@ download_complete_marker {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = "{{$v | Escape}}"
+        enabled = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2634,7 +2638,7 @@ download_notification {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = "{{$v | Escape}}"
+        enabled = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2653,16 +2657,16 @@ downstream_cache {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "behavior") (ne $v nil)}}
-		behavior = "{{$v | Escape}}"
+        behavior = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "allowBehavior") (ne $v nil)}}
-		allow_behavior = "{{$v | Escape}}"
+        allow_behavior = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "ttl") (ne $v nil)}}
-		ttl = "{{$v | Escape}}"
+        ttl = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "sendHeaders") (ne $v nil)}}
-		send_headers = "{{$v | Escape}}"
+        send_headers = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "sendPrivate") (ne $v nil)}}
 		send_private = {{$v}}
@@ -2703,7 +2707,7 @@ dynamic_throughtput_optimization_override {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "throughput") (ne $v nil)}}
-		throughput = "{{$v | Escape}}"
+        throughput = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2769,19 +2773,19 @@ ecms_database {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "database") (ne $v nil)}}
-		database = "{{$v | Escape}}"
+        database = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "extractLocation") (ne $v nil)}}
-		extract_location = "{{$v | Escape}}"
+        extract_location = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "headerName") (ne $v nil)}}
-		header_name = "{{$v | Escape}}"
+        header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "queryParameterName") (ne $v nil)}}
-		query_parameter_name = "{{$v | Escape}}"
+        query_parameter_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "regexPattern") (ne $v nil)}}
-		regex_pattern = "{{$v | Escape}}"
+        regex_pattern = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2800,19 +2804,19 @@ ecms_dataset {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "dataset") (ne $v nil)}}
-		dataset = "{{$v | Escape}}"
+        dataset = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "extractLocation") (ne $v nil)}}
-		extract_location = "{{$v | Escape}}"
+        extract_location = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "headerName") (ne $v nil)}}
-		header_name = "{{$v | Escape}}"
+        header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "queryParameterName") (ne $v nil)}}
-		query_parameter_name = "{{$v | Escape}}"
+        query_parameter_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "regexPattern") (ne $v nil)}}
-		regex_pattern = "{{$v | Escape}}"
+        regex_pattern = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2831,7 +2835,7 @@ ecms_object_key {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "regex") (ne $v nil)}}
-		regex = "{{$v | Escape}}"
+        regex = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2853,28 +2857,28 @@ edge_connect {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "apiConnector") (ne $v nil)}}
-		api_connector = "{{$v | Escape}}"
+        api_connector = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "apiDataElements"}}
 		api_data_elements = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "destinationHostname") (ne $v nil)}}
-		destination_hostname = "{{$v | Escape}}"
+        destination_hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "destinationPath") (ne $v nil)}}
-		destination_path = "{{$v | Escape}}"
+        destination_path = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "overrideAggregateSettings") (ne $v nil)}}
 		override_aggregate_settings = {{$v}}
 {{- end}}
 {{- if and (eq $k "aggregateTime") (ne $v nil)}}
-		aggregate_time = "{{$v | Escape}}"
+        aggregate_time = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "aggregateLines") (ne $v nil)}}
-		aggregate_lines = "{{$v | Escape}}"
+        aggregate_lines = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "aggregateSize") (ne $v nil)}}
-		aggregate_size = "{{$v | Escape}}"
+        aggregate_size = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2893,13 +2897,10 @@ edge_load_balancing_advanced {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "xml") (ne $v nil)}}
-		xml = <<EOT
-{{$v}}
-%{~if false}trim redundant new line%{endif~}
-EOT
+        xml = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2918,32 +2919,32 @@ edge_load_balancing_data_center {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "originId") (ne $v nil)}}
-		origin_id = "{{$v | Escape}}"
+        origin_id = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hostname") (ne $v nil)}}
-		hostname = "{{$v | Escape}}"
+        hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "cookieName") (ne $v nil)}}
-		cookie_name = "{{$v | Escape}}"
+        cookie_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "failoverTitle") (ne $v nil)}}
-		failover_title = "{{$v | Escape}}"
+        failover_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enableFailover") (ne $v nil)}}
 		enable_failover = {{$v}}
 {{- end}}
 {{- if and (eq $k "ip") (ne $v nil)}}
-		ip = "{{$v | Escape}}"
+        ip = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "failoverRules" }}
 		{{- range $v := $v}}
 		failover_rules {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "failoverHostname") (ne $v nil)}}
-		failover_hostname = "{{$v | Escape}}"
+        failover_hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "modifyRequest") (ne $v nil)}}
 		modify_request = {{$v}}
@@ -2952,7 +2953,7 @@ edge_load_balancing_data_center {
 		override_hostname = {{$v}}
 {{- end}}
 {{- if and (eq $k "contextRoot") (ne $v nil)}}
-		context_root = "{{$v | Escape}}"
+        context_root = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "absolutePath") (ne $v nil)}}
 		absolute_path = {{$v}}
@@ -2978,22 +2979,22 @@ edge_load_balancing_origin {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "id") (ne $v nil)}}
-		id = "{{$v | Escape}}"
+        id = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hostname") (ne $v nil)}}
-		hostname = "{{$v | Escape}}"
+        hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "sessionPersistenceTitle") (ne $v nil)}}
-		session_persistence_title = "{{$v | Escape}}"
+        session_persistence_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enableSessionPersistence") (ne $v nil)}}
 		enable_session_persistence = {{$v}}
 {{- end}}
 {{- if and (eq $k "cookieName") (ne $v nil)}}
-		cookie_name = "{{$v | Escape}}"
+        cookie_name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3015,13 +3016,13 @@ edge_origin_authorization {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "cookieName") (ne $v nil)}}
-		cookie_name = "{{$v | Escape}}"
+        cookie_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "domain") (ne $v nil)}}
-		domain = "{{$v | Escape}}"
+        domain = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3053,7 +3054,7 @@ edge_redirector {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -3138,13 +3139,13 @@ edge_worker {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "createEdgeWorker") (ne $v nil)}}
-		create_edge_worker = "{{$v | Escape}}"
+        create_edge_worker = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "edgeWorkerId") (ne $v nil)}}
-		edge_worker_id = "{{$v | Escape}}"
+        edge_worker_id = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "resourceTier") (ne $v nil)}}
-		resource_tier = "{{$v | Escape}}"
+        resource_tier = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3163,7 +3164,7 @@ enhanced_akamai_protocol {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "display") (ne $v nil)}}
-		display = "{{$v | Escape}}"
+        display = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3188,97 +3189,97 @@ enhanced_proxy_detection {
 		forward_header_enrichment = {{$v}}
 {{- end}}
 {{- if and (eq $k "enableConfigurationMode") (ne $v nil)}}
-		enable_configuration_mode = "{{$v | Escape}}"
+        enable_configuration_mode = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "bestPracticeAction") (ne $v nil)}}
-		best_practice_action = "{{$v | Escape}}"
+        best_practice_action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "bestPracticeRedirecturl") (ne $v nil)}}
-		best_practice_redirecturl = "{{$v | Escape}}"
+        best_practice_redirecturl = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "anonymousVpn") (ne $v nil)}}
-		anonymous_vpn = "{{$v | Escape}}"
+        anonymous_vpn = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectAnonymousVpn") (ne $v nil)}}
 		detect_anonymous_vpn = {{$v}}
 {{- end}}
 {{- if and (eq $k "detectAnonymousVpnAction") (ne $v nil)}}
-		detect_anonymous_vpn_action = "{{$v | Escape}}"
+        detect_anonymous_vpn_action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectAnonymousVpnRedirecturl") (ne $v nil)}}
-		detect_anonymous_vpn_redirecturl = "{{$v | Escape}}"
+        detect_anonymous_vpn_redirecturl = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "publicProxy") (ne $v nil)}}
-		public_proxy = "{{$v | Escape}}"
+        public_proxy = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectPublicProxy") (ne $v nil)}}
 		detect_public_proxy = {{$v}}
 {{- end}}
 {{- if and (eq $k "detectPublicProxyAction") (ne $v nil)}}
-		detect_public_proxy_action = "{{$v | Escape}}"
+        detect_public_proxy_action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectPublicProxyRedirecturl") (ne $v nil)}}
-		detect_public_proxy_redirecturl = "{{$v | Escape}}"
+        detect_public_proxy_redirecturl = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "torExitNode") (ne $v nil)}}
-		tor_exit_node = "{{$v | Escape}}"
+        tor_exit_node = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectTorExitNode") (ne $v nil)}}
 		detect_tor_exit_node = {{$v}}
 {{- end}}
 {{- if and (eq $k "detectTorExitNodeAction") (ne $v nil)}}
-		detect_tor_exit_node_action = "{{$v | Escape}}"
+        detect_tor_exit_node_action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectTorExitNodeRedirecturl") (ne $v nil)}}
-		detect_tor_exit_node_redirecturl = "{{$v | Escape}}"
+        detect_tor_exit_node_redirecturl = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "smartDNSProxy") (ne $v nil)}}
-		smart_dns_proxy = "{{$v | Escape}}"
+        smart_dns_proxy = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectSmartDNSProxy") (ne $v nil)}}
 		detect_smart_dns_proxy = {{$v}}
 {{- end}}
 {{- if and (eq $k "detectSmartDNSProxyAction") (ne $v nil)}}
-		detect_smart_dns_proxy_action = "{{$v | Escape}}"
+        detect_smart_dns_proxy_action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectSmartDNSProxyRedirecturl") (ne $v nil)}}
-		detect_smart_dns_proxy_redirecturl = "{{$v | Escape}}"
+        detect_smart_dns_proxy_redirecturl = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hostingProvider") (ne $v nil)}}
-		hosting_provider = "{{$v | Escape}}"
+        hosting_provider = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectHostingProvider") (ne $v nil)}}
 		detect_hosting_provider = {{$v}}
 {{- end}}
 {{- if and (eq $k "detectHostingProviderAction") (ne $v nil)}}
-		detect_hosting_provider_action = "{{$v | Escape}}"
+        detect_hosting_provider_action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectHostingProviderRedirecturl") (ne $v nil)}}
-		detect_hosting_provider_redirecturl = "{{$v | Escape}}"
+        detect_hosting_provider_redirecturl = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "vpnDataCenter") (ne $v nil)}}
-		vpn_data_center = "{{$v | Escape}}"
+        vpn_data_center = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectVpnDataCenter") (ne $v nil)}}
 		detect_vpn_data_center = {{$v}}
 {{- end}}
 {{- if and (eq $k "detectVpnDataCenterAction") (ne $v nil)}}
-		detect_vpn_data_center_action = "{{$v | Escape}}"
+        detect_vpn_data_center_action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectVpnDataCenterRedirecturl") (ne $v nil)}}
-		detect_vpn_data_center_redirecturl = "{{$v | Escape}}"
+        detect_vpn_data_center_redirecturl = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "residentialProxy") (ne $v nil)}}
-		residential_proxy = "{{$v | Escape}}"
+        residential_proxy = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectResidentialProxy") (ne $v nil)}}
 		detect_residential_proxy = {{$v}}
 {{- end}}
 {{- if and (eq $k "detectResidentialProxyAction") (ne $v nil)}}
-		detect_residential_proxy_action = "{{$v | Escape}}"
+        detect_residential_proxy_action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectResidentialProxyRedirecturl") (ne $v nil)}}
-		detect_residential_proxy_redirecturl = "{{$v | Escape}}"
+        detect_residential_proxy_redirecturl = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3319,10 +3320,10 @@ fail_action {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "actionType") (ne $v nil)}}
-		action_type = "{{$v | Escape}}"
+        action_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "saasType") (ne $v nil)}}
-		saas_type = "{{$v | Escape}}"
+        saas_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "saasCnameEnabled") (ne $v nil)}}
 		saas_cname_enabled = {{$v}}
@@ -3331,52 +3332,52 @@ fail_action {
 		saas_cname_level = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "saasCookie") (ne $v nil)}}
-		saas_cookie = "{{$v | Escape}}"
+        saas_cookie = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "saasQueryString") (ne $v nil)}}
-		saas_query_string = "{{$v | Escape}}"
+        saas_query_string = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "saasRegex") (ne $v nil)}}
-		saas_regex = "{{$v | Escape}}"
+        saas_regex = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "saasReplace") (ne $v nil)}}
-		saas_replace = "{{$v | Escape}}"
+        saas_replace = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "saasSuffix") (ne $v nil)}}
-		saas_suffix = "{{$v | Escape}}"
+        saas_suffix = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "dynamicMethod") (ne $v nil)}}
-		dynamic_method = "{{$v | Escape}}"
+        dynamic_method = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "dynamicCustomPath") (ne $v nil)}}
 		dynamic_custom_path = {{$v}}
 {{- end}}
 {{- if and (eq $k "dynamicPath") (ne $v nil)}}
-		dynamic_path = "{{$v | Escape}}"
+        dynamic_path = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "redirectHostnameType") (ne $v nil)}}
-		redirect_hostname_type = "{{$v | Escape}}"
+        redirect_hostname_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "redirectHostname") (ne $v nil)}}
-		redirect_hostname = "{{$v | Escape}}"
+        redirect_hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "redirectCustomPath") (ne $v nil)}}
 		redirect_custom_path = {{$v}}
 {{- end}}
 {{- if and (eq $k "redirectPath") (ne $v nil)}}
-		redirect_path = "{{$v | Escape}}"
+        redirect_path = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "redirectMethod") (ne $v nil)}}
 		redirect_method = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "contentHostname") (ne $v nil)}}
-		content_hostname = "{{$v | Escape}}"
+        content_hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "contentCustomPath") (ne $v nil)}}
 		content_custom_path = {{$v}}
 {{- end}}
 {{- if and (eq $k "contentPath") (ne $v nil)}}
-		content_path = "{{$v | Escape}}"
+        content_path = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "netStorageHostname" }}
 		{{- if $v}}
@@ -3386,26 +3387,26 @@ fail_action {
 		cp_code = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
-		download_domain_name = "{{$v | Escape}}"
+        download_domain_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "g2oToken") (ne $v nil)}}
-		g2o_token = "{{$v | Escape}}"
+        g2o_token = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "netStoragePath") (ne $v nil)}}
-		net_storage_path = "{{$v | Escape}}"
+        net_storage_path = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "cexHostname") (ne $v nil)}}
-		cex_hostname = "{{$v | Escape}}"
+        cex_hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "cexCustomPath") (ne $v nil)}}
 		cex_custom_path = {{$v}}
 {{- end}}
 {{- if and (eq $k "cexPath") (ne $v nil)}}
-		cex_path = "{{$v | Escape}}"
+        cex_path = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "cpCode" }}
 		{{- if $v}}
@@ -3415,13 +3416,13 @@ fail_action {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "createdDate") (ne $v nil)}}
 		created_date = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "products"}}
 		products = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -3437,7 +3438,7 @@ fail_action {
 		limit = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "limitType") (ne $v nil)}}
-		limit_type = "{{$v | Escape}}"
+        limit_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -3457,7 +3458,7 @@ fail_action {
 		modify_protocol = {{$v}}
 {{- end}}
 {{- if and (eq $k "protocol") (ne $v nil)}}
-		protocol = "{{$v | Escape}}"
+        protocol = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "allowFCMParentOverride") (ne $v nil)}}
 		allow_fcm_parent_override = {{$v}}
@@ -3520,7 +3521,7 @@ first_party_marketing {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "javaScriptInsertionRule") (ne $v nil)}}
-		java_script_insertion_rule = "{{$v | Escape}}"
+        java_script_insertion_rule = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "cloudletPolicy" }}
 		{{- if $v}}
@@ -3530,14 +3531,14 @@ first_party_marketing {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "mediaMathPrefix") (ne $v nil)}}
-		media_math_prefix = "{{$v | Escape}}"
+        media_math_prefix = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3559,7 +3560,7 @@ first_party_marketing_plus {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "javaScriptInsertionRule") (ne $v nil)}}
-		java_script_insertion_rule = "{{$v | Escape}}"
+        java_script_insertion_rule = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "cloudletPolicy" }}
 		{{- if $v}}
@@ -3569,14 +3570,14 @@ first_party_marketing_plus {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "mediaMathPrefix") (ne $v nil)}}
-		media_math_prefix = "{{$v | Escape}}"
+        media_math_prefix = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3608,7 +3609,7 @@ forward_rewrite {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -3656,10 +3657,10 @@ g2oheader {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "dataHeader") (ne $v nil)}}
-		data_header = "{{$v | Escape}}"
+        data_header = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "signedHeader") (ne $v nil)}}
-		signed_header = "{{$v | Escape}}"
+        signed_header = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "encodingVersion") (ne $v nil)}}
 		encoding_version = {{$v | AsInt}}
@@ -3671,10 +3672,10 @@ g2oheader {
 		custom_sign_string = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "secretKey") (ne $v nil)}}
-		secret_key = "{{$v | Escape}}"
+        secret_key = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "nonce") (ne $v nil)}}
-		nonce = "{{$v | Escape}}"
+        nonce = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3693,13 +3694,13 @@ global_request_number {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "outputOption") (ne $v nil)}}
-		output_option = "{{$v | Escape}}"
+        output_option = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "headerName") (ne $v nil)}}
-		header_name = "{{$v | Escape}}"
+        header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "variableName") (ne $v nil)}}
-		variable_name = "{{$v | Escape}}"
+        variable_name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3724,16 +3725,16 @@ graphql_caching {
 		cache_responses_with_errors = {{$v}}
 {{- end}}
 {{- if and (eq $k "advanced") (ne $v nil)}}
-		advanced = "{{$v | Escape}}"
+        advanced = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "postRequestProcessingErrorHandling") (ne $v nil)}}
-		post_request_processing_error_handling = "{{$v | Escape}}"
+        post_request_processing_error_handling = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "operationsUrlQueryParameterName") (ne $v nil)}}
-		operations_url_query_parameter_name = "{{$v | Escape}}"
+        operations_url_query_parameter_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "operationsJsonBodyParameterName") (ne $v nil)}}
-		operations_json_body_parameter_name = "{{$v | Escape}}"
+        operations_json_body_parameter_name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3752,7 +3753,7 @@ gzip_response {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "behavior") (ne $v nil)}}
-		behavior = "{{$v | Escape}}"
+        behavior = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3771,13 +3772,10 @@ hd_data_advanced {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "xml") (ne $v nil)}}
-		xml = <<EOT
-{{$v}}
-%{~if false}trim redundant new line%{endif~}
-EOT
+        xml = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3799,7 +3797,7 @@ health_detection {
 		retry_count = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "retryInterval") (ne $v nil)}}
-		retry_interval = "{{$v | Escape}}"
+        retry_interval = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "maximumReconnects") (ne $v nil)}}
 		maximum_reconnects = {{$v | AsInt}}
@@ -3833,7 +3831,7 @@ hsaf_eip_binding {
 		hash_max_value = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "tier") (ne $v nil)}}
-		tier = "{{$v | Escape}}"
+        tier = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3852,7 +3850,7 @@ http2 {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = "{{$v | Escape}}"
+        enabled = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3893,7 +3891,7 @@ http_strict_transport_security {
 		enable = {{$v}}
 {{- end}}
 {{- if and (eq $k "maxAge") (ne $v nil)}}
-		max_age = "{{$v | Escape}}"
+        max_age = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "includeSubDomains") (ne $v nil)}}
 		include_sub_domains = {{$v}}
@@ -3924,7 +3922,7 @@ http_to_https_upgrade {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "upgrade") (ne $v nil)}}
-		upgrade = "{{$v | Escape}}"
+        upgrade = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3943,40 +3941,40 @@ im_override {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "override") (ne $v nil)}}
-		override = "{{$v | Escape}}"
+        override = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "typesel") (ne $v nil)}}
-		typesel = "{{$v | Escape}}"
+        typesel = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "formatvar") (ne $v nil)}}
-		formatvar = "{{$v | Escape}}"
+        formatvar = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "format") (ne $v nil)}}
-		format = "{{$v | Escape}}"
+        format = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "dprvar") (ne $v nil)}}
-		dprvar = "{{$v | Escape}}"
+        dprvar = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "dpr") (ne $v nil)}}
 		dpr = {{$v}}
 {{- end}}
 {{- if and (eq $k "widthvar") (ne $v nil)}}
-		widthvar = "{{$v | Escape}}"
+        widthvar = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "width") (ne $v nil)}}
 		width = {{$v}}
 {{- end}}
 {{- if and (eq $k "policyvar") (ne $v nil)}}
-		policyvar = "{{$v | Escape}}"
+        policyvar = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "policy") (ne $v nil)}}
-		policy = "{{$v | Escape}}"
+        policy = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "policyvarName") (ne $v nil)}}
-		policyvar_name = "{{$v | Escape}}"
+        policyvar_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "policyvarIMvar") (ne $v nil)}}
-		policyvar_i_mvar = "{{$v | Escape}}"
+        policyvar_i_mvar = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "excludeAllQueryParameters") (ne $v nil)}}
 		exclude_all_query_parameters = {{$v}}
@@ -4001,7 +3999,7 @@ image_and_video_manager {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "policySetType") (ne $v nil)}}
-		policy_set_type = "{{$v | Escape}}"
+        policy_set_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
@@ -4020,13 +4018,13 @@ image_and_video_manager {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "createdDate") (ne $v nil)}}
 		created_date = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "products"}}
 		products = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -4042,7 +4040,7 @@ image_and_video_manager {
 		limit = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "limitType") (ne $v nil)}}
-		limit_type = "{{$v | Escape}}"
+        limit_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -4060,13 +4058,13 @@ image_and_video_manager {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "createdDate") (ne $v nil)}}
 		created_date = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "products"}}
 		products = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -4082,7 +4080,7 @@ image_and_video_manager {
 		limit = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "limitType") (ne $v nil)}}
-		limit_type = "{{$v | Escape}}"
+        limit_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -4093,10 +4091,10 @@ image_and_video_manager {
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "imageSet") (ne $v nil)}}
-		image_set = "{{$v | Escape}}"
+        image_set = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "videoSet") (ne $v nil)}}
-		video_set = "{{$v | Escape}}"
+        video_set = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -4115,7 +4113,7 @@ image_manager {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "settingsTitle") (ne $v nil)}}
-		settings_title = "{{$v | Escape}}"
+        settings_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
@@ -4127,10 +4125,10 @@ image_manager {
 		apply_best_file_type = {{$v}}
 {{- end}}
 {{- if and (eq $k "superCacheRegion") (ne $v nil)}}
-		super_cache_region = "{{$v | Escape}}"
+        super_cache_region = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "trafficTitle") (ne $v nil)}}
-		traffic_title = "{{$v | Escape}}"
+        traffic_title = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "cpCodeOriginal" }}
 		{{- if $v}}
@@ -4140,13 +4138,13 @@ image_manager {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "createdDate") (ne $v nil)}}
 		created_date = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "products"}}
 		products = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -4162,7 +4160,7 @@ image_manager {
 		limit = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "limitType") (ne $v nil)}}
-		limit_type = "{{$v | Escape}}"
+        limit_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -4180,13 +4178,13 @@ image_manager {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "createdDate") (ne $v nil)}}
 		created_date = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "products"}}
 		products = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -4202,7 +4200,7 @@ image_manager {
 		limit = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "limitType") (ne $v nil)}}
-		limit_type = "{{$v | Escape}}"
+        limit_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -4213,22 +4211,22 @@ image_manager {
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "apiReferenceTitle") (ne $v nil)}}
-		api_reference_title = "{{$v | Escape}}"
+        api_reference_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "useExistingPolicySet") (ne $v nil)}}
 		use_existing_policy_set = {{$v}}
 {{- end}}
 {{- if and (eq $k "policySet") (ne $v nil)}}
-		policy_set = "{{$v | Escape}}"
+        policy_set = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "advanced") (ne $v nil)}}
 		advanced = {{$v}}
 {{- end}}
 {{- if and (eq $k "policyToken") (ne $v nil)}}
-		policy_token = "{{$v | Escape}}"
+        policy_token = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "policyTokenDefault") (ne $v nil)}}
-		policy_token_default = "{{$v | Escape}}"
+        policy_token_default = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -4247,7 +4245,7 @@ image_manager_video {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "settingsTitle") (ne $v nil)}}
-		settings_title = "{{$v | Escape}}"
+        settings_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
@@ -4259,10 +4257,10 @@ image_manager_video {
 		apply_best_file_type = {{$v}}
 {{- end}}
 {{- if and (eq $k "superCacheRegion") (ne $v nil)}}
-		super_cache_region = "{{$v | Escape}}"
+        super_cache_region = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "trafficTitle") (ne $v nil)}}
-		traffic_title = "{{$v | Escape}}"
+        traffic_title = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "cpCodeOriginal" }}
 		{{- if $v}}
@@ -4272,13 +4270,13 @@ image_manager_video {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "createdDate") (ne $v nil)}}
 		created_date = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "products"}}
 		products = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -4294,7 +4292,7 @@ image_manager_video {
 		limit = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "limitType") (ne $v nil)}}
-		limit_type = "{{$v | Escape}}"
+        limit_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -4312,13 +4310,13 @@ image_manager_video {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "createdDate") (ne $v nil)}}
 		created_date = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "products"}}
 		products = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -4334,7 +4332,7 @@ image_manager_video {
 		limit = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "limitType") (ne $v nil)}}
-		limit_type = "{{$v | Escape}}"
+        limit_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -4345,22 +4343,22 @@ image_manager_video {
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "apiReferenceTitle") (ne $v nil)}}
-		api_reference_title = "{{$v | Escape}}"
+        api_reference_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "useExistingPolicySet") (ne $v nil)}}
 		use_existing_policy_set = {{$v}}
 {{- end}}
 {{- if and (eq $k "policySet") (ne $v nil)}}
-		policy_set = "{{$v | Escape}}"
+        policy_set = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "advanced") (ne $v nil)}}
 		advanced = {{$v}}
 {{- end}}
 {{- if and (eq $k "policyToken") (ne $v nil)}}
-		policy_token = "{{$v | Escape}}"
+        policy_token = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "policyTokenDefault") (ne $v nil)}}
-		policy_token_default = "{{$v | Escape}}"
+        policy_token_default = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -4379,7 +4377,7 @@ include {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "id") (ne $v nil)}}
-		id = "{{$v | Escape}}"
+        id = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -4408,23 +4406,23 @@ input_validation {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "label") (ne $v nil)}}
-		label = "{{$v | Escape}}"
+        label = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "userIdentificationTitle") (ne $v nil)}}
-		user_identification_title = "{{$v | Escape}}"
+        user_identification_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "userIdentificationByCookie") (ne $v nil)}}
 		user_identification_by_cookie = {{$v}}
 {{- end}}
 {{- if and (eq $k "userIdentificationKeyCookie") (ne $v nil)}}
-		user_identification_key_cookie = "{{$v | Escape}}"
+        user_identification_key_cookie = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "userIdentificationByIp") (ne $v nil)}}
 		user_identification_by_ip = {{$v}}
@@ -4442,7 +4440,7 @@ input_validation {
 		user_identification_key_params = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "validationTitle") (ne $v nil)}}
-		validation_title = "{{$v | Escape}}"
+        validation_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "allowLargePostBody") (ne $v nil)}}
 		allow_large_post_body = {{$v}}
@@ -4451,31 +4449,31 @@ input_validation {
 		reset_on_valid = {{$v}}
 {{- end}}
 {{- if and (eq $k "validateOnOriginWith") (ne $v nil)}}
-		validate_on_origin_with = "{{$v | Escape}}"
+        validate_on_origin_with = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "validateOnOriginHeaderName") (ne $v nil)}}
-		validate_on_origin_header_name = "{{$v | Escape}}"
+        validate_on_origin_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "validateOnOriginHeaderValue") (ne $v nil)}}
-		validate_on_origin_header_value = "{{$v | Escape}}"
+        validate_on_origin_header_value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "validateOnOriginResponseCode") (ne $v nil)}}
 		validate_on_origin_response_code = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "failure302Uri") (ne $v nil)}}
-		failure302_uri = "{{$v | Escape}}"
+        failure302_uri = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "penaltyTitle") (ne $v nil)}}
-		penalty_title = "{{$v | Escape}}"
+        penalty_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "penaltyThreshold") (ne $v nil)}}
 		penalty_threshold = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "penaltyAction") (ne $v nil)}}
-		penalty_action = "{{$v | Escape}}"
+        penalty_action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "penalty302Uri") (ne $v nil)}}
-		penalty302_uri = "{{$v | Escape}}"
+        penalty302_uri = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "penaltyNetStorage" }}
 		{{- if $v}}
@@ -4485,17 +4483,17 @@ input_validation {
 		cp_code = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
-		download_domain_name = "{{$v | Escape}}"
+        download_domain_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "g2oToken") (ne $v nil)}}
-		g2o_token = "{{$v | Escape}}"
+        g2o_token = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "penalty403NetStoragePath") (ne $v nil)}}
-		penalty403_net_storage_path = "{{$v | Escape}}"
+        penalty403_net_storage_path = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "penaltyBrandedDenyCacheTtl") (ne $v nil)}}
 		penalty_branded_deny_cache_ttl = {{$v | AsInt}}
@@ -4570,13 +4568,13 @@ large_file_optimization {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "enablePartialObjectCaching") (ne $v nil)}}
-		enable_partial_object_caching = "{{$v | Escape}}"
+        enable_partial_object_caching = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "minimumSize") (ne $v nil)}}
-		minimum_size = "{{$v | Escape}}"
+        minimum_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "maximumSize") (ne $v nil)}}
-		maximum_size = "{{$v | Escape}}"
+        maximum_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "useVersioning") (ne $v nil)}}
 		use_versioning = {{$v}}
@@ -4601,10 +4599,10 @@ large_file_optimization_advanced {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "objectSize") (ne $v nil)}}
-		object_size = "{{$v | Escape}}"
+        object_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "fragmentSize") (ne $v nil)}}
-		fragment_size = "{{$v | Escape}}"
+        fragment_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "prefetchDuringRequest") (ne $v nil)}}
 		prefetch_during_request = {{$v | AsInt}}
@@ -4639,7 +4637,7 @@ limit_bit_rate {
 		bitrate_value = {{$v}}
 {{- end}}
 {{- if and (eq $k "bitrateUnit") (ne $v nil)}}
-		bitrate_unit = "{{$v | Escape}}"
+        bitrate_unit = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -4653,7 +4651,7 @@ limit_bit_rate {
 		threshold_value = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "thresholdUnit") (ne $v nil)}}
-		threshold_unit = "{{$v | Escape}}"
+        threshold_unit = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -4679,7 +4677,7 @@ log_custom {
 		log_custom_log_field = {{$v}}
 {{- end}}
 {{- if and (eq $k "customLogField") (ne $v nil)}}
-		custom_log_field = "{{$v | Escape}}"
+        custom_log_field = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -4704,22 +4702,19 @@ m_pulse {
 		require_pci = {{$v}}
 {{- end}}
 {{- if and (eq $k "loaderVersion") (ne $v nil)}}
-		loader_version = "{{$v | Escape}}"
+        loader_version = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "titleOptional") (ne $v nil)}}
-		title_optional = "{{$v | Escape}}"
+        title_optional = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "apiKey") (ne $v nil)}}
-		api_key = "{{$v | Escape}}"
+        api_key = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "bufferSize") (ne $v nil)}}
-		buffer_size = "{{$v | Escape}}"
+        buffer_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "configOverride") (ne $v nil)}}
-		config_override = <<EOT
-{{$v}}
-%{~if false}trim redundant new line%{endif~}
-EOT
+        config_override = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -4741,31 +4736,31 @@ manifest_personalization {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "hlsTitle") (ne $v nil)}}
-		hls_title = "{{$v | Escape}}"
+        hls_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hlsEnabled") (ne $v nil)}}
 		hls_enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "hlsMode") (ne $v nil)}}
-		hls_mode = "{{$v | Escape}}"
+        hls_mode = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hlsPreferredBitrate") (ne $v nil)}}
-		hls_preferred_bitrate = "{{$v | Escape}}"
+        hls_preferred_bitrate = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hlsFilterInBitrates") (ne $v nil)}}
-		hls_filter_in_bitrates = "{{$v | Escape}}"
+        hls_filter_in_bitrates = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hlsFilterInBitrateRanges") (ne $v nil)}}
-		hls_filter_in_bitrate_ranges = "{{$v | Escape}}"
+        hls_filter_in_bitrate_ranges = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hlsQueryParamEnabled") (ne $v nil)}}
 		hls_query_param_enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "hlsQueryParamSecretKey") (ne $v nil)}}
-		hls_query_param_secret_key = "{{$v | Escape}}"
+        hls_query_param_secret_key = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hlsQueryParamTransitionKey") (ne $v nil)}}
-		hls_query_param_transition_key = "{{$v | Escape}}"
+        hls_query_param_transition_key = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hlsShowAdvanced") (ne $v nil)}}
 		hls_show_advanced = {{$v}}
@@ -4790,10 +4785,10 @@ manifest_rerouting {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "partner") (ne $v nil)}}
-		partner = "{{$v | Escape}}"
+        partner = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "username") (ne $v nil)}}
-		username = "{{$v | Escape}}"
+        username = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -4850,7 +4845,7 @@ media_acceleration_quic_optout {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "optout") (ne $v nil)}}
-		optout = "{{$v | Escape}}"
+        optout = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -4872,7 +4867,7 @@ media_client {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "beaconId") (ne $v nil)}}
-		beacon_id = "{{$v | Escape}}"
+        beacon_id = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "useHybridHttpUdp") (ne $v nil)}}
 		use_hybrid_http_udp = {{$v}}
@@ -4913,37 +4908,37 @@ media_origin_failover {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "detectOriginUnresponsiveTitle") (ne $v nil)}}
-		detect_origin_unresponsive_title = "{{$v | Escape}}"
+        detect_origin_unresponsive_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectOriginUnresponsive") (ne $v nil)}}
 		detect_origin_unresponsive = {{$v}}
 {{- end}}
 {{- if and (eq $k "originUnresponsiveDetectionLevel") (ne $v nil)}}
-		origin_unresponsive_detection_level = "{{$v | Escape}}"
+        origin_unresponsive_detection_level = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnresponsiveBlacklistOriginIp") (ne $v nil)}}
 		origin_unresponsive_blacklist_origin_ip = {{$v}}
 {{- end}}
 {{- if and (eq $k "originUnresponsiveBlacklistWindow") (ne $v nil)}}
-		origin_unresponsive_blacklist_window = "{{$v | Escape}}"
+        origin_unresponsive_blacklist_window = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnresponsiveRecovery") (ne $v nil)}}
-		origin_unresponsive_recovery = "{{$v | Escape}}"
+        origin_unresponsive_recovery = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnresponsiveRetryLimit") (ne $v nil)}}
-		origin_unresponsive_retry_limit = "{{$v | Escape}}"
+        origin_unresponsive_retry_limit = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnresponsiveBackupHost") (ne $v nil)}}
-		origin_unresponsive_backup_host = "{{$v | Escape}}"
+        origin_unresponsive_backup_host = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnresponsiveAlternateHost") (ne $v nil)}}
-		origin_unresponsive_alternate_host = "{{$v | Escape}}"
+        origin_unresponsive_alternate_host = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnresponsiveModifyRequestPath") (ne $v nil)}}
 		origin_unresponsive_modify_request_path = {{$v}}
 {{- end}}
 {{- if and (eq $k "originUnresponsiveModifiedPath") (ne $v nil)}}
-		origin_unresponsive_modified_path = "{{$v | Escape}}"
+        origin_unresponsive_modified_path = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnresponsiveIncludeQueryString") (ne $v nil)}}
 		origin_unresponsive_include_query_string = {{$v}}
@@ -4955,16 +4950,16 @@ media_origin_failover {
 		origin_unresponsive_change_protocol = {{$v}}
 {{- end}}
 {{- if and (eq $k "originUnresponsiveProtocol") (ne $v nil)}}
-		origin_unresponsive_protocol = "{{$v | Escape}}"
+        origin_unresponsive_protocol = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectOriginUnavailableTitle") (ne $v nil)}}
-		detect_origin_unavailable_title = "{{$v | Escape}}"
+        detect_origin_unavailable_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectOriginUnavailable") (ne $v nil)}}
 		detect_origin_unavailable = {{$v}}
 {{- end}}
 {{- if and (eq $k "originUnavailableDetectionLevel") (ne $v nil)}}
-		origin_unavailable_detection_level = "{{$v | Escape}}"
+        origin_unavailable_detection_level = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "originUnavailableResponseCodes"}}
 		origin_unavailable_response_codes = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -4973,25 +4968,25 @@ media_origin_failover {
 		origin_unavailable_blacklist_origin_ip = {{$v}}
 {{- end}}
 {{- if and (eq $k "originUnavailableBlacklistWindow") (ne $v nil)}}
-		origin_unavailable_blacklist_window = "{{$v | Escape}}"
+        origin_unavailable_blacklist_window = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnavailableRecovery") (ne $v nil)}}
-		origin_unavailable_recovery = "{{$v | Escape}}"
+        origin_unavailable_recovery = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnavailableRetryLimit") (ne $v nil)}}
-		origin_unavailable_retry_limit = "{{$v | Escape}}"
+        origin_unavailable_retry_limit = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnavailableBackupHost") (ne $v nil)}}
-		origin_unavailable_backup_host = "{{$v | Escape}}"
+        origin_unavailable_backup_host = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnavailableAlternateHost") (ne $v nil)}}
-		origin_unavailable_alternate_host = "{{$v | Escape}}"
+        origin_unavailable_alternate_host = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnavailableModifyRequestPath") (ne $v nil)}}
 		origin_unavailable_modify_request_path = {{$v}}
 {{- end}}
 {{- if and (eq $k "originUnavailableModifiedPath") (ne $v nil)}}
-		origin_unavailable_modified_path = "{{$v | Escape}}"
+        origin_unavailable_modified_path = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnavailableIncludeQueryString") (ne $v nil)}}
 		origin_unavailable_include_query_string = {{$v}}
@@ -5003,16 +4998,16 @@ media_origin_failover {
 		origin_unavailable_change_protocol = {{$v}}
 {{- end}}
 {{- if and (eq $k "originUnavailableProtocol") (ne $v nil)}}
-		origin_unavailable_protocol = "{{$v | Escape}}"
+        origin_unavailable_protocol = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectObjectUnavailableTitle") (ne $v nil)}}
-		detect_object_unavailable_title = "{{$v | Escape}}"
+        detect_object_unavailable_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "detectObjectUnavailable") (ne $v nil)}}
 		detect_object_unavailable = {{$v}}
 {{- end}}
 {{- if and (eq $k "objectUnavailableDetectionLevel") (ne $v nil)}}
-		object_unavailable_detection_level = "{{$v | Escape}}"
+        object_unavailable_detection_level = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "objectUnavailableResponseCodes"}}
 		object_unavailable_response_codes = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -5021,25 +5016,25 @@ media_origin_failover {
 		object_unavailable_blacklist_origin_ip = {{$v}}
 {{- end}}
 {{- if and (eq $k "objectUnavailableBlacklistWindow") (ne $v nil)}}
-		object_unavailable_blacklist_window = "{{$v | Escape}}"
+        object_unavailable_blacklist_window = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "objectUnavailableRecovery") (ne $v nil)}}
-		object_unavailable_recovery = "{{$v | Escape}}"
+        object_unavailable_recovery = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "objectUnavailableRetryLimit") (ne $v nil)}}
-		object_unavailable_retry_limit = "{{$v | Escape}}"
+        object_unavailable_retry_limit = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "objectUnavailableBackupHost") (ne $v nil)}}
-		object_unavailable_backup_host = "{{$v | Escape}}"
+        object_unavailable_backup_host = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "objectUnavailableAlternateHost") (ne $v nil)}}
-		object_unavailable_alternate_host = "{{$v | Escape}}"
+        object_unavailable_alternate_host = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "objectUnavailableModifyRequestPath") (ne $v nil)}}
 		object_unavailable_modify_request_path = {{$v}}
 {{- end}}
 {{- if and (eq $k "objectUnavailableModifiedPath") (ne $v nil)}}
-		object_unavailable_modified_path = "{{$v | Escape}}"
+        object_unavailable_modified_path = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "objectUnavailableIncludeQueryString") (ne $v nil)}}
 		object_unavailable_include_query_string = {{$v}}
@@ -5051,19 +5046,19 @@ media_origin_failover {
 		object_unavailable_change_protocol = {{$v}}
 {{- end}}
 {{- if and (eq $k "objectUnavailableProtocol") (ne $v nil)}}
-		object_unavailable_protocol = "{{$v | Escape}}"
+        object_unavailable_protocol = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "otherOptions") (ne $v nil)}}
-		other_options = "{{$v | Escape}}"
+        other_options = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "clientResponseCode") (ne $v nil)}}
-		client_response_code = "{{$v | Escape}}"
+        client_response_code = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "cacheErrorResponse") (ne $v nil)}}
 		cache_error_response = {{$v}}
 {{- end}}
 {{- if and (eq $k "cacheWindow") (ne $v nil)}}
-		cache_window = "{{$v | Escape}}"
+        cache_window = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -5123,28 +5118,28 @@ modify_incoming_request_header {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "action") (ne $v nil)}}
-		action = "{{$v | Escape}}"
+        action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardAddHeaderName") (ne $v nil)}}
-		standard_add_header_name = "{{$v | Escape}}"
+        standard_add_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardDeleteHeaderName") (ne $v nil)}}
-		standard_delete_header_name = "{{$v | Escape}}"
+        standard_delete_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardModifyHeaderName") (ne $v nil)}}
-		standard_modify_header_name = "{{$v | Escape}}"
+        standard_modify_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardPassHeaderName") (ne $v nil)}}
-		standard_pass_header_name = "{{$v | Escape}}"
+        standard_pass_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customHeaderName") (ne $v nil)}}
-		custom_header_name = "{{$v | Escape}}"
+        custom_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "headerValue") (ne $v nil)}}
-		header_value = "{{$v | Escape}}"
+        header_value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "newHeaderValue") (ne $v nil)}}
-		new_header_value = "{{$v | Escape}}"
+        new_header_value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "avoidDuplicateHeaders") (ne $v nil)}}
 		avoid_duplicate_headers = {{$v}}
@@ -5166,28 +5161,28 @@ modify_incoming_response_header {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "action") (ne $v nil)}}
-		action = "{{$v | Escape}}"
+        action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardAddHeaderName") (ne $v nil)}}
-		standard_add_header_name = "{{$v | Escape}}"
+        standard_add_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardDeleteHeaderName") (ne $v nil)}}
-		standard_delete_header_name = "{{$v | Escape}}"
+        standard_delete_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardModifyHeaderName") (ne $v nil)}}
-		standard_modify_header_name = "{{$v | Escape}}"
+        standard_modify_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardPassHeaderName") (ne $v nil)}}
-		standard_pass_header_name = "{{$v | Escape}}"
+        standard_pass_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customHeaderName") (ne $v nil)}}
-		custom_header_name = "{{$v | Escape}}"
+        custom_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "headerValue") (ne $v nil)}}
-		header_value = "{{$v | Escape}}"
+        header_value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "newHeaderValue") (ne $v nil)}}
-		new_header_value = "{{$v | Escape}}"
+        new_header_value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "avoidDuplicateHeaders") (ne $v nil)}}
 		avoid_duplicate_headers = {{$v}}
@@ -5209,31 +5204,31 @@ modify_outgoing_request_header {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "action") (ne $v nil)}}
-		action = "{{$v | Escape}}"
+        action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardAddHeaderName") (ne $v nil)}}
-		standard_add_header_name = "{{$v | Escape}}"
+        standard_add_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardDeleteHeaderName") (ne $v nil)}}
-		standard_delete_header_name = "{{$v | Escape}}"
+        standard_delete_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardModifyHeaderName") (ne $v nil)}}
-		standard_modify_header_name = "{{$v | Escape}}"
+        standard_modify_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customHeaderName") (ne $v nil)}}
-		custom_header_name = "{{$v | Escape}}"
+        custom_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "headerValue") (ne $v nil)}}
-		header_value = "{{$v | Escape}}"
+        header_value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "newHeaderValue") (ne $v nil)}}
-		new_header_value = "{{$v | Escape}}"
+        new_header_value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "regexHeaderMatch") (ne $v nil)}}
-		regex_header_match = "{{$v | Escape}}"
+        regex_header_match = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "regexHeaderReplace") (ne $v nil)}}
-		regex_header_replace = "{{$v | Escape}}"
+        regex_header_replace = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchMultiple") (ne $v nil)}}
 		match_multiple = {{$v}}
@@ -5258,31 +5253,31 @@ modify_outgoing_response_header {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "action") (ne $v nil)}}
-		action = "{{$v | Escape}}"
+        action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardAddHeaderName") (ne $v nil)}}
-		standard_add_header_name = "{{$v | Escape}}"
+        standard_add_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardDeleteHeaderName") (ne $v nil)}}
-		standard_delete_header_name = "{{$v | Escape}}"
+        standard_delete_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "standardModifyHeaderName") (ne $v nil)}}
-		standard_modify_header_name = "{{$v | Escape}}"
+        standard_modify_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customHeaderName") (ne $v nil)}}
-		custom_header_name = "{{$v | Escape}}"
+        custom_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "headerValue") (ne $v nil)}}
-		header_value = "{{$v | Escape}}"
+        header_value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "newHeaderValue") (ne $v nil)}}
-		new_header_value = "{{$v | Escape}}"
+        new_header_value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "regexHeaderMatch") (ne $v nil)}}
-		regex_header_match = "{{$v | Escape}}"
+        regex_header_match = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "regexHeaderReplace") (ne $v nil)}}
-		regex_header_replace = "{{$v | Escape}}"
+        regex_header_replace = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchMultiple") (ne $v nil)}}
 		match_multiple = {{$v}}
@@ -5310,10 +5305,10 @@ modify_via_header {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "modificationOption") (ne $v nil)}}
-		modification_option = "{{$v | Escape}}"
+        modification_option = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "renameHeaderTo") (ne $v nil)}}
-		rename_header_to = "{{$v | Escape}}"
+        rename_header_to = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -5332,7 +5327,7 @@ origin {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "originType") (ne $v nil)}}
-		origin_type = "{{$v | Escape}}"
+        origin_type = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "netStorage" }}
 		{{- if $v}}
@@ -5342,32 +5337,32 @@ origin {
 		cp_code = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
-		download_domain_name = "{{$v | Escape}}"
+        download_domain_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "g2oToken") (ne $v nil)}}
-		g2o_token = "{{$v | Escape}}"
+        g2o_token = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "originId") (ne $v nil)}}
-		origin_id = "{{$v | Escape}}"
+        origin_id = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hostname") (ne $v nil)}}
-		hostname = "{{$v | Escape}}"
+        hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "secondHostnameEnabled") (ne $v nil)}}
 		second_hostname_enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "secondHostname") (ne $v nil)}}
-		second_hostname = "{{$v | Escape}}"
+        second_hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "mslorigin") (ne $v nil)}}
-		mslorigin = "{{$v | Escape}}"
+        mslorigin = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "saasType") (ne $v nil)}}
-		saas_type = "{{$v | Escape}}"
+        saas_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "saasCnameEnabled") (ne $v nil)}}
 		saas_cname_enabled = {{$v}}
@@ -5376,31 +5371,31 @@ origin {
 		saas_cname_level = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "saasCookie") (ne $v nil)}}
-		saas_cookie = "{{$v | Escape}}"
+        saas_cookie = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "saasQueryString") (ne $v nil)}}
-		saas_query_string = "{{$v | Escape}}"
+        saas_query_string = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "saasRegex") (ne $v nil)}}
-		saas_regex = "{{$v | Escape}}"
+        saas_regex = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "saasReplace") (ne $v nil)}}
-		saas_replace = "{{$v | Escape}}"
+        saas_replace = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "saasSuffix") (ne $v nil)}}
-		saas_suffix = "{{$v | Escape}}"
+        saas_suffix = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "forwardHostHeader") (ne $v nil)}}
-		forward_host_header = "{{$v | Escape}}"
+        forward_host_header = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customForwardHostHeader") (ne $v nil)}}
-		custom_forward_host_header = "{{$v | Escape}}"
+        custom_forward_host_header = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "cacheKeyHostname") (ne $v nil)}}
-		cache_key_hostname = "{{$v | Escape}}"
+        cache_key_hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "ipVersion") (ne $v nil)}}
-		ip_version = "{{$v | Escape}}"
+        ip_version = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "useUniqueCacheKey") (ne $v nil)}}
 		use_unique_cache_key = {{$v}}
@@ -5412,16 +5407,16 @@ origin {
 		enable_true_client_ip = {{$v}}
 {{- end}}
 {{- if and (eq $k "trueClientIpHeader") (ne $v nil)}}
-		true_client_ip_header = "{{$v | Escape}}"
+        true_client_ip_header = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "trueClientIpClientSetting") (ne $v nil)}}
 		true_client_ip_client_setting = {{$v}}
 {{- end}}
 {{- if and (eq $k "originCertificate") (ne $v nil)}}
-		origin_certificate = "{{$v | Escape}}"
+        origin_certificate = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "verificationMode") (ne $v nil)}}
-		verification_mode = "{{$v | Escape}}"
+        verification_mode = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originSni") (ne $v nil)}}
 		origin_sni = {{$v}}
@@ -5430,7 +5425,7 @@ origin {
 		custom_valid_cn_values = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "originCertsToHonor") (ne $v nil)}}
-		origin_certs_to_honor = "{{$v | Escape}}"
+        origin_certs_to_honor = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "standardCertificateAuthorities"}}
 		standard_certificate_authorities = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -5440,10 +5435,10 @@ origin {
 		custom_certificate_authorities {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "pemEncodedCert") (ne $v nil)}}
-		pem_encoded_cert = "{{$v | Escape}}"
+        pem_encoded_cert = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "sha1Fingerprint") (ne $v nil)}}
-		sha1_fingerprint = "{{$v | Escape}}"
+        sha1_fingerprint = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -5454,17 +5449,17 @@ origin {
 		custom_certificates {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "pemEncodedCert") (ne $v nil)}}
-		pem_encoded_cert = "{{$v | Escape}}"
+        pem_encoded_cert = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "sha1Fingerprint") (ne $v nil)}}
-		sha1_fingerprint = "{{$v | Escape}}"
+        sha1_fingerprint = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 {{- end}}
 {{- end}}
 {{- if and (eq $k "ports") (ne $v nil)}}
-		ports = "{{$v | Escape}}"
+        ports = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "httpPort") (ne $v nil)}}
 		http_port = {{$v | AsInt}}
@@ -5489,19 +5484,19 @@ origin_characteristics {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "country") (ne $v nil)}}
-		country = "{{$v | Escape}}"
+        country = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "adcTitle") (ne $v nil)}}
-		adc_title = "{{$v | Escape}}"
+        adc_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "directConnectGeo") (ne $v nil)}}
-		direct_connect_geo = "{{$v | Escape}}"
+        direct_connect_geo = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "authenticationMethodTitle") (ne $v nil)}}
-		authentication_method_title = "{{$v | Escape}}"
+        authentication_method_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "authenticationMethod") (ne $v nil)}}
-		authentication_method = "{{$v | Escape}}"
+        authentication_method = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "encodingVersion") (ne $v nil)}}
 		encoding_version = {{$v | AsInt}}
@@ -5513,46 +5508,46 @@ origin_characteristics {
 		custom_sign_string = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "secretKey") (ne $v nil)}}
-		secret_key = "{{$v | Escape}}"
+        secret_key = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "nonce") (ne $v nil)}}
-		nonce = "{{$v | Escape}}"
+        nonce = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "mslkey") (ne $v nil)}}
-		mslkey = "{{$v | Escape}}"
+        mslkey = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "mslname") (ne $v nil)}}
-		mslname = "{{$v | Escape}}"
+        mslname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "accessKeyEncryptedStorage") (ne $v nil)}}
 		access_key_encrypted_storage = {{$v}}
 {{- end}}
 {{- if and (eq $k "gcsAccessKeyVersionGuid") (ne $v nil)}}
-		gcs_access_key_version_guid = "{{$v | Escape}}"
+        gcs_access_key_version_guid = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "gcsHmacKeyAccessId") (ne $v nil)}}
-		gcs_hmac_key_access_id = "{{$v | Escape}}"
+        gcs_hmac_key_access_id = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "gcsHmacKeySecret") (ne $v nil)}}
-		gcs_hmac_key_secret = "{{$v | Escape}}"
+        gcs_hmac_key_secret = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "awsAccessKeyVersionGuid") (ne $v nil)}}
-		aws_access_key_version_guid = "{{$v | Escape}}"
+        aws_access_key_version_guid = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "awsAccessKeyId") (ne $v nil)}}
-		aws_access_key_id = "{{$v | Escape}}"
+        aws_access_key_id = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "awsSecretAccessKey") (ne $v nil)}}
-		aws_secret_access_key = "{{$v | Escape}}"
+        aws_secret_access_key = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "awsRegion") (ne $v nil)}}
-		aws_region = "{{$v | Escape}}"
+        aws_region = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "awsHost") (ne $v nil)}}
-		aws_host = "{{$v | Escape}}"
+        aws_host = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "awsService") (ne $v nil)}}
-		aws_service = "{{$v | Escape}}"
+        aws_service = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -5571,7 +5566,7 @@ origin_characteristics_wsd {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "origintype") (ne $v nil)}}
-		origintype = "{{$v | Escape}}"
+        origintype = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -5590,10 +5585,10 @@ origin_failure_recovery_method {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "recoveryMethod") (ne $v nil)}}
-		recovery_method = "{{$v | Escape}}"
+        recovery_method = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customStatusCode") (ne $v nil)}}
-		custom_status_code = "{{$v | Escape}}"
+        custom_status_code = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -5615,7 +5610,7 @@ origin_failure_recovery_policy {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "tuningParameters") (ne $v nil)}}
-		tuning_parameters = "{{$v | Escape}}"
+        tuning_parameters = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enableIPAvoidance") (ne $v nil)}}
 		enable_ip_avoidance = {{$v}}
@@ -5630,13 +5625,13 @@ origin_failure_recovery_policy {
 		binary_equivalent_content = {{$v}}
 {{- end}}
 {{- if and (eq $k "originResponsivenessMonitoring") (ne $v nil)}}
-		origin_responsiveness_monitoring = "{{$v | Escape}}"
+        origin_responsiveness_monitoring = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "monitorOriginResponsiveness") (ne $v nil)}}
 		monitor_origin_responsiveness = {{$v}}
 {{- end}}
 {{- if and (eq $k "originResponsivenessTimeout") (ne $v nil)}}
-		origin_responsiveness_timeout = "{{$v | Escape}}"
+        origin_responsiveness_timeout = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originResponsivenessCustomTimeout") (ne $v nil)}}
 		origin_responsiveness_custom_timeout = {{$v | AsInt}}
@@ -5648,10 +5643,10 @@ origin_failure_recovery_policy {
 		origin_responsiveness_enable_recovery = {{$v}}
 {{- end}}
 {{- if and (eq $k "originResponsivenessRecoveryConfigName") (ne $v nil)}}
-		origin_responsiveness_recovery_config_name = "{{$v | Escape}}"
+        origin_responsiveness_recovery_config_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "statusCodeMonitoring1") (ne $v nil)}}
-		status_code_monitoring1 = "{{$v | Escape}}"
+        status_code_monitoring1 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "monitorStatusCodes1") (ne $v nil)}}
 		monitor_status_codes1 = {{$v}}
@@ -5666,10 +5661,10 @@ origin_failure_recovery_policy {
 		monitor_status_codes1_enable_recovery = {{$v}}
 {{- end}}
 {{- if and (eq $k "monitorStatusCodes1RecoveryConfigName") (ne $v nil)}}
-		monitor_status_codes1_recovery_config_name = "{{$v | Escape}}"
+        monitor_status_codes1_recovery_config_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "statusCodeMonitoring2") (ne $v nil)}}
-		status_code_monitoring2 = "{{$v | Escape}}"
+        status_code_monitoring2 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "monitorStatusCodes2") (ne $v nil)}}
 		monitor_status_codes2 = {{$v}}
@@ -5684,10 +5679,10 @@ origin_failure_recovery_policy {
 		monitor_status_codes2_enable_recovery = {{$v}}
 {{- end}}
 {{- if and (eq $k "monitorStatusCodes2RecoveryConfigName") (ne $v nil)}}
-		monitor_status_codes2_recovery_config_name = "{{$v | Escape}}"
+        monitor_status_codes2_recovery_config_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "statusCodeMonitoring3") (ne $v nil)}}
-		status_code_monitoring3 = "{{$v | Escape}}"
+        status_code_monitoring3 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "monitorStatusCodes3") (ne $v nil)}}
 		monitor_status_codes3 = {{$v}}
@@ -5702,7 +5697,7 @@ origin_failure_recovery_policy {
 		monitor_status_codes3_enable_recovery = {{$v}}
 {{- end}}
 {{- if and (eq $k "monitorStatusCodes3RecoveryConfigName") (ne $v nil)}}
-		monitor_status_codes3_recovery_config_name = "{{$v | Escape}}"
+        monitor_status_codes3_recovery_config_name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -5743,7 +5738,7 @@ persistent_client_connection {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "timeout") (ne $v nil)}}
-		timeout = "{{$v | Escape}}"
+        timeout = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -5765,7 +5760,7 @@ persistent_connection {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "timeout") (ne $v nil)}}
-		timeout = "{{$v | Escape}}"
+        timeout = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -5813,32 +5808,32 @@ phased_release {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "label") (ne $v nil)}}
-		label = "{{$v | Escape}}"
+        label = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "populationTitle") (ne $v nil)}}
-		population_title = "{{$v | Escape}}"
+        population_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "populationCookieType") (ne $v nil)}}
-		population_cookie_type = "{{$v | Escape}}"
+        population_cookie_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "populationExpirationDate") (ne $v nil)}}
-		population_expiration_date = "{{$v | Escape}}"
+        population_expiration_date = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "populationDuration") (ne $v nil)}}
-		population_duration = "{{$v | Escape}}"
+        population_duration = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "populationRefresh") (ne $v nil)}}
 		population_refresh = {{$v}}
 {{- end}}
 {{- if and (eq $k "failoverTitle") (ne $v nil)}}
-		failover_title = "{{$v | Escape}}"
+        failover_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "failoverEnabled") (ne $v nil)}}
 		failover_enabled = {{$v}}
@@ -5907,7 +5902,7 @@ predictive_prefetching {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "accuracyTarget") (ne $v nil)}}
-		accuracy_target = "{{$v | Escape}}"
+        accuracy_target = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -5986,52 +5981,52 @@ quality {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "origin_settings") (ne $v nil)}}
-		origin_settings = "{{$v | Escape}}"
+        origin_settings = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "country") (ne $v nil)}}
-		country = "{{$v | Escape}}"
+        country = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "audienceSettings") (ne $v nil)}}
-		audience_settings = "{{$v | Escape}}"
+        audience_settings = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "endUserLocation") (ne $v nil)}}
-		end_user_location = "{{$v | Escape}}"
+        end_user_location = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "maximumConcurrentUsers") (ne $v nil)}}
-		maximum_concurrent_users = "{{$v | Escape}}"
+        maximum_concurrent_users = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "contentSettings") (ne $v nil)}}
-		content_settings = "{{$v | Escape}}"
+        content_settings = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "contentType") (ne $v nil)}}
-		content_type = "{{$v | Escape}}"
+        content_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "objectSize") (ne $v nil)}}
-		object_size = "{{$v | Escape}}"
+        object_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "downloadType") (ne $v nil)}}
-		download_type = "{{$v | Escape}}"
+        download_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "popularityDistribution") (ne $v nil)}}
-		popularity_distribution = "{{$v | Escape}}"
+        popularity_distribution = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "deliveryType") (ne $v nil)}}
-		delivery_type = "{{$v | Escape}}"
+        delivery_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "deliveryFormat") (ne $v nil)}}
-		delivery_format = "{{$v | Escape}}"
+        delivery_format = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "segmentDuration") (ne $v nil)}}
 		segment_duration = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "catalogSize") (ne $v nil)}}
-		catalog_size = "{{$v | Escape}}"
+        catalog_size = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "refreshRate") (ne $v nil)}}
-		refresh_rate = "{{$v | Escape}}"
+        refresh_rate = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "optimizeFor") (ne $v nil)}}
-		optimize_for = "{{$v | Escape}}"
+        optimize_for = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -6078,7 +6073,7 @@ random_seek {
 		mp4 = {{$v}}
 {{- end}}
 {{- if and (eq $k "maximumSize") (ne $v nil)}}
-		maximum_size = "{{$v | Escape}}"
+        maximum_size = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -6116,7 +6111,7 @@ read_timeout {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -6179,40 +6174,40 @@ redirect {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "mobileDefaultChoice") (ne $v nil)}}
-		mobile_default_choice = "{{$v | Escape}}"
+        mobile_default_choice = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "destinationProtocol") (ne $v nil)}}
-		destination_protocol = "{{$v | Escape}}"
+        destination_protocol = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "destinationHostname") (ne $v nil)}}
-		destination_hostname = "{{$v | Escape}}"
+        destination_hostname = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "destinationHostnameSubdomain") (ne $v nil)}}
-		destination_hostname_subdomain = "{{$v | Escape}}"
+        destination_hostname_subdomain = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "destinationHostnameSibling") (ne $v nil)}}
-		destination_hostname_sibling = "{{$v | Escape}}"
+        destination_hostname_sibling = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "destinationHostnameOther") (ne $v nil)}}
-		destination_hostname_other = "{{$v | Escape}}"
+        destination_hostname_other = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "destinationPath") (ne $v nil)}}
-		destination_path = "{{$v | Escape}}"
+        destination_path = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "destinationPathPrefix") (ne $v nil)}}
-		destination_path_prefix = "{{$v | Escape}}"
+        destination_path_prefix = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "destinationPathSuffixStatus") (ne $v nil)}}
-		destination_path_suffix_status = "{{$v | Escape}}"
+        destination_path_suffix_status = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "destinationPathSuffix") (ne $v nil)}}
-		destination_path_suffix = "{{$v | Escape}}"
+        destination_path_suffix = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "destinationPathOther") (ne $v nil)}}
-		destination_path_other = "{{$v | Escape}}"
+        destination_path_other = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "queryString") (ne $v nil)}}
-		query_string = "{{$v | Escape}}"
+        query_string = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "responseCode") (ne $v nil)}}
 		response_code = {{$v | AsInt}}
@@ -6237,7 +6232,7 @@ redirectplus {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "destination") (ne $v nil)}}
-		destination = "{{$v | Escape}}"
+        destination = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "responseCode") (ne $v nil)}}
 		response_code = {{$v | AsInt}}
@@ -6337,7 +6332,7 @@ report {
 		log_accept_language = {{$v}}
 {{- end}}
 {{- if and (eq $k "logCookies") (ne $v nil)}}
-		log_cookies = "{{$v | Escape}}"
+        log_cookies = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "cookies"}}
 		cookies = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -6346,7 +6341,7 @@ report {
 		log_custom_log_field = {{$v}}
 {{- end}}
 {{- if and (eq $k "customLogField") (ne $v nil)}}
-		custom_log_field = "{{$v | Escape}}"
+        custom_log_field = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "logEdgeIP") (ne $v nil)}}
 		log_edge_ip = {{$v}}
@@ -6381,7 +6376,7 @@ request_control {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -6401,20 +6396,20 @@ request_control {
 		cp_code = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
-		download_domain_name = "{{$v | Escape}}"
+        download_domain_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "g2oToken") (ne $v nil)}}
-		g2o_token = "{{$v | Escape}}"
+        g2o_token = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "branded403File") (ne $v nil)}}
-		branded403_file = "{{$v | Escape}}"
+        branded403_file = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "branded403Url") (ne $v nil)}}
-		branded403_url = "{{$v | Escape}}"
+        branded403_url = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "brandedDenyCacheTtl") (ne $v nil)}}
 		branded_deny_cache_ttl = {{$v | AsInt}}
@@ -6436,7 +6431,7 @@ request_type_marker {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "requestType") (ne $v nil)}}
-		request_type = "{{$v | Escape}}"
+        request_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -6518,19 +6513,19 @@ response_cookie {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "cookieName") (ne $v nil)}}
-		cookie_name = "{{$v | Escape}}"
+        cookie_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "type") (ne $v nil)}}
-		type = "{{$v | Escape}}"
+        type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "format") (ne $v nil)}}
-		format = "{{$v | Escape}}"
+        format = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "defaultDomain") (ne $v nil)}}
 		default_domain = {{$v}}
@@ -6539,22 +6534,22 @@ response_cookie {
 		default_path = {{$v}}
 {{- end}}
 {{- if and (eq $k "domain") (ne $v nil)}}
-		domain = "{{$v | Escape}}"
+        domain = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "path") (ne $v nil)}}
-		path = "{{$v | Escape}}"
+        path = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "expires") (ne $v nil)}}
-		expires = "{{$v | Escape}}"
+        expires = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "expirationDate") (ne $v nil)}}
-		expiration_date = "{{$v | Escape}}"
+        expiration_date = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "duration") (ne $v nil)}}
-		duration = "{{$v | Escape}}"
+        duration = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "sameSite") (ne $v nil)}}
-		same_site = "{{$v | Escape}}"
+        same_site = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "secure") (ne $v nil)}}
 		secure = {{$v}}
@@ -6579,7 +6574,7 @@ restrict_object_caching {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "maximumSize") (ne $v nil)}}
-		maximum_size = "{{$v | Escape}}"
+        maximum_size = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -6598,7 +6593,7 @@ return_cache_status {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "responseHeaderName") (ne $v nil)}}
-		response_header_name = "{{$v | Escape}}"
+        response_header_name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -6617,25 +6612,25 @@ rewrite_url {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "behavior") (ne $v nil)}}
-		behavior = "{{$v | Escape}}"
+        behavior = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "match") (ne $v nil)}}
-		match = "{{$v | Escape}}"
+        match = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchRegex") (ne $v nil)}}
-		match_regex = "{{$v | Escape}}"
+        match_regex = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "targetRegex") (ne $v nil)}}
-		target_regex = "{{$v | Escape}}"
+        target_regex = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "targetPath") (ne $v nil)}}
-		target_path = "{{$v | Escape}}"
+        target_path = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "targetPathPrepend") (ne $v nil)}}
-		target_path_prepend = "{{$v | Escape}}"
+        target_path_prepend = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "targetUrl") (ne $v nil)}}
-		target_url = "{{$v | Escape}}"
+        target_url = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchMultiple") (ne $v nil)}}
 		match_multiple = {{$v}}
@@ -6663,7 +6658,7 @@ rum_custom {
 		rum_sample_rate = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "rumGroupName") (ne $v nil)}}
-		rum_group_name = "{{$v | Escape}}"
+        rum_group_name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -6682,10 +6677,10 @@ saas_definitions {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "customerTitle") (ne $v nil)}}
-		customer_title = "{{$v | Escape}}"
+        customer_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customerAction") (ne $v nil)}}
-		customer_action = "{{$v | Escape}}"
+        customer_action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customerCnameEnabled") (ne $v nil)}}
 		customer_cname_enabled = {{$v}}
@@ -6694,22 +6689,22 @@ saas_definitions {
 		customer_cname_level = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "customerCookie") (ne $v nil)}}
-		customer_cookie = "{{$v | Escape}}"
+        customer_cookie = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customerQueryString") (ne $v nil)}}
-		customer_query_string = "{{$v | Escape}}"
+        customer_query_string = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customerRegex") (ne $v nil)}}
-		customer_regex = "{{$v | Escape}}"
+        customer_regex = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customerReplace") (ne $v nil)}}
-		customer_replace = "{{$v | Escape}}"
+        customer_replace = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "applicationTitle") (ne $v nil)}}
-		application_title = "{{$v | Escape}}"
+        application_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "applicationAction") (ne $v nil)}}
-		application_action = "{{$v | Escape}}"
+        application_action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "applicationCnameEnabled") (ne $v nil)}}
 		application_cname_enabled = {{$v}}
@@ -6718,22 +6713,22 @@ saas_definitions {
 		application_cname_level = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "applicationCookie") (ne $v nil)}}
-		application_cookie = "{{$v | Escape}}"
+        application_cookie = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "applicationQueryString") (ne $v nil)}}
-		application_query_string = "{{$v | Escape}}"
+        application_query_string = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "applicationRegex") (ne $v nil)}}
-		application_regex = "{{$v | Escape}}"
+        application_regex = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "applicationReplace") (ne $v nil)}}
-		application_replace = "{{$v | Escape}}"
+        application_replace = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "usersTitle") (ne $v nil)}}
-		users_title = "{{$v | Escape}}"
+        users_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "usersAction") (ne $v nil)}}
-		users_action = "{{$v | Escape}}"
+        users_action = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "usersCnameEnabled") (ne $v nil)}}
 		users_cname_enabled = {{$v}}
@@ -6742,16 +6737,16 @@ saas_definitions {
 		users_cname_level = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "usersCookie") (ne $v nil)}}
-		users_cookie = "{{$v | Escape}}"
+        users_cookie = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "usersQueryString") (ne $v nil)}}
-		users_query_string = "{{$v | Escape}}"
+        users_query_string = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "usersRegex") (ne $v nil)}}
-		users_regex = "{{$v | Escape}}"
+        users_regex = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "usersReplace") (ne $v nil)}}
-		users_replace = "{{$v | Escape}}"
+        users_replace = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -6773,19 +6768,19 @@ sales_force_commerce_cloud_client {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "connectorId") (ne $v nil)}}
-		connector_id = "{{$v | Escape}}"
+        connector_id = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originType") (ne $v nil)}}
-		origin_type = "{{$v | Escape}}"
+        origin_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "sf3cOriginHost") (ne $v nil)}}
-		sf3c_origin_host = "{{$v | Escape}}"
+        sf3c_origin_host = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originHostHeader") (ne $v nil)}}
-		origin_host_header = "{{$v | Escape}}"
+        origin_host_header = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "sf3cOriginHostHeader") (ne $v nil)}}
-		sf3c_origin_host_header = "{{$v | Escape}}"
+        sf3c_origin_host_header = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "allowOverrideOriginCacheKey") (ne $v nil)}}
 		allow_override_origin_cache_key = {{$v}}
@@ -6826,7 +6821,7 @@ sales_force_commerce_cloud_provider_host_header {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "hostHeaderSource") (ne $v nil)}}
-		host_header_source = "{{$v | Escape}}"
+        host_header_source = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -6864,16 +6859,16 @@ schedule_invalidation {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "start") (ne $v nil)}}
-		start = "{{$v | Escape}}"
+        start = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "repeat") (ne $v nil)}}
 		repeat = {{$v}}
 {{- end}}
 {{- if and (eq $k "repeatInterval") (ne $v nil)}}
-		repeat_interval = "{{$v | Escape}}"
+        repeat_interval = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "refreshMethod") (ne $v nil)}}
-		refresh_method = "{{$v | Escape}}"
+        refresh_method = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -6895,7 +6890,7 @@ script_management {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "serviceworker") (ne $v nil)}}
-		serviceworker = "{{$v | Escape}}"
+        serviceworker = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "timestamp") (ne $v nil)}}
 		timestamp = {{$v | AsInt}}
@@ -6917,28 +6912,28 @@ segmented_content_protection {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "tokenAuthenticationTitle") (ne $v nil)}}
-		token_authentication_title = "{{$v | Escape}}"
+        token_authentication_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "key") (ne $v nil)}}
-		key = "{{$v | Escape}}"
+        key = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "useAdvanced") (ne $v nil)}}
 		use_advanced = {{$v}}
 {{- end}}
 {{- if and (eq $k "transitionKey") (ne $v nil)}}
-		transition_key = "{{$v | Escape}}"
+        transition_key = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "salt") (ne $v nil)}}
-		salt = "{{$v | Escape}}"
+        salt = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "headerForSalt"}}
 		header_for_salt = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "fieldCarryOver") (ne $v nil)}}
-		field_carry_over = "{{$v | Escape}}"
+        field_carry_over = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "sessionId") (ne $v nil)}}
 		session_id = {{$v}}
@@ -6953,7 +6948,7 @@ segmented_content_protection {
 		acl = {{$v}}
 {{- end}}
 {{- if and (eq $k "tokenAuthHLSTitle") (ne $v nil)}}
-		token_auth_hls_title = "{{$v | Escape}}"
+        token_auth_hls_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enableTokenInURI") (ne $v nil)}}
 		enable_token_in_uri = {{$v}}
@@ -6962,7 +6957,7 @@ segmented_content_protection {
 		hls_master_manifest_files = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "tokenRevocationTitle") (ne $v nil)}}
-		token_revocation_title = "{{$v | Escape}}"
+        token_revocation_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "tokenRevocationEnabled") (ne $v nil)}}
 		token_revocation_enabled = {{$v}}
@@ -6971,7 +6966,7 @@ segmented_content_protection {
 		revoked_list_id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "mediaEncryptionTitle") (ne $v nil)}}
-		media_encryption_title = "{{$v | Escape}}"
+        media_encryption_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hlsMediaEncryption") (ne $v nil)}}
 		hls_media_encryption = {{$v}}
@@ -6996,7 +6991,7 @@ segmented_media_optimization {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "behavior") (ne $v nil)}}
-		behavior = "{{$v | Escape}}"
+        behavior = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enableUllStreaming") (ne $v nil)}}
 		enable_ull_streaming = {{$v}}
@@ -7005,19 +7000,19 @@ segmented_media_optimization {
 		show_advanced = {{$v}}
 {{- end}}
 {{- if and (eq $k "liveType") (ne $v nil)}}
-		live_type = "{{$v | Escape}}"
+        live_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "startTime") (ne $v nil)}}
-		start_time = "{{$v | Escape}}"
+        start_time = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "endTime") (ne $v nil)}}
-		end_time = "{{$v | Escape}}"
+        end_time = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "dvrType") (ne $v nil)}}
-		dvr_type = "{{$v | Escape}}"
+        dvr_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "dvrWindow") (ne $v nil)}}
-		dvr_window = "{{$v | Escape}}"
+        dvr_window = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -7055,85 +7050,85 @@ set_variable {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "variableName") (ne $v nil)}}
-		variable_name = "{{$v | Escape}}"
+        variable_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "valueSource") (ne $v nil)}}
-		value_source = "{{$v | Escape}}"
+        value_source = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "variableValue") (ne $v nil)}}
-		variable_value = "{{$v | Escape}}"
+        variable_value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "extractLocation") (ne $v nil)}}
-		extract_location = "{{$v | Escape}}"
+        extract_location = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "certificateFieldName") (ne $v nil)}}
-		certificate_field_name = "{{$v | Escape}}"
+        certificate_field_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "headerName") (ne $v nil)}}
-		header_name = "{{$v | Escape}}"
+        header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "responseHeaderName") (ne $v nil)}}
-		response_header_name = "{{$v | Escape}}"
+        response_header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "setCookieName") (ne $v nil)}}
-		set_cookie_name = "{{$v | Escape}}"
+        set_cookie_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "cookieName") (ne $v nil)}}
-		cookie_name = "{{$v | Escape}}"
+        cookie_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "locationId") (ne $v nil)}}
-		location_id = "{{$v | Escape}}"
+        location_id = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "pathComponentOffset") (ne $v nil)}}
-		path_component_offset = "{{$v | Escape}}"
+        path_component_offset = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "queryParameterName") (ne $v nil)}}
-		query_parameter_name = "{{$v | Escape}}"
+        query_parameter_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "generator") (ne $v nil)}}
-		generator = "{{$v | Escape}}"
+        generator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "numberOfBytes") (ne $v nil)}}
 		number_of_bytes = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "minRandomNumber") (ne $v nil)}}
-		min_random_number = "{{$v | Escape}}"
+        min_random_number = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "maxRandomNumber") (ne $v nil)}}
-		max_random_number = "{{$v | Escape}}"
+        max_random_number = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "transform") (ne $v nil)}}
-		transform = "{{$v | Escape}}"
+        transform = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "operandOne") (ne $v nil)}}
-		operand_one = "{{$v | Escape}}"
+        operand_one = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "algorithm") (ne $v nil)}}
-		algorithm = "{{$v | Escape}}"
+        algorithm = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "encryptionKey") (ne $v nil)}}
-		encryption_key = "{{$v | Escape}}"
+        encryption_key = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "initializationVector") (ne $v nil)}}
-		initialization_vector = "{{$v | Escape}}"
+        initialization_vector = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "encryptionMode") (ne $v nil)}}
-		encryption_mode = "{{$v | Escape}}"
+        encryption_mode = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "nonce") (ne $v nil)}}
-		nonce = "{{$v | Escape}}"
+        nonce = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "prependBytes") (ne $v nil)}}
 		prepend_bytes = {{$v}}
 {{- end}}
 {{- if and (eq $k "formatString") (ne $v nil)}}
-		format_string = "{{$v | Escape}}"
+        format_string = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "paramName") (ne $v nil)}}
-		param_name = "{{$v | Escape}}"
+        param_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "separator") (ne $v nil)}}
-		separator = "{{$v | Escape}}"
+        separator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "min") (ne $v nil)}}
 		min = {{$v | AsInt}}
@@ -7142,13 +7137,13 @@ set_variable {
 		max = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "hmacKey") (ne $v nil)}}
-		hmac_key = "{{$v | Escape}}"
+        hmac_key = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hmacAlgorithm") (ne $v nil)}}
-		hmac_algorithm = "{{$v | Escape}}"
+        hmac_algorithm = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "ipVersion") (ne $v nil)}}
-		ip_version = "{{$v | Escape}}"
+        ip_version = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "ipv6Prefix") (ne $v nil)}}
 		ipv6_prefix = {{$v | AsInt}}
@@ -7157,13 +7152,13 @@ set_variable {
 		ipv4_prefix = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "subString") (ne $v nil)}}
-		sub_string = "{{$v | Escape}}"
+        sub_string = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "regex") (ne $v nil)}}
-		regex = "{{$v | Escape}}"
+        regex = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "replacement") (ne $v nil)}}
-		replacement = "{{$v | Escape}}"
+        replacement = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "caseSensitive") (ne $v nil)}}
 		case_sensitive = {{$v}}
@@ -7172,19 +7167,19 @@ set_variable {
 		global_substitution = {{$v}}
 {{- end}}
 {{- if and (eq $k "startIndex") (ne $v nil)}}
-		start_index = "{{$v | Escape}}"
+        start_index = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "endIndex") (ne $v nil)}}
-		end_index = "{{$v | Escape}}"
+        end_index = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "exceptChars") (ne $v nil)}}
-		except_chars = "{{$v | Escape}}"
+        except_chars = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "forceChars") (ne $v nil)}}
-		force_chars = "{{$v | Escape}}"
+        force_chars = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "deviceProfile") (ne $v nil)}}
-		device_profile = "{{$v | Escape}}"
+        device_profile = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -7203,7 +7198,7 @@ shutr {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "status") (ne $v nil)}}
-		status = "{{$v | Escape}}"
+        status = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -7222,10 +7217,10 @@ simulate_error_code {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "errorType") (ne $v nil)}}
-		error_type = "{{$v | Escape}}"
+        error_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "timeout") (ne $v nil)}}
-		timeout = "{{$v | Escape}}"
+        timeout = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -7248,20 +7243,20 @@ site_shield {
 		ssmap {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "srmap") (ne $v nil)}}
-		srmap = "{{$v | Escape}}"
+        srmap = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "nossmap") (ne $v nil)}}
-		nossmap = "{{$v | Escape}}"
+        nossmap = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -7283,7 +7278,7 @@ standard_tls_migration {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "migrationFrom") (ne $v nil)}}
-		migration_from = "{{$v | Escape}}"
+        migration_from = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "allowHTTPSUpgrade") (ne $v nil)}}
 		allow_https_upgrade = {{$v}}
@@ -7292,13 +7287,13 @@ standard_tls_migration {
 		allow_https_downgrade = {{$v}}
 {{- end}}
 {{- if and (eq $k "migrationStartTime") (ne $v nil)}}
-		migration_start_time = "{{$v | Escape}}"
+        migration_start_time = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "migrationDuration") (ne $v nil)}}
 		migration_duration = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "cacheSharingStartTime") (ne $v nil)}}
-		cache_sharing_start_time = "{{$v | Escape}}"
+        cache_sharing_start_time = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "cacheSharingDuration") (ne $v nil)}}
 		cache_sharing_duration = {{$v | AsInt}}
@@ -7310,7 +7305,7 @@ standard_tls_migration {
 		is_tiered_distribution_used = {{$v}}
 {{- end}}
 {{- if and (eq $k "tdLocation") (ne $v nil)}}
-		td_location = "{{$v | Escape}}"
+        td_location = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -7329,7 +7324,7 @@ standard_tls_migration_override {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "info") (ne $v nil)}}
-		info = "{{$v | Escape}}"
+        info = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -7376,7 +7371,7 @@ sub_customer {
 		origin = {{$v}}
 {{- end}}
 {{- if and (eq $k "partnerDomainSuffix") (ne $v nil)}}
-		partner_domain_suffix = "{{$v | Escape}}"
+        partner_domain_suffix = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "caching") (ne $v nil)}}
 		caching = {{$v}}
@@ -7446,25 +7441,25 @@ sure_route {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "type") (ne $v nil)}}
-		type = "{{$v | Escape}}"
+        type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customMap") (ne $v nil)}}
-		custom_map = "{{$v | Escape}}"
+        custom_map = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "testObjectUrl") (ne $v nil)}}
-		test_object_url = "{{$v | Escape}}"
+        test_object_url = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "srDownloadLinkTitle") (ne $v nil)}}
-		sr_download_link_title = "{{$v | Escape}}"
+        sr_download_link_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "toHostStatus") (ne $v nil)}}
-		to_host_status = "{{$v | Escape}}"
+        to_host_status = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "toHost") (ne $v nil)}}
-		to_host = "{{$v | Escape}}"
+        to_host = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "raceStatTtl") (ne $v nil)}}
-		race_stat_ttl = "{{$v | Escape}}"
+        race_stat_ttl = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "forceSslForward") (ne $v nil)}}
 		force_ssl_forward = {{$v}}
@@ -7476,7 +7471,7 @@ sure_route {
 		enable_custom_key = {{$v}}
 {{- end}}
 {{- if and (eq $k "customStatKey") (ne $v nil)}}
-		custom_stat_key = "{{$v | Escape}}"
+        custom_stat_key = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -7495,7 +7490,7 @@ tcp_optimization {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "display") (ne $v nil)}}
-		display = "{{$v | Escape}}"
+        display = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -7542,7 +7537,7 @@ tiered_distribution {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "tieredDistributionMap") (ne $v nil)}}
-		tiered_distribution_map = "{{$v | Escape}}"
+        tiered_distribution_map = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -7564,13 +7559,13 @@ tiered_distribution_advanced {
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "method") (ne $v nil)}}
-		method = "{{$v | Escape}}"
+        method = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "policy") (ne $v nil)}}
-		policy = "{{$v | Escape}}"
+        policy = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "tieredDistributionMap") (ne $v nil)}}
-		tiered_distribution_map = "{{$v | Escape}}"
+        tiered_distribution_map = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "allowall") (ne $v nil)}}
 		allowall = {{$v}}
@@ -7592,25 +7587,25 @@ tiered_distribution_customization {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "tier1Title") (ne $v nil)}}
-		tier1_title = "{{$v | Escape}}"
+        tier1_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customMapEnabled") (ne $v nil)}}
 		custom_map_enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "customMapName") (ne $v nil)}}
-		custom_map_name = "{{$v | Escape}}"
+        custom_map_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "serialStart") (ne $v nil)}}
-		serial_start = "{{$v | Escape}}"
+        serial_start = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "serialEnd") (ne $v nil)}}
-		serial_end = "{{$v | Escape}}"
+        serial_end = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "hashAlgorithm") (ne $v nil)}}
-		hash_algorithm = "{{$v | Escape}}"
+        hash_algorithm = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "cloudwrapperMapMigrationTitle") (ne $v nil)}}
-		cloudwrapper_map_migration_title = "{{$v | Escape}}"
+        cloudwrapper_map_migration_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "mapMigrationEnabled") (ne $v nil)}}
 		map_migration_enabled = {{$v}}
@@ -7619,13 +7614,13 @@ tiered_distribution_customization {
 		migration_within_cw_maps_enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "location") (ne $v nil)}}
-		location = "{{$v | Escape}}"
+        location = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "migrationStartDate") (ne $v nil)}}
-		migration_start_date = "{{$v | Escape}}"
+        migration_start_date = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "migrationEndDate") (ne $v nil)}}
-		migration_end_date = "{{$v | Escape}}"
+        migration_end_date = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -7644,7 +7639,7 @@ timeout {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -7663,22 +7658,22 @@ uid_configuration {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "legalText") (ne $v nil)}}
-		legal_text = "{{$v | Escape}}"
+        legal_text = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "extractLocation") (ne $v nil)}}
-		extract_location = "{{$v | Escape}}"
+        extract_location = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "headerName") (ne $v nil)}}
-		header_name = "{{$v | Escape}}"
+        header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "queryParameterName") (ne $v nil)}}
-		query_parameter_name = "{{$v | Escape}}"
+        query_parameter_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "variableName") (ne $v nil)}}
-		variable_name = "{{$v | Escape}}"
+        variable_name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -7716,16 +7711,16 @@ verify_json_web_token {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "extractLocation") (ne $v nil)}}
-		extract_location = "{{$v | Escape}}"
+        extract_location = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "headerName") (ne $v nil)}}
-		header_name = "{{$v | Escape}}"
+        header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "queryParameterName") (ne $v nil)}}
-		query_parameter_name = "{{$v | Escape}}"
+        query_parameter_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "jwt") (ne $v nil)}}
-		jwt = "{{$v | Escape}}"
+        jwt = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enableRS256") (ne $v nil)}}
 		enable_rs256 = {{$v}}
@@ -7750,40 +7745,40 @@ verify_json_web_token_for_dcp {
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "extractLocation") (ne $v nil)}}
-		extract_location = "{{$v | Escape}}"
+        extract_location = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "primaryLocation") (ne $v nil)}}
-		primary_location = "{{$v | Escape}}"
+        primary_location = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customHeader") (ne $v nil)}}
 		custom_header = {{$v}}
 {{- end}}
 {{- if and (eq $k "headerName") (ne $v nil)}}
-		header_name = "{{$v | Escape}}"
+        header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "queryParameterName") (ne $v nil)}}
-		query_parameter_name = "{{$v | Escape}}"
+        query_parameter_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "jwt") (ne $v nil)}}
-		jwt = "{{$v | Escape}}"
+        jwt = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "extractClientId") (ne $v nil)}}
 		extract_client_id = {{$v}}
 {{- end}}
 {{- if and (eq $k "clientId") (ne $v nil)}}
-		client_id = "{{$v | Escape}}"
+        client_id = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "extractAuthorizations") (ne $v nil)}}
 		extract_authorizations = {{$v}}
 {{- end}}
 {{- if and (eq $k "authorizations") (ne $v nil)}}
-		authorizations = "{{$v | Escape}}"
+        authorizations = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "extractUserName") (ne $v nil)}}
 		extract_user_name = {{$v}}
 {{- end}}
 {{- if and (eq $k "userName") (ne $v nil)}}
-		user_name = "{{$v | Escape}}"
+        user_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "enableRS256") (ne $v nil)}}
 		enable_rs256 = {{$v}}
@@ -7811,13 +7806,13 @@ verify_token_authorization {
 		use_advanced = {{$v}}
 {{- end}}
 {{- if and (eq $k "location") (ne $v nil)}}
-		location = "{{$v | Escape}}"
+        location = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "locationId") (ne $v nil)}}
-		location_id = "{{$v | Escape}}"
+        location_id = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "algorithm") (ne $v nil)}}
-		algorithm = "{{$v | Escape}}"
+        algorithm = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "escapeHmacInputs") (ne $v nil)}}
 		escape_hmac_inputs = {{$v}}
@@ -7826,13 +7821,13 @@ verify_token_authorization {
 		ignore_query_string = {{$v}}
 {{- end}}
 {{- if and (eq $k "key") (ne $v nil)}}
-		key = "{{$v | Escape}}"
+        key = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "transitionKey") (ne $v nil)}}
-		transition_key = "{{$v | Escape}}"
+        transition_key = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "salt") (ne $v nil)}}
-		salt = "{{$v | Escape}}"
+        salt = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "failureResponse") (ne $v nil)}}
 		failure_response = {{$v}}
@@ -7857,22 +7852,22 @@ virtual_waiting_room {
 		cloudlet_shared_policy = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "domainConfig") (ne $v nil)}}
-		domain_config = "{{$v | Escape}}"
+        domain_config = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customCookieDomain") (ne $v nil)}}
-		custom_cookie_domain = "{{$v | Escape}}"
+        custom_cookie_domain = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomTitle") (ne $v nil)}}
-		waiting_room_title = "{{$v | Escape}}"
+        waiting_room_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomPath") (ne $v nil)}}
-		waiting_room_path = "{{$v | Escape}}"
+        waiting_room_path = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "waitingRoomAssetsPaths"}}
 		waiting_room_assets_paths = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "accessTitle") (ne $v nil)}}
-		access_title = "{{$v | Escape}}"
+        access_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "sessionDuration") (ne $v nil)}}
 		session_duration = {{$v | AsInt}}
@@ -7923,20 +7918,20 @@ visitor_prioritization {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "userIdentificationTitle") (ne $v nil)}}
-		user_identification_title = "{{$v | Escape}}"
+        user_identification_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "userIdentificationByCookie") (ne $v nil)}}
 		user_identification_by_cookie = {{$v}}
 {{- end}}
 {{- if and (eq $k "userIdentificationKeyCookie") (ne $v nil)}}
-		user_identification_key_cookie = "{{$v | Escape}}"
+        user_identification_key_cookie = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "userIdentificationByHeaders") (ne $v nil)}}
 		user_identification_by_headers = {{$v}}
@@ -7954,13 +7949,13 @@ visitor_prioritization {
 		user_identification_key_params = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "allowedUserCookieManagementTitle") (ne $v nil)}}
-		allowed_user_cookie_management_title = "{{$v | Escape}}"
+        allowed_user_cookie_management_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "allowedUserCookieEnabled") (ne $v nil)}}
 		allowed_user_cookie_enabled = {{$v}}
 {{- end}}
 {{- if and (eq $k "allowedUserCookieLabel") (ne $v nil)}}
-		allowed_user_cookie_label = "{{$v | Escape}}"
+        allowed_user_cookie_label = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "allowedUserCookieDuration") (ne $v nil)}}
 		allowed_user_cookie_duration = {{$v | AsInt}}
@@ -7975,19 +7970,19 @@ visitor_prioritization {
 		allowed_user_cookie_automatic_salt = {{$v}}
 {{- end}}
 {{- if and (eq $k "allowedUserCookieSalt") (ne $v nil)}}
-		allowed_user_cookie_salt = "{{$v | Escape}}"
+        allowed_user_cookie_salt = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "allowedUserCookieDomainType") (ne $v nil)}}
-		allowed_user_cookie_domain_type = "{{$v | Escape}}"
+        allowed_user_cookie_domain_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "allowedUserCookieDomain") (ne $v nil)}}
-		allowed_user_cookie_domain = "{{$v | Escape}}"
+        allowed_user_cookie_domain = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "allowedUserCookieHttpOnly") (ne $v nil)}}
 		allowed_user_cookie_http_only = {{$v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomCookieManagementTitle") (ne $v nil)}}
-		waiting_room_cookie_management_title = "{{$v | Escape}}"
+        waiting_room_cookie_management_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomCookieEnabled") (ne $v nil)}}
 		waiting_room_cookie_enabled = {{$v}}
@@ -7996,7 +7991,7 @@ visitor_prioritization {
 		waiting_room_cookie_share_label = {{$v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomCookieLabel") (ne $v nil)}}
-		waiting_room_cookie_label = "{{$v | Escape}}"
+        waiting_room_cookie_label = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomCookieDuration") (ne $v nil)}}
 		waiting_room_cookie_duration = {{$v | AsInt}}
@@ -8008,19 +8003,19 @@ visitor_prioritization {
 		waiting_room_cookie_automatic_salt = {{$v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomCookieSalt") (ne $v nil)}}
-		waiting_room_cookie_salt = "{{$v | Escape}}"
+        waiting_room_cookie_salt = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomCookieDomainType") (ne $v nil)}}
-		waiting_room_cookie_domain_type = "{{$v | Escape}}"
+        waiting_room_cookie_domain_type = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomCookieDomain") (ne $v nil)}}
-		waiting_room_cookie_domain = "{{$v | Escape}}"
+        waiting_room_cookie_domain = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomCookieHttpOnly") (ne $v nil)}}
 		waiting_room_cookie_http_only = {{$v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomManagementTitle") (ne $v nil)}}
-		waiting_room_management_title = "{{$v | Escape}}"
+        waiting_room_management_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomStatusCode") (ne $v nil)}}
 		waiting_room_status_code = {{$v | AsInt}}
@@ -8036,13 +8031,13 @@ visitor_prioritization {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "createdDate") (ne $v nil)}}
 		created_date = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "products"}}
 		products = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -8058,7 +8053,7 @@ visitor_prioritization {
 		limit = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "limitType") (ne $v nil)}}
-		limit_type = "{{$v | Escape}}"
+        limit_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -8076,17 +8071,17 @@ visitor_prioritization {
 		cp_code = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "downloadDomainName") (ne $v nil)}}
-		download_domain_name = "{{$v | Escape}}"
+        download_domain_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "g2oToken") (ne $v nil)}}
-		g2o_token = "{{$v | Escape}}"
+        g2o_token = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
 		{{- end}}
 {{- end}}
 {{- if and (eq $k "waitingRoomDirectory") (ne $v nil)}}
-		waiting_room_directory = "{{$v | Escape}}"
+        waiting_room_directory = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomCacheTtl") (ne $v nil)}}
 		waiting_room_cache_ttl = {{$v | AsInt}}
@@ -8111,22 +8106,22 @@ visitor_prioritization_fifo {
 		cloudlet_shared_policy = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "domainConfig") (ne $v nil)}}
-		domain_config = "{{$v | Escape}}"
+        domain_config = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "customCookieDomain") (ne $v nil)}}
-		custom_cookie_domain = "{{$v | Escape}}"
+        custom_cookie_domain = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomTitle") (ne $v nil)}}
-		waiting_room_title = "{{$v | Escape}}"
+        waiting_room_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "waitingRoomPath") (ne $v nil)}}
-		waiting_room_path = "{{$v | Escape}}"
+        waiting_room_path = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "waitingRoomAssetsPaths"}}
 		waiting_room_assets_paths = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "accessTitle") (ne $v nil)}}
-		access_title = "{{$v | Escape}}"
+        access_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "sessionDuration") (ne $v nil)}}
 		session_duration = {{$v | AsInt}}
@@ -8170,55 +8165,49 @@ watermarking {
 		enable = {{$v}}
 {{- end}}
 {{- if and (eq $k "tokenSigningTitle") (ne $v nil)}}
-		token_signing_title = "{{$v | Escape}}"
+        token_signing_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "signatureVerificationEnable") (ne $v nil)}}
 		signature_verification_enable = {{$v}}
 {{- end}}
 {{- if and (eq $k "verificationKeyId1") (ne $v nil)}}
-		verification_key_id1 = "{{$v | Escape}}"
+        verification_key_id1 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "verificationPublicKey1") (ne $v nil)}}
-		verification_public_key1 = <<EOT
-{{$v}}
-%{~if false}trim redundant new line%{endif~}
-EOT
+        verification_public_key1 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "verificationKeyId2") (ne $v nil)}}
-		verification_key_id2 = "{{$v | Escape}}"
+        verification_key_id2 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "verificationPublicKey2") (ne $v nil)}}
-		verification_public_key2 = <<EOT
-{{$v}}
-%{~if false}trim redundant new line%{endif~}
-EOT
+        verification_public_key2 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "patternEncryptionTitle") (ne $v nil)}}
-		pattern_encryption_title = "{{$v | Escape}}"
+        pattern_encryption_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "patternDecryptionEnable") (ne $v nil)}}
 		pattern_decryption_enable = {{$v}}
 {{- end}}
 {{- if and (eq $k "decryptionPasswordId1") (ne $v nil)}}
-		decryption_password_id1 = "{{$v | Escape}}"
+        decryption_password_id1 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "decryptionPassword1") (ne $v nil)}}
-		decryption_password1 = "{{$v | Escape}}"
+        decryption_password1 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "decryptionPasswordId2") (ne $v nil)}}
-		decryption_password_id2 = "{{$v | Escape}}"
+        decryption_password_id2 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "decryptionPassword2") (ne $v nil)}}
-		decryption_password2 = "{{$v | Escape}}"
+        decryption_password2 = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "miscellaneousSettingsTitle") (ne $v nil)}}
-		miscellaneous_settings_title = "{{$v | Escape}}"
+        miscellaneous_settings_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "useOriginalAsA") (ne $v nil)}}
 		use_original_as_a = {{$v}}
 {{- end}}
 {{- if and (eq $k "abVariantLocation") (ne $v nil)}}
-		ab_variant_location = "{{$v | Escape}}"
+        ab_variant_location = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8244,10 +8233,10 @@ web_application_firewall {
 		config_id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "productionStatus") (ne $v nil)}}
-		production_status = "{{$v | Escape}}"
+        production_status = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "stagingStatus") (ne $v nil)}}
-		staging_status = "{{$v | Escape}}"
+        staging_status = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "productionVersion") (ne $v nil)}}
 		production_version = {{$v | AsInt}}
@@ -8256,7 +8245,7 @@ web_application_firewall {
 		staging_version = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "fileName") (ne $v nil)}}
-		file_name = "{{$v | Escape}}"
+        file_name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -8319,10 +8308,10 @@ advanced_im_match {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchOn") (ne $v nil)}}
-		match_on = "{{$v | Escape}}"
+        match_on = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8360,10 +8349,10 @@ cacheability {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8382,7 +8371,7 @@ china_cdn_region {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8404,7 +8393,7 @@ client_certificate {
 		is_certificate_present = {{$v}}
 {{- end}}
 {{- if and (eq $k "isCertificateValid") (ne $v nil)}}
-		is_certificate_valid = "{{$v | Escape}}"
+        is_certificate_valid = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8423,7 +8412,7 @@ client_ip {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "values"}}
 		values = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -8448,7 +8437,7 @@ client_ip_version {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "useXForwardedFor") (ne $v nil)}}
 		use_x_forwarded_for = {{$v}}
@@ -8470,7 +8459,7 @@ cloudlets_origin {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "originId") (ne $v nil)}}
-		origin_id = "{{$v | Escape}}"
+        origin_id = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8489,10 +8478,10 @@ content_delivery_network {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "network") (ne $v nil)}}
-		network = "{{$v | Escape}}"
+        network = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8511,7 +8500,7 @@ content_type {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "values"}}
 		values = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -8539,16 +8528,16 @@ device_characteristic {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "characteristic") (ne $v nil)}}
-		characteristic = "{{$v | Escape}}"
+        characteristic = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "stringMatchOperator") (ne $v nil)}}
-		string_match_operator = "{{$v | Escape}}"
+        string_match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "numericMatchOperator") (ne $v nil)}}
-		numeric_match_operator = "{{$v | Escape}}"
+        numeric_match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "versionMatchOperator") (ne $v nil)}}
-		version_match_operator = "{{$v | Escape}}"
+        version_match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "booleanValue") (ne $v nil)}}
 		boolean_value = {{$v}}
@@ -8560,7 +8549,7 @@ device_characteristic {
 		numeric_value = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "versionValue") (ne $v nil)}}
-		version_value = "{{$v | Escape}}"
+        version_value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchCaseSensitive") (ne $v nil)}}
 		match_case_sensitive = {{$v}}
@@ -8585,10 +8574,10 @@ ecmd_auth_groups {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8607,7 +8596,7 @@ ecmd_auth_scheme {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "authScheme") (ne $v nil)}}
-		auth_scheme = "{{$v | Escape}}"
+        auth_scheme = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8626,7 +8615,7 @@ ecmd_is_authenticated {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8645,13 +8634,13 @@ ecmd_username {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "length") (ne $v nil)}}
-		length = "{{$v | Escape}}"
+        length = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8670,7 +8659,7 @@ edge_workers_failure {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "execStatus") (ne $v nil)}}
-		exec_status = "{{$v | Escape}}"
+        exec_status = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8689,7 +8678,7 @@ file_extension {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "values"}}
 		values = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -8714,7 +8703,7 @@ filename {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "values"}}
 		values = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -8739,7 +8728,7 @@ hostname {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "values"}}
 		values = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -8761,19 +8750,13 @@ match_advanced {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "openXml") (ne $v nil)}}
-		open_xml = <<EOT
-{{$v}}
-%{~if false}trim redundant new line%{endif~}
-EOT
+        open_xml = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "closeXml") (ne $v nil)}}
-		close_xml = <<EOT
-{{$v}}
-%{~if false}trim redundant new line%{endif~}
-EOT
+        close_xml = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8799,13 +8782,13 @@ match_cp_code {
 		id = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "name") (ne $v nil)}}
-		name = "{{$v | Escape}}"
+        name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "createdDate") (ne $v nil)}}
 		created_date = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "description") (ne $v nil)}}
-		description = "{{$v | Escape}}"
+        description = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "products"}}
 		products = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -8821,7 +8804,7 @@ match_cp_code {
 		limit = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "limitType") (ne $v nil)}}
-		limit_type = "{{$v | Escape}}"
+        limit_type = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
@@ -8848,7 +8831,7 @@ match_response_code {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "values"}}
 		values = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -8876,22 +8859,22 @@ match_variable {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "variableName") (ne $v nil)}}
-		variable_name = "{{$v | Escape}}"
+        variable_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "variableValues"}}
 		variable_values = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "variableExpression") (ne $v nil)}}
-		variable_expression = "{{$v | Escape}}"
+        variable_expression = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "lowerBound") (ne $v nil)}}
-		lower_bound = "{{$v | Escape}}"
+        lower_bound = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "upperBound") (ne $v nil)}}
-		upper_bound = "{{$v | Escape}}"
+        upper_bound = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchWildcard") (ne $v nil)}}
 		match_wildcard = {{$v}}
@@ -8916,10 +8899,10 @@ metadata_stage {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8938,7 +8921,7 @@ origin_timeout {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -8957,7 +8940,7 @@ path {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "values"}}
 		values = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -8985,10 +8968,10 @@ query_string_parameter {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "parameterName") (ne $v nil)}}
-		parameter_name = "{{$v | Escape}}"
+        parameter_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "values"}}
 		values = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -9050,7 +9033,7 @@ recovery_config {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "configName") (ne $v nil)}}
-		config_name = "{{$v | Escape}}"
+        config_name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -9069,10 +9052,10 @@ regular_expression {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchString") (ne $v nil)}}
-		match_string = "{{$v | Escape}}"
+        match_string = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "regex") (ne $v nil)}}
-		regex = "{{$v | Escape}}"
+        regex = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "caseSensitive") (ne $v nil)}}
 		case_sensitive = {{$v}}
@@ -9094,13 +9077,13 @@ request_cookie {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "cookieName") (ne $v nil)}}
-		cookie_name = "{{$v | Escape}}"
+        cookie_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "lowerBound") (ne $v nil)}}
 		lower_bound = {{$v | AsInt}}
@@ -9137,10 +9120,10 @@ request_header {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "headerName") (ne $v nil)}}
-		header_name = "{{$v | Escape}}"
+        header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "values"}}
 		values = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -9171,10 +9154,10 @@ request_method {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -9193,7 +9176,7 @@ request_protocol {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -9212,10 +9195,10 @@ request_type {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "value") (ne $v nil)}}
-		value = "{{$v | Escape}}"
+        value = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -9234,10 +9217,10 @@ response_header {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "headerName") (ne $v nil)}}
-		header_name = "{{$v | Escape}}"
+        header_name = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "values"}}
 		values = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -9274,31 +9257,31 @@ time {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "repeatInterval") (ne $v nil)}}
-		repeat_interval = "{{$v | Escape}}"
+        repeat_interval = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "repeatDuration") (ne $v nil)}}
-		repeat_duration = "{{$v | Escape}}"
+        repeat_duration = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "lastingDuration") (ne $v nil)}}
-		lasting_duration = "{{$v | Escape}}"
+        lasting_duration = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "lastingDate") (ne $v nil)}}
-		lasting_date = "{{$v | Escape}}"
+        lasting_date = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "repeatBeginDate") (ne $v nil)}}
-		repeat_begin_date = "{{$v | Escape}}"
+        repeat_begin_date = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "applyDaylightSavingsTime") (ne $v nil)}}
 		apply_daylight_savings_time = {{$v}}
 {{- end}}
 {{- if and (eq $k "beginDate") (ne $v nil)}}
-		begin_date = "{{$v | Escape}}"
+        begin_date = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "endDate") (ne $v nil)}}
-		end_date = "{{$v | Escape}}"
+        end_date = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -9317,7 +9300,7 @@ token_authorization {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "statusList"}}
 		status_list = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -9339,7 +9322,7 @@ user_agent {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "values"}}
 		values = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -9367,10 +9350,10 @@ user_location {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "field") (ne $v nil)}}
-		field = "{{$v | Escape}}"
+        field = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "countryValues"}}
 		country_values = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -9382,7 +9365,7 @@ user_location {
 		region_values = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "checkIps") (ne $v nil)}}
-		check_ips = "{{$v | Escape}}"
+        check_ips = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "useOnlyFirstXForwardedForIp") (ne $v nil)}}
 		use_only_first_x_forwarded_for_ip = {{$v}}
@@ -9404,10 +9387,10 @@ user_network {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "field") (ne $v nil)}}
-		field = "{{$v | Escape}}"
+        field = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "networkTypeValues"}}
 		network_type_values = [{{range $v}}"{{. | Escape}}", {{end}}]
@@ -9419,7 +9402,7 @@ user_network {
 		bandwidth_values = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "checkIps") (ne $v nil)}}
-		check_ips = "{{$v | Escape}}"
+        check_ips = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "useOnlyFirstXForwardedForIp") (ne $v nil)}}
 		use_only_first_x_forwarded_for_ip = {{$v}}
@@ -9463,10 +9446,10 @@ virtual_waiting_room_request {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchOn") (ne $v nil)}}
-		match_on = "{{$v | Escape}}"
+        match_on = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -9485,10 +9468,10 @@ visitor_prioritization_request {
 {{- end}}
 {{- range $k, $v := $v}}
 {{- if and (eq $k "matchOperator") (ne $v nil)}}
-		match_operator = "{{$v | Escape}}"
+        match_operator = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "matchOn") (ne $v nil)}}
-		match_on = "{{$v | Escape}}"
+        match_on = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -9502,7 +9485,7 @@ data "akamai_property_rules_builder" "{{.TerraformName}}" {
         name = "{{.Name | Escape}}"
         is_secure = {{.Options.IsSecure}}
         {{- if .Comments}}
-        comments = "{{.Comments}}"
+        comments = {{template "Text" .Comments}}
         {{- end}}
 		{{- if .CriteriaMustSatisfy}}
         criteria_must_satisfy = "{{.CriteriaMustSatisfy}}"

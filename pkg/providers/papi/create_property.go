@@ -186,6 +186,19 @@ var (
 	ErrUnsupportedRuleFormat = errors.New("unsupported rule format")
 )
 
+var additionalFuncs = template.FuncMap{
+	"ToLower":           strings.ToLower,
+	"TerraformName":     TerraformName,
+	"AsInt":             AsInt,
+	"Escape":            Escape,
+	"ReportError":       ReportError,
+	"CheckErrors":       CheckErrors,
+	"IsMultiline":       IsMultiline,
+	"NoNewlineAtTheEnd": NoNewlineAtTheEnd,
+	"RemoveLastNewline": RemoveLastNewline,
+	"GetEOT":            GetEOT,
+}
+
 // CmdCreateProperty is an entrypoint to create-property command
 func CmdCreateProperty(c *cli.Context) error {
 	ctx := c.Context
@@ -233,13 +246,7 @@ func CmdCreateProperty(c *cli.Context) error {
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
-		AdditionalFuncs: template.FuncMap{
-			"ToLower":     strings.ToLower,
-			"AsInt":       AsInt,
-			"Escape":      Escape,
-			"ReportError": ReportError,
-			"CheckErrors": CheckErrors,
-		},
+		AdditionalFuncs: additionalFuncs,
 	}
 
 	propertyName := c.Args().First()
@@ -917,4 +924,34 @@ func CheckErrors() (string, error) {
 		return "", fmt.Errorf("there were errors reported: %v", strings.Join(reportedErrors, ", "))
 	}
 	return "", nil
+}
+
+// IsMultiline returns true if the input string contains at least one new line character
+func IsMultiline(str string) bool {
+	return strings.LastIndex(str, "\n") >= 0
+}
+
+// NoNewlineAtTheEnd returns true if there is no new line character at the end of the string
+func NoNewlineAtTheEnd(str string) bool {
+	if str == "" {
+		return true
+	}
+	return str[len(str)-1:] != "\n"
+}
+
+// RemoveLastNewline removes the new line character if this is the last character in the string
+func RemoveLastNewline(str string) string {
+	if len(str) > 0 && str[len(str)-1:] == "\n" {
+		return str[:len(str)-1]
+	}
+	return str
+}
+
+// GetEOT generates unique delimiter word for heredoc, by default it is EOT
+func GetEOT(str string) string {
+	eot := "EOT"
+	for strings.LastIndex(str, eot) >= 0 {
+		eot += "A"
+	}
+	return eot
 }

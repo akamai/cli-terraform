@@ -22,15 +22,9 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
     criterion {
       match_advanced {
         uuid        = "fa27bc4d-bfff-4541-8eb7-ade156a57256"
-        close_xml   = <<EOT
-
-%{~if false}trim redundant new line%{endif~}
-EOT
+        close_xml   = ""
         description = ""
-        open_xml    = <<EOT
-
-%{~if false}trim redundant new line%{endif~}
-EOT
+        open_xml    = ""
       }
     }
     criterion {
@@ -216,8 +210,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters
 
 	xxx yyyy
 
-
-%{~if false}trim redundant new line%{endif~}
 EOT
       }
     }
@@ -239,6 +231,11 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_static_content" {
   rules_v2023_01_05 {
     name                  = "Static Content"
     is_secure             = false
+    comments              = <<EOT
+comment
+newline in the middle only
+%{~if false}trim redundant new line%{endif~}
+EOT
     criteria_must_satisfy = "all"
     criterion {
       file_extension {
@@ -268,6 +265,13 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_dynamic_content" {
   rules_v2023_01_05 {
     name                  = "Dynamic Content"
     is_secure             = false
+    comments              = <<EOTA
+comment
+newline
+and
+EOT
+inside
+EOTA
     criteria_must_satisfy = "all"
     criterion {
       cacheability {
@@ -348,10 +352,7 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_m_pulse" {
     behavior {
       m_pulse {
         buffer_size     = ""
-        config_override = <<EOT
-{"name":"John", "age":30, "car":null}
-%{~if false}trim redundant new line%{endif~}
-EOT
+        config_override = "{\"name\":\"John\", \"age\":30, \"car\":null}"
         enabled         = true
         loader_version  = "V12"
         require_pci     = true
