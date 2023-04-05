@@ -9477,13 +9477,15 @@ visitor_prioritization_request {
 }
 {{- end}}
 
-{{- range .Rules}}
-data "akamai_property_rules_builder" "{{.TerraformName}}" {
-	{{- $children := .Children}}
-	{{- with .Rule}}
+{{- range $i, $r := .Rules}}
+data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
+	{{- $children := $r.Children}}
+	{{- with $r.Rule}}
 	rules_v2023_01_05 {
         name = "{{.Name | Escape}}"
+		{{- if eq $i 0}}
         is_secure = {{.Options.IsSecure}}
+		{{- end}}
         {{- if .Comments}}
         comments = {{template "Text" .Comments}}
         {{- end}}
@@ -9502,6 +9504,7 @@ data "akamai_property_rules_builder" "{{.TerraformName}}" {
         {{- if .CriteriaLocked}}
         criteria_locked = "{{.CriteriaLocked}}"
         {{- end}}
+{{- if eq $i 0}}
 {{- range .Variables}}
         variable {
             name        = "{{.Name | Escape}}"
@@ -9510,6 +9513,7 @@ data "akamai_property_rules_builder" "{{.TerraformName}}" {
             hidden      = {{.Hidden}}
             sensitive   = {{.Sensitive}}
         }
+{{- end}}
 {{- end}}
 {{- range .Criteria}}
         criterion {

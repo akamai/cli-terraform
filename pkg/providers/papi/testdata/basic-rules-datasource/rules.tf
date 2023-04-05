@@ -192,7 +192,6 @@ EOT
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters--a-------------ą" {
   rules_v2023_01_05 {
     name                  = "Strange Characters${a}\"\\||$%&*@#|!ą"
-    is_secure             = false
     criteria_must_satisfy = "all"
     criterion {
       content_type {
@@ -230,7 +229,6 @@ EOT
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_static_content" {
   rules_v2023_01_05 {
     name                  = "Static Content"
-    is_secure             = false
     comments              = <<EOT
 comment
 newline in the middle only
@@ -264,7 +262,6 @@ EOT
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_dynamic_content" {
   rules_v2023_01_05 {
     name                  = "Dynamic Content"
-    is_secure             = false
     comments              = <<EOTA
 comment
 newline
@@ -290,7 +287,6 @@ EOTA
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule" {
   rules_v2023_01_05 {
     name                  = "new rule"
-    is_secure             = false
     criteria_must_satisfy = "all"
   }
 }
@@ -298,7 +294,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule" {
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule1" {
   rules_v2023_01_05 {
     name                  = "new rule"
-    is_secure             = false
     criteria_must_satisfy = "any"
   }
 }
@@ -306,7 +301,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule1" {
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_deny_by_location" {
   rules_v2023_01_05 {
     name                  = "Deny by Location"
-    is_secure             = false
     criteria_must_satisfy = "any"
   }
 }
@@ -314,7 +308,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_deny_by_location" 
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_redirect_to_language_specific_section" {
   rules_v2023_01_05 {
     name                  = "redirect to language specific section"
-    is_secure             = false
     criteria_must_satisfy = "any"
   }
 }
@@ -322,7 +315,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_redirect_to_langua
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule2" {
   rules_v2023_01_05 {
     name                  = "new rule"
-    is_secure             = false
     criteria_must_satisfy = "all"
   }
 }
@@ -330,7 +322,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule2" {
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule3" {
   rules_v2023_01_05 {
     name                  = "new rule"
-    is_secure             = false
     criteria_must_satisfy = "all"
   }
 }
@@ -338,7 +329,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule3" {
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters--a-------------ą1" {
   rules_v2023_01_05 {
     name                  = "Strange Characters${a}\"\\&&$%&*@#|!ą"
-    is_secure             = false
     criteria_must_satisfy = "all"
   }
 }
@@ -346,7 +336,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_m_pulse" {
   rules_v2023_01_05 {
     name                  = "mPulse"
-    is_secure             = false
     comments              = "Test mPulse"
     criteria_must_satisfy = "all"
     behavior {
