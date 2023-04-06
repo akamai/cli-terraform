@@ -44,13 +44,11 @@ import (
 type EdgeHostname struct {
 	EdgeHostname             string
 	EdgeHostnameID           string
-	ProductName              string
 	ContractID               string
 	GroupID                  string
 	ID                       string
 	IPv6                     string
 	EdgeHostnameResourceName string
-	SlotNumber               int
 	SecurityType             string
 	UseCases                 string
 }
@@ -378,7 +376,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	}
 
 	tfData.Property.Hostnames, tfData.Property.EdgeHostnames, err =
-		getEdgeHostnameDetail(ctx, client, clientHapi, hostnames, product.ProductName, property)
+		getEdgeHostnameDetail(ctx, client, clientHapi, hostnames, property)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrFetchingHostnameDetails, err)
@@ -493,8 +491,7 @@ func getPropertyVersionHostnames(ctx context.Context, client papi.PAPI, property
 	return &response.Hostnames, nil
 }
 
-func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI hapi.HAPI, hostnames *papi.HostnameResponseItems,
-	productName string, property *papi.Property) (map[string]Hostname, map[string]EdgeHostname, error) {
+func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI hapi.HAPI, hostnames *papi.HostnameResponseItems, property *papi.Property) (map[string]Hostname, map[string]EdgeHostname, error) {
 
 	edgeHostnamesMap := map[string]EdgeHostname{}
 	hostnamesMap := map[string]Hostname{}
@@ -532,12 +529,10 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			edgeHostnamesMap[cnameToResource] = EdgeHostname{
 				EdgeHostname:             cnameTo,
 				EdgeHostnameID:           hostname.EdgeHostnameID,
-				ProductName:              productName,
 				ContractID:               property.ContractID,
 				GroupID:                  property.GroupID,
 				IPv6:                     getIPv6(papiEdgeHostnames, hostname.EdgeHostnameID),
 				EdgeHostnameResourceName: cnameToResource,
-				SlotNumber:               edgeHostname.SlotNumber,
 				SecurityType:             edgeHostname.SecurityType,
 				UseCases:                 useCases,
 			}

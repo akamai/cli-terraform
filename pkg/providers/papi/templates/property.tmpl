@@ -28,14 +28,10 @@ data "akamai_property_rules_template" "rules" {
 }{{end}}
 {{range .Property.EdgeHostnames}}
 resource "akamai_edge_hostname" "{{.EdgeHostnameResourceName}}" {
-  product_id  = "prd_{{.ProductName}}"
   contract_id = data.akamai_contract.contract.id
   group_id = data.akamai_group.group.id
   ip_behavior = "{{.IPv6}}"
   edge_hostname = "{{.EdgeHostname}}"
-{{- if .SlotNumber}}
-  certificate = {{.SlotNumber}}
-{{- end}}
 {{- if .UseCases}}
   use_cases = jsonencode({{.UseCases}})
 {{- end}}

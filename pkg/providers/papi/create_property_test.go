@@ -569,7 +569,6 @@ func TestCreateProperty(t *testing.T) {
 							"test-edgesuite-net": {
 								EdgeHostname:             "test.edgesuite.net",
 								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
 								ContractID:               "test_contract",
 								GroupID:                  "grp_12345",
 								ID:                       "",
@@ -791,7 +790,6 @@ func TestCreateProperty(t *testing.T) {
 							"test-edgesuite-net": {
 								EdgeHostname:             "test.edgesuite.net",
 								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
 								ContractID:               "test_contract",
 								GroupID:                  "grp_12345",
 								ID:                       "",
@@ -922,7 +920,6 @@ func TestCreateProperty(t *testing.T) {
 							"test-edgesuite-net": {
 								EdgeHostname:             "test.edgesuite.net",
 								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
 								ContractID:               "test_contract",
 								GroupID:                  "grp_12345",
 								ID:                       "",
@@ -1053,7 +1050,6 @@ func TestCreateProperty(t *testing.T) {
 							"test-edgesuite-net": {
 								EdgeHostname:             "test.edgesuite.net",
 								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
 								ContractID:               "test_contract",
 								GroupID:                  "grp_12345",
 								ID:                       "",
@@ -1213,7 +1209,6 @@ func TestCreateProperty(t *testing.T) {
 							"test-edgesuite-net": {
 								EdgeHostname:             "test.edgesuite.net",
 								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
 								ContractID:               "test_contract",
 								GroupID:                  "grp_12345",
 								ID:                       "",
@@ -1405,7 +1400,6 @@ func TestCreateProperty(t *testing.T) {
 							"test-edgesuite-net": {
 								EdgeHostname:             "test.edgesuite.net",
 								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
 								ContractID:               "test_contract",
 								GroupID:                  "grp_12345",
 								ID:                       "",
@@ -1539,7 +1533,6 @@ func TestCreateProperty(t *testing.T) {
 							"test-edgesuite-net": {
 								EdgeHostname:             "test.edgesuite.net",
 								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
 								ContractID:               "test_contract",
 								GroupID:                  "grp_12345",
 								ID:                       "",
@@ -1670,7 +1663,6 @@ func TestCreateProperty(t *testing.T) {
 							"test-edgesuite-net": {
 								EdgeHostname:             "test.edgesuite.net",
 								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
 								ContractID:               "test_contract",
 								GroupID:                  "grp_12345",
 								ID:                       "",
@@ -1794,7 +1786,6 @@ func TestCreateProperty(t *testing.T) {
 							"test-edgesuite-net": {
 								EdgeHostname:             "test.edgesuite.net",
 								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
 								ContractID:               "test_contract",
 								GroupID:                  "grp_12345",
 								ID:                       "",
@@ -1926,7 +1917,6 @@ func TestCreateProperty(t *testing.T) {
 							"test-edgesuite-net": {
 								EdgeHostname:             "test.edgesuite.net",
 								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
 								ContractID:               "test_contract",
 								GroupID:                  "grp_12345",
 								ID:                       "",
@@ -2052,7 +2042,6 @@ func TestCreateProperty(t *testing.T) {
 							"test-edgesuite-net": {
 								EdgeHostname:             "test.edgesuite.net",
 								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
 								ContractID:               "test_contract",
 								GroupID:                  "grp_12345",
 								ID:                       "",
@@ -2373,7 +2362,6 @@ func TestCreateProperty(t *testing.T) {
 							"test-edgesuite-net": {
 								EdgeHostname:             "test.edgesuite.net",
 								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
 								ContractID:               "test_contract",
 								GroupID:                  "grp_12345",
 								ID:                       "",
@@ -2477,7 +2465,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2520,7 +2507,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2564,7 +2550,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2625,7 +2610,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2698,7 +2682,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2742,7 +2725,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2786,7 +2768,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2830,7 +2811,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",

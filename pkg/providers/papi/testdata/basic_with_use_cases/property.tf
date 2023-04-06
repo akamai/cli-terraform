@@ -27,7 +27,6 @@ data "akamai_property_rules_template" "rules" {
 }
 
 resource "akamai_edge_hostname" "test-edgesuite-net" {
-  product_id    = "prd_HTTP_Content_Del"
   contract_id   = data.akamai_contract.contract.id
   group_id      = data.akamai_group.group.id
   ip_behavior   = "IPV6_COMPLIANCE"
