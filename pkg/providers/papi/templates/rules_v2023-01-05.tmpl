@@ -9522,6 +9522,12 @@ data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
 		{{- if .AdvancedOverride}}
         advanced_override = {{template "Text" .AdvancedOverride}}
         {{- end}}
+		{{- with .CustomOverride}}
+		custom_override {
+			name        = "{{.Name}}"
+			override_id = "{{.OverrideID}}"
+		}
+		{{- end}}
 {{- end}}
 {{- range .Criteria}}
         criterion {

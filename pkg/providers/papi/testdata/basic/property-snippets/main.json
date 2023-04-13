@@ -78,6 +78,10 @@
       "#include:Dynamic_Content.json"
     ],
     "uuid": "default",
-    "options": {}
+    "options": {},
+    "customOverride": {
+      "name": "mdc",
+      "overrideId": "cbo_12345"
+    }
   }
 }

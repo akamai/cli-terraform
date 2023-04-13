@@ -25,6 +25,10 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
 ...
 EOT
     , "\n")
+    custom_override {
+      name        = "mdc"
+      override_id = "cbo_12345"
+    }
     criterion {
       match_advanced {
         uuid        = "fa27bc4d-bfff-4541-8eb7-ade156a57256"

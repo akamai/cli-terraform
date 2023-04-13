@@ -593,6 +593,7 @@ func setPropertyRuleTemplates(rules *papi.GetRuleTreeResponse) (RuleTemplate, Ru
 		UUID:                rules.Rules.UUID,
 		Variables:           rules.Rules.Variables,
 		AdvancedOverride:    rules.Rules.AdvancedOverride,
+		CustomOverride:      rules.Rules.CustomOverride,
 		Children:            make([]string, 0),
 		Options:             rules.Rules.Options,
 	}
