@@ -1,13 +1,18 @@
 {{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/papi.TFData*/ -}}
 {{- define "Text"}}
-	{{- if . | IsMultiline}}<<{{. | GetEOT}}
-{{. | RemoveLastNewline}}
+	{{- if . | IsMultiline}}
 		{{- if . | NoNewlineAtTheEnd}}
-%{~if false}trim redundant new line%{endif~}
-		{{- end}}
+{{- "trimsuffix(<<"}}{{. | GetEOT}}
+{{. | RemoveLastNewline}}
 {{. | GetEOT}}
-		{{- else}}"{{. | Escape}}"
-        {{- end}}
+, "\n")
+		{{- else}}
+{{- "<<"}}{{. | GetEOT}}
+{{. | RemoveLastNewline}}
+{{. | GetEOT}}
+		{{- end}}
+	{{- else}}"{{. | Escape}}"
+	{{- end}}
 {{- end}}
 
 

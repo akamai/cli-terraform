@@ -19,12 +19,12 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
       hidden      = false
       sensitive   = false
     }
-    advanced_override = <<EOT
+    advanced_override = trimsuffix(<<EOT
 <!-- Remove Duplicate X-Akamai-Staging Header -->
 
 ...
-%{~if false}trim redundant new line%{endif~}
 EOT
+    , "\n")
     criterion {
       match_advanced {
         uuid        = "fa27bc4d-bfff-4541-8eb7-ade156a57256"
@@ -123,7 +123,7 @@ EOT
       advanced {
         uuid        = "feeaeff9-fe7e-4e27-ba0c-7b1dcecdba8b"
         description = "extract inputs"
-        xml         = <<EOT
+        xml = trimsuffix(<<EOT
 <assign:extract-value>
    <variable-name>ENDUSER</variable-name>
    <location>Query_String</location>
@@ -160,8 +160,8 @@ EOT
       <name>Distance</name>
       <value>%(DISTANCE)</value>
    </edgeservices:modify-outgoing-response.add-header>
-%{~if false}trim redundant new line%{endif~}
 EOT
+        , "\n")
       }
     }
     behavior {
@@ -234,12 +234,12 @@ EOT
 
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_static_content" {
   rules_v2023_01_05 {
-    name                  = "Static Content"
-    comments              = <<EOT
+    name = "Static Content"
+    comments = trimsuffix(<<EOT
 comment
 newline in the middle only
-%{~if false}trim redundant new line%{endif~}
 EOT
+    , "\n")
     criteria_must_satisfy = "all"
     criterion {
       file_extension {
