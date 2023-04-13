@@ -436,6 +436,7 @@
       }
     ],
     "uuid": "default",
-    "criteriaMustSatisfy": "all"
+    "criteriaMustSatisfy": "all",
+    "advancedOverride": "<!-- Remove Duplicate X-Akamai-Staging Header -->\n\n..."
   }
 }

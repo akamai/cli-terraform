@@ -9514,6 +9514,9 @@ data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
             sensitive   = {{.Sensitive}}
         }
 {{- end}}
+		{{- if .AdvancedOverride}}
+        advanced_override = {{template "Text" .AdvancedOverride}}
+        {{- end}}
 {{- end}}
 {{- range .Criteria}}
         criterion {

@@ -19,6 +19,12 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
       hidden      = false
       sensitive   = false
     }
+    advanced_override = <<EOT
+<!-- Remove Duplicate X-Akamai-Staging Header -->
+
+...
+%{~if false}trim redundant new line%{endif~}
+EOT
     criterion {
       match_advanced {
         uuid        = "fa27bc4d-bfff-4541-8eb7-ade156a57256"
