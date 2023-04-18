@@ -38,13 +38,13 @@ resource "akamai_property" "test-edgesuite-net" {
   contract_id = data.akamai_contract.contract.id
   group_id    = data.akamai_group.group.id
   product_id  = "prd_HTTP_Content_Del"
-  rule_format = "latest"
   hostnames {
     cname_from             = "test.edgesuite.net"
     cname_to               = akamai_edge_hostname.test-edgesuite-net.edge_hostname
     cert_provisioning_type = "CPS_MANAGED"
   }
-  rules = data.akamai_property_rules_template.rules.json
+  rule_format = "latest"
+  rules       = data.akamai_property_rules_template.rules.json
 }
 
 resource "akamai_property_activation" "test-edgesuite-net" {

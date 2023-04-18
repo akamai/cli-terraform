@@ -13,6 +13,7 @@
   * `is_secure` and `variable` fields can only be used in `default` datasource `akamai_property_rules_builder`
   * Support for `advanced_override` and `custom_override` fields in `default` datasource `akamai_property_rules_builder`
   * Fix ending newline character during export for heredoc in `akamai_property_rules_builder` datasource
+  * Export `akamai_property.rule_format` as reference to `akamai_property_rules_builder`
 
 ## Version 1.4.0 (Mar 30, 2023)
 

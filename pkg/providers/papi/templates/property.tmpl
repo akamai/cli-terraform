@@ -42,7 +42,6 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
   contract_id = data.akamai_contract.contract.id
   group_id = data.akamai_group.group.id
   product_id = "prd_{{.Property.ProductName}}"
-  rule_format = "{{.Property.RuleFormat}}"
 {{- range .Property.Hostnames}}
   hostnames {
     cname_from = "{{.CnameFrom}}"
@@ -55,9 +54,11 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
   }
 {{- end}}
 {{- if .RulesAsSchema}}
-  rules = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.json
+  rule_format = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.rule_format
+  rules       = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.json
 {{- else}}
-  rules = data.akamai_property_rules_template.rules.json
+  rule_format = "{{.Property.RuleFormat}}"
+  rules       = data.akamai_property_rules_template.rules.json
 {{- end}}
 }
 
