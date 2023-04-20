@@ -133,9 +133,7 @@ terraform import module.security.akamai_appsec_advanced_settings_request_body.{{
 {{ end -}}
 {{ if .RatePolicies -}}
 {{ range .RatePolicies -}}
-{{ if eq .Type "WAF" }}
 terraform import module.security.akamai_appsec_rate_policy.{{ escapeName .Name}} {{ $configID }}:{{ .ID }}
-{{ end -}}
 {{ end -}}
 {{ end -}}
 {{ if .ReputationProfiles  -}}
@@ -157,5 +155,99 @@ terraform import module.activate-security.akamai_appsec_activations.appsecactiva
 {{ if .MalwarePolicies -}}
 {{ range .MalwarePolicies -}}
 terraform import module.security.akamai_appsec_malware_policy.{{ escapeName .Name}} {{ $configID }}:{{ .MalwarePolicyID }}
+{{ end -}}
+{{ end -}}
+
+{{ if .CustomBotCategories  -}}
+{{ range .CustomBotCategories  -}}
+terraform import module.security.akamai_botman_custom_bot_category.{{escapeName (index . "categoryName")}}_{{index . "categoryId"}} {{ $configID }}:{{index . "categoryId"}}
+{{ if (index . "metadata" "akamaiDefinedBots") -}}
+{{ range (index . "metadata" "akamaiDefinedBots") -}}
+terraform import module.security.akamai_botman_recategorized_akamai_defined_bot.{{ escapeName (index . "botName") }}_{{ index . "botId" }} {{ $configID }}:{{ index . "botId" }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .CustomBotCategorySequence  -}}
+terraform import module.security.akamai_botman_custom_bot_category_sequence.custom_bot_category_sequence {{ $configID }}
+{{ end -}}
+{{ if .CustomDefinedBots  -}}
+{{ range .CustomDefinedBots  -}}
+terraform import module.security.akamai_botman_custom_defined_bot.{{escapeName (index . "botName")}}_{{index . "botId"}} {{ $configID }}:{{index . "botId"}}
+{{ end -}}
+{{ end -}}
+{{ if .CustomClients  -}}
+{{ range .CustomClients  -}}
+terraform import module.security.akamai_botman_custom_client.{{escapeName (index . "customClientName")}}_{{index . "customClientId"}} {{ $configID }}:{{index . "customClientId"}}
+{{ end -}}
+{{ end -}}
+{{ if .ResponseActions  -}}
+{{ if .ResponseActions.ServeAlternateActions  -}}
+{{ range .ResponseActions.ServeAlternateActions  -}}
+terraform import module.security.akamai_botman_serve_alternate_action.{{escapeName (index . "actionName")}}_{{index . "actionId"}} {{ $configID }}:{{index . "actionId"}}
+{{ end -}}
+{{ end -}}
+{{ if .ResponseActions.ChallengeActions  -}}
+{{ range .ResponseActions.ChallengeActions  -}}
+terraform import module.security.akamai_botman_challenge_action.{{escapeName (index . "actionName")}}_{{index . "actionId"}} {{ $configID }}:{{index . "actionId"}}
+{{ end -}}
+{{ end -}}
+{{ if .ResponseActions.ConditionalActions  -}}
+{{ range .ResponseActions.ConditionalActions  -}}
+terraform import module.security.akamai_botman_conditional_action.{{escapeName (index . "actionName")}}_{{index . "actionId"}} {{ $configID }}:{{index . "actionId"}}
+{{ end -}}
+{{ end -}}
+{{ if .ResponseActions.ChallengeInterceptionRules  -}}
+terraform import module.security.akamai_botman_challenge_interception_rules.challenge_interception_rules {{ $configID }}
+{{ end -}}
+{{ end -}}
+{{ if .AdvancedSettings -}}
+{{ if .AdvancedSettings.BotAnalyticsCookieSettings -}}
+terraform import module.security.akamai_botman_bot_analytics_cookie.bot_analytics_cookie {{$configID}}
+{{ end -}}
+{{ if .AdvancedSettings.ClientSideSecuritySettings -}}
+terraform import module.security.akamai_botman_client_side_security.client_side_security {{$configID}}
+{{ end -}}
+{{ if .AdvancedSettings.TransactionalEndpointProtectionSettings -}}
+terraform import module.security.akamai_botman_transactional_endpoint_protection.transactional_endpoint_protection {{$configID}}
+{{ end -}}
+{{ end -}}
+{{ range .SecurityPolicies -}}
+{{ $policyName:= escapeName .Name -}}
+{{ $policyID:= .ID -}}
+{{ if .BotManagement -}}
+{{ if .BotManagement.AkamaiBotCategoryActions -}}
+{{ range .BotManagement.AkamaiBotCategoryActions -}}
+terraform import module.security.akamai_botman_akamai_bot_category_action.{{$policyName}}_{{ escapeName (index . "categoryName") }}_{{ index . "categoryId" }} {{$configID}}:{{$policyID}}:{{index . "categoryId"}}
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.CustomBotCategoryActions -}}
+{{ range .BotManagement.CustomBotCategoryActions -}}
+terraform import module.security.akamai_botman_custom_bot_category_action.{{$policyName}}_{{ getCustomBotCategoryNameByID $.CustomBotCategories (index . "categoryId") }}_{{index . "categoryId"}} {{$configID}}:{{$policyID}}:{{index . "categoryId"}}
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.BotDetectionActions -}}
+{{ range .BotManagement.BotDetectionActions -}}
+terraform import module.security.akamai_botman_bot_detection_action.{{$policyName}}_{{ escapeName (index . "detectionName") }}_{{index . "detectionId"}} {{$configID}}:{{$policyID}}:{{index . "detectionId"}}
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.BotManagementSettings -}}
+terraform import module.security.akamai_botman_bot_management_settings.{{$policyName}} {{$configID}}:{{$policyID}}
+{{ end -}}
+{{ if .BotManagement.JavascriptInjectionRules -}}
+terraform import module.security.akamai_botman_javascript_injection.{{$policyName}} {{$configID}}:{{$policyID}}
+{{ end -}}
+{{ if .BotManagement.TransactionalEndpoints -}}
+{{ if .BotManagement.TransactionalEndpoints.BotProtection -}}
+{{ range .BotManagement.TransactionalEndpoints.BotProtection -}}
+terraform import module.security.akamai_botman_transactional_endpoint.{{$policyName}}_{{(index . "operationId")}} {{$configID}}:{{$policyID}}:{{index . "operationId"}}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.TransactionalEndpoints -}}
+{{ if .BotManagement.TransactionalEndpoints.BotProtectionExceptions -}}
+terraform import module.security.akamai_botman_bot_category_exception.{{$policyName}} {{$configID}}:{{$policyID}}
+{{ end -}}
+{{ end -}}
 {{ end -}}
 {{ end -}}

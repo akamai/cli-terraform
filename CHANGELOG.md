@@ -4,6 +4,11 @@
 
 ### Features/Enhancements
 
+### Features/Enhancements
+
+* APPSEC
+  * Add import support for bot management resources
+
 ### Fixes
 
 * GTM

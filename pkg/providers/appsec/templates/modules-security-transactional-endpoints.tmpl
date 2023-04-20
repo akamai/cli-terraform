@@ -1,0 +1,30 @@
+{{ range .SecurityPolicies -}}
+{{ if .BotManagement -}}
+{{ if .BotManagement.TransactionalEndpoints -}}
+{{ $policyName := escapeName .Name -}}
+{{ if .BotManagement.TransactionalEndpoints.BotProtection -}}
+{{ range .BotManagement.TransactionalEndpoints.BotProtection -}}
+resource "akamai_botman_transactional_endpoint" "{{ $policyName}}_{{  index . "operationId" }}" {
+    config_id          = akamai_botman_transactional_endpoint_protection.transactional_endpoint_protection.config_id
+    security_policy_id = akamai_botman_bot_management_settings.{{ $policyName}}.security_policy_id
+    operation_id       = "{{ index . "operationId" }}"
+    transactional_endpoint = jsonencode(
+{{ exportJSONWithoutKeys . "operationId" }}
+)
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.TransactionalEndpoints.BotProtectionExceptions -}}
+resource "akamai_botman_bot_category_exception" "{{ $policyName}}" {
+    config_id          = akamai_botman_custom_bot_category_sequence.custom_bot_category_sequence.config_id
+    security_policy_id = akamai_botman_bot_management_settings.{{ $policyName}}.security_policy_id
+    bot_category_exception = jsonencode(
+{{ exportJSON .BotManagement.TransactionalEndpoints.BotProtectionExceptions }}
+)
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}

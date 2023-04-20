@@ -43,4 +43,16 @@ resource "akamai_appsec_slowpost_protection" "{{ $policyName }}" {
     enabled            = {{ .SecurityControls.ApplySlowPostControls }}
 }
 
+{{ if .BotManagement -}}
+{{ if .BotManagement.BotManagementSettings -}}
+resource "akamai_botman_bot_management_settings" "{{ $policyName}}" {
+    config_id          = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_appsec_slowpost_protection.{{ $policyName}}.security_policy_id
+    bot_management_settings = jsonencode(
+{{ exportJSON .BotManagement.BotManagementSettings }}
+)
+}
+{{ end -}}
+{{ end -}}
+
 {{ end -}}

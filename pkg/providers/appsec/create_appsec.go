@@ -14,6 +14,7 @@ import (
 	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/appsec"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/botman"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
@@ -25,6 +26,7 @@ import (
 //go:embed templates/*
 var templateFiles embed.FS
 var client appsec.APPSEC
+var botmanClient botman.BotMan
 
 var (
 	// ErrFetchingPolicy is returned when fetching policy fails
@@ -44,6 +46,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 	ctx := c.Context
 	sess := edgegrid.GetSession(ctx)
 	client = appsec.Client(sess)
+	botmanClient = botman.Client(sess)
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
@@ -81,49 +84,59 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"imports.tmpl":                        filepath.Join(tfWorkPath, "appsec-import.sh"),
 		"main.tmpl":                           filepath.Join(tfWorkPath, "appsec-main.tf"),
 		"modules-activate-security-main.tmpl": filepath.Join(activateSecurityModulePath, "main.tf"),
-		"modules-activate-security-variables.tmpl":     filepath.Join(activateSecurityModulePath, "variables.tf"),
-		"modules-activate-security-versions.tmpl":      filepath.Join(activateSecurityModulePath, "versions.tf"),
-		"modules-security-advanced.tmpl":               filepath.Join(securityModulePath, "advanced.tf"),
-		"modules-security-api.tmpl":                    filepath.Join(securityModulePath, "api.tf"),
-		"modules-security-custom-deny.tmpl":            filepath.Join(securityModulePath, "custom-deny.tf"),
-		"modules-security-custom-rules.tmpl":           filepath.Join(securityModulePath, "custom-rules.tf"),
-		"modules-security-firewall.tmpl":               filepath.Join(securityModulePath, "firewall.tf"),
-		"modules-security-main.tmpl":                   filepath.Join(securityModulePath, "main.tf"),
-		"modules-security-malware-policies.tmpl":       filepath.Join(securityModulePath, "malware-policies.tf"),
-		"modules-security-malware-policy-actions.tmpl": filepath.Join(securityModulePath, "malware-policy-actions.tf"),
-		"modules-security-match-targets.tmpl":          filepath.Join(securityModulePath, "match-targets.tf"),
-		"modules-security-penalty-box.tmpl":            filepath.Join(securityModulePath, "penalty-box.tf"),
-		"modules-security-policies.tmpl":               filepath.Join(securityModulePath, "policies.tf"),
-		"modules-security-protections.tmpl":            filepath.Join(securityModulePath, "protections.tf"),
-		"modules-security-rate-policies.tmpl":          filepath.Join(securityModulePath, "rate-policies.tf"),
-		"modules-security-rate-policy-actions.tmpl":    filepath.Join(securityModulePath, "rate-policy-actions.tf"),
-		"modules-security-reputation-profiles.tmpl":    filepath.Join(securityModulePath, "reputation-profiles.tf"),
-		"modules-security-reputation.tmpl":             filepath.Join(securityModulePath, "reputation.tf"),
-		"modules-security-selected-hostnames.tmpl":     filepath.Join(securityModulePath, "selected-hostnames.tf"),
-		"modules-security-siem.tmpl":                   filepath.Join(securityModulePath, "siem.tf"),
-		"modules-security-slow-post.tmpl":              filepath.Join(securityModulePath, "slow-post.tf"),
-		"modules-security-variables.tmpl":              filepath.Join(securityModulePath, "variables.tf"),
-		"modules-security-versions.tmpl":               filepath.Join(securityModulePath, "versions.tf"),
-		"modules-security-waf.tmpl":                    filepath.Join(securityModulePath, "waf.tf"),
-		"variables.tmpl":                               filepath.Join(tfWorkPath, "appsec-variables.tf"),
-		"versions.tmpl":                                filepath.Join(tfWorkPath, "appsec-versions.tf"),
+		"modules-activate-security-variables.tmpl":      filepath.Join(activateSecurityModulePath, "variables.tf"),
+		"modules-activate-security-versions.tmpl":       filepath.Join(activateSecurityModulePath, "versions.tf"),
+		"modules-security-advanced.tmpl":                filepath.Join(securityModulePath, "advanced.tf"),
+		"modules-security-api.tmpl":                     filepath.Join(securityModulePath, "api.tf"),
+		"modules-security-custom-deny.tmpl":             filepath.Join(securityModulePath, "custom-deny.tf"),
+		"modules-security-custom-rules.tmpl":            filepath.Join(securityModulePath, "custom-rules.tf"),
+		"modules-security-firewall.tmpl":                filepath.Join(securityModulePath, "firewall.tf"),
+		"modules-security-main.tmpl":                    filepath.Join(securityModulePath, "main.tf"),
+		"modules-security-malware-policies.tmpl":        filepath.Join(securityModulePath, "malware-policies.tf"),
+		"modules-security-malware-policy-actions.tmpl":  filepath.Join(securityModulePath, "malware-policy-actions.tf"),
+		"modules-security-match-targets.tmpl":           filepath.Join(securityModulePath, "match-targets.tf"),
+		"modules-security-penalty-box.tmpl":             filepath.Join(securityModulePath, "penalty-box.tf"),
+		"modules-security-policies.tmpl":                filepath.Join(securityModulePath, "policies.tf"),
+		"modules-security-protections.tmpl":             filepath.Join(securityModulePath, "protections.tf"),
+		"modules-security-rate-policies.tmpl":           filepath.Join(securityModulePath, "rate-policies.tf"),
+		"modules-security-rate-policy-actions.tmpl":     filepath.Join(securityModulePath, "rate-policy-actions.tf"),
+		"modules-security-reputation-profiles.tmpl":     filepath.Join(securityModulePath, "reputation-profiles.tf"),
+		"modules-security-reputation.tmpl":              filepath.Join(securityModulePath, "reputation.tf"),
+		"modules-security-selected-hostnames.tmpl":      filepath.Join(securityModulePath, "selected-hostnames.tf"),
+		"modules-security-siem.tmpl":                    filepath.Join(securityModulePath, "siem.tf"),
+		"modules-security-slow-post.tmpl":               filepath.Join(securityModulePath, "slow-post.tf"),
+		"modules-security-variables.tmpl":               filepath.Join(securityModulePath, "variables.tf"),
+		"modules-security-versions.tmpl":                filepath.Join(securityModulePath, "versions.tf"),
+		"modules-security-waf.tmpl":                     filepath.Join(securityModulePath, "waf.tf"),
+		"modules-security-bot-directory.tmpl":           filepath.Join(securityModulePath, "bot-directory.tf"),
+		"modules-security-bot-directory-actions.tmpl":   filepath.Join(securityModulePath, "bot-directory-actions.tf"),
+		"modules-security-custom-client.tmpl":           filepath.Join(securityModulePath, "custom-client.tf"),
+		"modules-security-response-actions.tmpl":        filepath.Join(securityModulePath, "response-actions.tf"),
+		"modules-security-advanced-settings.tmpl":       filepath.Join(securityModulePath, "advanced-settings.tf"),
+		"modules-security-javascript-injection.tmpl":    filepath.Join(securityModulePath, "javascript-injection.tf"),
+		"modules-security-transactional-endpoints.tmpl": filepath.Join(securityModulePath, "transactional-endpoints.tf"),
+		"variables.tmpl":                                filepath.Join(tfWorkPath, "appsec-variables.tf"),
+		"versions.tmpl":                                 filepath.Join(tfWorkPath, "appsec-versions.tf"),
 	}
 
 	// Provide custom helper functions to get data that does not exist in the security config export
 	additionalFuncs := template.FuncMap{
-		"exportJSON":            exportJSON,
-		"getConfigDescription":  getConfigDescription,
-		"getCustomRuleNameByID": getCustomRuleNameByID,
-		"getMalwareNameByID":    getMalwareNameByID,
-		"getPolicyNameByID":     getPolicyNameByID,
-		"getPrefixFromID":       getPrefixFromID,
-		"getRateNameByID":       getRateNameByID,
-		"getRepNameByID":        getRepNameByID,
-		"getRuleDescByID":       getRuleDescByID,
-		"getRuleNameByID":       getRuleNameByID,
-		"getSection":            getSection,
-		"getWAFMode":            getWAFMode,
-		"isStructuredRule":      isStructuredRule,
+		"exportJSON":                             exportJSON,
+		"getConfigDescription":                   getConfigDescription,
+		"getCustomRuleNameByID":                  getCustomRuleNameByID,
+		"getMalwareNameByID":                     getMalwareNameByID,
+		"getPolicyNameByID":                      getPolicyNameByID,
+		"getPrefixFromID":                        getPrefixFromID,
+		"getRateNameByID":                        getRateNameByID,
+		"getRepNameByID":                         getRepNameByID,
+		"getRuleDescByID":                        getRuleDescByID,
+		"getRuleNameByID":                        getRuleNameByID,
+		"getSection":                             getSection,
+		"getWAFMode":                             getWAFMode,
+		"isStructuredRule":                       isStructuredRule,
+		"exportJSONWithoutKeys":                  exportJSONWithoutKeys,
+		"getCustomBotCategoryResourceNamesByIDs": getCustomBotCategoryResourceNamesByIDs,
+		"getCustomBotCategoryNameByID":           getCustomBotCategoryNameByID,
 	}
 
 	// The template processor
@@ -161,6 +174,11 @@ func createAppsec(ctx context.Context, configName string, client appsec.APPSEC, 
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrFetchingPolicy, err)
+	}
+
+	if err := addBotmanCommonResources(ctx, configuration); err != nil {
+		term.Spinner().Fail()
+		return fmt.Errorf("error fetching botman common values: %s", err)
 	}
 
 	term.Spinner().OK()
@@ -391,4 +409,155 @@ func isStructuredRule(configuration *appsec.GetExportConfigurationResponse, id i
 		}
 	}
 	return false
+}
+
+// addBotmanCommonResources makes api call to get akamaiBotCategories, botDetection and akamaiDefinedBots to fetch names to be used in terraform resource names
+func addBotmanCommonResources(ctx context.Context, configuration *appsec.GetExportConfigurationResponse) error {
+	hasAkamaiBotCategoryAction := false
+	for _, policy := range configuration.SecurityPolicies {
+		if policy.BotManagement != nil && len(policy.BotManagement.AkamaiBotCategoryActions) > 0 {
+			hasAkamaiBotCategoryAction = true
+			break
+		}
+	}
+	if hasAkamaiBotCategoryAction {
+		var akamaiBotCategoryList, err = botmanClient.GetAkamaiBotCategoryList(ctx, botman.GetAkamaiBotCategoryListRequest{})
+		if err != nil {
+			return err
+		}
+		akamaiBotCategoryMap := make(map[string]string)
+		for _, akamaiBotCategory := range akamaiBotCategoryList.Categories {
+			akamaiBotCategoryMap[akamaiBotCategory["categoryId"].(string)] = akamaiBotCategory["categoryName"].(string)
+		}
+		for _, policy := range configuration.SecurityPolicies {
+			if policy.BotManagement == nil {
+				continue
+			}
+			for _, akamaiBotCategoryAction := range policy.BotManagement.AkamaiBotCategoryActions {
+				akamaiBotCategoryAction["categoryName"] = akamaiBotCategoryMap[akamaiBotCategoryAction["categoryId"].(string)]
+			}
+		}
+	}
+
+	hasBotDetectionAction := false
+	for _, policy := range configuration.SecurityPolicies {
+		if policy.BotManagement != nil && len(policy.BotManagement.BotDetectionActions) > 0 {
+			hasBotDetectionAction = true
+			break
+		}
+	}
+	if hasBotDetectionAction {
+		var botDetectionList, err = botmanClient.GetBotDetectionList(ctx, botman.GetBotDetectionListRequest{})
+		if err != nil {
+			return err
+		}
+		botDetectionMap := make(map[string]string)
+		for _, botDetection := range botDetectionList.Detections {
+			botDetectionMap[botDetection["detectionId"].(string)] = botDetection["detectionName"].(string)
+		}
+		for _, policy := range configuration.SecurityPolicies {
+			if policy.BotManagement == nil {
+				continue
+			}
+			for _, botDetectionAction := range policy.BotManagement.BotDetectionActions {
+				botDetectionAction["detectionName"] = botDetectionMap[botDetectionAction["detectionId"].(string)]
+			}
+		}
+	}
+	var akamaiBotIDMap map[string]string
+	for _, category := range configuration.CustomBotCategories {
+		if category["metadata"] == nil {
+			continue
+		}
+		metadata := category["metadata"].(map[string]interface{})
+		if metadata["akamaiDefinedBotIds"] == nil {
+			continue
+		}
+		akamaiDefinedBotIDs := metadata["akamaiDefinedBotIds"].([]interface{})
+		if len(akamaiDefinedBotIDs) == 0 {
+			continue
+		}
+		if akamaiBotIDMap == nil {
+			akamaiDefinedBotList, err := botmanClient.GetAkamaiDefinedBotList(ctx, botman.GetAkamaiDefinedBotListRequest{})
+			if err != nil {
+				return err
+			}
+			akamaiBotIDMap = make(map[string]string)
+			for _, akamaiBot := range akamaiDefinedBotList.Bots {
+				akamaiBotIDMap[akamaiBot["botId"].(string)] = akamaiBot["botName"].(string)
+			}
+		}
+		recategorizedAkamaiDefinedBot := make([]map[string]string, len(akamaiDefinedBotIDs))
+		for i, botID := range akamaiDefinedBotIDs {
+			akamaiBot := make(map[string]string)
+			akamaiBot["botId"] = botID.(string)
+			akamaiBot["botName"] = akamaiBotIDMap[botID.(string)]
+			recategorizedAkamaiDefinedBot[i] = akamaiBot
+		}
+		metadata["akamaiDefinedBots"] = recategorizedAkamaiDefinedBot
+	}
+
+	return nil
+}
+
+// exportJSONWithoutKeys returns json string without specified keys
+func exportJSONWithoutKeys(source map[string]interface{}, keys ...string) (string, error) {
+	// deep copy source by converting to json
+	js, err := json.Marshal(source)
+	if err != nil {
+		return "", err
+	}
+	dest := make(map[string]interface{})
+	err = json.Unmarshal(js, &dest)
+	if err != nil {
+		return "", err
+	}
+	for _, key := range keys {
+		delete(dest, key)
+	}
+
+	js, err = json.MarshalIndent(dest, "", "    ")
+	if err != nil {
+		return "", err
+	}
+
+	return string(js), nil
+}
+
+func getCustomBotCategoryNameByID(customBotCategories []map[string]interface{}, categoryID string) (string, error) {
+	for _, category := range customBotCategories {
+		if category["categoryId"].(string) == categoryID {
+			return tools.EscapeName(category["categoryName"].(string))
+		}
+	}
+	return "", fmt.Errorf("cannot find custom bot category name for id %s", categoryID)
+}
+
+// getCustomBotCategoryResourceNamesByIDs returns comma separated custom bot category resource names in the same order as the provided categoryIDs
+func getCustomBotCategoryResourceNamesByIDs(customBotCategories []map[string]interface{}, categoryIDs []string) (string, error) {
+	customBotCategoryMap := make(map[string]string)
+	for _, category := range customBotCategories {
+		categoryName, ok := category["categoryName"].(string)
+		if !ok {
+			return "", errors.New("cannot convert categoryName to string")
+		}
+		name, err := tools.EscapeName(categoryName)
+		if err != nil {
+			return "", err
+		}
+		categoryID, ok := category["categoryId"].(string)
+		if !ok {
+			return "", errors.New("cannot convert categoryId to string")
+		}
+		customBotCategoryMap[categoryID] = name
+	}
+	categoryResourceNames := make([]string, len(categoryIDs))
+	for i, categoryID := range categoryIDs {
+		categoryName, ok := customBotCategoryMap[categoryID]
+		if !ok {
+			return "", fmt.Errorf("cannot find custom bot category name for id %s", categoryID)
+		}
+		categoryResourceNames[i] = fmt.Sprintf("akamai_botman_custom_bot_category.%s_%s.category_id", categoryName, categoryID)
+	}
+	return strings.Join(categoryResourceNames, ","), nil
 }

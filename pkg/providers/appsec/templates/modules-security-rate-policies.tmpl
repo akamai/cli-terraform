@@ -1,6 +1,5 @@
 {{ if .RatePolicies -}}
 {{ range .RatePolicies -}}
-{{ if eq .Type "WAF" -}}
 resource "akamai_appsec_rate_policy" "{{ escapeName .Name }}" {
     config_id   = akamai_appsec_configuration.config.config_id
     rate_policy = jsonencode(
@@ -8,6 +7,5 @@ resource "akamai_appsec_rate_policy" "{{ escapeName .Name }}" {
 )
 }
 
-{{ end -}}
 {{ end -}}
 {{ end -}}

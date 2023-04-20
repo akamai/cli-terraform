@@ -1,0 +1,3951 @@
+{
+    "configId": 79947,
+    "configName": "TFDEMO",
+    "version": 1,
+    "staging": {
+        "action": "ACTIVATE",
+        "status": "Active",
+        "time": "2022-01-27T10:42:13Z"
+    },
+    "production": {
+        "action": "DEACTIVATE",
+        "status": "Deactivated",
+        "time": "2022-01-27T11:21:35Z"
+    },
+    "createDate": "2022-01-11T13:13:07Z",
+    "createdBy": "icass",
+    "selectedHosts": [
+        "test.akamai.com"
+    ],
+    "selectableHosts": [
+        "test.akamai.com"
+    ],
+    "ratePolicies": [
+        {
+            "additionalMatchOptions": [
+                {
+                    "positiveMatch": true,
+                    "type": "RequestMethodCondition",
+                    "values": [
+                        "GET",
+                        "HEAD"
+                    ]
+                }
+            ],
+            "averageThreshold": 12,
+            "burstThreshold": 18,
+            "clientIdentifier": "ip",
+            "createDate": "2022-01-11T13:13:15Z",
+            "description": "A popular brute force attack that consists of sending a large number of requests for base page, HTML page or XHR requests (usually non-cacheable). This could destabilize the origin.",
+            "fileExtensions": {
+                "positiveMatch": false,
+                "values": [
+                    "aif",
+                    "aiff",
+                    "au",
+                    "avi",
+                    "bin",
+                    "bmp",
+                    "cab",
+                    "carb",
+                    "cct",
+                    "cdf",
+                    "class",
+                    "css",
+                    "doc",
+                    "dcr",
+                    "dtd",
+                    "exe",
+                    "flv",
+                    "gcf",
+                    "gff",
+                    "gif",
+                    "grv",
+                    "hdml",
+                    "hqx",
+                    "ico",
+                    "ini",
+                    "jpeg",
+                    "jpg",
+                    "js",
+                    "mov",
+                    "mp3",
+                    "nc",
+                    "pct",
+                    "pdf",
+                    "png",
+                    "ppc",
+                    "pws",
+                    "svg",
+                    "swa",
+                    "swf",
+                    "txt",
+                    "vbs",
+                    "w32",
+                    "wav",
+                    "wbmp",
+                    "wml",
+                    "wmlc",
+                    "wmls",
+                    "wmlsc",
+                    "xsd",
+                    "zip",
+                    "webp",
+                    "jxr",
+                    "hdp",
+                    "wdp",
+                    "webm",
+                    "ogv",
+                    "mp4",
+                    "ttf",
+                    "woff",
+                    "eot",
+                    "woff2"
+                ]
+            },
+            "id": 177906,
+            "matchType": "path",
+            "name": "Page View Requests",
+            "pathMatchType": "Custom",
+            "pathUriPositiveMatch": true,
+            "requestType": "ClientRequest",
+            "sameActionOnIpv6": true,
+            "type": "WAF",
+            "updateDate": "2022-01-11T13:13:16Z",
+            "useXForwardForHeaders": false,
+            "used": true
+        },
+        {
+            "additionalMatchOptions": [
+                {
+                    "positiveMatch": true,
+                    "type": "ResponseStatusCondition",
+                    "values": [
+                        "400",
+                        "401",
+                        "402",
+                        "403",
+                        "404",
+                        "405",
+                        "406",
+                        "407",
+                        "408",
+                        "409",
+                        "410",
+                        "500",
+                        "501",
+                        "502",
+                        "503",
+                        "504"
+                    ]
+                }
+            ],
+            "averageThreshold": 5,
+            "burstThreshold": 8,
+            "clientIdentifier": "ip",
+            "createDate": "2022-01-11T13:13:16Z",
+            "description": "An excessive error rate from the origin could indicate malicious activity by a bot scanning the site or a publishing error. In both cases, this would increase the origin traffic and could potentially destabilize it.",
+            "id": 177907,
+            "matchType": "path",
+            "name": "Origin Error",
+            "pathMatchType": "Custom",
+            "pathUriPositiveMatch": true,
+            "requestType": "ForwardResponse",
+            "sameActionOnIpv6": true,
+            "type": "WAF",
+            "updateDate": "2022-01-11T13:13:16Z",
+            "useXForwardForHeaders": false,
+            "used": true
+        },
+        {
+            "additionalMatchOptions": [
+                {
+                    "positiveMatch": true,
+                    "type": "RequestMethodCondition",
+                    "values": [
+                        "POST"
+                    ]
+                }
+            ],
+            "averageThreshold": 3,
+            "burstThreshold": 5,
+            "clientIdentifier": "ip",
+            "createDate": "2022-01-11T13:17:17Z",
+            "description": "Mitigating HTTP flood attacks using POST requests",
+            "id": 177908,
+            "matchType": "path",
+            "name": "POST Page Requests",
+            "pathMatchType": "Custom",
+            "pathUriPositiveMatch": true,
+            "requestType": "ClientRequest",
+            "sameActionOnIpv6": true,
+            "type": "WAF",
+            "updateDate": "2022-01-11T13:17:17Z",
+            "useXForwardForHeaders": false,
+            "used": true
+        }
+    ],
+    "reputationProfiles": [
+        {
+            "context": "DOSATCK",
+            "contextReadable": "DoS Attackers",
+            "enabled": false,
+            "id": 3017089,
+            "name": "DoS Attackers (High Threat)",
+            "sharedIpHandling": "NON_SHARED",
+            "threshold": 9
+        },
+        {
+            "context": "DOSATCK",
+            "contextReadable": "DoS Attackers",
+            "enabled": false,
+            "id": 3017090,
+            "name": "DoS Attackers (Low Threat)",
+            "sharedIpHandling": "NON_SHARED",
+            "threshold": 5
+        },
+        {
+            "context": "SCANTL",
+            "contextReadable": "Scanning Tools",
+            "enabled": false,
+            "id": 3017091,
+            "name": "Scanning Tools (High Threat)",
+            "sharedIpHandling": "NON_SHARED",
+            "threshold": 9
+        },
+        {
+            "context": "SCANTL",
+            "contextReadable": "Scanning Tools",
+            "enabled": false,
+            "id": 3017092,
+            "name": "Scanning Tools (Low Threat)",
+            "sharedIpHandling": "NON_SHARED",
+            "threshold": 5
+        },
+        {
+            "context": "WEBATCK",
+            "contextReadable": "Web Attackers",
+            "enabled": false,
+            "id": 3017093,
+            "name": "Web Attackers (High Threat)",
+            "sharedIpHandling": "NON_SHARED",
+            "threshold": 9
+        },
+        {
+            "context": "WEBATCK",
+            "contextReadable": "Web Attackers",
+            "enabled": false,
+            "id": 3017094,
+            "name": "Web Attackers (Low Threat)",
+            "sharedIpHandling": "NON_SHARED",
+            "threshold": 5
+        },
+        {
+            "context": "WEBSCRP",
+            "contextReadable": "Web Scrapers",
+            "enabled": false,
+            "id": 3017095,
+            "name": "Web Scrapers (High Threat)",
+            "sharedIpHandling": "NON_SHARED",
+            "threshold": 9
+        },
+        {
+            "context": "WEBSCRP",
+            "contextReadable": "Web Scrapers",
+            "enabled": false,
+            "id": 3017096,
+            "name": "Web Scrapers (Low Threat)",
+            "sharedIpHandling": "NON_SHARED",
+            "threshold": 5
+        }
+    ],
+    "customRules": [
+        {
+            "conditions": [
+                {
+                    "type": "requestMethodMatch",
+                    "positiveMatch": true,
+                    "value": [
+                        "POST"
+                    ]
+                },
+                {
+                    "type": "pathMatch",
+                    "positiveMatch": true,
+                    "value": [
+                        "/login"
+                    ]
+                },
+                {
+                    "type": "argsPostMatch",
+                    "name": "email",
+                    "positiveMatch": true,
+                    "value": [
+                        "me@email.com"
+                    ]
+                }
+            ],
+            "id": 60088542,
+            "name": "Custom Rule 1",
+            "ruleActivated": false,
+            "structured": true,
+            "tag": [
+                "Login"
+            ],
+            "version": 1
+        },
+        {
+            "description": "Mimicked rule 950103 minus REQUEST_FILENAME",
+            "id": 60039230,
+            "inspectRequest": false,
+            "inspectResponse": false,
+            "metadata": "<match:metadata-stage value=\"client-request-body\">\n    <match:regex flags=\"s\" impl=\"re2\" regex=\"((?i)(?:\\x5c|(?:%(?:c(?:0%(?:[2aq]f|5c|9v)|1%(?:[19p]c|8s|af))|2(?:5(?:c(?:0%25af|1%259c)|2f|5c)|%46|f)|(?:(?:f(?:8%8)?0%8|e)0%80%a|bg%q)f|%3(?:2(?:%(?:%6|4)6|F)|5%%63)|u(?:221[56]|002f|EFC8|F025)|1u|5c)|0x(?:2f|5c)|\\/))(?:%(?:(?:f(?:(?:c%80|8)%8)?0%8|e)0%80%ae|2(?:(?:5(?:c0%25a|2))?e|%45)|u(?:(?:002|ff0)e|2024)|%32(?:%(?:%6|4)5|E)|c0(?:%[256aef]e|\\.))|\\.(?:%0[01]|\\?)?|\\?\\.?|0x2e){1,2};*?(?:\\x5c|(?:%(?:c(?:0%(?:[2aq]f|5c|9v)|1%(?:[19p]c|8s|af))|2(?:5(?:c(?:0%25af|1%259c)|2f|5c)|%46|f)|(?:(?:f(?:8%8)?0%8|e)0%80%a|bg%q)f|%3(?:2(?:%(?:%6|4)6|F)|5%%63)|u(?:221[56]|002f|EFC8|F025)|1u|5c)|0x(?:2f|5c)|\\/)))\" select=\"ARGS|ARGS_NAMES|REQUEST_COOKIES|REQUEST_COOKIES_NAMES|REQUEST_HEADERS|!REQUEST_HEADERS:Cookie|FILES|FILES_NAMES|JSON_PAIRS:'/*'|JSON_NAMES|XML_PAIRS:'/*'\" strict-err-check-re2=\"on\" variable-list=\"LOGDATA\">\n        <security:firewall.action>\n            <msg>Custom Rule for 950103 detected(Minus REQUEST_FILENAME)</msg>\n            <tag>AKAMAI/CUSTOM/60039230</tag>\n            <id>60039230</id>\n            <action>%(WAF_CUSTOM_R60039230_ACTION)</action>\n            <data>%(LOGDATA)</data>\n        </security:firewall.action>\n    </match:regex>\n</match:metadata-stage>\n",
+            "name": "Mimic rule of 950103 (minus REQUEST_FILENAME)",
+            "ruleActivated": true,
+            "structured": false,
+            "version": 3
+        }
+    ],
+    "rulesets": [
+        {
+            "id": 103,
+            "rulesetVersionId": 7257,
+            "type": "ASE AUTO",
+            "releaseDate": "2022-02-01T15:49:03Z",
+            "rules": [
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000080,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Attribute Injection 1)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 959977,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "PHP Injection Attack (Configuration Override)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 959976,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "PHP Injection Attack (Common Functions)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000072,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "Deserialization Attack Detected"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000065,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "Apache Struts Remote Command Execution (Deserialization Attack)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 973311,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (XSS Unicode PoC String)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981247,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Built-in Functions, Objects and Keyword Probes 3)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 973312,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Common PoC Payload)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981248,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Built-in Functions, Objects and Keyword Probes 2)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 950011,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "Server-Side Include (SSI) Attack"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 973307,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Eval/Atob Functions)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981243,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 3,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (SQL Operator and Expression Probes 2)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981244,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Tautology Probes 2)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 973305,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (URL Protocols)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981242,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 3,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (SQL Operator and Expression Probes 1)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 950007,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Blind Testing)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981240,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (SQL Conditional Probes)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 950006,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (OS Commands 5)"
+                },
+                {
+                    "attackGroups": [
+                        "PROTOCOL"
+                    ],
+                    "id": 961011,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PROTOCOL>",
+                    "title": "GET or HEAD Request with Body Content"
+                },
+                {
+                    "attackGroups": [
+                        "PROTOCOL"
+                    ],
+                    "id": 961012,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PROTOCOL>",
+                    "title": "POST Request Missing Content-Length Header"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000081,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Attribute Injection 2)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 950002,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (OS Commands 4)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981260,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Hex Encoding Detected)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000041,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "Server Side Template Injection (SSTI)"
+                },
+                {
+                    "attackGroups": [
+                        "PROTOCOL"
+                    ],
+                    "id": 961034,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PROTOCOL>",
+                    "title": "Invalid HTTP Protocol Version"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981255,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Sysadmin access functions)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000038,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (DOM Window Properties)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981256,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Merge, Execute, Match Probes)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000037,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (JS On-Event Handler)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981253,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Stored Procedure Detected)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981254,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Time-based Blind Probe)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000039,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (DOM Document Methods)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981251,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Built-in Functions, Objects and Keyword Probes 3)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000034,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "Command Injection via the Java Runtime.getRuntime() Method"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981252,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Charset manipulation)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000033,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "PHP Wrapper Attack"
+                },
+                {
+                    "attackGroups": [
+                        "OUTBOUND"
+                    ],
+                    "id": 970015,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": true,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/OUTBOUND/LEAKAGE>",
+                    "title": "PHP Source Code Leakage"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000061,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting Attack (Referer Header From OpenBugBounty Website)"
+                },
+                {
+                    "attackGroups": [
+                        "OUTBOUND"
+                    ],
+                    "id": 970013,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": true,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/OUTBOUND/LEAKAGE>",
+                    "title": "Directory Listing"
+                },
+                {
+                    "attackGroups": [
+                        "OUTBOUND"
+                    ],
+                    "id": 970014,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": true,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/OUTBOUND/LEAKAGE>",
+                    "title": "ASP/JSP Source Code Leakage"
+                },
+                {
+                    "attackGroups": [
+                        "OUTBOUND"
+                    ],
+                    "id": 970011,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": true,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/OUTBOUND/LEAKAGE>",
+                    "title": "File or Directory Names Leakage"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000058,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "Apache Struts Remote Command Execution (OGNL Injection)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981276,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (UNION Attempt)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000057,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Common Attack Tool Keywords)"
+                },
+                {
+                    "attackGroups": [
+                        "OUTBOUND"
+                    ],
+                    "id": 970009,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": true,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/OUTBOUND/LEAKAGE>",
+                    "title": "PHP Information Leakage"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 973335,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 2,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (IE XSS Filter Evasion Attempt)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000056,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "PHP Object Injection Attack Detected"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981270,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (NoSQL MongoDB Probes)"
+                },
+                {
+                    "attackGroups": [
+                        "OUTBOUND"
+                    ],
+                    "id": 970003,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": true,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/OUTBOUND/LEAKAGE>",
+                    "title": "SQL Information Leakage"
+                },
+                {
+                    "attackGroups": [
+                        "OUTBOUND"
+                    ],
+                    "id": 970004,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": true,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/OUTBOUND/LEAKAGE>",
+                    "title": "IIS Information Leakage"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000142,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (OS Commands 2)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000141,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (OS Commands 1)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000144,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (Uname with -a flag)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000143,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (Bash with -c flag)"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 3000138,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "Detected ARDT client request"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 3000137,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "Detected LOIC / HOIC client request based on query string"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 3000140,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "Avzhan Bot DDOS Detection"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000139,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "Detect Attempts to Access the Wordpress system.multicall XML-RPC API"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000134,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "XML External Entity (XXE) Attack"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000133,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "Apache Commons FileUpload and Apache Tomcat DoS"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000136,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "Potential Account Brute Force Guessing via Wordpress XML-RPC API authenticated methods"
+                },
+                {
+                    "attackGroups": [
+                        "PROTOCOL"
+                    ],
+                    "id": 968230,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PROTOCOL>",
+                    "title": "HTTP Range Header: Invalid Last Byte Value"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000135,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "HTTP.sys Remote Code Execution Vulnerability Attack Detected (CVE-2015-1635)"
+                },
+                {
+                    "attackGroups": [
+                        "RFI"
+                    ],
+                    "id": 3000130,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/RFI>",
+                    "title": "Remote File Inclusion Attack (Well-Known RFI Testing/Attack URL)"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 3000129,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "Pandora DDoS Detection - HTTP POST Attacks"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000132,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "Detect Attempts to Access the Wordpress Pingback API"
+                },
+                {
+                    "attackGroups": [
+                        "RFI"
+                    ],
+                    "id": 3000131,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/RFI>",
+                    "title": "Remote File Inclusion Attack (Well-Known RFI Filename)"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 3000157,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "Mirai / Kaiten DDoS Detection - HTTP Attacks"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 3000160,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "Security Scanner/Web Attack Tool Detected (PoC Testing Payload)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000154,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (Common PHP Function Detected)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000153,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (OS Commands 3)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000156,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (PHP High-Risk Functions)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000155,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (Php/Data Filter Detected)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000150,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (Sleep with Bracketed IFS Obfuscation)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 958008,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (HTML INPUT IMAGE Tag)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000149,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (Common Uname PoC)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000152,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 4,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (IP Address Detected)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000151,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (Bracketed IFS Argument Separator Detected)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 958003,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Fromcharcode Detected)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000146,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (/bin/sh with pipe \"|\")"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981300,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (SELECT Statement Anomaly Detected)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000145,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (Cmd.exe with \"dir\" command)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000148,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (Ping Beaconing)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000147,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (Shellshock Variant)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000110,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (SmartDetect)"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000109,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "Ruby on Rails YAML Injection Attack"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000112,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Common PoC Probes 2)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000111,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Common PoC Probes 1)"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 3000108,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "Pandora / DirtJumper DDoS Detection - HTTP GET Attacks"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 958023,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Javascript URL Protocol Handler with \"lowsrc\" Attribute)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 3000102,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 3,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Null Byte Detected)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 981320,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Known/Default DB Resources Probe)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 3000101,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Common SQL Database Probes)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 3000100,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (SmartDetect)"
+                },
+                {
+                    "attackGroups": [
+                        "LFI"
+                    ],
+                    "id": 3000126,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/LFI>",
+                    "title": "Local File Inclusion (LFI) Attack (Common OS Files 5)"
+                },
+                {
+                    "attackGroups": [
+                        "LFI"
+                    ],
+                    "id": 3000125,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/LFI>",
+                    "title": "Local File Inclusion (LFI) Attack (Common OS Files 4)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000128,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 3,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (HTML Entity Named Encoding Detected)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 959070,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Merge, Execute, Having Probes)"
+                },
+                {
+                    "attackGroups": [
+                        "LFI"
+                    ],
+                    "id": 3000127,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 3,
+                    "tag": "<ASE/WEB_ATTACK/LFI>",
+                    "title": "Local File Inclusion (LFI) Attack (Nul Byte Detected)"
+                },
+                {
+                    "attackGroups": [
+                        "LFI"
+                    ],
+                    "id": 3000122,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/LFI>",
+                    "title": "Local File Inclusion (LFI) Attack (Long Directory Traversal)"
+                },
+                {
+                    "attackGroups": [
+                        "LFI"
+                    ],
+                    "id": 3000121,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/LFI>",
+                    "title": "Local File Inclusion (LFI) Attack (Common OS Files 2)"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 999002,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "Security Scanner/Web Attack Tool Detected (User-Agent)"
+                },
+                {
+                    "attackGroups": [
+                        "LFI"
+                    ],
+                    "id": 3000124,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/LFI>",
+                    "title": "Local File Inclusion (LFI) Attack (Common OS Files 3)"
+                },
+                {
+                    "attackGroups": [
+                        "LFI"
+                    ],
+                    "id": 3000123,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/LFI>",
+                    "title": "Local File Inclusion (LFI) Attack (Directory Traversal Obfuscation)"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 3000118,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "DirtJumper DDoS Detection - HTTP POST Attacks"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 3000117,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "HULK DoS Attack Tool Detected"
+                },
+                {
+                    "attackGroups": [
+                        "LFI"
+                    ],
+                    "id": 3000120,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/LFI>",
+                    "title": "Local File Inclusion (LFI) Attack (Common OS Files 1)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000119,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 3,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (HTML Context Breaking)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000114,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Shell Script Execution)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000113,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Javascript Mixed Case Obfuscation)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 3000116,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (HTML Injection)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 958034,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Style Attribute with 'expression' Keyword)"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 3000115,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "LOIC 1.1 DoS Detection"
+                },
+                {
+                    "attackGroups": [
+                        "PROTOCOL"
+                    ],
+                    "id": 961904,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PROTOCOL>",
+                    "title": "Request Containing Content, but Missing Content-Type header"
+                },
+                {
+                    "attackGroups": [
+                        "RFI"
+                    ],
+                    "id": 950118,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/RFI>",
+                    "title": "Remote File Inclusion Attack (Common PHP RFI Attacks)"
+                },
+                {
+                    "attackGroups": [
+                        "PROTOCOL"
+                    ],
+                    "id": 951910,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PROTOCOL>",
+                    "title": "HTTP Response Splitting Attack (Header Injection)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 958051,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Script Tag)"
+                },
+                {
+                    "attackGroups": [
+                        "XSS"
+                    ],
+                    "id": 958052,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/XSS>",
+                    "title": "Cross-site Scripting (XSS) Attack (Common PoC DOM Event Triggers)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 959073,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Built-in Functions, Objects and Keyword Probes 1)"
+                },
+                {
+                    "attackGroups": [
+                        "POLICY"
+                    ],
+                    "id": 961912,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/POLICY>",
+                    "title": "Failed to Parse Request Body for WAF Inspection"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 950901,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Tautology Probes 1)"
+                },
+                {
+                    "attackGroups": [
+                        "PROTOCOL"
+                    ],
+                    "id": 3000174,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PROTOCOL>",
+                    "title": "Potential HTTP Desync Attack: HTTP Request Smuggling Detect in Request Body"
+                },
+                {
+                    "attackGroups": [
+                        "PROTOCOL"
+                    ],
+                    "id": 3000173,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PROTOCOL>",
+                    "title": "Potential HTTP Desync Attack: Invalid Transfer-Encoding Header Value"
+                },
+                {
+                    "attackGroups": [
+                        "PROTOCOL"
+                    ],
+                    "id": 3000176,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PROTOCOL>",
+                    "title": "Potential HTTP Desync Attack: Transfer-Encoding Header in Request Body"
+                },
+                {
+                    "attackGroups": [
+                        "PROTOCOL"
+                    ],
+                    "id": 3000175,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PROTOCOL>",
+                    "title": "Potential HTTP Desync Attack: Transfer-Encoding Header Name Obfuscation"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000171,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "Webshell/Backdoor File Upload Attempt"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000166,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "Potential Wordpress Javascript DoS Attack (CVE-2018-6389)"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000168,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "Edge Side Inclusion (ESI) injection Attack"
+                },
+                {
+                    "attackGroups": [
+                        "OUTBOUND"
+                    ],
+                    "id": 970118,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": true,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/OUTBOUND/ERROR>",
+                    "title": "Application is not Available (Server-Side Exceptions)"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000167,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "Potential Drupal Attack (CVE-2018-7600)"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 3000162,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "Mirai/Kaiten Bot DDOS Detection - Bogus Search Engine Referer"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 3000164,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "Application Layer Hash DoS Attack"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000185,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "Confluence/OGNLi Attack Detected (CVE-2021-26084)"
+                },
+                {
+                    "attackGroups": [
+                        "OUTBOUND"
+                    ],
+                    "id": 970903,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": true,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/OUTBOUND/LEAKAGE>",
+                    "title": "ASP/JSP Source Code Leakage"
+                },
+                {
+                    "attackGroups": [
+                        "OUTBOUND"
+                    ],
+                    "id": 970904,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": true,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/OUTBOUND/LEAKAGE>",
+                    "title": "IIS Information Leakage"
+                },
+                {
+                    "attackGroups": [
+                        "OUTBOUND"
+                    ],
+                    "id": 970901,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": true,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/OUTBOUND/ERROR>",
+                    "title": "Application is not Available (HTTP 5XX)"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000184,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "Possible MS Exchange/OWA Attack Detected (CVE-2021-27065)"
+                },
+                {
+                    "attackGroups": [
+                        "OUTBOUND"
+                    ],
+                    "id": 970902,
+                    "inspectRequestBody": false,
+                    "inspectResponseBody": true,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/OUTBOUND/LEAKAGE>",
+                    "title": "PHP Source Code Leakage"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000183,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "Possible MS Exchange/OWA Attack Detected (CVE-2021-26855)"
+                },
+                {
+                    "attackGroups": [
+                        "PROTOCOL"
+                    ],
+                    "id": 3000177,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PROTOCOL>",
+                    "title": "Potential HTTP Desync Attack: Chunked header value with invalid Header Name"
+                },
+                {
+                    "attackGroups": [
+                        "POLICY"
+                    ],
+                    "id": 3000180,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/POLICY>",
+                    "title": "Partial Request Body Inspection Warning - Request Body is larger than the configured inspection limit"
+                },
+                {
+                    "attackGroups": [
+                        "PLATFORM"
+                    ],
+                    "id": 3000179,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PLATFORM>",
+                    "title": "Microsoft Sharepoint Remote Command Execution (Deserialization Attack)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000014,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "Apache Struts Remote Command Execution (OGNL Injection)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000013,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "System Command Injection (Attacker Toolset Download)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 3000015,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Database Timing Query)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000012,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "Apache Struts Remote Command Execution (OGNL Injection)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 3000006,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (Comment String Termination)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000005,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CMD Injection Attack Detected (OS commands with full path)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000007,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "Command Injection (Unix File Leakage)"
+                },
+                {
+                    "attackGroups": [
+                        "RFI"
+                    ],
+                    "id": 3000004,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/RFI>",
+                    "title": "Potential Remote File Inclusion (RFI) Attack: Suspicious Off-Domain URL Reference"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 969151,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "PHP Injection Attack (Opening Tag)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 3000029,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack: MySQL comments, conditions and ch(a)r injections"
+                },
+                {
+                    "attackGroups": [
+                        "LFI"
+                    ],
+                    "id": 950203,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/LFI>",
+                    "title": "Local File Inclusion (LFI) Attack (Directory Traversal and Obfuscation Attempts)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000025,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "CVE-2014-6271 Bash Command Injection Attack"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 3000022,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 5,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection (Built-in Functions, Objects and Keyword Probes 4)"
+                },
+                {
+                    "attackGroups": [
+                        "CMD"
+                    ],
+                    "id": 3000023,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/CMD_INJECTION>",
+                    "title": "Apache Struts ClassLoader Manipulation Remote Code Execution"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 3000017,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "MySQL Keywords Anomaly Detection Alert"
+                },
+                {
+                    "attackGroups": [
+                        "POLICY"
+                    ],
+                    "id": 950220,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/POLICY>",
+                    "title": "Possible URL Redirector Abuse (Off-Domain URL)"
+                },
+                {
+                    "attackGroups": [
+                        "PROTOCOL"
+                    ],
+                    "id": 950216,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/PROTOCOL>",
+                    "title": "Unicode Full/Half Width Abuse Attack Attempt"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 999902,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "Security Scanner/Web Attack Tool Detected (Filename)"
+                },
+                {
+                    "attackGroups": [
+                        "SQL"
+                    ],
+                    "id": 3000000,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/SQL_INJECTION>",
+                    "title": "SQL Injection Attack (GROUP BY/ORDER BY)"
+                },
+                {
+                    "attackGroups": [
+                        "WAT"
+                    ],
+                    "id": 999901,
+                    "inspectRequestBody": true,
+                    "inspectResponseBody": false,
+                    "outdated": false,
+                    "ruleVersion": 1,
+                    "score": 1000,
+                    "tag": "<ASE/WEB_ATTACK/TOOL>",
+                    "title": "Security Scanner/Web Attack Tool Detected (Request Header Names)"
+                }
+            ],
+            "attackGroups": [
+                {
+                    "group": "PLATFORM",
+                    "groupName": "Web Platform Attack",
+                    "threshold": 9
+                },
+                {
+                    "group": "POLICY",
+                    "groupName": "Web Policy Violation",
+                    "threshold": 9
+                },
+                {
+                    "group": "OUTBOUND",
+                    "groupName": "Total Outbound",
+                    "threshold": 9
+                },
+                {
+                    "group": "RFI",
+                    "groupName": "Remote File Inclusion",
+                    "threshold": 5
+                },
+                {
+                    "group": "XSS",
+                    "groupName": "Cross Site Scripting (XSS)",
+                    "threshold": 9
+                },
+                {
+                    "group": "PROTOCOL",
+                    "groupName": "Web Protocol Attack",
+                    "threshold": 9
+                },
+                {
+                    "group": "CMD",
+                    "groupName": "Command Injection",
+                    "threshold": 5
+                },
+                {
+                    "group": "WAT",
+                    "groupName": "Web Attack Tool",
+                    "threshold": 9
+                },
+                {
+                    "group": "SQL",
+                    "groupName": "SQL Injection",
+                    "threshold": 9
+                },
+                {
+                    "group": "LFI",
+                    "groupName": "Local File Inclusion",
+                    "threshold": 5
+                }
+            ]
+        }
+    ],
+    "matchTargets": {
+        "websiteTargets": [
+            {
+                "type": "website",
+                "defaultFile": "NO_MATCH",
+                "effectiveSecurityControls": {
+                    "applyApplicationLayerControls": true,
+                    "applyNetworkLayerControls": true,
+                    "applyRateControls": true,
+                    "applyReputationControls": false,
+                    "applySlowPostControls": true
+                },
+                "filePaths": [
+                    "/*"
+                ],
+                "hostnames": [
+                    "www.rlw7w.uk"
+                ],
+                "id": 4262513,
+                "isNegativeFileExtensionMatch": false,
+                "isNegativePathMatch": false,
+                "securityPolicy": {
+                    "policyId": "ASE1_156138"
+                },
+                "sequence": 1
+            }
+        ]
+    },
+    "securityPolicies": [
+        {
+            "id": "ASE1_156138",
+            "name": "Default Policy",
+            "hasRatePolicyWithApiKey": false,
+            "securityControls": {
+                "applyApiConstraints": false,
+                "applyApplicationLayerControls": true,
+                "applyBotmanControls": false,
+                "applyMalwareControls": true,
+                "applyNetworkLayerControls": true,
+                "applyRateControls": true,
+                "applyReputationControls": false,
+                "applySlowPostControls": true
+            },
+            "webApplicationFirewall": {
+                "ruleActions": [
+                    {
+                        "action": "alert",
+                        "id": 950002,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 950006,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 950007,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 950011,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 950118,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 950203,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 950216,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 950220,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 950901,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 951910,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 958003,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 958008,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 958023,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 958034,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 958051,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 958052,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 959070,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 959073,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 959976,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 959977,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 961011,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 961012,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 961034,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 961904,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 961912,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 968230,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 969151,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 970003,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 970004,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 970009,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 970011,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 970013,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 970014,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 970015,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 970118,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 970901,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 970902,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 970903,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 970904,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 973305,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 973307,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 973311,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 973312,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 973335,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981240,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981242,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981243,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981244,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981247,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981248,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981251,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981252,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981253,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981254,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981255,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981256,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981260,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981270,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981276,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981300,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 981320,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 999002,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 999901,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 999902,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000000,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000004,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000005,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000006,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000007,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000012,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000013,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000014,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000015,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000017,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000022,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000023,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000025,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000029,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000033,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000034,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000037,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000038,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000039,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000041,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000056,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000057,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000058,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000061,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000065,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000072,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000080,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000081,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000100,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000101,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000102,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000108,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000109,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000110,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000111,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000112,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000113,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000114,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000115,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000116,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000117,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000118,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000119,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000120,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000121,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000122,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000123,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000124,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000125,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000126,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000127,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000128,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000129,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000130,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000131,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000132,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000133,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000134,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000135,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000136,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000137,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000138,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000139,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000140,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000141,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000142,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000143,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000144,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000145,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000146,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000147,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000148,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000149,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000150,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000151,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000152,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000153,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000154,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000155,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000156,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000157,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000160,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000162,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000164,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000166,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000167,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000168,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000171,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000173,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000174,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000175,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000176,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000177,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000179,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000180,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000183,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000184,
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "alert",
+                        "id": 3000185,
+                        "rulesetVersionId": 7257
+                    }
+                ],
+                "attackGroupActions": [
+                    {
+                        "action": "deny",
+                        "group": "POLICY",
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "deny",
+                        "group": "WAT",
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "deny",
+                        "group": "PROTOCOL",
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "deny",
+                        "group": "SQL",
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "deny",
+                        "group": "XSS",
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "deny",
+                        "group": "CMD",
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "deny",
+                        "group": "LFI",
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "deny",
+                        "group": "RFI",
+                        "rulesetVersionId": 7257
+                    },
+                    {
+                        "action": "deny",
+                        "group": "PLATFORM",
+                        "rulesetVersionId": 7257
+                    }
+                ],
+                "threatIntel": "on"
+            },
+            "customRuleActions": [
+                {
+                    "action": "deny",
+                    "id": 60039230
+                }
+            ],
+            "ratePolicyActions": [
+                {
+                    "id": 177906,
+                    "ipv4Action": "alert",
+                    "ipv6Action": "alert"
+                },
+                {
+                    "id": 177907,
+                    "ipv4Action": "alert",
+                    "ipv6Action": "alert"
+                },
+                {
+                    "id": 177908,
+                    "ipv4Action": "alert",
+                    "ipv6Action": "alert"
+                }
+            ],
+            "malwarePolicyActions": [
+                {
+                    "id": 1187,
+                    "action": "alert",
+                    "unscannedAction": "deny"
+                },
+                {
+                    "id": 1186,
+                    "action": "alert",
+                    "unscannedAction": "deny"
+                },
+                {
+                    "id": 1185,
+                    "action": "deny",
+                    "unscannedAction": "deny"
+                }
+            ],
+            "ipGeoFirewall": {
+                "block": "blockSpecificIPGeo",
+                "ipControls": {
+                    "blockedIPNetworkLists": {
+                        "networkList": [
+                            "118736_TFDEMOLISTATUL"
+                        ]
+                    }
+                }
+            },
+            "clientReputation": {
+                "reputationProfileActions": [
+                    {
+                        "action": "deny",
+                        "id": 3017089
+                    }
+                ]
+            },
+            "slowPost": {
+                "action": "alert",
+                "slowRateThreshold": {
+                    "period": 60,
+                    "rate": 10
+                }
+            },
+            "penaltyBox": {
+                "action": "alert",
+                "penaltyBoxProtection": true
+            },
+            "pragmaHeader": {
+                "override": false
+            },
+            "apiRequestConstraints": {
+                "apiEndpoints": [
+                    {
+                        "action": "alert",
+                        "id": 12345
+                    },
+                    {
+                        "action": "alert",
+                        "id": 12346
+                    }
+                ]
+            },
+            "requestBody": {
+                "requestBodyInspectionLimitInKB": "default"
+            },
+            "botManagement": {
+                "akamaiBotCategoryActions": [
+                    {
+                        "categoryId": "0b116152-1d20-4715-8fa7-dcacb1c697e2",
+                        "primitiveKey": "primitiveValueA",
+                        "arrayKey": [
+                            "arrayValueA1",
+                            "arrayValueA2"
+                        ],
+                        "objectKey": {
+                            "innerKey": "innerValueA"
+                        }
+                    },
+                    {
+                        "categoryId": "da0596ba-2379-4657-9b84-79b460d66070",
+                        "primitiveKey": "primitiveValueB",
+                        "arrayKey": [
+                            "arrayValueB1",
+                            "arrayValueB2"
+                        ],
+                        "objectKey": {
+                            "innerKey": "innerValueB"
+                        }
+                    }
+                ],
+                "botDetectionActions": [
+                    {
+                        "detectionId": "179e6bd6-5077-4f22-9a5b-3b09ee731eca",
+                        "primitiveKey": "primitiveValueA",
+                        "arrayKey": [
+                            "arrayValueA1",
+                            "arrayValueA2"
+                        ],
+                        "objectKey": {
+                            "innerKey": "innerValueA"
+                        }
+                    },
+                    {
+                        "detectionId": "c4d20de1-af7a-476f-911d-73aedd97e294",
+                        "primitiveKey": "primitiveValueB",
+                        "arrayKey": [
+                            "arrayValueB1",
+                            "arrayValueB2"
+                        ],
+                        "objectKey": {
+                            "innerKey": "innerValueB"
+                        }
+                    }
+                ],
+                "botManagementSettings": {
+                    "primitiveKey": "primitiveValueA",
+                    "arrayKey": [
+                        "arrayValueA1",
+                        "arrayValueA2"
+                    ],
+                    "objectKey": {
+                        "innerKey": "innerValueA"
+                    }
+                },
+                "customBotCategoryActions": [
+                    {
+                        "categoryId": "dae597b8-b552-4c95-ab8b-066a3fef2f75",
+                        "primitiveKey": "primitiveValueA",
+                        "arrayKey": [
+                            "arrayValueA1",
+                            "arrayValueA2"
+                        ],
+                        "objectKey": {
+                            "innerKey": "innerValueA"
+                        }
+                    },
+                    {
+                        "categoryId": "c3362371-4b98-40fe-a7b9-cd7fab93eec5",
+                        "primitiveKey": "primitiveValueB",
+                        "arrayKey": [
+                            "arrayValueB1",
+                            "arrayValueB2"
+                        ],
+                        "objectKey": {
+                            "innerKey": "innerValueB"
+                        }
+                    }
+                ],
+                "javascriptInjectionRules": {
+                    "primitiveKey": "primitiveValueA",
+                    "arrayKey": [
+                        "arrayValueA1",
+                        "arrayValueA2"
+                    ],
+                    "objectKey": {
+                        "innerKey": "innerValueA"
+                    }
+                },
+                "transactionalEndpoints": {
+                    "botProtection": [
+                        {
+                            "operationId": "061429d0-a709-418e-9311-1c3b4ee28792",
+                            "primitiveKey": "primitiveValueA",
+                            "arrayKey": [
+                                "arrayValueA1",
+                                "arrayValueA2"
+                            ],
+                            "objectKey": {
+                                "innerKey": "innerValueA"
+                            }
+                        },
+                        {
+                            "operationId": "c2b20de9-bb2e-4da8-ac99-f5b6e9ae4e10",
+                            "primitiveKey": "primitiveValueB",
+                            "arrayKey": [
+                                "arrayValueB1",
+                                "arrayValueB2"
+                            ],
+                            "objectKey": {
+                                "innerKey": "innerValueB"
+                            }
+                        }
+                    ],
+                    "botProtectionExceptions": {
+                        "primitiveKey": "primitiveValueA",
+                        "arrayKey": [
+                            "arrayValueA1",
+                            "arrayValueA2"
+                        ],
+                        "objectKey": {
+                            "innerKey": "innerValueA"
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "malwarePolicies": [
+        {
+            "contentTypes": [
+                "application/xml",
+                "audio/x-wav",
+                "application/json"
+            ],
+            "description": "Malware configuration details",
+            "hostnames": [
+                "test.akamai.com",
+                "sample.akamai.com"
+            ],
+            "id": 1187,
+            "name": "FMS Configuration 1",
+            "paths": [
+                "/base-path",
+                "/test"
+            ]
+        },
+        {
+            "contentTypes": [
+                "application/msword",
+                "application/x-mswrite",
+                "application/rtf"
+            ],
+            "description": "Malware configuration details",
+            "hostnames": [
+                "test.akamai.com"
+            ],
+            "id": 1186,
+            "name": "FMS Configuration 2",
+            "paths": [
+                "/base-path"
+            ]
+        },
+        {
+            "contentTypes": [
+                "application/xml",
+                "application/json"
+            ],
+            "description": "Malware configuration details",
+            "hostnames": [
+                "sample.akamai.com"
+            ],
+            "id": 1185,
+            "name": "FMS Configuration 3",
+            "paths": [
+                "/test"
+            ]
+        }
+    ],
+    "siem": {
+        "enableSiem": false
+    },
+    "advancedOptions": {
+        "attackPayloadLogging": {
+            "enabled": true,
+            "requestBody": {
+                "type": "NONE"
+            },
+            "responseBody": {
+                "type": "ATTACK_PAYLOAD"
+            }
+        },
+        "logging": {
+            "allowSampling": true,
+            "cookies": {
+                "type": "all"
+            },
+            "customHeaders": {
+                "type": "all"
+            },
+            "standardHeaders": {
+                "type": "all"
+            }
+        },
+        "pragmaHeader": {
+            "action": "REMOVE"
+        },
+        "prefetch": {
+            "allExtensions": false,
+            "enableAppLayer": true,
+            "enableRateControls": false,
+            "extensions": [
+                "cgi",
+                "jsp",
+                "aspx",
+                "EMPTY_STRING",
+                "php",
+                "py",
+                "asp"
+            ]
+        },
+        "requestBody": {
+            "requestBodyInspectionLimitInKB": "default"
+        }
+    },
+    "Siem": {
+        "EnableForAllPolicies": false,
+        "EnableSiem": true,
+        "EnableBotmanSiemEvents": false,
+        "FirewallPolicyIds": [
+            "ASE1_156138"
+        ],
+        "SiemDefinitionID": 1
+    },
+    "customDenyList": [
+        {
+            "id": "deny_custom_78842",
+            "name": "Deny Message",
+            "parameters": [
+                {
+                    "displayName": "Prevent browser caching",
+                    "name": "prevent_browser_cache",
+                    "value": "true"
+                },
+                {
+                    "displayName": "Response body content",
+                    "name": "response_body_content",
+                    "value": "You were denied, bad actor!"
+                },
+                {
+                    "displayName": "Response content type",
+                    "name": "response_content_type",
+                    "value": "text/html"
+                },
+                {
+                    "displayName": "Response status code",
+                    "name": "response_status_code",
+                    "value": "433"
+                }
+            ]
+        }
+    ],
+    "advancedSettings": {
+        "botAnalyticsCookieSettings": {
+            "primitiveKey": "primitiveValueA",
+            "arrayKey": [
+                "arrayValueA1",
+                "arrayValueA2"
+            ],
+            "objectKey": {
+                "innerKey": "innerValueA"
+            }
+        },
+        "clientSideSecuritySettings": {
+            "primitiveKey": "primitiveValueA",
+            "arrayKey": [
+                "arrayValueA1",
+                "arrayValueA2"
+            ],
+            "objectKey": {
+                "innerKey": "innerValueA"
+            }
+        },
+        "transactionalEndpointProtectionSettings": {
+            "primitiveKey": "primitiveValueA",
+            "arrayKey": [
+                "arrayValueA1",
+                "arrayValueA2"
+            ],
+            "objectKey": {
+                "innerKey": "innerValueA"
+            }
+        }
+    },
+    "customBotCategories": [
+        {
+            "categoryId": "dae597b8-b552-4c95-ab8b-066a3fef2f75",
+            "categoryName": "category a",
+            "metadata": {
+                "akamaiDefinedBotIds": [
+                    "eceac3f9-871b-4c57-9a24-c25b0237949a",
+                    "c590d2e5-a041-4f05-8fda-71608f42d720"
+                ],
+                "someKey": "someValue"
+            },
+            "ruleId": "RULE_ID_B",
+            "primitiveKey": "primitiveValueA",
+            "arrayKey": [
+                "arrayValueA1",
+                "arrayValueA2"
+            ],
+            "objectKey": {
+                "innerKey": "innerValueA"
+            }
+        },
+        {
+            "categoryId": "c3362371-4b98-40fe-a7b9-cd7fab93eec5",
+            "categoryName": "category b",
+            "metadata": {
+                "someKey": "someValue"
+            },
+            "ruleId": "RULE_ID_B",
+            "primitiveKey": "primitiveValueB",
+            "arrayKey": [
+                "arrayValueB1",
+                "arrayValueB2"
+            ],
+            "objectKey": {
+                "innerKey": "innerValueB"
+            }
+        }
+    ],
+    "customBotCategorySequence": [
+        "c3362371-4b98-40fe-a7b9-cd7fab93eec5",
+        "dae597b8-b552-4c95-ab8b-066a3fef2f75"
+    ],
+    "customClients": [
+        {
+            "customClientId": "a7fe489d-0354-43bd-b81c-8cabbe850cdd",
+            "customClientName": "Custom Client A",
+            "primitiveKey": "primitiveValueA",
+            "arrayKey": [
+                "arrayValueA1",
+                "arrayValueA2"
+            ],
+            "objectKey": {
+                "innerKey": "innerValueA"
+            }
+        },
+        {
+            "customClientId": "60374346-2d1d-444d-91c1-90373e3f804a",
+            "customClientName": "Custom Client B",
+            "primitiveKey": "primitiveValueB",
+            "arrayKey": [
+                "arrayValueB1",
+                "arrayValueB2"
+            ],
+            "objectKey": {
+                "innerKey": "innerValueB"
+            }
+        }
+    ],
+    "customDefinedBots": [
+        {
+            "botId": "50789280-ba99-4f8f-b4c6-ad9c1c69569a",
+            "botName": "Bot A",
+            "primitiveKey": "primitiveValueA",
+            "arrayKey": [
+                "arrayValueA1",
+                "arrayValueA2"
+            ],
+            "objectKey": {
+                "innerKey": "innerValueA"
+            }
+        },
+        {
+            "botId": "da1de35e-deda-4273-933d-3131291fa3d4",
+            "botName": "Bot B",
+            "primitiveKey": "primitiveValueB",
+            "arrayKey": [
+                "arrayValueB1",
+                "arrayValueB2"
+            ],
+            "objectKey": {
+                "innerKey": "innerValueB"
+            }
+        }
+    ],
+    "responseActions": {
+        "challengeActions": [
+            {
+                "actionId": "action_A",
+                "actionName": "Challenge Action A",
+                "primitiveKey": "primitiveValueA",
+                "arrayKey": [
+                    "arrayValueA1",
+                    "arrayValueA2"
+                ],
+                "objectKey": {
+                    "innerKey": "innerValueA"
+                }
+            },
+            {
+                "actionId": "action_B",
+                "actionName": "Challenge Action B",
+                "primitiveKey": "primitiveValueB",
+                "arrayKey": [
+                    "arrayValueB1",
+                    "arrayValueB2"
+                ],
+                "objectKey": {
+                    "innerKey": "innerValueB"
+                }
+            }
+        ],
+        "challengeInterceptionRules": {
+            "primitiveKey": "primitiveValueA",
+            "arrayKey": [
+                "arrayValueA1",
+                "arrayValueA2"
+            ],
+            "objectKey": {
+                "innerKey": "innerValueA"
+            }
+        },
+        "conditionalActions": [
+            {
+                "actionId": "action_A",
+                "actionName": "Conditional Action A",
+                "primitiveKey": "primitiveValueA",
+                "arrayKey": [
+                    "arrayValueA1",
+                    "arrayValueA2"
+                ],
+                "objectKey": {
+                    "innerKey": "innerValueA"
+                }
+            },
+            {
+                "actionId": "action_B",
+                "actionName": "Conditional Action B",
+                "primitiveKey": "primitiveValueB",
+                "arrayKey": [
+                    "arrayValueB1",
+                    "arrayValueB2"
+                ],
+                "objectKey": {
+                    "innerKey": "innerValueB"
+                }
+            }
+        ],
+        "serveAlternateActions": [
+            {
+                "actionId": "action_A",
+                "actionName": "Serve Alternate Action A",
+                "primitiveKey": "primitiveValueA",
+                "arrayKey": [
+                    "arrayValueA1",
+                    "arrayValueA2"
+                ],
+                "objectKey": {
+                    "innerKey": "innerValueA"
+                }
+            },
+            {
+                "actionId": "action_B",
+                "actionName": "Serve Alternate Action B",
+                "primitiveKey": "primitiveValueB",
+                "arrayKey": [
+                    "arrayValueB1",
+                    "arrayValueB2"
+                ],
+                "objectKey": {
+                    "innerKey": "innerValueB"
+                }
+            }
+        ]
+    }
+}
