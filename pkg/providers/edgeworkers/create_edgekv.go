@@ -28,6 +28,7 @@ type (
 		Retention   int
 		GeoLocation string
 		Section     string
+		GroupItems  map[string]map[string]edgeworkers.Item
 	}
 )
 
@@ -37,6 +38,12 @@ var (
 
 	// ErrFetchingEdgeKV is returned when fetching edgekv fails
 	ErrFetchingEdgeKV = errors.New("unable to fetch edgekv with given namespace_name and network")
+	// ErrFetchingEdgeKVItems is returned when fetching edgekv items fails
+	ErrFetchingEdgeKVItems = errors.New("unable to fetch edgekv items with given group id")
+	// ErrFetchingEdgeKVItem is returned when fetching edgekv item fails
+	ErrFetchingEdgeKVItem = errors.New("unable to fetch edgekv item with given group and item id")
+	// ErrFetchingEdgeKVGroups is returned when fetching edgekv groups fails
+	ErrFetchingEdgeKVGroups = errors.New("unable to fetch edgekv groups with given namespace_name and network")
 )
 
 // CmdCreateEdgeKV is an entrypoint to create-edgekv command
@@ -72,6 +79,7 @@ func CmdCreateEdgeKV(c *cli.Context) error {
 			"ToLower": func(network edgeworkers.ActivationNetwork) string {
 				return strings.ToLower(string(network))
 			},
+			"Escape": tools.Escape,
 		},
 	}
 
@@ -88,7 +96,7 @@ func CmdCreateEdgeKV(c *cli.Context) error {
 func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.NamespaceNetwork, section string, client edgeworkers.Edgeworkers, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 	fmt.Println("Configuring EdgeKV")
-	term.Spinner().Start("Fetching EdgeKV "+namespace, "")
+	term.Spinner().Start("Fetching EdgeKV %s", namespace)
 
 	edgeKV, err := getEdgeKV(ctx, namespace, network, client)
 	if err != nil {
@@ -96,12 +104,41 @@ func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.Nam
 		return fmt.Errorf("%w: %s", ErrFetchingEdgeKV, err)
 	}
 
+	term.Spinner().OK()
+	term.Spinner().Start("Fetching EdgeKV groups in %s", namespace)
+	groupItems := make(map[string]map[string]edgeworkers.Item, 0)
+	edgeKVGroups, err := getEdgeKVGroups(ctx, namespace, network, client)
+	if err != nil {
+		term.Spinner().Fail()
+		return fmt.Errorf("%w: %s", ErrFetchingEdgeKV, err)
+	}
+	term.Spinner().OK()
+	term.Spinner().Start("Fetching EdgeKV items in groups in %s", namespace)
+	for _, group := range edgeKVGroups {
+		edgeKVItems, err := getEdgeKVItems(ctx, namespace, network, group, client)
+		if err != nil {
+			term.Spinner().Fail()
+			return fmt.Errorf("%w: %s", ErrFetchingEdgeKV, err)
+		}
+
+		items := make(map[string]edgeworkers.Item, 0)
+		for _, itemID := range *edgeKVItems {
+			item, err := getEdgeKVItem(ctx, namespace, network, group, itemID, client)
+			if err != nil {
+				term.Spinner().Fail()
+				return fmt.Errorf("%w: %s", ErrFetchingEdgeKV, err)
+			}
+			items[itemID] = *item
+		}
+		groupItems[group] = items
+	}
 	tfEdgeKVData := TFEdgeKVData{
 		Name:        edgeKV.Name,
 		Network:     network,
 		Retention:   *edgeKV.Retention,
 		GeoLocation: edgeKV.GeoLocation,
 		Section:     section,
+		GroupItems:  groupItems,
 	}
 
 	// Only add GroupID if the API returns it
@@ -134,4 +171,47 @@ func getEdgeKV(ctx context.Context, namespace string, network edgeworkers.Namesp
 	}
 
 	return edgeKV, nil
+}
+
+func getEdgeKVItems(ctx context.Context, namespace string, network edgeworkers.NamespaceNetwork, groupID string, client edgeworkers.Edgeworkers) (*edgeworkers.ListItemsResponse, error) {
+	items, err := client.ListItems(ctx, edgeworkers.ListItemsRequest{
+		ItemsRequestParams: edgeworkers.ItemsRequestParams{
+			Network:     edgeworkers.ItemNetwork(network),
+			NamespaceID: namespace,
+			GroupID:     groupID,
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s: %s", ErrFetchingEdgeKVItems, groupID, err)
+	}
+
+	return items, nil
+}
+
+func getEdgeKVItem(ctx context.Context, namespace string, network edgeworkers.NamespaceNetwork, groupID, itemID string, client edgeworkers.Edgeworkers) (*edgeworkers.Item, error) {
+	item, err := client.GetItem(ctx, edgeworkers.GetItemRequest{
+		ItemID: itemID,
+		ItemsRequestParams: edgeworkers.ItemsRequestParams{
+			Network:     edgeworkers.ItemNetwork(network),
+			NamespaceID: namespace,
+			GroupID:     groupID,
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s,%s: %s", ErrFetchingEdgeKVItem, groupID, itemID, err)
+	}
+
+	return item, nil
+}
+
+func getEdgeKVGroups(ctx context.Context, namespace string, network edgeworkers.NamespaceNetwork, client edgeworkers.Edgeworkers) ([]string, error) {
+	items, err := client.ListGroupsWithinNamespace(ctx, edgeworkers.ListGroupsWithinNamespaceRequest{
+		Network:     network,
+		NamespaceID: namespace,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s", ErrFetchingEdgeKVGroups, err)
+	}
+
+	return items, nil
 }

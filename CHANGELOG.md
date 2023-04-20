@@ -4,10 +4,11 @@
 
 ### Features/Enhancements
 
-### Features/Enhancements
-
 * APPSEC
   * Add import support for bot management resources
+
+* EdgeKV
+  * Export of `export-edgekv` uses `akamai_edgekv_group_items` resource instead of deprecated `initial_data` within `akamai_edgekv` resource
 
 ### Fixes
 

@@ -106,3 +106,10 @@ func EscapeQuotedStringLit(s string) string {
 	}
 	return buf.String()
 }
+
+// Escape is correcting values stored in terraform fields by escaping special characters
+func Escape(str string) string {
+	str = strings.ReplaceAll(str, `\`, `\\`)
+	str = strings.ReplaceAll(str, "\n", "\\n")
+	return strings.ReplaceAll(str, `"`, `\"`)
+}

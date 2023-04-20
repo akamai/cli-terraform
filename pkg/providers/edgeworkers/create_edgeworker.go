@@ -80,6 +80,7 @@ func CmdCreateEdgeWorker(c *cli.Context) error {
 			"ToLower": func(network edgeworkers.ActivationNetwork) string {
 				return strings.ToLower(string(network))
 			},
+			"Escape": tools.Escape,
 		},
 	}
 

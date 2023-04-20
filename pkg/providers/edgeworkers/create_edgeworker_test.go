@@ -13,6 +13,7 @@ import (
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/edgeworkers"
 	"github.com/akamai/cli-terraform/pkg/templates"
+	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -254,6 +255,7 @@ func TestProcessEdgeWorkerTemplates(t *testing.T) {
 					"ToLower": func(network edgeworkers.ActivationNetwork) string {
 						return strings.ToLower(string(network))
 					},
+					"Escape": tools.Escape,
 				},
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))

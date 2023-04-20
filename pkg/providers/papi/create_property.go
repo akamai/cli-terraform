@@ -188,7 +188,7 @@ var additionalFuncs = template.FuncMap{
 	"ToLower":           strings.ToLower,
 	"TerraformName":     TerraformName,
 	"AsInt":             AsInt,
-	"Escape":            Escape,
+	"Escape":            tools.Escape,
 	"ReportError":       ReportError,
 	"CheckErrors":       CheckErrors,
 	"IsMultiline":       IsMultiline,
@@ -895,12 +895,6 @@ func TerraformName(str string) string {
 // AsInt provides proper conversion of values which are integers in reality
 func AsInt(f any) int64 {
 	return int64(f.(float64))
-}
-
-// Escape is correcting values stored in terraform fields by escaping special characters
-func Escape(str string) string {
-	str = strings.ReplaceAll(str, `\`, `\\`)
-	return strings.ReplaceAll(str, `"`, `\"`)
 }
 
 // as go templates do not support well pointers in receivers and function arguments, global variable seems to be the only

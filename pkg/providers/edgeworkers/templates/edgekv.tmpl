@@ -1,9 +1,9 @@
-{{- /*gotype: github.com/akamai/cli-terraform/cloudlets.TFEdgeKVData*/ -}}
+{{- /*gotype: github.com/akamai/cli-terraform/edgeworkers.TFEdgeKVData*/ -}}
 terraform {
   required_providers {
     akamai = {
       source = "akamai/akamai"
-      version = ">= 2.0.0"
+      version = ">= 3.6.0"
     }
   }
   required_version = ">= 0.13"
@@ -21,3 +21,16 @@ resource "akamai_edgekv" "edgekv" {
   retention_in_seconds = {{.Retention}}
   geo_location         = "{{.GeoLocation}}"
 }
+{{- range $group, $items := .GroupItems}}
+
+resource "akamai_edgekv_group_items" "{{$group | Escape}}" {
+  namespace_name = "{{$.Name}}"
+  network        = "{{$.Network}}"
+  group_name     = "{{$group}}"
+  items = {
+{{- range $k, $v := $items}}
+    "{{$k | Escape}}" = "{{$v | printf "%s" | Escape}}"
+{{- end}}
+  }
+}
+{{- end}}
