@@ -29,7 +29,7 @@ If you want to compile it from source, you will need Go 1.18 or later:
 
 1. Create a clone of the target repository: 
   `git clone https://github.com/akamai/cli-terraform.git`
-3. Change to the package directory and compile the binary:
+2. Change to the package directory and compile the binary:
   - Linux/macOS/*nix: `go build -o akamai-terraform`
   - Windows: `go build -o akamai-terraform.exe`
 
