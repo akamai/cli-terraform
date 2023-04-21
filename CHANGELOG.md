@@ -1,6 +1,6 @@
 # Release Notes
 
-## Version 1.4.x (Apr xx, 2023)
+## Version 1.5.0 (Apr 27, 2023)
 
 ### Features/Enhancements
 
@@ -20,7 +20,7 @@
   * Support for `advanced_override` and `custom_override` fields in `default` datasource `akamai_property_rules_builder`
   * Fix ending newline character during export for heredoc in `akamai_property_rules_builder` datasource
   * Export `akamai_property.rule_format` as reference to `akamai_property_rules_builder`
-  * Stop exporting `compliance_record` field in `akamai_property_include_activation` resource
+  * Remove `certificate` and `product_id` from edgehostnames during export `akamai_edge_hostname` ([I#338](https://github.com/akamai/terraform-provider-akamai/issues/338))
 
 ## Version 1.4.0 (Mar 30, 2023)
 
