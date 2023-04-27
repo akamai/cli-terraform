@@ -56,7 +56,7 @@ coverage: ; $(info $(M) Running tests with coverage...) @ ## Run tests and gener
 .PHONY: create-junit-report
 create-junit-report: | $(GOJUNITREPORT) ; $(info $(M) Creating juint xml report) @ ## Generate junit-style coverage report
 	@cat $(CURDIR)/test/tests.output | $(GOJUNITREPORT) > $(CURDIR)/test/tests.xml
-	@sed -i -e 's/skip=/skipped=/g;s/ failures=/ errors="0" failures=/g' $(CURDIR)/test/tests.xml
+	@sed -i -e 's/skip=/skipped=/g' $(CURDIR)/test/tests.xml
 
 .PHONY: create-coverage-files
 create-coverage-files: | $(GOCOV) $(GOCOVXML); $(info $(M) Creating coverage files...) @ ## Generate coverage report files
@@ -86,7 +86,7 @@ terraform-fmt: ; $(info $(M) Running terraform fmt check...) @ ## Check formatti
 
 .PHONY: terraform-lint
 terraform-lint: | $(TFLINT) ; $(info $(M) Checking source code against tflint...) @ ## Run tflint on all HCL files in the project
-	@find ./pkg -type f -name "*.tf" | xargs -I % dirname % | sort -u | xargs -I @ sh -c "echo @ && $(TFLINT) @"
+	@find ./pkg -type f -name "*.tf" | xargs -I % dirname % | sort -u | xargs -I @ sh -c "echo @ && $(TFLINT) --filter @"
 
 .PHONY: validate-testdata
 validate-testdata: ; $(info $(M) Validating testdata agains terraform-provider-akamai...) @ ## terraform init & terraform validate on all .tf files

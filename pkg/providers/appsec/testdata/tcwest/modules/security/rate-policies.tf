@@ -38,3 +38,29 @@ resource "akamai_appsec_rate_policy" "low_rate" {
   )
 }
 
+resource "akamai_appsec_rate_policy" "bot_rate" {
+  config_id = akamai_appsec_configuration.config.config_id
+  rate_policy = jsonencode(
+    {
+      "additionalMatchOptions" : null,
+      "averageThreshold" : 25,
+      "burstThreshold" : 50,
+      "clientIdentifier" : "",
+      "matchType" : "path",
+      "name" : "Bot Rate",
+      "path" : {
+        "positiveMatch" : true,
+        "values" : [
+          "/robots.txt"
+        ]
+      },
+      "pathMatchType" : "Custom",
+      "pathUriPositiveMatch" : true,
+      "requestType" : "ClientRequest",
+      "sameActionOnIpv6" : false,
+      "type" : "BOTMAN",
+      "useXForwardForHeaders" : false
+    }
+  )
+}
+

@@ -57,12 +57,6 @@ resource "akamai_property_include_activation" "{{$include.IncludeName}}_{{$netwo
   note = "{{$include.ActivationNoteProduction}}"
 {{- end}}
   notify_emails = [{{range $index, $element := $include.ActivationEmailsProduction}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
-  compliance_record {
-    noncompliance_reason = "NONE"
-    customer_email       = "customer@email.com"
-    peer_reviewed_by     = "John Doe"
-    unit_tested          = true
-  }
 {{- end}}
 }
 {{- end}}

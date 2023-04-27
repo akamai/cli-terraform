@@ -2,7 +2,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 2.0.0"
+      version = ">= 3.5.0"
     }
   }
   required_version = ">= 0.13"
@@ -23,7 +23,6 @@ data "akamai_contract" "contract" {
 }
 
 resource "akamai_edge_hostname" "test-edgesuite-net" {
-  product_id    = "prd_HTTP_Content_Del"
   contract_id   = data.akamai_contract.contract.id
   group_id      = data.akamai_group.group.id
   ip_behavior   = "IPV6_COMPLIANCE"
@@ -35,13 +34,13 @@ resource "akamai_property" "test-edgesuite-net" {
   contract_id = data.akamai_contract.contract.id
   group_id    = data.akamai_group.group.id
   product_id  = "prd_HTTP_Content_Del"
-  rule_format = "v2023-01-05"
   hostnames {
     cname_from             = "test.edgesuite.net"
     cname_to               = akamai_edge_hostname.test-edgesuite-net.edge_hostname
     cert_provisioning_type = "CPS_MANAGED"
   }
-  rules = data.akamai_property_rules_builder.test-edgesuite-net_rule_default.json
+  rule_format = data.akamai_property_rules_builder.test-edgesuite-net_rule_default.rule_format
+  rules       = data.akamai_property_rules_builder.test-edgesuite-net_rule_default.json
 }
 
 resource "akamai_property_activation" "test-edgesuite-net" {

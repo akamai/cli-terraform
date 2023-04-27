@@ -25,16 +25,13 @@ for your system, or by cloning this repository and compiling it yourself.
 
 ### Compiling from Source
 
-If you want to compile it from source, you will need Go 1.12 or later:
+If you want to compile it from source, you will need Go 1.18 or later:
 
-1. Fetch the package:  
-  `go get github.com/akamai/cli-terraform`
-2. Change to the package directory:  
-  `cd $GOPATH/src/github.com/akamai/cli-terraform`
-3. Compile the binary:
+1. Create a clone of the target repository: 
+  `git clone https://github.com/akamai/cli-terraform.git`
+2. Change to the package directory and compile the binary:
   - Linux/macOS/*nix: `go build -o akamai-terraform`
   - Windows: `go build -o akamai-terraform.exe`
-4. Move the binary (`akamai-terraform` or `akamai-terraform.exe`) in to your `PATH`
 
 ## General Usage
 

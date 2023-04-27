@@ -79,9 +79,6 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
         enabled = {{.Enabled}}
         weight = {{.Weight}}
         servers = [{{range $i, $v := .Servers}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
-        {{- if .Name}}
-        name = "{{.Name}}"
-        {{- end}}
         {{- if .HandoutCName}}
         handout_cname = "{{.HandoutCName}}"
         {{- end}}

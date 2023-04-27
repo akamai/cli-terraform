@@ -217,6 +217,10 @@
     ],
     "name": "default",
     "options": {},
+    "customOverride": {
+      "overrideId": "cbo_12345",
+      "name": "mdc"
+    },
     "uuid": "default"
   }
 }

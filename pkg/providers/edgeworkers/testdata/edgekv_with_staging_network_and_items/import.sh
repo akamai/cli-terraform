@@ -1,0 +1,4 @@
+terraform init
+terraform import akamai_edgekv.edgekv test_namespace:staging
+terraform import akamai_edgekv_group_items.group1 test_namespace:staging:group1
+terraform import akamai_edgekv_group_items.group2 test_namespace:staging:group2

@@ -44,22 +44,22 @@ import (
 type EdgeHostname struct {
 	EdgeHostname             string
 	EdgeHostnameID           string
-	ProductName              string
 	ContractID               string
 	GroupID                  string
 	ID                       string
 	IPv6                     string
 	EdgeHostnameResourceName string
-	SlotNumber               int
 	SecurityType             string
 	UseCases                 string
 }
 
 // Hostname represents edge hostname resource
 type Hostname struct {
-	Hostname                 string
+	CnameFrom                string
+	CnameTo                  string
 	EdgeHostnameResourceName string
 	CertProvisioningType     string
+	IsActive                 bool
 }
 
 // WrappedRules is a wrapper around Rule which simplifies flattening rule tree into list and adjust names of the datasources
@@ -184,6 +184,19 @@ var (
 	ErrUnsupportedRuleFormat = errors.New("unsupported rule format")
 )
 
+var additionalFuncs = template.FuncMap{
+	"ToLower":           strings.ToLower,
+	"TerraformName":     TerraformName,
+	"AsInt":             AsInt,
+	"Escape":            tools.Escape,
+	"ReportError":       ReportError,
+	"CheckErrors":       CheckErrors,
+	"IsMultiline":       IsMultiline,
+	"NoNewlineAtTheEnd": NoNewlineAtTheEnd,
+	"RemoveLastNewline": RemoveLastNewline,
+	"GetEOT":            GetEOT,
+}
+
 // CmdCreateProperty is an entrypoint to create-property command
 func CmdCreateProperty(c *cli.Context) error {
 	ctx := c.Context
@@ -231,11 +244,7 @@ func CmdCreateProperty(c *cli.Context) error {
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
-		AdditionalFuncs: template.FuncMap{
-			"ToLower": strings.ToLower,
-			"AsInt":   AsInt,
-			"Escape":  Escape,
-		},
+		AdditionalFuncs: additionalFuncs,
 	}
 
 	propertyName := c.Args().First()
@@ -360,14 +369,14 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 
 	// Get Hostnames
 	term.Spinner().Start("Fetching hostnames ")
-	hostnames, err := getHostnames(ctx, client, property, version)
+	hostnames, err := getPropertyVersionHostnames(ctx, client, property, version)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrHostnamesNotFound, err)
 	}
 
 	tfData.Property.Hostnames, tfData.Property.EdgeHostnames, err =
-		getEdgeHostnameDetail(ctx, client, clientHapi, hostnames, product.ProductName, property)
+		getEdgeHostnameDetail(ctx, client, clientHapi, hostnames, property)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrFetchingHostnameDetails, err)
@@ -395,9 +404,11 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	term.Spinner().Start("Saving TF configurations ")
 	if err = templateProcessor.ProcessTemplates(tfData); err != nil {
 		term.Spinner().Fail()
+		if _, err := CheckErrors(); err != nil {
+			return fmt.Errorf("%w", err)
+		}
 		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
 	}
-
 	if !schema {
 		// Save snippets
 		ruleTemplate, rulesTemplate := setPropertyRuleTemplates(rules)
@@ -453,7 +464,7 @@ func flattenWrappedRules(rule *WrappedRules) []*WrappedRules {
 	return result
 }
 
-func getHostnames(ctx context.Context, client papi.PAPI, property *papi.Property, version *papi.GetPropertyVersionsResponse) (*papi.HostnameResponseItems, error) {
+func getPropertyVersionHostnames(ctx context.Context, client papi.PAPI, property *papi.Property, version *papi.GetPropertyVersionsResponse) (*papi.HostnameResponseItems, error) {
 	if version == nil {
 		var err error
 		version, err = client.GetLatestVersion(ctx, papi.GetLatestVersionRequest{
@@ -480,8 +491,7 @@ func getHostnames(ctx context.Context, client papi.PAPI, property *papi.Property
 	return &response.Hostnames, nil
 }
 
-func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI hapi.HAPI, hostnames *papi.HostnameResponseItems,
-	productName string, property *papi.Property) (map[string]Hostname, map[string]EdgeHostname, error) {
+func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI hapi.HAPI, hostnames *papi.HostnameResponseItems, property *papi.Property) (map[string]Hostname, map[string]EdgeHostname, error) {
 
 	edgeHostnamesMap := map[string]EdgeHostname{}
 	hostnamesMap := map[string]Hostname{}
@@ -519,12 +529,10 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			edgeHostnamesMap[cnameToResource] = EdgeHostname{
 				EdgeHostname:             cnameTo,
 				EdgeHostnameID:           hostname.EdgeHostnameID,
-				ProductName:              productName,
 				ContractID:               property.ContractID,
 				GroupID:                  property.GroupID,
 				IPv6:                     getIPv6(papiEdgeHostnames, hostname.EdgeHostnameID),
 				EdgeHostnameResourceName: cnameToResource,
-				SlotNumber:               edgeHostname.SlotNumber,
 				SecurityType:             edgeHostname.SecurityType,
 				UseCases:                 useCases,
 			}
@@ -535,9 +543,11 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			certProvisioningType = hostname.CertProvisioningType
 		}
 		hostnamesMap[cnameFrom] = Hostname{
-			Hostname:                 cnameFrom,
+			CnameFrom:                cnameFrom,
+			CnameTo:                  cnameTo,
 			EdgeHostnameResourceName: cnameToResource,
 			CertProvisioningType:     certProvisioningType,
+			IsActive:                 len(hostname.EdgeHostnameID) > 0,
 		}
 	}
 
@@ -583,6 +593,7 @@ func setPropertyRuleTemplates(rules *papi.GetRuleTreeResponse) (RuleTemplate, Ru
 		UUID:                rules.Rules.UUID,
 		Variables:           rules.Rules.Variables,
 		AdvancedOverride:    rules.Rules.AdvancedOverride,
+		CustomOverride:      rules.Rules.CustomOverride,
 		Children:            make([]string, 0),
 		Options:             rules.Rules.Options,
 	}
@@ -886,8 +897,51 @@ func AsInt(f any) int64 {
 	return int64(f.(float64))
 }
 
-// Escape is correcting values stored in terraform fields by escaping special characters
-func Escape(str string) string {
-	str = strings.ReplaceAll(str, `\`, `\\`)
-	return strings.ReplaceAll(str, `"`, `\"`)
+// as go templates do not support well pointers in receivers and function arguments, global variable seems to be the only
+// solution to accumulate all issues
+var reportedErrors []string
+
+// ReportError is used to report unknown behaviors or criteria during processing the template
+func ReportError(format string, a ...any) string {
+	message := fmt.Sprintf(format, a...)
+	reportedErrors = append(reportedErrors, message)
+	return message
+}
+
+// CheckErrors is used to fail the processing of the template in case of any unknown behaviors or criteria
+func CheckErrors() (string, error) {
+	if len(reportedErrors) > 0 {
+		return "", fmt.Errorf("there were errors reported: %v", strings.Join(reportedErrors, ", "))
+	}
+	return "", nil
+}
+
+// IsMultiline returns true if the input string contains at least one new line character
+func IsMultiline(str string) bool {
+	return strings.LastIndex(str, "\n") >= 0
+}
+
+// NoNewlineAtTheEnd returns true if there is no new line character at the end of the string
+func NoNewlineAtTheEnd(str string) bool {
+	if str == "" {
+		return true
+	}
+	return str[len(str)-1:] != "\n"
+}
+
+// RemoveLastNewline removes the new line character if this is the last character in the string
+func RemoveLastNewline(str string) string {
+	if len(str) > 0 && str[len(str)-1:] == "\n" {
+		return str[:len(str)-1]
+	}
+	return str
+}
+
+// GetEOT generates unique delimiter word for heredoc, by default it is EOT
+func GetEOT(str string) string {
+	eot := "EOT"
+	for strings.LastIndex(str, eot) >= 0 {
+		eot += "A"
+	}
+	return eot
 }

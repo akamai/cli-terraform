@@ -1,5 +1,27 @@
 # Release Notes
 
+## Version 1.5.0 (Apr 27, 2023)
+
+### Features/Enhancements
+
+* APPSEC
+  * Add import support for bot management resources
+
+* EdgeKV
+  * Export of `export-edgekv` uses `akamai_edgekv_group_items` resource instead of deprecated `initial_data` within `akamai_edgekv` resource
+
+### Fixes
+
+* GTM
+  * Remove deprecated field `name` of `traffic_target` during export  ([I#374](https://github.com/akamai/terraform-provider-akamai/issues/374))
+
+* PAPI
+  * `is_secure` and `variable` fields can only be used in `default` datasource `akamai_property_rules_builder`
+  * Support for `advanced_override` and `custom_override` fields in `default` datasource `akamai_property_rules_builder`
+  * Fix ending newline character during export for heredoc in `akamai_property_rules_builder` datasource
+  * Export `akamai_property.rule_format` as reference to `akamai_property_rules_builder`
+  * Remove `certificate` and `product_id` from edgehostnames during export `akamai_edge_hostname` ([I#338](https://github.com/akamai/terraform-provider-akamai/issues/338))
+
 ## Version 1.4.0 (Mar 30, 2023)
 
 ### Features/Enhancements

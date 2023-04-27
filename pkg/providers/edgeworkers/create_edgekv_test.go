@@ -12,6 +12,7 @@ import (
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/edgeworkers"
 	"github.com/akamai/cli-terraform/pkg/templates"
+	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -45,8 +46,61 @@ var (
 			}, nil)
 	}
 
+	expectListGroupsWithinNamespace = func(e *edgeworkers.Mock, network edgeworkers.NamespaceNetwork, name string, groups []string, err error) *mock.Call {
+		call := e.On(
+			"ListGroupsWithinNamespace",
+			mock.Anything,
+			edgeworkers.ListGroupsWithinNamespaceRequest{
+				Network:     network,
+				NamespaceID: name,
+			},
+		)
+		if err != nil {
+			return call.Return(nil, err)
+		}
+		return call.Return(groups, nil)
+	}
+
+	expectListItems = func(e *edgeworkers.Mock, network edgeworkers.NamespaceNetwork, name string, group string, items *edgeworkers.ListItemsResponse, err error) *mock.Call {
+		call := e.On(
+			"ListItems",
+			mock.Anything,
+			edgeworkers.ListItemsRequest{
+				ItemsRequestParams: edgeworkers.ItemsRequestParams{
+					Network:     edgeworkers.ItemNetwork(network),
+					NamespaceID: name,
+					GroupID:     group,
+				},
+			},
+		)
+		if err != nil {
+			return call.Return(nil, err)
+		}
+		return call.Return(items, nil)
+	}
+
+	expectGetItem = func(e *edgeworkers.Mock, network edgeworkers.NamespaceNetwork, name, group, itemID, item string, err error) *mock.Call {
+		call := e.On(
+			"GetItem",
+			mock.Anything,
+			edgeworkers.GetItemRequest{
+				ItemID: itemID,
+				ItemsRequestParams: edgeworkers.ItemsRequestParams{
+					Network:     edgeworkers.ItemNetwork(network),
+					NamespaceID: name,
+					GroupID:     group,
+				},
+			},
+		)
+		if err != nil {
+			return call.Return(nil, err)
+		}
+		it := edgeworkers.Item(item)
+		return call.Return(&it, nil)
+	}
+
 	expectProcessTemplates = func(p *templates.MockProcessor, network edgeworkers.NamespaceNetwork, name string, geoLocation string,
-		retention int, groupID *int, section string, err error) *mock.Call {
+		retention int, groupID *int, section string, items map[string]map[string]edgeworkers.Item, err error) *mock.Call {
 		var tfData TFEdgeKVData
 		tfData = TFEdgeKVData{
 			Name:        name,
@@ -54,6 +108,7 @@ var (
 			Retention:   retention,
 			GeoLocation: geoLocation,
 			Section:     section,
+			GroupItems:  items,
 		}
 		if groupID != nil {
 			tfData.GroupID = *groupID
@@ -68,6 +123,19 @@ var (
 		}
 		return call.Return(nil)
 	}
+
+	emptyItems = map[string]map[string]edgeworkers.Item{}
+
+	items = map[string]map[string]edgeworkers.Item{
+		"group1": {
+			"item1.1": edgeworkers.Item("value1.1"),
+			"item1.2": edgeworkers.Item("value1.2"),
+		},
+		"group2": {
+			"item2.1": edgeworkers.Item("value2.1"),
+			"item2.2": edgeworkers.Item("value\n2.2"),
+		},
+	}
 )
 
 func TestCreateEdgeKV(t *testing.T) {
@@ -80,13 +148,28 @@ func TestCreateEdgeKV(t *testing.T) {
 		"fetch edgekv based on namespace and network": {
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), nil).Once()
-				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), section, nil).Once()
+				expectListGroupsWithinNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", []string{}, nil).Once()
+				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), section, emptyItems, nil).Once()
+			},
+		},
+		"fetch edgekv based on namespace and network with group items": {
+			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
+				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), nil).Once()
+				expectListGroupsWithinNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", []string{"group1", "group2"}, nil).Once()
+				expectListItems(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "group1", &edgeworkers.ListItemsResponse{"item1.1", "item1.2"}, nil).Once()
+				expectListItems(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "group2", &edgeworkers.ListItemsResponse{"item2.1", "item2.2"}, nil).Once()
+				expectGetItem(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "group1", "item1.1", "value1.1", nil).Once()
+				expectGetItem(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "group1", "item1.2", "value1.2", nil).Once()
+				expectGetItem(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "group2", "item2.1", "value2.1", nil).Once()
+				expectGetItem(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "group2", "item2.2", "value\n2.2", nil).Once()
+				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), section, items, nil).Once()
 			},
 		},
 		"fetch edgekv based on namespace and network with no group_id returned": {
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), nil, nil).Once()
-				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, nil, section, nil).Once()
+				expectListGroupsWithinNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", []string{}, nil).Once()
+				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, nil, section, emptyItems, nil).Once()
 			},
 		},
 		"error fetching edgekv": {
@@ -98,7 +181,8 @@ func TestCreateEdgeKV(t *testing.T) {
 		"error processing template": {
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), nil).Once()
-				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), section, fmt.Errorf("error")).Once()
+				expectListGroupsWithinNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", []string{}, nil).Once()
+				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), section, emptyItems, fmt.Errorf("error")).Once()
 			},
 			withError: templates.ErrSavingFiles,
 		},
@@ -140,6 +224,19 @@ func TestProcessEdgeKVTemplates(t *testing.T) {
 			dir:          "edgekv_with_staging_network",
 			filesToCheck: []string{"edgekv.tf", "variables.tf", "import.sh"},
 		},
+		"edgekv with staging network and items": {
+			givenData: TFEdgeKVData{
+				Name:        "test_namespace",
+				Network:     edgeworkers.NamespaceStagingNetwork,
+				GroupID:     123,
+				Retention:   0,
+				GeoLocation: "EU",
+				Section:     "test_section",
+				GroupItems:  items,
+			},
+			dir:          "edgekv_with_staging_network_and_items",
+			filesToCheck: []string{"edgekv.tf", "variables.tf", "import.sh"},
+		},
 		"edgekv with staging network no group_id": {
 			givenData: TFEdgeKVData{
 				Name:        "test_namespace",
@@ -179,6 +276,7 @@ func TestProcessEdgeKVTemplates(t *testing.T) {
 					"ToLower": func(network edgeworkers.ActivationNetwork) string {
 						return strings.ToLower(string(network))
 					},
+					"Escape": tools.Escape,
 				},
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))

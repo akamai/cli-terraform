@@ -2,7 +2,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 2.0.0"
+      version = ">= 3.5.0"
     }
   }
   required_version = ">= 0.13"
@@ -28,14 +28,10 @@ data "akamai_property_rules_template" "rules" {
 }{{end}}
 {{range .Property.EdgeHostnames}}
 resource "akamai_edge_hostname" "{{.EdgeHostnameResourceName}}" {
-  product_id  = "prd_{{.ProductName}}"
   contract_id = data.akamai_contract.contract.id
   group_id = data.akamai_group.group.id
   ip_behavior = "{{.IPv6}}"
   edge_hostname = "{{.EdgeHostname}}"
-{{- if .SlotNumber}}
-  certificate = {{.SlotNumber}}
-{{- end}}
 {{- if .UseCases}}
   use_cases = jsonencode({{.UseCases}})
 {{- end}}
@@ -46,18 +42,23 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
   contract_id = data.akamai_contract.contract.id
   group_id = data.akamai_group.group.id
   product_id = "prd_{{.Property.ProductName}}"
-  rule_format = "{{.Property.RuleFormat}}"
 {{- range .Property.Hostnames}}
   hostnames {
-    cname_from = "{{.Hostname}}"
-    cname_to = akamai_edge_hostname.{{.EdgeHostnameResourceName}}.edge_hostname
+    cname_from = "{{.CnameFrom}}"
+    {{- if .IsActive}}
+      cname_to = akamai_edge_hostname.{{.EdgeHostnameResourceName}}.edge_hostname
+    {{- else}}
+      cname_to = "{{.CnameTo}}"
+    {{- end}}
     cert_provisioning_type = "{{.CertProvisioningType}}"
   }
 {{- end}}
 {{- if .RulesAsSchema}}
-  rules = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.json
+  rule_format = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.rule_format
+  rules       = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.json
 {{- else}}
-  rules = data.akamai_property_rules_template.rules.json
+  rule_format = "{{.Property.RuleFormat}}"
+  rules       = data.akamai_property_rules_template.rules.json
 {{- end}}
 }
 

@@ -811,10 +811,9 @@ terraform import module.security.akamai_appsec_slow_post.policy1 32641:easy_8043
 terraform import module.security.akamai_appsec_advanced_settings_logging.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_advanced_settings_attack_payload_logging.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_advanced_settings_request_body.policy1 32641:easy_80433
-
 terraform import module.security.akamai_appsec_rate_policy.high_rate 32641:172320
-
 terraform import module.security.akamai_appsec_rate_policy.low_rate 32641:172321
+terraform import module.security.akamai_appsec_rate_policy.bot_rate 32641:172322
 terraform import module.security.akamai_appsec_reputation_profile.web_attackers_high_threat 32641:2670508
 terraform import module.security.akamai_appsec_reputation_profile.dos_attackers_high_threat 32641:2670509
 terraform import module.security.akamai_appsec_reputation_profile.scanning_tools_high_threat 32641:2670510

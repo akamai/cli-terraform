@@ -22,6 +22,11 @@ SSH_PRV_KEY="$(cat ~/.ssh/id_rsa)"
 SSH_PUB_KEY="$(cat ~/.ssh/id_rsa.pub)"
 SSH_KNOWN_HOSTS="$(cat ~/.ssh/known_hosts)"
 
+COVERAGE_DIR=test/coverage
+COVERAGE_PROFILE="$COVERAGE_DIR"/profile.out
+COVERAGE_XML="$COVERAGE_DIR"/coverage.xml
+COVERAGE_HTML="$COVERAGE_DIR"/index.html
+
 WORKDIR="${WORKDIR-$(pwd)}"
 echo "WORKDIR is $WORKDIR"
 TERRAFORM_VERSION="1.2.5"
@@ -95,6 +100,12 @@ docker exec akatf-container sh -c 'cd edgegrid; git checkout ${EDGEGRID_BRANCH_N
                                    go mod tidy'
 
 echo "Running checks"
+mkdir -p $COVERAGE_DIR
 docker exec akatf-container sh -c 'cd cli-terraform; make all'
+docker exec akatf-container sh -c 'cat cli-terraform/test/tests.xml' > test/tests.xml
+
+docker exec akatf-container sh -c 'cat cli-terraform/test/coverage/profile.out' > "$COVERAGE_PROFILE"
+docker exec akatf-container sh -c 'cat cli-terraform/test/coverage/index.html' > "$COVERAGE_HTML"
+docker exec akatf-container sh -c 'cat cli-terraform/test/coverage/coverage.xml' > "$COVERAGE_XML"
 
 docker rm -f akatf-container 2> /dev/null || true

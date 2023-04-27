@@ -1,3 +1,6 @@
 {{- /*gotype: github.com/akamai/cli-terraform/edgeworkers.TFEdgeKVData*/ -}}
 terraform init
 terraform import akamai_edgekv.edgekv {{.Name}}:{{.Network}}
+{{- range $group, $items := .GroupItems}}
+terraform import akamai_edgekv_group_items.{{$group | Escape}} {{$.Name}}:{{$.Network}}:{{$group | Escape}}
+{{- end}}

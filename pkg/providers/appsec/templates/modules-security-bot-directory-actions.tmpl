@@ -1,0 +1,44 @@
+{{ range .SecurityPolicies -}}
+{{ if .BotManagement -}}
+{{ $policyName := escapeName .Name -}}
+{{ if .BotManagement.AkamaiBotCategoryActions -}}
+{{ range .BotManagement.AkamaiBotCategoryActions -}}
+resource "akamai_botman_akamai_bot_category_action" "{{ $policyName }}_{{ escapeName (index . "categoryName") }}_{{  index . "categoryId" }}" {
+    config_id          = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_botman_bot_management_settings.{{ $policyName}}.security_policy_id
+    category_id        = "{{ index . "categoryId" }}"
+    akamai_bot_category_action = jsonencode(
+{{ exportJSONWithoutKeys . "categoryId" "categoryName" }}
+)
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.CustomBotCategoryActions -}}
+{{ range .BotManagement.CustomBotCategoryActions -}}
+resource "akamai_botman_custom_bot_category_action" "{{ $policyName }}_{{ getCustomBotCategoryNameByID $.CustomBotCategories (index . "categoryId") }}_{{  index . "categoryId" }}" {
+    config_id          = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_botman_bot_management_settings.{{ $policyName}}.security_policy_id
+    category_id        = akamai_botman_custom_bot_category.{{getCustomBotCategoryNameByID $.CustomBotCategories (index . "categoryId")}}_{{index . "categoryId"}}.category_id
+    custom_bot_category_action = jsonencode(
+{{ exportJSONWithoutKeys . "categoryId" }}
+)
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.BotDetectionActions -}}
+{{ range .BotManagement.BotDetectionActions -}}
+resource "akamai_botman_bot_detection_action" "{{ $policyName }}_{{ escapeName (index . "detectionName") }}_{{  index . "detectionId" }}" {
+    config_id          = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_botman_bot_management_settings.{{ $policyName}}.security_policy_id
+    detection_id       = "{{ index . "detectionId" }}"
+    bot_detection_action = jsonencode(
+{{ exportJSONWithoutKeys . "detectionId" "detectionName" }}
+)
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}

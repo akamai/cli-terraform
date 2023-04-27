@@ -1,0 +1,65 @@
+{
+  "accountId": "test_account",
+  "contractId": "test_contract",
+  "groupId": "grp_12345",
+  "propertyId": "prp_12345",
+  "propertyVersion": 5,
+  "etag": "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
+  "ruleFormat": "v2023-01-05",
+  "rules": {
+    "behaviors": [
+      {
+        "name": "caching-unknown",
+        "options": {
+          "behavior": "NO_STORE"
+        }
+      },
+      {
+        "name": "allowPost-unknown",
+        "options": {
+          "allowWithoutContentLength": false,
+          "enabled": true
+        }
+      },
+      {
+        "name": "report",
+        "options": {
+          "logAcceptLanguage": false,
+          "logCookies": "OFF",
+          "logCustomLogField": false,
+          "logHost": false,
+          "logReferer": false,
+          "logUserAgent": true
+        }
+      }
+    ],
+    "criteria": [
+      {
+        "name": "matchAdvanced-unsupported",
+        "options": {
+          "description": "",
+          "openXml": "",
+          "closeXml": ""
+        },
+        "uuid": "fa27bc4d-bfff-4541-8eb7-ade156a57256"
+      },
+      {
+        "name": "contentType",
+        "options": {
+          "matchCaseSensitive": false,
+          "matchOperator": "IS_ONE_OF",
+          "matchWildcard": true,
+          "values": [
+            "text/html*",
+            "text/css*",
+            "application/x-javascript*"
+          ]
+        }
+      }
+    ],
+    "name": "default",
+    "options": {},
+    "uuid": "default",
+    "criteriaMustSatisfy": "all"
+  }
+}

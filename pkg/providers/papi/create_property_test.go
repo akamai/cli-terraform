@@ -7,9 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"testing"
-	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/hapi"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/papi"
@@ -464,6 +462,49 @@ func TestCreateProperty(t *testing.T) {
 		},
 	}
 
+	hapiGetEdgeHostnameResponse := hapi.GetEdgeHostnameResponse{
+		EdgeHostnameID:    2867480,
+		RecordName:        "test",
+		DNSZone:           "edgesuite.net",
+		SecurityType:      "STANDARD-TLS",
+		UseDefaultTTL:     false,
+		UseDefaultMap:     false,
+		IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
+		ProductID:         "",
+		TTL:               21600,
+		Map:               "a;test.akamai.net",
+		SerialNumber:      1461,
+	}
+
+	tfIncludeData := TFIncludeData{
+		ActivationNoteProduction:   "test production activation",
+		ActivationNoteStaging:      "test staging activation",
+		ContractID:                 "test_contract",
+		ActivationEmailsProduction: []string{"test@example.com", "test1@example.com"},
+		ActivationEmailsStaging:    []string{"test@example.com"},
+		GroupID:                    "test_group",
+		IncludeID:                  "inc_123456",
+		IncludeName:                "test_include",
+		IncludeType:                string(papi.IncludeTypeMicroServices),
+		Networks:                   []string{"STAGING", "PRODUCTION"},
+		RuleFormat:                 "v2020-11-02",
+		VersionProduction:          "1",
+		VersionStaging:             "1",
+	}
+
+	tfIncludeData1 := TFIncludeData{
+		ActivationNoteStaging:   "test staging activation",
+		ContractID:              "test_contract",
+		ActivationEmailsStaging: []string{"test@example.com"},
+		GroupID:                 "test_group",
+		IncludeID:               "inc_78910",
+		IncludeName:             "test_include_1",
+		IncludeType:             string(papi.IncludeTypeMicroServices),
+		Networks:                []string{"STAGING"},
+		RuleFormat:              "v2020-11-02",
+		VersionStaging:          "1",
+	}
+
 	tests := map[string]struct {
 		init                func(*papi.Mock, *hapi.Mock, *templates.MockProcessor, string)
 		dir                 string
@@ -476,123 +517,20 @@ func TestCreateProperty(t *testing.T) {
 	}{
 		"basic property": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&ruleResponse, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
-
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 5,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(&getPropertyVersionHostnamesResponse, nil).Once()
-
-				h.On("GetEdgeHostname", mock.Anything, 2867480).
-					Return(&hapi.GetEdgeHostnameResponse{
-						EdgeHostnameID:    2867480,
-						RecordName:        "test",
-						DNSZone:           "edgesuite.net",
-						SecurityType:      "STANDARD-TLS",
-						UseDefaultTTL:     false,
-						UseDefaultMap:     false,
-						IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
-						ProductID:         "",
-						TTL:               21600,
-						Map:               "a;test.akamai.net",
-						SerialNumber:      1461,
-					}, nil).Once()
-
-				c.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&papi.GetEdgeHostnamesResponse{
-					EdgeHostnames: papi.EdgeHostnameItems{
-						Items: []papi.EdgeHostnameGetItem{
-							{
-								ID:                "ehn_2867480",
-								Domain:            "test.edgesuite.net",
-								ProductID:         "",
-								DomainPrefix:      "test",
-								DomainSuffix:      "edgesuite.net",
-								Status:            "CREATED",
-								Secure:            false,
-								IPVersionBehavior: "IPV6_COMPLIANCE",
-								UseCases:          []papi.UseCase(nil),
-							},
-						},
-					},
-				}, nil).Once()
-
-				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getActivationsResponse, nil).Once()
-
-				p.On("ProcessTemplates", TFData{
-					Property: TFPropertyData{
-						GroupName:            "test_group",
-						GroupID:              "grp_12345",
-						ContractID:           "test_contract",
-						PropertyResourceName: "test-edgesuite-net",
-						PropertyName:         "test.edgesuite.net",
-						PropertyID:           "prp_12345",
-						ProductID:            "prd_HTTP_Content_Del",
-						ProductName:          "HTTP_Content_Del",
-						RuleFormat:           "latest",
-						IsSecure:             "false",
-						EdgeHostnames: map[string]EdgeHostname{
-							"test-edgesuite-net": {
-								EdgeHostname:             "test.edgesuite.net",
-								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
-								ContractID:               "test_contract",
-								GroupID:                  "grp_12345",
-								ID:                       "",
-								IPv6:                     "IPV6_COMPLIANCE",
-								SecurityType:             "STANDARD-TLS",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-							},
-						},
-						Hostnames: map[string]Hostname{
-							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-								CertProvisioningType:     "CPS_MANAGED",
-							},
-						},
-						Emails:               []string{"jsmith@akamai.com"},
-						Version:              "LATEST",
-						HasStagingActivation: true,
-					},
-					Section: "test_section",
-				}).Return(nil).Once()
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().build(), nil)
 			},
 			dir:     "basic",
 			jsonDir: "basic/property-snippets",
@@ -605,79 +543,23 @@ func TestCreateProperty(t *testing.T) {
 		},
 		"basic property with empty hostname id": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
 
 				var ruleResponse papi.GetRuleTreeResponse
 				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
 				assert.NoError(t, err)
 				err = json.Unmarshal(rules, &ruleResponse)
 				assert.NoError(t, err)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&ruleResponse, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
-
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 5,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(&getPropertyVersionEmptyHostnameIDResponse, nil).Once()
-
-				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getActivationsResponse, nil).Once()
-
-				p.On("ProcessTemplates", TFData{
-					Property: TFPropertyData{
-						GroupName:            "test_group",
-						GroupID:              "grp_12345",
-						ContractID:           "test_contract",
-						PropertyResourceName: "test-edgesuite-net",
-						PropertyName:         "test.edgesuite.net",
-						PropertyID:           "prp_12345",
-						ProductID:            "prd_HTTP_Content_Del",
-						ProductName:          "HTTP_Content_Del",
-						RuleFormat:           "latest",
-						IsSecure:             "false",
-						EdgeHostnames:        map[string]EdgeHostname{},
-						Hostnames: map[string]Hostname{
-							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-								CertProvisioningType:     "CPS_MANAGED",
-							},
-						},
-						Emails:               []string{"jsmith@akamai.com"},
-						Version:              "LATEST",
-						HasStagingActivation: true,
-					},
-					Section: "test_section",
-				}).Return(nil).Once()
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionEmptyHostnameIDResponse, nil)
+				mockGetActivations(c, &getActivationsResponse)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withEdgeHostname(map[string]EdgeHostname{}).
+					withIsActive(false).build(), nil)
 			},
 			dir:     "basic_property_with_empty_hostname_id",
 			jsonDir: "basic_property_with_empty_hostname_id/property-snippets",
@@ -690,413 +572,102 @@ func TestCreateProperty(t *testing.T) {
 		},
 		"basic property with rules as datasource": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&ruleResponse, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
-
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 5,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(&getPropertyVersionHostnamesResponse, nil).Once()
-
-				h.On("GetEdgeHostname", mock.Anything, 2867480).
-					Return(&hapi.GetEdgeHostnameResponse{
-						EdgeHostnameID:    2867480,
-						RecordName:        "test",
-						DNSZone:           "edgesuite.net",
-						SecurityType:      "STANDARD-TLS",
-						UseDefaultTTL:     false,
-						UseDefaultMap:     false,
-						IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
-						ProductID:         "",
-						TTL:               21600,
-						Map:               "a;test.akamai.net",
-						SerialNumber:      1461,
-					}, nil).Once()
-
-				c.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&papi.GetEdgeHostnamesResponse{
-					EdgeHostnames: papi.EdgeHostnameItems{
-						Items: []papi.EdgeHostnameGetItem{
-							{
-								ID:                "ehn_2867480",
-								Domain:            "test.edgesuite.net",
-								ProductID:         "",
-								DomainPrefix:      "test",
-								DomainSuffix:      "edgesuite.net",
-								Status:            "CREATED",
-								Secure:            false,
-								IPVersionBehavior: "IPV6_COMPLIANCE",
-								UseCases:          []papi.UseCase(nil),
-							},
-						},
-					},
-				}, nil).Once()
-
-				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getActivationsResponse, nil).Once()
-
-				p.On("AddTemplateTarget", "rules_v2023-01-05.tmpl", "rules.tf")
-
-				p.On("TemplateExists", "rules_v2023-01-05.tmpl").Return(true).Once()
-
-				p.On("ProcessTemplates", TFData{
-					Property: TFPropertyData{
-						GroupName:            "test_group",
-						GroupID:              "grp_12345",
-						ContractID:           "test_contract",
-						PropertyResourceName: "test-edgesuite-net",
-						PropertyName:         "test.edgesuite.net",
-						PropertyID:           "prp_12345",
-						ProductID:            "prd_HTTP_Content_Del",
-						ProductName:          "HTTP_Content_Del",
-						RuleFormat:           "v2023-01-05",
-						IsSecure:             "false",
-						EdgeHostnames: map[string]EdgeHostname{
-							"test-edgesuite-net": {
-								EdgeHostname:             "test.edgesuite.net",
-								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
-								ContractID:               "test_contract",
-								GroupID:                  "grp_12345",
-								ID:                       "",
-								IPv6:                     "IPV6_COMPLIANCE",
-								SecurityType:             "STANDARD-TLS",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-							},
-						},
-						Hostnames: map[string]Hostname{
-							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-								CertProvisioningType:     "CPS_MANAGED",
-							},
-						},
-						Emails:               []string{"jsmith@akamai.com"},
-						Version:              "LATEST",
-						HasStagingActivation: true,
-					},
-					Section:       "test_section",
-					Rules:         flattenRules("test.edgesuite.net", ruleResponse.Rules),
-					RulesAsSchema: true,
-				}).Return(nil).Once()
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse)
+				mockAddTemplateTarget(p)
+				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withRuleFormat("v2023-01-05").
+					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), nil)
 			},
 			dir:    "basic-rules-datasource",
 			schema: true,
 		},
 		"basic property with rules as datasource with unsupported rule format": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&ruleResponse, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
-
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 5,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(&getPropertyVersionHostnamesResponse, nil).Once()
-
-				h.On("GetEdgeHostname", mock.Anything, 2867480).
-					Return(&hapi.GetEdgeHostnameResponse{
-						EdgeHostnameID:    2867480,
-						RecordName:        "test",
-						DNSZone:           "edgesuite.net",
-						SecurityType:      "STANDARD-TLS",
-						UseDefaultTTL:     false,
-						UseDefaultMap:     false,
-						IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
-						ProductID:         "",
-						TTL:               21600,
-						Map:               "a;test.akamai.net",
-						SerialNumber:      1461,
-					}, nil).Once()
-
-				c.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&papi.GetEdgeHostnamesResponse{
-					EdgeHostnames: papi.EdgeHostnameItems{
-						Items: []papi.EdgeHostnameGetItem{
-							{
-								ID:                "ehn_2867480",
-								Domain:            "test.edgesuite.net",
-								ProductID:         "",
-								DomainPrefix:      "test",
-								DomainSuffix:      "edgesuite.net",
-								Status:            "CREATED",
-								Secure:            false,
-								IPVersionBehavior: "IPV6_COMPLIANCE",
-								UseCases:          []papi.UseCase(nil),
-							},
-						},
-					},
-				}, nil).Once()
-
-				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getActivationsResponse, nil).Once()
-
-				p.On("AddTemplateTarget", "rules_v2023-01-05.tmpl", "rules.tf")
-
-				p.On("TemplateExists", "rules_latest.tmpl").Return(false).Once()
-
-				p.On("ProcessTemplates", TFData{
-					Property: TFPropertyData{
-						GroupName:            "test_group",
-						GroupID:              "grp_12345",
-						ContractID:           "test_contract",
-						PropertyResourceName: "test-edgesuite-net",
-						PropertyName:         "test.edgesuite.net",
-						PropertyID:           "prp_12345",
-						ProductID:            "prd_HTTP_Content_Del",
-						ProductName:          "HTTP_Content_Del",
-						RuleFormat:           "latest",
-						IsSecure:             "false",
-						EdgeHostnames: map[string]EdgeHostname{
-							"test-edgesuite-net": {
-								EdgeHostname:             "test.edgesuite.net",
-								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
-								ContractID:               "test_contract",
-								GroupID:                  "grp_12345",
-								ID:                       "",
-								IPv6:                     "IPV6_COMPLIANCE",
-								SecurityType:             "STANDARD-TLS",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-							},
-						},
-						Hostnames: map[string]Hostname{
-							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-								CertProvisioningType:     "CPS_MANAGED",
-							},
-						},
-						Emails:  []string{"jsmith@akamai.com"},
-						Version: "LATEST",
-					},
-					Section:       "test_section",
-					Rules:         flattenRules("test.edgesuite.net", ruleResponse.Rules),
-					RulesAsSchema: true,
-				}).Return(nil).Once()
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse)
+				mockAddTemplateTarget(p)
+				mockTemplateExist(p, "rules_latest.tmpl", false)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withIsActive(false).
+					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), nil)
 			},
 			withError: ErrUnsupportedRuleFormat,
 			dir:       "basic",
 			schema:    true,
 		},
-		"basic property with include": {
+		"basic property with rules as datasource with unsupported behaviors and criteria": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&ruleResponse, nil).Once()
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse)
+				mockAddTemplateTarget(p)
+				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withRuleFormat("v2023-01-05").
+					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), ErrSavingFiles)
+			},
+			withError: ErrSavingFiles,
+			dir:       "basic-rules-datasource-unknown",
+			schema:    true,
+		},
+		"basic property with include": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
 
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
 
 				// Includes
-				c.On("ListReferencedIncludes", mock.Anything, papi.ListReferencedIncludesRequest{
-					PropertyID:      "prp_12345",
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-					PropertyVersion: 5,
-				}).Return(&getListReferencedIncludesResponse, nil).Once()
+				mockListReferencedIncludes(c, &getListReferencedIncludesResponse)
 				expectGetIncludeVersion(c)
 				var includeRuleResponse papi.GetIncludeRuleTreeResponse
 				includeRules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_include_rules.json"))
 				assert.NoError(t, err)
 				assert.NoError(t, json.Unmarshal(includeRules, &includeRuleResponse))
-				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReq).Return(&includeRuleResponse, nil).Once()
+				mockGetIncludeRuleTree(c, getIncludeRuleTreeReq, &includeRuleResponse)
 				expectListIncludeActivations(c)
 
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 5,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(&getPropertyVersionHostnamesResponse, nil).Once()
-
-				h.On("GetEdgeHostname", mock.Anything, 2867480).
-					Return(&hapi.GetEdgeHostnameResponse{
-						EdgeHostnameID:    2867480,
-						RecordName:        "test",
-						DNSZone:           "edgesuite.net",
-						SecurityType:      "STANDARD-TLS",
-						UseDefaultTTL:     false,
-						UseDefaultMap:     false,
-						IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
-						ProductID:         "",
-						TTL:               21600,
-						Map:               "a;test.akamai.net",
-						SerialNumber:      1461,
-					}, nil).Once()
-
-				c.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&papi.GetEdgeHostnamesResponse{
-					EdgeHostnames: papi.EdgeHostnameItems{
-						Items: []papi.EdgeHostnameGetItem{
-							{
-								ID:                "ehn_2867480",
-								Domain:            "test.edgesuite.net",
-								ProductID:         "",
-								DomainPrefix:      "test",
-								DomainSuffix:      "edgesuite.net",
-								Status:            "CREATED",
-								Secure:            false,
-								IPVersionBehavior: "IPV6_COMPLIANCE",
-								UseCases:          []papi.UseCase(nil),
-							},
-						},
-					},
-				}, nil).Once()
-
-				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getActivationsResponse, nil).Once()
-
-				p.On("ProcessTemplates", TFData{
-					Includes: []TFIncludeData{
-						{
-							ActivationNoteProduction:   "test production activation",
-							ActivationNoteStaging:      "test staging activation",
-							ContractID:                 "test_contract",
-							ActivationEmailsProduction: []string{"test@example.com", "test1@example.com"},
-							ActivationEmailsStaging:    []string{"test@example.com"},
-							GroupID:                    "test_group",
-							IncludeID:                  "inc_123456",
-							IncludeName:                "test_include",
-							IncludeType:                string(papi.IncludeTypeMicroServices),
-							Networks:                   []string{"STAGING", "PRODUCTION"},
-							RuleFormat:                 "v2020-11-02",
-							VersionProduction:          "1",
-							VersionStaging:             "1",
-						},
-					},
-					Property: TFPropertyData{
-						GroupName:            "test_group",
-						GroupID:              "grp_12345",
-						ContractID:           "test_contract",
-						PropertyResourceName: "test-edgesuite-net",
-						PropertyName:         "test.edgesuite.net",
-						PropertyID:           "prp_12345",
-						ProductID:            "prd_HTTP_Content_Del",
-						ProductName:          "HTTP_Content_Del",
-						RuleFormat:           "latest",
-						IsSecure:             "false",
-						EdgeHostnames: map[string]EdgeHostname{
-							"test-edgesuite-net": {
-								EdgeHostname:             "test.edgesuite.net",
-								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
-								ContractID:               "test_contract",
-								GroupID:                  "grp_12345",
-								ID:                       "",
-								IPv6:                     "IPV6_COMPLIANCE",
-								SecurityType:             "STANDARD-TLS",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-							},
-						},
-						Hostnames: map[string]Hostname{
-							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-								CertProvisioningType:     "CPS_MANAGED",
-							},
-						},
-						Emails:               []string{"jsmith@akamai.com"},
-						Version:              "LATEST",
-						HasStagingActivation: true,
-					},
-					Section: "test_section",
-				}).Return(nil).Once()
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withIncludes([]TFIncludeData{tfIncludeData}).build(), nil)
 			},
 			dir:     "basic_property_with_include",
 			jsonDir: "basic_property_with_include/property-snippets",
@@ -1111,46 +682,24 @@ func TestCreateProperty(t *testing.T) {
 		},
 		"basic property with multiple includes": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&ruleResponse, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
 
 				// Includes
-				c.On("ListReferencedIncludes", mock.Anything, papi.ListReferencedIncludesRequest{
-					PropertyID:      "prp_12345",
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-					PropertyVersion: 5,
-				}).Return(&getListReferencedMultipleIncludesResponse, nil).Once()
+				mockListReferencedIncludes(c, &getListReferencedMultipleIncludesResponse)
 				expectGetIncludeVersion(c)
 
 				var includeRuleResponse papi.GetIncludeRuleTreeResponse
 				includeRules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_include_rules.json"))
 				assert.NoError(t, err)
 				assert.NoError(t, json.Unmarshal(includeRules, &includeRuleResponse))
-				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReq).Return(&includeRuleResponse, nil).Once()
+				mockGetIncludeRuleTree(c, getIncludeRuleTreeReq, &includeRuleResponse)
 				expectListIncludeActivations(c)
 
 				var secondIncludeRuleResponse papi.GetIncludeRuleTreeResponse
@@ -1158,135 +707,22 @@ func TestCreateProperty(t *testing.T) {
 				secondIncludeRules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_second_include_rules.json"))
 				assert.NoError(t, err)
 				assert.NoError(t, json.Unmarshal(secondIncludeRules, &secondIncludeRuleResponse))
-				c.On("GetIncludeRuleTree", mock.Anything, papi.GetIncludeRuleTreeRequest{
+
+				mockGetIncludeRuleTree(c, papi.GetIncludeRuleTreeRequest{
 					ContractID:     "test_contract",
 					GroupID:        "test_group",
 					IncludeID:      "inc_78910",
 					IncludeVersion: 2,
 					RuleFormat:     "v2020-11-02",
-				}).Return(&secondIncludeRuleResponse, nil).Once()
+				}, &secondIncludeRuleResponse)
 				expectListSecondIncludeActivations(c)
 
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 5,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(&getPropertyVersionHostnamesResponse, nil).Once()
-
-				h.On("GetEdgeHostname", mock.Anything, 2867480).
-					Return(&hapi.GetEdgeHostnameResponse{
-						EdgeHostnameID:    2867480,
-						RecordName:        "test",
-						DNSZone:           "edgesuite.net",
-						SecurityType:      "STANDARD-TLS",
-						UseDefaultTTL:     false,
-						UseDefaultMap:     false,
-						IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
-						ProductID:         "",
-						TTL:               21600,
-						Map:               "a;test.akamai.net",
-						SerialNumber:      1461,
-					}, nil).Once()
-
-				c.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&papi.GetEdgeHostnamesResponse{
-					EdgeHostnames: papi.EdgeHostnameItems{
-						Items: []papi.EdgeHostnameGetItem{
-							{
-								ID:                "ehn_2867480",
-								Domain:            "test.edgesuite.net",
-								ProductID:         "",
-								DomainPrefix:      "test",
-								DomainSuffix:      "edgesuite.net",
-								Status:            "CREATED",
-								Secure:            false,
-								IPVersionBehavior: "IPV6_COMPLIANCE",
-								UseCases:          []papi.UseCase(nil),
-							},
-						},
-					},
-				}, nil).Once()
-
-				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getActivationsResponse, nil).Once()
-
-				p.On("ProcessTemplates", TFData{
-					Includes: []TFIncludeData{
-						{
-							ActivationNoteProduction:   "test production activation",
-							ActivationNoteStaging:      "test staging activation",
-							ContractID:                 "test_contract",
-							ActivationEmailsProduction: []string{"test@example.com", "test1@example.com"},
-							ActivationEmailsStaging:    []string{"test@example.com"},
-							GroupID:                    "test_group",
-							IncludeID:                  "inc_123456",
-							IncludeName:                "test_include",
-							IncludeType:                string(papi.IncludeTypeMicroServices),
-							Networks:                   []string{"STAGING", "PRODUCTION"},
-							RuleFormat:                 "v2020-11-02",
-							VersionProduction:          "1",
-							VersionStaging:             "1",
-						},
-						{
-							ActivationNoteStaging:   "test staging activation",
-							ContractID:              "test_contract",
-							ActivationEmailsStaging: []string{"test@example.com"},
-							GroupID:                 "test_group",
-							IncludeID:               "inc_78910",
-							IncludeName:             "test_include_1",
-							IncludeType:             string(papi.IncludeTypeMicroServices),
-							Networks:                []string{"STAGING"},
-							RuleFormat:              "v2020-11-02",
-							VersionStaging:          "1",
-						},
-					},
-					Property: TFPropertyData{
-						GroupName:            "test_group",
-						GroupID:              "grp_12345",
-						ContractID:           "test_contract",
-						PropertyResourceName: "test-edgesuite-net",
-						PropertyName:         "test.edgesuite.net",
-						PropertyID:           "prp_12345",
-						ProductID:            "prd_HTTP_Content_Del",
-						ProductName:          "HTTP_Content_Del",
-						RuleFormat:           "latest",
-						IsSecure:             "false",
-						EdgeHostnames: map[string]EdgeHostname{
-							"test-edgesuite-net": {
-								EdgeHostname:             "test.edgesuite.net",
-								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
-								ContractID:               "test_contract",
-								GroupID:                  "grp_12345",
-								ID:                       "",
-								IPv6:                     "IPV6_COMPLIANCE",
-								SecurityType:             "STANDARD-TLS",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-							},
-						},
-						Hostnames: map[string]Hostname{
-							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-								CertProvisioningType:     "CPS_MANAGED",
-							},
-						},
-						Emails:               []string{"jsmith@akamai.com"},
-						Version:              "LATEST",
-						HasStagingActivation: true,
-					},
-					Section: "test_section",
-				}).Return(nil).Once()
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withIncludes([]TFIncludeData{tfIncludeData, tfIncludeData1}).build(), nil)
 			},
 			dir:     "basic_property_with_multiple_includes",
 			jsonDir: "basic_property_with_multiple_includes/property-snippets",
@@ -1302,123 +738,20 @@ func TestCreateProperty(t *testing.T) {
 		},
 		"basic property with cert provisioning type": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&ruleResponse, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
-
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 5,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(&getPropertyVersion2HostnamesResponse, nil).Once()
-
-				h.On("GetEdgeHostname", mock.Anything, 2867480).
-					Return(&hapi.GetEdgeHostnameResponse{
-						EdgeHostnameID:    2867480,
-						RecordName:        "test",
-						DNSZone:           "edgesuite.net",
-						SecurityType:      "STANDARD-TLS",
-						UseDefaultTTL:     false,
-						UseDefaultMap:     false,
-						IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
-						ProductID:         "",
-						TTL:               21600,
-						Map:               "a;test.akamai.net",
-						SerialNumber:      1461,
-					}, nil).Once()
-
-				c.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&papi.GetEdgeHostnamesResponse{
-					EdgeHostnames: papi.EdgeHostnameItems{
-						Items: []papi.EdgeHostnameGetItem{
-							{
-								ID:                "ehn_2867480",
-								Domain:            "test.edgesuite.net",
-								ProductID:         "",
-								DomainPrefix:      "test",
-								DomainSuffix:      "edgesuite.net",
-								Status:            "CREATED",
-								Secure:            false,
-								IPVersionBehavior: "IPV6_COMPLIANCE",
-								UseCases:          []papi.UseCase(nil),
-							},
-						},
-					},
-				}, nil).Once()
-
-				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getActivationsResponse, nil).Once()
-
-				p.On("ProcessTemplates", TFData{
-					Property: TFPropertyData{
-						GroupName:            "test_group",
-						GroupID:              "grp_12345",
-						ContractID:           "test_contract",
-						PropertyResourceName: "test-edgesuite-net",
-						PropertyName:         "test.edgesuite.net",
-						PropertyID:           "prp_12345",
-						ProductID:            "prd_HTTP_Content_Del",
-						ProductName:          "HTTP_Content_Del",
-						RuleFormat:           "latest",
-						IsSecure:             "false",
-						EdgeHostnames: map[string]EdgeHostname{
-							"test-edgesuite-net": {
-								EdgeHostname:             "test.edgesuite.net",
-								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
-								ContractID:               "test_contract",
-								GroupID:                  "grp_12345",
-								ID:                       "",
-								IPv6:                     "IPV6_COMPLIANCE",
-								SecurityType:             "STANDARD-TLS",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-							},
-						},
-						Hostnames: map[string]Hostname{
-							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-								CertProvisioningType:     "DEFAULT",
-							},
-						},
-						Emails:               []string{"jsmith@akamai.com"},
-						Version:              "LATEST",
-						HasStagingActivation: true,
-					},
-					Section: "test_section",
-				}).Return(nil).Once()
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersion2HostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withCertProvisioningType("DEFAULT").build(), nil)
 			},
 			dir:     "basic_with_cert_provisioning_type",
 			jsonDir: "basic_with_cert_provisioning_type/property-snippets",
@@ -1431,123 +764,20 @@ func TestCreateProperty(t *testing.T) {
 		},
 		"import LATEST property version": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&ruleResponse, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
-
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 5,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(&getPropertyVersionHostnamesResponse, nil).Once()
-
-				h.On("GetEdgeHostname", mock.Anything, 2867480).
-					Return(&hapi.GetEdgeHostnameResponse{
-						EdgeHostnameID:    2867480,
-						RecordName:        "test",
-						DNSZone:           "edgesuite.net",
-						SecurityType:      "STANDARD-TLS",
-						UseDefaultTTL:     false,
-						UseDefaultMap:     false,
-						IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
-						ProductID:         "",
-						TTL:               21600,
-						Map:               "a;test.akamai.net",
-						SerialNumber:      1461,
-					}, nil).Once()
-
-				c.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&papi.GetEdgeHostnamesResponse{
-					EdgeHostnames: papi.EdgeHostnameItems{
-						Items: []papi.EdgeHostnameGetItem{
-							{
-								ID:                "ehn_2867480",
-								Domain:            "test.edgesuite.net",
-								ProductID:         "",
-								DomainPrefix:      "test",
-								DomainSuffix:      "edgesuite.net",
-								Status:            "CREATED",
-								Secure:            false,
-								IPVersionBehavior: "IPV6_COMPLIANCE",
-								UseCases:          []papi.UseCase(nil),
-							},
-						},
-					},
-				}, nil).Once()
-
-				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getActivationsResponse, nil).Once()
-
-				p.On("ProcessTemplates", TFData{
-					Property: TFPropertyData{
-						GroupName:            "test_group",
-						GroupID:              "grp_12345",
-						ContractID:           "test_contract",
-						PropertyResourceName: "test-edgesuite-net",
-						PropertyName:         "test.edgesuite.net",
-						PropertyID:           "prp_12345",
-						ProductID:            "prd_HTTP_Content_Del",
-						ProductName:          "HTTP_Content_Del",
-						RuleFormat:           "latest",
-						IsSecure:             "false",
-						EdgeHostnames: map[string]EdgeHostname{
-							"test-edgesuite-net": {
-								EdgeHostname:             "test.edgesuite.net",
-								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
-								ContractID:               "test_contract",
-								GroupID:                  "grp_12345",
-								ID:                       "",
-								IPv6:                     "IPV6_COMPLIANCE",
-								SecurityType:             "STANDARD-TLS",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-							},
-						},
-						Hostnames: map[string]Hostname{
-							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-								CertProvisioningType:     "CPS_MANAGED",
-							},
-						},
-						Emails:               []string{"jsmith@akamai.com"},
-						Version:              "LATEST",
-						HasStagingActivation: true,
-					},
-					Section: "test_section",
-				}).Return(nil).Once()
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().build(), nil)
 			},
 			dir:     "basic",
 			jsonDir: "basic/property-snippets",
@@ -1560,116 +790,19 @@ func TestCreateProperty(t *testing.T) {
 		},
 		"import not the latest property version": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 1, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&ruleResponse, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 1,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(&getPropertyVersion1HostnamesResponse, nil).Once()
-
-				h.On("GetEdgeHostname", mock.Anything, 2867480).
-					Return(&hapi.GetEdgeHostnameResponse{
-						EdgeHostnameID:    2867480,
-						RecordName:        "test",
-						DNSZone:           "edgesuite.net",
-						SecurityType:      "STANDARD-TLS",
-						UseDefaultTTL:     false,
-						UseDefaultMap:     false,
-						IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
-						ProductID:         "",
-						TTL:               21600,
-						Map:               "a;test.akamai.net",
-						SerialNumber:      1461,
-					}, nil).Once()
-
-				c.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&papi.GetEdgeHostnamesResponse{
-					EdgeHostnames: papi.EdgeHostnameItems{
-						Items: []papi.EdgeHostnameGetItem{
-							{
-								ID:                "ehn_2867480",
-								Domain:            "test.edgesuite.net",
-								ProductID:         "",
-								DomainPrefix:      "test",
-								DomainSuffix:      "edgesuite.net",
-								Status:            "CREATED",
-								Secure:            false,
-								IPVersionBehavior: "IPV6_COMPLIANCE",
-								UseCases:          []papi.UseCase(nil),
-							},
-						},
-					},
-				}, nil).Once()
-
-				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getActivations1Response, nil).Once()
-
-				p.On("ProcessTemplates", TFData{
-					Property: TFPropertyData{
-						GroupName:            "test_group",
-						GroupID:              "grp_12345",
-						ContractID:           "test_contract",
-						PropertyResourceName: "test-edgesuite-net",
-						PropertyName:         "test.edgesuite.net",
-						PropertyID:           "prp_12345",
-						ProductID:            "prd_HTTP_Content_Del",
-						ProductName:          "HTTP_Content_Del",
-						RuleFormat:           "latest",
-						IsSecure:             "false",
-						EdgeHostnames: map[string]EdgeHostname{
-							"test-edgesuite-net": {
-								EdgeHostname:             "test.edgesuite.net",
-								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
-								ContractID:               "test_contract",
-								GroupID:                  "grp_12345",
-								ID:                       "",
-								IPv6:                     "IPV6_COMPLIANCE",
-								SecurityType:             "STANDARD-TLS",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-							},
-						},
-						Hostnames: map[string]Hostname{
-							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-								CertProvisioningType:     "CPS_MANAGED",
-							},
-						},
-						Emails:               []string{"jsmith@akamai.com"},
-						Version:              "1",
-						HasStagingActivation: true,
-					},
-					Section: "test_section",
-				}).Return(nil).Once()
+				mockGetRuleTree(c, 1, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 1, &getPropertyVersion1HostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivations1Response)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withVersion("1").build(), nil)
 			},
 			dir:     "basic-v1",
 			jsonDir: "basic-v1/property-snippets",
@@ -1683,566 +816,142 @@ func TestCreateProperty(t *testing.T) {
 		},
 		"property activation with note": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&ruleResponse, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
-
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 5,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(&getPropertyVersionHostnamesResponse, nil).Once()
-
-				h.On("GetEdgeHostname", mock.Anything, 2867480).
-					Return(&hapi.GetEdgeHostnameResponse{
-						EdgeHostnameID:    2867480,
-						RecordName:        "test",
-						DNSZone:           "edgesuite.net",
-						SecurityType:      "STANDARD-TLS",
-						UseDefaultTTL:     false,
-						UseDefaultMap:     false,
-						IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
-						ProductID:         "",
-						TTL:               21600,
-						Map:               "a;test.akamai.net",
-						SerialNumber:      1461,
-					}, nil).Once()
-
-				c.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&papi.GetEdgeHostnamesResponse{
-					EdgeHostnames: papi.EdgeHostnameItems{
-						Items: []papi.EdgeHostnameGetItem{
-							{
-								ID:                "ehn_2867480",
-								Domain:            "test.edgesuite.net",
-								ProductID:         "",
-								DomainPrefix:      "test",
-								DomainSuffix:      "edgesuite.net",
-								Status:            "CREATED",
-								Secure:            false,
-								IPVersionBehavior: "IPV6_COMPLIANCE",
-								UseCases:          []papi.UseCase(nil),
-							},
-						},
-					},
-				}, nil).Once()
-
-				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getActivationsResponseWithNote, nil).Once()
-
-				p.On("ProcessTemplates", TFData{
-					Property: TFPropertyData{
-						GroupName:            "test_group",
-						GroupID:              "grp_12345",
-						ContractID:           "test_contract",
-						PropertyResourceName: "test-edgesuite-net",
-						PropertyName:         "test.edgesuite.net",
-						PropertyID:           "prp_12345",
-						ProductID:            "prd_HTTP_Content_Del",
-						ProductName:          "HTTP_Content_Del",
-						RuleFormat:           "latest",
-						IsSecure:             "false",
-						EdgeHostnames: map[string]EdgeHostname{
-							"test-edgesuite-net": {
-								EdgeHostname:             "test.edgesuite.net",
-								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
-								ContractID:               "test_contract",
-								GroupID:                  "grp_12345",
-								ID:                       "",
-								IPv6:                     "IPV6_COMPLIANCE",
-								SecurityType:             "STANDARD-TLS",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-							},
-						},
-						Hostnames: map[string]Hostname{
-							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-								CertProvisioningType:     "CPS_MANAGED",
-							},
-						},
-						Emails:               []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
-						ActivationNote:       "example note",
-						Version:              "LATEST",
-						HasStagingActivation: true,
-					},
-					Section: "test_section",
-				}).Return(nil).Once()
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponseWithNote)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withActivationNote("example note").
+					withEmails([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}).build(), nil)
 			},
 			dir: "basic",
 		},
 		"property activation with empty emails": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&ruleResponse, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
-
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 5,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(&getPropertyVersionHostnamesResponse, nil).Once()
-
-				h.On("GetEdgeHostname", mock.Anything, 2867480).
-					Return(&hapi.GetEdgeHostnameResponse{
-						EdgeHostnameID:    2867480,
-						RecordName:        "test",
-						DNSZone:           "edgesuite.net",
-						SecurityType:      "STANDARD-TLS",
-						UseDefaultTTL:     false,
-						UseDefaultMap:     false,
-						IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
-						ProductID:         "",
-						TTL:               21600,
-						Map:               "a;test.akamai.net",
-						SerialNumber:      1461,
-					}, nil).Once()
-
-				c.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&papi.GetEdgeHostnamesResponse{
-					EdgeHostnames: papi.EdgeHostnameItems{
-						Items: []papi.EdgeHostnameGetItem{
-							{
-								ID:                "ehn_2867480",
-								Domain:            "test.edgesuite.net",
-								ProductID:         "",
-								DomainPrefix:      "test",
-								DomainSuffix:      "edgesuite.net",
-								Status:            "CREATED",
-								Secure:            false,
-								IPVersionBehavior: "IPV6_COMPLIANCE",
-								UseCases:          []papi.UseCase(nil),
-							},
-						},
-					},
-				}, nil).Once()
-
-				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getActivationsResponseWithEmptyEmails, nil).Once()
-
-				p.On("ProcessTemplates", TFData{
-					Property: TFPropertyData{
-						GroupName:            "test_group",
-						GroupID:              "grp_12345",
-						ContractID:           "test_contract",
-						PropertyResourceName: "test-edgesuite-net",
-						PropertyName:         "test.edgesuite.net",
-						PropertyID:           "prp_12345",
-						ProductID:            "prd_HTTP_Content_Del",
-						ProductName:          "HTTP_Content_Del",
-						RuleFormat:           "latest",
-						IsSecure:             "false",
-						Version:              "LATEST",
-						EdgeHostnames: map[string]EdgeHostname{
-							"test-edgesuite-net": {
-								EdgeHostname:             "test.edgesuite.net",
-								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
-								ContractID:               "test_contract",
-								GroupID:                  "grp_12345",
-								ID:                       "",
-								IPv6:                     "IPV6_COMPLIANCE",
-								SecurityType:             "STANDARD-TLS",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-							},
-						},
-						Hostnames: map[string]Hostname{
-							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-								CertProvisioningType:     "CPS_MANAGED",
-							},
-						},
-						Emails:               []string{""},
-						ActivationNote:       "example note",
-						HasStagingActivation: true,
-					},
-					Section: "test_section",
-				}).Return(nil).Once()
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponseWithEmptyEmails)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withActivationNote("example note").
+					withEmails([]string{""}).build(), nil)
 			},
 			dir: "basic",
 		},
 		"error property not found": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(nil, fmt.Errorf("oops")).Once()
+				mockSearchProperties(c, nil, fmt.Errorf("oops"))
 			},
 			withError: ErrPropertyNotFound,
 		},
 		"error group not found": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
-
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&papi.GetRuleTreeResponse{}, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(nil, fmt.Errorf("oops")).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
+				mockGetGroups(c, nil, fmt.Errorf("oops"))
 			},
 			withError: ErrGroupNotFound,
 		},
 		"error property rules not found": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
 
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(nil, fmt.Errorf("oops")).Once()
+				mockGetRuleTree(c, 5, nil, fmt.Errorf("oops"))
 
 			},
 			withError: ErrPropertyRulesNotFound,
 		},
 		"error property version not found": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
-
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&papi.GetRuleTreeResponse{}, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(nil, fmt.Errorf("oops")).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, nil, fmt.Errorf("oops"))
 
 			},
 			withError: ErrPropertyVersionNotFound,
 		},
 		"error product name not found": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
-
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&papi.GetRuleTreeResponse{}, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
-
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(nil, fmt.Errorf("oops")).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, nil, fmt.Errorf("oops"))
 
 			},
 			withError: ErrProductNameNotFound,
 		},
 		"error hostnames not found": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
-
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&papi.GetRuleTreeResponse{}, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
-
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 5,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(nil, fmt.Errorf("oops")).Once()
-
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, nil, fmt.Errorf("oops"))
 			},
 			withError: ErrHostnamesNotFound,
 		},
 		"error hostname details": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
-
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&papi.GetRuleTreeResponse{}, nil).Once()
-
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
-
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 5,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(&getPropertyVersionHostnamesResponse, nil).Once()
-
-				h.On("GetEdgeHostname", mock.Anything, 2867480).
-					Return(nil, fmt.Errorf("oops")).Once()
-
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, nil, fmt.Errorf("oops"))
 			},
 			withError: ErrFetchingHostnameDetails,
 		},
 		"error saving files": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
-					Return(&searchPropertiesResponse, nil).Once()
-
-				c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
-					Return(&getPropertyResponse, nil).Once()
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
 
 				ruleResponse := getRuleTreeResponse(dir, t)
-				c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: 5, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
-					Return(&ruleResponse, nil).Once()
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
 
-				c.On("GetGroups", mock.Anything).
-					Return(&getGroupsResponse, nil).Once()
-
-				c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getPropertyVersionsResponse, nil).Once()
-
-				c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
-					PropertyID:  "prp_12345",
-					ActivatedOn: "",
-					ContractID:  "test_contract",
-					GroupID:     "grp_12345",
-				}).Return(&getLatestVersionResponse, nil).Once()
-
-				c.On("GetProducts", mock.Anything, papi.GetProductsRequest{
-					ContractID: "test_contract",
-				}).Return(&getProductsResponse, nil).Once()
-
-				c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
-					PropertyID:      "prp_12345",
-					PropertyVersion: 5,
-					ContractID:      "test_contract",
-					GroupID:         "grp_12345",
-				}).Return(&getPropertyVersionHostnamesResponse, nil).Once()
-
-				h.On("GetEdgeHostname", mock.Anything, 2867480).
-					Return(&hapi.GetEdgeHostnameResponse{
-						EdgeHostnameID:    2867480,
-						RecordName:        "test",
-						DNSZone:           "edgesuite.net",
-						SecurityType:      "STANDARD-TLS",
-						UseDefaultTTL:     false,
-						UseDefaultMap:     false,
-						IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
-						ProductID:         "",
-						TTL:               21600,
-						Map:               "a;test.akamai.net",
-						SerialNumber:      1461,
-					}, nil).Once()
-
-				c.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&papi.GetEdgeHostnamesResponse{
-					EdgeHostnames: papi.EdgeHostnameItems{
-						Items: []papi.EdgeHostnameGetItem{
-							{
-								ID:                "ehn_2867480",
-								Domain:            "test.edgesuite.net",
-								ProductID:         "",
-								DomainPrefix:      "test",
-								DomainSuffix:      "edgesuite.net",
-								Status:            "CREATED",
-								Secure:            false,
-								IPVersionBehavior: "IPV6_COMPLIANCE",
-								UseCases:          []papi.UseCase(nil),
-							},
-						},
-					},
-				}, nil).Once()
-
-				c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
-					PropertyID: "prp_12345",
-					ContractID: "test_contract",
-					GroupID:    "grp_12345",
-				}).Return(&getActivationsResponse, nil).Once()
-
-				p.On("AddTemplateTarget", "rules_v2023-01-05.tmpl", "rules.tf")
-				p.On("TemplateExists", "rules_v2023-01-05.tmpl").Return(true).Once()
-				p.On("ProcessTemplates", TFData{
-					Property: TFPropertyData{
-						GroupName:            "test_group",
-						GroupID:              "grp_12345",
-						ContractID:           "test_contract",
-						PropertyResourceName: "test-edgesuite-net",
-						PropertyName:         "test.edgesuite.net",
-						PropertyID:           "prp_12345",
-						ProductID:            "prd_HTTP_Content_Del",
-						ProductName:          "HTTP_Content_Del",
-						RuleFormat:           "latest",
-						IsSecure:             "false",
-						EdgeHostnames: map[string]EdgeHostname{
-							"test-edgesuite-net": {
-								EdgeHostname:             "test.edgesuite.net",
-								EdgeHostnameID:           "ehn_2867480",
-								ProductName:              "HTTP_Content_Del",
-								ContractID:               "test_contract",
-								GroupID:                  "grp_12345",
-								ID:                       "",
-								IPv6:                     "IPV6_COMPLIANCE",
-								SecurityType:             "STANDARD-TLS",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-							},
-						},
-						Hostnames: map[string]Hostname{
-							"test.edgesuite.net": {
-								Hostname:                 "test.edgesuite.net",
-								EdgeHostnameResourceName: "test-edgesuite-net",
-								CertProvisioningType:     "CPS_MANAGED",
-							},
-						},
-						Emails:               []string{"jsmith@akamai.com"},
-						Version:              "LATEST",
-						HasStagingActivation: true,
-					},
-					Section: "test_section",
-				}).Return(fmt.Errorf("oops")).Once()
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse)
+				mockAddTemplateTarget(p)
+				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().build(), fmt.Errorf("oops"))
 			},
 			dir:       "basic",
 			withError: ErrSavingFiles,
@@ -2275,6 +984,118 @@ func TestCreateProperty(t *testing.T) {
 	}
 }
 
+func mockSearchProperties(c *papi.Mock, searchPropertiesResponse *papi.SearchResponse, err error) {
+	c.On("SearchProperties", mock.Anything, papi.SearchRequest{Key: "propertyName", Value: "test.edgesuite.net"}).
+		Return(searchPropertiesResponse, err).Once()
+}
+
+func mockGetProperty(c *papi.Mock, getPropertyResponse *papi.GetPropertyResponse) {
+	c.On("GetProperty", mock.Anything, papi.GetPropertyRequest{ContractID: "test_contract", GroupID: "grp_12345", PropertyID: "prp_12345"}).
+		Return(getPropertyResponse, nil).Once()
+}
+
+func mockGetRuleTree(c *papi.Mock, propertyVersion int, ruleResponse *papi.GetRuleTreeResponse, err error) {
+	c.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: propertyVersion, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
+		Return(ruleResponse, err).Once()
+}
+
+func mockGetGroups(c *papi.Mock, getGroupsResponse *papi.GetGroupsResponse, err error) {
+	c.On("GetGroups", mock.Anything).
+		Return(getGroupsResponse, err).Once()
+}
+
+func mockGetPropertyVersions(c *papi.Mock, getPropertyVersionsResponse *papi.GetPropertyVersionsResponse, err error) {
+	c.On("GetPropertyVersions", mock.Anything, papi.GetPropertyVersionsRequest{
+		PropertyID: "prp_12345",
+		ContractID: "test_contract",
+		GroupID:    "grp_12345",
+	}).Return(getPropertyVersionsResponse, err).Once()
+}
+
+func mockGetLatestVersion(c *papi.Mock, getLatestVersionResponse *papi.GetPropertyVersionsResponse) {
+	c.On("GetLatestVersion", mock.Anything, papi.GetLatestVersionRequest{
+		PropertyID:  "prp_12345",
+		ActivatedOn: "",
+		ContractID:  "test_contract",
+		GroupID:     "grp_12345",
+	}).Return(getLatestVersionResponse, nil).Once()
+}
+
+func mockGetProducts(c *papi.Mock, getProductsResponse *papi.GetProductsResponse, err error) {
+	c.On("GetProducts", mock.Anything, papi.GetProductsRequest{ContractID: "test_contract"}).
+		Return(getProductsResponse, err).Once()
+}
+
+func mockGetPropertyVersionHostnames(c *papi.Mock, propertyVersion int, getPropertyVersionHostnamesResponse *papi.GetPropertyVersionHostnamesResponse, err error) {
+	c.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
+		PropertyID:      "prp_12345",
+		PropertyVersion: propertyVersion,
+		ContractID:      "test_contract",
+		GroupID:         "grp_12345",
+	}).Return(getPropertyVersionHostnamesResponse, err).Once()
+}
+
+func mockGetEdgeHostnames(c *papi.Mock) *mock.Call {
+	return c.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
+		ContractID: "test_contract",
+		GroupID:    "grp_12345",
+	}).Return(&papi.GetEdgeHostnamesResponse{
+		EdgeHostnames: papi.EdgeHostnameItems{
+			Items: []papi.EdgeHostnameGetItem{
+				{
+					ID:                "ehn_2867480",
+					Domain:            "test.edgesuite.net",
+					ProductID:         "",
+					DomainPrefix:      "test",
+					DomainSuffix:      "edgesuite.net",
+					Status:            "CREATED",
+					Secure:            false,
+					IPVersionBehavior: "IPV6_COMPLIANCE",
+					UseCases:          []papi.UseCase(nil),
+				},
+			},
+		},
+	}, nil).Once()
+}
+
+func mockGetEdgeHostname(h *hapi.Mock, hapiGetEdgeHostnameResponse *hapi.GetEdgeHostnameResponse, err error) {
+	h.On("GetEdgeHostname", mock.Anything, 2867480).
+		Return(hapiGetEdgeHostnameResponse, err).Once()
+}
+
+func mockGetActivations(c *papi.Mock, getActivationsResponse *papi.GetActivationsResponse) {
+	c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
+		PropertyID: "prp_12345",
+		ContractID: "test_contract",
+		GroupID:    "grp_12345",
+	}).Return(getActivationsResponse, nil).Once()
+}
+
+func mockAddTemplateTarget(p *templates.MockProcessor) {
+	p.On("AddTemplateTarget", "rules_v2023-01-05.tmpl", "rules.tf")
+}
+
+func mockTemplateExist(p *templates.MockProcessor, templatePath string, templateExist bool) *mock.Call {
+	return p.On("TemplateExists", templatePath).Return(templateExist).Once()
+}
+
+func mockListReferencedIncludes(c *papi.Mock, getListReferencedIncludesResponse *papi.ListReferencedIncludesResponse) {
+	c.On("ListReferencedIncludes", mock.Anything, papi.ListReferencedIncludesRequest{
+		PropertyID:      "prp_12345",
+		ContractID:      "test_contract",
+		GroupID:         "grp_12345",
+		PropertyVersion: 5,
+	}).Return(getListReferencedIncludesResponse, nil).Once()
+}
+
+func mockGetIncludeRuleTree(c *papi.Mock, getIncludeRuleTreeReq papi.GetIncludeRuleTreeRequest, includeRuleResponse *papi.GetIncludeRuleTreeResponse) {
+	c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReq).Return(includeRuleResponse, nil).Once()
+}
+
+func mockProcessTemplates(p *templates.MockProcessor, tfData TFData, err error) {
+	p.On("ProcessTemplates", tfData).Return(err).Once()
+}
+
 func getRuleTreeResponse(dir string, t *testing.T) papi.GetRuleTreeResponse {
 	var ruleResponse papi.GetRuleTreeResponse
 	rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
@@ -2303,6 +1124,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		withIncludes bool
 		schema       bool
 		ruleResponse papi.GetRuleTreeResponse
+		withError    string
 	}{
 		"property": {
 			givenData: TFData{
@@ -2322,7 +1144,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2333,9 +1154,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 					Emails:               []string{"jsmith@akamai.com"},
@@ -2364,7 +1186,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2375,9 +1196,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 					Emails:               []string{"jsmith@akamai.com"},
@@ -2388,6 +1210,49 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "basic-rules-datasource",
 			schema:       true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+		},
+		"property with rules as datasource with unknown behaviors and criteria": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "v2023-01-05",
+					IsSecure:             "false",
+					Version:              "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							CnameTo:                  "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+						},
+					},
+					Emails:               []string{"jsmith@akamai.com"},
+					HasStagingActivation: true,
+				},
+				Section: "test_section",
+			},
+			dir:          "basic-rules-datasource-unknown",
+			schema:       true,
+			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+			withError:    "there were errors reported: Unknown criterion 'matchAdvanced-unsupported', Unknown behavior 'caching-unknown', Unknown behavior 'allowPost-unknown'",
 		},
 		"property with include": {
 			givenData: TFData{
@@ -2424,7 +1289,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2435,9 +1299,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 					Emails:               []string{"jsmith@akamai.com"},
@@ -2496,7 +1361,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2507,9 +1371,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 					Emails:               []string{"jsmith@akamai.com"},
@@ -2539,7 +1404,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2551,9 +1415,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 					Emails:               []string{"jsmith@akamai.com"},
@@ -2582,7 +1447,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2593,9 +1457,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 					Emails:               []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
@@ -2625,7 +1490,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
 							EdgeHostnameID:           "ehn_2867480",
-							ProductName:              "HTTP_Content_Del",
 							ContractID:               "test_contract",
 							GroupID:                  "grp_12345",
 							ID:                       "",
@@ -2636,9 +1500,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 					Hostnames: map[string]Hostname{
 						"test.edgesuite.net": {
-							Hostname:                 "test.edgesuite.net",
+							CnameFrom:                "test.edgesuite.net",
 							EdgeHostnameResourceName: "test-edgesuite-net",
 							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
 						},
 					},
 				},
@@ -2672,13 +1537,16 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			processor := templates.FSTemplateProcessor{
 				TemplatesFS:     templateFiles,
 				TemplateTargets: templateToFile,
-				AdditionalFuncs: template.FuncMap{
-					"ToLower": strings.ToLower,
-					"AsInt":   AsInt,
-					"Escape":  Escape,
-				},
+				AdditionalFuncs: additionalFuncs,
 			}
-			require.NoError(t, processor.ProcessTemplates(test.givenData))
+			err := processor.ProcessTemplates(test.givenData)
+			reportedErrors = []string{}
+			if test.withError != "" {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), test.withError)
+				return
+			}
+			require.NoError(t, err)
 
 			for _, f := range test.filesToCheck {
 				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
@@ -2792,4 +1660,225 @@ func TestTerraformName(t *testing.T) {
 			assert.Equal(t, test.expected, TerraformName(test.given))
 		})
 	}
+}
+
+func TestIsMultiline(t *testing.T) {
+	tests := map[string]struct {
+		given    string
+		expected bool
+	}{
+		"has new lines": {
+			given:    "this\nis test\n",
+			expected: true,
+		},
+		"empty": {
+			given:    "",
+			expected: false,
+		},
+		"no new lines": {
+			given:    "no new lines",
+			expected: false,
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, test.expected, IsMultiline(test.given))
+		})
+	}
+}
+
+func TestNoNewlineAtTheEnd(t *testing.T) {
+	tests := map[string]struct {
+		given    string
+		expected bool
+	}{
+		"has new line at the end": {
+			given:    "this\nis test\n",
+			expected: false,
+		},
+		"has new line in the middle": {
+			given:    "this\nis test",
+			expected: true,
+		},
+		"empty": {
+			given:    "",
+			expected: true,
+		},
+		"no new lines": {
+			given:    "no new lines",
+			expected: true,
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, test.expected, NoNewlineAtTheEnd(test.given))
+		})
+	}
+}
+
+func TestRemoveLastNewline(t *testing.T) {
+	tests := map[string]struct {
+		given    string
+		expected string
+	}{
+		"has new line at the end": {
+			given:    "this\nis test\n",
+			expected: "this\nis test",
+		},
+		"has new line in the middle": {
+			given:    "this\nis test",
+			expected: "this\nis test",
+		},
+		"empty": {
+			given:    "",
+			expected: "",
+		},
+		"no new lines": {
+			given:    "no new lines",
+			expected: "no new lines",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, test.expected, RemoveLastNewline(test.given))
+		})
+	}
+}
+
+func TestGetEOT(t *testing.T) {
+	tests := map[string]struct {
+		given    string
+		expected string
+	}{
+		"has new line": {
+			given:    "this\nis test\n",
+			expected: "EOT",
+		},
+		"has EOT inside": {
+			given:    "this\nEOT",
+			expected: "EOTA",
+		},
+		"empty": {
+			given:    "",
+			expected: "EOT",
+		},
+		"has two EOTs": {
+			given:    "some\nEOT\nEOTA\ntext",
+			expected: "EOTAA",
+		},
+		"has EOT": {
+			given:    "comment\nnewline\nand\nEOT\ninside\n",
+			expected: "EOTA",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, test.expected, GetEOT(test.given))
+		})
+	}
+}
+
+type tfDataBuilder struct {
+	tfData TFData
+}
+
+func (t *tfDataBuilder) withDefaults() *tfDataBuilder {
+	t.tfData = TFData{
+		Property: TFPropertyData{
+			GroupName:            "test_group",
+			GroupID:              "grp_12345",
+			ContractID:           "test_contract",
+			PropertyResourceName: "test-edgesuite-net",
+			PropertyName:         "test.edgesuite.net",
+			PropertyID:           "prp_12345",
+			ProductID:            "prd_HTTP_Content_Del",
+			ProductName:          "HTTP_Content_Del",
+			RuleFormat:           "latest",
+			IsSecure:             "false",
+			EdgeHostnames: map[string]EdgeHostname{
+				"test-edgesuite-net": {
+					EdgeHostname:             "test.edgesuite.net",
+					EdgeHostnameID:           "ehn_2867480",
+					ContractID:               "test_contract",
+					GroupID:                  "grp_12345",
+					ID:                       "",
+					IPv6:                     "IPV6_COMPLIANCE",
+					SecurityType:             "STANDARD-TLS",
+					EdgeHostnameResourceName: "test-edgesuite-net",
+				},
+			},
+			Hostnames: map[string]Hostname{
+				"test.edgesuite.net": {
+					CnameFrom:                "test.edgesuite.net",
+					CnameTo:                  "test.edgesuite.net",
+					EdgeHostnameResourceName: "test-edgesuite-net",
+					CertProvisioningType:     "CPS_MANAGED",
+					IsActive:                 true,
+				},
+			},
+			Emails:               []string{"jsmith@akamai.com"},
+			Version:              "LATEST",
+			HasStagingActivation: true,
+		},
+		Section: "test_section",
+	}
+	return t
+}
+
+func (t *tfDataBuilder) withRuleFormat(ruleFormat string) *tfDataBuilder {
+	t.tfData.Property.RuleFormat = ruleFormat
+	return t
+}
+
+func (t *tfDataBuilder) withEdgeHostname(edgeHostname map[string]EdgeHostname) *tfDataBuilder {
+	t.tfData.Property.EdgeHostnames = edgeHostname
+	return t
+}
+
+func (t *tfDataBuilder) withIsActive(isActive bool) *tfDataBuilder {
+	hostname := t.tfData.Property.Hostnames["test.edgesuite.net"]
+	hostname.IsActive = isActive
+	t.tfData.Property.Hostnames["test.edgesuite.net"] = hostname
+	return t
+}
+
+func (t *tfDataBuilder) withEmails(emails []string) *tfDataBuilder {
+	t.tfData.Property.Emails = emails
+	return t
+}
+
+func (t *tfDataBuilder) withVersion(version string) *tfDataBuilder {
+	t.tfData.Property.Version = version
+	return t
+}
+
+func (t *tfDataBuilder) withRules(rules []*WrappedRules) *tfDataBuilder {
+	t.tfData.Rules = rules
+	t.tfData.RulesAsSchema = true
+	return t
+}
+
+func (t *tfDataBuilder) withCertProvisioningType(certProvisioningType string) *tfDataBuilder {
+	hostname := t.tfData.Property.Hostnames["test.edgesuite.net"]
+	hostname.CertProvisioningType = certProvisioningType
+	t.tfData.Property.Hostnames["test.edgesuite.net"] = hostname
+	return t
+}
+
+func (t *tfDataBuilder) withActivationNote(activationNote string) *tfDataBuilder {
+	t.tfData.Property.ActivationNote = activationNote
+	return t
+}
+
+func (t *tfDataBuilder) withIncludes(includes []TFIncludeData) *tfDataBuilder {
+	t.tfData.Includes = includes
+	return t
+}
+
+func (t *tfDataBuilder) build() TFData {
+	return t.tfData
 }

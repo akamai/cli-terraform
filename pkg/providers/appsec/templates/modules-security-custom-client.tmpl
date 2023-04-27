@@ -1,0 +1,11 @@
+{{ if .CustomClients  -}}
+{{ range .CustomClients  -}}
+resource "akamai_botman_custom_client" "{{ escapeName (index . "customClientName") }}_{{index . "customClientId"}}" {
+    config_id = akamai_appsec_configuration.config.config_id
+    custom_client = jsonencode(
+{{ exportJSONWithoutKeys . "customClientId" }}
+)
+}
+
+{{ end -}}
+{{ end -}}

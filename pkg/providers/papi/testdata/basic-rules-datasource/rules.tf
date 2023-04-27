@@ -19,18 +19,22 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
       hidden      = false
       sensitive   = false
     }
+    advanced_override = trimsuffix(<<EOT
+<!-- Remove Duplicate X-Akamai-Staging Header -->
+
+...
+EOT
+    , "\n")
+    custom_override {
+      name        = "mdc"
+      override_id = "cbo_12345"
+    }
     criterion {
       match_advanced {
         uuid        = "fa27bc4d-bfff-4541-8eb7-ade156a57256"
-        close_xml   = <<EOT
-
-%{~if false}trim redundant new line%{endif~}
-EOT
+        close_xml   = ""
         description = ""
-        open_xml    = <<EOT
-
-%{~if false}trim redundant new line%{endif~}
-EOT
+        open_xml    = ""
       }
     }
     criterion {
@@ -123,7 +127,7 @@ EOT
       advanced {
         uuid        = "feeaeff9-fe7e-4e27-ba0c-7b1dcecdba8b"
         description = "extract inputs"
-        xml         = <<EOT
+        xml = trimsuffix(<<EOT
 <assign:extract-value>
    <variable-name>ENDUSER</variable-name>
    <location>Query_String</location>
@@ -160,8 +164,8 @@ EOT
       <name>Distance</name>
       <value>%(DISTANCE)</value>
    </edgeservices:modify-outgoing-response.add-header>
-%{~if false}trim redundant new line%{endif~}
 EOT
+        , "\n")
       }
     }
     behavior {
@@ -198,7 +202,6 @@ EOT
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters--a-------------ą" {
   rules_v2023_01_05 {
     name                  = "Strange Characters${a}\"\\||$%&*@#|!ą"
-    is_secure             = false
     criteria_must_satisfy = "all"
     criterion {
       content_type {
@@ -216,8 +219,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters
 
 	xxx yyyy
 
-
-%{~if false}trim redundant new line%{endif~}
 EOT
       }
     }
@@ -237,8 +238,12 @@ EOT
 
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_static_content" {
   rules_v2023_01_05 {
-    name                  = "Static Content"
-    is_secure             = false
+    name = "Static Content"
+    comments = trimsuffix(<<EOT
+comment
+newline in the middle only
+EOT
+    , "\n")
     criteria_must_satisfy = "all"
     criterion {
       file_extension {
@@ -267,7 +272,13 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_static_content" {
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_dynamic_content" {
   rules_v2023_01_05 {
     name                  = "Dynamic Content"
-    is_secure             = false
+    comments              = <<EOTA
+comment
+newline
+and
+EOT
+inside
+EOTA
     criteria_must_satisfy = "all"
     criterion {
       cacheability {
@@ -286,7 +297,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_dynamic_content" {
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule" {
   rules_v2023_01_05 {
     name                  = "new rule"
-    is_secure             = false
     criteria_must_satisfy = "all"
   }
 }
@@ -294,7 +304,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule" {
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule1" {
   rules_v2023_01_05 {
     name                  = "new rule"
-    is_secure             = false
     criteria_must_satisfy = "any"
   }
 }
@@ -302,7 +311,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule1" {
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_deny_by_location" {
   rules_v2023_01_05 {
     name                  = "Deny by Location"
-    is_secure             = false
     criteria_must_satisfy = "any"
   }
 }
@@ -310,7 +318,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_deny_by_location" 
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_redirect_to_language_specific_section" {
   rules_v2023_01_05 {
     name                  = "redirect to language specific section"
-    is_secure             = false
     criteria_must_satisfy = "any"
   }
 }
@@ -318,7 +325,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_redirect_to_langua
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule2" {
   rules_v2023_01_05 {
     name                  = "new rule"
-    is_secure             = false
     criteria_must_satisfy = "all"
   }
 }
@@ -326,7 +332,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule2" {
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule3" {
   rules_v2023_01_05 {
     name                  = "new rule"
-    is_secure             = false
     criteria_must_satisfy = "all"
   }
 }
@@ -334,7 +339,6 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule3" {
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters--a-------------ą1" {
   rules_v2023_01_05 {
     name                  = "Strange Characters${a}\"\\&&$%&*@#|!ą"
-    is_secure             = false
     criteria_must_satisfy = "all"
   }
 }
@@ -342,16 +346,12 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_m_pulse" {
   rules_v2023_01_05 {
     name                  = "mPulse"
-    is_secure             = false
     comments              = "Test mPulse"
     criteria_must_satisfy = "all"
     behavior {
       m_pulse {
         buffer_size     = ""
-        config_override = <<EOT
-{"name":"John", "age":30, "car":null}
-%{~if false}trim redundant new line%{endif~}
-EOT
+        config_override = "{\"name\":\"John\", \"age\":30, \"car\":null}"
         enabled         = true
         loader_version  = "V12"
         require_pci     = true

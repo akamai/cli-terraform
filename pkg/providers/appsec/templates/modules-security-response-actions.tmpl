@@ -1,0 +1,44 @@
+{{if .ResponseActions -}}
+{{ if .ResponseActions.ServeAlternateActions  -}}
+{{ range .ResponseActions.ServeAlternateActions  -}}
+resource "akamai_botman_serve_alternate_action" "{{escapeName (index . "actionName")}}_{{index . "actionId"}}" {
+    config_id = akamai_appsec_configuration.config.config_id
+    serve_alternate_action = jsonencode(
+{{ exportJSONWithoutKeys . "actionId" }}
+)
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .ResponseActions.ChallengeActions  -}}
+{{ range .ResponseActions.ChallengeActions  -}}
+    resource "akamai_botman_challenge_action" "{{escapeName (index . "actionName")}}_{{index . "actionId"}}" {
+    config_id = akamai_appsec_configuration.config.config_id
+    challenge_action = jsonencode(
+{{ exportJSONWithoutKeys . "actionId" }}
+)
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .ResponseActions.ConditionalActions  -}}
+{{ range .ResponseActions.ConditionalActions  -}}
+    resource "akamai_botman_conditional_action" "{{escapeName (index . "actionName")}}_{{index . "actionId"}}" {
+    config_id = akamai_appsec_configuration.config.config_id
+    conditional_action = jsonencode(
+{{ exportJSONWithoutKeys . "actionId" }}
+)
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .ResponseActions.ChallengeInterceptionRules  -}}
+resource "akamai_botman_challenge_interception_rules" "challenge_interception_rules" {
+    config_id = akamai_appsec_configuration.config.config_id
+    challenge_interception_rules = jsonencode(
+{{ exportJSON .ResponseActions.ChallengeInterceptionRules }}
+)
+}
+
+{{ end -}}
+{{ end -}}

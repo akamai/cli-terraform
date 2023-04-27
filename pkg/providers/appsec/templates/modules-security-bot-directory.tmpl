@@ -1,0 +1,41 @@
+{{ if .CustomBotCategories  -}}
+{{ range .CustomBotCategories  -}}
+{{ $categoryID := (index . "categoryId") -}}
+{{ $categoryName := (index . "categoryName") -}}
+resource "akamai_botman_custom_bot_category" "{{escapeName $categoryName }}_{{ $categoryID }}" {
+    config_id = akamai_appsec_configuration.config.config_id
+    custom_bot_category = jsonencode(
+{{ exportJSONWithoutKeys . "categoryId" "metadata" "ruleId" }}
+)
+}
+
+{{ if (index . "metadata" "akamaiDefinedBots") -}}
+{{ range (index . "metadata" "akamaiDefinedBots") -}}
+resource "akamai_botman_recategorized_akamai_defined_bot" "{{ escapeName (index . "botName") }}_{{ index . "botId" }}" {
+    config_id   = akamai_appsec_configuration.config.config_id
+    bot_id      = "{{ index . "botId" }}"
+    category_id = akamai_botman_custom_bot_category.{{escapeName $categoryName }}_{{ $categoryID }}.category_id
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .CustomBotCategorySequence  -}}
+resource "akamai_botman_custom_bot_category_sequence" "custom_bot_category_sequence" {
+    config_id    = akamai_appsec_configuration.config.config_id
+    category_ids = [{{getCustomBotCategoryResourceNamesByIDs .CustomBotCategories .CustomBotCategorySequence}}]
+}
+
+{{ end -}}
+{{ if .CustomDefinedBots  -}}
+{{ range .CustomDefinedBots  -}}
+resource "akamai_botman_custom_defined_bot" "{{escapeName (index . "botName")}}_{{(index . "botId")}}" {
+    config_id = akamai_botman_custom_bot_category_sequence.custom_bot_category_sequence.config_id
+    custom_defined_bot = jsonencode(
+{{ exportJSONWithoutKeys . "botId" }}
+)
+}
+
+{{ end -}}
+{{ end -}}

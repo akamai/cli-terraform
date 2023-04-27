@@ -40,10 +40,4 @@ resource "akamai_property_include_activation" "test_include_production" {
   version                        = "1"
   note                           = "test production activation"
   notify_emails                  = ["test@example.com", "test1@example.com"]
-  compliance_record {
-    noncompliance_reason = "NONE"
-    customer_email       = "customer@email.com"
-    peer_reviewed_by     = "John Doe"
-    unit_tested          = true
-  }
 }
