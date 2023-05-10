@@ -1,10 +1,9 @@
 
 data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
   rules_v2023_01_05 {
-    name                  = "default"
-    is_secure             = false
-    criteria_must_satisfy = "all"
-    uuid                  = "default"
+    name      = "default"
+    is_secure = false
+    uuid      = "default"
     variable {
       name        = "PMUSER_TESTSTR"
       description = "DSTR"
@@ -28,22 +27,6 @@ EOT
     custom_override {
       name        = "mdc"
       override_id = "cbo_12345"
-    }
-    criterion {
-      match_advanced {
-        uuid        = "fa27bc4d-bfff-4541-8eb7-ade156a57256"
-        close_xml   = ""
-        description = ""
-        open_xml    = ""
-      }
-    }
-    criterion {
-      content_type {
-        match_case_sensitive = false
-        match_operator       = "IS_ONE_OF"
-        match_wildcard       = true
-        values               = ["text/html*", "text/css*", "application/x-javascript*", ]
-      }
     }
     behavior {
       application_load_balancer {

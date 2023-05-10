@@ -1252,7 +1252,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "basic-rules-datasource-unknown",
 			schema:       true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
-			withError:    "there were errors reported: Unknown criterion 'matchAdvanced-unsupported', Unknown behavior 'caching-unknown', Unknown behavior 'allowPost-unknown'",
+			withError:    "there were errors reported: Unknown behavior 'caching-unknown', Unknown behavior 'allowPost-unknown'",
 		},
 		"property with include": {
 			givenData: TFData{

@@ -9494,8 +9494,10 @@ data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
         {{- if .Comments}}
         comments = {{template "Text" .Comments}}
         {{- end}}
+		{{- if ne $i 0}}
 		{{- if .CriteriaMustSatisfy}}
         criteria_must_satisfy = "{{.CriteriaMustSatisfy}}"
+        {{- end}}
         {{- end}}
         {{- if .UUID}}
         uuid = "{{.UUID}}"
@@ -9506,9 +9508,11 @@ data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
         {{- if .TemplateLink}}
         template_link = "{{.TemplateLink}}"
         {{- end}}
+		{{- if ne $i 0}}
         {{- if .CriteriaLocked}}
         criteria_locked = "{{.CriteriaLocked}}"
         {{- end}}
+		{{- end}}
 {{- if eq $i 0}}
 {{- range .Variables}}
         variable {
@@ -9529,10 +9533,12 @@ data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
 		}
 		{{- end}}
 {{- end}}
+{{- if ne $i 0}}
 {{- range .Criteria}}
         criterion {
 {{- template "Criteria" .}}
         }
+{{- end}}
 {{- end}}
 {{- range .Behaviors}}
         behavior {
