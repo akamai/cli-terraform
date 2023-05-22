@@ -128,9 +128,10 @@ func CmdCreateDomain(c *cli.Context) error {
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
 		AdditionalFuncs: template.FuncMap{
-			"normalize":   normalizeResourceName,
-			"toUpper":     strings.ToUpper,
-			"isDefaultDC": isDefaultDatacenter,
+			"normalize":    normalizeResourceName,
+			"toUpper":      strings.ToUpper,
+			"isDefaultDC":  isDefaultDatacenter,
+			"escapeString": tools.EscapeQuotedStringLit,
 		},
 	}
 

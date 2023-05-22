@@ -25,7 +25,7 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
         ttl = {{.TTL}}
         {{- end}}
         {{- if .Rdata}}
-        rdata = [{{range $i, $v := .Rdata}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+        rdata = [{{range $i, $v := .Rdata}}{{if $i}}, {{end}}"{{$v | escapeString}}"{{end}}]
         {{- end}}
     }
     {{- end}}

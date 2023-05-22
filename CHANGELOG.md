@@ -2,6 +2,9 @@
 
 ## Version X.X.X (X X, 2023)
 
+### Bug fixes
+* Fix escaping of `akamai_gtm_property` `static_rr_set.rdata` field
+
 ### Features/Enhancements
 
 * Migrate to Terraform 1.3.7 version

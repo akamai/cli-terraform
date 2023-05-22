@@ -14,6 +14,7 @@ import (
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/gtm"
 	"github.com/akamai/cli-terraform/pkg/templates"
+	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -819,7 +820,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						StaticRRSets: []*gtm.StaticRRSet{
 							{
 								Type:  "test type",
-								Rdata: []string{"rdata1", "rdata2"},
+								Rdata: []string{"rdata1", "rdata2", "\"properlyescaped\""},
 							},
 						},
 						TrafficTargets: []*gtm.TrafficTarget{
@@ -1014,9 +1015,10 @@ func TestProcessDomainTemplates(t *testing.T) {
 					"variables.tmpl":   filepath.Join(outDir, "variables.tf"),
 				},
 				AdditionalFuncs: template.FuncMap{
-					"normalize":   normalizeResourceName,
-					"toUpper":     strings.ToUpper,
-					"isDefaultDC": isDefaultDatacenter,
+					"normalize":    normalizeResourceName,
+					"toUpper":      strings.ToUpper,
+					"isDefaultDC":  isDefaultDatacenter,
+					"escapeString": tools.EscapeQuotedStringLit,
 				},
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))

@@ -470,7 +470,6 @@ func TestCreateProperty(t *testing.T) {
 		UseDefaultTTL:     false,
 		UseDefaultMap:     false,
 		IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
-		ProductID:         "",
 		TTL:               21600,
 		Map:               "a;test.akamai.net",
 		SerialNumber:      1461,
