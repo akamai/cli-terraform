@@ -14,9 +14,6 @@ provider "akamai" {
 }
 
 
-data "akamai_property_rules_template" "rules_test_include" {
-  template_file = abspath("${path.module}/property-snippets/test_include.json")
-}
 
 /*
 data "akamai_property_include_parents" "test_include" {
@@ -31,8 +28,8 @@ resource "akamai_property_include" "test_include" {
   group_id    = "test_group"
   name        = "test_include"
   type        = "MICROSERVICES"
-  rule_format = "v2020-11-02"
-  rules       = data.akamai_property_rules_template.rules_test_include.json
+  rule_format = data.akamai_property_rules_builder.test_include_rule_default.rule_format
+  rules       = data.akamai_property_rules_builder.test_include_rule_default.json
 }
 
 resource "akamai_property_include_activation" "test_include_staging" {

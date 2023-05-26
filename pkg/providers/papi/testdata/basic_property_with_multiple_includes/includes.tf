@@ -4,7 +4,7 @@ data "akamai_property_rules_template" "rules_test_include" {
 }
 
 /*
-data "akamai_property_include_parents" "include_parents" {
+data "akamai_property_include_parents" "test_include" {
   contract_id = "test_contract"
   group_id    = "test_group"
   include_id  = "inc_123456"
@@ -15,8 +15,8 @@ resource "akamai_property_include" "test_include" {
   contract_id = "test_contract"
   group_id    = "test_group"
   name        = "test_include"
-  rule_format = "v2020-11-02"
   type        = "MICROSERVICES"
+  rule_format = "v2020-11-02"
   rules       = data.akamai_property_rules_template.rules_test_include.json
 }
 
@@ -46,7 +46,7 @@ data "akamai_property_rules_template" "rules_test_include_1" {
 }
 
 /*
-data "akamai_property_include_parents" "include_parents" {
+data "akamai_property_include_parents" "test_include_1" {
   contract_id = "test_contract"
   group_id    = "test_group"
   include_id  = "inc_78910"
@@ -57,8 +57,8 @@ resource "akamai_property_include" "test_include_1" {
   contract_id = "test_contract"
   group_id    = "test_group"
   name        = "test_include_1"
-  rule_format = "v2020-11-02"
   type        = "MICROSERVICES"
+  rule_format = "v2020-11-02"
   rules       = data.akamai_property_rules_template.rules_test_include_1.json
 }
 

@@ -1,3 +1,4 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/papi.TFData*/ -}}
 {{- if not .Property.PropertyID -}}
 terraform {
   required_providers {
@@ -16,12 +17,14 @@ provider "akamai" {
 
 {{ end }}
 {{- range $include := .Includes }}
+{{- if not $.RulesAsSchema}}
 data "akamai_property_rules_template" "rules_{{.IncludeName}}" {
   template_file = abspath("${path.module}/property-snippets/{{.IncludeName}}.json")
 }
+{{- end}}
 
 /*
-data "akamai_property_include_parents" "include_parents" {
+data "akamai_property_include_parents" "{{.IncludeName}}" {
   contract_id = "{{.ContractID}}"
   group_id    = "{{.GroupID}}"
   include_id  = "{{.IncludeID}}"
@@ -32,9 +35,18 @@ resource "akamai_property_include" "{{.IncludeName}}" {
   contract_id = "{{.ContractID}}"
   group_id = "{{.GroupID}}"
   name = "{{.IncludeName}}"
-  rule_format = "{{.RuleFormat}}"
   type = "{{.IncludeType}}"
+{{- if $.RulesAsSchema}}
+{{- if .Rules}}
+  rule_format = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.rule_format
+  rules       = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.json
+{{- else}}
+  rule_format = "{{.RuleFormat}}"
+{{- end}}
+{{- else}}
+  rule_format = "{{.RuleFormat}}"
   rules = data.akamai_property_rules_template.rules_{{.IncludeName}}.json
+{{- end}}
 }
 {{- range $network := .Networks}}
 

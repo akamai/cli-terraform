@@ -584,7 +584,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
 				mockGetActivations(c, &getActivationsResponse)
-				mockAddTemplateTarget(p)
+				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withRuleFormat("v2023-01-05").
 					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), nil)
@@ -607,7 +607,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
 				mockGetActivations(c, &getActivationsResponse)
-				mockAddTemplateTarget(p)
+				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_latest.tmpl", false)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withIsActive(false).
 					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), nil)
@@ -631,7 +631,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
 				mockGetActivations(c, &getActivationsResponse)
-				mockAddTemplateTarget(p)
+				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withRuleFormat("v2023-01-05").
 					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), ErrSavingFiles)
@@ -653,11 +653,8 @@ func TestCreateProperty(t *testing.T) {
 
 				// Includes
 				mockListReferencedIncludes(c, &getListReferencedIncludesResponse)
-				expectGetIncludeVersion(c)
-				var includeRuleResponse papi.GetIncludeRuleTreeResponse
-				includeRules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_include_rules.json"))
-				assert.NoError(t, err)
-				assert.NoError(t, json.Unmarshal(includeRules, &includeRuleResponse))
+				expectGetIncludeVersion(c, "v2020-11-02")
+				includeRuleResponse := getIncludeRuleResponse(dir, t, "mock_include_rules.json")
 				mockGetIncludeRuleTree(c, getIncludeRuleTreeReq, &includeRuleResponse)
 				expectListIncludeActivations(c)
 
@@ -692,20 +689,14 @@ func TestCreateProperty(t *testing.T) {
 
 				// Includes
 				mockListReferencedIncludes(c, &getListReferencedMultipleIncludesResponse)
-				expectGetIncludeVersion(c)
+				expectGetIncludeVersion(c, "v2020-11-02")
 
-				var includeRuleResponse papi.GetIncludeRuleTreeResponse
-				includeRules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_include_rules.json"))
-				assert.NoError(t, err)
-				assert.NoError(t, json.Unmarshal(includeRules, &includeRuleResponse))
+				includeRuleResponse := getIncludeRuleResponse(dir, t, "mock_include_rules.json")
 				mockGetIncludeRuleTree(c, getIncludeRuleTreeReq, &includeRuleResponse)
 				expectListIncludeActivations(c)
 
-				var secondIncludeRuleResponse papi.GetIncludeRuleTreeResponse
-				expectGetSeconIncludeVersion(c)
-				secondIncludeRules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_second_include_rules.json"))
-				assert.NoError(t, err)
-				assert.NoError(t, json.Unmarshal(secondIncludeRules, &secondIncludeRuleResponse))
+				secondIncludeRuleResponse := getIncludeRuleResponse(dir, t, "mock_second_include_rules.json")
+				expectGetSecondIncludeVersion(c, "v2020-11-02")
 
 				mockGetIncludeRuleTree(c, papi.GetIncludeRuleTreeRequest{
 					ContractID:     "test_contract",
@@ -734,6 +725,61 @@ func TestCreateProperty(t *testing.T) {
 				"Dynamic_Content.json",
 			},
 			withIncludes: true,
+		},
+		"basic property with multiple includes as schema": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+
+				// Includes
+				mockListReferencedIncludes(c, &getListReferencedMultipleIncludesResponse)
+				expectGetIncludeVersion(c, "v2023-01-05")
+
+				includeRuleResponse := getIncludeRuleResponse(dir, t, "mock_include_rules.json")
+				mockGetIncludeRuleTree(c, getIncludeRuleTreeReqSchema, &includeRuleResponse)
+				expectListIncludeActivations(c)
+
+				secondIncludeRuleResponse := getIncludeRuleResponse(dir, t, "mock_second_include_rules.json")
+				expectGetSecondIncludeVersion(c, "v2023-01-05")
+
+				mockGetIncludeRuleTree(c, papi.GetIncludeRuleTreeRequest{
+					ContractID:     "test_contract",
+					GroupID:        "test_group",
+					IncludeID:      "inc_78910",
+					IncludeVersion: 2,
+					RuleFormat:     "v2023-01-05",
+				}, &secondIncludeRuleResponse)
+				expectListSecondIncludeActivations(c)
+
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse)
+				tfIncludeData := tfIncludeData
+				tfIncludeData.RuleFormat = "v2023-01-05"
+				tfIncludeData1 := tfIncludeData1
+				tfIncludeData1.RuleFormat = "v2023-01-05"
+				mockProcessTemplates(p, (&tfDataBuilder{}).
+					withData(getTestData("basic property with multiple includes schema")).
+					withRuleFormat("v2023-01-05").
+					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).
+					withIncludes([]TFIncludeData{tfIncludeData, tfIncludeData1}).
+					withIncludeRules(0, flattenRules("test_include", includeRuleResponse.Rules)).
+					withIncludeRules(1, flattenRules("test_include_1", secondIncludeRuleResponse.Rules)).
+					build(), nil)
+				mockAddTemplateTargetRules(p)
+				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
+			},
+			dir:          "basic_property_with_multiple_includes_schema",
+			withIncludes: true,
+			schema:       true,
 		},
 		"basic property with cert provisioning type": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
@@ -948,7 +994,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
 				mockGetActivations(c, &getActivationsResponse)
-				mockAddTemplateTarget(p)
+				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().build(), fmt.Errorf("oops"))
 			},
@@ -981,6 +1027,14 @@ func TestCreateProperty(t *testing.T) {
 			mp.AssertExpectations(t)
 		})
 	}
+}
+
+func getIncludeRuleResponse(dir string, t *testing.T, fileName string) papi.GetIncludeRuleTreeResponse {
+	var includeRuleResponse papi.GetIncludeRuleTreeResponse
+	includeRules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, fileName))
+	assert.NoError(t, err)
+	assert.NoError(t, json.Unmarshal(includeRules, &includeRuleResponse))
+	return includeRuleResponse
 }
 
 func mockSearchProperties(c *papi.Mock, searchPropertiesResponse *papi.SearchResponse, err error) {
@@ -1070,8 +1124,12 @@ func mockGetActivations(c *papi.Mock, getActivationsResponse *papi.GetActivation
 	}).Return(getActivationsResponse, nil).Once()
 }
 
-func mockAddTemplateTarget(p *templates.MockProcessor) {
+func mockAddTemplateTargetRules(p *templates.MockProcessor) {
 	p.On("AddTemplateTarget", "rules_v2023-01-05.tmpl", "rules.tf")
+}
+
+func mockAddTemplateTargetIncludesRules(p *templates.MockProcessor) {
+	p.On("AddTemplateTarget", "includes_rules.tmpl", "includes_rules.tf")
 }
 
 func mockTemplateExist(p *templates.MockProcessor, templatePath string, templateExist bool) *mock.Call {
@@ -1385,6 +1443,81 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			filesToCheck: []string{"property.tf", "includes.tf", "variables.tf", "import.sh"},
 			withIncludes: true,
 		},
+		"property with multiple includes as schema": {
+			givenData: TFData{
+				Includes: []TFIncludeData{
+					{
+						ActivationNoteProduction:   "test production activation",
+						ActivationNoteStaging:      "test staging activation",
+						ContractID:                 "test_contract",
+						ActivationEmailsProduction: []string{"test@example.com", "test1@example.com"},
+						ActivationEmailsStaging:    []string{"test@example.com"},
+						GroupID:                    "test_group",
+						IncludeID:                  "inc_123456",
+						IncludeName:                "test_include",
+						IncludeType:                string(papi.IncludeTypeMicroServices),
+						Networks:                   []string{"STAGING", "PRODUCTION"},
+						RuleFormat:                 "v2023-01-05",
+						Rules:                      flattenRules("test_include", getIncludeRuleResponse("basic_property_with_multiple_includes_schema", t, "mock_include_rules.json").Rules),
+						VersionProduction:          "1",
+						VersionStaging:             "1",
+					},
+					{
+						ActivationNoteStaging:   "test staging activation",
+						ContractID:              "test_contract",
+						ActivationEmailsStaging: []string{"test@example.com"},
+						GroupID:                 "test_group",
+						IncludeID:               "inc_78910",
+						IncludeName:             "test_include_1",
+						IncludeType:             string(papi.IncludeTypeMicroServices),
+						Networks:                []string{"STAGING"},
+						RuleFormat:              "v2023-01-05",
+						Rules:                   flattenRules("test_include_1", getIncludeRuleResponse("basic_property_with_multiple_includes_schema", t, "mock_second_include_rules.json").Rules),
+						VersionStaging:          "1",
+					},
+				},
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					Version:              "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							CnameFrom:                "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
+						},
+					},
+					Emails:               []string{"jsmith@akamai.com"},
+					HasStagingActivation: true,
+				},
+				Section: "test_section",
+			},
+			dir:          "basic_property_with_multiple_includes_schema",
+			filesToCheck: []string{"property.tf", "includes.tf", "variables.tf", "import.sh", "includes_rules.tf"},
+			withIncludes: true,
+			schema:       true,
+		},
 		"property with use cases": {
 			givenData: TFData{
 				Property: TFPropertyData{
@@ -1533,6 +1666,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			if test.schema {
 				templateToFile["rules_v2023-01-05.tmpl"] = fmt.Sprintf("./testdata/res/%s/rules.tf", test.dir)
 			}
+			if test.withIncludes && test.schema {
+				templateToFile["includes_rules.tmpl"] = fmt.Sprintf("./testdata/res/%s/includes_rules.tf", test.dir)
+			}
+
 			processor := templates.FSTemplateProcessor{
 				TemplatesFS:     templateFiles,
 				TemplateTargets: templateToFile,
@@ -1828,6 +1965,11 @@ func (t *tfDataBuilder) withDefaults() *tfDataBuilder {
 	return t
 }
 
+func (t *tfDataBuilder) withData(data TFData) *tfDataBuilder {
+	t.tfData = data
+	return t
+}
+
 func (t *tfDataBuilder) withRuleFormat(ruleFormat string) *tfDataBuilder {
 	t.tfData.Property.RuleFormat = ruleFormat
 	return t
@@ -1857,6 +1999,12 @@ func (t *tfDataBuilder) withVersion(version string) *tfDataBuilder {
 
 func (t *tfDataBuilder) withRules(rules []*WrappedRules) *tfDataBuilder {
 	t.tfData.Rules = rules
+	t.tfData.RulesAsSchema = true
+	return t
+}
+
+func (t *tfDataBuilder) withIncludeRules(index int, rules []*WrappedRules) *tfDataBuilder {
+	t.tfData.Includes[index].Rules = rules
 	t.tfData.RulesAsSchema = true
 	return t
 }

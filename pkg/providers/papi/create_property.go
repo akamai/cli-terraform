@@ -93,6 +93,7 @@ type TFIncludeData struct {
 	RuleFormat                 string
 	VersionProduction          string
 	VersionStaging             string
+	Rules                      []*WrappedRules
 }
 
 // TFPropertyData holds template data for property
@@ -241,6 +242,10 @@ func CmdCreateProperty(c *cli.Context) error {
 		schema = c.Bool("schema")
 	}
 
+	if withIncludes && schema {
+		templateToFile["includes_rules.tmpl"] = filepath.Join(tfWorkPath, "includes_rules.tf")
+	}
+
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
@@ -329,10 +334,24 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 
 		tfData.Includes = make([]TFIncludeData, 0)
 		for _, include := range includes.Includes.Items {
-			includeData, err := getIncludeData(ctx, &include, jsonDir, tfWorkPath, client)
+			includeData, rules, err := getIncludeData(ctx, &include, client)
 			if err != nil {
 				return err
 			}
+
+			// Save snippets
+			if !schema {
+				term.Spinner().Start("Saving snippets ")
+				ruleTemplate, rulesTemplate := setIncludeRuleTemplates(rules)
+				if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), fmt.Sprintf("%s.json", include.IncludeName)); err != nil {
+					term.Spinner().Fail()
+					return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
+				}
+				term.Spinner().OK()
+			} else {
+				includeData.Rules = flattenRules(includeData.IncludeName, rules.Rules)
+			}
+
 			tfData.Includes = append(tfData.Includes, *includeData)
 		}
 	}

@@ -1,0 +1,6 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/papi.TFData*/ -}}
+{{- if $.RulesAsSchema}}
+{{- range .Includes }}
+{{- template "rules_builder" .}}
+{{- end}}
+{{- end}}

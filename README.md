@@ -201,6 +201,8 @@ Flags:
    --schema               Rules will be exported as `akamai_property_rules_builder` data source in HCL format.
 ```
 
+> Flag `schema` works now with `include` sub-command as well with `with-includes` flag.
+
 ### Export property manager property configuration.
 
 ```

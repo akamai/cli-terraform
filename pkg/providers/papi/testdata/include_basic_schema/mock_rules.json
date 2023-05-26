@@ -1,0 +1,222 @@
+{
+  "accountId": "test_account",
+  "contractId": "test_contract",
+  "groupId": "test_group",
+  "includeId": "inc_123456",
+  "includeVersion": 2,
+  "includeType": "MICROSERVICES",
+  "etag": "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
+  "ruleFormat": "v2023-01-05",
+  "rules": {
+    "behaviors": [
+      {
+        "name": "origin",
+        "options": {
+          "cacheKeyHostname": "ORIGIN_HOSTNAME",
+          "compress": true,
+          "enableTrueClientIp": false,
+          "forwardHostHeader": "REQUEST_HOST_HEADER",
+          "hostname": "1.2.3.4",
+          "httpPort": 80,
+          "httpsPort": 443,
+          "originSni": false,
+          "originType": "CUSTOMER",
+          "useUniqueCacheKey": false,
+          "verificationMode": "PLATFORM_SETTINGS"
+        }
+      },
+      {
+        "name": "cpCode",
+        "options": {
+          "value": {
+            "createdDate": 1506429558000,
+            "description": "Test-NewHire",
+            "id": 626358,
+            "name": "Test-NewHire",
+            "products": [
+              "Site_Defender"
+            ]
+          }
+        }
+      },
+      {
+        "name": "caching",
+        "options": {
+          "behavior": "NO_STORE"
+        }
+      },
+      {
+        "name": "allowPost",
+        "options": {
+          "allowWithoutContentLength": false,
+          "enabled": true
+        }
+      },
+      {
+        "name": "report",
+        "options": {
+          "logAcceptLanguage": false,
+          "logCookies": "OFF",
+          "logCustomLogField": false,
+          "logHost": false,
+          "logReferer": false,
+          "logUserAgent": true
+        }
+      },
+      {
+        "name": "advanced",
+        "options": {
+          "description": "extract inputs"
+        },
+        "uuid": "feeaeff9-fe7e-4e27-ba0c-7b1dcecdba8b"
+      }
+    ],
+    "children": [
+      {
+        "behaviors": [
+          {
+            "name": "gzipResponse",
+            "options": {
+              "behavior": "ALWAYS"
+            }
+          }
+        ],
+        "criteria": [
+          {
+            "name": "contentType",
+            "options": {
+              "matchCaseSensitive": false,
+              "matchOperator": "IS_ONE_OF",
+              "matchWildcard": true,
+              "values": [
+                "text/html*",
+                "text/css*",
+                "application/x-javascript*"
+              ]
+            }
+          }
+        ],
+        "name": "Content Compression",
+        "options": {},
+        "criteriaMustSatisfy": "all"
+      },
+      {
+        "behaviors": [
+          {
+            "name": "caching",
+            "options": {
+              "behavior": "MAX_AGE",
+              "mustRevalidate": false,
+              "ttl": "1d"
+            }
+          }
+        ],
+        "criteria": [
+          {
+            "name": "fileExtension",
+            "options": {
+              "matchCaseSensitive": false,
+              "matchOperator": "IS_ONE_OF",
+              "values": [
+                "aif",
+                "aiff",
+                "au",
+                "avi",
+                "bin",
+                "bmp",
+                "cab",
+                "carb",
+                "cct",
+                "cdf",
+                "class",
+                "css",
+                "doc",
+                "dcr",
+                "dtd",
+                "exe",
+                "flv",
+                "gcf",
+                "gff",
+                "gif",
+                "grv",
+                "hdml",
+                "hqx",
+                "ico",
+                "ini",
+                "jpeg",
+                "jpg",
+                "js",
+                "mov",
+                "mp3",
+                "nc",
+                "pct",
+                "pdf",
+                "png",
+                "ppc",
+                "pws",
+                "swa",
+                "swf",
+                "txt",
+                "vbs",
+                "w32",
+                "wav",
+                "wbmp",
+                "wml",
+                "wmlc",
+                "wmls",
+                "wmlsc",
+                "xsd",
+                "zip",
+                "webp",
+                "jxr",
+                "hdp",
+                "wdp",
+                "pict",
+                "tif",
+                "tiff",
+                "mid",
+                "midi",
+                "ttf",
+                "eot",
+                "woff",
+                "otf",
+                "svg",
+                "svgz",
+                "jar",
+                "woff2"
+              ]
+            }
+          }
+        ],
+        "name": "Static Content",
+        "options": {},
+        "criteriaMustSatisfy": "all"
+      },
+      {
+        "behaviors": [
+          {
+            "name": "downstreamCache",
+            "options": {
+              "behavior": "TUNNEL_ORIGIN"
+            }
+          }
+        ],
+        "criteria": [
+          {
+            "name": "cacheability",
+            "options": {
+              "matchOperator": "IS_NOT",
+              "value": "CACHEABLE"
+            }
+          }
+        ],
+        "name": "Dynamic Content",
+        "options": {},
+        "criteriaMustSatisfy": "all"
+      }
+    ],
+    "name": "default",
+    "options": {},
+    "uuid": "default"
+  }
+}

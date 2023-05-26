@@ -9481,7 +9481,7 @@ visitor_prioritization_request {
 {{- end}}
 }
 {{- end}}
-
+{{- define "rules_builder"}}
 {{- range $i, $r := .Rules}}
 data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
 	{{- $children := $r.Children}}
@@ -9554,4 +9554,6 @@ data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
 	{{- end}}
 }
 {{end -}}
-{{CheckErrors -}}
+{{- end}}
+{{- template "rules_builder" .}}
+{{- CheckErrors -}}

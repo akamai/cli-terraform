@@ -59,7 +59,7 @@ var (
 		client.On("ListIncludes", mock.Anything, listIncludesReq).Return(&includes, nil).Once()
 	}
 
-	expectGetIncludeVersion = func(client *papi.Mock) {
+	expectGetIncludeVersion = func(client *papi.Mock, format string) {
 		getIncludeVersionReq := papi.GetIncludeVersionRequest{
 			ContractID: "test_contract",
 			GroupID:    "test_group",
@@ -82,7 +82,7 @@ var (
 						UpdatedDate:      "2022-08-22T07:17:48Z",
 						ProductionStatus: papi.VersionStatusInactive,
 						Etag:             "1d8ed19bce0833a3fe93e62ae5d5579a38cc2dbe",
-						RuleFormat:       "v2020-11-02",
+						RuleFormat:       format,
 						IncludeVersion:   2,
 						StagingStatus:    papi.VersionStatusInactive,
 					},
@@ -93,7 +93,7 @@ var (
 				UpdatedDate:      "2022-08-22T07:17:48Z",
 				ProductionStatus: papi.VersionStatusInactive,
 				Etag:             "1d8ed19bce0833a3fe93e62ae5d5579a38cc2dbe",
-				RuleFormat:       "v2020-11-02",
+				RuleFormat:       format,
 				IncludeVersion:   2,
 				StagingStatus:    papi.VersionStatusInactive,
 			},
@@ -102,7 +102,7 @@ var (
 		client.On("GetIncludeVersion", mock.Anything, getIncludeVersionReq).Return(&version, nil).Once()
 	}
 
-	expectGetSeconIncludeVersion = func(client *papi.Mock) {
+	expectGetSecondIncludeVersion = func(client *papi.Mock, format string) {
 		getIncludeVersionReq := papi.GetIncludeVersionRequest{
 			ContractID: "test_contract",
 			GroupID:    "test_group",
@@ -125,7 +125,7 @@ var (
 						UpdatedDate:      "2022-08-22T07:17:48Z",
 						ProductionStatus: papi.VersionStatusInactive,
 						Etag:             "1d8ed19bce0833a3fe93e62ae5d5579a38cc2dbe",
-						RuleFormat:       "v2020-11-02",
+						RuleFormat:       format,
 						IncludeVersion:   2,
 						StagingStatus:    papi.VersionStatusInactive,
 					},
@@ -136,7 +136,7 @@ var (
 				UpdatedDate:      "2022-08-22T07:17:48Z",
 				ProductionStatus: papi.VersionStatusInactive,
 				Etag:             "1d8ed19bce0833a3fe93e62ae5d5579a38cc2dbe",
-				RuleFormat:       "v2020-11-02",
+				RuleFormat:       format,
 				IncludeVersion:   2,
 				StagingStatus:    papi.VersionStatusInactive,
 			},
@@ -151,6 +151,14 @@ var (
 		IncludeID:      "inc_123456",
 		IncludeVersion: 2,
 		RuleFormat:     "v2020-11-02",
+	}
+
+	getIncludeRuleTreeReqSchema = papi.GetIncludeRuleTreeRequest{
+		ContractID:     "test_contract",
+		GroupID:        "test_group",
+		IncludeID:      "inc_123456",
+		IncludeVersion: 2,
+		RuleFormat:     "v2023-01-05",
 	}
 
 	expectListIncludeActivations = func(client *papi.Mock) {
@@ -321,11 +329,12 @@ func TestCreateInclude(t *testing.T) {
 		snippetFilesToCheck []string
 		jsonDir             string
 		withError           error
+		schema              bool
 	}{
 		"include basic": {
 			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
 				expectListIncludes(c)
-				expectGetIncludeVersion(c)
+				expectGetIncludeVersion(c, "v2020-11-02")
 
 				// Rule Tree
 				var ruleResponse papi.GetIncludeRuleTreeResponse
@@ -347,6 +356,57 @@ func TestCreateInclude(t *testing.T) {
 				"Static_Content.json",
 				"Dynamic_Content.json",
 			},
+		},
+		"include basic schema": {
+			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
+				expectListIncludes(c)
+				expectGetIncludeVersion(c, "v2023-01-05")
+
+				// Rule Tree
+				var ruleResponse papi.GetIncludeRuleTreeResponse
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				assert.NoError(t, err)
+				assert.NoError(t, json.Unmarshal(rules, &ruleResponse))
+				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReqSchema).Return(&ruleResponse, nil).Once()
+
+				expectListIncludeActivations(c)
+				expectAllProcessTemplates(p, (&tfDataBuilder{}).withData(getTestData("include basic schema")).
+					withIncludeRules(0, flattenRules("test_include", ruleResponse.Rules)).
+					build())
+				mockAddTemplateTargetRules(p)
+				mockAddTemplateTargetIncludesRules(p)
+				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
+
+			},
+
+			includeName: "test_include",
+			dir:         "include_basic_schema",
+			schema:      true,
+		},
+		"include basic, unsupported schema version": {
+			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
+				expectListIncludes(c)
+				expectGetIncludeVersion(c, "v2020-11-02")
+
+				// Rule Tree
+				var ruleResponse papi.GetIncludeRuleTreeResponse
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				assert.NoError(t, err)
+				assert.NoError(t, json.Unmarshal(rules, &ruleResponse))
+				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReq).Return(&ruleResponse, nil).Once()
+
+				expectListIncludeActivations(c)
+				expectAllProcessTemplates(p, (&tfDataBuilder{}).withData(getTestData("include basic")).
+					withIncludeRules(0, flattenRules("test_include", ruleResponse.Rules)).
+					build())
+				mockAddTemplateTargetRules(p)
+				mockTemplateExist(p, "rules_v2020-11-02.tmpl", false)
+			},
+
+			includeName: "test_include",
+			dir:         "include_basic",
+			schema:      true,
+			withError:   ErrUnsupportedRuleFormat,
 		},
 		"error include not found": {
 			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
@@ -371,7 +431,7 @@ func TestCreateInclude(t *testing.T) {
 		"error include rules not found": {
 			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
 				expectListIncludes(c)
-				expectGetIncludeVersion(c)
+				expectGetIncludeVersion(c, "v2020-11-02")
 				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReq).Return(nil, fmt.Errorf("oops")).Once()
 			},
 			withError:   ErrIncludeRulesNotFound,
@@ -380,7 +440,7 @@ func TestCreateInclude(t *testing.T) {
 		"error fetching activations": {
 			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
 				expectListIncludes(c)
-				expectGetIncludeVersion(c)
+				expectGetIncludeVersion(c, "v2020-11-02")
 
 				// Rule Tree
 				var ruleResponse papi.GetIncludeRuleTreeResponse
@@ -402,7 +462,7 @@ func TestCreateInclude(t *testing.T) {
 		"error saving files": {
 			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
 				expectListIncludes(c)
-				expectGetIncludeVersion(c)
+				expectGetIncludeVersion(c, "v2020-11-02")
 
 				// Rule Tree
 				var ruleResponse papi.GetIncludeRuleTreeResponse
@@ -428,7 +488,7 @@ func TestCreateInclude(t *testing.T) {
 			mp := new(templates.MockProcessor)
 			test.init(mc, mp, test.dir)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createInclude(ctx, contractID, test.includeName, section, fmt.Sprintf("./testdata/res/%s", test.jsonDir), "./", mc, mp)
+			err := createInclude(ctx, contractID, test.includeName, section, fmt.Sprintf("./testdata/res/%s", test.jsonDir), "./", test.schema, mc, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -452,11 +512,18 @@ func TestProcessIncludeTemplates(t *testing.T) {
 		givenData    TFData
 		dir          string
 		filesToCheck []string
+		schema       bool
 	}{
 		"include basic": {
 			givenData:    getTestData("include basic"),
 			dir:          "include_basic",
 			filesToCheck: []string{"includes.tf", "variables.tf", "import.sh"},
+		},
+		"include basic schema": {
+			givenData:    getTestData("include basic schema"),
+			dir:          "include_basic_schema",
+			filesToCheck: []string{"includes.tf", "variables.tf", "import.sh", "includes_rules.tf"},
+			schema:       true,
 		},
 		"include single network": {
 			givenData:    getTestData("include single network"),
@@ -471,14 +538,23 @@ func TestProcessIncludeTemplates(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			if test.schema {
+				ruleResponse := getRuleTreeResponse(test.dir, t)
+				test.givenData.Includes[0].Rules = flattenRules(test.givenData.Includes[0].IncludeName, ruleResponse.Rules)
+				test.givenData.RulesAsSchema = true
+			}
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
+			templateToFile := map[string]string{
+				"includes.tmpl":  fmt.Sprintf("./testdata/res/%s/includes.tf", test.dir),
+				"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
+				"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
+			}
+			if test.schema {
+				templateToFile["includes_rules.tmpl"] = fmt.Sprintf("./testdata/res/%s/includes_rules.tf", test.dir)
+			}
 			processor := templates.FSTemplateProcessor{
-				TemplatesFS: templateFiles,
-				TemplateTargets: map[string]string{
-					"includes.tmpl":  fmt.Sprintf("./testdata/res/%s/includes.tf", test.dir),
-					"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
-					"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
-				},
+				TemplatesFS:     templateFiles,
+				TemplateTargets: templateToFile,
 				AdditionalFuncs: additionalFuncs,
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
@@ -517,6 +593,26 @@ func getTestData(key string) TFData {
 				},
 			},
 		},
+		"include basic schema": {
+			Section: section,
+			Includes: []TFIncludeData{
+				{
+					ActivationNoteProduction:   "test production activation",
+					ActivationNoteStaging:      "test staging activation",
+					ContractID:                 "test_contract",
+					ActivationEmailsProduction: []string{"test@example.com", "test1@example.com"},
+					ActivationEmailsStaging:    []string{"test@example.com"},
+					GroupID:                    "test_group",
+					IncludeID:                  "inc_123456",
+					IncludeName:                "test_include",
+					IncludeType:                string(papi.IncludeTypeMicroServices),
+					Networks:                   []string{"STAGING", "PRODUCTION"},
+					RuleFormat:                 "v2023-01-05",
+					VersionProduction:          "1",
+					VersionStaging:             "1",
+				},
+			},
+		},
 		"include single network": {
 			Section: section,
 			Includes: []TFIncludeData{
@@ -545,6 +641,45 @@ func getTestData(key string) TFData {
 					RuleFormat:  "v2020-11-02",
 				},
 			},
+		},
+		"basic property with multiple includes schema": {
+			Property: TFPropertyData{
+				GroupName:            "test_group",
+				GroupID:              "grp_12345",
+				ContractID:           "test_contract",
+				PropertyResourceName: "test-edgesuite-net",
+				PropertyName:         "test.edgesuite.net",
+				PropertyID:           "prp_12345",
+				ProductID:            "prd_HTTP_Content_Del",
+				ProductName:          "HTTP_Content_Del",
+				RuleFormat:           "latest",
+				IsSecure:             "false",
+				EdgeHostnames: map[string]EdgeHostname{
+					"test-edgesuite-net": {
+						EdgeHostname:             "test.edgesuite.net",
+						EdgeHostnameID:           "ehn_2867480",
+						ContractID:               "test_contract",
+						GroupID:                  "grp_12345",
+						ID:                       "",
+						IPv6:                     "IPV6_COMPLIANCE",
+						SecurityType:             "STANDARD-TLS",
+						EdgeHostnameResourceName: "test-edgesuite-net",
+					},
+				},
+				Hostnames: map[string]Hostname{
+					"test.edgesuite.net": {
+						CnameFrom:                "test.edgesuite.net",
+						CnameTo:                  "test.edgesuite.net",
+						EdgeHostnameResourceName: "test-edgesuite-net",
+						CertProvisioningType:     "CPS_MANAGED",
+						IsActive:                 true,
+					},
+				},
+				Emails:               []string{"jsmith@akamai.com"},
+				Version:              "LATEST",
+				HasStagingActivation: true,
+			},
+			Section: "test_section",
 		},
 	}
 

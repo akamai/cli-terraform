@@ -54,6 +54,11 @@ func CmdCreateInclude(c *cli.Context) error {
 		"imports.tmpl":   importPath,
 	}
 
+	var schema bool
+	if c.IsSet("schema") {
+		schema = c.Bool("schema")
+	}
+
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
@@ -64,19 +69,20 @@ func CmdCreateInclude(c *cli.Context) error {
 	includeName := c.Args().Get(1)
 	section := edgegrid.GetEdgercSection(c)
 
-	if err = createInclude(ctx, contractID, includeName, section, "property-snippets", tfWorkPath, client, processor); err != nil {
+	if err = createInclude(ctx, contractID, includeName, section, "property-snippets", tfWorkPath, schema, client, processor); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting include: %s", err)), 1)
 	}
 
 	return nil
 }
 
-func createInclude(ctx context.Context, contractID, includeName, section, jsonDir, tfWorkPath string, client papi.PAPI, processor templates.TemplateProcessor) error {
+func createInclude(ctx context.Context, contractID, includeName, section, jsonDir, tfWorkPath string, schema bool, client papi.PAPI, processor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
 	tfData := TFData{
-		Includes: make([]TFIncludeData, 0),
-		Section:  section,
+		Includes:      make([]TFIncludeData, 0),
+		Section:       section,
+		RulesAsSchema: schema,
 	}
 
 	// Get Include
@@ -88,13 +94,33 @@ func createInclude(ctx context.Context, contractID, includeName, section, jsonDi
 	}
 	term.Spinner().OK()
 
-	includeData, err := getIncludeData(ctx, include, jsonDir, tfWorkPath, client)
+	includeData, rules, err := getIncludeData(ctx, include, client)
 	if err != nil {
 		return err
 	}
 
-	tfData.Includes = append(tfData.Includes, *includeData)
+	// Save snippets
+	if !schema {
+		term.Spinner().Start("Saving snippets ")
+		ruleTemplate, rulesTemplate := setIncludeRuleTemplates(rules)
+		if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), fmt.Sprintf("%s.json", include.IncludeName)); err != nil {
+			term.Spinner().Fail()
+			return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
+		}
+		term.Spinner().OK()
+	} else {
+		includeData.Rules = flattenRules(includeData.IncludeName, rules.Rules)
+	}
 
+	tfData.Includes = append(tfData.Includes, *includeData)
+	if schema {
+		ruleTemplate := fmt.Sprintf("rules_%s.tmpl", rules.RuleFormat)
+		if !processor.TemplateExists(ruleTemplate) {
+			return fmt.Errorf("%w: %s", ErrUnsupportedRuleFormat, rules.RuleFormat)
+		}
+		processor.AddTemplateTarget(ruleTemplate, filepath.Join(tfWorkPath, "rules.tf"))
+		processor.AddTemplateTarget("includes_rules.tmpl", filepath.Join(tfWorkPath, "includes_rules.tf"))
+	}
 	term.Spinner().Start("Saving TF configurations ")
 	if err = processor.ProcessTemplates(tfData); err != nil {
 		term.Spinner().Fail()
@@ -107,7 +133,7 @@ func createInclude(ctx context.Context, contractID, includeName, section, jsonDi
 	return nil
 }
 
-func getIncludeData(ctx context.Context, include *papi.Include, jsonDir, tfWorkPath string, client papi.PAPI) (*TFIncludeData, error) {
+func getIncludeData(ctx context.Context, include *papi.Include, client papi.PAPI) (*TFIncludeData, *papi.GetIncludeRuleTreeResponse, error) {
 	term := terminal.Get(ctx)
 
 	// Get the latest version of include
@@ -120,7 +146,7 @@ func getIncludeData(ctx context.Context, include *papi.Include, jsonDir, tfWorkP
 	})
 	if err != nil {
 		term.Spinner().Fail()
-		return nil, fmt.Errorf("%w: %s", ErrFetchingLatestIncludeVersion, err)
+		return nil, nil, fmt.Errorf("%w: %s", ErrFetchingLatestIncludeVersion, err)
 	}
 
 	// Get include rules
@@ -134,7 +160,7 @@ func getIncludeData(ctx context.Context, include *papi.Include, jsonDir, tfWorkP
 	})
 	if err != nil {
 		term.Spinner().Fail()
-		return nil, fmt.Errorf("%w: %s", ErrIncludeRulesNotFound, err)
+		return nil, nil, fmt.Errorf("%w: %s", ErrIncludeRulesNotFound, err)
 	}
 	term.Spinner().OK()
 
@@ -147,7 +173,7 @@ func getIncludeData(ctx context.Context, include *papi.Include, jsonDir, tfWorkP
 	})
 	if err != nil {
 		term.Spinner().Fail()
-		return nil, fmt.Errorf("%w: %s", ErrFetchingActivations, err)
+		return nil, nil, fmt.Errorf("%w: %s", ErrFetchingActivations, err)
 	}
 	activations := results.Activations.Items
 	term.Spinner().OK()
@@ -184,17 +210,9 @@ func getIncludeData(ctx context.Context, include *papi.Include, jsonDir, tfWorkP
 		includeData.VersionProduction = strconv.Itoa(latestProdActivation.IncludeVersion)
 	}
 
-	// Save snippets
-	term.Spinner().Start("Saving snippets ")
-	ruleTemplate, rulesTemplate := setIncludeRuleTemplates(rules)
-	if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), fmt.Sprintf("%s.json", include.IncludeName)); err != nil {
-		term.Spinner().Fail()
-		return nil, fmt.Errorf("%w: %s", ErrSavingSnippets, err)
-	}
-
 	term.Spinner().OK()
 
-	return &includeData, nil
+	return &includeData, rules, nil
 }
 
 // findLatestIncludeActivation finds the latest activation of type `ACTIVATE` with status `ACTIVE` or `PENDING`.
