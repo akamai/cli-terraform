@@ -3,6 +3,7 @@
 ## Version 1.6.0 (May 31, 2023)
 
 ### Bug fixes
+
 * Fix escaping of `akamai_gtm_property` `static_rr_set.rdata` field
 * Export of some fields depends on the fact if the rule is default or not
 
