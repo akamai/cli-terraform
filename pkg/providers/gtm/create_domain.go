@@ -25,7 +25,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/gtm"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v6/pkg/gtm"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
@@ -128,9 +128,10 @@ func CmdCreateDomain(c *cli.Context) error {
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
 		AdditionalFuncs: template.FuncMap{
-			"normalize":   normalizeResourceName,
-			"toUpper":     strings.ToUpper,
-			"isDefaultDC": isDefaultDatacenter,
+			"normalize":    normalizeResourceName,
+			"toUpper":      strings.ToUpper,
+			"isDefaultDC":  isDefaultDatacenter,
+			"escapeString": tools.EscapeQuotedStringLit,
 		},
 	}
 

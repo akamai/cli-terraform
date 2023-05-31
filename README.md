@@ -157,6 +157,35 @@ Flags:
 
 ## Property Manager Properties
 
+Certain export conditions require the use of a particular property rule format. Verify your rule format matches the use case requirement and [update your rule format](https://techdocs.akamai.com/terraform/docs/set-up-includes#update-rule-format) as needed.
+
+<table>
+<thead>
+  <tr>
+    <th>Export condition</th>
+    <th>Output</th>
+    <th>Rule format</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>General</td>
+    <td>Your declarative property configuration and its JSON-formatted rules.</td>
+    <td>Any supported format.</td>
+  </tr>
+  <tr>
+    <td>Addition of <code>--schema</code> flag</td>
+    <td>Your declarative property configuration and HCL-formatted rules. <strong>Does not return includes</strong> as includes are JSON-formatted.</td>
+    <td>≥ <code>v2023_01_05</code></td>
+  </tr>
+  <tr>
+    <td>Addition of <code>include</code> subcommand</td>
+    <td>Your property configuration and its JSON-formatted rules and includes.</td>
+    <td>Any supported format, <em>but</em> your rules and includes must use the same rule format version.</td>
+  </tr>
+</tbody>
+</table>
+
 ### Usage
 
 ```
@@ -169,8 +198,10 @@ Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
    --version value        Property version to import  (default: LATEST)
    --with-includes        Referenced includes will also be exported along with property
-   --schema               Referenced rules will be exported as `akamai_property_rules_builder` data source
+   --schema               Rules will be exported as `akamai_property_rules_builder` data source in HCL format.
 ```
+
+> Flag `schema` works now with `include` sub-command as well with `with-includes` flag.
 
 ### Export property manager property configuration.
 

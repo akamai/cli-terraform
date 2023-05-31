@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v6/pkg/session"
 	"github.com/urfave/cli/v2"
 )
 

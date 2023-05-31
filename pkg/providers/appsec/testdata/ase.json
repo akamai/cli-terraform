@@ -3471,9 +3471,20 @@
     "malwarePolicies": [
         {
             "contentTypes": [
-                "application/xml",
-                "audio/x-wav",
-                "application/json"
+                {
+                    "name": "text/value"
+                },
+                {
+                    "name": "application/json",
+                    "encodedContentAttributes": [
+                        {
+                            "path": "image.imagePath",
+                            "encoding": [
+                                "base64"
+                            ]
+                        }
+                    ]
+                }
             ],
             "description": "Malware configuration details",
             "hostnames": [
@@ -3489,9 +3500,20 @@
         },
         {
             "contentTypes": [
-                "application/msword",
-                "application/x-mswrite",
-                "application/rtf"
+                {
+                    "name": "text/value"
+                },
+                {
+                    "name": "application/json",
+                    "encodedContentAttributes": [
+                        {
+                            "path": "image.imagePath",
+                            "encoding": [
+                                "base64"
+                            ]
+                        }
+                    ]
+                }
             ],
             "description": "Malware configuration details",
             "hostnames": [
@@ -3505,8 +3527,20 @@
         },
         {
             "contentTypes": [
-                "application/xml",
-                "application/json"
+                {
+                    "name": "text/value"
+                },
+                {
+                    "name": "application/json",
+                    "encodedContentAttributes": [
+                        {
+                            "path": "image.imagePath",
+                            "encoding": [
+                                "base64"
+                            ]
+                        }
+                    ]
+                }
             ],
             "description": "Malware configuration details",
             "hostnames": [

@@ -2,7 +2,6 @@ resource "akamai_appsec_rate_policy" "high_rate" {
   config_id = akamai_appsec_configuration.config.config_id
   rate_policy = jsonencode(
     {
-      "additionalMatchOptions" : null,
       "averageThreshold" : 100,
       "burstThreshold" : 500,
       "clientIdentifier" : "ip",
@@ -22,7 +21,6 @@ resource "akamai_appsec_rate_policy" "low_rate" {
   config_id = akamai_appsec_configuration.config.config_id
   rate_policy = jsonencode(
     {
-      "additionalMatchOptions" : null,
       "averageThreshold" : 75,
       "burstThreshold" : 250,
       "clientIdentifier" : "ip",
@@ -42,10 +40,8 @@ resource "akamai_appsec_rate_policy" "bot_rate" {
   config_id = akamai_appsec_configuration.config.config_id
   rate_policy = jsonencode(
     {
-      "additionalMatchOptions" : null,
       "averageThreshold" : 25,
       "burstThreshold" : 50,
-      "clientIdentifier" : "",
       "matchType" : "path",
       "name" : "Bot Rate",
       "path" : {

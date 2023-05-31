@@ -33,33 +33,8 @@
         }
       }
     ],
-    "criteria": [
-      {
-        "name": "matchAdvanced-unsupported",
-        "options": {
-          "description": "",
-          "openXml": "",
-          "closeXml": ""
-        },
-        "uuid": "fa27bc4d-bfff-4541-8eb7-ade156a57256"
-      },
-      {
-        "name": "contentType",
-        "options": {
-          "matchCaseSensitive": false,
-          "matchOperator": "IS_ONE_OF",
-          "matchWildcard": true,
-          "values": [
-            "text/html*",
-            "text/css*",
-            "application/x-javascript*"
-          ]
-        }
-      }
-    ],
     "name": "default",
     "options": {},
-    "uuid": "default",
-    "criteriaMustSatisfy": "all"
+    "uuid": "default"
   }
 }

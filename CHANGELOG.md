@@ -1,5 +1,17 @@
 # Release Notes
 
+## Version 1.6.0 (May 31, 2023)
+
+### Bug fixes
+
+* Fix escaping of `akamai_gtm_property` `static_rr_set.rdata` field
+* Export of some fields depends on the fact if the rule is default or not
+
+### Features/Enhancements
+
+* Migrate to Terraform 1.3.7 version
+* Flag `schema` works now with `include` sub-command as well with `with-includes` flag
+
 ## Version 1.5.0 (Apr 27, 2023)
 
 ### Features/Enhancements

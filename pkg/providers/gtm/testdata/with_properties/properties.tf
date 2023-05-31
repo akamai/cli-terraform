@@ -48,7 +48,7 @@ resource "akamai_gtm_property" "test_property2" {
   balance_by_download_score   = false
   static_rr_set {
     type  = "test type"
-    rdata = ["rdata1", "rdata2"]
+    rdata = ["rdata1", "rdata2", "\"properlyescaped\""]
   }
   dynamic_ttl            = 60
   handout_limit          = 8

@@ -29,7 +29,7 @@ COVERAGE_HTML="$COVERAGE_DIR"/index.html
 
 WORKDIR="${WORKDIR-$(pwd)}"
 echo "WORKDIR is $WORKDIR"
-TERRAFORM_VERSION="1.2.5"
+TERRAFORM_VERSION="1.3.7"
 
 STASH_SERVER=git.source.akamai.com
 GIT_IP=$(dig +short $STASH_SERVER)
@@ -95,7 +95,7 @@ docker exec akatf-container sh -c 'cd edgegrid; git checkout ${EDGEGRID_BRANCH_N
                                    cd ../cli; git checkout ${CLI_BRANCH_NAME};
                                    go mod tidy;
                                    cd ../cli-terraform; git checkout ${CLI_TERRAFORM_BRANCH_NAME};
-                                   go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v5=../edgegrid;
+                                   go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v6=../edgegrid;
                                    go mod edit -replace github.com/akamai/cli=../cli;
                                    go mod tidy'
 

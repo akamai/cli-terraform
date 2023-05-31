@@ -3,7 +3,7 @@ package iam
 import (
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v5/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v6/pkg/iam"
 	"github.com/stretchr/testify/assert"
 )
 
