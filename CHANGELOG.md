@@ -1,5 +1,11 @@
 # Release Notes
 
+## Version X.X.X (xxx xx, 2023)
+
+### Features/Enhancements
+
+* Migrate to Terraform 1.4.6 version
+
 ## Version 1.6.0 (May 31, 2023)
 
 ### Bug fixes
