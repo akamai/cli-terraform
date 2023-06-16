@@ -4,7 +4,13 @@ terraform init
 terraform import akamai_edge_hostname.{{.EdgeHostnameResourceName}} {{.EdgeHostnameID}},{{.ContractID}},{{.GroupID}}
 {{- end}}
 {{- if .Property.PropertyID}}
-terraform import akamai_property.{{.Property.PropertyResourceName}} {{.Property.PropertyID}},{{.Property.ContractID}},{{.Property.GroupID}},{{.Property.Version}}
+terraform import akamai_property.{{.Property.PropertyResourceName}} {{.Property.PropertyID}},{{.Property.ContractID}},{{.Property.GroupID}},{{.Property.ReadVersion}}
+{{- end}}
+{{- if and .Property.PropertyID .Property.StagingInfo.HasActivation}}
+terraform import akamai_property_activation.{{.Property.PropertyResourceName}}-staging {{.Property.PropertyID}}:STAGING
+{{- end}}
+{{- if and .Property.PropertyID .Property.ProductionInfo.HasActivation}}
+terraform import akamai_property_activation.{{.Property.PropertyResourceName}}-production {{.Property.PropertyID}}:PRODUCTION
 {{- end}}
 {{- range $include := .Includes}}
 terraform import akamai_property_include.{{.IncludeName}} {{.ContractID}}:{{.GroupID}}:{{.IncludeID}}

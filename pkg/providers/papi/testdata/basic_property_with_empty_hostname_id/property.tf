@@ -40,9 +40,10 @@ resource "akamai_property" "test-edgesuite-net" {
   rules = data.akamai_property_rules_template.rules.json
 }
 
-#resource "akamai_property_activation" "test-edgesuite-net" {
-#  property_id = akamai_property.test-edgesuite-net.id
-#  contact     = ["jsmith@akamai.com"]
-#  version     = akamai_property.test-edgesuite-net.latest_version
-#  network     = upper(var.env)
+#resource "akamai_property_activation" "test-edgesuite-net-staging" {
+#  property_id                    = akamai_property.test-edgesuite-net.id
+#  contact                        = ["jsmith@akamai.com"]
+#  version                        = akamai_property.test-edgesuite-net.latest_version
+#  network                        = staging
+#  auto_acknowledge_rule_warnings = false
 #}

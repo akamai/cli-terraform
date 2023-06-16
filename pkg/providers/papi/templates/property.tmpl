@@ -63,26 +63,52 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
 {{- end}}
 }
 
-{{- if .Property.HasStagingActivation}}
+{{- if .Property.StagingInfo.HasActivation}}
 
-resource "akamai_property_activation" "{{.Property.PropertyResourceName}}" {
-  property_id = akamai_property.{{.Property.PropertyResourceName}}.id
-  contact = [{{range $index, $element := .Property.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
-  version = akamai_property.{{.Property.PropertyResourceName}}.latest_version
-  network = upper(var.env)
-{{- if .Property.ActivationNote}}
-  note = "{{.Property.ActivationNote}}"
+resource "akamai_property_activation" "{{.Property.PropertyResourceName}}-staging" {
+  property_id                    = akamai_property.{{.Property.PropertyResourceName}}.id
+  contact                        = [{{range $index, $element := .Property.StagingInfo.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+  version                        = akamai_property.{{.Property.PropertyResourceName}}.staging_version
+  network                        = "STAGING"
+{{- if .Property.StagingInfo.ActivationNote}}
+  note                           = "{{.Property.StagingInfo.ActivationNote}}"
 {{- end}}
+  auto_acknowledge_rule_warnings = false
 }
 {{ else}}
 
-#resource "akamai_property_activation" "{{.Property.PropertyResourceName}}" {
-#  property_id = akamai_property.{{.Property.PropertyResourceName}}.id
-#  contact = [{{range $index, $element := .Property.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
-#  version = akamai_property.{{.Property.PropertyResourceName}}.latest_version
-#  network = upper(var.env)
-{{- if .Property.ActivationNote}}
-#  note = "{{.Property.ActivationNote}}"
+#resource "akamai_property_activation" "{{.Property.PropertyResourceName}}-staging" {
+#  property_id                    = akamai_property.{{.Property.PropertyResourceName}}.id
+#  contact                        = [{{range $index, $element := .Property.StagingInfo.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+#  version                        = akamai_property.{{.Property.PropertyResourceName}}.latest_version
+#  network                        = "STAGING"
+{{- if .Property.StagingInfo.ActivationNote}}
+#  note                           = "{{.Property.StagingInfo.ActivationNote}}"
 {{- end}}
+#  auto_acknowledge_rule_warnings = false
+#}
+{{ end}}
+
+{{- if .Property.ProductionInfo.HasActivation}}
+resource "akamai_property_activation" "{{.Property.PropertyResourceName}}-production" {
+  property_id                    = akamai_property.{{.Property.PropertyResourceName}}.id
+  contact                        = [{{range $index, $element := .Property.ProductionInfo.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+  version                        = akamai_property.{{.Property.PropertyResourceName}}.production_version
+  network                        = "PRODUCTION"
+{{- if .Property.ProductionInfo.ActivationNote}}
+  note                           = "{{.Property.ProductionInfo.ActivationNote}}"
+{{- end}}
+  auto_acknowledge_rule_warnings = false
+}
+{{ else}}
+#resource "akamai_property_activation" "{{.Property.PropertyResourceName}}-production" {
+#  property_id                    = akamai_property.{{.Property.PropertyResourceName}}.id
+#  contact                        = [{{range $index, $element := .Property.ProductionInfo.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+#  version                        = akamai_property.{{.Property.PropertyResourceName}}.latest_version
+#  network                        = "PRODUCTION"
+{{- if .Property.ProductionInfo.ActivationNote}}
+#  note                           = "{{.Property.ProductionInfo.ActivationNote}}"
+{{- end}}
+#  auto_acknowledge_rule_warnings = false
 #}
 {{ end}}

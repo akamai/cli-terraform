@@ -49,16 +49,18 @@ resource "akamai_property" "test-edgesuite-net" {
 
 resource "akamai_property_activation" "test-edgesuite-net-staging" {
   property_id                    = akamai_property.test-edgesuite-net.id
-  contact                        = ["jsmith@akamai.com"]
+  contact                        = ["jsmith@akamai.com", "rjohnson@akamai.com"]
   version                        = akamai_property.test-edgesuite-net.staging_version
   network                        = "STAGING"
+  note                           = "example staging note"
   auto_acknowledge_rule_warnings = false
 }
 
-#resource "akamai_property_activation" "test-edgesuite-net-production" {
-#  property_id                    = akamai_property.test-edgesuite-net.id
-#  contact                        = []
-#  version                        = akamai_property.test-edgesuite-net.latest_version
-#  network                        = "PRODUCTION"
-#  auto_acknowledge_rule_warnings = false
-#}
+resource "akamai_property_activation" "test-edgesuite-net-production" {
+  property_id                    = akamai_property.test-edgesuite-net.id
+  contact                        = ["jsmith@akamai.com", "rjohnson@akamai.com"]
+  version                        = akamai_property.test-edgesuite-net.production_version
+  network                        = "PRODUCTION"
+  note                           = "example production note"
+  auto_acknowledge_rule_warnings = false
+}

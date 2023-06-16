@@ -18,6 +18,10 @@
 * Migrate to Terraform 1.3.7 version
 * Flag `schema` works now with `include` sub-command as well with `with-includes` flag
 
+* PAPI
+  * Add import support for `akamai_property_activation` resource
+  * Result of `export-property` command contains `STAGING` and `PRODUCTION` configurations for `akamai_property_activation`. Drop support for `var.env` variable and add `auto_acknowledge_rule_warnings` parameter to export.
+
 ## Version 1.5.0 (Apr 27, 2023)
 
 ### Features/Enhancements
