@@ -197,8 +197,8 @@ terraform import module.security.akamai_botman_challenge_action.{{escapeName (in
 terraform import module.security.akamai_botman_conditional_action.{{escapeName (index . "actionName")}}_{{index . "actionId"}} {{ $configID }}:{{index . "actionId"}}
 {{ end -}}
 {{ end -}}
-{{ if .ResponseActions.ChallengeInterceptionRules  -}}
-terraform import module.security.akamai_botman_challenge_interception_rules.challenge_interception_rules {{ $configID }}
+{{ if .ResponseActions.ChallengeInjectionRules  -}}
+terraform import module.security.akamai_botman_challenge_injection_rules.challenge_injection_rules {{ $configID }}
 {{ end -}}
 {{ end -}}
 {{ if .AdvancedSettings -}}

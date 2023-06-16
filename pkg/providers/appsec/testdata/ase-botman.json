@@ -3919,7 +3919,7 @@
                 }
             }
         ],
-        "challengeInterceptionRules": {
+        "challengeInjectionRules": {
             "primitiveKey": "primitiveValueA",
             "arrayKey": [
                 "arrayValueA1",

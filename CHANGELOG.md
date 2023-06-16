@@ -1,6 +1,10 @@
 # Release Notes
 
 ## Version 1.x.0 (xxxx yy, 2023)
+### Features/Enhancements
+
+* APPSEC
+  * Export of `export-appsec` uses `challenge_injection_rules` resource instead of deprecated `challenge_interception_rules`
 
 ### Bug fixes
 

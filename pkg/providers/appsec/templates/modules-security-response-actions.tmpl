@@ -32,11 +32,11 @@ resource "akamai_botman_serve_alternate_action" "{{escapeName (index . "actionNa
 
 {{ end -}}
 {{ end -}}
-{{ if .ResponseActions.ChallengeInterceptionRules  -}}
-resource "akamai_botman_challenge_interception_rules" "challenge_interception_rules" {
+{{ if .ResponseActions.ChallengeInjectionRules  -}}
+resource "akamai_botman_challenge_injection_rules" "challenge_injection_rules" {
     config_id = akamai_appsec_configuration.config.config_id
-    challenge_interception_rules = jsonencode(
-{{ exportJSON .ResponseActions.ChallengeInterceptionRules }}
+    challenge_injection_rules = jsonencode(
+{{ exportJSON .ResponseActions.ChallengeInjectionRules }}
 )
 }
 
