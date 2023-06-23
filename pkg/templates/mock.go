@@ -8,8 +8,14 @@ type MockProcessor struct {
 }
 
 // ProcessTemplates is a mocked version
-func (m *MockProcessor) ProcessTemplates(i interface{}) error {
-	args := m.Called(i)
+func (m *MockProcessor) ProcessTemplates(i interface{}, filterFuncs ...func([]string) ([]string, error)) error {
+	var args mock.Arguments
+	switch len(filterFuncs) {
+	case 0:
+		args = m.Called(i)
+	case 1:
+		args = m.Called(i, filterFuncs[0])
+	}
 	return args.Error(0)
 }
 

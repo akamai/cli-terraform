@@ -5,6 +5,8 @@
 ### Features/Enhancements
 
 * Migrate to Terraform 1.4.6 version
+* PAPI
+  * `export-property` command with flag `--schema` now supports export of properties in frozen formats `v2023-01-05` and `v2023-05-30`
 
 ## Version 1.6.0 (May 31, 2023)
 

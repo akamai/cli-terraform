@@ -22,7 +22,7 @@ type (
 	TemplateProcessor interface {
 		// ProcessTemplates is used to parse given template/templates using the given data as input
 		// If template execution fails, ProcessTemplates should return ErrTemplateExecution
-		ProcessTemplates(interface{}) error
+		ProcessTemplates(interface{}, ...func([]string) ([]string, error)) error
 		// AddTemplateTarget provides ability to specify additional template target after the processor was created
 		AddTemplateTarget(string, string)
 		// TemplateExists returns information if given template exists
@@ -52,7 +52,7 @@ var (
 
 // ProcessTemplates parses templates located in fs.FS and executes them using the provided data
 // result of each template execution is persisted in location provided in FSTemplateProcessor.TemplateTargets
-func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
+func (t FSTemplateProcessor) ProcessTemplates(data interface{}, filterFuncs ...func([]string) ([]string, error)) error {
 	funcs := template.FuncMap{
 		"escape":        tools.EscapeQuotedStringLit,
 		"formatIntList": formatIntList,
@@ -63,6 +63,13 @@ func (t FSTemplateProcessor) ProcessTemplates(data interface{}) error {
 	files, err := findTemplateFiles(t.TemplatesFS)
 	if err != nil {
 		return fmt.Errorf("%s: %s", "error filtering template files", err)
+	}
+
+	for _, f := range filterFuncs {
+		files, err = f(files)
+		if err != nil {
+			return fmt.Errorf("%w: error filtering template files", err)
+		}
 	}
 
 	tmpl := template.Must(template.New("templates").Funcs(funcs).Funcs(t.AdditionalFuncs).

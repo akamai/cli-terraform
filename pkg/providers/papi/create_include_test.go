@@ -311,12 +311,14 @@ var (
 		client.On("ListIncludeActivations", mock.Anything, listIncludeActivationsReq).Return(&activations, nil).Once()
 	}
 
-	expectAllProcessTemplates = func(p *templates.MockProcessor, testData TFData) *mock.Call {
+	expectAllProcessTemplates = func(p *templates.MockProcessor, testData TFData, filterFuncs ...func([]string) ([]string, error)) *mock.Call {
+		var call *mock.Call
+		if len(filterFuncs) != 0 {
+			call = p.On("ProcessTemplates", testData, mock.AnythingOfType("func([]string) ([]string, error)"))
+		} else {
+			call = p.On("ProcessTemplates", testData)
+		}
 
-		call := p.On(
-			"ProcessTemplates",
-			testData,
-		)
 		return call.Return(nil)
 	}
 )
@@ -372,7 +374,7 @@ func TestCreateInclude(t *testing.T) {
 				expectListIncludeActivations(c)
 				expectAllProcessTemplates(p, (&tfDataBuilder{}).withData(getTestData("include basic schema")).
 					withIncludeRules(0, flattenRules("test_include", ruleResponse.Rules)).
-					build())
+					build(), useThisOnlyRuleFormat("v2023-01-05"))
 				mockAddTemplateTargetRules(p)
 				mockAddTemplateTargetIncludesRules(p)
 				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
@@ -513,6 +515,7 @@ func TestProcessIncludeTemplates(t *testing.T) {
 		dir          string
 		filesToCheck []string
 		schema       bool
+		filterFuncs  []func([]string) ([]string, error)
 	}{
 		"include basic": {
 			givenData:    getTestData("include basic"),
@@ -524,6 +527,7 @@ func TestProcessIncludeTemplates(t *testing.T) {
 			dir:          "include_basic_schema",
 			filesToCheck: []string{"includes.tf", "variables.tf", "import.sh", "includes_rules.tf"},
 			schema:       true,
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
 		},
 		"include single network": {
 			givenData:    getTestData("include single network"),
@@ -557,7 +561,7 @@ func TestProcessIncludeTemplates(t *testing.T) {
 				TemplateTargets: templateToFile,
 				AdditionalFuncs: additionalFuncs,
 			}
-			require.NoError(t, processor.ProcessTemplates(test.givenData))
+			require.NoError(t, processor.ProcessTemplates(test.givenData, test.filterFuncs...))
 
 			for _, f := range test.filesToCheck {
 				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))

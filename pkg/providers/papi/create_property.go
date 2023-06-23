@@ -438,6 +438,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 
 	term.Spinner().OK()
 
+	filterFuncs := make([]func([]string) ([]string, error), 0)
 	if schema {
 		ruleTemplate := fmt.Sprintf("rules_%s.tmpl", rules.RuleFormat)
 		if !templateProcessor.TemplateExists(ruleTemplate) {
@@ -445,9 +446,10 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		}
 		templateProcessor.AddTemplateTarget(ruleTemplate, filepath.Join(tfWorkPath, "rules.tf"))
 		tfData.Rules = flattenRules(tfData.Property.PropertyName, rules.Rules)
+		filterFuncs = append(filterFuncs, useThisOnlyRuleFormat(rules.RuleFormat))
 	}
 	term.Spinner().Start("Saving TF configurations ")
-	if err = templateProcessor.ProcessTemplates(tfData); err != nil {
+	if err = templateProcessor.ProcessTemplates(tfData, filterFuncs...); err != nil {
 		term.Spinner().Fail()
 		if _, err := CheckErrors(); err != nil {
 			return fmt.Errorf("%w", err)
@@ -467,6 +469,31 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	term.Printf("Terraform configuration for property '%s' was saved successfully\n", property.PropertyName)
 
 	return nil
+}
+
+func useThisOnlyRuleFormat(acceptedFormat string) func([]string) ([]string, error) {
+	reg := regexp.MustCompile(`rules_(v\d{4}-\d{2}-\d{2}).tmpl`)
+	return func(input []string) ([]string, error) {
+		res := make([]string, 0)
+		formatFound := false
+		for _, v := range input {
+			if reg.MatchString(v) {
+				submatch := reg.FindStringSubmatch(v)
+				if submatch[1] == acceptedFormat {
+					res = append(res, v)
+					formatFound = true
+				}
+			} else {
+				res = append(res, v)
+			}
+		}
+
+		if !formatFound {
+			return nil, fmt.Errorf("did not find %s format among %s", acceptedFormat, input)
+		}
+
+		return res, nil
+	}
 }
 
 func flattenRules(property string, rule papi.Rules) []*WrappedRules {
