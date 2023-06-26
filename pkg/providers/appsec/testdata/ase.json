@@ -3427,6 +3427,9 @@
                             "118736_TFDEMOLISTATUL"
                         ]
                     }
+                },
+                "ukraineGeoControl": {
+                    "action": "deny"
                 }
             },
             "clientReputation": {

@@ -23,5 +23,6 @@ resource "akamai_appsec_ip_geo" "policy1" {
   geo_network_lists          = ["113698_CUSTOMERGEOBLOCK"]
   ip_network_lists           = ["19843_TESTLIST"]
   exception_ip_network_lists = ["9132_MYTESTLIST"]
+  ukraine_geo_control_action = "deny"
 }
 
