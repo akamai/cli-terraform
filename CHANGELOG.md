@@ -1,12 +1,21 @@
 # Release Notes
 
-## Version X.X.X (xxx xx, 2023)
+## Version 1.7.0 (June 29, 2023)
 
 ### Features/Enhancements
 
-* Migrate to Terraform 1.4.6 version
+* Migrated to Terraform 1.4.6 version
+
 * PAPI
-  * `export-property` command with flag `--schema` now supports export of properties in frozen formats `v2023-01-05` and `v2023-05-30`
+  * Added support for `export-property` command with flag `--schema` for properties in frozen formats `v2023-01-05` and `v2023-05-30`. 
+  * Added support for import of `akamai_property_activation` resource.
+  * Added changes in `export-property` command:
+    * Added support for `STAGING` and `PRODUCTION` network configurations for `akamai_property_activation` resource.
+    * Removed support for `var.env` variable.
+    * Added support for `auto_acknowledge_rule_warnings` default value in `akamai_property_activation` resource.
+
+* APPSEC
+  * Added support for `ukraine_geo_control_action` to `modules-security-firewall.tmpl` template for IP/Geo Firewall.
 
 ## Version 1.6.0 (May 31, 2023)
 
@@ -19,10 +28,6 @@
 
 * Migrate to Terraform 1.3.7 version
 * Flag `schema` works now with `include` sub-command as well with `with-includes` flag
-
-* PAPI
-  * Add import support for `akamai_property_activation` resource
-  * Result of `export-property` command contains `STAGING` and `PRODUCTION` configurations for `akamai_property_activation`. Drop support for `var.env` variable and add `auto_acknowledge_rule_warnings` parameter to export.
 
 ## Version 1.5.0 (Apr 27, 2023)
 

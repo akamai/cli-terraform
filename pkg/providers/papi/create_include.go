@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v6/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/papi"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
