@@ -1,6 +1,6 @@
 # Release Notes
 
-## Version 1.7.0 (June 29, 2023)
+## Version 1.7.0 (July 5, 2023)
 
 ### Features/Enhancements
 
