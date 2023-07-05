@@ -29,6 +29,11 @@ resource "akamai_appsec_ip_geo" "{{ $policyName }}" {
     {{ end -}}
     {{ end -}}
     {{ end -}}
+    {{ if .IPGeoFirewall.UkraineGeoControls -}}
+    {{ if .IPGeoFirewall.UkraineGeoControls.Action -}}
+    ukraine_geo_control_action          = "{{.IPGeoFirewall.UkraineGeoControls.Action}}"
+    {{ end -}}
+    {{ end -}}
 }
 
 {{ end -}}

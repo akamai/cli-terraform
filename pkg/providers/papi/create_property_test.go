@@ -9,8 +9,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v6/pkg/hapi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v6/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/hapi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/papi"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
@@ -385,6 +385,30 @@ func TestCreateProperty(t *testing.T) {
 		},
 	}
 
+	getProductionActivationsResponse := papi.GetActivationsResponse{
+		Response: papi.Response{
+			AccountID:  "test_account",
+			ContractID: "test_contract",
+			GroupID:    "grp_12345",
+		},
+		Activations: papi.ActivationsItems{
+			Items: []*papi.Activation{
+				{
+					ActivationID:           "atv_5594260",
+					ActivationType:         "ACTIVATE",
+					PropertyName:           "test.edgesuite.net",
+					PropertyID:             "prp_12345",
+					PropertyVersion:        2,
+					Network:                "PRODUCTION",
+					AcknowledgeAllWarnings: false,
+					Status:                 "ACTIVE",
+					NotifyEmails:           []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+					Note:                   "example production note",
+				},
+			},
+		},
+	}
+
 	getActivations1Response := papi.GetActivationsResponse{
 		Response: papi.Response{
 			AccountID:  "test_account",
@@ -425,15 +449,16 @@ func TestCreateProperty(t *testing.T) {
 		Activations: papi.ActivationsItems{
 			Items: []*papi.Activation{
 				{
-					ActivationID:    "atv_5594260",
-					ActivationType:  "ACTIVATE",
-					PropertyName:    "test.edgesuite.net",
-					PropertyID:      "prp_12345",
-					PropertyVersion: 2,
-					Network:         "STAGING",
-					Status:          "ACTIVE",
-					NotifyEmails:    []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
-					Note:            "example note",
+					ActivationID:           "atv_5594260",
+					ActivationType:         "ACTIVATE",
+					PropertyName:           "test.edgesuite.net",
+					PropertyID:             "prp_12345",
+					PropertyVersion:        2,
+					AcknowledgeAllWarnings: false,
+					Network:                "STAGING",
+					Status:                 "ACTIVE",
+					NotifyEmails:           []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+					Note:                   "example staging note",
 				},
 			},
 		},
@@ -448,15 +473,16 @@ func TestCreateProperty(t *testing.T) {
 		Activations: papi.ActivationsItems{
 			Items: []*papi.Activation{
 				{
-					ActivationID:    "atv_5594260",
-					ActivationType:  "ACTIVATE",
-					PropertyName:    "test.edgesuite.net",
-					PropertyID:      "prp_12345",
-					PropertyVersion: 2,
-					Network:         "STAGING",
-					Status:          "ACTIVE",
-					NotifyEmails:    []string{},
-					Note:            "example note",
+					ActivationID:           "atv_5594260",
+					ActivationType:         "ACTIVATE",
+					PropertyName:           "test.edgesuite.net",
+					PropertyID:             "prp_12345",
+					PropertyVersion:        2,
+					AcknowledgeAllWarnings: false,
+					Network:                "STAGING",
+					Status:                 "ACTIVE",
+					NotifyEmails:           []string{},
+					Note:                   "example note",
 				},
 			},
 		},
@@ -504,6 +530,9 @@ func TestCreateProperty(t *testing.T) {
 		VersionStaging:          "1",
 	}
 
+	var noFilters []func([]string) ([]string, error)
+	otherRuleFormatFilter := []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")}
+
 	tests := map[string]struct {
 		init                func(*papi.Mock, *hapi.Mock, *templates.MockProcessor, string)
 		dir                 string
@@ -528,8 +557,9 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponse)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().build(), nil)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().build(), noFilters, nil)
 			},
 			dir:     "basic",
 			jsonDir: "basic/property-snippets",
@@ -556,9 +586,10 @@ func TestCreateProperty(t *testing.T) {
 				mockGetLatestVersion(c, &getLatestVersionResponse)
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionEmptyHostnameIDResponse, nil)
-				mockGetActivations(c, &getActivationsResponse)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withEdgeHostname(map[string]EdgeHostname{}).
-					withIsActive(false).build(), nil)
+					withIsActive(false).build(), noFilters, nil)
 			},
 			dir:     "basic_property_with_empty_hostname_id",
 			jsonDir: "basic_property_with_empty_hostname_id/property-snippets",
@@ -583,11 +614,12 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponse)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withRuleFormat("v2023-01-05").
-					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), nil)
+					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), otherRuleFormatFilter, nil)
 			},
 			dir:    "basic-rules-datasource",
 			schema: true,
@@ -606,11 +638,12 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponse)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_latest.tmpl", false)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withIsActive(false).
-					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), nil)
+					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), noFilters, nil)
 			},
 			withError: ErrUnsupportedRuleFormat,
 			dir:       "basic",
@@ -630,11 +663,12 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponse)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withRuleFormat("v2023-01-05").
-					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), ErrSavingFiles)
+					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), otherRuleFormatFilter, ErrSavingFiles)
 			},
 			withError: ErrSavingFiles,
 			dir:       "basic-rules-datasource-unknown",
@@ -662,8 +696,9 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponse)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withIncludes([]TFIncludeData{tfIncludeData}).build(), nil)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withIncludes([]TFIncludeData{tfIncludeData}).build(), noFilters, nil)
 			},
 			dir:     "basic_property_with_include",
 			jsonDir: "basic_property_with_include/property-snippets",
@@ -711,8 +746,9 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponse)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withIncludes([]TFIncludeData{tfIncludeData, tfIncludeData1}).build(), nil)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withIncludes([]TFIncludeData{tfIncludeData, tfIncludeData1}).build(), noFilters, nil)
 			},
 			dir:     "basic_property_with_multiple_includes",
 			jsonDir: "basic_property_with_multiple_includes/property-snippets",
@@ -761,7 +797,8 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponse)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				tfIncludeData := tfIncludeData
 				tfIncludeData.RuleFormat = "v2023-01-05"
 				tfIncludeData1 := tfIncludeData1
@@ -773,7 +810,7 @@ func TestCreateProperty(t *testing.T) {
 					withIncludes([]TFIncludeData{tfIncludeData, tfIncludeData1}).
 					withIncludeRules(0, flattenRules("test_include", includeRuleResponse.Rules)).
 					withIncludeRules(1, flattenRules("test_include_1", secondIncludeRuleResponse.Rules)).
-					build(), nil)
+					build(), otherRuleFormatFilter, nil)
 				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
 			},
@@ -795,8 +832,9 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersion2HostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponse)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withCertProvisioningType("DEFAULT").build(), nil)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withCertProvisioningType("DEFAULT").build(), noFilters, nil)
 			},
 			dir:     "basic_with_cert_provisioning_type",
 			jsonDir: "basic_with_cert_provisioning_type/property-snippets",
@@ -821,8 +859,9 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponse)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().build(), nil)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().build(), noFilters, nil)
 			},
 			dir:     "basic",
 			jsonDir: "basic/property-snippets",
@@ -846,8 +885,9 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersionHostnames(c, 1, &getPropertyVersion1HostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivations1Response)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withVersion("1").build(), nil)
+				mockGetActivations(c, &getActivations1Response, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withVersion("1").withStagingVersion(1).build(), noFilters, nil)
 			},
 			dir:     "basic-v1",
 			jsonDir: "basic-v1/property-snippets",
@@ -873,9 +913,49 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponseWithNote)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withActivationNote("example note").
-					withEmails([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}).build(), nil)
+				mockGetActivations(c, &getActivationsResponseWithNote, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withActivationNote("example staging note").
+					withEmails([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}).build(), noFilters, nil)
+			},
+			dir: "basic",
+		},
+		"property with production activation": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockGetActivations(c, &getProductionActivationsResponse, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withOnlyProductionActivation([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}, "example production note", 2).build(), noFilters, nil)
+			},
+			dir: "basic",
+		},
+		"property with both activations": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponseWithNote, nil)
+				mockGetActivations(c, &getProductionActivationsResponse, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withOnlyProductionActivation([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}, "example production note", 2).withActivationNote("example staging note").
+					withEmails([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}).withStagingVersion(2).build(), noFilters, nil)
 			},
 			dir: "basic",
 		},
@@ -893,9 +973,10 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponseWithEmptyEmails)
+				mockGetActivations(c, &getActivationsResponseWithEmptyEmails, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withActivationNote("example note").
-					withEmails([]string{""}).build(), nil)
+					withEmails([]string{""}).build(), noFilters, nil)
 			},
 			dir: "basic",
 		},
@@ -937,6 +1018,22 @@ func TestCreateProperty(t *testing.T) {
 
 			},
 			withError: ErrPropertyVersionNotFound,
+		},
+		"error fetching property activation": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, nil, fmt.Errorf("oops"))
+			},
+			withError: ErrFetchingActivationDetails,
 		},
 		"error product name not found": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
@@ -993,10 +1090,11 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponse)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &getActivationsResponse, nil)
 				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().build(), fmt.Errorf("oops"))
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().build(), noFilters, fmt.Errorf("oops"))
 			},
 			dir:       "basic",
 			withError: ErrSavingFiles,
@@ -1116,12 +1214,12 @@ func mockGetEdgeHostname(h *hapi.Mock, hapiGetEdgeHostnameResponse *hapi.GetEdge
 		Return(hapiGetEdgeHostnameResponse, err).Once()
 }
 
-func mockGetActivations(c *papi.Mock, getActivationsResponse *papi.GetActivationsResponse) {
+func mockGetActivations(c *papi.Mock, getActivationsResponse *papi.GetActivationsResponse, err error) {
 	c.On("GetActivations", mock.Anything, papi.GetActivationsRequest{
 		PropertyID: "prp_12345",
 		ContractID: "test_contract",
 		GroupID:    "grp_12345",
-	}).Return(getActivationsResponse, nil).Once()
+	}).Return(getActivationsResponse, err).Once()
 }
 
 func mockAddTemplateTargetRules(p *templates.MockProcessor) {
@@ -1149,8 +1247,12 @@ func mockGetIncludeRuleTree(c *papi.Mock, getIncludeRuleTreeReq papi.GetIncludeR
 	c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReq).Return(includeRuleResponse, nil).Once()
 }
 
-func mockProcessTemplates(p *templates.MockProcessor, tfData TFData, err error) {
-	p.On("ProcessTemplates", tfData).Return(err).Once()
+func mockProcessTemplates(p *templates.MockProcessor, tfData TFData, filterFuncs []func([]string) ([]string, error), err error) {
+	if len(filterFuncs) != 0 {
+		p.On("ProcessTemplates", tfData, mock.AnythingOfType("func([]string) ([]string, error)")).Return(err).Once()
+	} else {
+		p.On("ProcessTemplates", tfData).Return(err).Once()
+	}
 }
 
 func getRuleTreeResponse(dir string, t *testing.T) papi.GetRuleTreeResponse {
@@ -1182,6 +1284,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		schema       bool
 		ruleResponse papi.GetRuleTreeResponse
 		withError    string
+		filterFuncs  []func([]string) ([]string, error)
 	}{
 		"property": {
 			givenData: TFData{
@@ -1196,7 +1299,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					ProductName:          "HTTP_Content_Del",
 					RuleFormat:           "latest",
 					IsSecure:             "false",
-					Version:              "LATEST",
+					ReadVersion:          "LATEST",
 					EdgeHostnames: map[string]EdgeHostname{
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
@@ -1217,8 +1320,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 							IsActive:                 true,
 						},
 					},
-					Emails:               []string{"jsmith@akamai.com"},
-					HasStagingActivation: true,
+					StagingInfo: NetworkInfo{
+						HasActivation: true,
+						Emails:        []string{"jsmith@akamai.com"},
+					},
 				},
 				Section: "test_section",
 			},
@@ -1238,7 +1343,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					ProductName:          "HTTP_Content_Del",
 					RuleFormat:           "v2023-01-05",
 					IsSecure:             "false",
-					Version:              "LATEST",
+					ReadVersion:          "LATEST",
 					EdgeHostnames: map[string]EdgeHostname{
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
@@ -1259,14 +1364,17 @@ func TestProcessPolicyTemplates(t *testing.T) {
 							IsActive:                 true,
 						},
 					},
-					Emails:               []string{"jsmith@akamai.com"},
-					HasStagingActivation: true,
+					StagingInfo: NetworkInfo{
+						HasActivation: true,
+						Emails:        []string{"jsmith@akamai.com"},
+					},
 				},
 				Section: "test_section",
 			},
 			dir:          "basic-rules-datasource",
 			schema:       true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
 		},
 		"property with rules as datasource with unknown behaviors and criteria": {
 			givenData: TFData{
@@ -1281,7 +1389,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					ProductName:          "HTTP_Content_Del",
 					RuleFormat:           "v2023-01-05",
 					IsSecure:             "false",
-					Version:              "LATEST",
+					ReadVersion:          "LATEST",
 					EdgeHostnames: map[string]EdgeHostname{
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
@@ -1301,8 +1409,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 							CertProvisioningType:     "CPS_MANAGED",
 						},
 					},
-					Emails:               []string{"jsmith@akamai.com"},
-					HasStagingActivation: true,
+					StagingInfo: NetworkInfo{
+						HasActivation: true,
+						Emails:        []string{"jsmith@akamai.com"},
+					},
 				},
 				Section: "test_section",
 			},
@@ -1341,7 +1451,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					ProductName:          "HTTP_Content_Del",
 					RuleFormat:           "latest",
 					IsSecure:             "false",
-					Version:              "LATEST",
+					ReadVersion:          "LATEST",
 					EdgeHostnames: map[string]EdgeHostname{
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
@@ -1362,8 +1472,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 							IsActive:                 true,
 						},
 					},
-					Emails:               []string{"jsmith@akamai.com"},
-					HasStagingActivation: true,
+					StagingInfo: NetworkInfo{
+						HasActivation: true,
+						Emails:        []string{"jsmith@akamai.com"},
+					},
 				},
 				Section: "test_section",
 			},
@@ -1413,7 +1525,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					ProductName:          "HTTP_Content_Del",
 					RuleFormat:           "latest",
 					IsSecure:             "false",
-					Version:              "LATEST",
+					ReadVersion:          "LATEST",
 					EdgeHostnames: map[string]EdgeHostname{
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
@@ -1434,8 +1546,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 							IsActive:                 true,
 						},
 					},
-					Emails:               []string{"jsmith@akamai.com"},
-					HasStagingActivation: true,
+					StagingInfo: NetworkInfo{
+						HasActivation: true,
+						Emails:        []string{"jsmith@akamai.com"},
+					},
 				},
 				Section: "test_section",
 			},
@@ -1487,7 +1601,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					ProductName:          "HTTP_Content_Del",
 					RuleFormat:           "latest",
 					IsSecure:             "false",
-					Version:              "LATEST",
+					ReadVersion:          "LATEST",
 					EdgeHostnames: map[string]EdgeHostname{
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
@@ -1508,8 +1622,11 @@ func TestProcessPolicyTemplates(t *testing.T) {
 							IsActive:                 true,
 						},
 					},
-					Emails:               []string{"jsmith@akamai.com"},
-					HasStagingActivation: true,
+					StagingInfo: NetworkInfo{
+						Emails:        []string{"jsmith@akamai.com"},
+						Version:       2,
+						HasActivation: true,
+					},
 				},
 				Section: "test_section",
 			},
@@ -1517,6 +1634,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			filesToCheck: []string{"property.tf", "includes.tf", "variables.tf", "import.sh", "includes_rules.tf"},
 			withIncludes: true,
 			schema:       true,
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
 		},
 		"property with use cases": {
 			givenData: TFData{
@@ -1531,7 +1649,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					ProductName:          "HTTP_Content_Del",
 					RuleFormat:           "latest",
 					IsSecure:             "false",
-					Version:              "3",
+					ReadVersion:          "3",
 					EdgeHostnames: map[string]EdgeHostname{
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
@@ -1553,8 +1671,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 							IsActive:                 true,
 						},
 					},
-					Emails:               []string{"jsmith@akamai.com"},
-					HasStagingActivation: true,
+					StagingInfo: NetworkInfo{
+						HasActivation: true,
+						Emails:        []string{"jsmith@akamai.com"},
+					},
 				},
 				Section: "test_section",
 			},
@@ -1574,7 +1694,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					ProductName:          "HTTP_Content_Del",
 					RuleFormat:           "latest",
 					IsSecure:             "false",
-					Version:              "LATEST",
+					ReadVersion:          "LATEST",
 					EdgeHostnames: map[string]EdgeHostname{
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
@@ -1595,13 +1715,115 @@ func TestProcessPolicyTemplates(t *testing.T) {
 							IsActive:                 true,
 						},
 					},
-					Emails:               []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
-					ActivationNote:       "example note",
-					HasStagingActivation: true,
+					StagingInfo: NetworkInfo{
+						HasActivation:  true,
+						Emails:         []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+						ActivationNote: "example staging note",
+					},
 				},
 				Section: "test_section",
 			},
 			dir:          "basic_with_activation_note",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
+		"property with production activation": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							CnameFrom:                "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
+						},
+					},
+					StagingInfo: NetworkInfo{
+						Emails:         nil,
+						ActivationNote: "",
+						HasActivation:  false,
+					},
+					ProductionInfo: NetworkInfo{
+						Emails:         []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+						ActivationNote: "example production note",
+						HasActivation:  true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "basic_with_production_activation",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
+		"property with both activations - staging and production": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							CnameFrom:                "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
+						},
+					},
+					StagingInfo: NetworkInfo{
+						Emails:         []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+						ActivationNote: "example staging note",
+						HasActivation:  true,
+					},
+					ProductionInfo: NetworkInfo{
+						Emails:         []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+						ActivationNote: "example production note",
+						HasActivation:  true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "basic_with_both_activations",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
 		"property without activation - activation resource commented": {
@@ -1617,7 +1839,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					ProductName:          "HTTP_Content_Del",
 					RuleFormat:           "latest",
 					IsSecure:             "false",
-					Version:              "LATEST",
+					ReadVersion:          "LATEST",
 					EdgeHostnames: map[string]EdgeHostname{
 						"test-edgesuite-net": {
 							EdgeHostname:             "test.edgesuite.net",
@@ -1644,6 +1866,52 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "basic_without_activation",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
+		// property with rules as datasource - schema version 1 and 2 is a pair of tests that confirms that schema 1 does not use any schema's 2 template definitions and vice versa
+		// the behaviour was chosen in a way, so it's easily identifiable which template inner definition was picked (e.g. there was change in field type)
+		"property with rules as datasource - schema version 1": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "v2023-01-05",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+				},
+				Section: "test_section",
+			},
+			dir:          "basic-rules-datasource-schema1",
+			schema:       true,
+			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
+		},
+		"property with rules as datasource - schema version 2": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "v2023-05-30",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+				},
+				Section: "test_section",
+			},
+			dir:          "basic-rules-datasource-schema2",
+			schema:       true,
+			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-05-30")},
+		},
 	}
 
 	for name, test := range tests {
@@ -1664,7 +1932,13 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				templateToFile["includes.tmpl"] = fmt.Sprintf("./testdata/res/%s/includes.tf", test.dir)
 			}
 			if test.schema {
-				templateToFile["rules_v2023-01-05.tmpl"] = fmt.Sprintf("./testdata/res/%s/rules.tf", test.dir)
+				var rulesVersion string
+				if len(test.givenData.Includes) > 0 {
+					rulesVersion = test.givenData.Includes[0].RuleFormat
+				} else {
+					rulesVersion = test.givenData.Property.RuleFormat
+				}
+				templateToFile[fmt.Sprintf("rules_%s.tmpl", rulesVersion)] = fmt.Sprintf("./testdata/res/%s/rules.tf", test.dir)
 			}
 			if test.withIncludes && test.schema {
 				templateToFile["includes_rules.tmpl"] = fmt.Sprintf("./testdata/res/%s/includes_rules.tf", test.dir)
@@ -1675,7 +1949,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				TemplateTargets: templateToFile,
 				AdditionalFuncs: additionalFuncs,
 			}
-			err := processor.ProcessTemplates(test.givenData)
+			err := processor.ProcessTemplates(test.givenData, test.filterFuncs...)
 			reportedErrors = []string{}
 			if test.withError != "" {
 				assert.Error(t, err)
@@ -1956,9 +2230,12 @@ func (t *tfDataBuilder) withDefaults() *tfDataBuilder {
 					IsActive:                 true,
 				},
 			},
-			Emails:               []string{"jsmith@akamai.com"},
-			Version:              "LATEST",
-			HasStagingActivation: true,
+			StagingInfo: NetworkInfo{
+				Emails:        []string{"jsmith@akamai.com"},
+				HasActivation: true,
+				Version:       2,
+			},
+			ReadVersion: "LATEST",
 		},
 		Section: "test_section",
 	}
@@ -1988,12 +2265,36 @@ func (t *tfDataBuilder) withIsActive(isActive bool) *tfDataBuilder {
 }
 
 func (t *tfDataBuilder) withEmails(emails []string) *tfDataBuilder {
-	t.tfData.Property.Emails = emails
+	t.tfData.Property.StagingInfo.Emails = emails
+	return t
+}
+
+func (t *tfDataBuilder) withOnlyProductionActivation(emails []string, activationNote string, version int) *tfDataBuilder {
+	t.tfData.Property.ProductionInfo.HasActivation = true
+	t.tfData.Property.ProductionInfo.Emails = emails
+	t.tfData.Property.ProductionInfo.ActivationNote = activationNote
+	t.tfData.Property.ProductionInfo.Version = version
+	t.tfData.Property.StagingInfo.HasActivation = false
+	t.tfData.Property.StagingInfo.ActivationNote = ""
+	t.tfData.Property.StagingInfo.Version = 0
+	t.tfData.Property.StagingInfo.Emails = nil
 	return t
 }
 
 func (t *tfDataBuilder) withVersion(version string) *tfDataBuilder {
-	t.tfData.Property.Version = version
+	t.tfData.Property.ReadVersion = version
+	return t
+}
+
+func (t *tfDataBuilder) withStagingVersion(version int) *tfDataBuilder {
+	t.tfData.Property.StagingInfo.HasActivation = true
+	t.tfData.Property.StagingInfo.Version = version
+	return t
+}
+
+func (t *tfDataBuilder) withProductionVersion(version int) *tfDataBuilder {
+	t.tfData.Property.ProductionInfo.HasActivation = true
+	t.tfData.Property.ProductionInfo.Version = version
 	return t
 }
 
@@ -2017,7 +2318,7 @@ func (t *tfDataBuilder) withCertProvisioningType(certProvisioningType string) *t
 }
 
 func (t *tfDataBuilder) withActivationNote(activationNote string) *tfDataBuilder {
-	t.tfData.Property.ActivationNote = activationNote
+	t.tfData.Property.StagingInfo.ActivationNote = activationNote
 	return t
 }
 
@@ -2028,4 +2329,40 @@ func (t *tfDataBuilder) withIncludes(includes []TFIncludeData) *tfDataBuilder {
 
 func (t *tfDataBuilder) build() TFData {
 	return t.tfData
+}
+
+func TestUseThisOnlyRuleFormat(t *testing.T) {
+	tests := map[string]struct {
+		acceptedFormat string
+		input          []string
+		expected       []string
+		err            error
+	}{
+		"happy case": {
+			acceptedFormat: "v2023-05-30",
+			input:          []string{"import.sh", "templates/rules_v2023-01-05.tmpl", "templates/rules_v2023-05-30.tmpl"},
+			expected:       []string{"import.sh", "templates/rules_v2023-05-30.tmpl"},
+		},
+		"missing template": {
+			acceptedFormat: "v2023-05-32",
+			input:          []string{"import.sh", "templates/rules_v2023-01-05.tmpl", "templates/rules_v2023-05-30.tmpl"},
+			err:            fmt.Errorf("did not find v2023-05-32 format among [import.sh templates/rules_v2023-01-05.tmpl templates/rules_v2023-05-30.tmpl]"),
+		},
+		"no formats at all": {
+			acceptedFormat: "v2023-05-32",
+			input:          []string{"import.sh", "READ.md"},
+			err:            fmt.Errorf("did not find v2023-05-32 format among [import.sh READ.md]"),
+		},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			output, err := useThisOnlyRuleFormat(test.acceptedFormat)(test.input)
+			if test.err != nil {
+				assert.Equal(t, test.err, err)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, test.expected, output)
+		})
+	}
 }

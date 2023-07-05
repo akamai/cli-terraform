@@ -11010,6 +11010,9 @@
                             "19843_TESTLIST"
                         ]
                     }
+                },
+                "ukraineGeoControl": {
+                    "action": "deny"
                 }
             },
             "slowPost": {

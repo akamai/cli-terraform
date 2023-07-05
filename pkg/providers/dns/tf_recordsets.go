@@ -20,7 +20,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v6/pkg/dns"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/dns"
 	"github.com/shirou/gopsutil/mem"
 )
 
@@ -163,7 +163,6 @@ func getRecordMap(ctx context.Context, client dns.DNS, recordset dns.Recordset) 
 	recordFields := client.ParseRData(ctx, recordset.Type, recordset.Rdata) //returns map[string]interface{}
 	// required fields
 	recordFields["name"] = recordset.Name
-	//recordFields["active"] = true                   // how set?
 	recordFields["recordtype"] = recordset.Type
 	recordFields["ttl"] = recordset.TTL
 	recordMap := make(map[string]string)

@@ -8,17 +8,3 @@ variable "config_section" {
   type = string
   default = "{{.Section}}"
 }
-
-{{- if and .Property.PropertyID .Property.HasStagingActivation}}
-
-variable "env" {
-  type    = string
-  default = "staging"
-}
-{{ else }}
-
-#variable "env" {
-#  type    = string
-#  default = "staging"
-#}
-{{ end -}}

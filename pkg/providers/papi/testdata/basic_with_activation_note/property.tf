@@ -2,7 +2,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 3.5.0"
+      version = ">= 5.0.0"
     }
   }
   required_version = ">= 0.13"
@@ -47,10 +47,19 @@ resource "akamai_property" "test-edgesuite-net" {
   rules       = data.akamai_property_rules_template.rules.json
 }
 
-resource "akamai_property_activation" "test-edgesuite-net" {
-  property_id = akamai_property.test-edgesuite-net.id
-  contact     = ["jsmith@akamai.com", "rjohnson@akamai.com"]
-  version     = akamai_property.test-edgesuite-net.latest_version
-  network     = upper(var.env)
-  note        = "example note"
+resource "akamai_property_activation" "test-edgesuite-net-staging" {
+  property_id                    = akamai_property.test-edgesuite-net.id
+  contact                        = ["jsmith@akamai.com", "rjohnson@akamai.com"]
+  version                        = akamai_property.test-edgesuite-net.staging_version
+  network                        = "STAGING"
+  note                           = "example staging note"
+  auto_acknowledge_rule_warnings = false
 }
+
+#resource "akamai_property_activation" "test-edgesuite-net-production" {
+#  property_id                    = akamai_property.test-edgesuite-net.id
+#  contact                        = []
+#  version                        = akamai_property.test-edgesuite-net.latest_version
+#  network                        = "PRODUCTION"
+#  auto_acknowledge_rule_warnings = false
+#}

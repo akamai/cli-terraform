@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v6/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/papi"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
@@ -113,6 +113,7 @@ func createInclude(ctx context.Context, contractID, includeName, section, jsonDi
 	}
 
 	tfData.Includes = append(tfData.Includes, *includeData)
+	filterFuncs := make([]func([]string) ([]string, error), 0)
 	if schema {
 		ruleTemplate := fmt.Sprintf("rules_%s.tmpl", rules.RuleFormat)
 		if !processor.TemplateExists(ruleTemplate) {
@@ -120,9 +121,10 @@ func createInclude(ctx context.Context, contractID, includeName, section, jsonDi
 		}
 		processor.AddTemplateTarget(ruleTemplate, filepath.Join(tfWorkPath, "rules.tf"))
 		processor.AddTemplateTarget("includes_rules.tmpl", filepath.Join(tfWorkPath, "includes_rules.tf"))
+		filterFuncs = append(filterFuncs, useThisOnlyRuleFormat(rules.RuleFormat))
 	}
 	term.Spinner().Start("Saving TF configurations ")
-	if err = processor.ProcessTemplates(tfData); err != nil {
+	if err = processor.ProcessTemplates(tfData, filterFuncs...); err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
 	}

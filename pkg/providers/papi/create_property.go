@@ -30,8 +30,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v6/pkg/hapi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v6/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/hapi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/papi"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
@@ -110,10 +110,17 @@ type TFPropertyData struct {
 	IsSecure             string
 	EdgeHostnames        map[string]EdgeHostname
 	Hostnames            map[string]Hostname
-	Emails               []string
-	ActivationNote       string
-	HasStagingActivation bool
-	Version              string
+	ReadVersion          string
+	ProductionInfo       NetworkInfo
+	StagingInfo          NetworkInfo
+}
+
+// NetworkInfo holds details for specific network
+type NetworkInfo struct {
+	Emails         []string
+	ActivationNote string
+	HasActivation  bool
+	Version        int
 }
 
 // RulesTemplate represent data used for rules
@@ -167,6 +174,8 @@ var (
 	ErrPropertyVersionNotValid = errors.New("property version not valid")
 	// ErrProductNameNotFound is returned when product couldn't be found
 	ErrProductNameNotFound = errors.New("product name not found")
+	// ErrFetchingActivationDetails is returned when fetching activation details request failed
+	ErrFetchingActivationDetails = errors.New("fetching activations")
 	// ErrFetchingHostnameDetails is returned when fetching hostname details request failed
 	ErrFetchingHostnameDetails = errors.New("fetching hostnames")
 	// ErrFetchingReferencedIncludes is returned when fetching referenced includes request failed
@@ -266,7 +275,6 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	tfData := TFData{
 		Property: TFPropertyData{
 			EdgeHostnames: make(map[string]EdgeHostname),
-			Emails:        make([]string, 0),
 		},
 		Section:       section,
 		RulesAsSchema: schema,
@@ -313,7 +321,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	}
 
 	tfData.Property.ProductID = version.Version.ProductID
-	tfData.Property.Version = readVersion
+	tfData.Property.ReadVersion = readVersion
 
 	term.Spinner().OK()
 
@@ -404,14 +412,33 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	term.Spinner().OK()
 
 	term.Spinner().Start("Fetching activation details ")
-	latestActivation, err := fetchLatestActivation(ctx, client, property)
-	if err == nil {
-		tfData.Property.ActivationNote = latestActivation.Note
-		tfData.Property.Emails = getContactEmails(latestActivation)
-		tfData.Property.HasStagingActivation = true
+
+	activeStagingActivation, err := fetchActiveActivationForNetwork(ctx, client, property, papi.ActivationNetworkStaging)
+	if err != nil {
+		term.Spinner().Fail()
+		return fmt.Errorf("%w: %s", ErrFetchingActivationDetails, err)
 	}
+	if activeStagingActivation != nil {
+		tfData.Property.StagingInfo.ActivationNote = activeStagingActivation.Note
+		tfData.Property.StagingInfo.Emails = getContactEmails(activeStagingActivation)
+		tfData.Property.StagingInfo.Version = activeStagingActivation.PropertyVersion
+		tfData.Property.StagingInfo.HasActivation = true
+	}
+	activeProductionActivation, err := fetchActiveActivationForNetwork(ctx, client, property, papi.ActivationNetworkProduction)
+	if err != nil {
+		term.Spinner().Fail()
+		return fmt.Errorf("%w: %s", ErrFetchingActivationDetails, err)
+	}
+	if activeProductionActivation != nil {
+		tfData.Property.ProductionInfo.ActivationNote = activeProductionActivation.Note
+		tfData.Property.ProductionInfo.Emails = getContactEmails(activeProductionActivation)
+		tfData.Property.ProductionInfo.Version = activeProductionActivation.PropertyVersion
+		tfData.Property.ProductionInfo.HasActivation = true
+	}
+
 	term.Spinner().OK()
 
+	filterFuncs := make([]func([]string) ([]string, error), 0)
 	if schema {
 		ruleTemplate := fmt.Sprintf("rules_%s.tmpl", rules.RuleFormat)
 		if !templateProcessor.TemplateExists(ruleTemplate) {
@@ -419,9 +446,10 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		}
 		templateProcessor.AddTemplateTarget(ruleTemplate, filepath.Join(tfWorkPath, "rules.tf"))
 		tfData.Rules = flattenRules(tfData.Property.PropertyName, rules.Rules)
+		filterFuncs = append(filterFuncs, useThisOnlyRuleFormat(rules.RuleFormat))
 	}
 	term.Spinner().Start("Saving TF configurations ")
-	if err = templateProcessor.ProcessTemplates(tfData); err != nil {
+	if err = templateProcessor.ProcessTemplates(tfData, filterFuncs...); err != nil {
 		term.Spinner().Fail()
 		if _, err := CheckErrors(); err != nil {
 			return fmt.Errorf("%w", err)
@@ -441,6 +469,31 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	term.Printf("Terraform configuration for property '%s' was saved successfully\n", property.PropertyName)
 
 	return nil
+}
+
+func useThisOnlyRuleFormat(acceptedFormat string) func([]string) ([]string, error) {
+	reg := regexp.MustCompile(`rules_(v\d{4}-\d{2}-\d{2}).tmpl`)
+	return func(input []string) ([]string, error) {
+		res := make([]string, 0)
+		formatFound := false
+		for _, v := range input {
+			if reg.MatchString(v) {
+				submatch := reg.FindStringSubmatch(v)
+				if submatch[1] == acceptedFormat {
+					res = append(res, v)
+					formatFound = true
+				}
+			} else {
+				res = append(res, v)
+			}
+		}
+
+		if !formatFound {
+			return nil, fmt.Errorf("did not find %s format among %s", acceptedFormat, input)
+		}
+
+		return res, nil
+	}
 }
 
 func flattenRules(property string, rule papi.Rules) []*WrappedRules {
@@ -573,7 +626,7 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 	return hostnamesMap, edgeHostnamesMap, nil
 }
 
-func fetchLatestActivation(ctx context.Context, client papi.PAPI, property *papi.Property) (*papi.Activation, error) {
+func fetchActiveActivationForNetwork(ctx context.Context, client papi.PAPI, property *papi.Property, network papi.ActivationNetwork) (*papi.Activation, error) {
 	activationsResponse, err := client.GetActivations(ctx, papi.GetActivationsRequest{
 		PropertyID: property.PropertyID,
 		ContractID: property.ContractID,
@@ -582,13 +635,7 @@ func fetchLatestActivation(ctx context.Context, client papi.PAPI, property *papi
 	if err != nil {
 		return nil, err
 	}
-
-	latestActivation, err := getLatestStagingActivation(activationsResponse.Activations, "")
-	if err != nil {
-		return nil, err
-	}
-
-	return latestActivation, nil
+	return getLatestActivation(activationsResponse.Activations, network, ""), nil
 }
 
 // getContactEmails gets list of emails from latest activation
@@ -838,19 +885,12 @@ func findProduct(products *papi.GetProductsResponse, id string) (*papi.ProductIt
 	return nil, fmt.Errorf("unable to find product: \"%s\"", id)
 }
 
-// getLatestStagingActivation retrieves the latest activation for the staging network
-//
-// Pass in a status to check for, defaults to StatusActive
-func getLatestStagingActivation(activations papi.ActivationsItems, status papi.ActivationStatus) (*papi.Activation, error) {
-	return getLatestActivation(activations, papi.ActivationNetworkStaging, status)
-}
-
 // getLatestActivation gets the latest activation for the specified network
 //
 // Defaults to NetworkProduction. Pass in a status to check for, defaults to StatusActive
 //
 // This can return an activation OR a deactivation. Check activation.ActivationType and activation.Status for what you're looking for
-func getLatestActivation(activations papi.ActivationsItems, network papi.ActivationNetwork, status papi.ActivationStatus) (*papi.Activation, error) {
+func getLatestActivation(activations papi.ActivationsItems, network papi.ActivationNetwork, status papi.ActivationStatus) *papi.Activation {
 	if network == "" {
 		network = papi.ActivationNetworkProduction
 	}
@@ -866,11 +906,7 @@ func getLatestActivation(activations papi.ActivationsItems, network papi.Activat
 		}
 	}
 
-	if latest == nil {
-		return nil, fmt.Errorf("no activation found (network: %s, status: %s)", network, status)
-	}
-
-	return latest, nil
+	return latest
 }
 
 func ruleNameNormalizer() func(string) string {
