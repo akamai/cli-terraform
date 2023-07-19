@@ -27,7 +27,12 @@ provider "akamai" {
       {{- if eq .ValidationType "dv" }}
     sans = [{{range .CSR.SANS}}{{if ne $cn .}}"{{.}}", {{end}}{{end}}]
       {{- else if eq .ValidationType "third-party" }}
+        {{- $length := len .CSR.SANS}}
+        {{- if and (eq $length 1) (eq (index .CSR.SANS 0) .CSR.CN)}}
+    sans = []
+        {{- else}}
     sans = [{{range .CSR.SANS}}"{{.}}", {{end}}]
+        {{- end}}
       {{- end}}
     {{- end}}
     secure_network = "{{.NetworkConfiguration.SecureNetwork}}"

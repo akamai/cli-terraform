@@ -278,96 +278,102 @@ var (
 		ValidationType: "dv",
 	}
 
-	enrollmentThirdPartyAll = cps.Enrollment{
-		AdminContact: &cps.Contact{
-			AddressLineOne:   "150 Broadway",
-			AddressLineTwo:   "Aka",
-			City:             "Cambridge",
-			Country:          "US",
-			Email:            "r1d1@akamai.com",
-			FirstName:        "R1",
-			LastName:         "D1",
-			OrganizationName: "Akamai",
-			Phone:            "123123123",
-			PostalCode:       "12345",
-			Region:           "MA",
-			Title:            "title",
-		},
-		AutoRenewalStartTime: "2022-10-03",
-		CertificateChainType: "default",
-		CertificateType:      "san",
-		ChangeManagement:     true,
-		CSR: &cps.CSR{
-			C:    "US",
-			CN:   "test.akamai.com",
-			L:    "Cambridge",
-			O:    "Akamai",
-			OU:   "WebEx",
-			SANS: []string{"test.akamai.com", "san.test.akamai.com"},
-			ST:   "MA",
-		},
-		EnableMultiStackedCertificates: true,
-		Location:                       "loc",
-		MaxAllowedSanNames:             10,
-		MaxAllowedWildcardSanNames:     20,
-		NetworkConfiguration: &cps.NetworkConfiguration{
-			ClientMutualAuthentication: &cps.ClientMutualAuthentication{
-				AuthenticationOptions: &cps.AuthenticationOptions{
-					OCSP: &cps.OCSP{
-						Enabled: tools.BoolPtr(true),
+	enrollmentThirdParty = func(sans []string) cps.Enrollment {
+		return cps.Enrollment{
+			AdminContact: &cps.Contact{
+				AddressLineOne:   "150 Broadway",
+				AddressLineTwo:   "Aka",
+				City:             "Cambridge",
+				Country:          "US",
+				Email:            "r1d1@akamai.com",
+				FirstName:        "R1",
+				LastName:         "D1",
+				OrganizationName: "Akamai",
+				Phone:            "123123123",
+				PostalCode:       "12345",
+				Region:           "MA",
+				Title:            "title",
+			},
+			AutoRenewalStartTime: "2022-10-03",
+			CertificateChainType: "default",
+			CertificateType:      "san",
+			ChangeManagement:     true,
+			CSR: &cps.CSR{
+				C:    "US",
+				CN:   "test.akamai.com",
+				L:    "Cambridge",
+				O:    "Akamai",
+				OU:   "WebEx",
+				SANS: sans,
+				ST:   "MA",
+			},
+			EnableMultiStackedCertificates: true,
+			Location:                       "loc",
+			MaxAllowedSanNames:             10,
+			MaxAllowedWildcardSanNames:     20,
+			NetworkConfiguration: &cps.NetworkConfiguration{
+				ClientMutualAuthentication: &cps.ClientMutualAuthentication{
+					AuthenticationOptions: &cps.AuthenticationOptions{
+						OCSP: &cps.OCSP{
+							Enabled: tools.BoolPtr(true),
+						},
+						SendCAListToClient: tools.BoolPtr(true),
 					},
-					SendCAListToClient: tools.BoolPtr(true),
+					SetID: "2",
 				},
-				SetID: "2",
+				DisallowedTLSVersions: []string{"TLSv1", "TLSv1_1"},
+				DNSNameSettings: &cps.DNSNameSettings{
+					CloneDNSNames: true,
+					DNSNames:      []string{"san.test.akamai.com"},
+				},
+				Geography:        "core",
+				MustHaveCiphers:  "ak-akamai-default",
+				OCSPStapling:     "on",
+				PreferredCiphers: "ak-akamai-default",
+				QuicEnabled:      true,
+				SecureNetwork:    "enhanced-tls",
+				SNIOnly:          true,
 			},
-			DisallowedTLSVersions: []string{"TLSv1", "TLSv1_1"},
-			DNSNameSettings: &cps.DNSNameSettings{
-				CloneDNSNames: true,
-				DNSNames:      []string{"san.test.akamai.com"},
+			Org: &cps.Org{
+				AddressLineOne: "150 Broadway",
+				AddressLineTwo: "Aka",
+				City:           "Cambridge",
+				Country:        "US",
+				Name:           "Akamai",
+				Phone:          "321321321",
+				PostalCode:     "12345",
+				Region:         "MA",
 			},
-			Geography:        "core",
-			MustHaveCiphers:  "ak-akamai-default",
-			OCSPStapling:     "on",
-			PreferredCiphers: "ak-akamai-default",
-			QuicEnabled:      true,
-			SecureNetwork:    "enhanced-tls",
-			SNIOnly:          true,
-		},
-		Org: &cps.Org{
-			AddressLineOne: "150 Broadway",
-			AddressLineTwo: "Aka",
-			City:           "Cambridge",
-			Country:        "US",
-			Name:           "Akamai",
-			Phone:          "321321321",
-			PostalCode:     "12345",
-			Region:         "MA",
-		},
-		PendingChanges: []cps.PendingChange{
-			{
-				Location:   "change",
-				ChangeType: "new-certificate",
+			PendingChanges: []cps.PendingChange{
+				{
+					Location:   "change",
+					ChangeType: "new-certificate",
+				},
 			},
-		},
-		RA:                 "lets-encrypt",
-		SignatureAlgorithm: "SHA-256",
-		TechContact: &cps.Contact{
-			AddressLineOne:   "150 Broadway",
-			City:             "Cambridge",
-			Country:          "US",
-			Email:            "r2d2@akamai.com",
-			FirstName:        "R2",
-			LastName:         "D2",
-			OrganizationName: "Akamai",
-			Phone:            "123123123",
-			PostalCode:       "12345",
-			Region:           "MA",
-		},
-		ThirdParty: &cps.ThirdParty{
-			ExcludeSANS: true,
-		},
-		ValidationType: "third-party",
+			RA:                 "lets-encrypt",
+			SignatureAlgorithm: "SHA-256",
+			TechContact: &cps.Contact{
+				AddressLineOne:   "150 Broadway",
+				City:             "Cambridge",
+				Country:          "US",
+				Email:            "r2d2@akamai.com",
+				FirstName:        "R2",
+				LastName:         "D2",
+				OrganizationName: "Akamai",
+				Phone:            "123123123",
+				PostalCode:       "12345",
+				Region:           "MA",
+			},
+			ThirdParty: &cps.ThirdParty{
+				ExcludeSANS: true,
+			},
+			ValidationType: "third-party",
+		}
 	}
+
+	enrollmentThirdPartyAll = enrollmentThirdParty([]string{"test.akamai.com", "san.test.akamai.com"})
+
+	enrollmentThirdPartyAllNoSANs = enrollmentThirdParty([]string{"test.akamai.com"})
 
 	enrollmentOV = cps.Enrollment{
 		AdminContact: &cps.Contact{
@@ -628,6 +634,26 @@ func TestCreateCPS(t *testing.T) {
 			enrollmentID: 1,
 			contractID:   "ctr_1",
 			dataDir:      "third_party_enrollment_all_fields_new_certificate",
+			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
+		},
+		"export third party enrollment new certificate no SANs": {
+			init: func(m *cps.Mock) {
+				expectGetEnrollment(m, 1, enrollmentThirdPartyAllNoSANs, nil).Once()
+				response := cps.GetChangeHistoryResponse{
+					Changes: []cps.ChangeHistory{
+						{
+							Action:            "new-certificate",
+							ActionDescription: "Create New Certificate",
+							Status:            "incomplete",
+							RA:                "third-party",
+						},
+					},
+				}
+				expectGetChangeHistory(m, 1, response, nil).Once()
+			},
+			enrollmentID: 1,
+			contractID:   "ctr_1",
+			dataDir:      "third_party_enrollment_new_certificate_no_sans",
 			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
 		"error fetching enrollment": {
