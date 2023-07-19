@@ -11207,6 +11207,9 @@
         },
         "requestBody": {
             "requestBodyInspectionLimitInKB": "16"
+        },
+        "piiLearning": {
+          "enablePiiLearning": true
         }
     },
     "customDenyList": [

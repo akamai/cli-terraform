@@ -16,6 +16,9 @@ terraform import module.security.akamai_appsec_advanced_settings_pragma_header.p
 {{ if .AdvancedOptions.EvasivePathMatch -}}
 terraform import module.security.akamai_appsec_advanced_settings_evasive_path_match.evasive_path_match {{ $configID }}
 {{ end -}}
+{{ if .AdvancedOptions.PIILearning -}}
+terraform import module.security.akamai_appsec_advanced_settings_pii_learning.pii_learning {{ $configID }}
+{{ end -}}
 {{ if .AdvancedOptions.RequestBody -}}
 terraform import module.security.akamai_appsec_advanced_settings_request_body.config_settings {{ $configID }}
 {{ end -}}

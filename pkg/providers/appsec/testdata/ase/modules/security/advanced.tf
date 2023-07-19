@@ -34,6 +34,11 @@ resource "akamai_appsec_advanced_settings_pragma_header" "pragma_header" {
   )
 }
 
+resource "akamai_appsec_advanced_settings_pii_learning" "pii_learning" {
+  config_id           = akamai_appsec_configuration.config.config_id
+  enable_pii_learning = false
+}
+
 resource "akamai_appsec_advanced_settings_attack_payload_logging" "attack_payload_logging" {
   config_id = akamai_appsec_configuration.config.config_id
   attack_payload_logging = jsonencode(

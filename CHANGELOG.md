@@ -5,6 +5,7 @@
 
 * APPSEC
   * Export of `export-appsec` uses `challenge_injection_rules` resource instead of deprecated `challenge_interception_rules`
+  * Add import support for `enable_pii_learning` in `akamai_appsec_advanced_settings_pii_learning` resource
 
 ### Bug fixes
 
