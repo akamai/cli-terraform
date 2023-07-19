@@ -9445,8 +9445,12 @@ data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
 {{- range .Variables}}
         variable {
             name        = "{{.Name | Escape}}"
+            {{- if .Description}}
             description = "{{.Description | Escape}}"
+            {{- end}}
+            {{- if .Value}}
             value       = "{{.Value | Escape}}"
+            {{- end}}
             hidden      = {{.Hidden}}
             sensitive   = {{.Sensitive}}
         }
