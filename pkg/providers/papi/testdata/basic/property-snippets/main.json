@@ -6,6 +6,7 @@
   "propertyVersion": 5,
   "etag": "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
   "ruleFormat": "latest",
+  "comments": "some comment",
   "rules": {
     "name": "default",
     "behaviors": [

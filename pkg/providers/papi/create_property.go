@@ -135,6 +135,7 @@ type RulesTemplate struct {
 	IncludeType     string        `json:"includeType,omitempty"`
 	Etag            string        `json:"etag"`
 	RuleFormat      string        `json:"ruleFormat"`
+	Comments        string        `json:"comments,omitempty"`
 	Rule            *RuleTemplate `json:"rules"`
 	Errors          []*papi.Error `json:"errors,omitempty"`
 }
@@ -671,6 +672,7 @@ func setPropertyRuleTemplates(rules *papi.GetRuleTreeResponse) (RuleTemplate, Ru
 		PropertyID:      rules.PropertyID,
 		PropertyVersion: rules.PropertyVersion,
 		Etag:            rules.Etag,
+		Comments:        rules.Comments,
 		RuleFormat:      rules.RuleFormat,
 	}
 

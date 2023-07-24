@@ -1,5 +1,11 @@
 # Release Notes
 
+## Version 1.x.0 (xxxx yy, 2023)
+
+### Bug fixes
+
+* Fix exporting comments for property and includes rules
+
 ## Version 1.7.0 (July 5, 2023)
 
 ### Features/Enhancements

@@ -5,6 +5,7 @@
   "propertyId": "prp_12345",
   "propertyVersion": 5,
   "etag": "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
+  "comments": "some comment",
   "ruleFormat": "latest",
   "rules": {
     "behaviors": [
