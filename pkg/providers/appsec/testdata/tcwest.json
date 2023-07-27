@@ -11209,7 +11209,7 @@
             "requestBodyInspectionLimitInKB": "16"
         },
         "piiLearning": {
-          "enablePiiLearning": true
+          "enabled": true
         }
     },
     "customDenyList": [

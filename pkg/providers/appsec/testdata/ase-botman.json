@@ -3729,7 +3729,7 @@
             "requestBodyInspectionLimitInKB": "default"
         },
         "piiLearning": {
-          "enablePiiLearning": true
+          "enabled": true
         }
     },
     "Siem": {
