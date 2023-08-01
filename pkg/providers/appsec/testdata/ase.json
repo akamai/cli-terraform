@@ -3600,6 +3600,9 @@
         },
         "requestBody": {
             "requestBodyInspectionLimitInKB": "default"
+        },
+        "piiLearning": {
+          "enabled": false
         }
     },
     "Siem": {

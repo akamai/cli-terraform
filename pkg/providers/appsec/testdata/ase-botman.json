@@ -3727,6 +3727,9 @@
         },
         "requestBody": {
             "requestBodyInspectionLimitInKB": "default"
+        },
+        "piiLearning": {
+          "enabled": true
         }
     },
     "Siem": {
@@ -3919,7 +3922,7 @@
                 }
             }
         ],
-        "challengeInterceptionRules": {
+        "challengeInjectionRules": {
             "primitiveKey": "primitiveValueA",
             "arrayKey": [
                 "arrayValueA1",

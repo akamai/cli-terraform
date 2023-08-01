@@ -1,5 +1,22 @@
 # Release Notes
 
+## Version 1.8.0 (August 1, 2023)
+
+### Features/Enhancements
+
+* APPSEC
+  * `export-appsec` command uses `challenge_injection_rules` resource instead of deprecated `challenge_interception_rules`
+  * Added import support for `enable_pii_learning` in `akamai_appsec_advanced_settings_pii_learning` resource
+
+### Bug fixes
+
+* CPS
+  * Fixed CN being added to an empty SANS list in `akamai_cps_third_party_enrollment`
+
+* PAPI
+  * Fixed exporting property and property include version comments in rule tree JSON
+  * Fixed exporting rule tree variables with null value or description in `--schema` mode
+
 ## Version 1.7.0 (July 5, 2023)
 
 ### Features/Enhancements

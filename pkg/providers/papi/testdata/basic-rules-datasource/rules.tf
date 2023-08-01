@@ -18,6 +18,11 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
       hidden      = false
       sensitive   = false
     }
+    variable {
+      name      = "PMUSER_TEST_NO_VAL_DESC"
+      hidden    = false
+      sensitive = false
+    }
     advanced_override = trimsuffix(<<EOT
 <!-- Remove Duplicate X-Akamai-Staging Header -->
 

@@ -280,6 +280,7 @@ func setIncludeRuleTemplates(rules *papi.GetIncludeRuleTreeResponse) (RuleTempla
 		IncludeVersion: rules.IncludeVersion,
 		IncludeType:    string(rules.IncludeType),
 		Etag:           rules.Etag,
+		Comments:       rules.Comments,
 		RuleFormat:     rules.RuleFormat,
 	}
 

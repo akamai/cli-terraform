@@ -226,7 +226,7 @@ Flags:
 $ akamai terraform export-cloudlets-policy
 ```
 
-## Edgeworkers
+## EdgeWorkers
 
 ### Export EdgeKV Usage
 
@@ -240,23 +240,23 @@ Flags:
 ### Export edgekv configuration.
 
 ```
-$ akamai terraform export-edgekv
+$ akamai terraform [global flags] export-edgekv [command flags] <namespace_name> <network>
 ```
 
 ### Export EdgeWorker Usage
 
 ```
-   akamai terraform [global flags] export-edgeworker [flags] <edgeworker_id>
+   akamai terraform [global flags] export-edgeworker [command flags] <edgeworker_id>
 
 Flags:
    --bundlepath path      Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
-### Export edgeworker configuration.
-
+### Export EdgeWorker configuration.
+ 
 ```
-$ akamai terraform export-edgekv
+$ akamai terraform [global flags] export-edgeworker [command flags] <edgeworker_id>
 ```
 
 ## Identity and Access Management

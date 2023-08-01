@@ -100,9 +100,9 @@ resource "akamai_botman_conditional_action" "conditional_action_b_action_B" {
   )
 }
 
-resource "akamai_botman_challenge_interception_rules" "challenge_interception_rules" {
+resource "akamai_botman_challenge_injection_rules" "challenge_injection_rules" {
   config_id = akamai_appsec_configuration.config.config_id
-  challenge_interception_rules = jsonencode(
+  challenge_injection_rules = jsonencode(
     {
       "arrayKey" : [
         "arrayValueA1",

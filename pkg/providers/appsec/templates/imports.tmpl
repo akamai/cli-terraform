@@ -16,6 +16,9 @@ terraform import module.security.akamai_appsec_advanced_settings_pragma_header.p
 {{ if .AdvancedOptions.EvasivePathMatch -}}
 terraform import module.security.akamai_appsec_advanced_settings_evasive_path_match.evasive_path_match {{ $configID }}
 {{ end -}}
+{{ if .AdvancedOptions.PIILearning -}}
+terraform import module.security.akamai_appsec_advanced_settings_pii_learning.pii_learning {{ $configID }}
+{{ end -}}
 {{ if .AdvancedOptions.RequestBody -}}
 terraform import module.security.akamai_appsec_advanced_settings_request_body.config_settings {{ $configID }}
 {{ end -}}
@@ -197,8 +200,8 @@ terraform import module.security.akamai_botman_challenge_action.{{escapeName (in
 terraform import module.security.akamai_botman_conditional_action.{{escapeName (index . "actionName")}}_{{index . "actionId"}} {{ $configID }}:{{index . "actionId"}}
 {{ end -}}
 {{ end -}}
-{{ if .ResponseActions.ChallengeInterceptionRules  -}}
-terraform import module.security.akamai_botman_challenge_interception_rules.challenge_interception_rules {{ $configID }}
+{{ if .ResponseActions.ChallengeInjectionRules  -}}
+terraform import module.security.akamai_botman_challenge_injection_rules.challenge_injection_rules {{ $configID }}
 {{ end -}}
 {{ end -}}
 {{ if .AdvancedSettings -}}
