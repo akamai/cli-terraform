@@ -1,4 +1,10 @@
 # Release Notes
+## Version 1.x.x (xxxx yy, 2023)
+
+### Bug fixes
+
+* PAPI
+  * Fixed `export-property` command to export `akamai_property_activation` resource attributes for latest active version.
 
 ## Version 1.8.0 (August 1, 2023)
 

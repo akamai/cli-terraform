@@ -26,6 +26,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"text/template"
@@ -636,7 +637,7 @@ func fetchActiveActivationForNetwork(ctx context.Context, client papi.PAPI, prop
 	if err != nil {
 		return nil, err
 	}
-	return getLatestActivation(activationsResponse.Activations, network, ""), nil
+	return getLatestActiveActivation(activationsResponse.Activations, network), nil
 }
 
 // getContactEmails gets list of emails from latest activation
@@ -887,28 +888,29 @@ func findProduct(products *papi.GetProductsResponse, id string) (*papi.ProductIt
 	return nil, fmt.Errorf("unable to find product: \"%s\"", id)
 }
 
-// getLatestActivation gets the latest activation for the specified network
-//
-// Defaults to NetworkProduction. Pass in a status to check for, defaults to StatusActive
-//
-// This can return an activation OR a deactivation. Check activation.ActivationType and activation.Status for what you're looking for
-func getLatestActivation(activations papi.ActivationsItems, network papi.ActivationNetwork, status papi.ActivationStatus) *papi.Activation {
-	if network == "" {
-		network = papi.ActivationNetworkProduction
+// getLatestActiveActivation retrieves the latest active activation for the specified network.
+func getLatestActiveActivation(activationItems papi.ActivationsItems, network papi.ActivationNetwork) *papi.Activation {
+	activations := activationItems.Items
+	if len(activations) == 0 {
+		return nil
 	}
 
-	if status == "" {
-		status = papi.ActivationStatusActive
-	}
+	sort.Slice(activations, func(i, j int) bool {
+		return activations[i].UpdateDate > activations[j].UpdateDate
+	})
 
-	var latest *papi.Activation
-	for _, activation := range activations.Items {
-		if activation.Network == network && activation.Status == status && (latest == nil || activation.PropertyVersion > latest.PropertyVersion) {
-			latest = activation
+	for _, activation := range activations {
+		if activation.Status == papi.ActivationStatusActive && activation.Network == network {
+			if activation.ActivationType == papi.ActivationTypeActivate {
+				return activation
+			}
+			if activation.ActivationType == papi.ActivationTypeDeactivate {
+				return nil
+			}
 		}
 	}
 
-	return latest
+	return nil
 }
 
 func ruleNameNormalizer() func(string) string {
