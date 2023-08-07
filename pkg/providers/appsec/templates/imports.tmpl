@@ -184,6 +184,9 @@ terraform import module.security.akamai_botman_custom_defined_bot.{{escapeName (
 terraform import module.security.akamai_botman_custom_client.{{escapeName (index . "customClientName")}}_{{index . "customClientId"}} {{ $configID }}:{{index . "customClientId"}}
 {{ end -}}
 {{ end -}}
+{{ if .CustomClientSequence  -}}
+terraform import module.security.akamai_botman_custom_client_sequence.sequence {{ $configID }}
+{{ end -}}
 {{ if .ResponseActions  -}}
 {{ if .ResponseActions.ServeAlternateActions  -}}
 {{ range .ResponseActions.ServeAlternateActions  -}}

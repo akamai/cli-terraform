@@ -7,6 +7,9 @@
 * CloudWrapper
   * Added support for `export-cloudwrapper` command which allows export of `akamai_cloudwrapper_configuration` and `akamai_cloudwrapper_activation` resources
 
+* APPSEC
+  * Add import support for custom client sequence
+
 ### Bug fixes
 
 * Image and Video Manager
