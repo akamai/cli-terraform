@@ -3,6 +3,9 @@
 
 ### Bug fixes
 
+* Image and Video Manager
+  * Added description for `--schema` flag for `export-imaging` command in `README.md` ([#56](https://github.com/akamai/cli-terraform/issues/56))
+
 * PAPI
   * Fixed `export-property` command to export `akamai_property_activation` resource attributes for latest active version.
 
