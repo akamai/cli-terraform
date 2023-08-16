@@ -1,4 +1,5 @@
 # Release Notes
+
 ## Version 1.x.x (xxxx yy, 2023)
 
 ### Bug fixes
@@ -10,6 +11,8 @@
   * Fixed `export-property` command to export `akamai_property_activation` resource attributes for latest active version.
   * Fixed `export-property` command to use `group_id` and `contract_id` as terraform variables, instead of data sources, which
   produced inconsistencies ([I#374](https://github.com/akamai/terraform-provider-akamai/issues/426))
+  * `logStreamName` field from `datastream` behavior has changed from string to array of strings for rule
+    format `v2023-05-30` ([#58](https://github.com/akamai/cli-terraform/issues/58))
 
 ## Version 1.8.0 (August 1, 2023)
 

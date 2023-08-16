@@ -11,7 +11,7 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_default" {
         datastream_ids           = "77-85-6"
         enabled                  = true
         log_enabled              = false
-        log_stream_name          = "60"
+        log_stream_name          = ["60", ]
         log_stream_title         = "test"
         sampling_percentage      = 100
         stream_type              = "LOG"
