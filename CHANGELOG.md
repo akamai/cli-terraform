@@ -8,6 +8,8 @@
 
 * PAPI
   * Fixed `export-property` command to export `akamai_property_activation` resource attributes for latest active version.
+  * Fixed `export-property` command to use `group_id` and `contract_id` as terraform variables, instead of data sources, which
+  produced inconsistencies ([I#374](https://github.com/akamai/terraform-provider-akamai/issues/426))
 
 ## Version 1.8.0 (August 1, 2023)
 

@@ -13,26 +13,17 @@ provider "akamai" {
   config_section = var.config_section
 }
 
-data "akamai_group" "group" {
-  group_name  = "test_group"
-  contract_id = "test_contract"
-}
-
-data "akamai_contract" "contract" {
-  group_name = data.akamai_group.group.group_name
-}
-
 resource "akamai_edge_hostname" "test-edgesuite-net" {
-  contract_id   = data.akamai_contract.contract.id
-  group_id      = data.akamai_group.group.id
+  contract_id   = var.contract_id
+  group_id      = var.group_id
   ip_behavior   = "IPV6_COMPLIANCE"
   edge_hostname = "test.edgesuite.net"
 }
 
 resource "akamai_property" "test-edgesuite-net" {
   name        = "test.edgesuite.net"
-  contract_id = data.akamai_contract.contract.id
-  group_id    = data.akamai_group.group.id
+  contract_id = var.contract_id
+  group_id    = var.group_id
   product_id  = "prd_HTTP_Content_Del"
   hostnames {
     cname_from             = "test.edgesuite.net"

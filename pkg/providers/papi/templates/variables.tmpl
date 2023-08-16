@@ -8,3 +8,14 @@ variable "config_section" {
   type = string
   default = "{{.Section}}"
 }
+{{ if .Property.PropertyName }}
+variable "contract_id" {
+  type = string
+  default = "{{.Property.ContractID}}"
+}
+
+variable "group_id" {
+  type = string
+  default = "{{.Property.GroupID}}"
+}
+{{- end}}
