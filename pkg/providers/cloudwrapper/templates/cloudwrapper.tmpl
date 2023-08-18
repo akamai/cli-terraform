@@ -1,0 +1,50 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/cloudwrapper.TFCloudWrapperData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 5.2.0"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
+provider "akamai" {
+  edgerc         = var.edgerc_path
+  config_section = var.config_section
+}
+
+resource "akamai_cloudwrapper_configuration" "{{.Configuration.ConfigurationResourceName}}" {
+  config_name               = "{{.Configuration.Name}}"
+  contract_id               = "{{.Configuration.ContractID}}"
+  property_ids              =  [{{range $index, $element := .Configuration.PropertyIDs}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+  {{- if .Configuration.NotificationEmails }}
+  notification_emails       =  [{{range $index, $element := .Configuration.NotificationEmails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+  {{- end}}
+  comments                  = "{{.Configuration.Comments}}"
+  retain_idle_objects       = {{.Configuration.RetainIdleObjects}}
+  {{- if .Configuration.CapacityAlertsThreshold }}
+  capacity_alerts_threshold = {{.Configuration.CapacityAlertsThreshold}}
+  {{- end}}
+  {{- range $index, $element := .Configuration.Locations}}
+  location {
+    traffic_type_id = {{$element.TrafficTypeID}}
+    comments        = "{{$element.Comments}}"
+    capacity {
+      value = {{$element.Capacity.Value}}
+      unit  = "{{$element.Capacity.Unit}}"
+    }
+  }
+  {{- end}}
+}
+{{ if .Configuration.IsActive }}
+resource "akamai_cloudwrapper_activation" "{{.Configuration.ConfigurationResourceName}}_activation" {
+  config_id = akamai_cloudwrapper_configuration.{{.Configuration.ConfigurationResourceName}}.id
+  revision  = akamai_cloudwrapper_configuration.{{.Configuration.ConfigurationResourceName}}.revision
+}
+{{- else }}
+#resource "akamai_cloudwrapper_activation" "{{.Configuration.ConfigurationResourceName}}_activation" {
+#  config_id = akamai_cloudwrapper_configuration.{{.Configuration.ConfigurationResourceName}}.id
+#  revision  = akamai_cloudwrapper_configuration.{{.Configuration.ConfigurationResourceName}}.revision
+#}
+{{- end }}

@@ -1,6 +1,11 @@
 # Release Notes
 
-## Version 1.x.x (xxxx yy, 2023)
+## Version 1.9.0 (August 29, 2023)
+
+### Features/Enhancements
+
+* CloudWrapper
+  * Added support for `export-cloudwrapper` command which allows export of `akamai_cloudwrapper_configuration` and `akamai_cloudwrapper_activation` resources
 
 ### Bug fixes
 

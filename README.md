@@ -42,6 +42,7 @@ Description:
    Administer and manage available Akamai resources with Terraform
 
 Built-In Commands:
+  export-cloudwrapper
   export-domain (alias: create-domain)
   export-zone (alias: create-zone)
   export-appsec (alias: create-appsec)
@@ -224,6 +225,23 @@ Flags:
 
 ```
 $ akamai terraform export-cloudlets-policy
+```
+
+## CloudWrapper
+
+### Usage
+
+```
+   akamai terraform [global flags] export-cloudwrapper [flags] <configuration_id>
+
+Flags:
+   --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
+```
+
+### Export CloudWrapper configuration.
+
+```
+$ akamai terraform export-cloudwrapper
 ```
 
 ## EdgeWorkers
