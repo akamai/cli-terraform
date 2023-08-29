@@ -1255,6 +1255,38 @@ func mockProcessTemplates(p *templates.MockProcessor, tfData TFData, filterFuncs
 	}
 }
 
+type activationItemData struct {
+	actType    string
+	actID      string
+	network    string
+	status     string
+	version    int
+	updateDate string
+}
+
+type activationItemsData []activationItemData
+
+func mockActivationsItems(items activationItemsData) papi.ActivationsItems {
+	var activations []*papi.Activation
+	for _, activationItem := range items {
+		activation := papi.Activation{
+			ActivationID:           activationItem.actID,
+			ActivationType:         papi.ActivationType(activationItem.actType),
+			PropertyName:           "test.edgesuite.net",
+			PropertyID:             "prp_12345",
+			PropertyVersion:        activationItem.version,
+			AcknowledgeAllWarnings: false,
+			Network:                papi.ActivationNetwork(activationItem.network),
+			Status:                 papi.ActivationStatus(activationItem.status),
+			NotifyEmails:           []string{"aa@aa.com"},
+			Note:                   "example note",
+			UpdateDate:             activationItem.updateDate,
+		}
+		activations = append(activations, &activation)
+	}
+	return papi.ActivationsItems{Items: activations}
+}
+
 func getRuleTreeResponse(dir string, t *testing.T) papi.GetRuleTreeResponse {
 	var ruleResponse papi.GetRuleTreeResponse
 	rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
@@ -2034,6 +2066,111 @@ func TestRuleNameNormalizer(t *testing.T) {
 				normalizer(n)
 			}
 			assert.Equal(t, test.expected, normalizer(test.given))
+		})
+	}
+}
+
+func TestGetLatestActiveActivation(t *testing.T) {
+	tests := map[string]struct {
+		activationItems       activationItemsData
+		network               papi.ActivationNetwork
+		expectedActiveVersion int
+	}{
+		"one staging activation": {
+			activationItems: activationItemsData{
+				activationItemData{
+					actType:    "ACTIVATE",
+					actID:      "atv_1",
+					status:     "ACTIVE",
+					network:    "STAGING",
+					version:    1,
+					updateDate: "2018-03-07T23:40:45Z"},
+			},
+			network:               papi.ActivationNetworkStaging,
+			expectedActiveVersion: 1,
+		},
+		"two staging activations": {
+			activationItems: activationItemsData{
+				activationItemData{
+					actType:    "ACTIVATE",
+					actID:      "atv_2",
+					status:     "ACTIVE",
+					network:    "STAGING",
+					version:    2,
+					updateDate: "2018-03-12T15:40:45Z"},
+				activationItemData{
+					actType:    "DEACTIVATE",
+					actID:      "atv_1",
+					status:     "INACTIVE",
+					network:    "STAGING",
+					version:    1,
+					updateDate: "2018-03-07T10:11:45Z"},
+			},
+			network:               papi.ActivationNetworkStaging,
+			expectedActiveVersion: 2,
+		},
+		"three staging activation - 2nd active": {
+			activationItems: activationItemsData{
+				activationItemData{
+					actType:    "DEACTIVATE",
+					actID:      "atv_3",
+					status:     "INACTIVE",
+					network:    "STAGING",
+					version:    3,
+					updateDate: "2018-04-01T14:00:45Z"},
+				activationItemData{
+					actType:    "ACTIVATE",
+					actID:      "atv_2",
+					status:     "ACTIVE",
+					network:    "STAGING",
+					version:    2,
+					updateDate: "2018-04-20T10:00:45Z"},
+				activationItemData{
+					actType:    "DEACTIVATE",
+					actID:      "atv_1",
+					status:     "INACTIVE",
+					network:    "STAGING",
+					version:    1,
+					updateDate: "2018-03-07T08:40:45Z"},
+			},
+			network:               papi.ActivationNetworkStaging,
+			expectedActiveVersion: 2,
+		},
+		"two production activations": {
+			activationItems: activationItemsData{
+				activationItemData{
+					actType:    "ACTIVATE",
+					actID:      "atv_2",
+					status:     "ACTIVE",
+					network:    "PRODUCTION",
+					version:    2,
+					updateDate: "2018-03-08T12:00:45Z"},
+				activationItemData{
+					actType:    "DEACTIVATE",
+					actID:      "atv_1",
+					status:     "INACTIVE",
+					network:    "PRODUCTION",
+					version:    1,
+					updateDate: "2018-03-07T08:00:45Z"},
+			},
+			network:               papi.ActivationNetworkProduction,
+			expectedActiveVersion: 2,
+		},
+		"no activations": {
+			activationItems: activationItemsData{},
+			network:         papi.ActivationNetworkProduction,
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			items := mockActivationsItems(test.activationItems)
+			var activation = getLatestActiveActivation(items, test.network)
+			if activation != nil {
+				assert.Equal(t, test.expectedActiveVersion, activation.PropertyVersion)
+			} else {
+				assert.Empty(t, test.expectedActiveVersion)
+			}
 		})
 	}
 }

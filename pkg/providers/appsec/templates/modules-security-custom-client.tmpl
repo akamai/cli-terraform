@@ -9,3 +9,11 @@ resource "akamai_botman_custom_client" "{{ escapeName (index . "customClientName
 
 {{ end -}}
 {{ end -}}
+{{ if .CustomClientSequence  -}}
+resource "akamai_botman_custom_client_sequence" "sequence" {
+    config_id         = akamai_appsec_configuration.config.config_id
+    custom_client_ids = [
+        {{getCustomClientResourceNamesByIDs .CustomClients .CustomClientSequence}}
+    ]
+}
+{{ end -}}

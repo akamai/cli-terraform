@@ -16,7 +16,9 @@
           "datastreamIds": "77-85-6",
           "enabled": true,
           "logEnabled": false,
-          "logStreamName": "60",
+          "logStreamName": [
+            "60"
+          ],
           "logStreamTitle": "test",
           "samplingPercentage": 100,
           "streamType": "LOG"

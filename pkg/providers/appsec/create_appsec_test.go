@@ -300,6 +300,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"exportJSONWithoutKeys":                  exportJSONWithoutKeys,
 		"getCustomBotCategoryNameByID":           getCustomBotCategoryNameByID,
 		"getCustomBotCategoryResourceNamesByIDs": getCustomBotCategoryResourceNamesByIDs,
+		"getCustomClientResourceNamesByIDs":      getCustomClientResourceNamesByIDs,
 	}
 
 	// Template to path mappings
@@ -421,6 +422,7 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 		"exportJSONWithoutKeys":                  exportJSONWithoutKeys,
 		"getCustomBotCategoryNameByID":           getCustomBotCategoryNameByID,
 		"getCustomBotCategoryResourceNamesByIDs": getCustomBotCategoryResourceNamesByIDs,
+		"getCustomClientResourceNamesByIDs":      getCustomClientResourceNamesByIDs,
 	}
 
 	// Template to path mappings

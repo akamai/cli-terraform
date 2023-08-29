@@ -1,5 +1,27 @@
 # Release Notes
 
+## Version 1.9.0 (August 29, 2023)
+
+### Features/Enhancements
+
+* [IMPORTANT] CloudWrapper
+  * Added support for `export-cloudwrapper` command which allows export of `akamai_cloudwrapper_configuration` and `akamai_cloudwrapper_activation` resources
+
+* APPSEC
+  * Added import support for custom client sequence
+
+### Bug fixes
+
+* Image and Video Manager
+  * Added description for `--schema` flag for `export-imaging` command in `README.md` ([#56](https://github.com/akamai/cli-terraform/issues/56))
+
+* PAPI
+  * Fixed `export-property` command to export `akamai_property_activation` resource attributes for latest active version.
+  * Fixed `export-property` command to use `group_id` and `contract_id` as terraform variables, instead of data sources, which
+  produced inconsistencies ([I#374](https://github.com/akamai/terraform-provider-akamai/issues/426))
+  * `logStreamName` field from `datastream` behavior has changed from string to array of strings for rule
+    format `v2023-05-30` ([#58](https://github.com/akamai/cli-terraform/issues/58))
+
 ## Version 1.8.0 (August 1, 2023)
 
 ### Features/Enhancements

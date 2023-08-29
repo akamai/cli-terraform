@@ -18,6 +18,7 @@ package commands
 import (
 	"github.com/akamai/cli-terraform/pkg/providers/appsec"
 	"github.com/akamai/cli-terraform/pkg/providers/cloudlets"
+	"github.com/akamai/cli-terraform/pkg/providers/cloudwrapper"
 	"github.com/akamai/cli-terraform/pkg/providers/cps"
 	"github.com/akamai/cli-terraform/pkg/providers/dns"
 	"github.com/akamai/cli-terraform/pkg/providers/edgeworkers"
@@ -147,6 +148,22 @@ func CommandLocator() ([]*cli.Command, error) {
 			&cli.BoolFlag{
 				Name:  "schema",
 				Usage: "Referenced rules will be exported as data source",
+			},
+		},
+		BashComplete: autocomplete.Default,
+	})
+
+	commands = append(commands, &cli.Command{
+		Name:        "export-cloudwrapper",
+		Description: "Generates Terraform configuration for CloudWrapper resources",
+		Usage:       "export-cloudwrapper",
+		ArgsUsage:   "<config_id>",
+		Action:      validatedAction(cloudwrapper.CmdCreateCloudWrapper, requireValidWorkpath, requireNArguments(1)),
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 		},
 		BashComplete: autocomplete.Default,

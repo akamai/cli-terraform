@@ -137,6 +137,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"exportJSONWithoutKeys":                  exportJSONWithoutKeys,
 		"getCustomBotCategoryResourceNamesByIDs": getCustomBotCategoryResourceNamesByIDs,
 		"getCustomBotCategoryNameByID":           getCustomBotCategoryNameByID,
+		"getCustomClientResourceNamesByIDs":      getCustomClientResourceNamesByIDs,
 	}
 
 	// The template processor
@@ -560,4 +561,33 @@ func getCustomBotCategoryResourceNamesByIDs(customBotCategories []map[string]int
 		categoryResourceNames[i] = fmt.Sprintf("akamai_botman_custom_bot_category.%s_%s.category_id", categoryName, categoryID)
 	}
 	return strings.Join(categoryResourceNames, ","), nil
+}
+
+// getCustomClientResourceNamesByIDs returns comma separated custom-client resource names in the same order as the provided customClientIDs
+func getCustomClientResourceNamesByIDs(customClients []map[string]interface{}, customClientIDs []string) (string, error) {
+	customClientMap := make(map[string]string)
+	for _, customClient := range customClients {
+		customClientName, ok := customClient["customClientName"].(string)
+		if !ok {
+			return "", fmt.Errorf("cannot convert custom client name %s to string", customClient["customClientName"])
+		}
+		name, err := tools.EscapeName(customClientName)
+		if err != nil {
+			return "", err
+		}
+		customClientID, ok := customClient["customClientId"].(string)
+		if !ok {
+			return "", errors.New("cannot convert customClientId to string")
+		}
+		customClientMap[customClientID] = name
+	}
+	customClientResourceNames := make([]string, len(customClientIDs))
+	for i, customClientID := range customClientIDs {
+		customClientName, ok := customClientMap[customClientID]
+		if !ok {
+			return "", fmt.Errorf("cannot find custom client name for id %s", customClientID)
+		}
+		customClientResourceNames[i] = fmt.Sprintf("akamai_botman_custom_client.%s_%s.custom_client_id", customClientName, customClientID)
+	}
+	return strings.Join(customClientResourceNames, ",\n"), nil
 }

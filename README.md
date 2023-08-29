@@ -42,6 +42,7 @@ Description:
    Administer and manage available Akamai resources with Terraform
 
 Built-In Commands:
+  export-cloudwrapper
   export-domain (alias: create-domain)
   export-zone (alias: create-zone)
   export-appsec (alias: create-appsec)
@@ -226,6 +227,23 @@ Flags:
 $ akamai terraform export-cloudlets-policy
 ```
 
+## CloudWrapper
+
+### Usage
+
+```
+   akamai terraform [global flags] export-cloudwrapper [flags] <configuration_id>
+
+Flags:
+   --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
+```
+
+### Export CloudWrapper configuration.
+
+```
+$ akamai terraform export-cloudwrapper
+```
+
 ## EdgeWorkers
 
 ### Export EdgeKV Usage
@@ -292,6 +310,7 @@ $ akamai terraform export-iam
 Flags:
    --tfworkpath path         Directory used to store files created when running commands. (default: current directory)
    --policy-json-dir path    Path location for placement of policy jsons. Default: same value as tfworkpath
+   --schema                  Generate content of the policy using HCL instead of JSON file (default: false)
 ```
 
 ### Export Image and Video policy configuration.

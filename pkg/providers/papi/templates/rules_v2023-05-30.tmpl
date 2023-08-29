@@ -2258,8 +2258,8 @@ datastream {
 {{- if and (eq $k "logEnabled") (ne $v nil)}}
 		log_enabled = {{$v}}
 {{- end}}
-{{- if and (eq $k "logStreamName") (ne $v nil)}}
-        log_stream_name = {{template "Text" $v}}
+{{- if eq $k "logStreamName"}}
+		log_stream_name = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "samplingPercentage") (ne $v nil)}}
 		sampling_percentage = {{$v | AsInt}}

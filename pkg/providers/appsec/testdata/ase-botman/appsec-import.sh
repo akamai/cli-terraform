@@ -228,6 +228,7 @@ terraform import module.security.akamai_botman_custom_defined_bot.bot_a_50789280
 terraform import module.security.akamai_botman_custom_defined_bot.bot_b_da1de35e-deda-4273-933d-3131291fa3d4 79947:da1de35e-deda-4273-933d-3131291fa3d4
 terraform import module.security.akamai_botman_custom_client.custom_client_a_a7fe489d-0354-43bd-b81c-8cabbe850cdd 79947:a7fe489d-0354-43bd-b81c-8cabbe850cdd
 terraform import module.security.akamai_botman_custom_client.custom_client_b_60374346-2d1d-444d-91c1-90373e3f804a 79947:60374346-2d1d-444d-91c1-90373e3f804a
+terraform import module.security.akamai_botman_custom_client_sequence.sequence 79947
 terraform import module.security.akamai_botman_serve_alternate_action.serve_alternate_action_a_action_A 79947:action_A
 terraform import module.security.akamai_botman_serve_alternate_action.serve_alternate_action_b_action_B 79947:action_B
 terraform import module.security.akamai_botman_challenge_action.challenge_action_a_action_A 79947:action_A
