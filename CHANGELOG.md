@@ -1,5 +1,14 @@
 # Release Notes
 
+## Version 1.10.0 (September xx, 2023)
+
+### Features/Enhancements
+
+### Bug fixes
+
+* CPS
+  * Fixed nil pointer evaluating *cps.DNSNameSettings.CloneDNSNames ([#52](https://github.com/akamai/cli-terraform/issues/52))
+
 ## Version 1.9.0 (August 29, 2023)
 
 ### Features/Enhancements

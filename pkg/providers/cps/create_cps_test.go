@@ -14,6 +14,7 @@ import (
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/tools"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
+	"github.com/jinzhu/copier"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -485,6 +486,18 @@ func TestCreateCPS(t *testing.T) {
 		"export DV enrollment with minimum fields": {
 			init: func(m *cps.Mock) {
 				expectGetEnrollment(m, 1, enrollmentDVMin, nil).Once()
+			},
+			enrollmentID: 1,
+			contractID:   "ctr_1",
+			dataDir:      "dv_enrollment_min",
+			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
+		},
+		"export DV enrollment without DNSNameSettings": {
+			init: func(m *cps.Mock) {
+				var enrollment cps.Enrollment
+				_ = copier.CopyWithOption(&enrollment, enrollmentDVMin, copier.Option{DeepCopy: true})
+				enrollment.NetworkConfiguration.DNSNameSettings = nil
+				expectGetEnrollment(m, 1, enrollment, nil).Once()
 			},
 			enrollmentID: 1,
 			contractID:   "ctr_1",

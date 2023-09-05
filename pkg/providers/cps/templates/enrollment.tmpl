@@ -94,7 +94,7 @@ provider "akamai" {
         {{- if .DisallowedTLSVersions}}
             disallowed_tls_versions = [{{range .DisallowedTLSVersions}}"{{.}}",{{end}}]
         {{- end}}
-        {{- if .DNSNameSettings.CloneDNSNames}}
+        {{- if and .DNSNameSettings .DNSNameSettings.CloneDNSNames}}
             clone_dns_names         = {{.DNSNameSettings.CloneDNSNames}}
         {{- end}}
         geography               = "{{.Geography}}"
