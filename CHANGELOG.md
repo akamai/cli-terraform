@@ -9,6 +9,9 @@
 * CPS
   * Fixed nil pointer evaluating *cps.DNSNameSettings.CloneDNSNames ([#52](https://github.com/akamai/cli-terraform/issues/52))
 
+* Identity and Access Management (IAM)
+  * Fixed newline escaping in `description` field after exporting a role
+
 ## Version 1.9.0 (August 29, 2023)
 
 ### Features/Enhancements

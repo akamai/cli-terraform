@@ -6,7 +6,7 @@
 {{- range .TFRoles -}}
     resource "akamai_iam_role" "role_id_{{.RoleID}}" {
       name          = "{{.RoleName}}"
-      description   = "{{.RoleDescription}}"
+      description   = "{{escape .RoleDescription}}"
       granted_roles = {{formatIntList .GrantedRoles}}
     }
 
