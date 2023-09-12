@@ -30,7 +30,7 @@ $(BIN)/tflint: $(BIN) ; $(info $(M) Installing tflint...)
 	curl -sSfL https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh  | bash
 
 GOLANGCILINT = $(BIN)/golangci-lint
-GOLANGCI_LINT_VERSION = v1.50.1
+GOLANGCI_LINT_VERSION = v1.52.2
 $(BIN)/golangci-lint: ; $(info $(M) Installing golangci-lint...)
 	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(BIN) $(GOLANGCI_LINT_VERSION)
 
