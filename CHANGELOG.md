@@ -1,8 +1,6 @@
 # Release Notes
 
-## Version 1.10.0 (September xx, 2023)
-
-### Features/Enhancements
+## Version 1.9.1 (September 26, 2023)
 
 ### Bug fixes
 
