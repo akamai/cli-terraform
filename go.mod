@@ -3,10 +3,11 @@ module github.com/akamai/cli-terraform
 go 1.18
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v7 v7.2.1
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v7 v7.3.0
 	github.com/akamai/cli v1.5.5
 	github.com/fatih/color v1.13.0
 	github.com/hashicorp/hcl/v2 v2.11.1
+	github.com/jinzhu/copier v0.4.0
 	github.com/shirou/gopsutil v2.20.4+incompatible
 	github.com/stretchr/testify v1.8.0
 	github.com/tj/assert v0.0.3

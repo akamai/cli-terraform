@@ -432,7 +432,7 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 					{
 						RoleID:          12345,
 						RoleName:        "Custom role",
-						RoleDescription: "Custom role description",
+						RoleDescription: "Custom role\ndescription",
 						GrantedRoles:    []int{992, 707, 452, 677, 726, 296, 457, 987},
 					},
 				},

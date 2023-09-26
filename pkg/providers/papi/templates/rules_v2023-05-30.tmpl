@@ -5325,11 +5325,90 @@ origin {
 		{{- range $v := $v}}
 		custom_certificate_authorities {
 {{- range $k, $v := $v}}
-{{- if and (eq $k "pemEncodedCert") (ne $v nil)}}
-        pem_encoded_cert = {{template "Text" $v}}
+{{- if and (eq $k "subjectCN") (ne $v nil)}}
+        subject_cn = {{template "Text" $v}}
+{{- end}}
+{{- if eq $k "subjectAlternativeNames"}}
+		subject_alternative_names = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "subjectRDNs" }}
+		{{- if $v}}
+		subject_rdns {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "C") (ne $v nil)}}
+        c = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "OU") (ne $v nil)}}
+        ou = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "O") (ne $v nil)}}
+        o = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "CN") (ne $v nil)}}
+        cn = {{template "Text" $v}}
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
+{{- if eq $k "issuerRDNs" }}
+		{{- if $v}}
+		issuer_rdns {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "C") (ne $v nil)}}
+        c = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "OU") (ne $v nil)}}
+        ou = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "O") (ne $v nil)}}
+        o = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "CN") (ne $v nil)}}
+        cn = {{template "Text" $v}}
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
+{{- if and (eq $k "notBefore") (ne $v nil)}}
+		not_before = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "notAfter") (ne $v nil)}}
+		not_after = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "sigAlgName") (ne $v nil)}}
+        sig_alg_name = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "publicKey") (ne $v nil)}}
+        public_key = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "publicKeyAlgorithm") (ne $v nil)}}
+        public_key_algorithm = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "publicKeyFormat") (ne $v nil)}}
+        public_key_format = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "serialNumber") (ne $v nil)}}
+        serial_number = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "version") (ne $v nil)}}
+		version = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "sha1Fingerprint") (ne $v nil)}}
         sha1_fingerprint = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "pemEncodedCert") (ne $v nil)}}
+        pem_encoded_cert = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "canBeLeaf") (ne $v nil)}}
+		can_be_leaf = {{$v}}
+{{- end}}
+{{- if and (eq $k "canBeCA") (ne $v nil)}}
+		can_be_ca = {{$v}}
+{{- end}}
+{{- if and (eq $k "selfSigned") (ne $v nil)}}
+		self_signed = {{$v}}
 {{- end}}
 {{- end}}
 		}
@@ -5339,11 +5418,90 @@ origin {
 		{{- range $v := $v}}
 		custom_certificates {
 {{- range $k, $v := $v}}
-{{- if and (eq $k "pemEncodedCert") (ne $v nil)}}
-        pem_encoded_cert = {{template "Text" $v}}
+{{- if and (eq $k "subjectCN") (ne $v nil)}}
+        subject_cn = {{template "Text" $v}}
+{{- end}}
+{{- if eq $k "subjectAlternativeNames"}}
+		subject_alternative_names = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "subjectRDNs" }}
+		{{- if $v}}
+		subject_rdns {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "C") (ne $v nil)}}
+        c = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "OU") (ne $v nil)}}
+        ou = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "O") (ne $v nil)}}
+        o = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "CN") (ne $v nil)}}
+        cn = {{template "Text" $v}}
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
+{{- if eq $k "issuerRDNs" }}
+		{{- if $v}}
+		issuer_rdns {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "C") (ne $v nil)}}
+        c = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "OU") (ne $v nil)}}
+        ou = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "O") (ne $v nil)}}
+        o = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "CN") (ne $v nil)}}
+        cn = {{template "Text" $v}}
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
+{{- if and (eq $k "notBefore") (ne $v nil)}}
+		not_before = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "notAfter") (ne $v nil)}}
+		not_after = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "sigAlgName") (ne $v nil)}}
+        sig_alg_name = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "publicKey") (ne $v nil)}}
+        public_key = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "publicKeyAlgorithm") (ne $v nil)}}
+        public_key_algorithm = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "publicKeyFormat") (ne $v nil)}}
+        public_key_format = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "serialNumber") (ne $v nil)}}
+        serial_number = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "version") (ne $v nil)}}
+		version = {{$v | AsInt}}
 {{- end}}
 {{- if and (eq $k "sha1Fingerprint") (ne $v nil)}}
         sha1_fingerprint = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "pemEncodedCert") (ne $v nil)}}
+        pem_encoded_cert = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "canBeLeaf") (ne $v nil)}}
+		can_be_leaf = {{$v}}
+{{- end}}
+{{- if and (eq $k "canBeCA") (ne $v nil)}}
+		can_be_ca = {{$v}}
+{{- end}}
+{{- if and (eq $k "selfSigned") (ne $v nil)}}
+		self_signed = {{$v}}
 {{- end}}
 {{- end}}
 		}
@@ -7152,6 +7310,15 @@ site_shield {
 {{- end}}
 {{- if and (eq $k "srmap") (ne $v nil)}}
         srmap = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "chinaCdnMap") (ne $v nil)}}
+        china_cdn_map = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "hasMixedHosts") (ne $v nil)}}
+		has_mixed_hosts = {{$v}}
+{{- end}}
+{{- if and (eq $k "src") (ne $v nil)}}
+        src = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 		}
