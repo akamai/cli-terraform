@@ -1,5 +1,12 @@
 # Release Notes
 
+## Version 1.x.x (October xx, 2023)
+
+### Features/Enhancements
+
+* Cloudlets
+  * Added `matches_always` field to `akamai_cloudlets_edge_redirector_match_rule` export template
+
 ## Version 1.9.1 (September 26, 2023)
 
 ### Bug fixes
@@ -15,7 +22,6 @@
 
 ## Version 1.9.0 (August 29, 2023)
 
-### Features/Enhancements
 
 * [IMPORTANT] CloudWrapper
   * Added support for `export-cloudwrapper` command which allows export of `akamai_cloudwrapper_configuration` and `akamai_cloudwrapper_activation` resources

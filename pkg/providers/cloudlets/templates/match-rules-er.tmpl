@@ -5,6 +5,7 @@ data "akamai_cloudlets_edge_redirector_match_rule" "match_rules_er" {
     name = "{{escape .Name}}"
     start = {{.Start}}
     end = {{.End}}
+    {{- if .MatchesAlways }}matches_always = true{{end}}
     {{- range .Matches}}
     matches {
       match_type = "{{.MatchType}}"

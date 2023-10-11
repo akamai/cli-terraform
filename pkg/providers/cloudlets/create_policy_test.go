@@ -368,7 +368,7 @@ func TestCreatePolicy(t *testing.T) {
 				}).Return(nil).Once()
 			},
 		},
-		"fetch latest version of policy and produce output without activations": {
+		"fetch latest version of policy and produce output without activations ER": {
 			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
 					{
@@ -432,6 +432,77 @@ func TestCreatePolicy(t *testing.T) {
 							Start: 1,
 							End:   2,
 							ID:    1234,
+						},
+					},
+				}).Return(nil).Once()
+			},
+		},
+		"fetch latest version of policy with matches always": {
+			init: func(c *cloudlets.Mock, p *templates.MockProcessor) {
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
+					{
+						PolicyID:     1,
+						GroupID:      123,
+						Name:         "some policy",
+						CloudletID:   0,
+						CloudletCode: "ER",
+					},
+					{
+						PolicyID:     2,
+						GroupID:      234,
+						Name:         "test_policy",
+						Description:  "test_policy description",
+						CloudletID:   0,
+						CloudletCode: "ER",
+					},
+				}, nil).Once()
+				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2, PageSize: &pageSize, Offset: 0}).Return([]cloudlets.PolicyVersion{
+					{
+						PolicyID: 2,
+						Version:  1,
+					},
+					{
+						PolicyID:        2,
+						Version:         2,
+						Description:     "version 2 description",
+						MatchRuleFormat: "1.0",
+					},
+				}, nil).Once()
+				c.On("GetPolicyVersion", mock.Anything, cloudlets.GetPolicyVersionRequest{
+					PolicyID: 2,
+					Version:  2,
+				}).Return(&cloudlets.PolicyVersion{
+					PolicyID:    2,
+					Version:     2,
+					Description: "version 2 description",
+					MatchRules: cloudlets.MatchRules{
+						&cloudlets.MatchRuleER{
+							Name:          "some rule",
+							Type:          "ER",
+							Start:         1,
+							End:           2,
+							ID:            1234,
+							MatchesAlways: true,
+						},
+					},
+					MatchRuleFormat: "1.0",
+				}, nil).Once()
+				p.On("ProcessTemplates", TFPolicyData{
+					Name:              "test_policy",
+					Section:           section,
+					CloudletCode:      "ER",
+					Description:       "version 2 description",
+					GroupID:           234,
+					PolicyActivations: map[string]TFPolicyActivationData{},
+					MatchRuleFormat:   "1.0",
+					MatchRules: cloudlets.MatchRules{
+						&cloudlets.MatchRuleER{
+							Name:          "some rule",
+							Type:          "ER",
+							Start:         1,
+							End:           2,
+							ID:            1234,
+							MatchesAlways: true,
 						},
 					},
 				}).Return(nil).Once()
@@ -1227,6 +1298,18 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				MatchRuleFormat: "1.0",
 			},
 			dir:          "no_activations_no_match_rules",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+		},
+		"policy with matches always": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				Section:         "test_section",
+				CloudletCode:    "ER",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+			},
+			dir:          "no_activations_with_matches_always",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
 		"policy with match rules alb": {
