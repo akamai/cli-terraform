@@ -1,0 +1,22 @@
+[
+  {
+    "value": "1.1.1.1",
+    "tags": [
+      "t1"
+    ],
+    "description": "item 1",
+    "expirationDate": "2026-12-26T01:00:00+00:00"
+  },
+  {
+    "value": "1.1.1.2",
+    "tags": [],
+    "description": "",
+    "expirationDate": ""
+  },
+  {
+    "value": "1.1.1.3",
+    "tags": [],
+    "description": "",
+    "expirationDate": ""
+  }
+]

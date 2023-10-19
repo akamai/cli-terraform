@@ -1,0 +1,77 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/clientlists.TFData*/ -}}
+
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 5.4.0"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
+provider "akamai" {
+  edgerc = var.edgerc_path
+  config_section = var.config_section
+}
+
+resource "akamai_clientlist_list" "list_{{.ClientList.ListID}}" {
+  name  = "{{.ClientList.Name}}"
+  type  = "{{.ClientList.Type}}"
+  notes = "{{.ClientList.Notes}}"
+  tags  = [{{range $index, $element := .ClientList.Tags}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+
+  contract_id = var.contract_id
+  group_id    = var.group_id
+  {{- if ne .ClientList.ItemsCount 0}}
+
+    dynamic "items" {
+      for_each = jsondecode(file("./{{.ClientList.ListID}}.json"))
+
+      content {
+        value           = items.value.value
+        description     = items.value.description
+        tags            = items.value.tags
+        expiration_date = items.value.expirationDate
+      }
+    }
+  {{- end}}
+}
+{{if .ClientList.StagingActivation.HasActivation}}
+resource "akamai_clientlist_activation" "activation_{{.ClientList.ListID}}_STAGING" {
+  list_id                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.list_id
+  version                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.version
+  network                 = "STAGING"
+  comments                = "{{.ClientList.StagingActivation.Comments}}"
+  notification_recipients = [{{range $index, $element := .ClientList.StagingActivation.NotificationRecipients}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+  siebel_ticket_id        = "{{.ClientList.StagingActivation.SiebelTicketID}}"
+}
+{{- else}}
+# resource "akamai_clientlist_activation" "activation_{{.ClientList.ListID}}_STAGING" {
+#   list_id                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.list_id
+#   version                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.version
+#   network                 = "STAGING"
+#   comments                = ""
+#   notification_recipients = []
+#   siebel_ticket_id        = ""
+# }
+{{- end}}
+{{if .ClientList.ProductionActivation.HasActivation}}
+resource "akamai_clientlist_activation" "activation_{{.ClientList.ListID}}_PRODUCTION" {
+  list_id                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.list_id
+  version                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.version
+  network                 = "PRODUCTION"
+  comments                = "{{.ClientList.ProductionActivation.Comments}}"
+  notification_recipients = [{{range $index, $element := .ClientList.ProductionActivation.NotificationRecipients}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+  siebel_ticket_id        = "{{.ClientList.ProductionActivation.SiebelTicketID}}"
+}
+{{- else }}
+# resource "akamai_clientlist_activation" "activation_{{.ClientList.ListID}}_PRODUCTION" {
+#   list_id                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.list_id
+#   version                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.version
+#   network                 = "PRODUCTION"
+#   comments                = ""
+#   notification_recipients = []
+#   siebel_ticket_id        = ""
+# }
+{{- end}}

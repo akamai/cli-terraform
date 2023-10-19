@@ -9,6 +9,9 @@
 
 ## Version 1.9.1 (September 26, 2023)
 
+* [IMPORTANT] Client Lists
+  * Added command `export-clientlist` which allows export of `akamai_clientlist_list` and `akamai_clientlist_activation` resources
+
 ### Bug fixes
 
 * CPS
@@ -65,7 +68,7 @@
 * Migrated to Terraform 1.4.6 version
 
 * PAPI
-  * Added support for `export-property` command with flag `--schema` for properties in frozen formats `v2023-01-05` and `v2023-05-30`. 
+  * Added support for `export-property` command with flag `--schema` for properties in frozen formats `v2023-01-05` and `v2023-05-30`.
   * Added support for import of `akamai_property_activation` resource.
   * Added changes in `export-property` command:
     * Added support for `STAGING` and `PRODUCTION` network configurations for `akamai_property_activation` resource.
@@ -152,7 +155,7 @@
 
 * CPS
   * New `export-cps` command to export DV enrollment (`akamai_cps_dv_enrollment`) or third-party enrollment with accompanying resources and data source (`akamai_cps_third_party_enrollment`,`akamai_cps_csr` and `akamai_cps_upload_certificate`)
-  
+
 ## Version 1.1.1 (Oct 27, 2022)
 
 ### Fixes
@@ -332,7 +335,7 @@
 * PAPI
   * Remove deprecated CPCode support
 
-## Version 0.2.0 
+## Version 0.2.0
 
 ### Bug Fixes
 
@@ -358,7 +361,7 @@ Initial release
 * DNS
   * Support importing existing DNS zones and related resources
 
-* GTM 
+* GTM
   * Support importing existing GTM domains and related resources
 
 * PAPI

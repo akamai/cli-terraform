@@ -1,0 +1,20 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/clientlists.TFData*/ -}}
+variable "edgerc_path" {
+  type = string
+  default = "{{.EdgercPath}}"
+}
+
+variable "config_section" {
+  type = string
+  default = "{{.Section}}"
+}
+
+variable "contract_id" {
+  type = string
+  default = "{{.ClientList.ContractID}}"
+}
+
+variable "group_id" {
+  type = number
+  default = {{.ClientList.GroupID}}
+}
