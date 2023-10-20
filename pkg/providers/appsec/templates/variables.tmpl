@@ -15,7 +15,7 @@ variable "name" {
 
 variable "description" {
     type    = string
-    default = "{{ getConfigDescription .ConfigID }}"
+    default = {{template "Text" (getConfigDescription .ConfigID)}}
 }
 
 variable "hostnames" {

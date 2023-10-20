@@ -59,14 +59,14 @@ resource "akamai_property_include_activation" "{{$include.IncludeName}}_{{$netwo
 {{- if eq $network "STAGING"}}
   version = "{{$include.VersionStaging}}"
 {{- if $include.ActivationNoteStaging}}
-  note = "{{$include.ActivationNoteStaging}}"
+  note = {{template "Text" $include.ActivationNoteStaging}}
 {{- end}}
   notify_emails = [{{range $index, $element := $include.ActivationEmailsStaging}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
 {{- end}}
 {{- if eq $network "PRODUCTION"}}
   version = "{{$include.VersionProduction}}"
 {{- if $include.ActivationNoteProduction}}
-  note = "{{$include.ActivationNoteProduction}}"
+  note = {{template "Text" $include.ActivationNoteProduction}}
 {{- end}}
   notify_emails = [{{range $index, $element := $include.ActivationEmailsProduction}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
 {{- end}}

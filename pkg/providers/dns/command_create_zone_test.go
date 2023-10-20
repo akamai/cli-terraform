@@ -14,23 +14,23 @@ func Test_createNamedModulePath(t *testing.T) {
 	}{
 		"tfWorkPath = ./": {
 			tfWorkPath:   "./",
-			modName:      "_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com",
-			expectedPath: moduleFolder + "/_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com",
+			modName:      "_0007770b-08a8-4b5f-a46b-081b772ba605-test_com",
+			expectedPath: moduleFolder + "/_0007770b-08a8-4b5f-a46b-081b772ba605-test_com",
 		},
 		"tfWorkPath = test_path": {
 			tfWorkPath:   "test_path",
-			modName:      "_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com",
-			expectedPath: "test_path/" + moduleFolder + "/_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com",
+			modName:      "_0007770b-08a8-4b5f-a46b-081b772ba605-test_com",
+			expectedPath: "test_path/" + moduleFolder + "/_0007770b-08a8-4b5f-a46b-081b772ba605-test_com",
 		},
 		"tfWorkPath = ../": {
 			tfWorkPath:   "../",
-			modName:      "_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com",
-			expectedPath: "../" + moduleFolder + "/_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com",
+			modName:      "_0007770b-08a8-4b5f-a46b-081b772ba605-test_com",
+			expectedPath: "../" + moduleFolder + "/_0007770b-08a8-4b5f-a46b-081b772ba605-test_com",
 		},
 		"blank tfWorkPath": {
 			tfWorkPath:   "",
-			modName:      "_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com",
-			expectedPath: moduleFolder + "/_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com",
+			modName:      "_0007770b-08a8-4b5f-a46b-081b772ba605-test_com",
+			expectedPath: moduleFolder + "/_0007770b-08a8-4b5f-a46b-081b772ba605-test_com",
 		},
 	}
 	for name, test := range tests {

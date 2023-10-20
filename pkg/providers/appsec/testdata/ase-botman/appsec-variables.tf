@@ -15,7 +15,10 @@ variable "name" {
 
 variable "description" {
   type    = string
-  default = "A security config for demo"
+  default = <<EOT
+A security config for
+demo
+EOT
 }
 
 variable "hostnames" {

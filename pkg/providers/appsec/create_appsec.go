@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
-	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/appsec"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/botman"
@@ -120,7 +119,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 	}
 
 	// Provide custom helper functions to get data that does not exist in the security config export
-	additionalFuncs := template.FuncMap{
+	additionalFuncs := tools.DecorateWithMultilineHandlingFunctions(map[string]any{
 		"exportJSON":                             exportJSON,
 		"getConfigDescription":                   getConfigDescription,
 		"getCustomRuleNameByID":                  getCustomRuleNameByID,
@@ -138,7 +137,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"getCustomBotCategoryResourceNamesByIDs": getCustomBotCategoryResourceNamesByIDs,
 		"getCustomBotCategoryNameByID":           getCustomBotCategoryNameByID,
 		"getCustomClientResourceNamesByIDs":      getCustomClientResourceNamesByIDs,
-	}
+	})
 
 	// The template processor
 	processor := templates.FSTemplateProcessor{

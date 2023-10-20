@@ -22,7 +22,7 @@ resource "akamai_dns_zone" "{{.BlockName}}" {
     zone = local.zone
     type = "{{.Type}}"
     masters = [{{range $i, $v := .Masters}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
-    comment = "{{.Comment}}"
+    comment = {{template "Text" .Comment}}
     sign_and_serve = {{.SignAndServe}}
     sign_and_serve_algorithm = "{{.SignAndServeAlgorithm}}"
     {{- with .TsigKey}}

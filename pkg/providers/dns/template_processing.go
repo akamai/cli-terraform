@@ -7,6 +7,7 @@ import (
 	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/dns"
+	"github.com/akamai/cli-terraform/pkg/tools"
 )
 
 //go:embed templates/*
@@ -45,11 +46,11 @@ type (
 	}
 )
 
-var funcs = template.FuncMap{
+var funcs = tools.DecorateWithMultilineHandlingFunctions(map[string]any{
 	"namedModulePath":           createNamedModulePath,
 	"checkForResource":          checkForResource,
 	"createUniqueRecordsetName": createUniqueRecordsetName,
-}
+})
 var tmpl = template.Must(template.New("template").Funcs(funcs).ParseFS(templateFiles, "**/*.tmpl"))
 
 func useTemplate(data interface{}, templateName string, trimBeginning bool) string {

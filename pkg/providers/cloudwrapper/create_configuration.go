@@ -59,6 +59,8 @@ type (
 //go:embed templates/*
 var templateFiles embed.FS
 
+var additionalFunctions = tools.DecorateWithMultilineHandlingFunctions(map[string]any{})
+
 var (
 	// ErrFetchingConfiguration is returned when problem occurred during fetching configuration
 	ErrFetchingConfiguration = errors.New("problem with fetching configuration")
@@ -97,6 +99,7 @@ func CmdCreateCloudWrapper(c *cli.Context) error {
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
+		AdditionalFuncs: additionalFunctions,
 	}
 	configID, err := strconv.ParseInt(c.Args().Get(0), 10, 64)
 	if err != nil {

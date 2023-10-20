@@ -7,6 +7,17 @@
 * Cloudlets
   * Added `matches_always` field to `akamai_cloudlets_edge_redirector_match_rule` export template
 
+### Bug fixes
+
+* Fixed generation of multiline text for: 
+  * `description` variable in AppSec configuration
+  * `comments` and `location.comments` fields in `akamai_cloudwrapper_configuration`
+  * `comment` field in `akamai_dns_zone`
+  * `comment` field in `akamai_gtm_domain`
+  * `comments` field in `akamai_gtm_property`
+  * `description` field in `akamai_gtm_resource`
+  * `note` field in `akamai_property_activation` and `akamai_property_include_activation`
+
 ## Version 1.9.1 (September 26, 2023)
 
 * [IMPORTANT] Client Lists

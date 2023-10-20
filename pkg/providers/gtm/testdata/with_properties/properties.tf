@@ -13,6 +13,7 @@ resource "akamai_gtm_property" "test_property1" {
   handout_mode                = "normal"
   failover_delay              = 0
   failback_delay              = 0
+  comments                    = "some comment"
   ghost_demand_reporting      = false
   liveness_test {
     name                             = "HTTP"
