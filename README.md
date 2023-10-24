@@ -27,7 +27,7 @@ for your system, or by cloning this repository and compiling it yourself.
 
 If you want to compile it from source, you will need Go 1.18 or later:
 
-1. Create a clone of the target repository: 
+1. Create a clone of the target repository:
   `git clone https://github.com/akamai/cli-terraform.git`
 2. Change to the package directory and compile the binary:
   - Linux/macOS/*nix: `go build -o akamai-terraform`
@@ -52,6 +52,7 @@ Built-In Commands:
   export-edgeworker (alias: create-edgeworker)
   export-iam (alias: create-iam)
   export-imaging (alias: create-imaging)
+  export-clientlist (alias: create-clientlist)
   list
   help
 
@@ -90,7 +91,7 @@ $ akamai terraform export-domain --createconfig example.akadns.net
 
 ### Domain Notes:
 1. Mapping GTM entity names to TF resource names may require normalization. Invalid TF resource name characters will be replaced by underscores, '_' in config generation.
- 
+
 
 ## EdgeDNS Zones
 
@@ -99,13 +100,13 @@ $ akamai terraform export-domain --createconfig example.akadns.net
 ```
    akamai terraform [global flags] export-zone [flags] <zone>
 
-Flags: 
+Flags:
    --tfworkpath path       Directory used to store files created when running commands. (default: current directory)
    --resources             Creates a JSON-formatted resource file for import: <zone>_resources.json. The createconfig flag uses this file as an input. (default: false)
    --createconfig          Creates these Terraform configuration files based on the values in <zone>_resources.json: <zone>.tf and dnsvars.tf. (default: false)
    --importscript          Creates import script for generated Terraform configuration script (<zone>_import.script) files. (default: false)
    --segmentconfig         Use with the createconfig flag to group and segment records by name into separate config files. (default: false)
-   --configonly            Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Saves zone config for 
+   --configonly            Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Saves zone config for
                            importscript. Ignores any existing resource JSON file. (default: false)
    --namesonly             Directive for both resource gathering and config generation. All record set types assumed. (default: false)
    --recordname value      Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.
@@ -143,7 +144,7 @@ $ akamai terraform export-zone --importscript testprimaryzone.com
 #### Advanced options for --createconfig
 
 1. namesonly - Resources for all associated Types will be generated
-2. segmentconfig - Generate a modularized configuration. 
+2. segmentconfig - Generate a modularized configuration.
 3. configonly - Generates a zone configuration without JSON itemization. The configuration generated varies based on which set of flags you use.
 
 ## Appsec
@@ -151,7 +152,7 @@ $ akamai terraform export-zone --importscript testprimaryzone.com
 ### Usage
 ```
    akamai terraform [global flags] export-appsec [flags] <name_of_security_config>
-   
+
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
@@ -272,7 +273,7 @@ Flags:
 ```
 
 ### Export EdgeWorker configuration.
- 
+
 ```
 $ akamai terraform [global flags] export-edgeworker [command flags] <edgeworker_id>
 ```
@@ -334,6 +335,17 @@ Flags:
 
 ```
 $ akamai terraform export-cps
+```
+
+## Client Lists
+
+Export Client List.
+
+```
+akamai terraform [global flags] export-clientlist [flags] <list_id>
+
+Flags:
+   --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
 ## General Notes
