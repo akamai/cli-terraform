@@ -1,9 +1,12 @@
 # Release Notes
 
-## Version 1.x.x (October xx, 2023)
+## Version 1.10.0 (October 30, 2023)
 
 ### Features/Enhancements
 
+* [IMPORTANT] Client Lists
+  * Added command `export-clientlist` which allows export of `akamai_clientlist_list` and `akamai_clientlist_activation`
+    resources
 * Cloudlets
   * Added `matches_always` field to `akamai_cloudlets_edge_redirector_match_rule` export template
 * PAPI
@@ -21,9 +24,6 @@
   * `note` field in `akamai_property_activation` and `akamai_property_include_activation`
 
 ## Version 1.9.1 (September 26, 2023)
-
-* [IMPORTANT] Client Lists
-  * Added command `export-clientlist` which allows export of `akamai_clientlist_list` and `akamai_clientlist_activation` resources
 
 ### Bug fixes
 
