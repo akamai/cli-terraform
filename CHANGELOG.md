@@ -6,6 +6,8 @@
 
 * Cloudlets
   * Added `matches_always` field to `akamai_cloudlets_edge_redirector_match_rule` export template
+* PAPI
+  * Added support for new rule format `v2023-09-20`
 
 ### Bug fixes
 

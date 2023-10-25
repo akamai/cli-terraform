@@ -1950,7 +1950,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		},
 		// property with rules as datasource - schema version 1 and 2 is a pair of tests that confirms that schema 1 does not use any schema's 2 template definitions and vice versa
 		// the behaviour was chosen in a way, so it's easily identifiable which template inner definition was picked (e.g. there was change in field type)
-		"property with rules as datasource - schema version 1": {
+		"property with rules as datasource - schema version v2023-01-05": {
 			givenData: TFData{
 				Property: TFPropertyData{
 					GroupName:            "test_group",
@@ -1967,12 +1967,12 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 				Section: "test_section",
 			},
-			dir:          "basic-rules-datasource-schema1",
+			dir:          "basic-rules-datasource-schema-v2023-01-05",
 			schema:       true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
 		},
-		"property with rules as datasource - schema version 2": {
+		"property with rules as datasource - schema version v2023-05-30": {
 			givenData: TFData{
 				Property: TFPropertyData{
 					GroupName:            "test_group",
@@ -1989,10 +1989,32 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 				Section: "test_section",
 			},
-			dir:          "basic-rules-datasource-schema2",
+			dir:          "basic-rules-datasource-schema-v2023-05-30",
 			schema:       true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-05-30")},
+		},
+		"property with rules as datasource - schema version v2023-09-20": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "v2023-09-20",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+				},
+				Section: "test_section",
+			},
+			dir:          "basic-rules-datasource-schema-v2023-09-20",
+			schema:       true,
+			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-09-20")},
 		},
 	}
 
