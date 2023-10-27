@@ -178,7 +178,7 @@ Certain export conditions require the use of a particular property rule format. 
   <tr>
     <td>Addition of <code>--schema</code> flag</td>
     <td>Your declarative property configuration and HCL-formatted rules. <strong>Does not return includes</strong> as includes are JSON-formatted.</td>
-    <td>≥ <code>v2023-01-05</code></td>
+    <td>Must be a dated rule format ≥ <code>v2023-01-05</code>. Cannot use `latest`.</td>
   </tr>
   <tr>
     <td>Addition of <code>include</code> subcommand</td>
