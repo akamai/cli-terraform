@@ -14,14 +14,14 @@ variable "name" {
 }
 
 output "zonename" {
-  value = akamai_dns_zone._0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com.name
+  value = akamai_dns_zone._0007770b-08a8-4b5f-a46b-081b772ba605-test_com.name
 }
 
 locals {
   zone = var.name
 }
 
-resource "akamai_dns_zone" "_0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin_com" {
+resource "akamai_dns_zone" "_0007770b-08a8-4b5f-a46b-081b772ba605-test_com" {
   contract                 = var.contractid
   group                    = var.groupid
   comment                  = ""

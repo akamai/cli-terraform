@@ -1,0 +1,16 @@
+{{- /*gotype: cli-terraform/pkg/providers/dns/dns.Data*/ -}}
+{{- define "Text"}}
+    {{- if . | IsMultiline}}
+        {{- if . | NoNewlineAtTheEnd}}
+{{- "trimsuffix(<<"}}{{. | GetEOT}}
+{{. | RemoveLastNewline}}
+{{. | GetEOT}}
+, "\n")
+        {{- else}}
+{{- "<<"}}{{. | GetEOT}}
+{{. | RemoveLastNewline}}
+{{. | GetEOT}}
+        {{- end}}
+    {{- else}}"{{. | Escape}}"
+    {{- end}}
+{{- end}}

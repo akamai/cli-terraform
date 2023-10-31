@@ -8,13 +8,10 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
-	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/gtm"
 	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -788,6 +785,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						DynamicTTL:           60,
 						HandoutLimit:         8,
 						HandoutMode:          "normal",
+						Comments:             "some comment",
 						TrafficTargets: []*gtm.TrafficTarget{
 							{
 								DatacenterId: 123,
@@ -997,6 +995,220 @@ func TestProcessDomainTemplates(t *testing.T) {
 			dir:          "with_qtr_properties",
 			filesToCheck: []string{"domain.tf", "datacenters.tf", "properties.tf", "variables.tf", "import.sh"},
 		},
+		"simple domain with resources and properties with multilines": {
+			givenData: TFDomainData{
+				Section:                 "test_section",
+				Name:                    "test.name.akadns.net",
+				NormalizedName:          "test_name",
+				Type:                    "basic",
+				Comment:                 "first\nsecond\n\nlast",
+				EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+				DefaultTimeoutPenalty:   10,
+				LoadImbalancePercentage: 50,
+				DefaultErrorPenalty:     90,
+				CnameCoalescingEnabled:  true,
+				LoadFeedback:            true,
+				DefaultDatacenters: []TFDatacenterData{
+					{
+						Nickname: "DEFAULT",
+						ID:       5400,
+					},
+				},
+				Datacenters: []TFDatacenterData{
+					{
+						Nickname:        "TEST1",
+						ID:              123,
+						City:            "New York",
+						StateOrProvince: "NY",
+						Country:         "US",
+						Latitude:        40.71305,
+						Longitude:       -74.00723,
+						DefaultLoadObject: &gtm.LoadObject{
+							LoadObject:     "test load object",
+							LoadObjectPort: 111,
+							LoadServers:    []string{"loadServer1", "loadServer2", "loadServer3"},
+						},
+					},
+					{
+						Nickname:        "TEST2",
+						ID:              124,
+						City:            "Chicago",
+						StateOrProvince: "IL",
+						Country:         "US",
+						Latitude:        41.88323,
+						Longitude:       -87.6324,
+					},
+				},
+				Resources: []*gtm.Resource{
+					{
+						Type:                "XML load object via HTTP",
+						HostHeader:          "header",
+						LeastSquaresDecay:   30,
+						Description:         "first\nsecond\n\nlast",
+						LeaderString:        "leader",
+						ConstrainedProperty: "**",
+						ResourceInstances: []*gtm.ResourceInstance{
+							{
+								DatacenterId:         123,
+								UseDefaultLoadObject: false,
+								LoadObject: gtm.LoadObject{
+									LoadObject:     "load",
+									LoadObjectPort: 80,
+									LoadServers:    []string{"server"},
+								},
+							},
+						},
+						AggregationType:             "latest",
+						LoadImbalancePercentage:     51,
+						UpperBound:                  20,
+						Name:                        "test resource1",
+						MaxUMultiplicativeIncrement: 10,
+						DecayRate:                   5,
+					},
+				},
+				Properties: []*gtm.Property{
+					{
+						Name:                 "test property1",
+						Type:                 "static",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						TrafficTargets: []*gtm.TrafficTarget{
+							{
+								DatacenterId: 123,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"1.2.3.4"},
+							},
+						},
+						LivenessTests: []*gtm.LivenessTest{
+							{
+								Name:               "HTTP",
+								TestInterval:       60,
+								TestObject:         "/",
+								HttpError3xx:       true,
+								HttpError4xx:       true,
+								HttpError5xx:       true,
+								TestObjectProtocol: "HTTP",
+								TestObjectPort:     80,
+								TestTimeout:        10,
+							},
+						},
+						Comments: "first\nsecond\n\nlast",
+					},
+				},
+			},
+			dir:          "with_multiline",
+			filesToCheck: []string{"domain.tf", "variables.tf", "import.sh", "resources.tf", "properties.tf"},
+		},
+		"simple domain with resources and properties with multilines - empty line at the end": {
+			givenData: TFDomainData{
+				Section:                 "test_section",
+				Name:                    "test.name.akadns.net",
+				NormalizedName:          "test_name",
+				Type:                    "basic",
+				Comment:                 "first\nsecond\n",
+				EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+				DefaultTimeoutPenalty:   10,
+				LoadImbalancePercentage: 50,
+				DefaultErrorPenalty:     90,
+				CnameCoalescingEnabled:  true,
+				LoadFeedback:            true,
+				DefaultDatacenters: []TFDatacenterData{
+					{
+						Nickname: "DEFAULT",
+						ID:       5400,
+					},
+				},
+				Datacenters: []TFDatacenterData{
+					{
+						Nickname:        "TEST1",
+						ID:              123,
+						City:            "New York",
+						StateOrProvince: "NY",
+						Country:         "US",
+						Latitude:        40.71305,
+						Longitude:       -74.00723,
+						DefaultLoadObject: &gtm.LoadObject{
+							LoadObject:     "test load object",
+							LoadObjectPort: 111,
+							LoadServers:    []string{"loadServer1", "loadServer2", "loadServer3"},
+						},
+					},
+					{
+						Nickname:        "TEST2",
+						ID:              124,
+						City:            "Chicago",
+						StateOrProvince: "IL",
+						Country:         "US",
+						Latitude:        41.88323,
+						Longitude:       -87.6324,
+					},
+				},
+				Resources: []*gtm.Resource{
+					{
+						Type:                "XML load object via HTTP",
+						HostHeader:          "header",
+						LeastSquaresDecay:   30,
+						Description:         "first\nsecond\n",
+						LeaderString:        "leader",
+						ConstrainedProperty: "**",
+						ResourceInstances: []*gtm.ResourceInstance{
+							{
+								DatacenterId:         123,
+								UseDefaultLoadObject: false,
+								LoadObject: gtm.LoadObject{
+									LoadObject:     "load",
+									LoadObjectPort: 80,
+									LoadServers:    []string{"server"},
+								},
+							},
+						},
+						AggregationType:             "latest",
+						LoadImbalancePercentage:     51,
+						UpperBound:                  20,
+						Name:                        "test resource1",
+						MaxUMultiplicativeIncrement: 10,
+						DecayRate:                   5,
+					},
+				},
+				Properties: []*gtm.Property{
+					{
+						Name:                 "test property1",
+						Type:                 "static",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						TrafficTargets: []*gtm.TrafficTarget{
+							{
+								DatacenterId: 123,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"1.2.3.4"},
+							},
+						},
+						LivenessTests: []*gtm.LivenessTest{
+							{
+								Name:               "HTTP",
+								TestInterval:       60,
+								TestObject:         "/",
+								HttpError3xx:       true,
+								HttpError4xx:       true,
+								HttpError5xx:       true,
+								TestObjectProtocol: "HTTP",
+								TestObjectPort:     80,
+								TestTimeout:        10,
+							},
+						},
+						Comments: "first\nsecond\n",
+					},
+				},
+			},
+			dir:          "with_multiline2",
+			filesToCheck: []string{"domain.tf", "variables.tf", "import.sh", "resources.tf", "properties.tf"},
+		},
 	}
 
 	for name, test := range tests {
@@ -1014,12 +1226,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 					"properties.tmpl":  filepath.Join(outDir, "properties.tf"),
 					"variables.tmpl":   filepath.Join(outDir, "variables.tf"),
 				},
-				AdditionalFuncs: template.FuncMap{
-					"normalize":    normalizeResourceName,
-					"toUpper":      strings.ToUpper,
-					"isDefaultDC":  isDefaultDatacenter,
-					"escapeString": tools.EscapeQuotedStringLit,
-				},
+				AdditionalFuncs: additionalFunctions,
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 			for _, f := range test.filesToCheck {

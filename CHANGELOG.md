@@ -1,5 +1,28 @@
 # Release Notes
 
+## Version 1.10.0 (October 31, 2023)
+
+### Features/Enhancements
+
+* [IMPORTANT] Client Lists
+  * Added command `export-clientlist` which allows export of `akamai_clientlist_list` and `akamai_clientlist_activation`
+    resources
+* Cloudlets
+  * Added `matches_always` field to `akamai_cloudlets_edge_redirector_match_rule` export template
+* PAPI
+  * Added support for new rule format `v2023-09-20`
+
+### Bug fixes
+
+* Fixed generation of multiline text for: 
+  * `description` variable in AppSec configuration
+  * `comments` and `location.comments` fields in `akamai_cloudwrapper_configuration`
+  * `comment` field in `akamai_dns_zone`
+  * `comment` field in `akamai_gtm_domain`
+  * `comments` field in `akamai_gtm_property`
+  * `description` field in `akamai_gtm_resource`
+  * `note` field in `akamai_property_activation` and `akamai_property_include_activation`
+
 ## Version 1.9.1 (September 26, 2023)
 
 ### Bug fixes
@@ -15,7 +38,6 @@
 
 ## Version 1.9.0 (August 29, 2023)
 
-### Features/Enhancements
 
 * [IMPORTANT] CloudWrapper
   * Added support for `export-cloudwrapper` command which allows export of `akamai_cloudwrapper_configuration` and `akamai_cloudwrapper_activation` resources
@@ -59,7 +81,7 @@
 * Migrated to Terraform 1.4.6 version
 
 * PAPI
-  * Added support for `export-property` command with flag `--schema` for properties in frozen formats `v2023-01-05` and `v2023-05-30`. 
+  * Added support for `export-property` command with flag `--schema` for properties in frozen formats `v2023-01-05` and `v2023-05-30`.
   * Added support for import of `akamai_property_activation` resource.
   * Added changes in `export-property` command:
     * Added support for `STAGING` and `PRODUCTION` network configurations for `akamai_property_activation` resource.
@@ -146,7 +168,7 @@
 
 * CPS
   * New `export-cps` command to export DV enrollment (`akamai_cps_dv_enrollment`) or third-party enrollment with accompanying resources and data source (`akamai_cps_third_party_enrollment`,`akamai_cps_csr` and `akamai_cps_upload_certificate`)
-  
+
 ## Version 1.1.1 (Oct 27, 2022)
 
 ### Fixes
@@ -326,7 +348,7 @@
 * PAPI
   * Remove deprecated CPCode support
 
-## Version 0.2.0 
+## Version 0.2.0
 
 ### Bug Fixes
 
@@ -352,7 +374,7 @@ Initial release
 * DNS
   * Support importing existing DNS zones and related resources
 
-* GTM 
+* GTM
   * Support importing existing GTM domains and related resources
 
 * PAPI

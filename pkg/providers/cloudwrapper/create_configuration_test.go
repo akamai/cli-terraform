@@ -26,7 +26,8 @@ var (
 	getConfigurationResponseWithMultiCDN = generateCloudWrapperResponseMock(cloudwrapper.StatusActive, true)
 	processor                            = func(testdir string) templates.FSTemplateProcessor {
 		return templates.FSTemplateProcessor{
-			TemplatesFS: templateFiles,
+			TemplatesFS:     templateFiles,
+			AdditionalFuncs: additionalFunctions,
 			TemplateTargets: map[string]string{
 				"cloudwrapper.tmpl": fmt.Sprintf("./testdata/res/%s/cloudwrapper.tf", testdir),
 				"variables.tmpl":    fmt.Sprintf("./testdata/res/%s/variables.tf", testdir),
@@ -165,6 +166,39 @@ func TestProcessCloudWrapperTemplates(t *testing.T) {
 				Section: section,
 			},
 			dir:          "all_fields_config",
+			filesToCheck: []string{"cloudwrapper.tf", "import.sh", "variables.tf"},
+		},
+		"configuration multiline comments": {
+			givenData: TFCloudWrapperData{
+				Configuration: TFCWConfiguration{
+					ID:                        int64(12345),
+					Comments:                  "first\nsecond\n\nlast",
+					PropertyIDs:               []string{"123", "456"},
+					ContractID:                "1234",
+					ConfigurationResourceName: "test_configuration",
+					Name:                      "test_configuration",
+					Locations: []Location{
+						{
+							Comments:      "first\nsecond\n",
+							TrafficTypeID: 1,
+							Capacity: Capacity{
+								Unit:  "GB",
+								Value: 1,
+							},
+						},
+						{
+							Comments:      "TestComments",
+							TrafficTypeID: 2,
+							Capacity: Capacity{
+								Unit:  "TB",
+								Value: 2,
+							},
+						},
+					},
+				},
+				Section: section,
+			},
+			dir:          "multiline_comment",
 			filesToCheck: []string{"cloudwrapper.tf", "import.sh", "variables.tf"},
 		},
 		"not active configuration": {

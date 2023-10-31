@@ -64,7 +64,7 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
     cname = "{{.CName}}"
     {{- end}}
     {{- if .Comments}}
-    comments = "{{.Comments}}"
+    comments = {{template "Text" .Comments}}
     {{- end}}
     ghost_demand_reporting = {{.GhostDemandReporting}}
     {{- if ne (.Type | toUpper) "STATIC"}}

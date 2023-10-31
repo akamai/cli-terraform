@@ -15,7 +15,7 @@ resource "akamai_gtm_resource" "{{normalize .Name}}" {
     upper_bound = {{.UpperBound}}
     {{- end}}
     {{- if .Description}}
-    description = "{{.Description}}"
+    description = {{template "Text" .Description}}
     {{- end}}
     {{- if .LeaderString}}
     leader_string = "{{.LeaderString}}"

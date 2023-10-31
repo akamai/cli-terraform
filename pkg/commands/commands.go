@@ -17,6 +17,7 @@ package commands
 
 import (
 	"github.com/akamai/cli-terraform/pkg/providers/appsec"
+	"github.com/akamai/cli-terraform/pkg/providers/clientlists"
 	"github.com/akamai/cli-terraform/pkg/providers/cloudlets"
 	"github.com/akamai/cli-terraform/pkg/providers/cloudwrapper"
 	"github.com/akamai/cli-terraform/pkg/providers/cps"
@@ -105,6 +106,22 @@ func CommandLocator() ([]*cli.Command, error) {
 		Usage:       "export-appsec",
 		ArgsUsage:   "<security configuration name>",
 		Action:      validatedAction(appsec.CmdCreateAppsec, requireValidWorkpath, requireNArguments(1)),
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
+			},
+		},
+		BashComplete: autocomplete.Default,
+	})
+
+	commands = append(commands, &cli.Command{
+		Name:        "export-clientlist",
+		Description: "Generates Terraform configuration for Client List resources",
+		Usage:       "export-clientlist",
+		ArgsUsage:   "<list_id>",
+		Action:      validatedAction(clientlists.CmdCreateClientList, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "tfworkpath",

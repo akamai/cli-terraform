@@ -1,0 +1,2 @@
+terraform init
+terraform import akamai_cloudwrapper_configuration.test_configuration 12345

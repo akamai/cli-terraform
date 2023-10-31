@@ -23,7 +23,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/gtm"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
@@ -82,6 +81,13 @@ var templateFiles embed.FS
 
 var defaultDCs = map[int]struct{}{5400: {}, 5401: {}, 5402: {}}
 
+var additionalFunctions = tools.DecorateWithMultilineHandlingFunctions(map[string]any{
+	"normalize":    normalizeResourceName,
+	"toUpper":      strings.ToUpper,
+	"isDefaultDC":  isDefaultDatacenter,
+	"escapeString": tools.EscapeQuotedStringLit,
+})
+
 var (
 	subWithUnderscoreRegexp               = regexp.MustCompile(`[^\w-_]`)
 	mustStartWithLetterOrUnderscoreRegexp = regexp.MustCompile("^[^a-zA-Z_]")
@@ -127,12 +133,7 @@ func CmdCreateDomain(c *cli.Context) error {
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
-		AdditionalFuncs: template.FuncMap{
-			"normalize":    normalizeResourceName,
-			"toUpper":      strings.ToUpper,
-			"isDefaultDC":  isDefaultDatacenter,
-			"escapeString": tools.EscapeQuotedStringLit,
-		},
+		AdditionalFuncs: additionalFunctions,
 	}
 
 	domainName := c.Args().First()

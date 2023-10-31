@@ -10,11 +10,11 @@ import (
 
 	"path/filepath"
 	"testing"
-	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/appsec"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/botman"
 	"github.com/akamai/cli-terraform/pkg/templates"
+	"github.com/akamai/cli-terraform/pkg/tools"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -283,7 +283,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 	}
 
 	// Additional functions for the template processor
-	additionalFuncs := template.FuncMap{
+	additionalFuncs := tools.DecorateWithMultilineHandlingFunctions(map[string]any{
 		"getCustomRuleNameByID":                  getCustomRuleNameByID,
 		"getRepNameByID":                         getRepNameByID,
 		"getRuleNameByID":                        getRuleNameByID,
@@ -301,7 +301,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"getCustomBotCategoryNameByID":           getCustomBotCategoryNameByID,
 		"getCustomBotCategoryResourceNamesByIDs": getCustomBotCategoryResourceNamesByIDs,
 		"getCustomClientResourceNamesByIDs":      getCustomClientResourceNamesByIDs,
-	}
+	})
 
 	// Template to path mappings
 	security := filepath.Join("modules", "security")
@@ -386,7 +386,7 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 	// Mocked API calls
 	mocks := func(c *appsec.Mock, p *templates.MockProcessor) {
 		c.On("GetWAFMode", mock.Anything, mock.Anything).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)
-		c.On("GetConfiguration", mock.Anything, mock.Anything).Return(&appsec.GetConfigurationResponse{Description: "A security config for demo"}, nil)
+		c.On("GetConfiguration", mock.Anything, mock.Anything).Return(&appsec.GetConfigurationResponse{Description: "A security config for\ndemo\n"}, nil)
 	}
 
 	botmanMocks := func(c *botman.Mock, p *templates.MockProcessor) {
@@ -405,7 +405,7 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 	}
 
 	// Additional functions for the template processor
-	additionalFuncs := template.FuncMap{
+	additionalFuncs := tools.DecorateWithMultilineHandlingFunctions(map[string]any{
 		"getCustomRuleNameByID":                  getCustomRuleNameByID,
 		"getRepNameByID":                         getRepNameByID,
 		"getRuleNameByID":                        getRuleNameByID,
@@ -423,7 +423,7 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 		"getCustomBotCategoryNameByID":           getCustomBotCategoryNameByID,
 		"getCustomBotCategoryResourceNamesByIDs": getCustomBotCategoryResourceNamesByIDs,
 		"getCustomClientResourceNamesByIDs":      getCustomClientResourceNamesByIDs,
-	}
+	})
 
 	// Template to path mappings
 	security := filepath.Join("modules", "security")

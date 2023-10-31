@@ -20,7 +20,7 @@ resource "akamai_gtm_domain" "{{.NormalizedName}}" {
     name = "{{.Name}}"
     type = "{{.Type}}"
     {{- if .Comment}}
-    comment = "{{.Comment}}"
+    comment = {{template "Text" .Comment}}
     {{- end}}
     {{- if .EmailNotificationList}}
     email_notification_list = [{{range $i, $v := .EmailNotificationList}}{{if $i}}, {{end}}"{{$v}}"{{end}}]

@@ -60,7 +60,7 @@ func TestProcessRecordset(t *testing.T) {
 			m := new(dns.Mock)
 
 			ctx := context.Background()
-			zone := "0007770b-08a8-4b5f-a46b-081b772ba605-sbodden-calvin.com"
+			zone := "0007770b-08a8-4b5f-a46b-081b772ba605-test.com"
 			metadata := dns.MetadataH{}
 			recordset := dns.Recordset{
 				Name:  "someName",

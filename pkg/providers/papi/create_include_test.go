@@ -539,6 +539,11 @@ func TestProcessIncludeTemplates(t *testing.T) {
 			dir:          "include_no_network",
 			filesToCheck: []string{"includes.tf", "variables.tf", "import.sh"},
 		},
+		"include basic with multiline note": {
+			givenData:    getTestData("include with multiline notes"),
+			dir:          "include_basic_multiline_notes",
+			filesToCheck: []string{"includes.tf", "variables.tf", "import.sh"},
+		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -643,6 +648,26 @@ func getTestData(key string) TFData {
 					IncludeName: "test_include",
 					IncludeType: string(papi.IncludeTypeMicroServices),
 					RuleFormat:  "v2020-11-02",
+				},
+			},
+		},
+		"include with multiline notes": {
+			Section: section,
+			Includes: []TFIncludeData{
+				{
+					ActivationNoteProduction:   "first\nsecond\n",
+					ActivationNoteStaging:      "first\nsecond\n\nlast",
+					ContractID:                 "test_contract",
+					ActivationEmailsProduction: []string{"test@example.com", "test1@example.com"},
+					ActivationEmailsStaging:    []string{"test@example.com"},
+					GroupID:                    "test_group",
+					IncludeID:                  "inc_123456",
+					IncludeName:                "test_include",
+					IncludeType:                string(papi.IncludeTypeMicroServices),
+					Networks:                   []string{"STAGING", "PRODUCTION"},
+					RuleFormat:                 "v2020-11-02",
+					VersionProduction:          "1",
+					VersionStaging:             "1",
 				},
 			},
 		},

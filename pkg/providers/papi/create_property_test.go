@@ -1758,6 +1758,56 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "basic_with_activation_note",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
+		"property with multiline activation note": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							CnameFrom:                "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
+						},
+					},
+					StagingInfo: NetworkInfo{
+						HasActivation:  true,
+						Emails:         []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+						ActivationNote: "first\nsecond\n\nlast",
+					},
+					ProductionInfo: NetworkInfo{
+						HasActivation:  true,
+						Emails:         []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+						ActivationNote: "first\nsecond\n",
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "basic_with_multiline_activation_note",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
 		"property with production activation": {
 			givenData: TFData{
 				Property: TFPropertyData{
@@ -1900,7 +1950,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		},
 		// property with rules as datasource - schema version 1 and 2 is a pair of tests that confirms that schema 1 does not use any schema's 2 template definitions and vice versa
 		// the behaviour was chosen in a way, so it's easily identifiable which template inner definition was picked (e.g. there was change in field type)
-		"property with rules as datasource - schema version 1": {
+		"property with rules as datasource - schema version v2023-01-05": {
 			givenData: TFData{
 				Property: TFPropertyData{
 					GroupName:            "test_group",
@@ -1917,12 +1967,12 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 				Section: "test_section",
 			},
-			dir:          "basic-rules-datasource-schema1",
+			dir:          "basic-rules-datasource-schema-v2023-01-05",
 			schema:       true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
 		},
-		"property with rules as datasource - schema version 2": {
+		"property with rules as datasource - schema version v2023-05-30": {
 			givenData: TFData{
 				Property: TFPropertyData{
 					GroupName:            "test_group",
@@ -1939,10 +1989,32 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 				Section: "test_section",
 			},
-			dir:          "basic-rules-datasource-schema2",
+			dir:          "basic-rules-datasource-schema-v2023-05-30",
 			schema:       true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-05-30")},
+		},
+		"property with rules as datasource - schema version v2023-09-20": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "v2023-09-20",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+				},
+				Section: "test_section",
+			},
+			dir:          "basic-rules-datasource-schema-v2023-09-20",
+			schema:       true,
+			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-09-20")},
 		},
 	}
 
@@ -2205,126 +2277,6 @@ func TestTerraformName(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			assert.Equal(t, test.expected, TerraformName(test.given))
-		})
-	}
-}
-
-func TestIsMultiline(t *testing.T) {
-	tests := map[string]struct {
-		given    string
-		expected bool
-	}{
-		"has new lines": {
-			given:    "this\nis test\n",
-			expected: true,
-		},
-		"empty": {
-			given:    "",
-			expected: false,
-		},
-		"no new lines": {
-			given:    "no new lines",
-			expected: false,
-		},
-	}
-
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, test.expected, IsMultiline(test.given))
-		})
-	}
-}
-
-func TestNoNewlineAtTheEnd(t *testing.T) {
-	tests := map[string]struct {
-		given    string
-		expected bool
-	}{
-		"has new line at the end": {
-			given:    "this\nis test\n",
-			expected: false,
-		},
-		"has new line in the middle": {
-			given:    "this\nis test",
-			expected: true,
-		},
-		"empty": {
-			given:    "",
-			expected: true,
-		},
-		"no new lines": {
-			given:    "no new lines",
-			expected: true,
-		},
-	}
-
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, test.expected, NoNewlineAtTheEnd(test.given))
-		})
-	}
-}
-
-func TestRemoveLastNewline(t *testing.T) {
-	tests := map[string]struct {
-		given    string
-		expected string
-	}{
-		"has new line at the end": {
-			given:    "this\nis test\n",
-			expected: "this\nis test",
-		},
-		"has new line in the middle": {
-			given:    "this\nis test",
-			expected: "this\nis test",
-		},
-		"empty": {
-			given:    "",
-			expected: "",
-		},
-		"no new lines": {
-			given:    "no new lines",
-			expected: "no new lines",
-		},
-	}
-
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, test.expected, RemoveLastNewline(test.given))
-		})
-	}
-}
-
-func TestGetEOT(t *testing.T) {
-	tests := map[string]struct {
-		given    string
-		expected string
-	}{
-		"has new line": {
-			given:    "this\nis test\n",
-			expected: "EOT",
-		},
-		"has EOT inside": {
-			given:    "this\nEOT",
-			expected: "EOTA",
-		},
-		"empty": {
-			given:    "",
-			expected: "EOT",
-		},
-		"has two EOTs": {
-			given:    "some\nEOT\nEOTA\ntext",
-			expected: "EOTAA",
-		},
-		"has EOT": {
-			given:    "comment\nnewline\nand\nEOT\ninside\n",
-			expected: "EOTA",
-		},
-	}
-
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, test.expected, GetEOT(test.given))
 		})
 	}
 }

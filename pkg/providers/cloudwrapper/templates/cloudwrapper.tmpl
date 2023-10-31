@@ -21,7 +21,7 @@ resource "akamai_cloudwrapper_configuration" "{{.Configuration.ConfigurationReso
   {{- if .Configuration.NotificationEmails }}
   notification_emails       =  [{{range $index, $element := .Configuration.NotificationEmails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
   {{- end}}
-  comments                  = "{{.Configuration.Comments}}"
+  comments                  = {{template "Text" .Configuration.Comments}}
   retain_idle_objects       = {{.Configuration.RetainIdleObjects}}
   {{- if .Configuration.CapacityAlertsThreshold }}
   capacity_alerts_threshold = {{.Configuration.CapacityAlertsThreshold}}
@@ -29,7 +29,7 @@ resource "akamai_cloudwrapper_configuration" "{{.Configuration.ConfigurationReso
   {{- range $index, $element := .Configuration.Locations}}
   location {
     traffic_type_id = {{$element.TrafficTypeID}}
-    comments        = "{{$element.Comments}}"
+    comments        = {{template "Text" $element.Comments}}
     capacity {
       value = {{$element.Capacity.Value}}
       unit  = "{{$element.Capacity.Unit}}"
