@@ -1,0 +1,115 @@
+{
+  "accountId": "test_account",
+  "contractId": "test_contract",
+  "groupId": "grp_12345",
+  "propertyId": "prp_12345",
+  "propertyVersion": 5,
+  "etag": "460FAKE3da8bc05b0c0f0f7524985d2fbc5d864d",
+  "ruleFormat": "v2023-01-05",
+  "rules": {
+    "name": "default",
+    "behaviors": [
+      {
+        "name": "origin",
+        "options": {
+          "originType": "CUSTOMER",
+          "hostname": "foo.amazonaws.com",
+          "forwardHostHeader": "REQUEST_HOST_HEADER",
+          "cacheKeyHostname": "REQUEST_HOST_HEADER",
+          "compress": true,
+          "enableTrueClientIp": true,
+          "trueClientIpHeader": "True-Client-IP",
+          "trueClientIpClientSetting": false,
+          "originCertificate": "",
+          "verificationMode": "CUSTOM",
+          "customValidCnValues": [
+            "{{Origin Hostname}}",
+            "{{Forward Host Header}}"
+          ],
+          "originCertsToHonor": "COMBO",
+          "standardCertificateAuthorities": [
+            "akamai-permissive"
+          ],
+          "customCertificateAuthorities": [
+            {
+              "subjectCN": "GeoTrust EV SSL CA - G4",
+              "subjectAlternativeNames": [],
+              "subjectRDNs": {
+                "C": "US",
+                "O": "GeoTrust Inc.",
+                "CN": "GeoTrust EV SSL CA - G4"
+              },
+              "issuerRDNs": {
+                "C": "US",
+                "O": "GeoTrust Inc.",
+                "CN": "GeoTrust Primary Certification Authority"
+              },
+              "notBefore": 1383177600000,
+              "notAfter": 1698710399000,
+              "sigAlgName": "SHA256withRSA",
+              "publicKey": "MIIBIjANBgkqhkiG9w0BFAKEAAOCAQ8AMIIBCgKCAQEA2bQF8jhnDwnnfPVjKuW5XqgRrnVx2UyEZ62JXfwoPSqwpdXU5jAKhNTkGMuFN8VGcesce2nbZWmMMAU+B+FvPMELYeY4RPy8jC9OdVf1lpl8PocfD5BLcMM/OUU7OmvLu3tAVNGLS6Fy0gTp4HIakxF6L/GrnZyYWK4s6ndfLy6Hr7hr4+LiP9Y94JZE3xFVY1Iv9CZ4xA8gTQrAaHAVhjjut3aIqxiPTzUe1IzJ2349RNQ2jME3tVlbh/np8dTFKL0d3MyWctF6oacgtbiv+G6lYHsrjR/u9CvWac2vyoBYKehMACCKSQpujoyo0QAShLbF4pWiwDuka/CC0JZdJQIDAQAB",
+              "publicKeyAlgorithm": "RSA",
+              "publicKeyFormat": "X.509",
+              "serialNumber": 1.4693455585277353e+38,
+              "version": 3,
+              "sha1Fingerprint": "3056b343485b9d55f3e2b177a895bb0463ee3efd",
+              "pemEncodedCert": "-----BEGIN CERTIFICATE-----\nMIIEbjFAKEagAwIBAgIQboqQ68/wRIpyDQgF0IKlRDANBgkqhkiG9w0BAQsFADBY\nMQswCQYDVQQGEwJVUzEWMBQGA1UEChMNR2VvVHJ1c3QgSW5jLjExMC8GA1UEAxMo\nR2VvVHJ1c3QgUHJpbWFyeSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTAeFw0xMzEw\nMzEwMDAwMDBaFw0yMzEwMzAyMzU5NTlaMEcxCzAJBgNVBAYTAlVTMRYwFAYDVQQK\nEw1HZW9UcnVzdCBJbmMuMSAwHgYDVQQDExdHZW9UcnVzdCBFViBTU0wgQ0EgLSBH\nNDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANm0BfI4Zw8J53z1Yyrl\nuV6oEa51cdlMhGetiV38KD0qsKXV1OYwCoTU5BjLhTfFRnHrHHtp22VpjDAFPgfh\nbzzBC2HmOET8vIwvTnVX9ZaZfD6HHw+QS3DDPzlFOzpry7t7QFTRi0uhctIE6eBy\nGpMRei/xq52cmFiuLOp3Xy8uh6+4a+Pi4j/WPeCWRN8RVWNSL/QmeMQPIE0KwGhw\nFYY47rd2iKsYj081HtSMydt+PUTUNozBN7VZW4f56fHUxSi9HdzMlnLReqGnILW4\nr/hupWB7K40f7vQr1mnNr8qAWCnoTAAgikkKbo6MqNEAEoS2xeKVosA7pGvwgtCW\nXSUCAwEAAaOCAUMwggE/MBIGA1UdEwEB/wQIMAYBAf8CAQAwDgYDVR0PAQH/BAQD\nAgEGMC8GCCsGAQUFBwEBBCMwITAfBggrBgEFBQcwAYYTaHR0cDovL2cyLnN5bWNi\nLmNvbTBHBgNVHSAEQDA+MDwGBFUdIAAwNDAyBggrBgEFBQcCARYmaHR0cHM6Ly93\nd3cuZ2VvdHJ1c3QuY29tL3Jlc291cmNlcy9jcHMwNAYDVR0fBC0wKzApoCegJYYj\naHR0cDovL2cxLnN5bWNiLmNvbS9HZW9UcnVzdFBDQS5jcmwwKQYDVR0RBCIwIKQe\nMBwxGjAYBgNVBAMTEVN5bWFudGVjUEtJLTEtNTM4MB0GA1UdDgQWBBTez1xQt64C\nHxUXqhboDbUonWpa8zAfBgNVHSMEGDAWgBQs1VBBlxWL8I82YVtK+2vZmckzkjAN\nBgkqhkiG9w0BAQsFAAOCAQEAtI69B7mahew7Z70HYGHmhNHU7+sbuguCS5VktmZT\nI723hN3ke40J2s+y9fHDv4eEvk6mqMLnEjkoNOCkVkRADJ+IoxXT6NNe4xwEYPtp\nNk9qfgwqKMHzqlgObM4dB8NKwJyNw3SxroLwGuH5Tim9Rt63Hfl929kPhMuSRcwc\nsxj2oM9xbwwum9Its5mTg0SsFaqbLmfsT4hpBVZ7i7JDqTpsHBMzJRv9qMhXAvsc\n4NG9O1ZEZcNj9Rvv7DDZ424uE+k5CCoMcvOazPYnKYTT70zHhBFlH8bjgQPbh8x4\n97Wdlj5qf7wRhXp15kF9Dc/55YVpJY/HjQct+GkPy0FTAA==\n-----END CERTIFICATE-----\n",
+              "canBeLeaf": false,
+              "canBeCA": true,
+              "selfSigned": false
+            }
+          ],
+          "customCertificates": [
+            {
+              "subjectCN": "*.foo.com",
+              "subjectAlternativeNames": [
+                "*.foo.com",
+                "foo.com.cn"
+              ],
+              "subjectRDNs": {
+                "CN": "*.foo.com"
+              },
+              "issuerRDNs": {
+                "C": "US",
+                "OU": "Server CA 1B",
+                "CN": "Amazon",
+                "O": "Amazon"
+              },
+              "notBefore": 1627516800000,
+              "notAfter": 1661644799000,
+              "sigAlgName": "SHA256withRSA",
+              "publicKey": "MIIBIjANBgkqFAKE9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1gpaSxNOXCC7iq0aJqfKJPvh7E3Us5EmgB1l1FxwwPV9kxppO6Hk3R8jDY5OJY+z3LY8fmGzteVesqbbEPvGnvbafSf4n7+8BXiA9QvCyoq2HS0YPGLxrPwb6lMMR/URUS9UlLDeOlAUI7e8Ywl4mqzTZ81Icx69mMNLckPepBrdkv3BYA4QsFtvMzns7IsGrYqUPhTF1zX2sxDM9GTPIBpyRzOJVU0EKxdLqmGbD2vH4huikRHbGeFx+SFx2NI2brnPdZCLfrth1X9VwPvNR30Rrrgrx2qI31BjQbmNEmISzrN+O9XzTcDpTm1j1M9jrxoAfOziU9QIR+/PP/KqoQIDAQAB",
+              "publicKeyAlgorithm": "RSA",
+              "publicKeyFormat": "X.509",
+              "serialNumber": "4610192225008347635903659133613654691",
+              "version": 3,
+              "sha1Fingerprint": "4d427593493f5c689a709d7efa5a429946a91c91",
+              "pemEncodedCert": "-----BEGIN CERTIFICATE-----\nMIIGCzCCBFAKEwIBAgIQA3fkBpb9nE+XoSK/oQBCozANBgkqhkiG9w0BAQsFADBG\nMQswCQYDVQQGEwJVUzEPMA0GA1UEChMGQW1hem9uMRUwEwYDVQQLEwxTZXJ2ZXIg\nQ0EgMUIxDzANBgNVBAMTBkFtYXpvbjAeFw0yMTA3MjkwMDAwMDBaFw0yMjA4Mjcy\nMzU5NTlaMBoxGDAWBgNVBAMMDyoubXl0aGVyZXNhLmNvbTCCASIwDQYJKoZIhvcN\nAQEBBQADggEPADCCAQoCggEBANYKWksTTlwgu4qtGianyiT74exN1LORJoAdZdRc\ncMD1fZMaaTuh5N0fIw2OTiWPs9y2PH5hs7XlXrKm2xD7xp722n0n+J+/vAV4gPUL\nwsqKth0tGDxi8az8G+pTDEf1EVEvVJSw3jpQFCO3vGMJeJqs02fNSHMevZjDS3JD\n3qQa3ZL9wWAOELBbbzM57OyLBq2KlD4Uxdc19rMQzPRkzyAackcziVVNBCsXS6ph\nmw9rx+IbopER2xnhcfkhcdjSNm65z3WQi367YdV/VcD7zUd9Ea64K8dqiN9QY0G5\njRJiEs6zfjvV803A6U5tY9TPY68aAHzs4lPUCEfvzz/yqqECAwEAAaOCAx8wggMb\nMB8GA1UdIwQYMBaAFFmkZgZSoHuVkjyjlAcnlnRb+T3QMB0GA1UdDgQWBBT3mQuP\nJXVtAKh7a86V6NZmh5YYPjBPBgNVHREESDBGgg8qLm15dGhlcmVzYS5jb22CDW15\ndGhlcmVzYS5jb22CEioubXl0aGVyZXNhLmNvbS5jboIQbXl0aGVyZXNhLmNvbS5j\nbjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMC\nMDsGA1UdHwQ0MDIwMKAuoCyGKmh0dHA6Ly9jcmwuc2NhMWIuYW1hem9udHJ1c3Qu\nY29tL3NjYTFiLmNybDATBgNVHSAEDDAKMAgGBmeBDAECATB1BggrBgEFBQcBAQRp\nMGcwLQYIKwYBBQUHMAGGIWh0dHA6Ly9vY3NwLnNjYTFiLmFtYXpvbnRydXN0LmNv\nbTA2BggrBgEFBQcwAoYqaHR0cDovL2NydC5zY2ExYi5hbWF6b250cnVzdC5jb20v\nc2NhMWIuY3J0MAwGA1UdEwEB/wQCMAAwggGABgorBgEEAdZ5AgQCBIIBcASCAWwB\nagB3ACl5vvCeOTkh8FZzn2Old+W+V32cYAr4+U1dJlwlXceEAAABevCFP78AAAQD\nAEgwRgIhAI0dmeYj3HQrGrRjwzT1MaoIxVWWmx1pDRXrp0FnmWDuAiEAirOnsVWd\nEtT1Y+lNaj5ZWYtO1bHoRG4XVnJHKaVwL0MAdwBRo7D1/QF5nFZtuDd4jwykeswb\nJ8v3nohCmg3+1IsF5QAAAXrwhT+1AAAEAwBIMEYCIQCt33r54fDpd/yaYN7cwazr\nm1/RtIY+ysHFTGap8DCQewIhAN0rQ25+HU3ybP5n9LMNijvzr61w5Ip61d55gFE5\n8PseAHYAQcjKsd8iRkoQxqE6CUKHXk4xixsD6+tLx2jwkGKWBvYAAAF68IU/bAAA\nBAMARzBFAiBR/vMRwvCfKPZ7ewre7Nb8ZlXldO7tKwpqKtre9R4CFQIhAK44D9Oj\nKk/CMsKRpFFkdgDQpDWx1w71QwJTWFjRcFpCMA0GCSqGSIb3DQEBCwUAA4IBAQCq\nVLjSaLp2lPm5HXDJBo6Tc/qcavM5lpeLsxN3Q7W9NOgn7NdT6gnGmWASlnMmtMzy\nw98VsFazjs+lJeXVaRCD7NMTD5ijQ9wixYVGvdBkDVqGqImhW3xI0SuDsYlJSvFt\nRcBhnop9HxADKIAP0kRMgLVSouQNyIYifnqCUPzw0Dz8zeN5fuFjVkSzZQe5CFek\nYH6nNKTANBa6SU3DgoTIw5cebYdMsiVPZ1fwOoMxTGflz9WEO2kHb/+mYcnzuNuh\nCNMsdiMUf48dIhpTs5Oe5VBuWfdeC6IVhh5cVwu5yGhG9zuPq9/IHW+eJBG/6Nrv\nPlTQzLLqEPFBItdmQwe3\n-----END CERTIFICATE-----\n",
+              "canBeLeaf": true,
+              "canBeCA": false,
+              "selfSigned": false
+            }
+          ],
+          "ports": "",
+          "httpPort": 80,
+          "httpsPort": 443,
+          "originSni": true
+        }
+      },
+      {
+        "name": "cpCode",
+        "options": {
+          "value": {
+            "id": 452416
+          }
+        }
+      }
+    ],
+    "uuid": "default",
+    "options": {
+      "is_secure": false
+    },
+    "variables": [],
+    "comments": "The behaviors in the Default Rule apply to all requests for the property hostname(s) unless another rule overrides the Default Rule settings."
+  }
+}

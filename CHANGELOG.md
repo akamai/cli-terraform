@@ -1,6 +1,6 @@
 # Release Notes
 
-## Version 1.11.0 (xx xx, 2023)
+## Version 1.11.0 (Dec xx, 2023)
 
 ### Features/Enhancements
 
@@ -9,6 +9,12 @@
   * `--rules-as-hcl`  (for export-property command)
 * Cloudlets
   * Add `origin_description` field export in `akamai_cloudlets_application_load_balancer` resource
+
+### Bug fixes
+
+* PAPI
+  * Fixed error with exporting schema containing `serialNumber`
+
 
 ## Version 1.10.0 (October 31, 2023)
 
