@@ -25,14 +25,20 @@ type (
 	TFPolicyData struct {
 		Name                    string
 		CloudletCode            string
+		OriginDescription       string
 		Description             string
 		GroupID                 int64
 		MatchRuleFormat         cloudlets.MatchRuleFormat
 		MatchRules              cloudlets.MatchRules
 		PolicyActivations       map[string]TFPolicyActivationData
-		LoadBalancers           []cloudlets.LoadBalancerVersion
+		LoadBalancers           []LoadBalancerVersion
 		LoadBalancerActivations []cloudlets.LoadBalancerActivation
 		Section                 string
+	}
+	// LoadBalancerVersion ...
+	LoadBalancerVersion struct {
+		cloudlets.LoadBalancerVersion
+		OriginDescription string
 	}
 
 	// TFPolicyActivationData represents data used in policy activation resource templates
@@ -205,8 +211,8 @@ func getLoadBalancerActivations(ctx context.Context, client cloudlets.Cloudlets,
 	return activations, nil
 }
 
-func getLoadBalancers(ctx context.Context, client cloudlets.Cloudlets, originIDs []string) ([]cloudlets.LoadBalancerVersion, error) {
-	loadBalancers := make([]cloudlets.LoadBalancerVersion, 0)
+func getLoadBalancers(ctx context.Context, client cloudlets.Cloudlets, originIDs []string) ([]LoadBalancerVersion, error) {
+	loadBalancers := make([]LoadBalancerVersion, 0)
 	for _, originID := range originIDs {
 		versions, err := client.ListLoadBalancerVersions(ctx, cloudlets.ListLoadBalancerVersionsRequest{
 			OriginID: originID,
@@ -224,7 +230,17 @@ func getLoadBalancers(ctx context.Context, client cloudlets.Cloudlets, originIDs
 			}
 		}
 		if ver > 0 {
-			loadBalancers = append(loadBalancers, loadBalancerVersion)
+			origin, err := client.GetOrigin(ctx, cloudlets.GetOriginRequest{
+				OriginID: originID,
+			})
+			if err != nil {
+				return nil, err
+			}
+
+			loadBalancers = append(loadBalancers, LoadBalancerVersion{
+				LoadBalancerVersion: loadBalancerVersion,
+				OriginDescription:   origin.Description,
+			})
 		}
 	}
 	return loadBalancers, nil

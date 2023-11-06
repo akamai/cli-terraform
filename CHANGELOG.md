@@ -1,5 +1,10 @@
 # Release Notes
 
+## Version 1.11.0 (xx xx, 2023)
+
+* Cloudlets
+  * Add `origin_description` field export in `akamai_cloudlets_application_load_balancer` resource
+
 ## Version 1.10.0 (October 31, 2023)
 
 ### Features/Enhancements
