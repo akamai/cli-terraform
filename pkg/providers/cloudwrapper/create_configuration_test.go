@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"testing"
 
@@ -16,6 +17,17 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
+
+func TestMain(m *testing.M) {
+	if err := os.MkdirAll("./testdata/res", 0755); err != nil {
+		log.Fatal(err)
+	}
+	exitCode := m.Run()
+	if err := os.RemoveAll("./testdata/res"); err != nil {
+		log.Fatal(err)
+	}
+	os.Exit(exitCode)
+}
 
 var (
 	section                              = "test_section"

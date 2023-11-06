@@ -153,7 +153,7 @@ var (
 		RuleFormat:     "v2020-11-02",
 	}
 
-	getIncludeRuleTreeReqSchema = papi.GetIncludeRuleTreeRequest{
+	getIncludeRuleTreeReqRulesAsHCL = papi.GetIncludeRuleTreeRequest{
 		ContractID:     "test_contract",
 		GroupID:        "test_group",
 		IncludeID:      "inc_123456",
@@ -331,7 +331,7 @@ func TestCreateInclude(t *testing.T) {
 		snippetFilesToCheck []string
 		jsonDir             string
 		withError           error
-		schema              bool
+		rulesAsHCL          bool
 	}{
 		"include basic": {
 			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
@@ -359,7 +359,7 @@ func TestCreateInclude(t *testing.T) {
 				"Dynamic_Content.json",
 			},
 		},
-		"include basic schema": {
+		"include basic rules as hcl": {
 			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
 				expectListIncludes(c)
 				expectGetIncludeVersion(c, "v2023-01-05")
@@ -369,10 +369,10 @@ func TestCreateInclude(t *testing.T) {
 				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
 				assert.NoError(t, err)
 				assert.NoError(t, json.Unmarshal(rules, &ruleResponse))
-				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReqSchema).Return(&ruleResponse, nil).Once()
+				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReqRulesAsHCL).Return(&ruleResponse, nil).Once()
 
 				expectListIncludeActivations(c)
-				expectAllProcessTemplates(p, (&tfDataBuilder{}).withData(getTestData("include basic schema")).
+				expectAllProcessTemplates(p, (&tfDataBuilder{}).withData(getTestData("include basic rules as hcl")).
 					withIncludeRules(0, flattenRules("test_include", ruleResponse.Rules)).
 					build(), useThisOnlyRuleFormat("v2023-01-05"))
 				mockAddTemplateTargetRules(p)
@@ -382,8 +382,8 @@ func TestCreateInclude(t *testing.T) {
 			},
 
 			includeName: "test_include",
-			dir:         "include_basic_schema",
-			schema:      true,
+			dir:         "include_basic_rules_as_hcl",
+			rulesAsHCL:  true,
 		},
 		"include basic, unsupported schema version": {
 			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
@@ -407,7 +407,7 @@ func TestCreateInclude(t *testing.T) {
 
 			includeName: "test_include",
 			dir:         "include_basic",
-			schema:      true,
+			rulesAsHCL:  true,
 			withError:   ErrUnsupportedRuleFormat,
 		},
 		"error include not found": {
@@ -490,7 +490,7 @@ func TestCreateInclude(t *testing.T) {
 			mp := new(templates.MockProcessor)
 			test.init(mc, mp, test.dir)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createInclude(ctx, contractID, test.includeName, section, fmt.Sprintf("./testdata/res/%s", test.jsonDir), "./", test.schema, mc, mp)
+			err := createInclude(ctx, contractID, test.includeName, section, fmt.Sprintf("./testdata/res/%s", test.jsonDir), "./", test.rulesAsHCL, mc, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -514,7 +514,7 @@ func TestProcessIncludeTemplates(t *testing.T) {
 		givenData    TFData
 		dir          string
 		filesToCheck []string
-		schema       bool
+		rulesAsHCL   bool
 		filterFuncs  []func([]string) ([]string, error)
 	}{
 		"include basic": {
@@ -522,11 +522,11 @@ func TestProcessIncludeTemplates(t *testing.T) {
 			dir:          "include_basic",
 			filesToCheck: []string{"includes.tf", "variables.tf", "import.sh"},
 		},
-		"include basic schema": {
-			givenData:    getTestData("include basic schema"),
-			dir:          "include_basic_schema",
+		"include basic rules as hcl": {
+			givenData:    getTestData("include basic rules as hcl"),
+			dir:          "include_basic_rules_as_hcl",
 			filesToCheck: []string{"includes.tf", "variables.tf", "import.sh", "includes_rules.tf"},
-			schema:       true,
+			rulesAsHCL:   true,
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
 		},
 		"include single network": {
@@ -547,10 +547,10 @@ func TestProcessIncludeTemplates(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			if test.schema {
+			if test.rulesAsHCL {
 				ruleResponse := getRuleTreeResponse(test.dir, t)
 				test.givenData.Includes[0].Rules = flattenRules(test.givenData.Includes[0].IncludeName, ruleResponse.Rules)
-				test.givenData.RulesAsSchema = true
+				test.givenData.RulesAsHCL = true
 			}
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
 			templateToFile := map[string]string{
@@ -558,7 +558,7 @@ func TestProcessIncludeTemplates(t *testing.T) {
 				"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
 				"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
 			}
-			if test.schema {
+			if test.rulesAsHCL {
 				templateToFile["includes_rules.tmpl"] = fmt.Sprintf("./testdata/res/%s/includes_rules.tf", test.dir)
 			}
 			processor := templates.FSTemplateProcessor{
@@ -602,7 +602,7 @@ func getTestData(key string) TFData {
 				},
 			},
 		},
-		"include basic schema": {
+		"include basic rules as hcl": {
 			Section: section,
 			Includes: []TFIncludeData{
 				{
@@ -671,7 +671,7 @@ func getTestData(key string) TFData {
 				},
 			},
 		},
-		"basic property with multiple includes schema": {
+		"basic property with multiple includes as hcl": {
 			Property: TFPropertyData{
 				GroupName:            "test_group",
 				GroupID:              "grp_12345",

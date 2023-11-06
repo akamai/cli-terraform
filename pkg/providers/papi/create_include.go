@@ -54,9 +54,9 @@ func CmdCreateInclude(c *cli.Context) error {
 		"imports.tmpl":   importPath,
 	}
 
-	var schema bool
-	if c.IsSet("schema") {
-		schema = c.Bool("schema")
+	var rulesAsHCL bool
+	if c.IsSet("rules-as-hcl") {
+		rulesAsHCL = c.Bool("rules-as-hcl")
 	}
 
 	processor := templates.FSTemplateProcessor{
@@ -69,20 +69,20 @@ func CmdCreateInclude(c *cli.Context) error {
 	includeName := c.Args().Get(1)
 	section := edgegrid.GetEdgercSection(c)
 
-	if err = createInclude(ctx, contractID, includeName, section, "property-snippets", tfWorkPath, schema, client, processor); err != nil {
+	if err = createInclude(ctx, contractID, includeName, section, "property-snippets", tfWorkPath, rulesAsHCL, client, processor); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting include: %s", err)), 1)
 	}
 
 	return nil
 }
 
-func createInclude(ctx context.Context, contractID, includeName, section, jsonDir, tfWorkPath string, schema bool, client papi.PAPI, processor templates.TemplateProcessor) error {
+func createInclude(ctx context.Context, contractID, includeName, section, jsonDir, tfWorkPath string, rulesAsHCL bool, client papi.PAPI, processor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
 	tfData := TFData{
-		Includes:      make([]TFIncludeData, 0),
-		Section:       section,
-		RulesAsSchema: schema,
+		Includes:   make([]TFIncludeData, 0),
+		Section:    section,
+		RulesAsHCL: rulesAsHCL,
 	}
 
 	// Get Include
@@ -100,7 +100,7 @@ func createInclude(ctx context.Context, contractID, includeName, section, jsonDi
 	}
 
 	// Save snippets
-	if !schema {
+	if !rulesAsHCL {
 		term.Spinner().Start("Saving snippets ")
 		ruleTemplate, rulesTemplate := setIncludeRuleTemplates(rules)
 		if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), fmt.Sprintf("%s.json", include.IncludeName)); err != nil {
@@ -114,7 +114,7 @@ func createInclude(ctx context.Context, contractID, includeName, section, jsonDi
 
 	tfData.Includes = append(tfData.Includes, *includeData)
 	filterFuncs := make([]func([]string) ([]string, error), 0)
-	if schema {
+	if rulesAsHCL {
 		ruleTemplate := fmt.Sprintf("rules_%s.tmpl", rules.RuleFormat)
 		if !processor.TemplateExists(ruleTemplate) {
 			return fmt.Errorf("%w: %s", ErrUnsupportedRuleFormat, rules.RuleFormat)

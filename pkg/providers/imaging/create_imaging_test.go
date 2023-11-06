@@ -683,7 +683,7 @@ func TestCreateImaging(t *testing.T) {
 		dataDir      string
 		jsonDir      string
 		withError    error
-		schema       bool
+		policyAsHCL  bool
 	}{
 		"fetch policy set with given id and contract and no policies": {
 			init: func(i *imaging.Mock) {
@@ -727,7 +727,7 @@ func TestCreateImaging(t *testing.T) {
 			filesToCheck: []string{"jsondir/_auto.json", "jsondir/test_policy_image.json", "imaging.tf", "import.sh", "variables.tf"},
 		},
 
-		"fetch policy set with image policies same on production as schema": {
+		"fetch policy set with image policies same on production as as hcl": {
 			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
@@ -739,11 +739,11 @@ func TestCreateImaging(t *testing.T) {
 				// policyID: test_policy_image - same on production
 				expectGetPolicy(i, policiesRequests[1], imagePoliciesOutputs[1], nil)
 			},
-			dataDir:      "json/image_policies_schema",
+			dataDir:      "json/image_policies_as_hcl",
 			filesToCheck: []string{"imaging.tf", "import.sh", "variables.tf"},
-			schema:       true,
+			policyAsHCL:  true,
 		},
-		"fetch policy set with image policies same on production as schema, too many levels": {
+		"fetch policy set with image policies same on production as as hcl, too many levels": {
 			init: func(i *imaging.Mock) {
 				policy, err := convertPolicyInputImage(&veryDeepPolicy)
 				require.NoError(t, err)
@@ -760,8 +760,8 @@ func TestCreateImaging(t *testing.T) {
 					PolicySetID: "test_policyset_id",
 				}, policy, nil)
 			},
-			withError: ErrFetchingPolicy,
-			schema:    true,
+			withError:   ErrFetchingPolicy,
+			policyAsHCL: true,
 		},
 		"fetch policy set with image policies different on production": {
 			init: func(i *imaging.Mock) {
@@ -811,7 +811,7 @@ func TestCreateImaging(t *testing.T) {
 			filesToCheck: []string{"jsondir/_auto.json", "jsondir/test_policy_video.json", "imaging.tf", "import.sh", "variables.tf"},
 		},
 
-		"fetch policy set with video policies same on production as schema": {
+		"fetch policy set with video policies same on production as as hcl": {
 			init: func(i *imaging.Mock) {
 				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "VIDEO", "EMEA", nil).Once()
 				// getPolicies returns two policy outputs from staging
@@ -823,8 +823,8 @@ func TestCreateImaging(t *testing.T) {
 				// policyID: test_policy_image - same on production
 				expectGetPolicy(i, policiesRequests[2], videoPoliciesOutputs[1], nil)
 			},
-			dataDir:      "json/video_policies_schema",
-			schema:       true,
+			dataDir:      "json/video_policies_as_hcl",
+			policyAsHCL:  true,
 			filesToCheck: []string{"imaging.tf", "import.sh", "variables.tf"},
 		},
 		"fetch policy set with video policies different on production": {
@@ -879,7 +879,7 @@ func TestCreateImaging(t *testing.T) {
 			mp := processor(test.dataDir)
 			test.init(mi)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createImaging(ctx, "ctr_123", "test_policyset_id", tfWorkPath, test.jsonDir, section, mi, mp, test.schema)
+			err := createImaging(ctx, "ctr_123", "test_policyset_id", tfWorkPath, test.jsonDir, section, mi, mp, test.policyAsHCL)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -935,7 +935,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "with_image_policies",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
 		},
-		"policy set with image policies schema": {
+		"policy set with image policies as hcl": {
 			givenData: TFImagingData{
 				PolicySet: TFPolicySet{
 					ID:         "test_policyset_id",
@@ -953,10 +953,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 				Section: "test_section",
 			},
-			dir:          "with_image_policies_schema",
+			dir:          "with_image_policies_as_hcl",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
 		},
-		"policy set with image policies schema empty": {
+		"policy set with image policies as hcl empty": {
 			givenData: TFImagingData{
 				PolicySet: TFPolicySet{
 					ID:         "test_policyset_id",
@@ -974,10 +974,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 				Section: "test_section",
 			},
-			dir:          "with_image_policies_schema_empty",
+			dir:          "with_image_policies_as_hcl_empty",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
 		},
-		"policy set with image policies schema with image type": {
+		"policy set with image policies as hcl with image type": {
 			givenData: TFImagingData{
 				PolicySet: TFPolicySet{
 					ID:         "test_policyset_id",
@@ -1036,7 +1036,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 				Section: "test_section",
 			},
-			dir:          "with_image_policies_schema_with_imagetype",
+			dir:          "with_image_policies_as_hcl_with_imagetype",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
 		},
 		"policy set with video policies": {
@@ -1054,7 +1054,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "with_video_policies",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
 		},
-		"policy set with video policies schema": {
+		"policy set with video policies as hcl": {
 			givenData: TFImagingData{
 				PolicySet: TFPolicySet{
 					ID:         "test_policyset_id",
@@ -1123,7 +1123,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 				Section: "test_section",
 			},
-			dir:          "with_video_policies_schema",
+			dir:          "with_video_policies_as_hcl",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
 		},
 	}

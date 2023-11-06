@@ -2,6 +2,11 @@
 
 ## Version 1.11.0 (xx xx, 2023)
 
+### Features/Enhancements
+
+* Deprecated `--schema` flag and replaced with
+  * `--policy-as-hcl` (for export-imaging command)
+  * `--rules-as-hcl`  (for export-property command)
 * Cloudlets
   * Add `origin_description` field export in `akamai_cloudlets_application_load_balancer` resource
 

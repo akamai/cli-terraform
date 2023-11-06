@@ -14,7 +14,7 @@ provider "akamai" {
   config_section = var.config_section
 }
 
-{{- if not .RulesAsSchema}}
+{{- if not .RulesAsHCL}}
 
 data "akamai_property_rules_template" "rules" {
   template_file = abspath("${path.module}/property-snippets/main.json")
@@ -46,7 +46,7 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
     cert_provisioning_type = "{{.CertProvisioningType}}"
   }
 {{- end}}
-{{- if .RulesAsSchema}}
+{{- if .RulesAsHCL}}
   rule_format = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.rule_format
   rules       = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.json
 {{- else}}

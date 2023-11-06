@@ -93,7 +93,7 @@ func CmdCreateImaging(c *cli.Context) error {
 	if c.IsSet("policy-json-dir") {
 		jsonDir = c.String("policy-json-dir")
 	}
-	if !c.IsSet("schema") {
+	if !c.IsSet("policies-as-hcl") {
 		jsonDirPath := path.Join(tfWorkPath, jsonDir)
 		err = ensureDirExists(jsonDirPath)
 		if err != nil {
@@ -122,13 +122,13 @@ func CmdCreateImaging(c *cli.Context) error {
 
 	contractID, policySetID := c.Args().Get(0), c.Args().Get(1)
 	section := edgegrid.GetEdgercSection(c)
-	if err = createImaging(ctx, contractID, policySetID, tfWorkPath, jsonDir, section, client, processor, tools.Schema); err != nil {
+	if err = createImaging(ctx, contractID, policySetID, tfWorkPath, jsonDir, section, client, processor, tools.PolicyAsHCL); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting policy HCL: %s", err)), 1)
 	}
 	return nil
 }
 
-func createImaging(ctx context.Context, contractID, policySetID, tfWorkPath, jsonDir, section string, client imaging.Imaging, templateProcessor templates.TemplateProcessor, schema bool) error {
+func createImaging(ctx context.Context, contractID, policySetID, tfWorkPath, jsonDir, section string, client imaging.Imaging, templateProcessor templates.TemplateProcessor, policyAsHCL bool) error {
 	term := terminal.Get(ctx)
 
 	fmt.Println("Exporting Image and Video Manager configuration")
@@ -154,9 +154,9 @@ func createImaging(ctx context.Context, contractID, policySetID, tfWorkPath, jso
 	var tfPoliciesData []TFPolicy
 	switch policySet.Type {
 	case string(imaging.TypeImage):
-		tfPoliciesData, err = getPoliciesImageData(ctx, policies, policySetID, contractID, tfWorkPath, jsonDir, client, schema)
+		tfPoliciesData, err = getPoliciesImageData(ctx, policies, policySetID, contractID, tfWorkPath, jsonDir, client, policyAsHCL)
 	case string(imaging.TypeVideo):
-		tfPoliciesData, err = getPoliciesVideoData(ctx, policies, policySetID, contractID, tfWorkPath, jsonDir, client, schema)
+		tfPoliciesData, err = getPoliciesVideoData(ctx, policies, policySetID, contractID, tfWorkPath, jsonDir, client, policyAsHCL)
 	}
 	if err != nil {
 		term.Spinner().Fail()
@@ -215,7 +215,7 @@ func getPolicies(ctx context.Context, policySetID, contractID string, client ima
 	return stagingPolicies.Items, nil
 }
 
-func getPoliciesImageData(ctx context.Context, policies []imaging.PolicyOutput, policySetID, contractID, tfWorkPath, jsonDir string, client imaging.Imaging, schema bool) ([]TFPolicy, error) {
+func getPoliciesImageData(ctx context.Context, policies []imaging.PolicyOutput, policySetID, contractID, tfWorkPath, jsonDir string, client imaging.Imaging, policyAsHCL bool) ([]TFPolicy, error) {
 	var tfPoliciesData []TFPolicy
 
 	for _, policyOutput := range policies {
@@ -257,7 +257,7 @@ func getPoliciesImageData(ctx context.Context, policies []imaging.PolicyOutput, 
 			}
 		}
 
-		if schema {
+		if policyAsHCL {
 			// we store JSON as PolicyInput, so we need to convert it from PolicyInput via JSON representation
 			var policyInput imaging.PolicyInputImage
 			if err := json.Unmarshal([]byte(policyJSON), &policyInput); err != nil {
@@ -289,7 +289,7 @@ func getPoliciesImageData(ctx context.Context, policies []imaging.PolicyOutput, 
 	return tfPoliciesData, nil
 }
 
-func getPoliciesVideoData(ctx context.Context, policies []imaging.PolicyOutput, policySetID, contractID, tfWorkPath, jsonDir string, client imaging.Imaging, schema bool) ([]TFPolicy, error) {
+func getPoliciesVideoData(ctx context.Context, policies []imaging.PolicyOutput, policySetID, contractID, tfWorkPath, jsonDir string, client imaging.Imaging, policyAsHCL bool) ([]TFPolicy, error) {
 	var tfPoliciesData []TFPolicy
 
 	for _, policyOutput := range policies {
@@ -331,7 +331,7 @@ func getPoliciesVideoData(ctx context.Context, policies []imaging.PolicyOutput, 
 			}
 		}
 
-		if schema {
+		if policyAsHCL {
 			// we store JSON as PolicyInput, so we need to convert it from PolicyInput via JSON representation
 			var policyInput imaging.PolicyInputVideo
 			if err := json.Unmarshal([]byte(policyJSON), &policyInput); err != nil {

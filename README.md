@@ -176,7 +176,7 @@ Certain export conditions require the use of a particular property rule format. 
     <td>Any supported format.</td>
   </tr>
   <tr>
-    <td>Addition of <code>--schema</code> flag</td>
+    <td>Addition of <code>--rules-as-hcl</code> flag</td>
     <td>Your declarative property configuration and HCL-formatted rules. <strong>Does not return includes</strong> as includes are JSON-formatted.</td>
     <td>Must be a dated rule format ≥ <code>v2023-01-05</code>. Cannot use `latest`.</td>
   </tr>
@@ -200,10 +200,10 @@ Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
    --version value        Property version to import  (default: LATEST)
    --with-includes        Referenced includes will also be exported along with property
-   --schema               Rules will be exported as `akamai_property_rules_builder` data source in HCL format.
+   --rules-as-hcl         Rules will be exported as `akamai_property_rules_builder` data source in HCL format.
 ```
 
-> Flag `schema` works now with `include` sub-command as well with `with-includes` flag.
+> Flag `rules-as-hcl` works now with `include` sub-command as well with `with-includes` flag.
 
 ### Export property manager property configuration.
 
@@ -311,7 +311,7 @@ $ akamai terraform export-iam
 Flags:
    --tfworkpath path         Directory used to store files created when running commands. (default: current directory)
    --policy-json-dir path    Path location for placement of policy jsons. Default: same value as tfworkpath
-   --schema                  Generate content of the policy using HCL instead of JSON file (default: false)
+   --policy-as-hcl           Generate content of the policy using HCL instead of JSON file (default: false)
 ```
 
 ### Export Image and Video policy configuration.
