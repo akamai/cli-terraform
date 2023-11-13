@@ -1035,6 +1035,95 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "with_single_activation",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
 		},
+		"policy with ER match rules and two activations": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				Section:         "test_section",
+				CloudletCode:    "ER",
+				Description:     "Testing exported policy",
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				PolicyActivations: map[string]TFPolicyActivationData{
+					"prod": {
+						PolicyID:   2,
+						Version:    1,
+						Properties: []string{"prp_0"},
+					},
+					"staging": {
+						PolicyID:   2,
+						Version:    1,
+						Properties: []string{"prp_0"},
+					},
+				},
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleER{
+						Name:  "r1",
+						Start: 1,
+						End:   2,
+						Matches: []cloudlets.MatchCriteriaER{
+							{
+								MatchType:     "cookie",
+								MatchValue:    "cookie=cookievalue",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								ObjectMatchValue: cloudlets.ObjectMatchValueSimple{
+									Type:  "simple",
+									Value: []string{"GET"},
+								},
+							},
+							{
+								MatchType:     "extension",
+								MatchValue:    "txt",
+								MatchOperator: "equals",
+							},
+							{
+								MatchType:     "cookie",
+								MatchValue:    "cookie=cookievalue",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+							},
+							{
+								MatchType:     "hostname",
+								MatchValue:    "3333.dom",
+								MatchOperator: "equals",
+								CaseSensitive: true,
+								Negate:        true,
+							},
+						},
+						UseRelativeURL:           "copy_scheme_hostname",
+						StatusCode:               307,
+						RedirectURL:              "/abc/sss",
+						MatchURL:                 "test.url",
+						UseIncomingSchemeAndHost: true,
+					},
+					cloudlets.MatchRuleER{
+						Name:                     "r2",
+						UseRelativeURL:           "copy_scheme_hostname",
+						StatusCode:               301,
+						RedirectURL:              "/ddd",
+						MatchURL:                 "abc.com",
+						UseIncomingSchemeAndHost: true,
+						Matches: []cloudlets.MatchCriteriaER{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
+									Type: "object",
+									Name: "ALB",
+									Options: &cloudlets.Options{
+										Value:            []string{"y"},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
+					},
+				},
+			},
+			dir:          "with_two_activations",
+			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
+		},
 		"policy with match rules": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",

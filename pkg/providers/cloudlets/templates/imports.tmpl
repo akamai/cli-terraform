@@ -4,3 +4,18 @@ terraform init
 terraform import akamai_cloudlets_application_load_balancer.load_balancer_{{.OriginID}} {{.OriginID}}
 {{- end}}
 terraform import akamai_cloudlets_policy.policy {{.Name}}
+{{- with .PolicyActivations -}}
+{{- if (and .prod .staging) -}}
+{{/* PRODUCTION and STAGING*/}}
+{{- if (deepequal .prod.Properties .staging.Properties) -}}
+{{/* PRODUCTION.prop == STAGING.prop => res block */}}
+terraform import akamai_cloudlets_policy_activation.policy_activation {{.prod.PolicyID}}:prod
+{{- end}}
+{{- else if .prod -}}
+{{/* PRODUCTION and not STAGING => res block*/}}
+terraform import akamai_cloudlets_policy_activation.policy_activation {{.prod.PolicyID}}:prod
+{{- else if .staging  -}}
+{{/* STAGING and not PRODUCTION => res block*/}}
+terraform import akamai_cloudlets_policy_activation.policy_activation {{.staging.PolicyID}}:staging
+{{- end -}}
+{{- end}}

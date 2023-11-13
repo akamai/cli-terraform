@@ -12,7 +12,8 @@
 
 
 
-
+* Cloudlets
+  * Add Cloudlet V2 policy activation import functionality
 
 
 
