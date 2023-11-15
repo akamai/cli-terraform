@@ -8531,6 +8531,13 @@
             ],
             "ipGeoFirewall": {
                 "block": "blockSpecificIPGeo",
+                "asnControls": {
+                    "blockedIPNetworkLists": {
+                        "networkList": [
+                            "119711_ASNLIST"
+                        ]
+                    }
+                },
                 "geoControls": {
                     "blockedIPNetworkLists": {
                         "networkList": [

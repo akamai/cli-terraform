@@ -3421,6 +3421,13 @@
             ],
             "ipGeoFirewall": {
                 "block": "blockSpecificIPGeo",
+                "asnControls": {
+                    "blockedIPNetworkLists": {
+                        "networkList": [
+                            "119711_ASNLIST"
+                        ]
+                    }
+                },
                 "ipControls": {
                     "blockedIPNetworkLists": {
                         "networkList": [

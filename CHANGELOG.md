@@ -4,6 +4,8 @@
 
 ### Features/Enhancements
 
+* APPSEC
+  * Added support for `asn_network_lists` to `akamai_appsec_ip_geo` resource for IP/Geo Firewall.
 * Deprecated `--schema` flag and replaced with
   * `--policy-as-hcl` (for export-imaging command)
   * `--rules-as-hcl`  (for export-property command)
@@ -34,7 +36,7 @@
 
 ### Bug fixes
 
-* Fixed generation of multiline text for: 
+* Fixed generation of multiline text for:
   * `description` variable in AppSec configuration
   * `comments` and `location.comments` fields in `akamai_cloudwrapper_configuration`
   * `comment` field in `akamai_dns_zone`
