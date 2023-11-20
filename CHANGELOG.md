@@ -14,7 +14,9 @@
 
 * PAPI
   * Fixed error with exporting schema containing `serialNumber`
-
+* DNS (export-zone)
+  * Fixed `target` field string escaping in `akamai_dns_record` resource
+  * Changed provider version requirement from `~> 1.6.1` to `>= 1.6.1`
 
 ## Version 1.10.0 (October 31, 2023)
 
