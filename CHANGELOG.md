@@ -9,6 +9,8 @@
   * `--rules-as-hcl`  (for export-property command)
 * Cloudlets
   * Add `origin_description` field export in `akamai_cloudlets_application_load_balancer` resource
+* PAPI
+  * `export-property` command with flag `--rules-as-hcl` now supports export of properties in frozen format `v2023-10-30`
 
 ### Bug fixes
 
