@@ -1,5 +1,27 @@
 # Release Notes
 
+## Version 1.11.0 (Dec 7, 2023)
+
+### Features/Enhancements
+
+* APPSEC
+  * Added support for `asn_network_lists` to `akamai_appsec_ip_geo` resource for IP/Geo Firewall.
+* Deprecated `--schema` flag and replaced with
+  * `--policy-as-hcl` (for export-imaging command)
+  * `--rules-as-hcl`  (for export-property command)
+* Cloudlets
+  * Add `origin_description` field export in `akamai_cloudlets_application_load_balancer` resource
+* PAPI
+  * `export-property` command with flag `--rules-as-hcl` now supports export of properties in frozen format `v2023-10-30`
+
+### Bug fixes
+
+* DNS (export-zone)
+  * Fixed `target` field string escaping in `akamai_dns_record` resource
+  * Changed provider version requirement from `~> 1.6.1` to `>= 1.6.1`
+* PAPI
+  * Fixed error with exporting schema containing `serialNumber`
+
 ## Version 1.10.0 (October 31, 2023)
 
 ### Features/Enhancements
@@ -14,7 +36,7 @@
 
 ### Bug fixes
 
-* Fixed generation of multiline text for: 
+* Fixed generation of multiline text for:
   * `description` variable in AppSec configuration
   * `comments` and `location.comments` fields in `akamai_cloudwrapper_configuration`
   * `comment` field in `akamai_dns_zone`

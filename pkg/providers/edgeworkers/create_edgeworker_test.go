@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 	"testing"
@@ -19,6 +20,17 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tj/assert"
 )
+
+func TestMain(m *testing.M) {
+	if err := os.MkdirAll("./testdata/res", 0755); err != nil {
+		log.Fatal(err)
+	}
+	exitCode := m.Run()
+	if err := os.RemoveAll("./testdata/res"); err != nil {
+		log.Fatal(err)
+	}
+	os.Exit(exitCode)
+}
 
 var (
 	expectEdgeWorkerProcessTemplates = func(p *templates.MockProcessor, edgeWorkerID int, name string, groupID int64, resourceTierID int,

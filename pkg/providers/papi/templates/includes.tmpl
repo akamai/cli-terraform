@@ -4,7 +4,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 5.4.0"
+      version = ">= 5.5.0"
     }
   }
   required_version = ">= 0.13"
@@ -17,7 +17,7 @@ provider "akamai" {
 
 {{ end }}
 {{- range $include := .Includes }}
-{{- if not $.RulesAsSchema}}
+{{- if not $.RulesAsHCL}}
 data "akamai_property_rules_template" "rules_{{.IncludeName}}" {
   template_file = abspath("${path.module}/property-snippets/{{.IncludeName}}.json")
 }
@@ -36,7 +36,7 @@ resource "akamai_property_include" "{{.IncludeName}}" {
   group_id = "{{.GroupID}}"
   name = "{{.IncludeName}}"
   type = "{{.IncludeType}}"
-{{- if $.RulesAsSchema}}
+{{- if $.RulesAsHCL}}
 {{- if .Rules}}
   rule_format = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.rule_format
   rules       = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.json

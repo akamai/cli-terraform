@@ -1,7 +1,8 @@
 resource "akamai_cloudlets_application_load_balancer" "load_balancer_test_origin" {
-  origin_id      = "test_origin"
-  description    = "test\\ description"
-  balancing_type = "WEIGHTED"
+  origin_id          = "test_origin"
+  origin_description = ""
+  description        = "test\\ description"
+  balancing_type     = "WEIGHTED"
 
   data_centers {
     latitude                          = 102.78108

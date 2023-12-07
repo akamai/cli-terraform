@@ -481,7 +481,6 @@ func TestCreateCPS(t *testing.T) {
 		dataDir      string
 		jsonDir      string
 		withError    error
-		schema       bool
 	}{
 		"export DV enrollment with minimum fields": {
 			init: func(m *cps.Mock) {

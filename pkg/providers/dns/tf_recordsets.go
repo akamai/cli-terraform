@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/dns"
+	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/shirou/gopsutil/mem"
 )
 
@@ -244,43 +245,7 @@ func recordValueForSlice(fval interface{}, rs dns.Recordset) string {
 
 // process string with embedded quotes
 func processString(source string) string {
-
-	if len(source) < 1 {
-		return source
-	}
-	stringSlice := strings.Split(source, " ")
-	if len(stringSlice) == 1 {
-		return stringSlice[0]
-	}
-	cleanString := ""
-	workingString := source
-	var quoteIndex int
-	for {
-		quoteIndex = strings.Index(workingString, "\"")
-		switch quoteIndex {
-		case -1:
-			cleanString += workingString
-			return cleanString
-		case 0:
-			cleanString += "\\\""
-		case len(workingString) - 1:
-			if workingString[quoteIndex-1:quoteIndex] != "\\" {
-				cleanString += workingString[:quoteIndex]
-				cleanString += "\\\""
-			} else {
-				cleanString += workingString[:]
-			}
-			return cleanString
-		default:
-			if workingString[quoteIndex-1:quoteIndex] != "\\" {
-				cleanString += workingString[:quoteIndex]
-				cleanString += "\\\""
-			} else {
-				cleanString += workingString[:quoteIndex+1]
-			}
-		}
-		workingString = workingString[quoteIndex+1:]
-	}
+	return tools.EscapeQuotedStringLit(source)
 }
 
 // create unique resource record name

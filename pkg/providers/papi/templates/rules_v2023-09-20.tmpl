@@ -5461,7 +5461,7 @@ origin {
         public_key_format = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "serialNumber") (ne $v nil)}}
-        serial_number = {{template "Text" $v}}
+		serial_number = "{{$v}}"
 {{- end}}
 {{- if and (eq $k "version") (ne $v nil)}}
 		version = {{$v | AsInt}}
@@ -5554,7 +5554,7 @@ origin {
         public_key_format = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "serialNumber") (ne $v nil)}}
-        serial_number = {{template "Text" $v}}
+		serial_number = "{{$v}}"
 {{- end}}
 {{- if and (eq $k "version") (ne $v nil)}}
 		version = {{$v | AsInt}}

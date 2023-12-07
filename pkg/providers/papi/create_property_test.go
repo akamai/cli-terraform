@@ -541,7 +541,7 @@ func TestCreateProperty(t *testing.T) {
 		withError           error
 		readVersion         string
 		withIncludes        bool
-		schema              bool
+		rulesAsHCL          bool
 	}{
 		"basic property": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
@@ -621,8 +621,8 @@ func TestCreateProperty(t *testing.T) {
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withRuleFormat("v2023-01-05").
 					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), otherRuleFormatFilter, nil)
 			},
-			dir:    "basic-rules-datasource",
-			schema: true,
+			dir:        "basic-rules-datasource",
+			rulesAsHCL: true,
 		},
 		"basic property with rules as datasource with unsupported rule format": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
@@ -645,9 +645,9 @@ func TestCreateProperty(t *testing.T) {
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withIsActive(false).
 					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), noFilters, nil)
 			},
-			withError: ErrUnsupportedRuleFormat,
-			dir:       "basic",
-			schema:    true,
+			withError:  ErrUnsupportedRuleFormat,
+			dir:        "basic",
+			rulesAsHCL: true,
 		},
 		"basic property with rules as datasource with unsupported behaviors and criteria": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
@@ -670,9 +670,9 @@ func TestCreateProperty(t *testing.T) {
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withRuleFormat("v2023-01-05").
 					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), otherRuleFormatFilter, ErrSavingFiles)
 			},
-			withError: ErrSavingFiles,
-			dir:       "basic-rules-datasource-unknown",
-			schema:    true,
+			withError:  ErrSavingFiles,
+			dir:        "basic-rules-datasource-unknown",
+			rulesAsHCL: true,
 		},
 		"basic property with include": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
@@ -762,7 +762,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 			withIncludes: true,
 		},
-		"basic property with multiple includes as schema": {
+		"basic property with multiple includes as hcl rules": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
@@ -778,7 +778,7 @@ func TestCreateProperty(t *testing.T) {
 				expectGetIncludeVersion(c, "v2023-01-05")
 
 				includeRuleResponse := getIncludeRuleResponse(dir, t, "mock_include_rules.json")
-				mockGetIncludeRuleTree(c, getIncludeRuleTreeReqSchema, &includeRuleResponse)
+				mockGetIncludeRuleTree(c, getIncludeRuleTreeReqRulesAsHCL, &includeRuleResponse)
 				expectListIncludeActivations(c)
 
 				secondIncludeRuleResponse := getIncludeRuleResponse(dir, t, "mock_second_include_rules.json")
@@ -804,7 +804,7 @@ func TestCreateProperty(t *testing.T) {
 				tfIncludeData1 := tfIncludeData1
 				tfIncludeData1.RuleFormat = "v2023-01-05"
 				mockProcessTemplates(p, (&tfDataBuilder{}).
-					withData(getTestData("basic property with multiple includes schema")).
+					withData(getTestData("basic property with multiple includes as hcl")).
 					withRuleFormat("v2023-01-05").
 					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).
 					withIncludes([]TFIncludeData{tfIncludeData, tfIncludeData1}).
@@ -814,9 +814,9 @@ func TestCreateProperty(t *testing.T) {
 				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
 			},
-			dir:          "basic_property_with_multiple_includes_schema",
+			dir:          "basic_property_with_multiple_includes_rules_as_hcl",
 			withIncludes: true,
-			schema:       true,
+			rulesAsHCL:   true,
 		},
 		"basic property with cert provisioning type": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
@@ -1108,7 +1108,7 @@ func TestCreateProperty(t *testing.T) {
 			mp := new(templates.MockProcessor)
 			test.init(mc, mh, mp, test.dir)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createProperty(ctx, "test.edgesuite.net", test.readVersion, section, fmt.Sprintf("./testdata/res/%s", test.jsonDir), "./", test.withIncludes, test.schema, mc, mh, mp)
+			err := createProperty(ctx, "test.edgesuite.net", test.readVersion, section, fmt.Sprintf("./testdata/res/%s", test.jsonDir), "./", test.withIncludes, test.rulesAsHCL, mc, mh, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -1313,7 +1313,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		dir          string
 		filesToCheck []string
 		withIncludes bool
-		schema       bool
+		rulesAsHCL   bool
 		ruleResponse papi.GetRuleTreeResponse
 		withError    string
 		filterFuncs  []func([]string) ([]string, error)
@@ -1404,7 +1404,53 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Section: "test_section",
 			},
 			dir:          "basic-rules-datasource",
-			schema:       true,
+			rulesAsHCL:   true,
+			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
+		},
+		"property with rules as datasource with serial": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "v2023-01-05",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							CnameFrom:                "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
+						},
+					},
+					StagingInfo: NetworkInfo{
+						HasActivation: true,
+						Emails:        []string{"jsmith@akamai.com"},
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "basic-rules-datasource-serial",
+			rulesAsHCL:   true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
 		},
@@ -1449,7 +1495,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Section: "test_section",
 			},
 			dir:          "basic-rules-datasource-unknown",
-			schema:       true,
+			rulesAsHCL:   true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			withError:    "there were errors reported: Unknown behavior 'caching-unknown', Unknown behavior 'allowPost-unknown'",
 		},
@@ -1589,7 +1635,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			filesToCheck: []string{"property.tf", "includes.tf", "variables.tf", "import.sh"},
 			withIncludes: true,
 		},
-		"property with multiple includes as schema": {
+		"property with multiple includes as hcl rules": {
 			givenData: TFData{
 				Includes: []TFIncludeData{
 					{
@@ -1604,7 +1650,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						IncludeType:                string(papi.IncludeTypeMicroServices),
 						Networks:                   []string{"STAGING", "PRODUCTION"},
 						RuleFormat:                 "v2023-01-05",
-						Rules:                      flattenRules("test_include", getIncludeRuleResponse("basic_property_with_multiple_includes_schema", t, "mock_include_rules.json").Rules),
+						Rules:                      flattenRules("test_include", getIncludeRuleResponse("basic_property_with_multiple_includes_rules_as_hcl", t, "mock_include_rules.json").Rules),
 						VersionProduction:          "1",
 						VersionStaging:             "1",
 					},
@@ -1618,7 +1664,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						IncludeType:             string(papi.IncludeTypeMicroServices),
 						Networks:                []string{"STAGING"},
 						RuleFormat:              "v2023-01-05",
-						Rules:                   flattenRules("test_include_1", getIncludeRuleResponse("basic_property_with_multiple_includes_schema", t, "mock_second_include_rules.json").Rules),
+						Rules:                   flattenRules("test_include_1", getIncludeRuleResponse("basic_property_with_multiple_includes_rules_as_hcl", t, "mock_second_include_rules.json").Rules),
 						VersionStaging:          "1",
 					},
 				},
@@ -1662,10 +1708,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 				Section: "test_section",
 			},
-			dir:          "basic_property_with_multiple_includes_schema",
+			dir:          "basic_property_with_multiple_includes_rules_as_hcl",
 			filesToCheck: []string{"property.tf", "includes.tf", "variables.tf", "import.sh", "includes_rules.tf"},
 			withIncludes: true,
-			schema:       true,
+			rulesAsHCL:   true,
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
 		},
 		"property with use cases": {
@@ -1948,9 +1994,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "basic_without_activation",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
-		// property with rules as datasource - schema version 1 and 2 is a pair of tests that confirms that schema 1 does not use any schema's 2 template definitions and vice versa
+		// property with rules as datasource - hcl rules version 1 and 2 is a pair of tests that confirms that hcl rules 1 does not use any hcl rules's 2 template definitions and vice versa
 		// the behaviour was chosen in a way, so it's easily identifiable which template inner definition was picked (e.g. there was change in field type)
-		"property with rules as datasource - schema version v2023-01-05": {
+		"property with rules as datasource - hcl rules version v2023-01-05": {
 			givenData: TFData{
 				Property: TFPropertyData{
 					GroupName:            "test_group",
@@ -1968,11 +2014,11 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Section: "test_section",
 			},
 			dir:          "basic-rules-datasource-schema-v2023-01-05",
-			schema:       true,
+			rulesAsHCL:   true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
 		},
-		"property with rules as datasource - schema version v2023-05-30": {
+		"property with rules as datasource - hcl rules version v2023-05-30": {
 			givenData: TFData{
 				Property: TFPropertyData{
 					GroupName:            "test_group",
@@ -1990,11 +2036,11 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Section: "test_section",
 			},
 			dir:          "basic-rules-datasource-schema-v2023-05-30",
-			schema:       true,
+			rulesAsHCL:   true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-05-30")},
 		},
-		"property with rules as datasource - schema version v2023-09-20": {
+		"property with rules as datasource - hcl rules version v2023-09-20": {
 			givenData: TFData{
 				Property: TFPropertyData{
 					GroupName:            "test_group",
@@ -2012,18 +2058,40 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Section: "test_section",
 			},
 			dir:          "basic-rules-datasource-schema-v2023-09-20",
-			schema:       true,
+			rulesAsHCL:   true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-09-20")},
+		},
+		"property with rules as datasource - hcl rules version v2023-10-30": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "v2023-10-30",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+				},
+				Section: "test_section",
+			},
+			dir:          "basic-rules-datasource-schema-v2023-10-30",
+			rulesAsHCL:   true,
+			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-10-30")},
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			if test.schema {
+			if test.rulesAsHCL {
 				ruleResponse := getRuleTreeResponse(test.dir, t)
 				test.givenData.Rules = flattenRules("test.edgesuite.net", ruleResponse.Rules)
-				test.givenData.RulesAsSchema = true
+				test.givenData.RulesAsHCL = true
 			}
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
 			templateToFile := map[string]string{
@@ -2035,7 +2103,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			if test.withIncludes {
 				templateToFile["includes.tmpl"] = fmt.Sprintf("./testdata/res/%s/includes.tf", test.dir)
 			}
-			if test.schema {
+			if test.rulesAsHCL {
 				var rulesVersion string
 				if len(test.givenData.Includes) > 0 {
 					rulesVersion = test.givenData.Includes[0].RuleFormat
@@ -2044,7 +2112,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				}
 				templateToFile[fmt.Sprintf("rules_%s.tmpl", rulesVersion)] = fmt.Sprintf("./testdata/res/%s/rules.tf", test.dir)
 			}
-			if test.withIncludes && test.schema {
+			if test.withIncludes && test.rulesAsHCL {
 				templateToFile["includes_rules.tmpl"] = fmt.Sprintf("./testdata/res/%s/includes_rules.tf", test.dir)
 			}
 
@@ -2389,13 +2457,13 @@ func (t *tfDataBuilder) withProductionVersion(version int) *tfDataBuilder {
 
 func (t *tfDataBuilder) withRules(rules []*WrappedRules) *tfDataBuilder {
 	t.tfData.Rules = rules
-	t.tfData.RulesAsSchema = true
+	t.tfData.RulesAsHCL = true
 	return t
 }
 
 func (t *tfDataBuilder) withIncludeRules(index int, rules []*WrappedRules) *tfDataBuilder {
 	t.tfData.Includes[index].Rules = rules
-	t.tfData.RulesAsSchema = true
+	t.tfData.RulesAsHCL = true
 	return t
 }
 

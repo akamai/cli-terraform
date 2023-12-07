@@ -39,6 +39,16 @@ func TestProcessStringEmbeddedQuotes(t *testing.T) {
 	assert.Equal(t, returnedString, expectedString)
 }
 
+func TestProcessStringBackslash(t *testing.T) {
+
+	sourceString := `hello\world`
+	expectedString := `hello\\world`
+
+	returnedString := processString(sourceString)
+
+	assert.Equal(t, returnedString, expectedString)
+}
+
 func TestProcessRecordset(t *testing.T) {
 	tests := map[string]struct {
 		mod            bool

@@ -33,7 +33,7 @@ import (
 
 var (
 	// Version holds current version of cli-terraform
-	Version = "1.10.0"
+	Version = "1.11.0"
 )
 
 // Run initializes the cli and runs it
@@ -55,7 +55,7 @@ func Run() error {
 		app.Commands = append(cmds, app.Commands...)
 	}
 
-	app.Before = ensureBefore(putSessionInContext, putLoggerInContext, deprecationInfoForCreateCommands)
+	app.Before = ensureBefore(putSessionInContext, putLoggerInContext, deprecationInfoForCreateCommands, deprecationInfoForSchemaFlags)
 	return app.RunContext(ctx, os.Args)
 }
 
@@ -134,6 +134,37 @@ func deprecationInfoForCreateCommands(c *cli.Context) error {
 	if strings.HasPrefix(command, "create-") {
 		fmt.Fprintln(c.App.Writer, color.HiYellowString("Warning:"), "create command names are now deprecated, use export commands instead.")
 		fmt.Fprintln(c.App.Writer)
+	}
+	return nil
+}
+
+func deprecationInfoForSchemaFlags(c *cli.Context) error {
+	if !c.Args().Present() {
+		return nil
+	}
+	command := c.Args().First()
+	newFlagName := ""
+	if strings.HasSuffix(command, "property") {
+		newFlagName = "--rules-as-hcl"
+	}
+	if strings.HasSuffix(command, "imaging") {
+		newFlagName = "--policy-as-hcl"
+	}
+	if newFlagName == "" {
+		return nil
+	}
+
+	hasSchemaFlag := false
+	for _, f := range c.Args().Slice() {
+		if f == "--schema" {
+			hasSchemaFlag = true
+			break
+		}
+	}
+
+	if hasSchemaFlag {
+		fmt.Fprint(c.App.Writer, color.HiYellowString("Warning: "))
+		fmt.Fprintf(c.App.Writer, "flag --schema is now deprecated, use %s flag instead.\n\n", newFlagName)
 	}
 	return nil
 }

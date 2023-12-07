@@ -71,11 +71,11 @@ type WrappedRules struct {
 
 // TFData holds template data
 type TFData struct {
-	Includes      []TFIncludeData
-	Property      TFPropertyData
-	Section       string
-	Rules         []*WrappedRules
-	RulesAsSchema bool
+	Includes   []TFIncludeData
+	Property   TFPropertyData
+	Section    string
+	Rules      []*WrappedRules
+	RulesAsHCL bool
 }
 
 // TFIncludeData holds template data for include
@@ -243,12 +243,12 @@ func CmdCreateProperty(c *cli.Context) error {
 		}
 	}
 
-	var schema bool
-	if c.IsSet("schema") {
-		schema = c.Bool("schema")
+	var rulesAsHCL bool
+	if c.IsSet("rules-as-hcl") {
+		rulesAsHCL = c.Bool("rules-as-hcl")
 	}
 
-	if withIncludes && schema {
+	if withIncludes && rulesAsHCL {
 		templateToFile["includes_rules.tmpl"] = filepath.Join(tfWorkPath, "includes_rules.tf")
 	}
 
@@ -260,21 +260,21 @@ func CmdCreateProperty(c *cli.Context) error {
 
 	propertyName := c.Args().First()
 	section := edgegrid.GetEdgercSection(c)
-	if err = createProperty(ctx, propertyName, version, section, "property-snippets", tfWorkPath, withIncludes, schema, client, clientHapi, processor); err != nil {
+	if err = createProperty(ctx, propertyName, version, section, "property-snippets", tfWorkPath, withIncludes, rulesAsHCL, client, clientHapi, processor); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting property: %s", err)), 1)
 	}
 	return nil
 }
 
-func createProperty(ctx context.Context, propertyName, readVersion, section, jsonDir, tfWorkPath string, withIncludes, schema bool, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
+func createProperty(ctx context.Context, propertyName, readVersion, section, jsonDir, tfWorkPath string, withIncludes, rulesAsHCL bool, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
 	tfData := TFData{
 		Property: TFPropertyData{
 			EdgeHostnames: make(map[string]EdgeHostname),
 		},
-		Section:       section,
-		RulesAsSchema: schema,
+		Section:    section,
+		RulesAsHCL: rulesAsHCL,
 	}
 
 	// Get Property
@@ -345,7 +345,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 			}
 
 			// Save snippets
-			if !schema {
+			if !rulesAsHCL {
 				term.Spinner().Start("Saving snippets ")
 				ruleTemplate, rulesTemplate := setIncludeRuleTemplates(rules)
 				if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), fmt.Sprintf("%s.json", include.IncludeName)); err != nil {
@@ -436,7 +436,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	term.Spinner().OK()
 
 	filterFuncs := make([]func([]string) ([]string, error), 0)
-	if schema {
+	if rulesAsHCL {
 		ruleTemplate := fmt.Sprintf("rules_%s.tmpl", rules.RuleFormat)
 		if !templateProcessor.TemplateExists(ruleTemplate) {
 			return fmt.Errorf("%w: %s", ErrUnsupportedRuleFormat, rules.RuleFormat)
@@ -453,7 +453,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		}
 		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
 	}
-	if !schema {
+	if !rulesAsHCL {
 		// Save snippets
 		ruleTemplate, rulesTemplate := setPropertyRuleTemplates(rules)
 		if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), "main.json"); err != nil {

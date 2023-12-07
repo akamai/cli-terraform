@@ -1,11 +1,24 @@
 package iam
 
 import (
+	"log"
+	"os"
 	"testing"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/iam"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMain(m *testing.M) {
+	if err := os.MkdirAll("./testdata/res", 0755); err != nil {
+		log.Fatal(err)
+	}
+	exitCode := m.Run()
+	if err := os.RemoveAll("./testdata/res"); err != nil {
+		log.Fatal(err)
+	}
+	os.Exit(exitCode)
+}
 
 func TestGetGrantedRolesID(t *testing.T) {
 	tests := map[string]struct {

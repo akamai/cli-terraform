@@ -39,9 +39,6 @@ eTAG="$(git describe --tags --always)"
 CLI_TERRAFORM_BRANCH_HASH="$(git rev-parse --short HEAD)"
 echo "Making build on branch $CLI_TERRAFORM_BRANCH_NAME at hash $CLI_TERRAFORM_BRANCH_HASH with tag $eTAG"
 
-cp "$HOME"/.edgerc "$WORKDIR"/.edgerc
-sed -i -e "1s/^.*$/[default]/" "$WORKDIR"/.edgerc
-
 docker rm -f akatf-container 2> /dev/null || true
 
 # Remove docker image if RELOAD_DOCKER_IMAGE is true
@@ -75,7 +72,6 @@ docker run -d -it --name akatf-container --entrypoint "/usr/bin/tail" \
         -v "$HOME"/.ssh/id_rsa=/root/id_rsa \
         -v "$HOME"/.ssh/id_rsa.pub=/root/id_rsa.pub \
         -v "$HOME"/.ssh/known_hosts=/root/known_hosts \
-        -v "$WORKDIR"/.edgerc:/root/.edgerc:ro \
         -w /tf/ \
         terraform/akamai:terraform-provider-akamai -f /dev/null
 
