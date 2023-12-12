@@ -55,7 +55,7 @@ var (
 	RSA                     = "RSA"
 	ECDSA                   = "ECDSA"
 
-	enrollmentDV = cps.Enrollment{
+	enrollmentDV = cps.GetEnrollmentResponse{
 		AdminContact: &cps.Contact{
 			AddressLineOne:   "150 Broadway",
 			City:             "Cambridge",
@@ -122,7 +122,7 @@ var (
 		ValidationType: "dv",
 	}
 
-	enrollmentDVMin = cps.Enrollment{
+	enrollmentDVMin = cps.GetEnrollmentResponse{
 		AdminContact: &cps.Contact{
 			AddressLineOne:   "150 Broadway",
 			City:             "Cambridge",
@@ -189,7 +189,7 @@ var (
 		ValidationType: "dv",
 	}
 
-	enrollmentDVAll = cps.Enrollment{
+	enrollmentDVAll = cps.GetEnrollmentResponse{
 		AdminContact: &cps.Contact{
 			AddressLineOne:   "150 Broadway",
 			AddressLineTwo:   "Aka",
@@ -279,8 +279,8 @@ var (
 		ValidationType: "dv",
 	}
 
-	enrollmentThirdParty = func(sans []string) cps.Enrollment {
-		return cps.Enrollment{
+	enrollmentThirdParty = func(sans []string) cps.GetEnrollmentResponse {
+		return cps.GetEnrollmentResponse{
 			AdminContact: &cps.Contact{
 				AddressLineOne:   "150 Broadway",
 				AddressLineTwo:   "Aka",
@@ -376,7 +376,7 @@ var (
 
 	enrollmentThirdPartyAllNoSANs = enrollmentThirdParty([]string{"test.akamai.com"})
 
-	enrollmentOV = cps.Enrollment{
+	enrollmentOV = cps.GetEnrollmentResponse{
 		AdminContact: &cps.Contact{
 			AddressLineOne:   "150 Broadway",
 			City:             "Cambridge",
@@ -442,7 +442,7 @@ var (
 		ValidationType: "ov",
 	}
 
-	expectGetEnrollment = func(m *cps.Mock, enrollmentID int, enrollment cps.Enrollment, err error) *mock.Call {
+	expectGetEnrollment = func(m *cps.Mock, enrollmentID int, enrollment cps.GetEnrollmentResponse, err error) *mock.Call {
 		call := m.On(
 			"GetEnrollment",
 			mock.Anything,
@@ -493,7 +493,7 @@ func TestCreateCPS(t *testing.T) {
 		},
 		"export DV enrollment without DNSNameSettings": {
 			init: func(m *cps.Mock) {
-				var enrollment cps.Enrollment
+				var enrollment cps.GetEnrollmentResponse
 				_ = copier.CopyWithOption(&enrollment, enrollmentDVMin, copier.Option{DeepCopy: true})
 				enrollment.NetworkConfiguration.DNSNameSettings = nil
 				expectGetEnrollment(m, 1, enrollment, nil).Once()

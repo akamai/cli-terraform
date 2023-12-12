@@ -22,7 +22,7 @@ import (
 type (
 	// TFCPSData represents the data used in CPS templates
 	TFCPSData struct {
-		Enrollment          cps.Enrollment
+		Enrollment          cps.GetEnrollmentResponse
 		EnrollmentID        int
 		ContractID          string
 		Section             string
