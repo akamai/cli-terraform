@@ -22,6 +22,13 @@ resource "akamai_imaging_policy_set" "policyset" {
 
 data "akamai_imaging_policy_image" "data_policy_test_policy_image" {
   policy {
+    output {
+
+      allow_pristine_on_downsize = true
+      perceptual_quality         = "mediumHigh"
+      prefer_modern_formats      = false
+    }
+    serve_stale_duration = 3600
     transformations {
       append {
         gravity          = "Center"
