@@ -2233,6 +2233,67 @@ resource "akamai_appsec_attack_group" "policy2_XSS" {
   security_policy_id  = akamai_appsec_waf_protection.policy2.security_policy_id
   attack_group        = "XSS"
   attack_group_action = "deny"
+  condition_exception = jsonencode(
+    { "advancedExceptions" : {
+      "conditionOperator" : "AND",
+      "conditions" : [
+        {
+          "type" : "extensionMatch",
+          "extensions" : [
+            "pdf"
+          ],
+          "positiveMatch" : true
+        },
+        {
+          "type" : "filenameMatch",
+          "filenames" : [
+            "upload.txt"
+          ],
+          "positiveMatch" : true
+        },
+        {
+          "type" : "pathMatch",
+          "paths" : [
+            "/test"
+          ],
+          "positiveMatch" : true
+        }
+      ],
+      "specificHeaderCookieOrParamNameValue" : [
+        {
+          "namesValues" : [
+            {
+              "names" : [
+                "test"
+              ],
+              "values" : [
+                "test"
+              ]
+            }
+          ],
+          "selector" : "ARGS",
+          "valueWildcard" : true,
+          "wildcard" : true
+        }
+      ],
+      "specificHeaderCookieParamXmlOrJsonNames" : [
+        {
+          "names" : [
+            "testgroup*"
+          ],
+          "selector" : "ARGS_NAMES",
+          "wildcard" : true
+        },
+        {
+          "names" : [
+            "group*"
+          ],
+          "selector" : "ARGS",
+          "wildcard" : true
+        }
+      ]
+    } }
+  )
 }
 
 resource "akamai_appsec_attack_group" "policy2_CMD" {
@@ -3728,6 +3789,33 @@ resource "akamai_appsec_rule" "policy1_aseweb_attackcmd_injection_950002" {
   security_policy_id = akamai_appsec_waf_protection.policy1.security_policy_id
   rule_id            = "950002"
   rule_action        = "alert"
+  condition_exception = jsonencode(
+    { "advancedExceptions" : {
+      "conditionOperator" : "OR",
+      "conditions" : [
+        {
+          "type" : "hostMatch",
+          "hosts" : [
+            "test.com"
+          ],
+          "positiveMatch" : true
+        },
+        {
+          "type" : "pathMatch",
+          "paths" : [
+            "/test"
+          ],
+          "positiveMatch" : true
+        },
+        {
+          "type" : "requestHeaderMatch",
+          "header" : "Test",
+          "positiveMatch" : true,
+          "value" : "test*"
+        }
+      ]
+    } }
+  )
 }
 
 // Session Fixation

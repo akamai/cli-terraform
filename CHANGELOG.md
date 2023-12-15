@@ -29,7 +29,8 @@
 
 ### Bug fixes
 
-
+* APPSEC
+  * Fixed issue where advanced exceptions were not generated for Rules and Risk Groups ([#61](https://github.com/akamai/cli-terraform/issues/61))
 
 
 
