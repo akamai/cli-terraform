@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"sort"
-	"strconv"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/papi"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
@@ -196,20 +195,23 @@ func getIncludeData(ctx context.Context, include *papi.Include, client papi.PAPI
 		IncludeID:   include.IncludeID,
 		IncludeName: include.IncludeName,
 		IncludeType: string(include.IncludeType),
-		Networks:    getActivatedNetworks(include),
 		RuleFormat:  latestVersion.IncludeVersion.RuleFormat,
 	}
 
 	if latestStagingActivation != nil {
-		includeData.ActivationNoteStaging = latestStagingActivation.Note
-		includeData.ActivationEmailsStaging = latestStagingActivation.NotifyEmails
-		includeData.VersionStaging = strconv.Itoa(latestStagingActivation.IncludeVersion)
+		includeData.StagingInfo.ActivationNote = latestStagingActivation.Note
+		includeData.StagingInfo.Emails = latestStagingActivation.NotifyEmails
+		includeData.StagingInfo.Version = latestStagingActivation.IncludeVersion
+		includeData.StagingInfo.HasActivation = true
+		includeData.StagingInfo.IsActiveOnLatestVersion = latestStagingActivation.IncludeVersion == include.LatestVersion
 	}
 
 	if latestProdActivation != nil {
-		includeData.ActivationNoteProduction = latestProdActivation.Note
-		includeData.ActivationEmailsProduction = latestProdActivation.NotifyEmails
-		includeData.VersionProduction = strconv.Itoa(latestProdActivation.IncludeVersion)
+		includeData.ProductionInfo.ActivationNote = latestProdActivation.Note
+		includeData.ProductionInfo.Emails = latestProdActivation.NotifyEmails
+		includeData.ProductionInfo.Version = latestProdActivation.IncludeVersion
+		includeData.ProductionInfo.HasActivation = true
+		includeData.ProductionInfo.IsActiveOnLatestVersion = latestProdActivation.IncludeVersion == include.LatestVersion
 	}
 
 	term.Spinner().OK()

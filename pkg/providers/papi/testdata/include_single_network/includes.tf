@@ -41,6 +41,16 @@ resource "akamai_property_include_activation" "test_include_staging" {
   include_id                     = akamai_property_include.test_include.id
   network                        = "STAGING"
   auto_acknowledge_rule_warnings = false
-  version                        = "3"
+  version                        = var.activate_latest_on_staging ? akamai_property_include.test_include.latest_version : akamai_property_include.test_include.staging_version
   notify_emails                  = ["test@example.com"]
 }
+
+#resource "akamai_property_include_activation" "test_include_production" {
+#  contract_id = akamai_property_include.test_include.contract_id
+#  group_id = akamai_property_include.test_include.group_id
+#  include_id = akamai_property_include.test_include.id
+#  network = "PRODUCTION"
+#  auto_acknowledge_rule_warnings = false
+#  version = var.activate_latest_on_production ? akamai_property_include.test_include.latest_version : akamai_property_include.test_include.production_version
+#  notify_emails = []
+#}

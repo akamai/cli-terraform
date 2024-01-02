@@ -19,3 +19,66 @@ variable "group_id" {
   default = "{{.Property.GroupID}}"
 }
 {{- end}}
+{{- if .Property.PropertyID}}
+{{ if .Property.StagingInfo.HasActivation}}
+variable "activate_latest_on_staging" {
+  type    = bool
+  default = {{$.Property.StagingInfo.IsActiveOnLatestVersion}}
+}
+{{- else}}
+#variable "activate_latest_on_staging" {
+#  type    = bool
+#  default = true
+#}
+{{- end}}
+{{ if .Property.ProductionInfo.HasActivation}}
+variable "activate_latest_on_production" {
+  type    = bool
+  default = {{$.Property.ProductionInfo.IsActiveOnLatestVersion}}
+}
+{{ else}}
+#variable "activate_latest_on_production" {
+#  type    = bool
+#  default = true
+#}
+{{ end}}
+{{- else if .Includes}}
+{{- $staging := false}}
+{{- $production := false}}
+{{- $isStagingActiveOnLatestVersion := false}}
+{{- $isProductionActiveOnLatestVersion := false}}
+{{- range .Includes}}
+{{- if .StagingInfo.HasActivation}}
+  {{- $staging = true}}
+  {{- $isStagingActiveOnLatestVersion = .StagingInfo.IsActiveOnLatestVersion}}
+{{- end}}
+{{- if .ProductionInfo.HasActivation}}
+  {{- $production = true}}
+  {{- $isProductionActiveOnLatestVersion = .ProductionInfo.IsActiveOnLatestVersion}}
+{{- end}}
+{{- end}}
+{{- with index .Includes 0 }}
+{{- if $staging}}
+variable "activate_latest_on_staging" {
+  type    = bool
+  default = {{$isStagingActiveOnLatestVersion}}
+}
+{{- else}}
+#variable "activate_latest_on_staging" {
+#  type    = bool
+#  default = true
+#}
+{{- end}}
+{{ if $production}}
+variable "activate_latest_on_production" {
+  type    = bool
+  default = {{$isProductionActiveOnLatestVersion}}
+}
+{{ else}}
+#variable "activate_latest_on_production" {
+#  type    = bool
+#  default = true
+#}
+{{ end}}
+{{- end}}
+{{- end}}

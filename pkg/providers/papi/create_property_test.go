@@ -376,7 +376,7 @@ func TestCreateProperty(t *testing.T) {
 					IgnoreHTTPErrors:       false,
 					PropertyName:           "test.edgesuite.net",
 					PropertyID:             "prp_12345",
-					PropertyVersion:        2,
+					PropertyVersion:        5,
 					Network:                "STAGING",
 					Status:                 "ACTIVE",
 					NotifyEmails:           []string{"jsmith@akamai.com"},
@@ -398,7 +398,7 @@ func TestCreateProperty(t *testing.T) {
 					ActivationType:         "ACTIVATE",
 					PropertyName:           "test.edgesuite.net",
 					PropertyID:             "prp_12345",
-					PropertyVersion:        2,
+					PropertyVersion:        5,
 					Network:                "PRODUCTION",
 					AcknowledgeAllWarnings: false,
 					Status:                 "ACTIVE",
@@ -453,7 +453,7 @@ func TestCreateProperty(t *testing.T) {
 					ActivationType:         "ACTIVATE",
 					PropertyName:           "test.edgesuite.net",
 					PropertyID:             "prp_12345",
-					PropertyVersion:        2,
+					PropertyVersion:        5,
 					AcknowledgeAllWarnings: false,
 					Network:                "STAGING",
 					Status:                 "ACTIVE",
@@ -477,7 +477,7 @@ func TestCreateProperty(t *testing.T) {
 					ActivationType:         "ACTIVATE",
 					PropertyName:           "test.edgesuite.net",
 					PropertyID:             "prp_12345",
-					PropertyVersion:        2,
+					PropertyVersion:        5,
 					AcknowledgeAllWarnings: false,
 					Network:                "STAGING",
 					Status:                 "ACTIVE",
@@ -502,32 +502,39 @@ func TestCreateProperty(t *testing.T) {
 	}
 
 	tfIncludeData := TFIncludeData{
-		ActivationNoteProduction:   "test production activation",
-		ActivationNoteStaging:      "test staging activation",
-		ContractID:                 "test_contract",
-		ActivationEmailsProduction: []string{"test@example.com", "test1@example.com"},
-		ActivationEmailsStaging:    []string{"test@example.com"},
-		GroupID:                    "test_group",
-		IncludeID:                  "inc_123456",
-		IncludeName:                "test_include",
-		IncludeType:                string(papi.IncludeTypeMicroServices),
-		Networks:                   []string{"STAGING", "PRODUCTION"},
-		RuleFormat:                 "v2020-11-02",
-		VersionProduction:          "1",
-		VersionStaging:             "1",
+		StagingInfo: NetworkInfo{
+			ActivationNote: "test staging activation",
+			Emails:         []string{"test@example.com"},
+			Version:        1,
+			HasActivation:  true,
+		},
+		ProductionInfo: NetworkInfo{
+			ActivationNote: "test production activation",
+			Emails:         []string{"test@example.com", "test1@example.com"},
+			Version:        1,
+			HasActivation:  true,
+		},
+		ContractID:  "test_contract",
+		GroupID:     "test_group",
+		IncludeID:   "inc_123456",
+		IncludeName: "test_include",
+		IncludeType: string(papi.IncludeTypeMicroServices),
+		RuleFormat:  "v2020-11-02",
 	}
 
 	tfIncludeData1 := TFIncludeData{
-		ActivationNoteStaging:   "test staging activation",
-		ContractID:              "test_contract",
-		ActivationEmailsStaging: []string{"test@example.com"},
-		GroupID:                 "test_group",
-		IncludeID:               "inc_78910",
-		IncludeName:             "test_include_1",
-		IncludeType:             string(papi.IncludeTypeMicroServices),
-		Networks:                []string{"STAGING"},
-		RuleFormat:              "v2020-11-02",
-		VersionStaging:          "1",
+		StagingInfo: NetworkInfo{
+			ActivationNote: "test staging activation",
+			Emails:         []string{"test@example.com"},
+			Version:        1,
+			HasActivation:  true,
+		},
+		ContractID:  "test_contract",
+		GroupID:     "test_group",
+		IncludeID:   "inc_78910",
+		IncludeName: "test_include_1",
+		IncludeType: string(papi.IncludeTypeMicroServices),
+		RuleFormat:  "v2020-11-02",
 	}
 
 	var noFilters []func([]string) ([]string, error)
@@ -563,6 +570,33 @@ func TestCreateProperty(t *testing.T) {
 			},
 			dir:     "basic",
 			jsonDir: "basic/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+		},
+		"basic property not active the latest": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivations1Response, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withStagingVersion(1, false).build(), noFilters, nil)
+			},
+			dir:     "basic_not_latest",
+			jsonDir: "basic_not_latest/property-snippets",
 			snippetFilesToCheck: []string{
 				"main.json",
 				"Content_Compression.json",
@@ -887,7 +921,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetEdgeHostnames(c)
 				mockGetActivations(c, &getActivations1Response, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withVersion("1").withStagingVersion(1).build(), noFilters, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withVersion("1").withStagingVersion(1, false).build(), noFilters, nil)
 			},
 			dir:     "basic-v1",
 			jsonDir: "basic-v1/property-snippets",
@@ -935,7 +969,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetEdgeHostnames(c)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockGetActivations(c, &getProductionActivationsResponse, nil)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withOnlyProductionActivation([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}, "example production note", 2).build(), noFilters, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withOnlyProductionActivation([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}, "example production note", 5).build(), noFilters, nil)
 			},
 			dir: "basic",
 		},
@@ -954,8 +988,8 @@ func TestCreateProperty(t *testing.T) {
 				mockGetEdgeHostnames(c)
 				mockGetActivations(c, &getActivationsResponseWithNote, nil)
 				mockGetActivations(c, &getProductionActivationsResponse, nil)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withOnlyProductionActivation([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}, "example production note", 2).withActivationNote("example staging note").
-					withEmails([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}).withStagingVersion(2).build(), noFilters, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withOnlyProductionActivation([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}, "example production note", 5).withActivationNote("example staging note").
+					withEmails([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}).withStagingVersion(5, true).build(), noFilters, nil)
 			},
 			dir: "basic",
 		},
@@ -1353,8 +1387,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 					StagingInfo: NetworkInfo{
-						HasActivation: true,
-						Emails:        []string{"jsmith@akamai.com"},
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
 					},
 				},
 				Section: "test_section",
@@ -1397,8 +1432,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 					StagingInfo: NetworkInfo{
-						HasActivation: true,
-						Emails:        []string{"jsmith@akamai.com"},
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
 					},
 				},
 				Section: "test_section",
@@ -1443,8 +1479,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 					StagingInfo: NetworkInfo{
-						HasActivation: true,
-						Emails:        []string{"jsmith@akamai.com"},
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
 					},
 				},
 				Section: "test_section",
@@ -1503,19 +1540,26 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			givenData: TFData{
 				Includes: []TFIncludeData{
 					{
-						ActivationNoteProduction:   "test production activation",
-						ActivationNoteStaging:      "test staging activation",
-						ContractID:                 "test_contract",
-						ActivationEmailsProduction: []string{"test@example.com", "test1@example.com"},
-						ActivationEmailsStaging:    []string{"test@example.com"},
-						GroupID:                    "test_group",
-						IncludeID:                  "inc_123456",
-						IncludeName:                "test_include",
-						IncludeType:                string(papi.IncludeTypeMicroServices),
-						Networks:                   []string{"STAGING", "PRODUCTION"},
-						RuleFormat:                 "v2020-11-02",
-						VersionProduction:          "1",
-						VersionStaging:             "1",
+						StagingInfo: NetworkInfo{
+							ActivationNote:          "test staging activation",
+							Emails:                  []string{"test@example.com"},
+							Version:                 1,
+							HasActivation:           true,
+							IsActiveOnLatestVersion: true,
+						},
+						ProductionInfo: NetworkInfo{
+							ActivationNote:          "test production activation",
+							Emails:                  []string{"test@example.com", "test1@example.com"},
+							Version:                 1,
+							HasActivation:           true,
+							IsActiveOnLatestVersion: true,
+						},
+						ContractID:  "test_contract",
+						GroupID:     "test_group",
+						IncludeID:   "inc_123456",
+						IncludeName: "test_include",
+						IncludeType: string(papi.IncludeTypeMicroServices),
+						RuleFormat:  "v2020-11-02",
 					},
 				},
 				Property: TFPropertyData{
@@ -1551,11 +1595,13 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 					StagingInfo: NetworkInfo{
-						HasActivation: true,
-						Emails:        []string{"jsmith@akamai.com"},
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
+				Section:      "test_section",
+				WithIncludes: true,
 			},
 			dir:          "basic_property_with_include",
 			filesToCheck: []string{"property.tf", "includes.tf", "variables.tf", "import.sh"},
@@ -1565,31 +1611,40 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			givenData: TFData{
 				Includes: []TFIncludeData{
 					{
-						ActivationNoteProduction:   "test production activation",
-						ActivationNoteStaging:      "test staging activation",
-						ContractID:                 "test_contract",
-						ActivationEmailsProduction: []string{"test@example.com", "test1@example.com"},
-						ActivationEmailsStaging:    []string{"test@example.com"},
-						GroupID:                    "test_group",
-						IncludeID:                  "inc_123456",
-						IncludeName:                "test_include",
-						IncludeType:                string(papi.IncludeTypeMicroServices),
-						Networks:                   []string{"STAGING", "PRODUCTION"},
-						RuleFormat:                 "v2020-11-02",
-						VersionProduction:          "1",
-						VersionStaging:             "1",
+						StagingInfo: NetworkInfo{
+							ActivationNote:          "test staging activation",
+							Emails:                  []string{"test@example.com"},
+							Version:                 1,
+							HasActivation:           true,
+							IsActiveOnLatestVersion: true,
+						},
+						ProductionInfo: NetworkInfo{
+							ActivationNote:          "test production activation",
+							Emails:                  []string{"test@example.com", "test1@example.com"},
+							Version:                 1,
+							HasActivation:           true,
+							IsActiveOnLatestVersion: true,
+						},
+						ContractID:  "test_contract",
+						GroupID:     "test_group",
+						IncludeID:   "inc_123456",
+						IncludeName: "test_include",
+						IncludeType: string(papi.IncludeTypeMicroServices),
+						RuleFormat:  "v2020-11-02",
 					},
 					{
-						ActivationNoteStaging:   "test staging activation",
-						ContractID:              "test_contract",
-						ActivationEmailsStaging: []string{"test@example.com"},
-						GroupID:                 "test_group",
-						IncludeID:               "inc_78910",
-						IncludeName:             "test_include_1",
-						IncludeType:             string(papi.IncludeTypeMicroServices),
-						Networks:                []string{"STAGING"},
-						RuleFormat:              "v2020-11-02",
-						VersionStaging:          "1",
+						StagingInfo: NetworkInfo{
+							ActivationNote: "test staging activation",
+							Emails:         []string{"test@example.com"},
+							Version:        1,
+							HasActivation:  true,
+						},
+						ContractID:  "test_contract",
+						GroupID:     "test_group",
+						IncludeID:   "inc_78910",
+						IncludeName: "test_include_1",
+						IncludeType: string(papi.IncludeTypeMicroServices),
+						RuleFormat:  "v2020-11-02",
 					},
 				},
 				Property: TFPropertyData{
@@ -1625,11 +1680,13 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 					StagingInfo: NetworkInfo{
-						HasActivation: true,
-						Emails:        []string{"jsmith@akamai.com"},
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
+				Section:      "test_section",
+				WithIncludes: true,
 			},
 			dir:          "basic_property_with_multiple_includes",
 			filesToCheck: []string{"property.tf", "includes.tf", "variables.tf", "import.sh"},
@@ -1639,33 +1696,42 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			givenData: TFData{
 				Includes: []TFIncludeData{
 					{
-						ActivationNoteProduction:   "test production activation",
-						ActivationNoteStaging:      "test staging activation",
-						ContractID:                 "test_contract",
-						ActivationEmailsProduction: []string{"test@example.com", "test1@example.com"},
-						ActivationEmailsStaging:    []string{"test@example.com"},
-						GroupID:                    "test_group",
-						IncludeID:                  "inc_123456",
-						IncludeName:                "test_include",
-						IncludeType:                string(papi.IncludeTypeMicroServices),
-						Networks:                   []string{"STAGING", "PRODUCTION"},
-						RuleFormat:                 "v2023-01-05",
-						Rules:                      flattenRules("test_include", getIncludeRuleResponse("basic_property_with_multiple_includes_rules_as_hcl", t, "mock_include_rules.json").Rules),
-						VersionProduction:          "1",
-						VersionStaging:             "1",
+						StagingInfo: NetworkInfo{
+							ActivationNote:          "test staging activation",
+							Emails:                  []string{"test@example.com"},
+							Version:                 1,
+							HasActivation:           true,
+							IsActiveOnLatestVersion: true,
+						},
+						ProductionInfo: NetworkInfo{
+							ActivationNote:          "test production activation",
+							Emails:                  []string{"test@example.com", "test1@example.com"},
+							Version:                 1,
+							HasActivation:           true,
+							IsActiveOnLatestVersion: true,
+						},
+						ContractID:  "test_contract",
+						GroupID:     "test_group",
+						IncludeID:   "inc_123456",
+						IncludeName: "test_include",
+						IncludeType: string(papi.IncludeTypeMicroServices),
+						RuleFormat:  "v2023-01-05",
+						Rules:       flattenRules("test_include", getIncludeRuleResponse("basic_property_with_multiple_includes_rules_as_hcl", t, "mock_include_rules.json").Rules),
 					},
 					{
-						ActivationNoteStaging:   "test staging activation",
-						ContractID:              "test_contract",
-						ActivationEmailsStaging: []string{"test@example.com"},
-						GroupID:                 "test_group",
-						IncludeID:               "inc_78910",
-						IncludeName:             "test_include_1",
-						IncludeType:             string(papi.IncludeTypeMicroServices),
-						Networks:                []string{"STAGING"},
-						RuleFormat:              "v2023-01-05",
-						Rules:                   flattenRules("test_include_1", getIncludeRuleResponse("basic_property_with_multiple_includes_rules_as_hcl", t, "mock_second_include_rules.json").Rules),
-						VersionStaging:          "1",
+						StagingInfo: NetworkInfo{
+							ActivationNote: "test staging activation",
+							Emails:         []string{"test@example.com"},
+							Version:        1,
+							HasActivation:  true,
+						},
+						ContractID:  "test_contract",
+						GroupID:     "test_group",
+						IncludeID:   "inc_78910",
+						IncludeName: "test_include_1",
+						IncludeType: string(papi.IncludeTypeMicroServices),
+						RuleFormat:  "v2023-01-05",
+						Rules:       flattenRules("test_include_1", getIncludeRuleResponse("basic_property_with_multiple_includes_rules_as_hcl", t, "mock_second_include_rules.json").Rules),
 					},
 				},
 				Property: TFPropertyData{
@@ -1701,12 +1767,14 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 					StagingInfo: NetworkInfo{
-						Emails:        []string{"jsmith@akamai.com"},
-						Version:       2,
-						HasActivation: true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						Version:                 2,
+						HasActivation:           true,
+						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
+				Section:      "test_section",
+				WithIncludes: true,
 			},
 			dir:          "basic_property_with_multiple_includes_rules_as_hcl",
 			filesToCheck: []string{"property.tf", "includes.tf", "variables.tf", "import.sh", "includes_rules.tf"},
@@ -1794,9 +1862,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 					StagingInfo: NetworkInfo{
-						HasActivation:  true,
-						Emails:         []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
-						ActivationNote: "example staging note",
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+						ActivationNote:          "example staging note",
+						IsActiveOnLatestVersion: true,
 					},
 				},
 				Section: "test_section",
@@ -1839,14 +1908,16 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 					StagingInfo: NetworkInfo{
-						HasActivation:  true,
-						Emails:         []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
-						ActivationNote: "first\nsecond\n\nlast",
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+						ActivationNote:          "first\nsecond\n\nlast",
+						IsActiveOnLatestVersion: true,
 					},
 					ProductionInfo: NetworkInfo{
-						HasActivation:  true,
-						Emails:         []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
-						ActivationNote: "first\nsecond\n",
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+						ActivationNote:          "first\nsecond\n",
+						IsActiveOnLatestVersion: true,
 					},
 				},
 				Section: "test_section",
@@ -1894,9 +1965,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						HasActivation:  false,
 					},
 					ProductionInfo: NetworkInfo{
-						Emails:         []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
-						ActivationNote: "example production note",
-						HasActivation:  true,
+						Emails:                  []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+						ActivationNote:          "example production note",
+						HasActivation:           true,
+						IsActiveOnLatestVersion: true,
 					},
 				},
 				Section: "test_section",
@@ -1939,14 +2011,16 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 					StagingInfo: NetworkInfo{
-						Emails:         []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
-						ActivationNote: "example staging note",
-						HasActivation:  true,
+						Emails:                  []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+						ActivationNote:          "example staging note",
+						HasActivation:           true,
+						IsActiveOnLatestVersion: true,
 					},
 					ProductionInfo: NetworkInfo{
-						Emails:         []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
-						ActivationNote: "example production note",
-						HasActivation:  true,
+						Emails:                  []string{"jsmith@akamai.com", "rjohnson@akamai.com"},
+						ActivationNote:          "example production note",
+						HasActivation:           true,
+						IsActiveOnLatestVersion: true,
 					},
 				},
 				Section: "test_section",
@@ -2388,9 +2462,10 @@ func (t *tfDataBuilder) withDefaults() *tfDataBuilder {
 				},
 			},
 			StagingInfo: NetworkInfo{
-				Emails:        []string{"jsmith@akamai.com"},
-				HasActivation: true,
-				Version:       2,
+				Emails:                  []string{"jsmith@akamai.com"},
+				HasActivation:           true,
+				Version:                 5,
+				IsActiveOnLatestVersion: true,
 			},
 			ReadVersion: "LATEST",
 		},
@@ -2431,10 +2506,12 @@ func (t *tfDataBuilder) withOnlyProductionActivation(emails []string, activation
 	t.tfData.Property.ProductionInfo.Emails = emails
 	t.tfData.Property.ProductionInfo.ActivationNote = activationNote
 	t.tfData.Property.ProductionInfo.Version = version
+	t.tfData.Property.ProductionInfo.IsActiveOnLatestVersion = true
 	t.tfData.Property.StagingInfo.HasActivation = false
 	t.tfData.Property.StagingInfo.ActivationNote = ""
 	t.tfData.Property.StagingInfo.Version = 0
 	t.tfData.Property.StagingInfo.Emails = nil
+	t.tfData.Property.StagingInfo.IsActiveOnLatestVersion = false
 	return t
 }
 
@@ -2443,15 +2520,17 @@ func (t *tfDataBuilder) withVersion(version string) *tfDataBuilder {
 	return t
 }
 
-func (t *tfDataBuilder) withStagingVersion(version int) *tfDataBuilder {
+func (t *tfDataBuilder) withStagingVersion(version int, isActiveOnLatestVersion bool) *tfDataBuilder {
 	t.tfData.Property.StagingInfo.HasActivation = true
 	t.tfData.Property.StagingInfo.Version = version
+	t.tfData.Property.StagingInfo.IsActiveOnLatestVersion = isActiveOnLatestVersion
 	return t
 }
 
-func (t *tfDataBuilder) withProductionVersion(version int) *tfDataBuilder {
+func (t *tfDataBuilder) withProductionVersion(version int, isActiveOnLatestVersion bool) *tfDataBuilder {
 	t.tfData.Property.ProductionInfo.HasActivation = true
 	t.tfData.Property.ProductionInfo.Version = version
+	t.tfData.Property.ProductionInfo.IsActiveOnLatestVersion = isActiveOnLatestVersion
 	return t
 }
 
@@ -2481,6 +2560,7 @@ func (t *tfDataBuilder) withActivationNote(activationNote string) *tfDataBuilder
 
 func (t *tfDataBuilder) withIncludes(includes []TFIncludeData) *tfDataBuilder {
 	t.tfData.Includes = includes
+	t.tfData.WithIncludes = true
 	return t
 }
 

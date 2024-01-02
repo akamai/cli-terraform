@@ -71,29 +71,25 @@ type WrappedRules struct {
 
 // TFData holds template data
 type TFData struct {
-	Includes   []TFIncludeData
-	Property   TFPropertyData
-	Section    string
-	Rules      []*WrappedRules
-	RulesAsHCL bool
+	Includes     []TFIncludeData
+	Property     TFPropertyData
+	Section      string
+	Rules        []*WrappedRules
+	RulesAsHCL   bool
+	WithIncludes bool
 }
 
 // TFIncludeData holds template data for include
 type TFIncludeData struct {
-	ActivationNoteProduction   string
-	ActivationNoteStaging      string
-	ContractID                 string
-	ActivationEmailsProduction []string
-	ActivationEmailsStaging    []string
-	GroupID                    string
-	IncludeID                  string
-	IncludeName                string
-	IncludeType                string
-	Networks                   []string
-	RuleFormat                 string
-	VersionProduction          string
-	VersionStaging             string
-	Rules                      []*WrappedRules
+	ContractID     string
+	GroupID        string
+	IncludeID      string
+	IncludeName    string
+	IncludeType    string
+	RuleFormat     string
+	Rules          []*WrappedRules
+	ProductionInfo NetworkInfo
+	StagingInfo    NetworkInfo
 }
 
 // TFPropertyData holds template data for property
@@ -117,10 +113,11 @@ type TFPropertyData struct {
 
 // NetworkInfo holds details for specific network
 type NetworkInfo struct {
-	Emails         []string
-	ActivationNote string
-	HasActivation  bool
-	Version        int
+	Emails                  []string
+	ActivationNote          string
+	HasActivation           bool
+	Version                 int
+	IsActiveOnLatestVersion bool
 }
 
 // RulesTemplate represent data used for rules
@@ -197,7 +194,6 @@ var (
 
 var additionalFuncs = tools.DecorateWithMultilineHandlingFunctions(
 	map[string]any{
-		"ToLower":       strings.ToLower,
 		"TerraformName": TerraformName,
 		"AsInt":         AsInt,
 		"ReportError":   ReportError,
@@ -273,8 +269,9 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		Property: TFPropertyData{
 			EdgeHostnames: make(map[string]EdgeHostname),
 		},
-		Section:    section,
-		RulesAsHCL: rulesAsHCL,
+		Section:      section,
+		RulesAsHCL:   rulesAsHCL,
+		WithIncludes: withIncludes,
 	}
 
 	// Get Property
@@ -311,7 +308,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 
 	// Get Version
 	term.Spinner().Start("Fetching property version ")
-	version, err := getVersion(ctx, client, property, readVersion)
+	version, latestVersion, err := getVersion(ctx, client, property, readVersion)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrPropertyVersionNotFound, err)
@@ -420,6 +417,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		tfData.Property.StagingInfo.Emails = getContactEmails(activeStagingActivation)
 		tfData.Property.StagingInfo.Version = activeStagingActivation.PropertyVersion
 		tfData.Property.StagingInfo.HasActivation = true
+		tfData.Property.StagingInfo.IsActiveOnLatestVersion = activeStagingActivation.PropertyVersion == latestVersion.Version.PropertyVersion
 	}
 	activeProductionActivation, err := fetchActiveActivationForNetwork(ctx, client, property, papi.ActivationNetworkProduction)
 	if err != nil {
@@ -431,6 +429,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		tfData.Property.ProductionInfo.Emails = getContactEmails(activeProductionActivation)
 		tfData.Property.ProductionInfo.Version = activeProductionActivation.PropertyVersion
 		tfData.Property.ProductionInfo.HasActivation = true
+		tfData.Property.ProductionInfo.IsActiveOnLatestVersion = activeProductionActivation.PropertyVersion == latestVersion.Version.PropertyVersion
 	}
 
 	term.Spinner().OK()
@@ -777,14 +776,14 @@ func getPropertyRules(ctx context.Context, client papi.PAPI, version *papi.GetPr
 }
 
 // getVersion gets property version for given property from api
-func getVersion(ctx context.Context, client papi.PAPI, property *papi.Property, readVersion string) (*papi.GetPropertyVersionsResponse, error) {
+func getVersion(ctx context.Context, client papi.PAPI, property *papi.Property, readVersion string) (*papi.GetPropertyVersionsResponse, *papi.GetPropertyVersionsResponse, error) {
 	versions, err := client.GetPropertyVersions(ctx, papi.GetPropertyVersionsRequest{
 		PropertyID: property.PropertyID,
 		ContractID: property.ContractID,
 		GroupID:    property.GroupID,
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if readVersion == "LATEST" {
@@ -795,31 +794,43 @@ func getVersion(ctx context.Context, client papi.PAPI, property *papi.Property, 
 			GroupID:     versions.GroupID,
 		})
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
-		return version, nil
+		return version, version, nil
 	}
 
 	v, err := strconv.Atoi(readVersion)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", ErrPropertyVersionNotValid, err)
+		return nil, nil, fmt.Errorf("%w: %s", ErrPropertyVersionNotValid, err)
 	}
+	// Latest will be the first one
+	sort.Slice(versions.Versions.Items, func(i, j int) bool {
+		return versions.Versions.Items[i].PropertyVersion > versions.Versions.Items[j].PropertyVersion
+	})
+	var latestVersion *papi.GetPropertyVersionsResponse
+	if len(versions.Versions.Items) == 0 {
+		return nil, nil, ErrPropertyVersionNotFound
+	}
+	latestVersion = getPropertyVersionsResponse(versions, versions.Versions.Items[0])
 	for _, item := range versions.Versions.Items {
 		if item.PropertyVersion == v {
-			return &papi.GetPropertyVersionsResponse{
-				PropertyID:   versions.PropertyID,
-				PropertyName: versions.PropertyName,
-				AccountID:    versions.AccountID,
-				ContractID:   versions.ContractID,
-				GroupID:      versions.GroupID,
-				AssetID:      versions.AssetID,
-				Version:      item,
-			}, nil
+			return getPropertyVersionsResponse(versions, item), latestVersion, nil
 		}
 	}
+	return nil, nil, ErrPropertyVersionNotFound
+}
 
-	return nil, ErrPropertyVersionNotFound
+func getPropertyVersionsResponse(versions *papi.GetPropertyVersionsResponse, item papi.PropertyVersionGetItem) *papi.GetPropertyVersionsResponse {
+	return &papi.GetPropertyVersionsResponse{
+		PropertyID:   versions.PropertyID,
+		PropertyName: versions.PropertyName,
+		AccountID:    versions.AccountID,
+		ContractID:   versions.ContractID,
+		GroupID:      versions.GroupID,
+		AssetID:      versions.AssetID,
+		Version:      item,
+	}
 }
 
 // getGroup fetches a group with specific groupID

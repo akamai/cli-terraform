@@ -194,12 +194,12 @@ Certain export conditions require the use of a particular property rule format. 
    akamai terraform [global flags] export-property [subcommand] [flags] <property name>
 
 Subcommand:
-    include <contract_id> <include_name>    Generates Terraform configuration for Include resources
+    include <contract_id> <include_name>    Generates Terraform configuration for Include resources. Deprecated, use `export-property-include` instead.
 
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
    --version value        Property version to import  (default: LATEST)
-   --with-includes        Referenced includes will also be exported along with property
+   --with-includes        Referenced includes will also be exported along with property. Deprecated.
    --rules-as-hcl         Rules will be exported as `akamai_property_rules_builder` data source in HCL format.
 ```
 
@@ -209,6 +209,48 @@ Flags:
 
 ```
 $ akamai terraform export-property
+```
+
+## Property Manager Includes
+
+Certain export conditions require the use of a particular property rule format. Verify your rule format matches the use case requirement and [update your rule format](https://techdocs.akamai.com/terraform/docs/set-up-includes#update-rule-format) as needed.
+
+<table>
+<thead>
+  <tr>
+    <th>Export condition</th>
+    <th>Output</th>
+    <th>Rule format</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>General</td>
+    <td>Your declarative include configuration and its JSON-formatted rules.</td>
+    <td>Any supported format.</td>
+  </tr>
+  <tr>
+    <td>Addition of <code>--rules-as-hcl</code> flag</td>
+    <td>Your declarative include configuration and HCL-formatted rules. <strong>Does not return includes</strong> as includes are JSON-formatted.</td>
+    <td>Must be a dated rule format ≥ <code>v2023-01-05</code>. Cannot use `latest`.</td>
+  </tr>
+</tbody>
+</table>
+
+### Usage
+
+```
+   akamai terraform [global flags] export-property-include [flags] <contract_id> <include_name>
+
+Flags:
+   --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
+   --rules-as-hcl         Rules will be exported as `akamai_property_rules_builder` data source in HCL format.
+```
+
+### Export property manager include configuration.
+
+```
+$ akamai terraform export-property-include
 ```
 
 ## Cloudlets

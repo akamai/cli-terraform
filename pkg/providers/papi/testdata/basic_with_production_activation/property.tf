@@ -38,18 +38,20 @@ resource "akamai_property" "test-edgesuite-net" {
   rules       = data.akamai_property_rules_template.rules.json
 }
 
+# NOTE: Be careful when removing this resource as you can disable traffic
 #resource "akamai_property_activation" "test-edgesuite-net-staging" {
 #  property_id                    = akamai_property.test-edgesuite-net.id
 #  contact                        = []
-#  version                        = akamai_property.test-edgesuite-net.latest_version
+#  version                        = var.activate_latest_on_staging ? akamai_property.test-edgesuite-net.latest_version : akamai_property.test-edgesuite-net.staging_version
 #  network                        = "STAGING"
 #  auto_acknowledge_rule_warnings = false
 #}
 
+# NOTE: Be careful when removing this resource as you can disable traffic
 resource "akamai_property_activation" "test-edgesuite-net-production" {
   property_id                    = akamai_property.test-edgesuite-net.id
   contact                        = ["jsmith@akamai.com", "rjohnson@akamai.com"]
-  version                        = akamai_property.test-edgesuite-net.production_version
+  version                        = var.activate_latest_on_production ? akamai_property.test-edgesuite-net.latest_version : akamai_property.test-edgesuite-net.production_version
   network                        = "PRODUCTION"
   note                           = "example production note"
   auto_acknowledge_rule_warnings = false

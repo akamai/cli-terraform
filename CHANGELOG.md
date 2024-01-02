@@ -25,6 +25,13 @@
 
 
 
+* PAPI
+* Introduced two variables `activate_latest_on_staging` and `activate_latest_on_production` in exported configuration for property activation or include activation (when exporting includes alone), to drive which version to use for activation
+* When there is no activation for given network, export activation commented out
+* Added a new export command `export-property-include` as replacement for `export-property`.`include` subcommand. It'll generate `include` configuration without related properties.
+* Deprecated `include` subcommand available for `export-property`
+* Deprecated `--with-includes` flag available for `export-property`
+
 
 
 ### Bug fixes

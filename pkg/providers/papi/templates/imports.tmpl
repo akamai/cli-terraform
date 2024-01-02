@@ -14,7 +14,10 @@ terraform import akamai_property_activation.{{.Property.PropertyResourceName}}-p
 {{- end}}
 {{- range $include := .Includes}}
 terraform import akamai_property_include.{{.IncludeName}} {{.ContractID}}:{{.GroupID}}:{{.IncludeID}}
-{{- range $network := .Networks}}
-terraform import akamai_property_include_activation.{{$include.IncludeName}}_{{$network | ToLower}} {{$include.ContractID}}:{{$include.GroupID}}:{{$include.IncludeID}}:{{$network}}
+{{- if $include.StagingInfo.HasActivation}}
+terraform import akamai_property_include_activation.{{$include.IncludeName}}_staging {{$include.ContractID}}:{{$include.GroupID}}:{{$include.IncludeID}}:STAGING
+{{- end}}
+{{- if $include.ProductionInfo.HasActivation}}
+terraform import akamai_property_include_activation.{{$include.IncludeName}}_production {{$include.ContractID}}:{{$include.GroupID}}:{{$include.IncludeID}}:PRODUCTION
 {{- end}}
 {{- end}}

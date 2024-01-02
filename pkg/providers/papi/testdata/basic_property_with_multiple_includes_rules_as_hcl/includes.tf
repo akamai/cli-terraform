@@ -66,3 +66,13 @@ resource "akamai_property_include_activation" "test_include_1_staging" {
   note                           = "test staging activation"
   notify_emails                  = ["test@example.com"]
 }
+
+#resource "akamai_property_include_activation" "test_include_1_production" {
+#  contract_id = akamai_property_include.test_include_1.contract_id
+#  group_id = akamai_property_include.test_include_1.group_id
+#  include_id = akamai_property_include.test_include_1.id
+#  network = "PRODUCTION"
+#  auto_acknowledge_rule_warnings = false
+#  version = "0"
+#  notify_emails = []
+#}

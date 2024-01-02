@@ -142,7 +142,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Subcommands: []*cli.Command{
 			{
 				Name:        "include",
-				Description: "Generates Terraform configuration for Include resources",
+				Description: "Generates Terraform configuration for Include resources. Deprecated, use `export-property-include` command instead",
 				ArgsUsage:   "<contract_id> <include_name>",
 				Action:      validatedAction(papi.CmdCreateInclude, requireValidWorkpath, requireNArguments(2)),
 			},
@@ -160,7 +160,28 @@ func CommandLocator() ([]*cli.Command, error) {
 			},
 			&cli.BoolFlag{
 				Name:  "with-includes",
-				Usage: "Referenced includes will also be exported along with property",
+				Usage: "Referenced includes will also be exported along with property. Deprecated.",
+			},
+			&cli.BoolFlag{
+				Name:    "rules-as-hcl",
+				Aliases: []string{"schema"},
+				Usage:   "Referenced rules will be exported as data source",
+			},
+		},
+		BashComplete: autocomplete.Default,
+	})
+
+	commands = append(commands, &cli.Command{
+		Name:        "export-property-include",
+		Description: "Generates Terraform configuration for Include resources",
+		Usage:       "export-property-include",
+		ArgsUsage:   "<contract_id> <include_name>",
+		Action:      validatedAction(papi.CmdCreateInclude, requireValidWorkpath, requireNArguments(2)),
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
 			},
 			&cli.BoolFlag{
 				Name:    "rules-as-hcl",
