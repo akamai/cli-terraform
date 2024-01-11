@@ -18,7 +18,8 @@
 
 
 
-
+* Edgeworkers
+  * Added support for generation of `note` field when exporting EdgeWorker configuration
 
 * IVM
   * Added support for generation of `serve_stale_duration`, `allow_pristine_on_downsize` and `prefer_modern_formats` when exporting using `--policy-as-hcl` flag
