@@ -10,5 +10,5 @@ variable "config_section" {
 
 variable "env" {
   type    = string
-  default = "staging"
+  default = "prod"
 }

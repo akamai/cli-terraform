@@ -2,7 +2,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 5.5.0"
+      version = ">= 5.6.0"
     }
   }
   required_version = ">= 0.13"
@@ -19,6 +19,7 @@ resource "akamai_cloudlets_policy" "policy" {
   description       = "Testing exported policy"
   group_id          = "12345"
   match_rule_format = "1.0"
+  is_shared         = false
 }
 
 /*

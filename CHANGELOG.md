@@ -13,7 +13,8 @@
 
 
 * Cloudlets
-  * Add Cloudlet V2 policy activation import functionality
+  * Modified export of active policies for cloudlets to generate `akamai_cloudlets_policy_activation` resource entry in `import.sh` script. In case of activation on both networks, only production will be exported.
+  * Added support to export shared (V3) policies
 
 
 
