@@ -32,6 +32,7 @@
 * Added a new export command `export-property-include` as replacement for `export-property`.`include` subcommand. It'll generate `include` configuration without related properties.
 * Deprecated `include` subcommand available for `export-property`
 * Deprecated `--with-includes` flag available for `export-property`
+* `export-property` and `export-property-include` commands with flag `--rules-as-hcl` now support export of properties in frozen format `v2024-01-09`
 
 
 
