@@ -487,8 +487,8 @@ func (strategy *v3ActivationStrategy) populateWithLatestPolicyVersion(ctx contex
 	}
 
 	policyVersion, err := strategy.client.GetPolicyVersion(ctx, v3.GetPolicyVersionRequest{
-		PolicyID: policyID,
-		Version:  versions.PolicyVersions[0].Version,
+		PolicyID:      policyID,
+		PolicyVersion: versions.PolicyVersions[0].PolicyVersion,
 	})
 	if err != nil {
 		return err

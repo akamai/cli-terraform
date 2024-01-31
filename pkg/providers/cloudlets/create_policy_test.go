@@ -695,24 +695,24 @@ func TestCreatePolicy(t *testing.T) {
 				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
 					PolicyVersions: []v3.ListPolicyVersionsItem{
 						{
-							PolicyID:    int64(2),
-							Version:     int64(2),
-							Description: tools.StringPtr("version 2 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(2),
+							Description:   tools.StringPtr("version 2 description"),
 						},
 						{
-							PolicyID:    int64(2),
-							Version:     int64(1),
-							Description: tools.StringPtr("version 1 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(1),
+							Description:   tools.StringPtr("version 1 description"),
 						},
 					},
 				}, nil).Once()
 				cv3.On("GetPolicyVersion", mock.Anything, v3.GetPolicyVersionRequest{
-					PolicyID: 2,
-					Version:  2,
+					PolicyID:      2,
+					PolicyVersion: 2,
 				}).Return(&v3.PolicyVersion{
-					PolicyID:    2,
-					Version:     2,
-					Description: tools.StringPtr("version 2 description"),
+					PolicyID:      2,
+					PolicyVersion: 2,
+					Description:   tools.StringPtr("version 2 description"),
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:         "test_policy",
@@ -767,24 +767,24 @@ func TestCreatePolicy(t *testing.T) {
 				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
 					PolicyVersions: []v3.ListPolicyVersionsItem{
 						{
-							PolicyID:    int64(2),
-							Version:     int64(2),
-							Description: tools.StringPtr("version 2 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(2),
+							Description:   tools.StringPtr("version 2 description"),
 						},
 						{
-							PolicyID:    int64(2),
-							Version:     int64(1),
-							Description: tools.StringPtr("version 1 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(1),
+							Description:   tools.StringPtr("version 1 description"),
 						},
 					},
 				}, nil).Once()
 				cv3.On("GetPolicyVersion", mock.Anything, v3.GetPolicyVersionRequest{
-					PolicyID: 2,
-					Version:  2,
+					PolicyID:      2,
+					PolicyVersion: 2,
 				}).Return(&v3.PolicyVersion{
-					PolicyID:    2,
-					Version:     2,
-					Description: tools.StringPtr("version 2 description"),
+					PolicyID:      2,
+					PolicyVersion: 2,
+					Description:   tools.StringPtr("version 2 description"),
 					MatchRules: v3.MatchRules{
 						&v3.MatchRuleER{
 							Name:  "some rule",
@@ -857,24 +857,24 @@ func TestCreatePolicy(t *testing.T) {
 				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
 					PolicyVersions: []v3.ListPolicyVersionsItem{
 						{
-							PolicyID:    int64(2),
-							Version:     int64(2),
-							Description: tools.StringPtr("version 2 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(2),
+							Description:   tools.StringPtr("version 2 description"),
 						},
 						{
-							PolicyID:    int64(2),
-							Version:     int64(1),
-							Description: tools.StringPtr("version 1 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(1),
+							Description:   tools.StringPtr("version 1 description"),
 						},
 					},
 				}, nil).Once()
 				cv3.On("GetPolicyVersion", mock.Anything, v3.GetPolicyVersionRequest{
-					PolicyID: 2,
-					Version:  2,
+					PolicyID:      2,
+					PolicyVersion: 2,
 				}).Return(&v3.PolicyVersion{
-					PolicyID:    2,
-					Version:     2,
-					Description: tools.StringPtr("version 2 description"),
+					PolicyID:      2,
+					PolicyVersion: 2,
+					Description:   tools.StringPtr("version 2 description"),
 					MatchRules: v3.MatchRules{
 						&v3.MatchRuleFR{
 							Name:  "some rule",
@@ -947,24 +947,24 @@ func TestCreatePolicy(t *testing.T) {
 				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
 					PolicyVersions: []v3.ListPolicyVersionsItem{
 						{
-							PolicyID:    int64(2),
-							Version:     int64(2),
-							Description: tools.StringPtr("version 2 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(2),
+							Description:   tools.StringPtr("version 2 description"),
 						},
 						{
-							PolicyID:    int64(2),
-							Version:     int64(1),
-							Description: tools.StringPtr("version 1 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(1),
+							Description:   tools.StringPtr("version 1 description"),
 						},
 					},
 				}, nil).Once()
 				cv3.On("GetPolicyVersion", mock.Anything, v3.GetPolicyVersionRequest{
-					PolicyID: 2,
-					Version:  2,
+					PolicyID:      2,
+					PolicyVersion: 2,
 				}).Return(&v3.PolicyVersion{
-					PolicyID:    2,
-					Version:     2,
-					Description: tools.StringPtr("version 2 description"),
+					PolicyID:      2,
+					PolicyVersion: 2,
+					Description:   tools.StringPtr("version 2 description"),
 					MatchRules: v3.MatchRules{
 						&v3.MatchRulePR{
 							Name:  "some rule",
@@ -1037,24 +1037,24 @@ func TestCreatePolicy(t *testing.T) {
 				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
 					PolicyVersions: []v3.ListPolicyVersionsItem{
 						{
-							PolicyID:    int64(2),
-							Version:     int64(2),
-							Description: tools.StringPtr("version 2 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(2),
+							Description:   tools.StringPtr("version 2 description"),
 						},
 						{
-							PolicyID:    int64(2),
-							Version:     int64(1),
-							Description: tools.StringPtr("version 1 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(1),
+							Description:   tools.StringPtr("version 1 description"),
 						},
 					},
 				}, nil).Once()
 				cv3.On("GetPolicyVersion", mock.Anything, v3.GetPolicyVersionRequest{
-					PolicyID: 2,
-					Version:  2,
+					PolicyID:      2,
+					PolicyVersion: 2,
 				}).Return(&v3.PolicyVersion{
-					PolicyID:    2,
-					Version:     2,
-					Description: tools.StringPtr("version 2 description"),
+					PolicyID:      2,
+					PolicyVersion: 2,
+					Description:   tools.StringPtr("version 2 description"),
 					MatchRules: v3.MatchRules{
 						&v3.MatchRuleAP{
 							Name:  "some rule",
@@ -1127,24 +1127,24 @@ func TestCreatePolicy(t *testing.T) {
 				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
 					PolicyVersions: []v3.ListPolicyVersionsItem{
 						{
-							PolicyID:    int64(2),
-							Version:     int64(2),
-							Description: tools.StringPtr("version 2 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(2),
+							Description:   tools.StringPtr("version 2 description"),
 						},
 						{
-							PolicyID:    int64(2),
-							Version:     int64(1),
-							Description: tools.StringPtr("version 1 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(1),
+							Description:   tools.StringPtr("version 1 description"),
 						},
 					},
 				}, nil).Once()
 				cv3.On("GetPolicyVersion", mock.Anything, v3.GetPolicyVersionRequest{
-					PolicyID: 2,
-					Version:  2,
+					PolicyID:      2,
+					PolicyVersion: 2,
 				}).Return(&v3.PolicyVersion{
-					PolicyID:    2,
-					Version:     2,
-					Description: tools.StringPtr("version 2 description"),
+					PolicyID:      2,
+					PolicyVersion: 2,
+					Description:   tools.StringPtr("version 2 description"),
 					MatchRules: v3.MatchRules{
 						&v3.MatchRuleAS{
 							Name:  "some rule",
@@ -1217,24 +1217,24 @@ func TestCreatePolicy(t *testing.T) {
 				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
 					PolicyVersions: []v3.ListPolicyVersionsItem{
 						{
-							PolicyID:    int64(2),
-							Version:     int64(2),
-							Description: tools.StringPtr("version 2 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(2),
+							Description:   tools.StringPtr("version 2 description"),
 						},
 						{
-							PolicyID:    int64(2),
-							Version:     int64(1),
-							Description: tools.StringPtr("version 1 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(1),
+							Description:   tools.StringPtr("version 1 description"),
 						},
 					},
 				}, nil).Once()
 				cv3.On("GetPolicyVersion", mock.Anything, v3.GetPolicyVersionRequest{
-					PolicyID: 2,
-					Version:  2,
+					PolicyID:      2,
+					PolicyVersion: 2,
 				}).Return(&v3.PolicyVersion{
-					PolicyID:    2,
-					Version:     2,
-					Description: tools.StringPtr("version 2 description"),
+					PolicyID:      2,
+					PolicyVersion: 2,
+					Description:   tools.StringPtr("version 2 description"),
 					MatchRules: v3.MatchRules{
 						&v3.MatchRuleRC{
 							Name:  "some rule",
@@ -1299,24 +1299,24 @@ func TestCreatePolicy(t *testing.T) {
 				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
 					PolicyVersions: []v3.ListPolicyVersionsItem{
 						{
-							PolicyID:    int64(2),
-							Version:     int64(2),
-							Description: tools.StringPtr("version 2 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(2),
+							Description:   tools.StringPtr("version 2 description"),
 						},
 						{
-							PolicyID:    int64(2),
-							Version:     int64(1),
-							Description: tools.StringPtr("version 1 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(1),
+							Description:   tools.StringPtr("version 1 description"),
 						},
 					},
 				}, nil).Once()
 				cv3.On("GetPolicyVersion", mock.Anything, v3.GetPolicyVersionRequest{
-					PolicyID: 2,
-					Version:  2,
+					PolicyID:      2,
+					PolicyVersion: 2,
 				}).Return(&v3.PolicyVersion{
-					PolicyID:    2,
-					Version:     2,
-					Description: tools.StringPtr("version 2 description"),
+					PolicyID:      2,
+					PolicyVersion: 2,
+					Description:   tools.StringPtr("version 2 description"),
 					MatchRules: v3.MatchRules{
 						&v3.MatchRuleER{
 							Name:  "some rule",
@@ -1375,24 +1375,24 @@ func TestCreatePolicy(t *testing.T) {
 				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
 					PolicyVersions: []v3.ListPolicyVersionsItem{
 						{
-							PolicyID:    int64(2),
-							Version:     int64(2),
-							Description: tools.StringPtr("version 2 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(2),
+							Description:   tools.StringPtr("version 2 description"),
 						},
 						{
-							PolicyID:    int64(2),
-							Version:     int64(1),
-							Description: tools.StringPtr("version 1 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(1),
+							Description:   tools.StringPtr("version 1 description"),
 						},
 					},
 				}, nil).Once()
 				cv3.On("GetPolicyVersion", mock.Anything, v3.GetPolicyVersionRequest{
-					PolicyID: 2,
-					Version:  2,
+					PolicyID:      2,
+					PolicyVersion: 2,
 				}).Return(&v3.PolicyVersion{
-					PolicyID:    2,
-					Version:     2,
-					Description: tools.StringPtr("version 2 description"),
+					PolicyID:      2,
+					PolicyVersion: 2,
+					Description:   tools.StringPtr("version 2 description"),
 					MatchRules: v3.MatchRules{
 						&v3.MatchRuleER{
 							Name:  "some rule",
@@ -1462,24 +1462,24 @@ func TestCreatePolicy(t *testing.T) {
 				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
 					PolicyVersions: []v3.ListPolicyVersionsItem{
 						{
-							PolicyID:    int64(2),
-							Version:     int64(2),
-							Description: tools.StringPtr("version 2 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(2),
+							Description:   tools.StringPtr("version 2 description"),
 						},
 						{
-							PolicyID:    int64(2),
-							Version:     int64(1),
-							Description: tools.StringPtr("version 1 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(1),
+							Description:   tools.StringPtr("version 1 description"),
 						},
 					},
 				}, nil).Once()
 				cv3.On("GetPolicyVersion", mock.Anything, v3.GetPolicyVersionRequest{
-					PolicyID: 2,
-					Version:  2,
+					PolicyID:      2,
+					PolicyVersion: 2,
 				}).Return(&v3.PolicyVersion{
-					PolicyID:    2,
-					Version:     2,
-					Description: tools.StringPtr("version 2 description"),
+					PolicyID:      2,
+					PolicyVersion: 2,
+					Description:   tools.StringPtr("version 2 description"),
 					MatchRules: v3.MatchRules{
 						&v3.MatchRuleER{
 							Name:  "some rule",
@@ -1715,20 +1715,20 @@ func TestCreatePolicy(t *testing.T) {
 				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
 					PolicyVersions: []v3.ListPolicyVersionsItem{
 						{
-							PolicyID:    int64(2),
-							Version:     int64(2),
-							Description: tools.StringPtr("version 2 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(2),
+							Description:   tools.StringPtr("version 2 description"),
 						},
 						{
-							PolicyID:    int64(2),
-							Version:     int64(1),
-							Description: tools.StringPtr("version 1 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(1),
+							Description:   tools.StringPtr("version 1 description"),
 						},
 					},
 				}, nil).Once()
 				cv3.On("GetPolicyVersion", mock.Anything, v3.GetPolicyVersionRequest{
-					PolicyID: 2,
-					Version:  2,
+					PolicyID:      2,
+					PolicyVersion: 2,
 				}).Return(nil, fmt.Errorf("oops")).Once()
 			},
 			withError: ErrFetchingVersion,
@@ -1833,24 +1833,24 @@ func TestCreatePolicy(t *testing.T) {
 				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
 					PolicyVersions: []v3.ListPolicyVersionsItem{
 						{
-							PolicyID:    int64(2),
-							Version:     int64(2),
-							Description: tools.StringPtr("version 2 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(2),
+							Description:   tools.StringPtr("version 2 description"),
 						},
 						{
-							PolicyID:    int64(2),
-							Version:     int64(1),
-							Description: tools.StringPtr("version 1 description"),
+							PolicyID:      int64(2),
+							PolicyVersion: int64(1),
+							Description:   tools.StringPtr("version 1 description"),
 						},
 					},
 				}, nil).Once()
 				cv3.On("GetPolicyVersion", mock.Anything, v3.GetPolicyVersionRequest{
-					PolicyID: 2,
-					Version:  2,
+					PolicyID:      2,
+					PolicyVersion: 2,
 				}).Return(&v3.PolicyVersion{
-					PolicyID:    2,
-					Version:     2,
-					Description: tools.StringPtr("version 2 description"),
+					PolicyID:      2,
+					PolicyVersion: 2,
+					Description:   tools.StringPtr("version 2 description"),
 					MatchRules: v3.MatchRules{
 						&v3.MatchRuleER{
 							Name:  "some rule",
