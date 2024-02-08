@@ -665,6 +665,37 @@ func TestCreatePolicy(t *testing.T) {
 				}).Return(nil).Once()
 			},
 		},
+		"fetch policy v2 without version": {
+			init: func(c *cloudlets.Mock, cv3 *v3.Mock, p *templates.MockProcessor) {
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
+					{
+						PolicyID:     1,
+						GroupID:      123,
+						Name:         "some policy",
+						CloudletID:   0,
+						CloudletCode: "ER",
+					},
+					{
+						PolicyID:     2,
+						GroupID:      234,
+						Name:         "test_policy",
+						Description:  "test_policy description",
+						CloudletID:   0,
+						CloudletCode: "ER",
+					},
+				}, nil).Once()
+				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2, PageSize: &pageSize, Offset: 0}).Return([]cloudlets.PolicyVersion{}, nil).Once()
+				p.On("ProcessTemplates", TFPolicyData{
+					Name:              "test_policy",
+					Section:           section,
+					CloudletCode:      "ER",
+					Description:       "",
+					GroupID:           234,
+					PolicyActivations: TFPolicyActivationsData{IsV3: false},
+					MatchRuleFormat:   "",
+				}).Return(nil).Once()
+			},
+		},
 		"fetch latest version of policy v3 without match rules": {
 			init: func(c *cloudlets.Mock, cv3 *v3.Mock, p *templates.MockProcessor) {
 				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return(nil, fmt.Errorf("400")).Once()
@@ -1419,6 +1450,39 @@ func TestCreatePolicy(t *testing.T) {
 							ID:    1234,
 						},
 					},
+					PolicyActivations: TFPolicyActivationsData{IsV3: true},
+				}).Return(nil).Once()
+			},
+		},
+		"fetch policy v3 without version": {
+			init: func(c *cloudlets.Mock, cv3 *v3.Mock, p *templates.MockProcessor) {
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return(nil, fmt.Errorf("400")).Once()
+				cv3.On("ListPolicies", mock.Anything, v3.ListPoliciesRequest{Page: 0, Size: pageSize}).Return(&v3.ListPoliciesResponse{Content: []v3.Policy{
+					{
+						Name:         "test_policy",
+						CloudletType: v3.CloudletTypeER,
+						ID:           int64(2),
+						CurrentActivations: v3.CurrentActivations{
+							Staging: v3.ActivationInfo{
+								Effective: nil,
+							},
+							Production: v3.ActivationInfo{
+								Effective: nil,
+							},
+						},
+						Description: tools.StringPtr("test_policy description"),
+						GroupID:     int64(234),
+					}}}, nil).Once()
+				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
+					PolicyVersions: []v3.ListPolicyVersionsItem{}}, nil).Once()
+				p.On("ProcessTemplates", TFPolicyData{
+					Name:              "test_policy",
+					Section:           section,
+					CloudletCode:      "ER",
+					Description:       "",
+					GroupID:           234,
+					IsV3:              true,
+					MatchRules:        nil,
 					PolicyActivations: TFPolicyActivationsData{IsV3: true},
 				}).Return(nil).Once()
 			},
@@ -2468,6 +2532,18 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				MatchRuleFormat: "1.0",
 			},
 			dir:          "no_activations_no_match_rules",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+		},
+		"policy without version": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				Section:         "test_section",
+				CloudletCode:    "ER",
+				Description:     "",
+				GroupID:         12345,
+				MatchRuleFormat: "",
+			},
+			dir:          "no_version",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
 		"policy with matches always": {
@@ -3598,6 +3674,20 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "v3/v3_with_ig_match_rules",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
 		},
+		"policy v3 without version": {
+			givenData: TFPolicyData{
+				Name:              "test_policy_export",
+				Section:           "test_section",
+				CloudletCode:      "ER",
+				Description:       "",
+				GroupID:           234,
+				IsV3:              true,
+				MatchRules:        nil,
+				PolicyActivations: TFPolicyActivationsData{IsV3: true},
+			},
+			dir:          "v3/v3_no_version",
+			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
+		},
 		"policy V3 with staging activation": {
 			givenData: TFPolicyData{
 				Name:         "test_policy_export",
@@ -3908,7 +3998,7 @@ func TestGetLatestPolicyVersion(t *testing.T) {
 	tests := map[string]struct {
 		policyID  int64
 		init      func(m *cloudlets.Mock)
-		expected  int64
+		expected  *int64
 		withError bool
 	}{
 		"policy version found in first iteration": {
@@ -3919,7 +4009,17 @@ func TestGetLatestPolicyVersion(t *testing.T) {
 				m.On("GetPolicyVersion", mock.Anything, cloudlets.GetPolicyVersionRequest{PolicyID: 123, Version: 499}).
 					Return(&cloudlets.PolicyVersion{Version: 499}, nil).Once()
 			},
-			expected: 499,
+			expected: tools.Int64Ptr(499),
+		},
+		"policy version found in actual order (descending)": {
+			policyID: 123,
+			init: func(m *cloudlets.Mock) {
+				m.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 123, PageSize: &pageSize, Offset: 0}).
+					Return([]cloudlets.PolicyVersion{{Version: 2}, {Version: 1}}, nil).Once()
+				m.On("GetPolicyVersion", mock.Anything, cloudlets.GetPolicyVersionRequest{PolicyID: 123, Version: 2}).
+					Return(&cloudlets.PolicyVersion{Version: 2}, nil).Once()
+			},
+			expected: tools.Int64Ptr(2),
 		},
 		"policy version found on 3rd page": {
 			policyID: 123,
@@ -3933,7 +4033,7 @@ func TestGetLatestPolicyVersion(t *testing.T) {
 				m.On("GetPolicyVersion", mock.Anything, cloudlets.GetPolicyVersionRequest{PolicyID: 123, Version: 2499}).
 					Return(&cloudlets.PolicyVersion{Version: 2499}, nil).Once()
 			},
-			expected: 2499,
+			expected: tools.Int64Ptr(2499),
 		},
 		"no policy versions found": {
 			policyID: 123,
@@ -3941,7 +4041,7 @@ func TestGetLatestPolicyVersion(t *testing.T) {
 				m.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 123, PageSize: &pageSize, Offset: 0}).
 					Return([]cloudlets.PolicyVersion{}, nil).Once()
 			},
-			withError: true,
+			expected: nil,
 		},
 		"error listing policy versions": {
 			policyID: 123,
@@ -3975,7 +4075,11 @@ func TestGetLatestPolicyVersion(t *testing.T) {
 				return
 			}
 			require.NoError(t, err)
-			assert.Equal(t, test.expected, strategy.policyVersion.Version)
+			if test.expected != nil {
+				assert.Equal(t, *test.expected, strategy.policyVersion.Version)
+			} else {
+				assert.Nil(t, strategy.policyVersion)
+			}
 		})
 	}
 }

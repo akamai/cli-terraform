@@ -186,11 +186,16 @@ func (strategy *v2ActivationStrategy) getTFPolicyData(ctx context.Context, secti
 		Name:              strategy.policy.Name,
 		CloudletCode:      strategy.policy.CloudletCode,
 		GroupID:           strategy.policy.GroupID,
-		Description:       strategy.policyVersion.Description,
-		MatchRuleFormat:   strategy.policyVersion.MatchRuleFormat,
-		MatchRules:        strategy.policyVersion.MatchRules,
 		PolicyActivations: TFPolicyActivationsData{IsV3: false},
 	}
+
+	if strategy.policyVersion == nil {
+		return &tfPolicyData, nil
+	}
+
+	tfPolicyData.Description = strategy.policyVersion.Description
+	tfPolicyData.MatchRuleFormat = strategy.policyVersion.MatchRuleFormat
+	tfPolicyData.MatchRules = strategy.policyVersion.MatchRules
 
 	if activationStaging := getActiveVersionAndProperties(strategy.policy, cloudlets.PolicyActivationNetworkStaging); activationStaging != nil {
 		tfPolicyData.PolicyActivations.Staging = activationStaging
@@ -360,7 +365,7 @@ func (strategy *v2ActivationStrategy) initializeWithPolicy(ctx context.Context, 
 }
 
 func (strategy *v2ActivationStrategy) populateWithLatestPolicyVersion(ctx context.Context) error {
-	var version int64
+	var version *int64
 	policyID := strategy.policy.PolicyID
 	pageSize, offset := 1000, 0
 	for {
@@ -375,11 +380,12 @@ func (strategy *v2ActivationStrategy) populateWithLatestPolicyVersion(ctx contex
 		}
 
 		if len(versions) == 0 {
-			return errVersionsNotFound
+			break
 		}
 		for _, v := range versions {
-			if v.Version > version {
-				version = v.Version
+			v := v
+			if version == nil || v.Version > *version {
+				version = &v.Version
 			}
 		}
 		if len(versions) < pageSize {
@@ -387,9 +393,12 @@ func (strategy *v2ActivationStrategy) populateWithLatestPolicyVersion(ctx contex
 		}
 		offset += pageSize
 	}
+	if version == nil {
+		return nil
+	}
 	policyVersion, err := strategy.client.GetPolicyVersion(ctx, cloudlets.GetPolicyVersionRequest{
 		PolicyID: policyID,
-		Version:  version,
+		Version:  *version,
 	})
 	if err != nil {
 		return err
@@ -483,7 +492,7 @@ func (strategy *v3ActivationStrategy) populateWithLatestPolicyVersion(ctx contex
 		return err
 	}
 	if len(versions.PolicyVersions) == 0 {
-		return errVersionsNotFound
+		return nil
 	}
 
 	policyVersion, err := strategy.client.GetPolicyVersion(ctx, v3.GetPolicyVersionRequest{
@@ -507,10 +516,10 @@ func (strategy *v3ActivationStrategy) getTFPolicyData(_ context.Context, section
 		PolicyActivations: TFPolicyActivationsData{IsV3: true},
 	}
 
-	if strategy.policyVersion.Description != nil {
+	if strategy.policyVersion != nil && strategy.policyVersion.Description != nil {
 		tfPolicyData.Description = *strategy.policyVersion.Description
 	}
-	if strategy.policyVersion.MatchRules != nil {
+	if strategy.policyVersion != nil && strategy.policyVersion.MatchRules != nil {
 		tfPolicyData.MatchRules = strategy.policyVersion.MatchRules
 	}
 
