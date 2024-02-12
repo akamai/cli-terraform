@@ -549,6 +549,7 @@ func TestCreateProperty(t *testing.T) {
 		readVersion         string
 		withIncludes        bool
 		rulesAsHCL          bool
+		withBootstrap       bool
 	}{
 		"basic property": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
@@ -879,6 +880,34 @@ func TestCreateProperty(t *testing.T) {
 				"Dynamic_Content.json",
 			},
 		},
+		"basic property with bootstrap": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withBootstrap(true).build(), noFilters, nil)
+			},
+			dir:     "basic-bootstrap",
+			jsonDir: "basic-bootstrap/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+			withBootstrap: true,
+		},
 		"import LATEST property version": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
@@ -1142,7 +1171,16 @@ func TestCreateProperty(t *testing.T) {
 			mp := new(templates.MockProcessor)
 			test.init(mc, mh, mp, test.dir)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createProperty(ctx, "test.edgesuite.net", test.readVersion, section, fmt.Sprintf("./testdata/res/%s", test.jsonDir), "./", test.withIncludes, test.rulesAsHCL, mc, mh, mp)
+			options := propertyOptions{
+				propertyName:  "test.edgesuite.net",
+				section:       section,
+				tfWorkPath:    "./",
+				version:       test.readVersion,
+				withIncludes:  test.withIncludes,
+				rulesAsHCL:    test.rulesAsHCL,
+				withBootstrap: test.withBootstrap,
+			}
+			err := createProperty(ctx, options, fmt.Sprintf("./testdata/res/%s", test.jsonDir), mc, mh, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -2180,6 +2218,51 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2024-01-09")},
 		},
+		"property with bootstrap": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							CnameFrom:                "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
+						},
+					},
+					StagingInfo: NetworkInfo{
+						HasActivation: true,
+						Emails:        []string{"jsmith@akamai.com"},
+					},
+				},
+				Section:      "test_section",
+				UseBootstrap: true,
+			},
+			dir:          "basic-bootstrap",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
 	}
 
 	for name, test := range tests {
@@ -2583,6 +2666,11 @@ func (t *tfDataBuilder) withActivationNote(activationNote string) *tfDataBuilder
 func (t *tfDataBuilder) withIncludes(includes []TFIncludeData) *tfDataBuilder {
 	t.tfData.Includes = includes
 	t.tfData.WithIncludes = true
+	return t
+}
+
+func (t *tfDataBuilder) withBootstrap(useBootstrap bool) *tfDataBuilder {
+	t.tfData.UseBootstrap = useBootstrap
 	return t
 }
 

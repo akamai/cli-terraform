@@ -77,6 +77,7 @@ type TFData struct {
 	Rules        []*WrappedRules
 	RulesAsHCL   bool
 	WithIncludes bool
+	UseBootstrap bool
 }
 
 // TFIncludeData holds template data for include
@@ -155,6 +156,16 @@ type RuleTemplate struct {
 	} `json:"options,omitempty"`
 
 	CustomOverride *papi.RuleCustomOverride `json:"customOverride,omitempty"`
+}
+
+type propertyOptions struct {
+	propertyName  string
+	section       string
+	tfWorkPath    string
+	version       string
+	withIncludes  bool
+	rulesAsHCL    bool
+	withBootstrap bool
 }
 
 //go:embed templates/*
@@ -244,6 +255,11 @@ func CmdCreateProperty(c *cli.Context) error {
 		rulesAsHCL = c.Bool("rules-as-hcl")
 	}
 
+	var isBootstrap bool
+	if c.IsSet("akamai-property-bootstrap") {
+		isBootstrap = c.Bool("akamai-property-bootstrap")
+	}
+
 	if withIncludes && rulesAsHCL {
 		templateToFile["includes_rules.tmpl"] = filepath.Join(tfWorkPath, "includes_rules.tf")
 	}
@@ -254,29 +270,37 @@ func CmdCreateProperty(c *cli.Context) error {
 		AdditionalFuncs: additionalFuncs,
 	}
 
-	propertyName := c.Args().First()
-	section := edgegrid.GetEdgercSection(c)
-	if err = createProperty(ctx, propertyName, version, section, "property-snippets", tfWorkPath, withIncludes, rulesAsHCL, client, clientHapi, processor); err != nil {
+	options := propertyOptions{
+		propertyName:  c.Args().First(),
+		section:       edgegrid.GetEdgercSection(c),
+		tfWorkPath:    tfWorkPath,
+		version:       version,
+		withIncludes:  withIncludes,
+		rulesAsHCL:    rulesAsHCL,
+		withBootstrap: isBootstrap,
+	}
+	if err = createProperty(ctx, options, "property-snippets", client, clientHapi, processor); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting property: %s", err)), 1)
 	}
 	return nil
 }
 
-func createProperty(ctx context.Context, propertyName, readVersion, section, jsonDir, tfWorkPath string, withIncludes, rulesAsHCL bool, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
+func createProperty(ctx context.Context, options propertyOptions, jsonDir string, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
 	tfData := TFData{
 		Property: TFPropertyData{
 			EdgeHostnames: make(map[string]EdgeHostname),
 		},
-		Section:      section,
-		RulesAsHCL:   rulesAsHCL,
-		WithIncludes: withIncludes,
+		Section:      options.section,
+		RulesAsHCL:   options.rulesAsHCL,
+		WithIncludes: options.withIncludes,
+		UseBootstrap: options.withBootstrap,
 	}
 
 	// Get Property
-	term.Spinner().Start("Fetching property " + propertyName)
-	property, err := findProperty(ctx, client, propertyName)
+	term.Spinner().Start("Fetching property " + options.propertyName)
+	property, err := findProperty(ctx, client, options.propertyName)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrPropertyNotFound, err)
@@ -302,26 +326,26 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 
 	term.Spinner().OK()
 
-	if readVersion == "" {
-		readVersion = "LATEST"
+	if options.version == "" {
+		options.version = "LATEST"
 	}
 
 	// Get Version
 	term.Spinner().Start("Fetching property version ")
-	version, latestVersion, err := getVersion(ctx, client, property, readVersion)
+	version, latestVersion, err := getVersion(ctx, client, property, options.version)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrPropertyVersionNotFound, err)
 	}
 
 	tfData.Property.ProductID = version.Version.ProductID
-	tfData.Property.ReadVersion = readVersion
+	tfData.Property.ReadVersion = options.version
 
 	term.Spinner().OK()
 
 	// Get Includes if withIncludes is set
-	if withIncludes {
-		term.Spinner().Start("Fetching referenced includes with property " + propertyName)
+	if options.withIncludes {
+		term.Spinner().Start("Fetching referenced includes with property " + options.propertyName)
 		includes, err := client.ListReferencedIncludes(ctx, papi.ListReferencedIncludesRequest{
 			PropertyID:      property.PropertyID,
 			ContractID:      property.ContractID,
@@ -342,10 +366,10 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 			}
 
 			// Save snippets
-			if !rulesAsHCL {
+			if !options.rulesAsHCL {
 				term.Spinner().Start("Saving snippets ")
 				ruleTemplate, rulesTemplate := setIncludeRuleTemplates(rules)
-				if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), fmt.Sprintf("%s.json", include.IncludeName)); err != nil {
+				if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(options.tfWorkPath, jsonDir), fmt.Sprintf("%s.json", include.IncludeName)); err != nil {
 					term.Spinner().Fail()
 					return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
 				}
@@ -435,12 +459,12 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 	term.Spinner().OK()
 
 	filterFuncs := make([]func([]string) ([]string, error), 0)
-	if rulesAsHCL {
+	if options.rulesAsHCL {
 		ruleTemplate := fmt.Sprintf("rules_%s.tmpl", rules.RuleFormat)
 		if !templateProcessor.TemplateExists(ruleTemplate) {
 			return fmt.Errorf("%w: %s", ErrUnsupportedRuleFormat, rules.RuleFormat)
 		}
-		templateProcessor.AddTemplateTarget(ruleTemplate, filepath.Join(tfWorkPath, "rules.tf"))
+		templateProcessor.AddTemplateTarget(ruleTemplate, filepath.Join(options.tfWorkPath, "rules.tf"))
 		tfData.Rules = flattenRules(tfData.Property.PropertyName, rules.Rules)
 		filterFuncs = append(filterFuncs, useThisOnlyRuleFormat(rules.RuleFormat))
 	}
@@ -452,10 +476,10 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		}
 		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
 	}
-	if !rulesAsHCL {
+	if !options.rulesAsHCL {
 		// Save snippets
 		ruleTemplate, rulesTemplate := setPropertyRuleTemplates(rules)
-		if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), "main.json"); err != nil {
+		if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(options.tfWorkPath, jsonDir), "main.json"); err != nil {
 			term.Spinner().Fail()
 			return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
 		}

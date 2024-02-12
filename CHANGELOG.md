@@ -4,8 +4,8 @@
 
 ### Features/Enhancements
 
-
-
+* PAPI
+  * Added support for `export-property` command with flag `--akamai-property-bootstrap` to export property using `akamai_property_bootstrap` resource. This option is true by default.
 
 
 

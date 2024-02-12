@@ -4,7 +4,12 @@ terraform init
 terraform import akamai_edge_hostname.{{.EdgeHostnameResourceName}} {{.EdgeHostnameID}},{{.ContractID}},{{.GroupID}}
 {{- end}}
 {{- if .Property.PropertyID}}
+{{- if .UseBootstrap}}
+terraform import akamai_property_bootstrap.{{.Property.PropertyResourceName}} {{.Property.PropertyID}},{{.Property.ContractID}},{{.Property.GroupID}}
+terraform import akamai_property.{{.Property.PropertyResourceName}} {{.Property.PropertyID}},{{.Property.ContractID}},{{.Property.GroupID}},{{.Property.ReadVersion}},property-bootstrap
+{{- else}}
 terraform import akamai_property.{{.Property.PropertyResourceName}} {{.Property.PropertyID}},{{.Property.ContractID}},{{.Property.GroupID}},{{.Property.ReadVersion}}
+{{- end}}
 {{- end}}
 {{- if and .Property.PropertyID .Property.StagingInfo.HasActivation}}
 terraform import akamai_property_activation.{{.Property.PropertyResourceName}}-staging {{.Property.PropertyID}}:STAGING

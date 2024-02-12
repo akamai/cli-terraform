@@ -30,11 +30,28 @@ resource "akamai_edge_hostname" "{{.EdgeHostnameResourceName}}" {
 {{- end}}
 }
 {{end}}
-resource "akamai_property" "{{.Property.PropertyResourceName}}" {
+
+{{- if .UseBootstrap}}
+resource "akamai_property_bootstrap" "{{.Property.PropertyResourceName}}" {
   name = "{{.Property.PropertyName}}"
   contract_id = var.contract_id
   group_id = var.group_id
   product_id = "prd_{{.Property.ProductName}}"
+}
+{{end}}
+resource "akamai_property" "{{.Property.PropertyResourceName}}" {
+{{- if .UseBootstrap}}
+  property_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.id
+  name = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.name
+  contract_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.contract_id
+  group_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.group_id
+  product_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.product_id
+{{- else}}
+  name = "{{.Property.PropertyName}}"
+  contract_id = var.contract_id
+  group_id = var.group_id
+  product_id = "prd_{{.Property.ProductName}}"
+{{- end}}
 {{- range .Property.Hostnames}}
   hostnames {
     cname_from = "{{.CnameFrom}}"

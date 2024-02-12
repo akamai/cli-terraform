@@ -197,10 +197,11 @@ Subcommand:
     include <contract_id> <include_name>    Generates Terraform configuration for Include resources. Deprecated, use `export-property-include` instead.
 
 Flags:
-   --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
-   --version value        Property version to import  (default: LATEST)
-   --with-includes        Referenced includes will also be exported along with property. Deprecated.
-   --rules-as-hcl         Rules will be exported as `akamai_property_rules_builder` data source in HCL format.
+   --tfworkpath path             Directory used to store files created when running commands. (default: current directory)
+   --version value               Property version to import  (default: LATEST)
+   --with-includes               Referenced includes will also be exported along with property. Deprecated.
+   --rules-as-hcl                Rules will be exported as `akamai_property_rules_builder` data source in HCL format.
+   --akamai-property-bootstrap   Referenced property will be exported using combination of `akamai-property-bootstrap` and `akamai-property` resources (default: false)
 ```
 
 > Flag `rules-as-hcl` works now with `include` sub-command as well with `with-includes` flag.
@@ -232,7 +233,7 @@ Certain export conditions require the use of a particular property rule format. 
   <tr>
     <td>Addition of <code>--rules-as-hcl</code> flag</td>
     <td>Your declarative include configuration and HCL-formatted rules. <strong>Does not return includes</strong> as includes are JSON-formatted.</td>
-    <td>Must be a dated rule format ≥ <code>v2023-01-05</code>. Cannot use `latest`.</td>
+    <td>Must be a dated rule format ≥ <code>v2023-01-05</code>. Cannot use <code>latest</code>.</td>
   </tr>
 </tbody>
 </table>
