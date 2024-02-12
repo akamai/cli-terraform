@@ -192,10 +192,6 @@ func CommandLocator() ([]*cli.Command, error) {
 				Aliases: []string{"schema"},
 				Usage:   "Referenced rules will be exported as data source",
 			},
-			&cli.BoolFlag{
-				Name:  "akamai-property-bootstrap",
-				Usage: "Referenced property will be exported using combination of 'akamai-property-bootstrap' and 'akamai-property' resources",
-			},
 		},
 		BashComplete: autocomplete.Default,
 	})
