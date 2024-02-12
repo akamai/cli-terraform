@@ -1,68 +1,30 @@
 # Release Notes
 
-## Version x.x.x (XXX xx, xxxx)
+## Version 1.12.0 (February 12, 2024)
 
 ### Features/Enhancements
 
-* PAPI
-  * Added support for `export-property` command with flag `--akamai-property-bootstrap` to export property using `akamai_property_bootstrap` resource. This option is true by default.
-
-
-
-
-
-
 * Cloudlets
-  * Modified export of active policies for cloudlets to generate `akamai_cloudlets_policy_activation` resource entry in `import.sh` script. In case of activation on both networks, only production will be exported.
+  * Modified export of active policies for cloudlets to generate `akamai_cloudlets_policy_activation` resource entry in `import.sh` script. In case of activation on both networks, only production will be exported
   * Added support to export shared (V3) policies
   * Added support for exporting policies without any version
-
-
-
-
-
 * Edgeworkers
   * Added support for generation of `note` field when exporting EdgeWorker configuration
-
 * IVM
   * Added support for generation of `serve_stale_duration`, `allow_pristine_on_downsize` and `prefer_modern_formats` when exporting using `--policy-as-hcl` flag
-
-
-
 * PAPI
-* Introduced two variables `activate_latest_on_staging` and `activate_latest_on_production` in exported configuration for property activation or include activation (when exporting includes alone), to drive which version to use for activation
-* When there is no activation for given network, export activation commented out
-* Added a new export command `export-property-include` as replacement for `export-property`.`include` subcommand. It'll generate `include` configuration without related properties.
-* Deprecated `include` subcommand available for `export-property`
-* Deprecated `--with-includes` flag available for `export-property`
-* `export-property` and `export-property-include` commands with flag `--rules-as-hcl` now support export of properties in frozen format `v2024-01-09`
-
-
+  * Introduced two variables `activate_latest_on_staging` and `activate_latest_on_production` in exported configuration for property activation or include activation (when exporting includes alone), to drive which version to use for activation
+  * When there is no activation for given network, export activation commented out
+  * Added a new export command `export-property-include` as replacement for `export-property`.`include` subcommand. It'll generate `include` configuration without related properties
+  * Deprecated `include` subcommand available for `export-property`
+  * Deprecated `--with-includes` flag available for `export-property`
+  * `export-property` and `export-property-include` commands with flag `--rules-as-hcl` now support export of properties in frozen format `v2024-01-09`
+  * Added support for `export-property` command with flag `--akamai-property-bootstrap` to export property using `akamai_property_bootstrap` resource. This option is false by default
 
 ### Bug fixes
 
 * APPSEC
   * Fixed issue where advanced exceptions were not generated for Rules and Risk Groups ([#61](https://github.com/akamai/cli-terraform/issues/61))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## Version 1.11.0 (Dec 7, 2023)
 
