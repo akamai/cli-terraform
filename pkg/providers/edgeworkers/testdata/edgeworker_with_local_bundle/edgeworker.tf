@@ -24,4 +24,5 @@ resource "akamai_edgeworkers_activation" "edgeworker_activation" {
   edgeworker_id = 123
   network       = var.env
   version       = akamai_edgeworker.edgeworker.version
+  note          = "note"
 }

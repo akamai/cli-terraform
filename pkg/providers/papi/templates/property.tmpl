@@ -3,7 +3,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 5.5.0"
+      version = ">= 5.6.0"
     }
   }
   required_version = ">= 0.13"
@@ -30,11 +30,28 @@ resource "akamai_edge_hostname" "{{.EdgeHostnameResourceName}}" {
 {{- end}}
 }
 {{end}}
-resource "akamai_property" "{{.Property.PropertyResourceName}}" {
+
+{{- if .UseBootstrap}}
+resource "akamai_property_bootstrap" "{{.Property.PropertyResourceName}}" {
   name = "{{.Property.PropertyName}}"
   contract_id = var.contract_id
   group_id = var.group_id
   product_id = "prd_{{.Property.ProductName}}"
+}
+{{end}}
+resource "akamai_property" "{{.Property.PropertyResourceName}}" {
+{{- if .UseBootstrap}}
+  property_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.id
+  name = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.name
+  contract_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.contract_id
+  group_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.group_id
+  product_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.product_id
+{{- else}}
+  name = "{{.Property.PropertyName}}"
+  contract_id = var.contract_id
+  group_id = var.group_id
+  product_id = "prd_{{.Property.ProductName}}"
+{{- end}}
 {{- range .Property.Hostnames}}
   hostnames {
     cname_from = "{{.CnameFrom}}"
@@ -55,12 +72,12 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
 {{- end}}
 }
 
+# NOTE: Be careful when removing this resource as you can disable traffic
 {{- if .Property.StagingInfo.HasActivation}}
-
 resource "akamai_property_activation" "{{.Property.PropertyResourceName}}-staging" {
   property_id                    = akamai_property.{{.Property.PropertyResourceName}}.id
   contact                        = [{{range $index, $element := .Property.StagingInfo.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
-  version                        = akamai_property.{{.Property.PropertyResourceName}}.staging_version
+  version                        = var.activate_latest_on_staging ? akamai_property.{{.Property.PropertyResourceName}}.latest_version : akamai_property.{{.Property.PropertyResourceName}}.staging_version
   network                        = "STAGING"
 {{- if .Property.StagingInfo.ActivationNote}}
   note                           = {{template "Text" .Property.StagingInfo.ActivationNote}}
@@ -68,11 +85,10 @@ resource "akamai_property_activation" "{{.Property.PropertyResourceName}}-stagin
   auto_acknowledge_rule_warnings = false
 }
 {{ else}}
-
 #resource "akamai_property_activation" "{{.Property.PropertyResourceName}}-staging" {
 #  property_id                    = akamai_property.{{.Property.PropertyResourceName}}.id
 #  contact                        = [{{range $index, $element := .Property.StagingInfo.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
-#  version                        = akamai_property.{{.Property.PropertyResourceName}}.latest_version
+#  version                        = var.activate_latest_on_staging ? akamai_property.{{.Property.PropertyResourceName}}.latest_version : akamai_property.{{.Property.PropertyResourceName}}.staging_version
 #  network                        = "STAGING"
 {{- if .Property.StagingInfo.ActivationNote}}
 #  note                           = {{template "Text" .Property.StagingInfo.ActivationNote}}
@@ -80,12 +96,12 @@ resource "akamai_property_activation" "{{.Property.PropertyResourceName}}-stagin
 #  auto_acknowledge_rule_warnings = false
 #}
 {{ end}}
-
+# NOTE: Be careful when removing this resource as you can disable traffic
 {{- if .Property.ProductionInfo.HasActivation}}
 resource "akamai_property_activation" "{{.Property.PropertyResourceName}}-production" {
   property_id                    = akamai_property.{{.Property.PropertyResourceName}}.id
   contact                        = [{{range $index, $element := .Property.ProductionInfo.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
-  version                        = akamai_property.{{.Property.PropertyResourceName}}.production_version
+  version                        = var.activate_latest_on_production ? akamai_property.{{.Property.PropertyResourceName}}.latest_version : akamai_property.{{.Property.PropertyResourceName}}.production_version
   network                        = "PRODUCTION"
 {{- if .Property.ProductionInfo.ActivationNote}}
   note                           = {{template "Text" .Property.ProductionInfo.ActivationNote}}
@@ -96,7 +112,7 @@ resource "akamai_property_activation" "{{.Property.PropertyResourceName}}-produc
 #resource "akamai_property_activation" "{{.Property.PropertyResourceName}}-production" {
 #  property_id                    = akamai_property.{{.Property.PropertyResourceName}}.id
 #  contact                        = [{{range $index, $element := .Property.ProductionInfo.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
-#  version                        = akamai_property.{{.Property.PropertyResourceName}}.latest_version
+#  version                        = var.activate_latest_on_production ? akamai_property.{{.Property.PropertyResourceName}}.latest_version : akamai_property.{{.Property.PropertyResourceName}}.production_version
 #  network                        = "PRODUCTION"
 {{- if .Property.ProductionInfo.ActivationNote}}
 #  note                           = {{template "Text" .Property.ProductionInfo.ActivationNote}}

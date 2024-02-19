@@ -857,6 +857,8 @@
 {{- define "OutputImage"}}
     {{- if .AdaptiveQuality}}
         adaptive_quality = {{.AdaptiveQuality}}{{end}}
+    {{- if .AllowPristineOnDownsize}}
+        allow_pristine_on_downsize = {{.AllowPristineOnDownsize}}{{end}}
     {{- if .AllowedFormats}}
         allowed_formats = [{{range $i, $v := .AllowedFormats}}{{if $i}}, {{end}}"{{$v}}"{{end}}]{{end}}
     {{- if .ForcedFormats}}
@@ -868,6 +870,8 @@
     {{- end}}
     {{- if .PerceptualQualityFloor}}
         perceptual_quality_floor = {{.PerceptualQualityFloor}}{{end}}
+    {{- if .PreferModernFormats}}
+        prefer_modern_formats = {{.PreferModernFormats}}{{end}}
     {{- with .Quality}}
         {{""}}
         {{- if .Value}}quality = {{.Value}}{{end}}
@@ -915,6 +919,8 @@
 {{- end}}
 {{- if .RolloutDuration}}
     rollout_duration = {{.RolloutDuration}}{{end}}
+{{- if .ServeStaleDuration}}
+    serve_stale_duration = {{.ServeStaleDuration}}{{end}}
 {{- if .Transformations}}
     {{- range .Transformations}}
         transformations {
@@ -1067,6 +1073,8 @@
         end_time = {{.EndTime}}{{end}}
     {{- if .RolloutDuration}}
         rollout_duration = {{.RolloutDuration}}{{end}}
+    {{- if .ServeStaleEndTime}}
+        serve_stale_end_time = {{.ServeStaleEndTime}}{{end}}
     {{- if .StartTime}}
         start_time = {{.StartTime}}{{end}}
 

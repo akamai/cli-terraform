@@ -71,29 +71,26 @@ type WrappedRules struct {
 
 // TFData holds template data
 type TFData struct {
-	Includes   []TFIncludeData
-	Property   TFPropertyData
-	Section    string
-	Rules      []*WrappedRules
-	RulesAsHCL bool
+	Includes     []TFIncludeData
+	Property     TFPropertyData
+	Section      string
+	Rules        []*WrappedRules
+	RulesAsHCL   bool
+	WithIncludes bool
+	UseBootstrap bool
 }
 
 // TFIncludeData holds template data for include
 type TFIncludeData struct {
-	ActivationNoteProduction   string
-	ActivationNoteStaging      string
-	ContractID                 string
-	ActivationEmailsProduction []string
-	ActivationEmailsStaging    []string
-	GroupID                    string
-	IncludeID                  string
-	IncludeName                string
-	IncludeType                string
-	Networks                   []string
-	RuleFormat                 string
-	VersionProduction          string
-	VersionStaging             string
-	Rules                      []*WrappedRules
+	ContractID     string
+	GroupID        string
+	IncludeID      string
+	IncludeName    string
+	IncludeType    string
+	RuleFormat     string
+	Rules          []*WrappedRules
+	ProductionInfo NetworkInfo
+	StagingInfo    NetworkInfo
 }
 
 // TFPropertyData holds template data for property
@@ -117,10 +114,11 @@ type TFPropertyData struct {
 
 // NetworkInfo holds details for specific network
 type NetworkInfo struct {
-	Emails         []string
-	ActivationNote string
-	HasActivation  bool
-	Version        int
+	Emails                  []string
+	ActivationNote          string
+	HasActivation           bool
+	Version                 int
+	IsActiveOnLatestVersion bool
 }
 
 // RulesTemplate represent data used for rules
@@ -160,6 +158,16 @@ type RuleTemplate struct {
 	CustomOverride *papi.RuleCustomOverride `json:"customOverride,omitempty"`
 }
 
+type propertyOptions struct {
+	propertyName  string
+	section       string
+	tfWorkPath    string
+	version       string
+	withIncludes  bool
+	rulesAsHCL    bool
+	withBootstrap bool
+}
+
 //go:embed templates/*
 var templateFiles embed.FS
 
@@ -197,7 +205,6 @@ var (
 
 var additionalFuncs = tools.DecorateWithMultilineHandlingFunctions(
 	map[string]any{
-		"ToLower":       strings.ToLower,
 		"TerraformName": TerraformName,
 		"AsInt":         AsInt,
 		"ReportError":   ReportError,
@@ -248,6 +255,11 @@ func CmdCreateProperty(c *cli.Context) error {
 		rulesAsHCL = c.Bool("rules-as-hcl")
 	}
 
+	var isBootstrap bool
+	if c.IsSet("akamai-property-bootstrap") {
+		isBootstrap = c.Bool("akamai-property-bootstrap")
+	}
+
 	if withIncludes && rulesAsHCL {
 		templateToFile["includes_rules.tmpl"] = filepath.Join(tfWorkPath, "includes_rules.tf")
 	}
@@ -258,28 +270,37 @@ func CmdCreateProperty(c *cli.Context) error {
 		AdditionalFuncs: additionalFuncs,
 	}
 
-	propertyName := c.Args().First()
-	section := edgegrid.GetEdgercSection(c)
-	if err = createProperty(ctx, propertyName, version, section, "property-snippets", tfWorkPath, withIncludes, rulesAsHCL, client, clientHapi, processor); err != nil {
+	options := propertyOptions{
+		propertyName:  c.Args().First(),
+		section:       edgegrid.GetEdgercSection(c),
+		tfWorkPath:    tfWorkPath,
+		version:       version,
+		withIncludes:  withIncludes,
+		rulesAsHCL:    rulesAsHCL,
+		withBootstrap: isBootstrap,
+	}
+	if err = createProperty(ctx, options, "property-snippets", client, clientHapi, processor); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting property: %s", err)), 1)
 	}
 	return nil
 }
 
-func createProperty(ctx context.Context, propertyName, readVersion, section, jsonDir, tfWorkPath string, withIncludes, rulesAsHCL bool, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
+func createProperty(ctx context.Context, options propertyOptions, jsonDir string, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
 	tfData := TFData{
 		Property: TFPropertyData{
 			EdgeHostnames: make(map[string]EdgeHostname),
 		},
-		Section:    section,
-		RulesAsHCL: rulesAsHCL,
+		Section:      options.section,
+		RulesAsHCL:   options.rulesAsHCL,
+		WithIncludes: options.withIncludes,
+		UseBootstrap: options.withBootstrap,
 	}
 
 	// Get Property
-	term.Spinner().Start("Fetching property " + propertyName)
-	property, err := findProperty(ctx, client, propertyName)
+	term.Spinner().Start("Fetching property " + options.propertyName)
+	property, err := findProperty(ctx, client, options.propertyName)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrPropertyNotFound, err)
@@ -305,26 +326,26 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 
 	term.Spinner().OK()
 
-	if readVersion == "" {
-		readVersion = "LATEST"
+	if options.version == "" {
+		options.version = "LATEST"
 	}
 
 	// Get Version
 	term.Spinner().Start("Fetching property version ")
-	version, err := getVersion(ctx, client, property, readVersion)
+	version, latestVersion, err := getVersion(ctx, client, property, options.version)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrPropertyVersionNotFound, err)
 	}
 
 	tfData.Property.ProductID = version.Version.ProductID
-	tfData.Property.ReadVersion = readVersion
+	tfData.Property.ReadVersion = options.version
 
 	term.Spinner().OK()
 
 	// Get Includes if withIncludes is set
-	if withIncludes {
-		term.Spinner().Start("Fetching referenced includes with property " + propertyName)
+	if options.withIncludes {
+		term.Spinner().Start("Fetching referenced includes with property " + options.propertyName)
 		includes, err := client.ListReferencedIncludes(ctx, papi.ListReferencedIncludesRequest{
 			PropertyID:      property.PropertyID,
 			ContractID:      property.ContractID,
@@ -345,10 +366,10 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 			}
 
 			// Save snippets
-			if !rulesAsHCL {
+			if !options.rulesAsHCL {
 				term.Spinner().Start("Saving snippets ")
 				ruleTemplate, rulesTemplate := setIncludeRuleTemplates(rules)
-				if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), fmt.Sprintf("%s.json", include.IncludeName)); err != nil {
+				if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(options.tfWorkPath, jsonDir), fmt.Sprintf("%s.json", include.IncludeName)); err != nil {
 					term.Spinner().Fail()
 					return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
 				}
@@ -420,6 +441,7 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		tfData.Property.StagingInfo.Emails = getContactEmails(activeStagingActivation)
 		tfData.Property.StagingInfo.Version = activeStagingActivation.PropertyVersion
 		tfData.Property.StagingInfo.HasActivation = true
+		tfData.Property.StagingInfo.IsActiveOnLatestVersion = activeStagingActivation.PropertyVersion == latestVersion.Version.PropertyVersion
 	}
 	activeProductionActivation, err := fetchActiveActivationForNetwork(ctx, client, property, papi.ActivationNetworkProduction)
 	if err != nil {
@@ -431,17 +453,18 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		tfData.Property.ProductionInfo.Emails = getContactEmails(activeProductionActivation)
 		tfData.Property.ProductionInfo.Version = activeProductionActivation.PropertyVersion
 		tfData.Property.ProductionInfo.HasActivation = true
+		tfData.Property.ProductionInfo.IsActiveOnLatestVersion = activeProductionActivation.PropertyVersion == latestVersion.Version.PropertyVersion
 	}
 
 	term.Spinner().OK()
 
 	filterFuncs := make([]func([]string) ([]string, error), 0)
-	if rulesAsHCL {
+	if options.rulesAsHCL {
 		ruleTemplate := fmt.Sprintf("rules_%s.tmpl", rules.RuleFormat)
 		if !templateProcessor.TemplateExists(ruleTemplate) {
 			return fmt.Errorf("%w: %s", ErrUnsupportedRuleFormat, rules.RuleFormat)
 		}
-		templateProcessor.AddTemplateTarget(ruleTemplate, filepath.Join(tfWorkPath, "rules.tf"))
+		templateProcessor.AddTemplateTarget(ruleTemplate, filepath.Join(options.tfWorkPath, "rules.tf"))
 		tfData.Rules = flattenRules(tfData.Property.PropertyName, rules.Rules)
 		filterFuncs = append(filterFuncs, useThisOnlyRuleFormat(rules.RuleFormat))
 	}
@@ -453,10 +476,10 @@ func createProperty(ctx context.Context, propertyName, readVersion, section, jso
 		}
 		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
 	}
-	if !rulesAsHCL {
+	if !options.rulesAsHCL {
 		// Save snippets
 		ruleTemplate, rulesTemplate := setPropertyRuleTemplates(rules)
-		if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), "main.json"); err != nil {
+		if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(options.tfWorkPath, jsonDir), "main.json"); err != nil {
 			term.Spinner().Fail()
 			return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
 		}
@@ -777,14 +800,14 @@ func getPropertyRules(ctx context.Context, client papi.PAPI, version *papi.GetPr
 }
 
 // getVersion gets property version for given property from api
-func getVersion(ctx context.Context, client papi.PAPI, property *papi.Property, readVersion string) (*papi.GetPropertyVersionsResponse, error) {
+func getVersion(ctx context.Context, client papi.PAPI, property *papi.Property, readVersion string) (*papi.GetPropertyVersionsResponse, *papi.GetPropertyVersionsResponse, error) {
 	versions, err := client.GetPropertyVersions(ctx, papi.GetPropertyVersionsRequest{
 		PropertyID: property.PropertyID,
 		ContractID: property.ContractID,
 		GroupID:    property.GroupID,
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if readVersion == "LATEST" {
@@ -795,31 +818,43 @@ func getVersion(ctx context.Context, client papi.PAPI, property *papi.Property, 
 			GroupID:     versions.GroupID,
 		})
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
-		return version, nil
+		return version, version, nil
 	}
 
 	v, err := strconv.Atoi(readVersion)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", ErrPropertyVersionNotValid, err)
+		return nil, nil, fmt.Errorf("%w: %s", ErrPropertyVersionNotValid, err)
 	}
+	// Latest will be the first one
+	sort.Slice(versions.Versions.Items, func(i, j int) bool {
+		return versions.Versions.Items[i].PropertyVersion > versions.Versions.Items[j].PropertyVersion
+	})
+	var latestVersion *papi.GetPropertyVersionsResponse
+	if len(versions.Versions.Items) == 0 {
+		return nil, nil, ErrPropertyVersionNotFound
+	}
+	latestVersion = getPropertyVersionsResponse(versions, versions.Versions.Items[0])
 	for _, item := range versions.Versions.Items {
 		if item.PropertyVersion == v {
-			return &papi.GetPropertyVersionsResponse{
-				PropertyID:   versions.PropertyID,
-				PropertyName: versions.PropertyName,
-				AccountID:    versions.AccountID,
-				ContractID:   versions.ContractID,
-				GroupID:      versions.GroupID,
-				AssetID:      versions.AssetID,
-				Version:      item,
-			}, nil
+			return getPropertyVersionsResponse(versions, item), latestVersion, nil
 		}
 	}
+	return nil, nil, ErrPropertyVersionNotFound
+}
 
-	return nil, ErrPropertyVersionNotFound
+func getPropertyVersionsResponse(versions *papi.GetPropertyVersionsResponse, item papi.PropertyVersionGetItem) *papi.GetPropertyVersionsResponse {
+	return &papi.GetPropertyVersionsResponse{
+		PropertyID:   versions.PropertyID,
+		PropertyName: versions.PropertyName,
+		AccountID:    versions.AccountID,
+		ContractID:   versions.ContractID,
+		GroupID:      versions.GroupID,
+		AssetID:      versions.AssetID,
+		Version:      item,
+	}
 }
 
 // getGroup fetches a group with specific groupID

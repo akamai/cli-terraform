@@ -2,7 +2,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 5.5.0"
+      version = ">= 5.6.0"
     }
   }
   required_version = ">= 0.13"
@@ -34,3 +34,23 @@ resource "akamai_property_include" "test_include" {
   rule_format = "v2020-11-02"
   rules       = data.akamai_property_rules_template.rules_test_include.json
 }
+
+#resource "akamai_property_include_activation" "test_include_staging" {
+#  contract_id = akamai_property_include.test_include.contract_id
+#  group_id = akamai_property_include.test_include.group_id
+#  include_id = akamai_property_include.test_include.id
+#  network = "STAGING"
+#  auto_acknowledge_rule_warnings = false
+#  version = var.activate_latest_on_staging ? akamai_property_include.test_include.latest_version : akamai_property_include.test_include.staging_version
+#  notify_emails = []
+#}
+
+#resource "akamai_property_include_activation" "test_include_production" {
+#  contract_id = akamai_property_include.test_include.contract_id
+#  group_id = akamai_property_include.test_include.group_id
+#  include_id = akamai_property_include.test_include.id
+#  network = "PRODUCTION"
+#  auto_acknowledge_rule_warnings = false
+#  version = var.activate_latest_on_production ? akamai_property_include.test_include.latest_version : akamai_property_include.test_include.production_version
+#  notify_emails = []
+#}

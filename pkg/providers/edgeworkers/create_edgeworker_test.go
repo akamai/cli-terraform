@@ -34,7 +34,7 @@ func TestMain(m *testing.M) {
 
 var (
 	expectEdgeWorkerProcessTemplates = func(p *templates.MockProcessor, edgeWorkerID int, name string, groupID int64, resourceTierID int,
-		localBundle, section string, err error) *mock.Call {
+		localBundle, section, note string, err error) *mock.Call {
 		tfData := TFEdgeWorkerData{
 			EdgeWorkerID:   edgeWorkerID,
 			Name:           name,
@@ -42,6 +42,7 @@ var (
 			ResourceTierID: resourceTierID,
 			LocalBundle:    localBundle,
 			Section:        section,
+			Note:           note,
 		}
 
 		call := p.On(
@@ -131,6 +132,34 @@ var (
 				EdgeWorkerVersions: versions,
 			}, nil)
 	}
+
+	expectListActivations = func(e *edgeworkers.Mock, edgeWorkerID int, version string, err error) *mock.Call {
+		call := e.On(
+			"ListActivations",
+			mock.Anything,
+			edgeworkers.ListActivationsRequest{
+				EdgeWorkerID: edgeWorkerID,
+				Version:      version,
+			},
+		)
+		if err != nil {
+			return call.Return(nil, err)
+		}
+
+		var activations = []edgeworkers.Activation{
+			{
+				Note:    "note",
+				Network: "STAGING",
+				Version: version,
+				Status:  "COMPLETE",
+			},
+		}
+
+		return call.Return(
+			&edgeworkers.ListActivationsResponse{
+				Activations: activations,
+			}, nil)
+	}
 )
 
 func TestCreateEdgeWorker(t *testing.T) {
@@ -152,15 +181,16 @@ func TestCreateEdgeWorker(t *testing.T) {
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, true, nil).Once()
-				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, "", section, nil).Once()
+				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, "", section, "", nil).Once()
 			},
 		},
 		"fetch edgeworker with version": {
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, false, nil).Once()
+				expectListActivations(e, 123, "1.24.5", nil).Once()
 				expectGetEdgeWorkerVersionContent(e, 123, "1.24.5", versionContent, nil).Once()
-				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, localBundle, section, nil).Once()
+				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, localBundle, section, "note", nil).Once()
 			},
 			withBundle: true,
 		},
@@ -181,6 +211,7 @@ func TestCreateEdgeWorker(t *testing.T) {
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, false, nil).Once()
+				expectListActivations(e, 123, "1.24.5", nil).Once()
 				expectGetEdgeWorkerVersionContent(e, 123, "1.24.5", versionContent, fmt.Errorf("error")).Once()
 			},
 			withError: ErrFetchingEdgeWorker,
@@ -189,7 +220,7 @@ func TestCreateEdgeWorker(t *testing.T) {
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, true, nil).Once()
-				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, "", section, fmt.Errorf("error")).Once()
+				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, "", section, "", fmt.Errorf("error")).Once()
 			},
 			withError: templates.ErrSavingFiles,
 		},
@@ -247,6 +278,7 @@ func TestProcessEdgeWorkerTemplates(t *testing.T) {
 				ResourceTierID: 2,
 				LocalBundle:    "testdata/bundle/sampleBundle.tgz",
 				Section:        "test_section",
+				Note:           "note",
 			},
 			dir:          "edgeworker_with_local_bundle",
 			filesToCheck: []string{"edgeworker.tf", "variables.tf", "import.sh"},

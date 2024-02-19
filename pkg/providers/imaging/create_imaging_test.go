@@ -991,6 +991,13 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						PolicyID:             "test_policy_image",
 						ActivateOnProduction: true,
 						Policy: &imaging.PolicyInputImage{
+							Output: &imaging.OutputImage{
+								AllowPristineOnDownsize: tools.BoolPtr(true),
+								PerceptualQuality: &imaging.OutputImagePerceptualQualityVariableInline{
+									Value: imaging.OutputImagePerceptualQualityPtr(imaging.OutputImagePerceptualQualityMediumHigh),
+								},
+								PreferModernFormats: tools.BoolPtr(false),
+							},
 							Transformations: []imaging.TransformationType{
 								&imaging.Append{
 									Gravity:         &imaging.GravityVariableInline{Value: imaging.GravityPtr("Center")},
@@ -1031,6 +1038,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 									Transformation:         "Append",
 								},
 							},
+							ServeStaleDuration: tools.IntPtr(3600),
 						},
 					},
 				},

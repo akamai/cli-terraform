@@ -3,13 +3,13 @@ module github.com/akamai/cli-terraform
 go 1.18
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v7 v7.5.0
-	github.com/akamai/cli v1.5.5
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v7 v7.6.0
+	github.com/akamai/cli v1.5.6
 	github.com/fatih/color v1.13.0
 	github.com/hashicorp/hcl/v2 v2.11.1
 	github.com/jinzhu/copier v0.4.0
 	github.com/shirou/gopsutil v2.20.4+incompatible
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.4
 	github.com/tj/assert v0.0.3
 	github.com/urfave/cli/v2 v2.3.0
 )
@@ -43,12 +43,13 @@ require (
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
-	github.com/stretchr/objx v0.4.0 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	go.uber.org/ratelimit v0.2.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/term v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/term v0.16.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

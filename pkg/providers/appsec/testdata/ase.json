@@ -2521,6 +2521,33 @@
                 "ruleActions": [
                     {
                         "action": "alert",
+                        "advancedExceptions": {
+                            "conditionOperator": "OR",
+                            "conditions": [
+                                {
+                                    "type": "hostMatch",
+                                    "hosts": [
+                                        "test.com"
+                                    ],
+                                    "positiveMatch": true
+                                },
+                                {
+                                    "type": "pathMatch",
+                                    "paths": [
+                                        "/test"
+                                    ],
+                                    "positiveMatch": true
+                                },
+                                {
+                                    "type": "requestHeaderMatch",
+                                    "header": "Test",
+                                    "positiveMatch": true,
+                                    "value": "test*",
+                                    "valueCase": false,
+                                    "valueWildcard": false
+                                }
+                            ]
+                        },
                         "id": 950002,
                         "rulesetVersionId": 7257
                     },
@@ -3353,6 +3380,65 @@
                     },
                     {
                         "action": "deny",
+                        "advancedExceptions": {
+                            "conditionOperator": "AND",
+                            "conditions": [
+                                {
+                                    "type": "extensionMatch",
+                                    "extensions": [
+                                        "pdf"
+                                    ],
+                                    "positiveMatch": true
+                                },
+                                {
+                                    "type": "filenameMatch",
+                                    "filenames": [
+                                        "upload.txt"
+                                    ],
+                                    "positiveMatch": true
+                                },
+                                {
+                                    "type": "pathMatch",
+                                    "paths": [
+                                        "/test"
+                                    ],
+                                    "positiveMatch": true
+                                }
+                            ],
+                            "specificHeaderCookieOrParamNameValue": [
+                                {
+                                    "namesValues": [
+                                        {
+                                            "names": [
+                                                "test"
+                                            ],
+                                            "values": [
+                                                "test"
+                                            ]
+                                        }
+                                    ],
+                                    "selector": "ARGS",
+                                    "valueWildcard": true,
+                                    "wildcard": true
+                                }
+                            ],
+                            "specificHeaderCookieParamXmlOrJsonNames": [
+                                {
+                                    "names": [
+                                        "testgroup*"
+                                    ],
+                                    "selector": "ARGS_NAMES",
+                                    "wildcard": true
+                                },
+                                {
+                                    "names": [
+                                        "group*"
+                                    ],
+                                    "selector": "ARGS",
+                                    "wildcard": true
+                                }
+                            ]
+                        },
                         "group": "XSS",
                         "rulesetVersionId": 7257
                     },

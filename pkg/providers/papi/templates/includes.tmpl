@@ -4,7 +4,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 5.5.0"
+      version = ">= 5.6.0"
     }
   }
   required_version = ">= 0.13"
@@ -48,28 +48,80 @@ resource "akamai_property_include" "{{.IncludeName}}" {
   rules = data.akamai_property_rules_template.rules_{{.IncludeName}}.json
 {{- end}}
 }
-{{- range $network := .Networks}}
 
-resource "akamai_property_include_activation" "{{$include.IncludeName}}_{{$network | ToLower}}" {
+{{- if $include.StagingInfo.HasActivation}}
+
+resource "akamai_property_include_activation" "{{$include.IncludeName}}_staging" {
   contract_id = akamai_property_include.{{$include.IncludeName}}.contract_id
   group_id = akamai_property_include.{{$include.IncludeName}}.group_id
   include_id = akamai_property_include.{{$include.IncludeName}}.id
-  network = "{{$network}}"
+  network = "STAGING"
   auto_acknowledge_rule_warnings = false
-{{- if eq $network "STAGING"}}
-  version = "{{$include.VersionStaging}}"
-{{- if $include.ActivationNoteStaging}}
-  note = {{template "Text" $include.ActivationNoteStaging}}
+{{- if $.WithIncludes }}
+  version = "{{$include.StagingInfo.Version}}"
+{{- else}}
+  version = var.activate_latest_on_staging ? akamai_property_include.{{$include.IncludeName}}.latest_version : akamai_property_include.{{$include.IncludeName}}.staging_version
 {{- end}}
-  notify_emails = [{{range $index, $element := $include.ActivationEmailsStaging}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+{{- if $include.StagingInfo.ActivationNote}}
+  note = {{template "Text" $include.StagingInfo.ActivationNote}}
 {{- end}}
-{{- if eq $network "PRODUCTION"}}
-  version = "{{$include.VersionProduction}}"
-{{- if $include.ActivationNoteProduction}}
-  note = {{template "Text" $include.ActivationNoteProduction}}
-{{- end}}
-  notify_emails = [{{range $index, $element := $include.ActivationEmailsProduction}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
-{{- end}}
+  notify_emails = [{{range $index, $element := $include.StagingInfo.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
 }
+{{- else}}
+
+#resource "akamai_property_include_activation" "{{$include.IncludeName}}_staging" {
+#  contract_id = akamai_property_include.{{$include.IncludeName}}.contract_id
+#  group_id = akamai_property_include.{{$include.IncludeName}}.group_id
+#  include_id = akamai_property_include.{{$include.IncludeName}}.id
+#  network = "STAGING"
+#  auto_acknowledge_rule_warnings = false
+{{- if $.WithIncludes }}
+#  version = "{{$include.StagingInfo.Version}}"
+{{- else}}
+#  version = var.activate_latest_on_staging ? akamai_property_include.{{$include.IncludeName}}.latest_version : akamai_property_include.{{$include.IncludeName}}.staging_version
 {{- end}}
+{{- if $include.StagingInfo.ActivationNote}}
+#  note = {{template "Text" $include.StagingInfo.ActivationNote}}
+{{- end}}
+#  notify_emails = [{{range $index, $element := $include.StagingInfo.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+#}
+{{- end}}
+{{- if $include.ProductionInfo.HasActivation}}
+
+resource "akamai_property_include_activation" "{{$include.IncludeName}}_production" {
+  contract_id = akamai_property_include.{{$include.IncludeName}}.contract_id
+  group_id = akamai_property_include.{{$include.IncludeName}}.group_id
+  include_id = akamai_property_include.{{$include.IncludeName}}.id
+  network = "PRODUCTION"
+  auto_acknowledge_rule_warnings = false
+{{- if $.WithIncludes }}
+  version = "{{$include.ProductionInfo.Version}}"
+{{- else}}
+  version = var.activate_latest_on_production ? akamai_property_include.{{$include.IncludeName}}.latest_version : akamai_property_include.{{$include.IncludeName}}.production_version
+{{- end}}
+{{- if $include.ProductionInfo.ActivationNote}}
+  note = {{template "Text" $include.ProductionInfo.ActivationNote}}
+{{- end}}
+  notify_emails = [{{range $index, $element := $include.ProductionInfo.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+}
+{{- else}}
+
+#resource "akamai_property_include_activation" "{{$include.IncludeName}}_production" {
+#  contract_id = akamai_property_include.{{$include.IncludeName}}.contract_id
+#  group_id = akamai_property_include.{{$include.IncludeName}}.group_id
+#  include_id = akamai_property_include.{{$include.IncludeName}}.id
+#  network = "PRODUCTION"
+#  auto_acknowledge_rule_warnings = false
+{{- if $.WithIncludes }}
+#  version = "{{$include.ProductionInfo.Version}}"
+{{- else}}
+#  version = var.activate_latest_on_production ? akamai_property_include.{{$include.IncludeName}}.latest_version : akamai_property_include.{{$include.IncludeName}}.production_version
+{{- end}}
+{{- if $include.ProductionInfo.ActivationNote}}
+#  note = {{template "Text" $include.ProductionInfo.ActivationNote}}
+{{- end}}
+#  notify_emails = [{{range $index, $element := $include.ProductionInfo.Emails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+#}
+{{- end}}
+
 {{- end}}

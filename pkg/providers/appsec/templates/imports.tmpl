@@ -60,12 +60,10 @@ terraform import module.security.akamai_appsec_rate_protection.{{ $policyName}} 
 terraform import module.security.akamai_appsec_reputation_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 terraform import module.security.akamai_appsec_slowpost_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 terraform import module.security.akamai_appsec_waf_mode.{{ $policyName}} {{ $configID }}:{{ $policyID }}
-{{ if or (eq $wafMode "KRS") (eq $wafMode "ASE_MANUAL") -}}
 {{ if .WebApplicationFirewall -}}
 {{ if .WebApplicationFirewall.RuleActions -}}
 {{ range .WebApplicationFirewall.RuleActions -}}
 terraform import module.security.akamai_appsec_rule.{{ $policyName}}_{{ getRuleNameByID $ .ID }}_{{ .ID }} {{ $configID }}:{{ $policyID }}:{{ .ID }}
-{{ end -}}
 {{ end -}}
 {{ end -}}
 {{ end -}}

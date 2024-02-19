@@ -1,20 +1,4 @@
 {{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/imaging.TFImagingData.Policy*/ -}}
-{{- define "Transformations"}}
-{{- end}}
-{{- define "ImageType"}}
-    {{- if eq .Type "Box"}}{{- template "BoxImageType" .}}{{- end}}
-    {{- if eq .Type "Text"}}{{- template "TextImageType" .}}{{- end}}
-    {{- if eq .Type "Url"}}{{- template "URLImageType" .}}{{- end}}
-    {{- if eq .Type "Circle"}}{{- template "CircleImageType" .}}{{- end}}
-{{- end}}
-{{- define "ShapeType"}}
-    {{- $shapeType := printf "%T" .}}
-    {{- if eq $shapeType "*imaging.CircleShapeType"}}{{- template "CircleShapeType" .}}{{- end}}
-    {{- if eq $shapeType "*imaging.PointShapeType"}}{{- template "PointShapeType" .}}{{- end}}
-    {{- if eq $shapeType "*imaging.PolygonShapeType"}}{{- template "PolygonShapeType" .}}{{- end}}
-    {{- if eq $shapeType "*imaging.RectangleShapeType"}}{{- template "RectangleShapeType" .}}{{- end}}
-    {{- if eq $shapeType "*imaging.UnionShapeType"}}{{- template "UnionShapeType" .}}{{- end}}
-{{- end}}
 {{- /*////////////////////////////////////////*/}}
 {{- /*////////// Generated types /////////////*/}}
 {{- /*////////////////////////////////////////*/}}
@@ -81,6 +65,8 @@
         end_time = {{.EndTime}}{{end}}
     {{- if .RolloutDuration}}
         rollout_duration = {{.RolloutDuration}}{{end}}
+    {{- if .ServeStaleEndTime}}
+        serve_stale_end_time = {{.ServeStaleEndTime}}{{end}}
     {{- if .StartTime}}
         start_time = {{.StartTime}}{{end}}
 
