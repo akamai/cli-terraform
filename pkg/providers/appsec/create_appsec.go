@@ -101,7 +101,6 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"modules-security-rate-policy-actions.tmpl":     filepath.Join(securityModulePath, "rate-policy-actions.tf"),
 		"modules-security-reputation-profiles.tmpl":     filepath.Join(securityModulePath, "reputation-profiles.tf"),
 		"modules-security-reputation.tmpl":              filepath.Join(securityModulePath, "reputation.tf"),
-		"modules-security-selected-hostnames.tmpl":      filepath.Join(securityModulePath, "selected-hostnames.tf"),
 		"modules-security-siem.tmpl":                    filepath.Join(securityModulePath, "siem.tf"),
 		"modules-security-slow-post.tmpl":               filepath.Join(securityModulePath, "slow-post.tf"),
 		"modules-security-variables.tmpl":               filepath.Join(securityModulePath, "variables.tf"),

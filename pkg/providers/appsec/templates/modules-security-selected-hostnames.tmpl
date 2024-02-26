@@ -1,7 +1,0 @@
-{{ if .SelectedHosts -}}
-resource "akamai_appsec_selected_hostnames" "hostnames" {
-    config_id = akamai_appsec_configuration.config.config_id
-    hostnames = [{{ toList .SelectedHosts }}]
-    mode      = "REPLACE"
-}
-{{ end -}}

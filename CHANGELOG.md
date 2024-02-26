@@ -66,6 +66,10 @@
 
 
 
+### Deprecations
+
+* APPSEC
+  * Exclude the deprecated `akamai_appsec_selected_hostnames` resource from the `export-appsec` command. Use exported `akamai_appsec_configuration` instead.
 
 ## Version 1.12.0 (February 19, 2024)
 
