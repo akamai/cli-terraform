@@ -2,6 +2,32 @@
 
 ## Version X.XX.X (Month XX, XXXX)
 
+#### BREAKING CHANGES:
+
+* PAPI
+  * Modified response structures of `GetProperty` API which is `GetPropertyResponse` by using struct `GetProperty` which does not return  `product_id`, `rule_format` and `note`, instead of struct `Property` for `resource_akamai_properties` and `data_akamai_property`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ### Features/Enhancements
 
 
