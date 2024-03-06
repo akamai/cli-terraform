@@ -33,7 +33,7 @@ resource "akamai_gtm_domain" "{{.NormalizedName}}" {
     default_ssl_client_private_key = "{{.DefaultSSLClientPrivateKey}}"
     {{- end}}
     default_error_penalty = {{.DefaultErrorPenalty}}
-    cname_coalescing_enabled = {{.CnameCoalescingEnabled}}
+    cname_coalescing_enabled = {{.CNameCoalescingEnabled}}
     load_feedback = {{.LoadFeedback}}
     {{- if .DefaultSSLClientCertificate}}
     default_ssl_client_certificate = "{{.DefaultSSLClientCertificate}}"

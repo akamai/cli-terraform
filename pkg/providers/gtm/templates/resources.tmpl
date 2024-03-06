@@ -35,7 +35,7 @@ resource "akamai_gtm_resource" "{{normalize .Name}}" {
     {{- range .ResourceInstances}}
 
     resource_instance {
-        datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}}.datacenter_id
+        datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterID}}.datacenter_id
         use_default_load_object = {{.UseDefaultLoadObject}}
         {{- if .LoadObject}}
         load_object = "{{.LoadObject.LoadObject}}"
@@ -49,7 +49,7 @@ resource "akamai_gtm_resource" "{{normalize .Name}}" {
 
     depends_on = [
         {{- range .ResourceInstances }}
-        akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}},
+        akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterID}},
         {{- end }}
         akamai_gtm_domain.{{$.NormalizedName}}
     ]

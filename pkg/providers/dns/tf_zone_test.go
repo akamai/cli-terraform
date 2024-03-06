@@ -18,8 +18,8 @@ func TestProcessZone(t *testing.T) {
 		ActivationState:    "NEW",
 		LastModifiedBy:     "jreed",
 		LastActivationDate: "2021-03-16T17:16:59.208264Z",
-		VersionId:          "fd858f59-6014-4ce4-8372-c08389d809e8",
-		TsigKey:            &dns.TSIGKey{Name: "some-name", Algorithm: "some-algorithm", Secret: "some-secret"},
+		VersionID:          "fd858f59-6014-4ce4-8372-c08389d809e8",
+		TSIGKey:            &dns.TSIGKey{Name: "some-name", Algorithm: "some-algorithm", Secret: "some-secret"},
 	}
 	tests := map[string]struct {
 		filePath       string
@@ -51,9 +51,9 @@ func TestProcessZone(t *testing.T) {
 				ActivationState:    "NEW",
 				LastModifiedBy:     "jreed",
 				LastActivationDate: "2021-03-16T17:16:59.208264Z",
-				VersionId:          "fd858f59-6014-4ce4-8372-c08389d809e8",
+				VersionID:          "fd858f59-6014-4ce4-8372-c08389d809e8",
 				Comment:            "first\nsecond\n\nlast",
-				TsigKey:            &dns.TSIGKey{Name: "some-name", Algorithm: "some-algorithm", Secret: "some-secret"},
+				TSIGKey:            &dns.TSIGKey{Name: "some-name", Algorithm: "some-algorithm", Secret: "some-secret"},
 			},
 		},
 		"modSegment=false, multiline comment ending newline": {
@@ -67,16 +67,16 @@ func TestProcessZone(t *testing.T) {
 				ActivationState:    "NEW",
 				LastModifiedBy:     "jreed",
 				LastActivationDate: "2021-03-16T17:16:59.208264Z",
-				VersionId:          "fd858f59-6014-4ce4-8372-c08389d809e8",
+				VersionID:          "fd858f59-6014-4ce4-8372-c08389d809e8",
 				Comment:            "first\nsecond\n",
-				TsigKey:            &dns.TSIGKey{Name: "some-name", Algorithm: "some-algorithm", Secret: "some-secret"},
+				TSIGKey:            &dns.TSIGKey{Name: "some-name", Algorithm: "some-algorithm", Secret: "some-secret"},
 			},
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			m := new(fileutilsmock)
+			m := new(fileUtilsMock)
 			if test.modSegment {
 				m.On("createModuleTF", test.modName, mock.Anything, mock.Anything).Return(nil).Once()
 			}

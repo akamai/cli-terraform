@@ -21,7 +21,7 @@ import (
 )
 
 // process zone
-func processZone(ctx context.Context, zone *dns.ZoneResponse, resourceZoneName string, modSegment bool, fileUtils fileUtils, tfworkPath string) (string, error) {
+func processZone(ctx context.Context, zone *dns.ZoneResponse, resourceZoneName string, modSegment bool, fileUtils fileUtils, tfWorkPath string) (string, error) {
 	data := ZoneData{
 		BlockName:             resourceZoneName,
 		Zone:                  zone.Zone,
@@ -30,14 +30,14 @@ func processZone(ctx context.Context, zone *dns.ZoneResponse, resourceZoneName s
 		Comment:               zone.Comment,
 		SignAndServe:          zone.SignAndServe,
 		SignAndServeAlgorithm: zone.SignAndServeAlgorithm,
-		TsigKey:               zone.TsigKey,
+		TSIGKey:               zone.TSIGKey,
 		Target:                zone.Target,
 		EndCustomerID:         zone.EndCustomerID,
-		TfWorkPath:            tfworkPath,
+		TFWorkPath:            tfWorkPath,
 	}
 	var zoneTF string
 	if modSegment {
-		err := fileUtils.createModuleTF(ctx, resourceZoneName, useTemplate(&data, "config.tmpl", true), tfworkPath)
+		err := fileUtils.createModuleTF(ctx, resourceZoneName, useTemplate(&data, "config.tmpl", true), tfWorkPath)
 		if err != nil {
 			return "", err
 		}
@@ -47,5 +47,4 @@ func processZone(ctx context.Context, zone *dns.ZoneResponse, resourceZoneName s
 	}
 
 	return zoneTF, nil
-
 }

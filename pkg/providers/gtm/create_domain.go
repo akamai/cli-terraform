@@ -45,7 +45,7 @@ type (
 		LoadImbalancePercentage     float64
 		DefaultSSLClientPrivateKey  string
 		DefaultErrorPenalty         int
-		CnameCoalescingEnabled      bool
+		CNameCoalescingEnabled      bool
 		LoadFeedback                bool
 		DefaultSSLClientCertificate string
 		EndUserMappingEnabled       bool
@@ -53,9 +53,9 @@ type (
 		Datacenters                 []TFDatacenterData
 		DefaultDatacenters          []TFDatacenterData
 		Resources                   []*gtm.Resource
-		CidrMaps                    []*gtm.CidrMap
+		CIDRMaps                    []*gtm.CIDRMap
 		GeoMaps                     []*gtm.GeoMap
-		AsMaps                      []*gtm.AsMap
+		ASMaps                      []*gtm.ASMap
 		Properties                  []*gtm.Property
 	}
 
@@ -167,16 +167,16 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, section strin
 		EmailNotificationList:       domain.EmailNotificationList,
 		DefaultTimeoutPenalty:       domain.DefaultTimeoutPenalty,
 		LoadImbalancePercentage:     domain.LoadImbalancePercentage,
-		DefaultSSLClientPrivateKey:  domain.DefaultSslClientPrivateKey,
+		DefaultSSLClientPrivateKey:  domain.DefaultSSLClientPrivateKey,
 		DefaultErrorPenalty:         domain.DefaultErrorPenalty,
-		CnameCoalescingEnabled:      domain.CnameCoalescingEnabled,
+		CNameCoalescingEnabled:      domain.CNameCoalescingEnabled,
 		LoadFeedback:                domain.LoadFeedback,
-		DefaultSSLClientCertificate: domain.DefaultSslClientCertificate,
+		DefaultSSLClientCertificate: domain.DefaultSSLClientCertificate,
 		EndUserMappingEnabled:       domain.EndUserMappingEnabled,
 		Resources:                   domain.Resources,
-		CidrMaps:                    domain.CidrMaps,
+		CIDRMaps:                    domain.CIDRMaps,
 		GeoMaps:                     domain.GeographicMaps,
-		AsMaps:                      domain.AsMaps,
+		ASMaps:                      domain.ASMaps,
 		Properties:                  domain.Properties,
 	}
 
@@ -201,11 +201,11 @@ func (d *TFDomainData) getDatacenters(domain *gtm.Domain) {
 	d.Datacenters = make([]TFDatacenterData, 0)
 	d.DefaultDatacenters = make([]TFDatacenterData, 0)
 	for _, dc := range domain.Datacenters {
-		if isDefaultDatacenter(dc.DatacenterId) {
-			d.DefaultDatacenters = append(d.DefaultDatacenters, TFDatacenterData{Nickname: dc.Nickname, ID: dc.DatacenterId})
+		if isDefaultDatacenter(dc.DatacenterID) {
+			d.DefaultDatacenters = append(d.DefaultDatacenters, TFDatacenterData{Nickname: dc.Nickname, ID: dc.DatacenterID})
 		} else {
 			d.Datacenters = append(d.Datacenters, TFDatacenterData{
-				ID:                            dc.DatacenterId,
+				ID:                            dc.DatacenterID,
 				Nickname:                      dc.Nickname,
 				City:                          dc.City,
 				CloneOf:                       dc.CloneOf,

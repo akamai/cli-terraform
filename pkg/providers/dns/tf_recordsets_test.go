@@ -71,21 +71,21 @@ func TestProcessRecordset(t *testing.T) {
 
 			ctx := context.Background()
 			zone := "0007770b-08a8-4b5f-a46b-081b772ba605-test.com"
-			metadata := dns.MetadataH{}
-			recordset := dns.Recordset{
+			metadata := dns.Metadata{}
+			recordset := dns.RecordSet{
 				Name:  "someName",
 				Type:  "someType",
 				TTL:   1000,
 				Rdata: []string{"INTEL-386", "Unix"},
 			}
-			recordsets := make([]dns.Recordset, 0)
-			recordsets = append(recordsets, recordset)
-			response := dns.RecordSetResponse{Metadata: metadata, Recordsets: recordsets}
-			m.On("GetRecordsets", ctx, zone, mock.Anything).Return(&response, nil).Once()
+			recordSets := make([]dns.RecordSet, 0)
+			recordSets = append(recordSets, recordset)
+			response := dns.RecordSetResponse{Metadata: metadata, RecordSets: recordSets}
+			m.On("GetRecordSets", ctx, zone, mock.Anything).Return(&response, nil).Once()
 			parsedRData := map[string]interface{}{"hardware": "INTEL-386", "software": "Unix"}
 			m.On("ParseRData", ctx, recordset.Type, recordset.Rdata).Return(parsedRData).Once()
 
-			fus := new(fileutilsmock)
+			fus := new(fileUtilsMock)
 			fus.On("appendRootModuleTF", mock.Anything).Return(nil).Once()
 			if test.mod {
 				fus.On("createModuleTF", "zoneName_someName_someType", mock.Anything, mock.Anything).Return(nil).Once()
@@ -93,7 +93,7 @@ func TestProcessRecordset(t *testing.T) {
 			zoneTypeMap := make(map[string]map[string]bool)
 			zoneTypeMap["someName"] = map[string]bool{"someType": true}
 			config := configStruct{fetchConfig: fetchConfigStruct{ModSegment: test.mod}}
-			processingResult, _ := processRecordsets(ctx, m, zone, "zoneName", zoneTypeMap, fus, config)
+			processingResult, _ := processRecordSets(ctx, m, zone, "zoneName", zoneTypeMap, fus, config)
 
 			assert.Equal(t, 1, len(processingResult))
 			types, nameExist := processingResult[recordset.Name]
@@ -105,7 +105,6 @@ func TestProcessRecordset(t *testing.T) {
 			if test.mod {
 				assertFileWithContent(t, test.expectModPath, fus.createModuleArg)
 			}
-
 		})
 	}
 }

@@ -33,43 +33,40 @@ const (
 
 // Util func to split params string
 func splitSvcParams(params string) []string {
-
 	r := regexp.MustCompile(`[^\s"]+|"([^"]*)"`)
-	paramslice := r.FindAllString(params, -1)
-	return paramslice
+	paramSlice := r.FindAllString(params, -1)
+	return paramSlice
 }
 
 // Util func to walk params and create a map
 func createParamsMap(params []string) *map[string]string {
-
 	paramsMap := map[string]string{}
 
 	for _, param := range params {
-		keyval := strings.Split(param, "=")
-		if len(keyval) == 0 || len(keyval) > 2 {
+		keyVal := strings.Split(param, "=")
+		if len(keyVal) == 0 || len(keyVal) > 2 {
 			continue // weird but skip
 		}
-		if len(keyval) == 1 {
-			paramsMap[strings.TrimSpace(keyval[0])] = "" // no value
+		if len(keyVal) == 1 {
+			paramsMap[strings.TrimSpace(keyVal[0])] = "" // no value
 			continue
 		}
-		paramsMap[strings.TrimSpace(keyval[0])] = strings.TrimSpace(keyval[1])
+		paramsMap[strings.TrimSpace(keyVal[0])] = strings.TrimSpace(keyVal[1])
 	}
 	if len(paramsMap) < 1 {
 		return nil
 	}
-	return &paramsMap
 
+	return &paramsMap
 }
 
 // Process recordset resources
-func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourceZoneName string, zoneTypeMap map[string]map[string]bool, fileUtils fileUtils, config configStruct) (map[string]Types, error) {
-
+func processRecordSets(ctx context.Context, client dns.DNS, zone, resourceZoneName string, zoneTypeMap map[string]map[string]bool, fileUtils fileUtils, config configStruct) (map[string]Types, error) {
 	// returned variable. That map later will be used to create import script
 	var importScriptConfig = make(map[string]Types)
 
 	queryArgs := getQueryArguments()
-	nameRecordSetsResp, err := client.GetRecordsets(ctx, zone, queryArgs)
+	nameRecordSetsResp, err := client.GetRecordSets(ctx, zone, queryArgs)
 	if err != nil {
 		return importScriptConfig, fmt.Errorf("failed to read record set %s", err.Error())
 	}
@@ -80,7 +77,7 @@ func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourc
 				zoneTypeMap[recname] = map[string]bool{}
 			}
 		}
-		for _, recordset := range nameRecordSetsResp.Recordsets {
+		for _, recordset := range nameRecordSetsResp.RecordSets {
 			if !shouldProcessRecordset(zoneTypeMap, recordset, config) {
 				continue
 			}
@@ -88,7 +85,7 @@ func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourc
 
 			recordMap := getRecordMap(ctx, client, recordset)
 			modName := createUniqueRecordsetName(resourceZoneName, recordset.Name, recordset.Type)
-			data := RecordsetData{BlockName: modName, ResourceFields: recordMap, TfWorkPath: config.tfWorkPath}
+			data := RecordsetData{BlockName: modName, ResourceFields: recordMap, TFWorkPath: config.tfWorkPath}
 			if config.fetchConfig.ModSegment {
 				// process as module
 				if err := fileUtils.appendRootModuleTF(useTemplate(&data, "module-set.tmpl", false)); err != nil {
@@ -109,26 +106,25 @@ func processRecordsets(ctx context.Context, client dns.DNS, zone string, resourc
 			break
 		}
 		queryArgs.Page++
-		nameRecordSetsResp, err = client.GetRecordsets(ctx, zone, queryArgs)
+		nameRecordSetsResp, err = client.GetRecordSets(ctx, zone, queryArgs)
 		if err != nil {
 			return importScriptConfig, fmt.Errorf("failed to read record set %s", err.Error())
 		}
 	}
 
 	return importScriptConfig, nil
-
 }
 
-func updateImportScriptConfig(importScriptConfig map[string]Types, recordset dns.Recordset) {
+func updateImportScriptConfig(importScriptConfig map[string]Types, recordset dns.RecordSet) {
 	if _, ok := importScriptConfig[recordset.Name]; !ok {
 		importScriptConfig[recordset.Name] = Types{}
 	}
 	importScriptConfig[recordset.Name] = append(importScriptConfig[recordset.Name], recordset.Type)
 }
 
-func shouldProcessRecordset(zoneTypeMap map[string]map[string]bool, recordset dns.Recordset, config configStruct) bool {
+func shouldProcessRecordset(zoneTypeMap map[string]map[string]bool, recordset dns.RecordSet, config configStruct) bool {
 	if config.fetchConfig.ConfigOnly {
-		// combination of recordnames and config only valid
+		// combination of record names and config only valid
 		if len(config.recordNames) > 0 {
 			if _, ok := zoneTypeMap[recordset.Name]; !ok {
 				return false
@@ -145,21 +141,21 @@ func shouldProcessRecordset(zoneTypeMap map[string]map[string]bool, recordset dn
 	return true
 }
 
-func getQueryArguments() dns.RecordsetQueryArgs {
+func getQueryArguments() dns.RecordSetQueryArgs {
 	v, _ := mem.VirtualMemory()
 	maxPageSize := (v.Free / 2) / 512 // use max half of free memory. Assume avg recordset size is 512 bytes
 	if maxPageSize > uint64(maxInt/512) {
 		maxPageSize = uint64(maxInt / 512)
 	}
-	pagesize := int(maxPageSize)
+	pageSize := int(maxPageSize)
 
-	// get recordsets
-	queryArgs := dns.RecordsetQueryArgs{PageSize: pagesize, SortBy: "name, type", Page: 1}
+	// get record sets
+	queryArgs := dns.RecordSetQueryArgs{PageSize: pageSize, SortBy: "name, type", Page: 1}
 	return queryArgs
 }
 
 // getRecordMap returns all fields that will be exported into generated resource. The fields name bases on recordset type
-func getRecordMap(ctx context.Context, client dns.DNS, recordset dns.Recordset) map[string]string {
+func getRecordMap(ctx context.Context, client dns.DNS, recordset dns.RecordSet) map[string]string {
 	// keys of that map depends on recordset.Type
 	recordFields := client.ParseRData(ctx, recordset.Type, recordset.Rdata) //returns map[string]interface{}
 	// required fields
@@ -167,50 +163,50 @@ func getRecordMap(ctx context.Context, client dns.DNS, recordset dns.Recordset) 
 	recordFields["recordtype"] = recordset.Type
 	recordFields["ttl"] = recordset.TTL
 	recordMap := make(map[string]string)
-	for fname, fval := range recordFields {
-		if (fname == "priority" || fname == "priority_increment") && recordset.Type == "MX" {
-			fval = 0
+	for fName, fVal := range recordFields {
+		if (fName == "priority" || fName == "priority_increment") && recordset.Type == "MX" {
+			fVal = 0
 		}
-		if recordset.Type == "SOA" && fname == "serial" {
+		if recordset.Type == "SOA" && fName == "serial" {
 			continue // computed
 		}
-		if recordset.Type == "AKAMAITLC" && (fname == "dns_name" || fname == "answer_type") {
+		if recordset.Type == "AKAMAITLC" && (fName == "dns_name" || fName == "answer_type") {
 			continue // computed
 		}
-		if fname == "svc_params" && (recordset.Type == "SVCB" || recordset.Type == "HTTPS") {
-			if createParamsMap(splitSvcParams(fmt.Sprint(fval))) == nil {
+		if fName == "svc_params" && (recordset.Type == "SVCB" || recordset.Type == "HTTPS") {
+			if createParamsMap(splitSvcParams(fmt.Sprint(fVal))) == nil {
 				continue
 			}
 		}
-		switch fval.(type) {
+		switch fVal.(type) {
 		case string:
-			recordMap[fname] = "\"" + handleSpecialCharacters(recordset, fval) + "\""
+			recordMap[fName] = "\"" + handleSpecialCharacters(recordset, fVal) + "\""
 
 		case []string:
 			// target
-			recordMap[fname] = fmt.Sprint(recordValueForSlice(fval, recordset))
+			recordMap[fName] = fmt.Sprint(recordValueForSlice(fVal, recordset))
 		default:
-			recordMap[fname] = fmt.Sprint(fval)
+			recordMap[fName] = fmt.Sprint(fVal)
 		}
 	}
 	return recordMap
 }
 
-func handleSpecialCharacters(rs dns.Recordset, fval interface{}) string {
-	strval := fmt.Sprint(fval)
+func handleSpecialCharacters(rs dns.RecordSet, fVal interface{}) string {
+	strVal := fmt.Sprint(fVal)
 	if rs.Type == "HTTPS" || rs.Type == "SVCB" {
-		strval = strings.ReplaceAll(strval, "\"", "\\\"")
+		strVal = strings.ReplaceAll(strVal, "\"", "\\\"")
 	}
-	if strings.HasPrefix(strval, "\"") {
-		strval = strings.Trim(strval, "\"")
-		strval = "\\\"" + strval + "\\\""
+	if strings.HasPrefix(strVal, "\"") {
+		strVal = strings.Trim(strVal, "\"")
+		strVal = "\\\"" + strVal + "\\\""
 	}
-	return strval
+	return strVal
 }
 
-func recordValueForSlice(fval interface{}, rs dns.Recordset) string {
+func recordValueForSlice(fVal interface{}, rs dns.RecordSet) string {
 	listString := ""
-	if len(fval.([]string)) > 0 {
+	if len(fVal.([]string)) > 0 {
 		listString += "["
 		if rs.Type == "MX" {
 			for _, rstr := range rs.Rdata {
@@ -225,7 +221,7 @@ func recordValueForSlice(fval interface{}, rs dns.Recordset) string {
 				listString += ", "
 			}
 		} else {
-			for _, str := range fval.([]string) {
+			for _, str := range fVal.([]string) {
 				if strings.HasPrefix(str, "\"") {
 					str = strings.Trim(str, "\"")
 					str = processString(str)
@@ -250,10 +246,8 @@ func processString(source string) string {
 
 // create unique resource record name
 func createUniqueRecordsetName(resourceZoneName, rName, rType string) string {
-
 	return strings.TrimRight(fmt.Sprintf("%s_%s_%s",
 		normalizeResourceName(resourceZoneName),
 		normalizeResourceName(rName),
 		rType), "_")
-
 }

@@ -12,18 +12,18 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type fileutilsmock struct {
+type fileUtilsMock struct {
 	mock.Mock
 	createModuleArg string
 	appendRootArg   string
 }
 
-func (m *fileutilsmock) createModuleTF(_ context.Context, modName string, content string, tfWorkPath string) error {
+func (m *fileUtilsMock) createModuleTF(_ context.Context, modName, content, tfWorkPath string) error {
 	m.createModuleArg = content
 	args := m.Called(modName, content, tfWorkPath)
 	return args.Error(0)
 }
-func (m *fileutilsmock) appendRootModuleTF(configText string) error {
+func (m *fileUtilsMock) appendRootModuleTF(configText string) error {
 	m.appendRootArg = configText
 	args := m.Called(configText)
 	return args.Error(0)
