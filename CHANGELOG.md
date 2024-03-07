@@ -38,7 +38,8 @@
 ### Bug fixes
 
 
-
+* PAPI
+  * Fixed issue that empty `custom_certificate_authorities` or `custom_certificates` where not generated during `export-property` with `rules-as-hcl` flag
 
 
 

@@ -1574,6 +1574,53 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			withError:    "there were errors reported: Unknown behavior 'caching-unknown', Unknown behavior 'allowPost-unknown'",
 		},
+		"property with rules as datasource with empty options": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "v2024-01-09",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							CnameFrom:                "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
+						},
+					},
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "basic-rules-datasource-empty-options",
+			rulesAsHCL:   true,
+			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2024-01-09")},
+		},
 		"property with include": {
 			givenData: TFData{
 				Includes: []TFIncludeData{
