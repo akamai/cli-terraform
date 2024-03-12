@@ -9556,6 +9556,34 @@
                 "action": "alert",
                 "penaltyBoxProtection": true
             },
+            "penaltyBoxConditions": {
+                "conditionOperator": "AND",
+                "conditions": [
+                    {
+                        "type": "filenameMatch",
+                        "filenames": [
+                            "appptest45"
+                        ],
+                        "positiveMatch": true
+                    }
+                ]
+            },
+            "evaluationPenaltyBox": {
+                "action": "alert",
+                "penaltyBoxProtection": true
+            },
+            "evaluationPenaltyBoxConditions": {
+                "conditionOperator": "AND",
+                "conditions": [
+                    {
+                        "type": "filenameMatch",
+                        "filenames": [
+                            "appptest45"
+                        ],
+                        "positiveMatch": true
+                    }
+                ]
+            },
             "pragmaHeader": {
                 "override": false
             },

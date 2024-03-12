@@ -502,6 +502,9 @@ terraform import module.security.akamai_appsec_reputation_profile_action.andrew_
 terraform import module.security.akamai_appsec_reputation_profile_action.andrew_2670509 32641:last_150674:2670509
 terraform import module.security.akamai_appsec_ip_geo.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_penalty_box.andrew 32641:last_150674
+terraform import module.security.akamai_appsec_penalty_box_conditions.andrew 32641:last_150674
+terraform import module.security.akamai_appsec_eval_penalty_box_conditions.andrew 32641:last_150674
+terraform import module.security.akamai_appsec_eval_penalty_box.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_slow_post.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_advanced_settings_request_body.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_security_policy.policy1 32641:easy_80433

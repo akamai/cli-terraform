@@ -95,6 +95,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"modules-security-malware-policy-actions.tmpl":  filepath.Join(securityModulePath, "malware-policy-actions.tf"),
 		"modules-security-match-targets.tmpl":           filepath.Join(securityModulePath, "match-targets.tf"),
 		"modules-security-penalty-box.tmpl":             filepath.Join(securityModulePath, "penalty-box.tf"),
+		"modules-security-eval-penalty-box.tmpl":        filepath.Join(securityModulePath, "eval-penalty-box.tf"),
 		"modules-security-policies.tmpl":                filepath.Join(securityModulePath, "policies.tf"),
 		"modules-security-protections.tmpl":             filepath.Join(securityModulePath, "protections.tf"),
 		"modules-security-rate-policies.tmpl":           filepath.Join(securityModulePath, "rate-policies.tf"),

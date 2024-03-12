@@ -7,6 +7,10 @@
 * Cloudlets
     * Changed export for `akamai_cloudlets_audience_segmentation_match_rule` to generate empty `forward_settings` when `origin_id` and `path_and_qs` both are empty and `use_incoming_query_string` is false
 
+* Appsec
+  *  Added support to export `akamai_appsec_penalty_box_conditions` for the specified policy.
+  *  Added support to export `akamai_appsec_eval_penalty_box_conditions` for the specified policy.
+
 
 * Updated minimal required terraform version to 1.0
 

@@ -111,6 +111,15 @@ terraform import module.security.akamai_appsec_ip_geo.{{ $policyName}} {{ $confi
 {{ if .PenaltyBox -}}
 terraform import module.security.akamai_appsec_penalty_box.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 {{ end -}}
+{{ if .PenaltyBoxConditions -}}
+terraform import module.security.akamai_appsec_penalty_box_conditions.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ if .EvaluationPenaltyBoxConditions -}}
+terraform import module.security.akamai_appsec_eval_penalty_box_conditions.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ if .EvaluationPenaltyBox -}}
+terraform import module.security.akamai_appsec_eval_penalty_box.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
 {{ if .SlowPost -}}
 terraform import module.security.akamai_appsec_slow_post.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 {{ end -}}
