@@ -28,6 +28,7 @@ resource "akamai_gtm_property" "test_property1" {
     http_error3xx                    = true
     http_error4xx                    = true
     http_error5xx                    = true
+    pre_2023_security_posture        = false
     disabled                         = false
     test_object_protocol             = "HTTP"
     test_object_port                 = 80

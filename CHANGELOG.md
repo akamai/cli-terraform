@@ -23,7 +23,10 @@
 
 
 
-
+* GTM
+  * Added support for exporting fields:
+    * `sign_and_serve`, `sign_and_serve_algorithm` for `akamai_gtm_domain` resource
+    * `http_method`, `http_request_body`, `pre_2023_security_posture`, `alternate_ca_certificate` inside `liveness_test` in `akamai_gtm_property` resource
 
 
 

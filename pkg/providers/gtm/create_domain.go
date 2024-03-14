@@ -50,6 +50,8 @@ type (
 		DefaultSSLClientCertificate string
 		EndUserMappingEnabled       bool
 		Section                     string
+		SignAndServe                bool
+		SignAndServeAlgorithm       string
 		Datacenters                 []TFDatacenterData
 		DefaultDatacenters          []TFDatacenterData
 		Resources                   []*gtm.Resource
@@ -178,6 +180,11 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, section strin
 		GeoMaps:                     domain.GeographicMaps,
 		ASMaps:                      domain.ASMaps,
 		Properties:                  domain.Properties,
+		SignAndServe:                domain.SignAndServe,
+	}
+
+	if domain.SignAndServeAlgorithm != nil {
+		tfDomainData.SignAndServeAlgorithm = *domain.SignAndServeAlgorithm
 	}
 
 	tfDomainData.getDatacenters(domain)

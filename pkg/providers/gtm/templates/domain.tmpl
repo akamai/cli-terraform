@@ -39,4 +39,8 @@ resource "akamai_gtm_domain" "{{.NormalizedName}}" {
     default_ssl_client_certificate = "{{.DefaultSSLClientCertificate}}"
     {{- end}}
     end_user_mapping_enabled = {{.EndUserMappingEnabled}}
+    sign_and_serve = {{.SignAndServe}}
+    {{- if .SignAndServeAlgorithm}}
+    sign_and_serve_algorithm = "{{.SignAndServeAlgorithm}}"
+    {{- end}}
 }

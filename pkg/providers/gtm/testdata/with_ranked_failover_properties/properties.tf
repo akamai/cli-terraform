@@ -1,7 +1,7 @@
 resource "akamai_gtm_property" "test_property1" {
   domain                      = akamai_gtm_domain.test_name.name
   name                        = "test property1"
-  type                        = "static"
+  type                        = "ranked-failover"
   ipv6                        = false
   score_aggregation_type      = "worst"
   stickiness_bonus_percentage = 0
@@ -23,10 +23,7 @@ resource "akamai_gtm_property" "test_property1" {
     http_error3xx                    = true
     http_error4xx                    = true
     http_error5xx                    = true
-    http_method                      = "GET"
-    http_request_body                = "Body"
-    alternate_ca_certificates        = ["test1"]
-    pre_2023_security_posture        = true
+    pre_2023_security_posture        = false
     disabled                         = false
     test_object_protocol             = "HTTP"
     test_object_port                 = 80
@@ -36,7 +33,6 @@ resource "akamai_gtm_property" "test_property1" {
     recursion_requested              = false
   }
   depends_on = [
-    akamai_gtm_datacenter.TEST1,
     akamai_gtm_domain.test_name
   ]
 }
@@ -44,7 +40,7 @@ resource "akamai_gtm_property" "test_property1" {
 resource "akamai_gtm_property" "test_property2" {
   domain                      = akamai_gtm_domain.test_name.name
   name                        = "test property2"
-  type                        = "performance"
+  type                        = "ranked-failover"
   ipv6                        = false
   score_aggregation_type      = "worst"
   stickiness_bonus_percentage = 0
@@ -66,9 +62,17 @@ resource "akamai_gtm_property" "test_property2" {
     enabled       = true
     weight        = 1
     servers       = ["1.2.3.4"]
+    precedence    = 10
   }
   traffic_target {
     datacenter_id = akamai_gtm_datacenter.TEST2.datacenter_id
+    enabled       = true
+    weight        = 1
+    servers       = ["7.6.5.4"]
+    precedence    = 200
+  }
+  traffic_target {
+    datacenter_id = data.akamai_gtm_default_datacenter.default_datacenter_5400.datacenter_id
     enabled       = true
     weight        = 1
     servers       = ["7.6.5.4"]
@@ -101,6 +105,7 @@ resource "akamai_gtm_property" "test_property2" {
   depends_on = [
     akamai_gtm_datacenter.TEST1,
     akamai_gtm_datacenter.TEST2,
+    data.akamai_gtm_default_datacenter.default_datacenter_5400,
     akamai_gtm_domain.test_name
   ]
 }
@@ -108,7 +113,7 @@ resource "akamai_gtm_property" "test_property2" {
 resource "akamai_gtm_property" "test_property3" {
   domain                      = akamai_gtm_domain.test_name.name
   name                        = "test property3"
-  type                        = "asmapping"
+  type                        = "ranked-failover"
   ipv6                        = false
   score_aggregation_type      = "worst"
   stickiness_bonus_percentage = 0
@@ -126,6 +131,7 @@ resource "akamai_gtm_property" "test_property3" {
     enabled       = true
     weight        = 0
     servers       = []
+    precedence    = 100
   }
   traffic_target {
     datacenter_id = akamai_gtm_datacenter.TEST2.datacenter_id

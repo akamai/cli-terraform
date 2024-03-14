@@ -82,6 +82,9 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
         {{- if .HandoutCName}}
         handout_cname = "{{.HandoutCName}}"
         {{- end}}
+        {{- if .Precedence}}
+        precedence = {{.Precedence}}
+        {{- end}}
     }
     {{- end}}
     {{- end}}
@@ -103,6 +106,16 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
         http_error3xx = {{.HTTPError3xx}}
         http_error4xx = {{.HTTPError4xx}}
         http_error5xx = {{.HTTPError5xx}}
+        {{- if .HTTPMethod}}
+            http_method = "{{.HTTPMethod}}"
+        {{- end}}
+        {{- if .HTTPRequestBody}}
+            http_request_body = "{{.HTTPRequestBody}}"
+        {{- end}}
+        {{- if .AlternateCACertificates}}
+            alternate_ca_certificates = [{{range $i, $v := .AlternateCACertificates}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+        {{- end}}
+        pre_2023_security_posture = {{.Pre2023SecurityPosture}}
         disabled = {{.Disabled}}
         test_object_protocol = "{{.TestObjectProtocol}}"
         {{- if .TestObjectPassword}}

@@ -12,6 +12,7 @@ import (
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/gtm"
 	"github.com/akamai/cli-terraform/pkg/templates"
+	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -41,6 +42,8 @@ var (
 		CNameCoalescingEnabled:  true,
 		LoadFeedback:            true,
 		EndUserMappingEnabled:   true,
+		SignAndServe:            true,
+		SignAndServeAlgorithm:   tools.StringPtr("RSA-SHA1"),
 		Datacenters: []*gtm.Datacenter{
 			{
 				Nickname:     "TEST1",
@@ -187,6 +190,8 @@ var (
 		CNameCoalescingEnabled:  true,
 		LoadFeedback:            true,
 		EndUserMappingEnabled:   true,
+		SignAndServe:            true,
+		SignAndServeAlgorithm:   "RSA-SHA1",
 		DefaultDatacenters: []TFDatacenterData{
 			{
 				Nickname: "DEFAULT",
@@ -481,6 +486,26 @@ func TestProcessDomainTemplates(t *testing.T) {
 				EndUserMappingEnabled:   false,
 			},
 			dir:          "domain_file",
+			filesToCheck: []string{"domain.tf", "variables.tf", "import.sh"},
+		},
+		"domain with sign_and_serve_algorithm": {
+			givenData: TFDomainData{
+				Section:                 "default",
+				Name:                    "test.name.akadns.net",
+				NormalizedName:          "test_name",
+				Type:                    "basic",
+				Comment:                 "test",
+				EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+				DefaultTimeoutPenalty:   10,
+				LoadImbalancePercentage: 50,
+				DefaultErrorPenalty:     90,
+				CNameCoalescingEnabled:  true,
+				LoadFeedback:            true,
+				EndUserMappingEnabled:   false,
+				SignAndServe:            true,
+				SignAndServeAlgorithm:   "RSA-SHA1",
+			},
+			dir:          "domain_with_sign_and_serve",
 			filesToCheck: []string{"domain.tf", "variables.tf", "import.sh"},
 		},
 		"simple domain with datacenters": {
@@ -796,15 +821,19 @@ func TestProcessDomainTemplates(t *testing.T) {
 						},
 						LivenessTests: []*gtm.LivenessTest{
 							{
-								Name:               "HTTP",
-								TestInterval:       60,
-								TestObject:         "/",
-								HTTPError3xx:       true,
-								HTTPError4xx:       true,
-								HTTPError5xx:       true,
-								TestObjectProtocol: "HTTP",
-								TestObjectPort:     80,
-								TestTimeout:        10,
+								Name:                    "HTTP",
+								TestInterval:            60,
+								TestObject:              "/",
+								HTTPError3xx:            true,
+								HTTPError4xx:            true,
+								HTTPError5xx:            true,
+								TestObjectProtocol:      "HTTP",
+								TestObjectPort:          80,
+								TestTimeout:             10,
+								HTTPMethod:              tools.StringPtr("GET"),
+								HTTPRequestBody:         tools.StringPtr("Body"),
+								AlternateCACertificates: []string{"test1"},
+								Pre2023SecurityPosture:  true,
 							},
 						},
 					},
@@ -884,6 +913,160 @@ func TestProcessDomainTemplates(t *testing.T) {
 				},
 			},
 			dir:          "with_properties",
+			filesToCheck: []string{"domain.tf", "datacenters.tf", "properties.tf", "variables.tf", "import.sh"},
+		},
+		"simple domain with ranked_failover properties": {
+			givenData: TFDomainData{
+				Section:                 "test_section",
+				Name:                    "test.name.akadns.net",
+				NormalizedName:          "test_name",
+				Type:                    "basic",
+				Comment:                 "test",
+				EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+				DefaultTimeoutPenalty:   10,
+				LoadImbalancePercentage: 50,
+				DefaultErrorPenalty:     90,
+				CNameCoalescingEnabled:  true,
+				LoadFeedback:            true,
+				DefaultDatacenters: []TFDatacenterData{
+					{
+						Nickname: "DEFAULT",
+						ID:       5400,
+					},
+				},
+				Datacenters: []TFDatacenterData{
+					{
+						Nickname:        "TEST1",
+						ID:              123,
+						City:            "New York",
+						StateOrProvince: "NY",
+						Country:         "US",
+						Latitude:        40.71305,
+						Longitude:       -74.00723,
+						DefaultLoadObject: &gtm.LoadObject{
+							LoadObject:     "test load object",
+							LoadObjectPort: 111,
+							LoadServers:    []string{"loadServer1", "loadServer2", "loadServer3"},
+						},
+					},
+					{
+						Nickname:        "TEST2",
+						ID:              124,
+						City:            "Chicago",
+						StateOrProvince: "IL",
+						Country:         "US",
+						Latitude:        41.88323,
+						Longitude:       -87.6324,
+					},
+				},
+				Properties: []*gtm.Property{
+					{
+						Name:                 "test property1",
+						Type:                 "ranked-failover",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						Comments:             "some comment",
+						LivenessTests: []*gtm.LivenessTest{
+							{
+								Name:               "HTTP",
+								TestInterval:       60,
+								TestObject:         "/",
+								HTTPError3xx:       true,
+								HTTPError4xx:       true,
+								HTTPError5xx:       true,
+								TestObjectProtocol: "HTTP",
+								TestObjectPort:     80,
+								TestTimeout:        10,
+							},
+						},
+					},
+					{
+						Name:                 "test property2",
+						Type:                 "ranked-failover",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						StaticRRSets: []*gtm.StaticRRSet{
+							{
+								Type:  "test type",
+								Rdata: []string{"rdata1", "rdata2", "\"properlyescaped\""},
+							},
+						},
+						TrafficTargets: []*gtm.TrafficTarget{
+							{
+								DatacenterID: 123,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"1.2.3.4"},
+								Precedence:   tools.IntPtr(10),
+							},
+							{
+								DatacenterID: 124,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"7.6.5.4"},
+								Precedence:   tools.IntPtr(200),
+							},
+							{
+								DatacenterID: 5400,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"7.6.5.4"},
+							},
+						},
+						LivenessTests: []*gtm.LivenessTest{
+							{
+								Name:               "HTTP",
+								TestInterval:       60,
+								TestObject:         "/",
+								HTTPError3xx:       true,
+								HTTPError4xx:       true,
+								HTTPError5xx:       true,
+								TestObjectProtocol: "HTTP",
+								TestObjectPort:     80,
+								TestTimeout:        10,
+								HTTPHeaders: []*gtm.HTTPHeader{
+									{
+										Name:  "header1",
+										Value: "header1Value",
+									},
+									{
+										Name:  "header2",
+										Value: "header2Value",
+									},
+								},
+							},
+						},
+					},
+					{
+						Name:                 "test property3",
+						Type:                 "ranked-failover",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						TrafficTargets: []*gtm.TrafficTarget{
+							{
+								DatacenterID: 5400,
+								Enabled:      true,
+								Weight:       0,
+								Servers:      []string{},
+								Precedence:   tools.IntPtr(100),
+							},
+							{
+								DatacenterID: 124,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{},
+							},
+						},
+					},
+				},
+			},
+			dir:          "with_ranked_failover_properties",
 			filesToCheck: []string{"domain.tf", "datacenters.tf", "properties.tf", "variables.tf", "import.sh"},
 		},
 		"simple domain with property of type 'qtr'": {

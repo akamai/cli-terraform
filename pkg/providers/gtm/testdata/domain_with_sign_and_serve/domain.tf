@@ -18,10 +18,7 @@ resource "akamai_gtm_domain" "test_name" {
   group                     = var.groupid
   name                      = "test.name.akadns.net"
   type                      = "basic"
-  comment                   = <<EOT
-first
-second
-EOT
+  comment                   = "test"
   email_notification_list   = ["john@akamai.com", "jdoe@akamai.com"]
   default_timeout_penalty   = 10
   load_imbalance_percentage = 50
@@ -29,5 +26,6 @@ EOT
   cname_coalescing_enabled  = true
   load_feedback             = true
   end_user_mapping_enabled  = false
-  sign_and_serve            = false
+  sign_and_serve            = true
+  sign_and_serve_algorithm  = "RSA-SHA1"
 }

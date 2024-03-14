@@ -26,4 +26,5 @@ resource "akamai_gtm_domain" "test_name" {
   cname_coalescing_enabled  = true
   load_feedback             = true
   end_user_mapping_enabled  = false
+  sign_and_serve            = false
 }
