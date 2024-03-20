@@ -21,8 +21,9 @@
 
 
 
-
-
+* PAPI
+  * `export-property` command with flag `--rules-as-hcl` now supports export of properties in frozen format `v2024-02-12`
+  * `export-property-include` command with flag `--rules-as-hcl` now supports export of includes in frozen format `v2024-02-12`
 
 
 
