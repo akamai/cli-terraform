@@ -20,7 +20,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/dns"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/dns"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/shirou/gopsutil/mem"
 )
