@@ -1,26 +1,26 @@
 {{ define "cidrmaps" -}}
-{{ range .CidrMaps -}}
+{{ range .CIDRMaps -}}
 resource "akamai_gtm_cidrmap" "{{normalize .Name}}" {
     domain = akamai_gtm_domain.{{$.NormalizedName}}.name
     default_datacenter {
         nickname = "{{.DefaultDatacenter.Nickname}}"
-    {{- if eq .DefaultDatacenter.DatacenterId 5400 }}
+    {{- if eq .DefaultDatacenter.DatacenterID 5400 }}
         datacenter_id = data.akamai_gtm_default_datacenter.default_datacenter_5400.datacenter_id
     {{- else }}
-        datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DefaultDatacenter.DatacenterId}}.datacenter_id
+        datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DefaultDatacenter.DatacenterID}}.datacenter_id
     {{- end }}
     }
     {{- range .Assignments }}
     assignment {
         nickname = "{{.Nickname}}"
-        datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}}.datacenter_id
+        datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterID}}.datacenter_id
         blocks = [{{range $i, $n := .Blocks}}{{if $i}}, {{end}}"{{$n}}"{{end}}]
     }
     {{- end }}
     name = "{{.Name}}"
     depends_on = [
     {{- range .Assignments }}
-        akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}},
+        akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterID}},
     {{- end }}
         akamai_gtm_domain.{{$.NormalizedName}}
     ]

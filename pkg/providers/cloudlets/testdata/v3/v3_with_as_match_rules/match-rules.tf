@@ -87,11 +87,7 @@ data "akamai_cloudlets_audience_segmentation_match_rule" "match_rules_as" {
     start     = 0
     end       = 0
     match_url = ""
-    forward_settings {
-      origin_id                 = ""
-      path_and_qs               = ""
-      use_incoming_query_string = false
-    }
+    forward_settings {}
     disabled = true
   }
 }

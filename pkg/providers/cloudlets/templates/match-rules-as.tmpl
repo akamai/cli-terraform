@@ -42,13 +42,17 @@ data "akamai_cloudlets_audience_segmentation_match_rule" "match_rules_as" {
     }
     {{- end}}
     match_url = "{{escape .MatchURL}}"
-    {{- with .ForwardSettings}}
-    forward_settings {
-      origin_id = "{{.OriginID}}"
-      path_and_qs = "{{escape .PathAndQS}}"
-      use_incoming_query_string = {{.UseIncomingQueryString}}
-    }
-    {{- end}}
+     {{- with .ForwardSettings}}
+     {{- if and (.OriginID | eq "") (.PathAndQS | eq "") (not .UseIncomingQueryString)}}
+        forward_settings {}
+     {{- else }}
+        forward_settings {
+            origin_id = "{{.OriginID}}"
+            path_and_qs = "{{escape .PathAndQS}}"
+            use_incoming_query_string = {{.UseIncomingQueryString}}
+        }
+     {{- end}}
+     {{- end}}
     disabled = {{.Disabled}}
   }
 {{end -}}

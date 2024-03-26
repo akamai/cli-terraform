@@ -5398,6 +5398,9 @@ origin {
 {{- end}}
 		}
 {{- end}}
+	{{- if (eq (len $v) 0)}}
+		custom_certificate_authorities {}
+	{{- end}}
 {{- end}}
 {{- if eq $k "customCertificates" }}
 		{{- range $v := $v}}
@@ -5491,6 +5494,9 @@ origin {
 {{- end}}
 		}
 {{- end}}
+	{{- if (eq (len $v) 0)}}
+		custom_certificates {}
+	{{- end}}
 {{- end}}
 {{- if and (eq $k "ports") (ne $v nil)}}
         ports = {{template "Text" $v}}

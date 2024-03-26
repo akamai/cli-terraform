@@ -22,12 +22,12 @@ import (
 )
 
 type tfStateStruct struct {
-	Version         int         `json:"version"`
-	TerraforVersion string      `json:"terraform_version"`
-	Serial          int         `json:"serial"`
-	Lineage         string      `json:"lineage"`
-	Outputs         interface{} `json:"outputs"`
-	Resources       []*Resource `json:"resources"`
+	Version          int         `json:"version"`
+	TerraformVersion string      `json:"terraform_version"`
+	Serial           int         `json:"serial"`
+	Lineage          string      `json:"lineage"`
+	Outputs          interface{} `json:"outputs"`
+	Resources        []*Resource `json:"resources"`
 }
 
 // Resource describes tf resource
@@ -41,14 +41,14 @@ type Resource struct {
 
 var tfState *tfStateStruct
 
-// Utility method to read in tfstate content
+// Utility method to read in tf state content
 func readTfState(tfWorkPath string) error {
 	// TFWorkPath global var
-	tfStateFilename := filepath.Join(tfWorkPath, "terraform.tfstate")
-	if _, err := os.Stat(tfStateFilename); err != nil {
+	tfStateFileName := filepath.Join(tfWorkPath, "terraform.tfstate")
+	if _, err := os.Stat(tfStateFileName); err != nil {
 		return err
 	}
-	stateData, err := ioutil.ReadFile(tfStateFilename)
+	stateData, err := ioutil.ReadFile(tfStateFileName)
 	if err != nil {
 		return err
 	}

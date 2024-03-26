@@ -5,4 +5,3 @@ resource "akamai_appsec_penalty_box" "default_policy" {
   penalty_box_protection = true
   penalty_box_action     = "alert"
 }
-

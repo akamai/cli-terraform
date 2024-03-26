@@ -2,10 +2,10 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 2.0.0"
+      version = ">= 6.0.0"
     }
   }
-  required_version = ">= 0.13"
+  required_version = ">= 1.0"
 }
 
 provider "akamai" {
@@ -26,4 +26,5 @@ resource "akamai_gtm_domain" "test_name" {
   cname_coalescing_enabled  = true
   load_feedback             = true
   end_user_mapping_enabled  = false
+  sign_and_serve            = false
 }

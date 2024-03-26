@@ -200,6 +200,9 @@ terraform import module.security.akamai_appsec_malware_policy_action.default_pol
 terraform import module.security.akamai_appsec_malware_policy_action.default_policy_fms_configuration_3 79947:ASE1_156138:1185
 terraform import module.security.akamai_appsec_ip_geo.default_policy 79947:ASE1_156138
 terraform import module.security.akamai_appsec_penalty_box.default_policy 79947:ASE1_156138
+terraform import module.security.akamai_appsec_penalty_box_conditions.default_policy 79947:ASE1_156138
+terraform import module.security.akamai_appsec_eval_penalty_box_conditions.default_policy 79947:ASE1_156138
+terraform import module.security.akamai_appsec_eval_penalty_box.default_policy 79947:ASE1_156138
 terraform import module.security.akamai_appsec_slow_post.default_policy 79947:ASE1_156138
 terraform import module.security.akamai_appsec_advanced_settings_request_body.default_policy 79947:ASE1_156138
 terraform import module.security.akamai_appsec_rate_policy.page_view_requests 79947:177906
@@ -214,7 +217,6 @@ terraform import module.security.akamai_appsec_reputation_profile.web_attackers_
 terraform import module.security.akamai_appsec_reputation_profile.web_scrapers_high_threat 79947:3017095
 terraform import module.security.akamai_appsec_reputation_profile.web_scrapers_low_threat 79947:3017096
 terraform import module.security.akamai_appsec_siem_settings.siem 79947
-terraform import module.security.akamai_appsec_selected_hostnames.hostnames 79947
 terraform import module.activate-security.akamai_appsec_activations.appsecactivation 79947:1:STAGING
 terraform import module.security.akamai_appsec_malware_policy.fms_configuration_1 79947:1187
 terraform import module.security.akamai_appsec_malware_policy.fms_configuration_2 79947:1186

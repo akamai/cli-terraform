@@ -4,7 +4,7 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
     domain = akamai_gtm_domain.{{$.NormalizedName}}.name
     name = "{{.Name}}"
     type = "{{.Type}}"
-    ipv6 = {{.Ipv6}}
+    ipv6 = {{.IPv6}}
     score_aggregation_type = "{{.ScoreAggregationType}}"
     stickiness_bonus_percentage = {{.StickinessBonusPercentage}}
     stickiness_bonus_constant = {{.StickinessBonusConstant}}
@@ -12,8 +12,8 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
     health_threshold = {{.HealthThreshold}}
     {{- end}}
     use_computed_targets = {{.UseComputedTargets}}
-    {{- if .BackupIp}}
-    backup_ip = "{{.BackupIp}}"
+    {{- if .BackupIP}}
+    backup_ip = "{{.BackupIP}}"
     {{- end}}
     balance_by_download_score = {{.BalanceByDownloadScore}}
     {{- range .StaticRRSets}}
@@ -71,16 +71,19 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
     {{- $type := .Type}}
     {{- range .TrafficTargets}}
     traffic_target {
-        {{- if isDefaultDC .DatacenterId}}
-        datacenter_id = data.akamai_gtm_default_datacenter.default_datacenter_{{.DatacenterId}}.datacenter_id
+        {{- if isDefaultDC .DatacenterID}}
+        datacenter_id = data.akamai_gtm_default_datacenter.default_datacenter_{{.DatacenterID}}.datacenter_id
         {{- else}}
-        datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}}.datacenter_id
+        datacenter_id = akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterID}}.datacenter_id
         {{- end}}
         enabled = {{.Enabled}}
         weight = {{.Weight}}
         servers = [{{range $i, $v := .Servers}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
         {{- if .HandoutCName}}
         handout_cname = "{{.HandoutCName}}"
+        {{- end}}
+        {{- if .Precedence}}
+        precedence = {{.Precedence}}
         {{- end}}
     }
     {{- end}}
@@ -100,23 +103,33 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
         {{- if .ResponseString}}
         response_string = "{{.ResponseString}}"
         {{- end}}
-        http_error3xx = {{.HttpError3xx}}
-        http_error4xx = {{.HttpError4xx}}
-        http_error5xx = {{.HttpError5xx}}
+        http_error3xx = {{.HTTPError3xx}}
+        http_error4xx = {{.HTTPError4xx}}
+        http_error5xx = {{.HTTPError5xx}}
+        {{- if .HTTPMethod}}
+            http_method = "{{.HTTPMethod}}"
+        {{- end}}
+        {{- if .HTTPRequestBody}}
+            http_request_body = "{{.HTTPRequestBody}}"
+        {{- end}}
+        {{- if .AlternateCACertificates}}
+            alternate_ca_certificates = [{{range $i, $v := .AlternateCACertificates}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+        {{- end}}
+        pre_2023_security_posture = {{.Pre2023SecurityPosture}}
         disabled = {{.Disabled}}
         test_object_protocol = "{{.TestObjectProtocol}}"
         {{- if .TestObjectPassword}}
         test_object_password = "{{.TestObjectPassword}}"
         {{- end}}
         test_object_port = {{.TestObjectPort}}
-        {{- if .SslClientPrivateKey}}
-        ssl_client_private_key = "{{.SslClientPrivateKey}}"
+        {{- if .SSLClientPrivateKey}}
+        ssl_client_private_key = "{{.SSLClientPrivateKey}}"
         {{- end}}
-        {{- if .SslClientCertificate}}
-        ssl_client_certificate = "{{.SslClientCertificate}}"
+        {{- if .SSLClientCertificate}}
+        ssl_client_certificate = "{{.SSLClientCertificate}}"
         {{- end}}
         disable_nonstandard_port_warning = {{.DisableNonstandardPortWarning}}
-        {{- range .HttpHeaders}}
+        {{- range .HTTPHeaders}}
         http_header {
             {{- if .Name}}
             name = "{{.Name}}"
@@ -145,10 +158,10 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
     depends_on = [
         {{- $type := .Type}}
         {{- range .TrafficTargets}}
-        {{- if isDefaultDC .DatacenterId}}
-        data.akamai_gtm_default_datacenter.default_datacenter_{{.DatacenterId}},
+        {{- if isDefaultDC .DatacenterID}}
+        data.akamai_gtm_default_datacenter.default_datacenter_{{.DatacenterID}},
         {{- else}}
-        akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterId}},
+        akamai_gtm_datacenter.{{$.FindDatacenterResourceName .DatacenterID}},
         {{- end}}
         {{- end}}
         akamai_gtm_domain.{{$.NormalizedName}}

@@ -23,6 +23,10 @@ resource "akamai_gtm_property" "test_property1" {
     http_error3xx                    = true
     http_error4xx                    = true
     http_error5xx                    = true
+    http_method                      = "GET"
+    http_request_body                = "Body"
+    alternate_ca_certificates        = ["test1"]
+    pre_2023_security_posture        = true
     disabled                         = false
     test_object_protocol             = "HTTP"
     test_object_port                 = 80
@@ -77,6 +81,7 @@ resource "akamai_gtm_property" "test_property2" {
     http_error3xx                    = true
     http_error4xx                    = true
     http_error5xx                    = true
+    pre_2023_security_posture        = false
     disabled                         = false
     test_object_protocol             = "HTTP"
     test_object_port                 = 80

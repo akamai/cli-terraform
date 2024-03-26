@@ -6,7 +6,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/dns"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/dns"
 	"github.com/akamai/cli-terraform/pkg/tools"
 )
 
@@ -19,7 +19,7 @@ type (
 		Zone           string
 		ResourceFields map[string]string
 		BlockName      string
-		TfWorkPath     string
+		TFWorkPath     string
 	}
 
 	// ZoneData represents a struct passed to zone-creation template
@@ -31,10 +31,10 @@ type (
 		Comment               string
 		SignAndServe          bool
 		SignAndServeAlgorithm string
-		TsigKey               *dns.TSIGKey
+		TSIGKey               *dns.TSIGKey
 		Target                string
 		EndCustomerID         string
-		TfWorkPath            string
+		TFWorkPath            string
 	}
 
 	// ImportData represents a struct passed to import script template
@@ -42,7 +42,7 @@ type (
 		Zone          string
 		ZoneConfigMap map[string]Types
 		ResourceName  string
-		TfWorkPath    string
+		TFWorkPath    string
 	}
 )
 
@@ -69,7 +69,7 @@ func useTemplate(data interface{}, templateName string, trimBeginning bool) stri
 }
 
 // check if resource present in state
-func checkForResource(rtype, name, tfWorkPath string) bool {
+func checkForResource(rType, name, tfWorkPath string) bool {
 
 	if tfState == nil {
 		if err := readTfState(tfWorkPath); err != nil {
@@ -78,7 +78,7 @@ func checkForResource(rtype, name, tfWorkPath string) bool {
 		}
 	}
 	for _, r := range tfState.Resources {
-		if r.Type == rtype && r.Name == name {
+		if r.Type == rType && r.Name == name {
 			return true
 		}
 	}

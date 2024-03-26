@@ -3,10 +3,10 @@ terraform {
   required_providers {
     akamai = {
       source = "akamai/akamai"
-      version = ">= 2.0.0"
+      version = ">= 6.0.0"
     }
   }
-  required_version = ">= 0.13"
+  required_version = ">= 1.0"
 }
 
 provider "akamai" {
@@ -33,10 +33,14 @@ resource "akamai_gtm_domain" "{{.NormalizedName}}" {
     default_ssl_client_private_key = "{{.DefaultSSLClientPrivateKey}}"
     {{- end}}
     default_error_penalty = {{.DefaultErrorPenalty}}
-    cname_coalescing_enabled = {{.CnameCoalescingEnabled}}
+    cname_coalescing_enabled = {{.CNameCoalescingEnabled}}
     load_feedback = {{.LoadFeedback}}
     {{- if .DefaultSSLClientCertificate}}
     default_ssl_client_certificate = "{{.DefaultSSLClientCertificate}}"
     {{- end}}
     end_user_mapping_enabled = {{.EndUserMappingEnabled}}
+    sign_and_serve = {{.SignAndServe}}
+    {{- if .SignAndServeAlgorithm}}
+    sign_and_serve_algorithm = "{{.SignAndServeAlgorithm}}"
+    {{- end}}
 }

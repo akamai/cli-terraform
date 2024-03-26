@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/appsec"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/botman"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/appsec"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/botman"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 
@@ -332,7 +332,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"modules-security-rate-policy-actions.tmpl":    filepath.Join(security, "rate-policy-actions.tf"),
 		"modules-security-reputation.tmpl":             filepath.Join(security, "reputation.tf"),
 		"modules-security-reputation-profiles.tmpl":    filepath.Join(security, "reputation-profiles.tf"),
-		"modules-security-selected-hostnames.tmpl":     filepath.Join(security, "selected-hostnames.tf"),
 		"modules-security-siem.tmpl":                   filepath.Join(security, "siem.tf"),
 		"modules-security-slow-post.tmpl":              filepath.Join(security, "slow-post.tf"),
 		"modules-security-variables.tmpl":              filepath.Join(security, "variables.tf"),
@@ -454,7 +453,6 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 		"modules-security-rate-policy-actions.tmpl":     filepath.Join(security, "rate-policy-actions.tf"),
 		"modules-security-reputation.tmpl":              filepath.Join(security, "reputation.tf"),
 		"modules-security-reputation-profiles.tmpl":     filepath.Join(security, "reputation-profiles.tf"),
-		"modules-security-selected-hostnames.tmpl":      filepath.Join(security, "selected-hostnames.tf"),
 		"modules-security-siem.tmpl":                    filepath.Join(security, "siem.tf"),
 		"modules-security-slow-post.tmpl":               filepath.Join(security, "slow-post.tf"),
 		"modules-security-variables.tmpl":               filepath.Join(security, "variables.tf"),

@@ -10,8 +10,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/gtm"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/gtm"
 	"github.com/akamai/cli-terraform/pkg/templates"
+	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -38,21 +39,23 @@ var (
 		DefaultTimeoutPenalty:   10,
 		LoadImbalancePercentage: 50,
 		DefaultErrorPenalty:     90,
-		CnameCoalescingEnabled:  true,
+		CNameCoalescingEnabled:  true,
 		LoadFeedback:            true,
 		EndUserMappingEnabled:   true,
+		SignAndServe:            true,
+		SignAndServeAlgorithm:   tools.StringPtr("RSA-SHA1"),
 		Datacenters: []*gtm.Datacenter{
 			{
 				Nickname:     "TEST1",
-				DatacenterId: 123,
+				DatacenterID: 123,
 			},
 			{
 				Nickname:     "TEST2",
-				DatacenterId: 124,
+				DatacenterID: 124,
 			},
 			{
 				Nickname:     "DEFAULT",
-				DatacenterId: 5400,
+				DatacenterID: 5400,
 			},
 		},
 		Resources: []*gtm.Resource{
@@ -73,7 +76,7 @@ var (
 				HandoutMode:          "normal",
 				TrafficTargets: []*gtm.TrafficTarget{
 					{
-						DatacenterId: 123,
+						DatacenterID: 123,
 						Enabled:      true,
 						Weight:       1,
 						Servers:      []string{"1.2.3.4"},
@@ -84,9 +87,9 @@ var (
 						Name:               "HTTP",
 						TestInterval:       60,
 						TestObject:         "/",
-						HttpError3xx:       true,
-						HttpError4xx:       true,
-						HttpError5xx:       true,
+						HTTPError3xx:       true,
+						HTTPError4xx:       true,
+						HTTPError5xx:       true,
 						TestObjectProtocol: "HTTP",
 						TestObjectPort:     80,
 						TestTimeout:        10,
@@ -108,13 +111,13 @@ var (
 				},
 				TrafficTargets: []*gtm.TrafficTarget{
 					{
-						DatacenterId: 123,
+						DatacenterID: 123,
 						Enabled:      true,
 						Weight:       1,
 						Servers:      []string{"1.2.3.4"},
 					},
 					{
-						DatacenterId: 124,
+						DatacenterID: 124,
 						Enabled:      true,
 						Weight:       1,
 						Servers:      []string{"7.6.5.4"},
@@ -125,13 +128,13 @@ var (
 						Name:               "HTTP",
 						TestInterval:       60,
 						TestObject:         "/",
-						HttpError3xx:       true,
-						HttpError4xx:       true,
-						HttpError5xx:       true,
+						HTTPError3xx:       true,
+						HTTPError4xx:       true,
+						HTTPError5xx:       true,
 						TestObjectProtocol: "HTTP",
 						TestObjectPort:     80,
 						TestTimeout:        10,
-						HttpHeaders: []*gtm.HttpHeader{
+						HTTPHeaders: []*gtm.HTTPHeader{
 							{
 								Name:  "header1",
 								Value: "header1Value",
@@ -145,12 +148,12 @@ var (
 				},
 			},
 		},
-		AsMaps: []*gtm.AsMap{
+		ASMaps: []*gtm.ASMap{
 			{
 				Name: "test_asmap",
 				DefaultDatacenter: &gtm.DatacenterBase{
 					Nickname:     "default",
-					DatacenterId: 5004,
+					DatacenterID: 5004,
 				},
 			},
 		},
@@ -159,16 +162,16 @@ var (
 				Name: "test_geomap",
 				DefaultDatacenter: &gtm.DatacenterBase{
 					Nickname:     "default",
-					DatacenterId: 5004,
+					DatacenterID: 5004,
 				},
 			},
 		},
-		CidrMaps: []*gtm.CidrMap{
+		CIDRMaps: []*gtm.CIDRMap{
 			{
 				Name: "test_cidrmap",
 				DefaultDatacenter: &gtm.DatacenterBase{
 					Nickname:     "default",
-					DatacenterId: 5004,
+					DatacenterID: 5004,
 				},
 			},
 		},
@@ -184,9 +187,11 @@ var (
 		DefaultTimeoutPenalty:   10,
 		LoadImbalancePercentage: 50,
 		DefaultErrorPenalty:     90,
-		CnameCoalescingEnabled:  true,
+		CNameCoalescingEnabled:  true,
 		LoadFeedback:            true,
 		EndUserMappingEnabled:   true,
+		SignAndServe:            true,
+		SignAndServeAlgorithm:   "RSA-SHA1",
 		DefaultDatacenters: []TFDatacenterData{
 			{
 				Nickname: "DEFAULT",
@@ -203,12 +208,12 @@ var (
 				ID:       124,
 			},
 		},
-		AsMaps: []*gtm.AsMap{
+		ASMaps: []*gtm.ASMap{
 			{
 				Name: "test_asmap",
 				DefaultDatacenter: &gtm.DatacenterBase{
 					Nickname:     "default",
-					DatacenterId: 5004,
+					DatacenterID: 5004,
 				},
 			},
 		},
@@ -217,16 +222,16 @@ var (
 				Name: "test_geomap",
 				DefaultDatacenter: &gtm.DatacenterBase{
 					Nickname:     "default",
-					DatacenterId: 5004,
+					DatacenterID: 5004,
 				},
 			},
 		},
-		CidrMaps: []*gtm.CidrMap{
+		CIDRMaps: []*gtm.CIDRMap{
 			{
 				Name: "test_cidrmap",
 				DefaultDatacenter: &gtm.DatacenterBase{
 					Nickname:     "default",
-					DatacenterId: 5004,
+					DatacenterID: 5004,
 				},
 			},
 		},
@@ -248,7 +253,7 @@ var (
 				HandoutMode:          "normal",
 				TrafficTargets: []*gtm.TrafficTarget{
 					{
-						DatacenterId: 123,
+						DatacenterID: 123,
 						Enabled:      true,
 						Weight:       1,
 						Servers:      []string{"1.2.3.4"},
@@ -259,9 +264,9 @@ var (
 						Name:               "HTTP",
 						TestInterval:       60,
 						TestObject:         "/",
-						HttpError3xx:       true,
-						HttpError4xx:       true,
-						HttpError5xx:       true,
+						HTTPError3xx:       true,
+						HTTPError4xx:       true,
+						HTTPError5xx:       true,
 						TestObjectProtocol: "HTTP",
 						TestObjectPort:     80,
 						TestTimeout:        10,
@@ -283,13 +288,13 @@ var (
 				},
 				TrafficTargets: []*gtm.TrafficTarget{
 					{
-						DatacenterId: 123,
+						DatacenterID: 123,
 						Enabled:      true,
 						Weight:       1,
 						Servers:      []string{"1.2.3.4"},
 					},
 					{
-						DatacenterId: 124,
+						DatacenterID: 124,
 						Enabled:      true,
 						Weight:       1,
 						Servers:      []string{"7.6.5.4"},
@@ -300,13 +305,13 @@ var (
 						Name:               "HTTP",
 						TestInterval:       60,
 						TestObject:         "/",
-						HttpError3xx:       true,
-						HttpError4xx:       true,
-						HttpError5xx:       true,
+						HTTPError3xx:       true,
+						HTTPError4xx:       true,
+						HTTPError5xx:       true,
 						TestObjectProtocol: "HTTP",
 						TestObjectPort:     80,
 						TestTimeout:        10,
-						HttpHeaders: []*gtm.HttpHeader{
+						HTTPHeaders: []*gtm.HTTPHeader{
 							{
 								Name:  "header1",
 								Value: "header1Value",
@@ -434,12 +439,12 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Name: "test property2",
 					},
 				},
-				AsMaps: []*gtm.AsMap{
+				ASMaps: []*gtm.ASMap{
 					{
 						Name: "test_asmap",
 						DefaultDatacenter: &gtm.DatacenterBase{
 							Nickname:     "default",
-							DatacenterId: 123,
+							DatacenterID: 123,
 						},
 					},
 				},
@@ -448,16 +453,16 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Name: "test_geomap",
 						DefaultDatacenter: &gtm.DatacenterBase{
 							Nickname:     "default",
-							DatacenterId: 124,
+							DatacenterID: 124,
 						},
 					},
 				},
-				CidrMaps: []*gtm.CidrMap{
+				CIDRMaps: []*gtm.CIDRMap{
 					{
 						Name: "test_cidrmap",
 						DefaultDatacenter: &gtm.DatacenterBase{
 							Nickname:     "default",
-							DatacenterId: 125,
+							DatacenterID: 125,
 						},
 					},
 				},
@@ -476,11 +481,31 @@ func TestProcessDomainTemplates(t *testing.T) {
 				DefaultTimeoutPenalty:   10,
 				LoadImbalancePercentage: 50,
 				DefaultErrorPenalty:     90,
-				CnameCoalescingEnabled:  true,
+				CNameCoalescingEnabled:  true,
 				LoadFeedback:            true,
 				EndUserMappingEnabled:   false,
 			},
 			dir:          "domain_file",
+			filesToCheck: []string{"domain.tf", "variables.tf", "import.sh"},
+		},
+		"domain with sign_and_serve_algorithm": {
+			givenData: TFDomainData{
+				Section:                 "default",
+				Name:                    "test.name.akadns.net",
+				NormalizedName:          "test_name",
+				Type:                    "basic",
+				Comment:                 "test",
+				EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+				DefaultTimeoutPenalty:   10,
+				LoadImbalancePercentage: 50,
+				DefaultErrorPenalty:     90,
+				CNameCoalescingEnabled:  true,
+				LoadFeedback:            true,
+				EndUserMappingEnabled:   false,
+				SignAndServe:            true,
+				SignAndServeAlgorithm:   "RSA-SHA1",
+			},
+			dir:          "domain_with_sign_and_serve",
 			filesToCheck: []string{"domain.tf", "variables.tf", "import.sh"},
 		},
 		"simple domain with datacenters": {
@@ -494,7 +519,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 				DefaultTimeoutPenalty:   10,
 				LoadImbalancePercentage: 50,
 				DefaultErrorPenalty:     90,
-				CnameCoalescingEnabled:  true,
+				CNameCoalescingEnabled:  true,
 				LoadFeedback:            true,
 				DefaultDatacenters: []TFDatacenterData{
 					{
@@ -537,7 +562,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						HandoutMode:          "normal",
 						TrafficTargets: []*gtm.TrafficTarget{
 							{
-								DatacenterId: 5400,
+								DatacenterID: 5400,
 								Enabled:      true,
 								Weight:       1,
 								Servers:      []string{"1.2.3.4"},
@@ -548,9 +573,9 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Name:               "HTTP",
 								TestInterval:       60,
 								TestObject:         "/",
-								HttpError3xx:       true,
-								HttpError4xx:       true,
-								HttpError5xx:       true,
+								HTTPError3xx:       true,
+								HTTPError4xx:       true,
+								HTTPError5xx:       true,
 								TestObjectProtocol: "HTTP",
 								TestObjectPort:     80,
 								TestTimeout:        10,
@@ -573,7 +598,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 				DefaultTimeoutPenalty:   10,
 				LoadImbalancePercentage: 50,
 				DefaultErrorPenalty:     90,
-				CnameCoalescingEnabled:  true,
+				CNameCoalescingEnabled:  true,
 				LoadFeedback:            true,
 				DefaultDatacenters: []TFDatacenterData{
 					{
@@ -606,21 +631,21 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Longitude:       -87.6324,
 					},
 				},
-				AsMaps: []*gtm.AsMap{
+				ASMaps: []*gtm.ASMap{
 					{
 						Name: "test_asmap",
-						Assignments: []*gtm.AsAssignment{
+						Assignments: []*gtm.ASAssignment{
 							{
 								DatacenterBase: gtm.DatacenterBase{
 									Nickname:     "TEST1",
-									DatacenterId: 123,
+									DatacenterID: 123,
 								},
-								AsNumbers: []int64{1, 2, 3},
+								ASNumbers: []int64{1, 2, 3},
 							},
 						},
 						DefaultDatacenter: &gtm.DatacenterBase{
 							Nickname:     "default",
-							DatacenterId: 123,
+							DatacenterID: 123,
 						},
 					},
 				},
@@ -631,23 +656,23 @@ func TestProcessDomainTemplates(t *testing.T) {
 							{
 								DatacenterBase: gtm.DatacenterBase{
 									Nickname:     "TEST1",
-									DatacenterId: 123,
+									DatacenterID: 123,
 								},
 								Countries: []string{"US"},
 							},
 						},
 						DefaultDatacenter: &gtm.DatacenterBase{
 							Nickname:     "default",
-							DatacenterId: 124,
+							DatacenterID: 124,
 						},
 					},
 				},
-				CidrMaps: []*gtm.CidrMap{
+				CIDRMaps: []*gtm.CIDRMap{
 					{
 						Name: "test_cidrmap",
 						DefaultDatacenter: &gtm.DatacenterBase{
 							Nickname:     "default",
-							DatacenterId: 124,
+							DatacenterID: 124,
 						},
 					},
 				},
@@ -666,7 +691,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 				DefaultTimeoutPenalty:   10,
 				LoadImbalancePercentage: 50,
 				DefaultErrorPenalty:     90,
-				CnameCoalescingEnabled:  true,
+				CNameCoalescingEnabled:  true,
 				LoadFeedback:            true,
 				DefaultDatacenters: []TFDatacenterData{
 					{
@@ -709,7 +734,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						ConstrainedProperty: "**",
 						ResourceInstances: []*gtm.ResourceInstance{
 							{
-								DatacenterId:         123,
+								DatacenterID:         123,
 								UseDefaultLoadObject: false,
 								LoadObject: gtm.LoadObject{
 									LoadObject:     "load",
@@ -744,7 +769,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 				DefaultTimeoutPenalty:   10,
 				LoadImbalancePercentage: 50,
 				DefaultErrorPenalty:     90,
-				CnameCoalescingEnabled:  true,
+				CNameCoalescingEnabled:  true,
 				LoadFeedback:            true,
 				DefaultDatacenters: []TFDatacenterData{
 					{
@@ -788,7 +813,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Comments:             "some comment",
 						TrafficTargets: []*gtm.TrafficTarget{
 							{
-								DatacenterId: 123,
+								DatacenterID: 123,
 								Enabled:      true,
 								Weight:       1,
 								Servers:      []string{"1.2.3.4"},
@@ -796,15 +821,19 @@ func TestProcessDomainTemplates(t *testing.T) {
 						},
 						LivenessTests: []*gtm.LivenessTest{
 							{
-								Name:               "HTTP",
-								TestInterval:       60,
-								TestObject:         "/",
-								HttpError3xx:       true,
-								HttpError4xx:       true,
-								HttpError5xx:       true,
-								TestObjectProtocol: "HTTP",
-								TestObjectPort:     80,
-								TestTimeout:        10,
+								Name:                    "HTTP",
+								TestInterval:            60,
+								TestObject:              "/",
+								HTTPError3xx:            true,
+								HTTPError4xx:            true,
+								HTTPError5xx:            true,
+								TestObjectProtocol:      "HTTP",
+								TestObjectPort:          80,
+								TestTimeout:             10,
+								HTTPMethod:              tools.StringPtr("GET"),
+								HTTPRequestBody:         tools.StringPtr("Body"),
+								AlternateCACertificates: []string{"test1"},
+								Pre2023SecurityPosture:  true,
 							},
 						},
 					},
@@ -823,13 +852,13 @@ func TestProcessDomainTemplates(t *testing.T) {
 						},
 						TrafficTargets: []*gtm.TrafficTarget{
 							{
-								DatacenterId: 123,
+								DatacenterID: 123,
 								Enabled:      true,
 								Weight:       1,
 								Servers:      []string{"1.2.3.4"},
 							},
 							{
-								DatacenterId: 124,
+								DatacenterID: 124,
 								Enabled:      true,
 								Weight:       1,
 								Servers:      []string{"7.6.5.4"},
@@ -840,13 +869,13 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Name:               "HTTP",
 								TestInterval:       60,
 								TestObject:         "/",
-								HttpError3xx:       true,
-								HttpError4xx:       true,
-								HttpError5xx:       true,
+								HTTPError3xx:       true,
+								HTTPError4xx:       true,
+								HTTPError5xx:       true,
 								TestObjectProtocol: "HTTP",
 								TestObjectPort:     80,
 								TestTimeout:        10,
-								HttpHeaders: []*gtm.HttpHeader{
+								HTTPHeaders: []*gtm.HTTPHeader{
 									{
 										Name:  "header1",
 										Value: "header1Value",
@@ -868,13 +897,13 @@ func TestProcessDomainTemplates(t *testing.T) {
 						HandoutMode:          "normal",
 						TrafficTargets: []*gtm.TrafficTarget{
 							{
-								DatacenterId: 5400,
+								DatacenterID: 5400,
 								Enabled:      true,
 								Weight:       0,
 								Servers:      []string{},
 							},
 							{
-								DatacenterId: 124,
+								DatacenterID: 124,
 								Enabled:      true,
 								Weight:       1,
 								Servers:      []string{},
@@ -884,6 +913,160 @@ func TestProcessDomainTemplates(t *testing.T) {
 				},
 			},
 			dir:          "with_properties",
+			filesToCheck: []string{"domain.tf", "datacenters.tf", "properties.tf", "variables.tf", "import.sh"},
+		},
+		"simple domain with ranked_failover properties": {
+			givenData: TFDomainData{
+				Section:                 "test_section",
+				Name:                    "test.name.akadns.net",
+				NormalizedName:          "test_name",
+				Type:                    "basic",
+				Comment:                 "test",
+				EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+				DefaultTimeoutPenalty:   10,
+				LoadImbalancePercentage: 50,
+				DefaultErrorPenalty:     90,
+				CNameCoalescingEnabled:  true,
+				LoadFeedback:            true,
+				DefaultDatacenters: []TFDatacenterData{
+					{
+						Nickname: "DEFAULT",
+						ID:       5400,
+					},
+				},
+				Datacenters: []TFDatacenterData{
+					{
+						Nickname:        "TEST1",
+						ID:              123,
+						City:            "New York",
+						StateOrProvince: "NY",
+						Country:         "US",
+						Latitude:        40.71305,
+						Longitude:       -74.00723,
+						DefaultLoadObject: &gtm.LoadObject{
+							LoadObject:     "test load object",
+							LoadObjectPort: 111,
+							LoadServers:    []string{"loadServer1", "loadServer2", "loadServer3"},
+						},
+					},
+					{
+						Nickname:        "TEST2",
+						ID:              124,
+						City:            "Chicago",
+						StateOrProvince: "IL",
+						Country:         "US",
+						Latitude:        41.88323,
+						Longitude:       -87.6324,
+					},
+				},
+				Properties: []*gtm.Property{
+					{
+						Name:                 "test property1",
+						Type:                 "ranked-failover",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						Comments:             "some comment",
+						LivenessTests: []*gtm.LivenessTest{
+							{
+								Name:               "HTTP",
+								TestInterval:       60,
+								TestObject:         "/",
+								HTTPError3xx:       true,
+								HTTPError4xx:       true,
+								HTTPError5xx:       true,
+								TestObjectProtocol: "HTTP",
+								TestObjectPort:     80,
+								TestTimeout:        10,
+							},
+						},
+					},
+					{
+						Name:                 "test property2",
+						Type:                 "ranked-failover",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						StaticRRSets: []*gtm.StaticRRSet{
+							{
+								Type:  "test type",
+								Rdata: []string{"rdata1", "rdata2", "\"properlyescaped\""},
+							},
+						},
+						TrafficTargets: []*gtm.TrafficTarget{
+							{
+								DatacenterID: 123,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"1.2.3.4"},
+								Precedence:   tools.IntPtr(10),
+							},
+							{
+								DatacenterID: 124,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"7.6.5.4"},
+								Precedence:   tools.IntPtr(200),
+							},
+							{
+								DatacenterID: 5400,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"7.6.5.4"},
+							},
+						},
+						LivenessTests: []*gtm.LivenessTest{
+							{
+								Name:               "HTTP",
+								TestInterval:       60,
+								TestObject:         "/",
+								HTTPError3xx:       true,
+								HTTPError4xx:       true,
+								HTTPError5xx:       true,
+								TestObjectProtocol: "HTTP",
+								TestObjectPort:     80,
+								TestTimeout:        10,
+								HTTPHeaders: []*gtm.HTTPHeader{
+									{
+										Name:  "header1",
+										Value: "header1Value",
+									},
+									{
+										Name:  "header2",
+										Value: "header2Value",
+									},
+								},
+							},
+						},
+					},
+					{
+						Name:                 "test property3",
+						Type:                 "ranked-failover",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						TrafficTargets: []*gtm.TrafficTarget{
+							{
+								DatacenterID: 5400,
+								Enabled:      true,
+								Weight:       0,
+								Servers:      []string{},
+								Precedence:   tools.IntPtr(100),
+							},
+							{
+								DatacenterID: 124,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{},
+							},
+						},
+					},
+				},
+			},
+			dir:          "with_ranked_failover_properties",
 			filesToCheck: []string{"domain.tf", "datacenters.tf", "properties.tf", "variables.tf", "import.sh"},
 		},
 		"simple domain with property of type 'qtr'": {
@@ -897,7 +1080,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 				DefaultTimeoutPenalty:   10,
 				LoadImbalancePercentage: 50,
 				DefaultErrorPenalty:     90,
-				CnameCoalescingEnabled:  true,
+				CNameCoalescingEnabled:  true,
 				LoadFeedback:            true,
 				Datacenters: []TFDatacenterData{
 					{
@@ -935,7 +1118,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						HandoutMode:          "normal",
 						TrafficTargets: []*gtm.TrafficTarget{
 							{
-								DatacenterId: 5401,
+								DatacenterID: 5401,
 								Enabled:      true,
 								Weight:       1,
 								Servers:      []string{"1.2.3.4"},
@@ -946,9 +1129,9 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Name:               "HTTP",
 								TestInterval:       60,
 								TestObject:         "/",
-								HttpError3xx:       true,
-								HttpError4xx:       true,
-								HttpError5xx:       true,
+								HTTPError3xx:       true,
+								HTTPError4xx:       true,
+								HTTPError5xx:       true,
 								TestObjectProtocol: "HTTP",
 								TestObjectPort:     80,
 								TestTimeout:        10,
@@ -964,13 +1147,13 @@ func TestProcessDomainTemplates(t *testing.T) {
 						HandoutMode:          "normal",
 						TrafficTargets: []*gtm.TrafficTarget{
 							{
-								DatacenterId: 123,
+								DatacenterID: 123,
 								Enabled:      true,
 								Weight:       1,
 								Servers:      []string{"1.2.3.4"},
 							},
 							{
-								DatacenterId: 5402,
+								DatacenterID: 5402,
 								Enabled:      true,
 								Weight:       1,
 								Servers:      []string{"7.6.5.4"},
@@ -981,9 +1164,9 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Name:               "HTTP",
 								TestInterval:       60,
 								TestObject:         "/",
-								HttpError3xx:       true,
-								HttpError4xx:       true,
-								HttpError5xx:       true,
+								HTTPError3xx:       true,
+								HTTPError4xx:       true,
+								HTTPError5xx:       true,
 								TestObjectProtocol: "HTTP",
 								TestObjectPort:     80,
 								TestTimeout:        10,
@@ -1006,7 +1189,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 				DefaultTimeoutPenalty:   10,
 				LoadImbalancePercentage: 50,
 				DefaultErrorPenalty:     90,
-				CnameCoalescingEnabled:  true,
+				CNameCoalescingEnabled:  true,
 				LoadFeedback:            true,
 				DefaultDatacenters: []TFDatacenterData{
 					{
@@ -1049,7 +1232,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						ConstrainedProperty: "**",
 						ResourceInstances: []*gtm.ResourceInstance{
 							{
-								DatacenterId:         123,
+								DatacenterID:         123,
 								UseDefaultLoadObject: false,
 								LoadObject: gtm.LoadObject{
 									LoadObject:     "load",
@@ -1076,7 +1259,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						HandoutMode:          "normal",
 						TrafficTargets: []*gtm.TrafficTarget{
 							{
-								DatacenterId: 123,
+								DatacenterID: 123,
 								Enabled:      true,
 								Weight:       1,
 								Servers:      []string{"1.2.3.4"},
@@ -1087,9 +1270,9 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Name:               "HTTP",
 								TestInterval:       60,
 								TestObject:         "/",
-								HttpError3xx:       true,
-								HttpError4xx:       true,
-								HttpError5xx:       true,
+								HTTPError3xx:       true,
+								HTTPError4xx:       true,
+								HTTPError5xx:       true,
 								TestObjectProtocol: "HTTP",
 								TestObjectPort:     80,
 								TestTimeout:        10,
@@ -1113,7 +1296,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 				DefaultTimeoutPenalty:   10,
 				LoadImbalancePercentage: 50,
 				DefaultErrorPenalty:     90,
-				CnameCoalescingEnabled:  true,
+				CNameCoalescingEnabled:  true,
 				LoadFeedback:            true,
 				DefaultDatacenters: []TFDatacenterData{
 					{
@@ -1156,7 +1339,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						ConstrainedProperty: "**",
 						ResourceInstances: []*gtm.ResourceInstance{
 							{
-								DatacenterId:         123,
+								DatacenterID:         123,
 								UseDefaultLoadObject: false,
 								LoadObject: gtm.LoadObject{
 									LoadObject:     "load",
@@ -1183,7 +1366,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						HandoutMode:          "normal",
 						TrafficTargets: []*gtm.TrafficTarget{
 							{
-								DatacenterId: 123,
+								DatacenterID: 123,
 								Enabled:      true,
 								Weight:       1,
 								Servers:      []string{"1.2.3.4"},
@@ -1194,9 +1377,9 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Name:               "HTTP",
 								TestInterval:       60,
 								TestObject:         "/",
-								HttpError3xx:       true,
-								HttpError4xx:       true,
-								HttpError5xx:       true,
+								HTTPError3xx:       true,
+								HTTPError4xx:       true,
+								HTTPError5xx:       true,
 								TestObjectProtocol: "HTTP",
 								TestObjectPort:     80,
 								TestTimeout:        10,

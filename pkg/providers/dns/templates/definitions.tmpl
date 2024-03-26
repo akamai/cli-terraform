@@ -1,7 +1,7 @@
 {{- /*gotype: cli-terraform/pkg/providers/dns/dns.Data*/ -}}
 {{- define "terraform"}}
 terraform {
-  required_version = ">= 0.13"
+  required_version = ">= 1.0"
   required_providers {
     akamai = {
       source = "akamai/akamai"
@@ -25,7 +25,7 @@ resource "akamai_dns_zone" "{{.BlockName}}" {
     comment = {{template "Text" .Comment}}
     sign_and_serve = {{.SignAndServe}}
     sign_and_serve_algorithm = "{{.SignAndServeAlgorithm}}"
-    {{- with .TsigKey}}
+    {{- with .TSIGKey}}
     tsig_key {
         name = "{{.Name}}"
         algorithm = "{{.Algorithm}}"

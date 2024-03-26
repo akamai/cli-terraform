@@ -3,7 +3,7 @@
 {{template "locals" printf "%q" .Zone}}
 
 module "{{.BlockName}}" {
-    source = "{{namedModulePath .BlockName .TfWorkPath}}"
+    source = "{{namedModulePath .BlockName .TFWorkPath}}"
 
     contract = var.contractid
     group = var.groupid

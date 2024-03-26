@@ -12,8 +12,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/appsec"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/botman"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/appsec"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/botman"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
@@ -95,13 +95,13 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"modules-security-malware-policy-actions.tmpl":  filepath.Join(securityModulePath, "malware-policy-actions.tf"),
 		"modules-security-match-targets.tmpl":           filepath.Join(securityModulePath, "match-targets.tf"),
 		"modules-security-penalty-box.tmpl":             filepath.Join(securityModulePath, "penalty-box.tf"),
+		"modules-security-eval-penalty-box.tmpl":        filepath.Join(securityModulePath, "eval-penalty-box.tf"),
 		"modules-security-policies.tmpl":                filepath.Join(securityModulePath, "policies.tf"),
 		"modules-security-protections.tmpl":             filepath.Join(securityModulePath, "protections.tf"),
 		"modules-security-rate-policies.tmpl":           filepath.Join(securityModulePath, "rate-policies.tf"),
 		"modules-security-rate-policy-actions.tmpl":     filepath.Join(securityModulePath, "rate-policy-actions.tf"),
 		"modules-security-reputation-profiles.tmpl":     filepath.Join(securityModulePath, "reputation-profiles.tf"),
 		"modules-security-reputation.tmpl":              filepath.Join(securityModulePath, "reputation.tf"),
-		"modules-security-selected-hostnames.tmpl":      filepath.Join(securityModulePath, "selected-hostnames.tf"),
 		"modules-security-siem.tmpl":                    filepath.Join(securityModulePath, "siem.tf"),
 		"modules-security-slow-post.tmpl":               filepath.Join(securityModulePath, "slow-post.tf"),
 		"modules-security-variables.tmpl":               filepath.Join(securityModulePath, "variables.tf"),

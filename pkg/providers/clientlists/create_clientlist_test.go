@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/clientlists"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/clientlists"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/mock"

@@ -502,6 +502,9 @@ terraform import module.security.akamai_appsec_reputation_profile_action.andrew_
 terraform import module.security.akamai_appsec_reputation_profile_action.andrew_2670509 32641:last_150674:2670509
 terraform import module.security.akamai_appsec_ip_geo.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_penalty_box.andrew 32641:last_150674
+terraform import module.security.akamai_appsec_penalty_box_conditions.andrew 32641:last_150674
+terraform import module.security.akamai_appsec_eval_penalty_box_conditions.andrew 32641:last_150674
+terraform import module.security.akamai_appsec_eval_penalty_box.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_slow_post.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_advanced_settings_request_body.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_security_policy.policy1 32641:easy_80433
@@ -824,7 +827,6 @@ terraform import module.security.akamai_appsec_reputation_profile.scanning_tools
 terraform import module.security.akamai_appsec_reputation_profile.web_scrapers_low_threat 32641:2670514
 terraform import module.security.akamai_appsec_reputation_profile.web_scrapers_high_threat 32641:2670515
 terraform import module.security.akamai_appsec_siem_settings.siem 32641
-terraform import module.security.akamai_appsec_selected_hostnames.hostnames 32641
 terraform import module.activate-security.akamai_appsec_activations.appsecactivation 32641:45:STAGING
 terraform import module.security.akamai_appsec_malware_policy.fms_configuration_1 32641:1187
 terraform import module.security.akamai_appsec_malware_policy.fms_configuration_2 32641:1186

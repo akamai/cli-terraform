@@ -1,5 +1,35 @@
 # Release Notes
 
+## Version 1.13.0 (March 26, 2024)
+
+### Features/Enhancements
+
+* General
+  * Updated minimal required terraform version to 1.0
+  * Migrate to go 1.21
+* Appsec
+  *  Added support to export `akamai_appsec_penalty_box_conditions` for the specified policy
+  *  Added support to export `akamai_appsec_eval_penalty_box_conditions` for the specified policy
+* Cloudlets
+  * Changed export for `akamai_cloudlets_audience_segmentation_match_rule` to generate empty `forward_settings` when `origin_id` and `path_and_qs` both are empty and `use_incoming_query_string` is false
+* GTM
+  * Added support for exporting fields:
+    * `sign_and_serve`, `sign_and_serve_algorithm` for `akamai_gtm_domain` resource
+    * `http_method`, `http_request_body`, `pre_2023_security_posture`, `alternate_ca_certificate` inside `liveness_test` in `akamai_gtm_property` resource
+* PAPI
+  * `export-property` command with flag `--rules-as-hcl` now supports export of properties in frozen format `v2024-02-12`
+  * `export-property-include` command with flag `--rules-as-hcl` now supports export of includes in frozen format `v2024-02-12`
+
+### Bug fixes
+
+* PAPI
+  * Fixed issue that empty `custom_certificate_authorities` or `custom_certificates` where not generated during `export-property` with `rules-as-hcl` flag
+
+### Deprecations
+
+* APPSEC
+  * Exclude the deprecated `akamai_appsec_selected_hostnames` resource from the `export-appsec` command. Use exported `akamai_appsec_configuration` instead
+
 ## Version 1.12.0 (February 19, 2024)
 
 ### Features/Enhancements

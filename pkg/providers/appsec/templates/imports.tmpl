@@ -111,6 +111,15 @@ terraform import module.security.akamai_appsec_ip_geo.{{ $policyName}} {{ $confi
 {{ if .PenaltyBox -}}
 terraform import module.security.akamai_appsec_penalty_box.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 {{ end -}}
+{{ if .PenaltyBoxConditions -}}
+terraform import module.security.akamai_appsec_penalty_box_conditions.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ if .EvaluationPenaltyBoxConditions -}}
+terraform import module.security.akamai_appsec_eval_penalty_box_conditions.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ if .EvaluationPenaltyBox -}}
+terraform import module.security.akamai_appsec_eval_penalty_box.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
 {{ if .SlowPost -}}
 terraform import module.security.akamai_appsec_slow_post.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 {{ end -}}
@@ -146,9 +155,6 @@ terraform import module.security.akamai_appsec_reputation_profile.{{ escapeName 
 {{ if .Siem.EnableSiem -}}
 terraform import module.security.akamai_appsec_siem_settings.siem {{ $configID }}
 {{ end -}}
-{{ end -}}
-{{ if .SelectedHosts -}}
-terraform import module.security.akamai_appsec_selected_hostnames.hostnames {{ $configID }}
 {{ end -}}
 {{ if eq .Staging.Status "Active" -}}
 terraform import module.activate-security.akamai_appsec_activations.appsecactivation {{ $configID }}:{{ $version }}:STAGING

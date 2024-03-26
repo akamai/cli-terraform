@@ -10,12 +10,12 @@ terraform import akamai_gtm_property.{{normalize .Name}} "{{$.Name}}:{{.Name}}"
 {{- range .Resources}}
 terraform import akamai_gtm_resource.{{normalize .Name}} "{{$.Name}}:{{.Name}}"
 {{- end}}
-{{- range .CidrMaps}}
+{{- range .CIDRMaps}}
 terraform import akamai_gtm_cidrmap.{{normalize .Name}} "{{$.Name}}:{{.Name}}"
 {{- end}}
 {{- range .GeoMaps}}
 terraform import akamai_gtm_geomap.{{normalize .Name}} "{{$.Name}}:{{.Name}}"
 {{- end}}
-{{- range .AsMaps}}
+{{- range .ASMaps}}
 terraform import akamai_gtm_asmap.{{normalize .Name}} "{{$.Name}}:{{.Name}}"
 {{- end}}

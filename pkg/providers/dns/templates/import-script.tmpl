@@ -1,11 +1,11 @@
 {{- /*gotype: cli-terraform/pkg/providers/dns/dns.ImportData*/ -}}
 terraform init
-{{- if not (checkForResource "akamai_dns_zone" .ResourceName .TfWorkPath)}}
+{{- if not (checkForResource "akamai_dns_zone" .ResourceName .TFWorkPath)}}
 terraform import akamai_dns_zone.{{.ResourceName}} {{.Zone}}
 {{- end}}
 {{- $rname := .ResourceName}}
 {{- $zone := .Zone}}
-{{- $tfWorkPath := .TfWorkPath}}
+{{- $tfWorkPath := .TFWorkPath}}
 {{- range $zname, $typeList := .ZoneConfigMap}}
     {{- range $tname := $typeList}}
         {{- $normalName := createUniqueRecordsetName $rname $zname $tname}}

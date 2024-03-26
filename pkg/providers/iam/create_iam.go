@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/iam"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )
