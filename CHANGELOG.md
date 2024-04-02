@@ -10,6 +10,8 @@
 
 
 
+* Image and Video Manager
+  * Added handling of `SmartCrop` transformation when exporting image with `policy-as-hcl` flag
 
 
 
