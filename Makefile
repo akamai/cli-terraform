@@ -41,7 +41,7 @@ COVERAGE_XML = $(COVERAGE_DIR)/coverage.xml
 COVERAGE_HTML = $(COVERAGE_DIR)/index.html
 
 .PHONY: all
-all: clean fmt-check lint terraform-fmt terraform-lint coverage create-junit-report create-coverage-files clean-tools
+all: clean tidy fmt-check lint terraform-fmt terraform-lint coverage create-junit-report create-coverage-files clean-tools
 
 .PHONY: test
 test: ; $(info $(M) Running tests...) ## Run all unit tests
@@ -62,6 +62,10 @@ create-junit-report: | $(GOJUNITREPORT) ; $(info $(M) Creating juint xml report)
 create-coverage-files: | $(GOCOV) $(GOCOVXML); $(info $(M) Creating coverage files...) @ ## Generate coverage report files
 	@$(GOCMD) tool cover -html=$(COVERAGE_PROFILE) -o $(COVERAGE_HTML)
 	@$(GOCOV) convert $(COVERAGE_PROFILE) | $(GOCOVXML) > $(COVERAGE_XML)
+
+.PHONY: tidy
+tidy: ; $(info $(M) Running go mod tidy...) @
+	@$(GOMODTIDY)
 
 .PHONY: lint
 lint: | $(GOLANGCILINT); $(info $(M) Running linter...) @ ## Run golangci-lint on all source files
@@ -104,7 +108,7 @@ validate-testdata: ; $(info $(M) Validating testdata agains terraform-provider-a
 release: ; $(info $(M) Generating release binaries and signatures...) @ ## Generate release binaries
 	@./scripts/build.sh
 
-.PHONY: ; clean
+.PHONY: clean
 clean: ; $(info $(M) Removing 'tools' directory and test results...) @ ## Cleanup installed packages and test reports
 	@rm -rf $(BIN)
 	@rm -rf $(BIN)/test/tests.* $(BIN)/test/coverage
