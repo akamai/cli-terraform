@@ -1,48 +1,14 @@
 # Release Notes
 
-## Version X.XX.X (Month XX, XXXX)
+## Version 1.14.0 (April 17, 2024)
 
 ### Features/Enhancements
-
-
-
-
-
 
 * General
   * Updated various dependencies
 
 * Image and Video Manager
   * Added handling of `SmartCrop` transformation when exporting image with `policy-as-hcl` flag
-
-
-
-
-
-
-### Bug fixes
-
-
-
-
-
-
-
-
-
-
-
-### Deprecations
-
-
-
-
-
-
-
-
-
-
 
 ## Version 1.13.0 (March 26, 2024)
 
