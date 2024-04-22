@@ -1,6 +1,6 @@
 # Release Notes
 
-## Version 1.14.0 (April 17, 2024)
+## Version 1.14.0 (April 23, 2024)
 
 ### Features/Enhancements
 
