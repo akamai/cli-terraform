@@ -1,13 +1,23 @@
 # Release Notes
 
+## Version 1.14.0 (April 23, 2024)
+
+### Features/Enhancements
+
+* General
+  * Updated various dependencies
+
+* Image and Video Manager
+  * Added handling of `SmartCrop` transformation when exporting image with `policy-as-hcl` flag
+
 ## Version 1.13.0 (March 26, 2024)
 
 ### Features/Enhancements
 
 * General
   * Updated minimal required terraform version to 1.0
-  * Migrate to go 1.21
-* Appsec
+  * Migrated to go 1.21
+* APPSEC
   *  Added support to export `akamai_appsec_penalty_box_conditions` for the specified policy
   *  Added support to export `akamai_appsec_eval_penalty_box_conditions` for the specified policy
 * Cloudlets
@@ -28,7 +38,7 @@
 ### Deprecations
 
 * APPSEC
-  * Exclude the deprecated `akamai_appsec_selected_hostnames` resource from the `export-appsec` command. Use exported `akamai_appsec_configuration` instead
+  * Excluded the deprecated `akamai_appsec_selected_hostnames` resource from the `export-appsec` command. Exported `akamai_appsec_configuration` should be used instead
 
 ## Version 1.12.0 (February 19, 2024)
 

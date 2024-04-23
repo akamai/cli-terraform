@@ -30,6 +30,7 @@
     {{- if eq .Transformation "Rotate"}}{{- template "Rotate" .}}{{- end}}
     {{- if eq .Transformation "Scale"}}{{- template "Scale" .}}{{- end}}
     {{- if eq .Transformation "Shear"}}{{- template "Shear" .}}{{- end}}
+    {{- if eq .Transformation "SmartCrop"}}{{- template "SmartCrop" .}}{{- end}}
     {{- if eq .Transformation "Trim"}}{{- template "Trim" .}}{{- end}}
     {{- if eq .Transformation "UnsharpMask"}}{{- template "UnsharpMask" .}}{{- end}}
 {{- end}}
@@ -1119,6 +1120,37 @@
 }
 {{- end}}
 {{- /*// ShearTransformation */}}
+{{- /*// SmartCrop */}}
+{{- define "SmartCrop"}}smart_crop {
+{{- with .Debug}}
+    {{""}}
+    {{- if .Value}}debug = {{.Value}}{{end}}
+    {{- if .Name}}debug_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Height}}
+    {{""}}
+    {{- if .Value}}height = {{.Value}}{{end}}
+    {{- if .Name}}height_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Sloppy}}
+    {{""}}
+    {{- if .Value}}sloppy = {{.Value}}{{end}}
+    {{- if .Name}}sloppy_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Style}}
+    {{""}}
+    {{- if .Value}}style = "{{.Value}}"{{end}}
+    {{- if .Name}}style_var = "{{.Name}}"{{end}}
+{{- end}}
+{{- with .Width}}
+    {{""}}
+    {{- if .Value}}width = {{.Value}}{{end}}
+    {{- if .Name}}width_var = "{{.Name}}"{{end}}
+{{- end}}
+}
+{{- end}}
+{{- /*// SmartCropStyle */}}
+{{- /*// SmartCropTransformation */}}
 {{- /*// TextImageType */}}
 {{- define "TextImageType"}}text_image {
 {{- with .Fill}}

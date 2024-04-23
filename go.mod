@@ -3,7 +3,7 @@ module github.com/akamai/cli-terraform
 go 1.21
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v8 v8.0.0
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v8 v8.1.0
 	github.com/akamai/cli v1.5.6
 	github.com/fatih/color v1.13.0
 	github.com/hashicorp/hcl/v2 v2.11.1
@@ -15,7 +15,7 @@ require (
 )
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.3.5 // indirect
+	github.com/AlecAivazis/survey/v2 v2.3.7 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
