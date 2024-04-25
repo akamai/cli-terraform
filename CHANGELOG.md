@@ -4,6 +4,9 @@
 
 ### Features/Enhancements
 
+* Cloudlets
+  * Added import support for `akamai_cloudlets_application_load_balancer_activation` resource
+
 
 
 

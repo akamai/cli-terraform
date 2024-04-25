@@ -3,6 +3,9 @@ terraform init
 {{- range .LoadBalancers}}
 terraform import akamai_cloudlets_application_load_balancer.load_balancer_{{.OriginID}} {{.OriginID}}
 {{- end}}
+{{- range .LoadBalancerActivations}}
+terraform import akamai_cloudlets_application_load_balancer_activation.load_balancer_activation_{{.OriginID}} {{.OriginID}},{{.Network}},{{.Version}}
+{{- end}}
 terraform import akamai_cloudlets_policy.policy {{.Name}}
 {{- with .PolicyActivations -}}
 {{- if (and .Production .Staging) -}}
