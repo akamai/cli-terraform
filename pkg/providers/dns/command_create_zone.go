@@ -86,7 +86,9 @@ func CmdCreateZone(c *cli.Context) error {
 
 	term := terminal.Get(ctx)
 	fmt.Println("Configuring Zone")
-	zoneObject, err := configDNS.GetZone(ctx, zoneName)
+	zoneObject, err := configDNS.GetZone(ctx, dns.GetZoneRequest{
+		Zone: zoneName,
+	})
 	if err != nil {
 		term.Spinner().Fail()
 		fmt.Println("Error: " + err.Error())
@@ -200,7 +202,7 @@ func setConfiguration(c *cli.Context) configStruct {
 	return executionConfig
 }
 
-func createZoneConfigFile(ctx context.Context, zoneImportList *zoneImportListStruct, resourceZoneName string, zoneObject *dns.ZoneResponse, configDNS dns.DNS, configuration configStruct) (err error) {
+func createZoneConfigFile(ctx context.Context, zoneImportList *zoneImportListStruct, resourceZoneName string, zoneObject *dns.GetZoneResponse, configDNS dns.DNS, configuration configStruct) (err error) {
 	// see if configuration file already exists and exclude any resources already represented.
 	var configImportList *zoneImportListStruct
 	var zoneTypeMap map[string]map[string]bool
@@ -239,7 +241,7 @@ func createZoneConfigFile(ctx context.Context, zoneImportList *zoneImportListStr
 	return saveResourceConfigFile(resourceConfigFilename)
 }
 
-func calculateTfConfig(ctx context.Context, zoneObject *dns.ZoneResponse, resourceZoneName string, fileUtils fileUtilsProcessor, config configStruct) error {
+func calculateTfConfig(ctx context.Context, zoneObject *dns.GetZoneResponse, resourceZoneName string, fileUtils fileUtilsProcessor, config configStruct) error {
 	// build tf file if none
 	var err error
 	if len(zoneTFConfig) > 0 {
@@ -383,7 +385,9 @@ func inventorZone(ctx context.Context, configDNS dns.DNS, configuration configSt
 	recordSets := make(map[string]Types)
 	// Retrieve all zone names
 	if len(configuration.recordNames) == 0 {
-		recordsetNames, err := configDNS.GetZoneNames(ctx, zoneName)
+		recordsetNames, err := configDNS.GetZoneNames(ctx, dns.GetZoneNamesRequest{
+			Zone: zoneName,
+		})
 		if err != nil {
 			return nil, cli.Exit(color.RedString("Zone Name retrieval failed"), 1)
 		}
@@ -393,7 +397,10 @@ func inventorZone(ctx context.Context, configDNS dns.DNS, configuration configSt
 		if configuration.fetchConfig.NamesOnly {
 			recordSets[zName] = make([]string, 0, 0)
 		} else {
-			nameTypesResp, err := configDNS.GetZoneNameTypes(ctx, zName, zoneName)
+			nameTypesResp, err := configDNS.GetZoneNameTypes(ctx, dns.GetZoneNameTypesRequest{
+				ZoneName: zoneName,
+				Zone:     zName,
+			})
 			if err != nil {
 				return nil, cli.Exit(color.RedString("Zone Name types retrieval failed"), 1)
 			}

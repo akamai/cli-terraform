@@ -66,7 +66,10 @@ func processRecordSets(ctx context.Context, client dns.DNS, zone, resourceZoneNa
 	var importScriptConfig = make(map[string]Types)
 
 	queryArgs := getQueryArguments()
-	nameRecordSetsResp, err := client.GetRecordSets(ctx, zone, queryArgs)
+	nameRecordSetsResp, err := client.GetRecordSets(ctx, dns.GetRecordSetsRequest{
+		Zone:      zone,
+		QueryArgs: &queryArgs,
+	})
 	if err != nil {
 		return importScriptConfig, fmt.Errorf("failed to read record set %s", err.Error())
 	}
@@ -106,7 +109,10 @@ func processRecordSets(ctx context.Context, client dns.DNS, zone, resourceZoneNa
 			break
 		}
 		queryArgs.Page++
-		nameRecordSetsResp, err = client.GetRecordSets(ctx, zone, queryArgs)
+		nameRecordSetsResp, err = client.GetRecordSets(ctx, dns.GetRecordSetsRequest{
+			Zone:      zone,
+			QueryArgs: &queryArgs,
+		})
 		if err != nil {
 			return importScriptConfig, fmt.Errorf("failed to read record set %s", err.Error())
 		}
@@ -149,7 +155,7 @@ func getQueryArguments() dns.RecordSetQueryArgs {
 	}
 	pageSize := int(maxPageSize)
 
-	// get record sets
+	// get recordsets
 	queryArgs := dns.RecordSetQueryArgs{PageSize: pageSize, SortBy: "name, type", Page: 1}
 	return queryArgs
 }

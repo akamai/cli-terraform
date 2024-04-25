@@ -54,11 +54,11 @@ type (
 		SignAndServeAlgorithm       string
 		Datacenters                 []TFDatacenterData
 		DefaultDatacenters          []TFDatacenterData
-		Resources                   []*gtm.Resource
-		CIDRMaps                    []*gtm.CIDRMap
-		GeoMaps                     []*gtm.GeoMap
-		ASMaps                      []*gtm.ASMap
-		Properties                  []*gtm.Property
+		Resources                   []gtm.Resource
+		CIDRMaps                    []gtm.CIDRMap
+		GeoMaps                     []gtm.GeoMap
+		ASMaps                      []gtm.ASMap
+		Properties                  []gtm.Property
 	}
 
 	// TFDatacenterData represents the data used for processing a datacenter
@@ -154,7 +154,9 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, section strin
 	}
 
 	term.Spinner().Start(fmt.Sprintf("Fetching domain %s", domainName))
-	domain, err := client.GetDomain(ctx, domainName)
+	domain, err := client.GetDomain(ctx, gtm.GetDomainRequest{
+		DomainName: domainName,
+	})
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrFetchingDomain, err)
@@ -204,7 +206,7 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, section strin
 	return nil
 }
 
-func (d *TFDomainData) getDatacenters(domain *gtm.Domain) {
+func (d *TFDomainData) getDatacenters(domain *gtm.GetDomainResponse) {
 	d.Datacenters = make([]TFDatacenterData, 0)
 	d.DefaultDatacenters = make([]TFDatacenterData, 0)
 	for _, dc := range domain.Datacenters {

@@ -10,7 +10,7 @@ import (
 )
 
 func TestProcessZone(t *testing.T) {
-	defaultZoneResponse := dns.ZoneResponse{
+	defaultZoneResponse := dns.GetZoneResponse{
 		Zone:               "0007770b-08a8-4b5f-a46b-081b772ba605-test.com",
 		Type:               "PRIMARY",
 		Masters:            []string{},
@@ -26,7 +26,7 @@ func TestProcessZone(t *testing.T) {
 		modSegment     bool
 		modName        string
 		modContentPath string
-		zoneResponse   dns.ZoneResponse
+		zoneResponse   dns.GetZoneResponse
 	}{
 		"modSegment=false": {
 			filePath:     "./testdata/zone/expected_zone.tf",
@@ -43,7 +43,7 @@ func TestProcessZone(t *testing.T) {
 		"modSegment=false, multiline comment": {
 			filePath:   "./testdata/zone/expected_zone_multiline.tf",
 			modSegment: false,
-			zoneResponse: dns.ZoneResponse{
+			zoneResponse: dns.GetZoneResponse{
 				Zone:               "0007770b-08a8-4b5f-a46b-081b772ba605-test.com",
 				Type:               "PRIMARY",
 				Masters:            []string{},
@@ -59,7 +59,7 @@ func TestProcessZone(t *testing.T) {
 		"modSegment=false, multiline comment ending newline": {
 			filePath:   "./testdata/zone/expected_zone_multiline2.tf",
 			modSegment: false,
-			zoneResponse: dns.ZoneResponse{
+			zoneResponse: dns.GetZoneResponse{
 				Zone:               "0007770b-08a8-4b5f-a46b-081b772ba605-test.com",
 				Type:               "PRIMARY",
 				Masters:            []string{},

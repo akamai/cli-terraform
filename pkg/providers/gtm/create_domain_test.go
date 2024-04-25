@@ -31,7 +31,7 @@ func TestMain(m *testing.M) {
 }
 
 var (
-	domain = &gtm.Domain{
+	domain = &gtm.GetDomainResponse{
 		Name:                    "1test.name.akadns.net",
 		Type:                    "test",
 		ModificationComments:    "cli-terraform test domain",
@@ -44,7 +44,7 @@ var (
 		EndUserMappingEnabled:   true,
 		SignAndServe:            true,
 		SignAndServeAlgorithm:   tools.StringPtr("RSA-SHA1"),
-		Datacenters: []*gtm.Datacenter{
+		Datacenters: []gtm.Datacenter{
 			{
 				Nickname:     "TEST1",
 				DatacenterID: 123,
@@ -58,7 +58,7 @@ var (
 				DatacenterID: 5400,
 			},
 		},
-		Resources: []*gtm.Resource{
+		Resources: []gtm.Resource{
 			{
 				Name: "test resource1",
 			},
@@ -66,7 +66,7 @@ var (
 				Name: "test resource2",
 			},
 		},
-		Properties: []*gtm.Property{
+		Properties: []gtm.Property{
 			{
 				Name:                 "test property1",
 				Type:                 "performance",
@@ -74,7 +74,7 @@ var (
 				DynamicTTL:           60,
 				HandoutLimit:         8,
 				HandoutMode:          "normal",
-				TrafficTargets: []*gtm.TrafficTarget{
+				TrafficTargets: []gtm.TrafficTarget{
 					{
 						DatacenterID: 123,
 						Enabled:      true,
@@ -82,7 +82,7 @@ var (
 						Servers:      []string{"1.2.3.4"},
 					},
 				},
-				LivenessTests: []*gtm.LivenessTest{
+				LivenessTests: []gtm.LivenessTest{
 					{
 						Name:               "HTTP",
 						TestInterval:       60,
@@ -103,13 +103,13 @@ var (
 				DynamicTTL:           60,
 				HandoutLimit:         8,
 				HandoutMode:          "normal",
-				StaticRRSets: []*gtm.StaticRRSet{
+				StaticRRSets: []gtm.StaticRRSet{
 					{
 						Type:  "test type",
 						Rdata: []string{"rdata1", "rdata2"},
 					},
 				},
-				TrafficTargets: []*gtm.TrafficTarget{
+				TrafficTargets: []gtm.TrafficTarget{
 					{
 						DatacenterID: 123,
 						Enabled:      true,
@@ -123,7 +123,7 @@ var (
 						Servers:      []string{"7.6.5.4"},
 					},
 				},
-				LivenessTests: []*gtm.LivenessTest{
+				LivenessTests: []gtm.LivenessTest{
 					{
 						Name:               "HTTP",
 						TestInterval:       60,
@@ -134,7 +134,7 @@ var (
 						TestObjectProtocol: "HTTP",
 						TestObjectPort:     80,
 						TestTimeout:        10,
-						HTTPHeaders: []*gtm.HTTPHeader{
+						HTTPHeaders: []gtm.HTTPHeader{
 							{
 								Name:  "header1",
 								Value: "header1Value",
@@ -148,7 +148,7 @@ var (
 				},
 			},
 		},
-		ASMaps: []*gtm.ASMap{
+		ASMaps: []gtm.ASMap{
 			{
 				Name: "test_asmap",
 				DefaultDatacenter: &gtm.DatacenterBase{
@@ -157,7 +157,7 @@ var (
 				},
 			},
 		},
-		GeographicMaps: []*gtm.GeoMap{
+		GeographicMaps: []gtm.GeoMap{
 			{
 				Name: "test_geomap",
 				DefaultDatacenter: &gtm.DatacenterBase{
@@ -166,7 +166,7 @@ var (
 				},
 			},
 		},
-		CIDRMaps: []*gtm.CIDRMap{
+		CIDRMaps: []gtm.CIDRMap{
 			{
 				Name: "test_cidrmap",
 				DefaultDatacenter: &gtm.DatacenterBase{
@@ -208,7 +208,7 @@ var (
 				ID:       124,
 			},
 		},
-		ASMaps: []*gtm.ASMap{
+		ASMaps: []gtm.ASMap{
 			{
 				Name: "test_asmap",
 				DefaultDatacenter: &gtm.DatacenterBase{
@@ -217,7 +217,7 @@ var (
 				},
 			},
 		},
-		GeoMaps: []*gtm.GeoMap{
+		GeoMaps: []gtm.GeoMap{
 			{
 				Name: "test_geomap",
 				DefaultDatacenter: &gtm.DatacenterBase{
@@ -226,7 +226,7 @@ var (
 				},
 			},
 		},
-		CIDRMaps: []*gtm.CIDRMap{
+		CIDRMaps: []gtm.CIDRMap{
 			{
 				Name: "test_cidrmap",
 				DefaultDatacenter: &gtm.DatacenterBase{
@@ -235,7 +235,7 @@ var (
 				},
 			},
 		},
-		Resources: []*gtm.Resource{
+		Resources: []gtm.Resource{
 			{
 				Name: "test resource1",
 			},
@@ -243,7 +243,7 @@ var (
 				Name: "test resource2",
 			},
 		},
-		Properties: []*gtm.Property{
+		Properties: []gtm.Property{
 			{
 				Name:                 "test property1",
 				Type:                 "performance",
@@ -251,7 +251,7 @@ var (
 				DynamicTTL:           60,
 				HandoutLimit:         8,
 				HandoutMode:          "normal",
-				TrafficTargets: []*gtm.TrafficTarget{
+				TrafficTargets: []gtm.TrafficTarget{
 					{
 						DatacenterID: 123,
 						Enabled:      true,
@@ -259,7 +259,7 @@ var (
 						Servers:      []string{"1.2.3.4"},
 					},
 				},
-				LivenessTests: []*gtm.LivenessTest{
+				LivenessTests: []gtm.LivenessTest{
 					{
 						Name:               "HTTP",
 						TestInterval:       60,
@@ -280,13 +280,13 @@ var (
 				DynamicTTL:           60,
 				HandoutLimit:         8,
 				HandoutMode:          "normal",
-				StaticRRSets: []*gtm.StaticRRSet{
+				StaticRRSets: []gtm.StaticRRSet{
 					{
 						Type:  "test type",
 						Rdata: []string{"rdata1", "rdata2"},
 					},
 				},
-				TrafficTargets: []*gtm.TrafficTarget{
+				TrafficTargets: []gtm.TrafficTarget{
 					{
 						DatacenterID: 123,
 						Enabled:      true,
@@ -300,7 +300,7 @@ var (
 						Servers:      []string{"7.6.5.4"},
 					},
 				},
-				LivenessTests: []*gtm.LivenessTest{
+				LivenessTests: []gtm.LivenessTest{
 					{
 						Name:               "HTTP",
 						TestInterval:       60,
@@ -311,7 +311,155 @@ var (
 						TestObjectProtocol: "HTTP",
 						TestObjectPort:     80,
 						TestTimeout:        10,
-						HTTPHeaders: []*gtm.HTTPHeader{
+						HTTPHeaders: []gtm.HTTPHeader{
+							{
+								Name:  "header1",
+								Value: "header1Value",
+							},
+							{
+								Name:  "header2",
+								Value: "header2Value",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	domainDataError = TFDomainData{
+		Section:                 "test_section",
+		Name:                    "1test.name.akadns.net",
+		NormalizedName:          "_1test_name",
+		Type:                    "test",
+		Comment:                 "cli-terraform test domain",
+		EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+		DefaultTimeoutPenalty:   10,
+		LoadImbalancePercentage: 50,
+		DefaultErrorPenalty:     90,
+		CNameCoalescingEnabled:  true,
+		LoadFeedback:            true,
+		EndUserMappingEnabled:   true,
+		DefaultDatacenters: []TFDatacenterData{
+			{
+				Nickname: "DEFAULT",
+				ID:       5400,
+			},
+		},
+		Datacenters: []TFDatacenterData{
+			{
+				Nickname: "TEST1",
+				ID:       123,
+			},
+			{
+				Nickname: "TEST2",
+				ID:       124,
+			},
+		},
+		ASMaps: []gtm.ASMap{
+			{
+				Name: "test_asmap",
+				DefaultDatacenter: &gtm.DatacenterBase{
+					Nickname:     "default",
+					DatacenterID: 5004,
+				},
+			},
+		},
+		GeoMaps: []gtm.GeoMap{
+			{
+				Name: "test_geomap",
+				DefaultDatacenter: &gtm.DatacenterBase{
+					Nickname:     "default",
+					DatacenterID: 5004,
+				},
+			},
+		},
+		CIDRMaps: []gtm.CIDRMap{
+			{
+				Name: "test_cidrmap",
+				DefaultDatacenter: &gtm.DatacenterBase{
+					Nickname:     "default",
+					DatacenterID: 5004,
+				},
+			},
+		},
+		Resources: []gtm.Resource{
+			{
+				Name: "test resource1",
+			},
+			{
+				Name: "test resource2",
+			},
+		},
+		Properties: []gtm.Property{
+			{
+				Name:                 "test property1",
+				Type:                 "performance",
+				ScoreAggregationType: "worst",
+				DynamicTTL:           60,
+				HandoutLimit:         8,
+				HandoutMode:          "normal",
+				TrafficTargets: []gtm.TrafficTarget{
+					{
+						DatacenterID: 123,
+						Enabled:      true,
+						Weight:       1,
+						Servers:      []string{"1.2.3.4"},
+					},
+				},
+				LivenessTests: []gtm.LivenessTest{
+					{
+						Name:               "HTTP",
+						TestInterval:       60,
+						TestObject:         "/",
+						HTTPError3xx:       true,
+						HTTPError4xx:       true,
+						HTTPError5xx:       true,
+						TestObjectProtocol: "HTTP",
+						TestObjectPort:     80,
+						TestTimeout:        10,
+					},
+				},
+			},
+			{
+				Name:                 "test property2",
+				Type:                 "performance",
+				ScoreAggregationType: "worst",
+				DynamicTTL:           60,
+				HandoutLimit:         8,
+				HandoutMode:          "normal",
+				StaticRRSets: []gtm.StaticRRSet{
+					{
+						Type:  "test type",
+						Rdata: []string{"rdata1", "rdata2"},
+					},
+				},
+				TrafficTargets: []gtm.TrafficTarget{
+					{
+						DatacenterID: 123,
+						Enabled:      true,
+						Weight:       1,
+						Servers:      []string{"1.2.3.4"},
+					},
+					{
+						DatacenterID: 124,
+						Enabled:      true,
+						Weight:       1,
+						Servers:      []string{"7.6.5.4"},
+					},
+				},
+				LivenessTests: []gtm.LivenessTest{
+					{
+						Name:               "HTTP",
+						TestInterval:       60,
+						TestObject:         "/",
+						HTTPError3xx:       true,
+						HTTPError4xx:       true,
+						HTTPError5xx:       true,
+						TestObjectProtocol: "HTTP",
+						TestObjectPort:     80,
+						TestTimeout:        10,
+						HTTPHeaders: []gtm.HTTPHeader{
 							{
 								Name:  "header1",
 								Value: "header1Value",
@@ -335,8 +483,8 @@ var (
 		return call.Return(nil)
 	}
 
-	expectGetDomain = func(mg *gtm.Mock, domainName string, domain *gtm.Domain, err error) *mock.Call {
-		call := mg.On("GetDomain", mock.Anything, domainName)
+	expectGetDomain = func(mg *gtm.Mock, params gtm.GetDomainRequest, err error) *mock.Call {
+		call := mg.On("GetDomain", mock.Anything, mock.AnythingOfType("gtm.GetDomainRequest"))
 		if err != nil {
 			return call.Return(nil, err)
 		}
@@ -354,19 +502,19 @@ func TestCreateDomain(t *testing.T) {
 	}{
 		"fetch domain success": {
 			init: func(mg *gtm.Mock, mp *templates.MockProcessor) {
-				expectGetDomain(mg, domainName, domain, nil).Once()
+				expectGetDomain(mg, gtm.GetDomainRequest{DomainName: domainName}, nil).Once()
 				expectGTMProcessTemplates(mp, domainData, nil).Once()
 			},
 		},
 		"error fetching domain": {
 			init: func(mg *gtm.Mock, mp *templates.MockProcessor) {
-				expectGetDomain(mg, domainName, domain, fmt.Errorf("oops")).Once()
+				expectGetDomain(mg, gtm.GetDomainRequest{DomainName: domain.Name}, fmt.Errorf("oops")).Once()
 			},
 			withError: ErrFetchingDomain,
 		},
 		"error processing template": {
 			init: func(mg *gtm.Mock, mp *templates.MockProcessor) {
-				expectGetDomain(mg, domainName, domain, nil).Once()
+				expectGetDomain(mg, gtm.GetDomainRequest{DomainName: domain.Name}, nil).Once()
 				expectGTMProcessTemplates(mp, domainData, templates.ErrSavingFiles).Once()
 			},
 			withError: templates.ErrSavingFiles,
@@ -423,7 +571,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						ID:       125,
 					},
 				},
-				Resources: []*gtm.Resource{
+				Resources: []gtm.Resource{
 					{
 						Name: "test resource1",
 					},
@@ -431,7 +579,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Name: "test resource2",
 					},
 				},
-				Properties: []*gtm.Property{
+				Properties: []gtm.Property{
 					{
 						Name: "test property1",
 					},
@@ -439,7 +587,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Name: "test property2",
 					},
 				},
-				ASMaps: []*gtm.ASMap{
+				ASMaps: []gtm.ASMap{
 					{
 						Name: "test_asmap",
 						DefaultDatacenter: &gtm.DatacenterBase{
@@ -448,7 +596,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						},
 					},
 				},
-				GeoMaps: []*gtm.GeoMap{
+				GeoMaps: []gtm.GeoMap{
 					{
 						Name: "test_geomap",
 						DefaultDatacenter: &gtm.DatacenterBase{
@@ -457,7 +605,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						},
 					},
 				},
-				CIDRMaps: []*gtm.CIDRMap{
+				CIDRMaps: []gtm.CIDRMap{
 					{
 						Name: "test_cidrmap",
 						DefaultDatacenter: &gtm.DatacenterBase{
@@ -552,7 +700,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Longitude:       -87.6324,
 					},
 				},
-				Properties: []*gtm.Property{
+				Properties: []gtm.Property{
 					{
 						Name:                 "test property1",
 						Type:                 "qtr",
@@ -560,7 +708,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						DynamicTTL:           60,
 						HandoutLimit:         8,
 						HandoutMode:          "normal",
-						TrafficTargets: []*gtm.TrafficTarget{
+						TrafficTargets: []gtm.TrafficTarget{
 							{
 								DatacenterID: 5400,
 								Enabled:      true,
@@ -568,7 +716,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Servers:      []string{"1.2.3.4"},
 							},
 						},
-						LivenessTests: []*gtm.LivenessTest{
+						LivenessTests: []gtm.LivenessTest{
 							{
 								Name:               "HTTP",
 								TestInterval:       60,
@@ -631,10 +779,10 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Longitude:       -87.6324,
 					},
 				},
-				ASMaps: []*gtm.ASMap{
+				ASMaps: []gtm.ASMap{
 					{
 						Name: "test_asmap",
-						Assignments: []*gtm.ASAssignment{
+						Assignments: []gtm.ASAssignment{
 							{
 								DatacenterBase: gtm.DatacenterBase{
 									Nickname:     "TEST1",
@@ -649,10 +797,10 @@ func TestProcessDomainTemplates(t *testing.T) {
 						},
 					},
 				},
-				GeoMaps: []*gtm.GeoMap{
+				GeoMaps: []gtm.GeoMap{
 					{
 						Name: "test_geomap",
-						Assignments: []*gtm.GeoAssignment{
+						Assignments: []gtm.GeoAssignment{
 							{
 								DatacenterBase: gtm.DatacenterBase{
 									Nickname:     "TEST1",
@@ -667,7 +815,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						},
 					},
 				},
-				CIDRMaps: []*gtm.CIDRMap{
+				CIDRMaps: []gtm.CIDRMap{
 					{
 						Name: "test_cidrmap",
 						DefaultDatacenter: &gtm.DatacenterBase{
@@ -724,7 +872,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Longitude:       -87.6324,
 					},
 				},
-				Resources: []*gtm.Resource{
+				Resources: []gtm.Resource{
 					{
 						Type:                "XML load object via HTTP",
 						HostHeader:          "header",
@@ -732,7 +880,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Description:         "some description",
 						LeaderString:        "leader",
 						ConstrainedProperty: "**",
-						ResourceInstances: []*gtm.ResourceInstance{
+						ResourceInstances: []gtm.ResourceInstance{
 							{
 								DatacenterID:         123,
 								UseDefaultLoadObject: false,
@@ -802,7 +950,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Longitude:       -87.6324,
 					},
 				},
-				Properties: []*gtm.Property{
+				Properties: []gtm.Property{
 					{
 						Name:                 "test property1",
 						Type:                 "static",
@@ -811,7 +959,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						HandoutLimit:         8,
 						HandoutMode:          "normal",
 						Comments:             "some comment",
-						TrafficTargets: []*gtm.TrafficTarget{
+						TrafficTargets: []gtm.TrafficTarget{
 							{
 								DatacenterID: 123,
 								Enabled:      true,
@@ -819,7 +967,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Servers:      []string{"1.2.3.4"},
 							},
 						},
-						LivenessTests: []*gtm.LivenessTest{
+						LivenessTests: []gtm.LivenessTest{
 							{
 								Name:                    "HTTP",
 								TestInterval:            60,
@@ -844,13 +992,13 @@ func TestProcessDomainTemplates(t *testing.T) {
 						DynamicTTL:           60,
 						HandoutLimit:         8,
 						HandoutMode:          "normal",
-						StaticRRSets: []*gtm.StaticRRSet{
+						StaticRRSets: []gtm.StaticRRSet{
 							{
 								Type:  "test type",
 								Rdata: []string{"rdata1", "rdata2", "\"properlyescaped\""},
 							},
 						},
-						TrafficTargets: []*gtm.TrafficTarget{
+						TrafficTargets: []gtm.TrafficTarget{
 							{
 								DatacenterID: 123,
 								Enabled:      true,
@@ -864,7 +1012,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Servers:      []string{"7.6.5.4"},
 							},
 						},
-						LivenessTests: []*gtm.LivenessTest{
+						LivenessTests: []gtm.LivenessTest{
 							{
 								Name:               "HTTP",
 								TestInterval:       60,
@@ -875,7 +1023,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 								TestObjectProtocol: "HTTP",
 								TestObjectPort:     80,
 								TestTimeout:        10,
-								HTTPHeaders: []*gtm.HTTPHeader{
+								HTTPHeaders: []gtm.HTTPHeader{
 									{
 										Name:  "header1",
 										Value: "header1Value",
@@ -895,7 +1043,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						DynamicTTL:           60,
 						HandoutLimit:         8,
 						HandoutMode:          "normal",
-						TrafficTargets: []*gtm.TrafficTarget{
+						TrafficTargets: []gtm.TrafficTarget{
 							{
 								DatacenterID: 5400,
 								Enabled:      true,
@@ -959,7 +1107,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Longitude:       -87.6324,
 					},
 				},
-				Properties: []*gtm.Property{
+				Properties: []gtm.Property{
 					{
 						Name:                 "test property1",
 						Type:                 "ranked-failover",
@@ -968,7 +1116,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						HandoutLimit:         8,
 						HandoutMode:          "normal",
 						Comments:             "some comment",
-						LivenessTests: []*gtm.LivenessTest{
+						LivenessTests: []gtm.LivenessTest{
 							{
 								Name:               "HTTP",
 								TestInterval:       60,
@@ -989,13 +1137,13 @@ func TestProcessDomainTemplates(t *testing.T) {
 						DynamicTTL:           60,
 						HandoutLimit:         8,
 						HandoutMode:          "normal",
-						StaticRRSets: []*gtm.StaticRRSet{
+						StaticRRSets: []gtm.StaticRRSet{
 							{
 								Type:  "test type",
 								Rdata: []string{"rdata1", "rdata2", "\"properlyescaped\""},
 							},
 						},
-						TrafficTargets: []*gtm.TrafficTarget{
+						TrafficTargets: []gtm.TrafficTarget{
 							{
 								DatacenterID: 123,
 								Enabled:      true,
@@ -1017,7 +1165,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Servers:      []string{"7.6.5.4"},
 							},
 						},
-						LivenessTests: []*gtm.LivenessTest{
+						LivenessTests: []gtm.LivenessTest{
 							{
 								Name:               "HTTP",
 								TestInterval:       60,
@@ -1028,7 +1176,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 								TestObjectProtocol: "HTTP",
 								TestObjectPort:     80,
 								TestTimeout:        10,
-								HTTPHeaders: []*gtm.HTTPHeader{
+								HTTPHeaders: []gtm.HTTPHeader{
 									{
 										Name:  "header1",
 										Value: "header1Value",
@@ -1048,7 +1196,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						DynamicTTL:           60,
 						HandoutLimit:         8,
 						HandoutMode:          "normal",
-						TrafficTargets: []*gtm.TrafficTarget{
+						TrafficTargets: []gtm.TrafficTarget{
 							{
 								DatacenterID: 5400,
 								Enabled:      true,
@@ -1108,7 +1256,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						ID:       5402,
 					},
 				},
-				Properties: []*gtm.Property{
+				Properties: []gtm.Property{
 					{
 						Name:                 "test property1",
 						Type:                 "qtr",
@@ -1116,7 +1264,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						DynamicTTL:           60,
 						HandoutLimit:         8,
 						HandoutMode:          "normal",
-						TrafficTargets: []*gtm.TrafficTarget{
+						TrafficTargets: []gtm.TrafficTarget{
 							{
 								DatacenterID: 5401,
 								Enabled:      true,
@@ -1124,7 +1272,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Servers:      []string{"1.2.3.4"},
 							},
 						},
-						LivenessTests: []*gtm.LivenessTest{
+						LivenessTests: []gtm.LivenessTest{
 							{
 								Name:               "HTTP",
 								TestInterval:       60,
@@ -1145,7 +1293,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						DynamicTTL:           60,
 						HandoutLimit:         8,
 						HandoutMode:          "normal",
-						TrafficTargets: []*gtm.TrafficTarget{
+						TrafficTargets: []gtm.TrafficTarget{
 							{
 								DatacenterID: 123,
 								Enabled:      true,
@@ -1159,7 +1307,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Servers:      []string{"7.6.5.4"},
 							},
 						},
-						LivenessTests: []*gtm.LivenessTest{
+						LivenessTests: []gtm.LivenessTest{
 							{
 								Name:               "HTTP",
 								TestInterval:       60,
@@ -1222,7 +1370,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Longitude:       -87.6324,
 					},
 				},
-				Resources: []*gtm.Resource{
+				Resources: []gtm.Resource{
 					{
 						Type:                "XML load object via HTTP",
 						HostHeader:          "header",
@@ -1230,7 +1378,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Description:         "first\nsecond\n\nlast",
 						LeaderString:        "leader",
 						ConstrainedProperty: "**",
-						ResourceInstances: []*gtm.ResourceInstance{
+						ResourceInstances: []gtm.ResourceInstance{
 							{
 								DatacenterID:         123,
 								UseDefaultLoadObject: false,
@@ -1249,7 +1397,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						DecayRate:                   5,
 					},
 				},
-				Properties: []*gtm.Property{
+				Properties: []gtm.Property{
 					{
 						Name:                 "test property1",
 						Type:                 "static",
@@ -1257,7 +1405,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						DynamicTTL:           60,
 						HandoutLimit:         8,
 						HandoutMode:          "normal",
-						TrafficTargets: []*gtm.TrafficTarget{
+						TrafficTargets: []gtm.TrafficTarget{
 							{
 								DatacenterID: 123,
 								Enabled:      true,
@@ -1265,7 +1413,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Servers:      []string{"1.2.3.4"},
 							},
 						},
-						LivenessTests: []*gtm.LivenessTest{
+						LivenessTests: []gtm.LivenessTest{
 							{
 								Name:               "HTTP",
 								TestInterval:       60,
@@ -1329,7 +1477,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Longitude:       -87.6324,
 					},
 				},
-				Resources: []*gtm.Resource{
+				Resources: []gtm.Resource{
 					{
 						Type:                "XML load object via HTTP",
 						HostHeader:          "header",
@@ -1337,7 +1485,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						Description:         "first\nsecond\n",
 						LeaderString:        "leader",
 						ConstrainedProperty: "**",
-						ResourceInstances: []*gtm.ResourceInstance{
+						ResourceInstances: []gtm.ResourceInstance{
 							{
 								DatacenterID:         123,
 								UseDefaultLoadObject: false,
@@ -1356,7 +1504,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						DecayRate:                   5,
 					},
 				},
-				Properties: []*gtm.Property{
+				Properties: []gtm.Property{
 					{
 						Name:                 "test property1",
 						Type:                 "static",
@@ -1364,7 +1512,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 						DynamicTTL:           60,
 						HandoutLimit:         8,
 						HandoutMode:          "normal",
-						TrafficTargets: []*gtm.TrafficTarget{
+						TrafficTargets: []gtm.TrafficTarget{
 							{
 								DatacenterID: 123,
 								Enabled:      true,
@@ -1372,7 +1520,7 @@ func TestProcessDomainTemplates(t *testing.T) {
 								Servers:      []string{"1.2.3.4"},
 							},
 						},
-						LivenessTests: []*gtm.LivenessTest{
+						LivenessTests: []gtm.LivenessTest{
 							{
 								Name:               "HTTP",
 								TestInterval:       60,

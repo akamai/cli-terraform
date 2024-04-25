@@ -21,7 +21,7 @@ import (
 )
 
 // process zone
-func processZone(ctx context.Context, zone *dns.ZoneResponse, resourceZoneName string, modSegment bool, fileUtils fileUtils, tfWorkPath string) (string, error) {
+func processZone(ctx context.Context, zone *dns.GetZoneResponse, resourceZoneName string, modSegment bool, fileUtils fileUtils, tfWorkPath string) (string, error) {
 	data := ZoneData{
 		BlockName:             resourceZoneName,
 		Zone:                  zone.Zone,
