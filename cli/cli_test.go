@@ -114,16 +114,16 @@ func TestPutLoggerInContext(t *testing.T) {
 	err := putLoggerInContext(cliCtx)
 	assert.NoError(t, err)
 
-	logger := log.FromContext(cliCtx.Context)
+	ctxLogger := log.FromContext(cliCtx.Context)
 	buffer.Reset()
-	logger.Info("oops")
+	ctxLogger.Info("oops")
 	assert.Contains(t, buffer.String(), "oops")
 
 	sess, err := session.New()
 	assert.NoError(t, err)
-	logger = sess.Log(cliCtx.Context)
+	sessLogger := sess.Log(cliCtx.Context)
 	buffer.Reset()
-	logger.Info("oops")
+	sessLogger.Info("oops")
 	assert.Contains(t, buffer.String(), "oops")
 }
 

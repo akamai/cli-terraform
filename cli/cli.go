@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/log"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/session"
 	"github.com/akamai/cli-terraform/pkg/commands"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
@@ -104,7 +105,11 @@ func putSessionInContext(c *cli.Context) error {
 
 func putLoggerInContext(c *cli.Context) error {
 	c.Context = log.SetupContext(c.Context, c.App.Writer)
-	c.Context = session.ContextWithOptions(c.Context, session.WithContextLog(log.FromContext(c.Context)))
+
+	handler := log.FromContext(c.Context).Handler()
+	sessionLogger := sesslog.NewSlogAdapter(handler)
+
+	c.Context = session.ContextWithOptions(c.Context, session.WithContextLog(sessionLogger))
 
 	return nil
 }

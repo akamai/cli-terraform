@@ -44,6 +44,13 @@
 
 
 
+* Logging
+    * Changed logger from `apex` to `slog`
+        * Log output has not been changed
+
+
+
+
 
 
 
