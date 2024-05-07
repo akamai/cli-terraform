@@ -51,6 +51,7 @@ type EdgeHostname struct {
 	EdgeHostnameResourceName string
 	SecurityType             string
 	UseCases                 string
+	CertificateID            int64
 }
 
 // Hostname represents edge hostname resource
@@ -618,6 +619,24 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 				return nil, nil, fmt.Errorf("cannot get use cases: %s", err)
 			}
 
+			var certificateID int64
+			if strings.ToUpper(edgeHostname.SecurityType) == "ENHANCED-TLS" {
+				certificate, err := clientHAPI.GetCertificate(ctx, hapi.GetCertificateRequest{
+					DNSZone:    edgeHostname.DNSZone,
+					RecordName: edgeHostname.RecordName,
+				})
+				if err != nil {
+					if !errors.Is(err, hapi.ErrNotFound) {
+						return nil, nil, fmt.Errorf("cannot get certificate details: %s", err)
+					}
+					certificateID = 0
+				} else {
+					certificateID, err = strconv.ParseInt(certificate.CertificateID, 10, 64)
+					if err != nil {
+						return nil, nil, fmt.Errorf("invalid certificate details: %s", err)
+					}
+				}
+			}
 			edgeHostnamesMap[cnameToResource] = EdgeHostname{
 				EdgeHostname:             cnameTo,
 				EdgeHostnameID:           hostname.EdgeHostnameID,
@@ -627,6 +646,7 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 				EdgeHostnameResourceName: cnameToResource,
 				SecurityType:             edgeHostname.SecurityType,
 				UseCases:                 useCases,
+				CertificateID:            certificateID,
 			}
 		}
 

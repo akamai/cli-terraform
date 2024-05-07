@@ -51,6 +51,9 @@
 * General
   * Updated various dependencies
 
+* PAPI
+  * Added export of the `certificate` for `akamai_edge_hostname` resource ([I#338](https://github.com/akamai/terraform-provider-akamai/issues/338))
+
 * Image and Video Manager
   * Added handling of `SmartCrop` transformation when exporting image with `policy-as-hcl` flag
 

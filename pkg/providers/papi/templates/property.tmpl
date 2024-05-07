@@ -25,6 +25,9 @@ resource "akamai_edge_hostname" "{{.EdgeHostnameResourceName}}" {
   group_id = var.group_id
   ip_behavior = "{{.IPv6}}"
   edge_hostname = "{{.EdgeHostname}}"
+{{- if .CertificateID}}
+  certificate = {{.CertificateID}}
+{{- end}}
 {{- if .UseCases}}
   use_cases = jsonencode({{.UseCases}})
 {{- end}}
