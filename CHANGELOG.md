@@ -1,48 +1,17 @@
 # Release Notes
 
-## Version X.XX.X (Month XX, XXXX)
+## Version 1.15.0 (May 28, 2024)
 
 ### Features/Enhancements
+
+* General
+  * Updated various dependencies
 
 * Cloudlets
   * Added import support for `akamai_cloudlets_application_load_balancer_activation` resource
 
-
-
-
-
-
-
-
-
-
-
-
-
-### Bug fixes
-
-
-
-
-
-
-
-
-
-
-
-### Deprecations
-
-
-
-
-
-
-
-
-
-
-
+* PAPI
+  * Added export of the `certificate` for `akamai_edge_hostname` resource ([I#338](https://github.com/akamai/terraform-provider-akamai/issues/338))
 
 ## Version 1.14.0 (April 23, 2024)
 
@@ -50,9 +19,6 @@
 
 * General
   * Updated various dependencies
-
-* PAPI
-  * Added export of the `certificate` for `akamai_edge_hostname` resource ([I#338](https://github.com/akamai/terraform-provider-akamai/issues/338))
 
 * Image and Video Manager
   * Added handling of `SmartCrop` transformation when exporting image with `policy-as-hcl` flag
