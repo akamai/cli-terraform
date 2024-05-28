@@ -17,28 +17,22 @@ data "akamai_property_rules_template" "rules" {
   template_file = abspath("${path.module}/property-snippets/main.json")
 }
 
-resource "akamai_edge_hostname" "test-edgesuite-net" {
+resource "akamai_edge_hostname" "test-edgekey-net" {
   contract_id   = var.contract_id
   group_id      = var.group_id
   ip_behavior   = "IPV6_COMPLIANCE"
-  edge_hostname = "test.edgesuite.net"
-  use_cases = jsonencode([
-    {
-      "option" : "BACKGROUND",
-      "type" : "GLOBAL",
-      "useCase" : "Download_Mode"
-    }
-  ])
+  edge_hostname = "test.edgekey.net"
+  certificate   = 123456
 }
 
-resource "akamai_property" "test-edgesuite-net" {
-  name        = "test.edgesuite.net"
+resource "akamai_property" "test-edgekey-net" {
+  name        = "test.edgekey.net"
   contract_id = var.contract_id
   group_id    = var.group_id
   product_id  = "prd_HTTP_Content_Del"
   hostnames {
-    cname_from             = "test.edgesuite.net"
-    cname_to               = akamai_edge_hostname.test-edgesuite-net.edge_hostname
+    cname_from             = "test.edgekey.net"
+    cname_to               = akamai_edge_hostname.test-edgekey-net.edge_hostname
     cert_provisioning_type = "CPS_MANAGED"
   }
   rule_format = "latest"
@@ -46,19 +40,19 @@ resource "akamai_property" "test-edgesuite-net" {
 }
 
 # NOTE: Be careful when removing this resource as you can disable traffic
-resource "akamai_property_activation" "test-edgesuite-net-staging" {
-  property_id                    = akamai_property.test-edgesuite-net.id
+resource "akamai_property_activation" "test-edgekey-net-staging" {
+  property_id                    = akamai_property.test-edgekey-net.id
   contact                        = ["jsmith@akamai.com"]
-  version                        = var.activate_latest_on_staging ? akamai_property.test-edgesuite-net.latest_version : akamai_property.test-edgesuite-net.staging_version
+  version                        = var.activate_latest_on_staging ? akamai_property.test-edgekey-net.latest_version : akamai_property.test-edgekey-net.staging_version
   network                        = "STAGING"
   auto_acknowledge_rule_warnings = false
 }
 
 # NOTE: Be careful when removing this resource as you can disable traffic
-#resource "akamai_property_activation" "test-edgesuite-net-production" {
-#  property_id                    = akamai_property.test-edgesuite-net.id
+#resource "akamai_property_activation" "test-edgekey-net-production" {
+#  property_id                    = akamai_property.test-edgekey-net.id
 #  contact                        = []
-#  version                        = var.activate_latest_on_production ? akamai_property.test-edgesuite-net.latest_version : akamai_property.test-edgesuite-net.production_version
+#  version                        = var.activate_latest_on_production ? akamai_property.test-edgekey-net.latest_version : akamai_property.test-edgekey-net.production_version
 #  network                        = "PRODUCTION"
 #  auto_acknowledge_rule_warnings = false
 #}
