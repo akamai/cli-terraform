@@ -18,6 +18,7 @@ package commands
 import (
 	"github.com/akamai/cli-terraform/pkg/providers/appsec"
 	"github.com/akamai/cli-terraform/pkg/providers/clientlists"
+	"github.com/akamai/cli-terraform/pkg/providers/cloudaccess"
 	"github.com/akamai/cli-terraform/pkg/providers/cloudlets"
 	"github.com/akamai/cli-terraform/pkg/providers/cloudwrapper"
 	"github.com/akamai/cli-terraform/pkg/providers/cps"
@@ -343,6 +344,29 @@ func CommandLocator() ([]*cli.Command, error) {
 		Usage:       "export-cps",
 		ArgsUsage:   "<enrollment_id> <contract_id>",
 		Action:      validatedAction(cps.CmdCreateCPS, requireValidWorkpath, requireNArguments(2)),
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
+			},
+		},
+		BashComplete: autocomplete.Default,
+	})
+
+	commands = append(commands, &cli.Command{
+		Name:               "list",
+		Description:        "List commands",
+		Action:             cmdList,
+		CustomHelpTemplate: apphelp.SimplifiedHelpTemplate,
+	})
+
+	commands = append(commands, &cli.Command{
+		Name:        "export-cloudaccess",
+		Description: "Generates Terraform configuration for CAM (Cloud Access Manager) resources",
+		Usage:       "export-cloudaccess",
+		ArgsUsage:   "<access_key_uid>",
+		Action:      validatedAction(cloudaccess.CmdCreateCloudAccess, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "tfworkpath",

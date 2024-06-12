@@ -11,6 +11,8 @@
 
 
 
+* [IMPORTANT] Cloud Access Manager
+  * Added command `export-cloudaccess` which allows export of `akamai_cloudaccess_key` resource
 
 
 

@@ -1,0 +1,2 @@
+terraform init
+terraform import akamai_cloudaccess_key.TestKeyName 1

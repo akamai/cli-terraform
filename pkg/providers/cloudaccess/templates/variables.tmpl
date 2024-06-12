@@ -1,0 +1,10 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/cloudaccess.TFCloudAccessData*/ -}}
+variable "edgerc_path" {
+  type = string
+  default = "~/.edgerc"
+}
+
+variable "config_section" {
+  type = string
+  default = "{{.Section}}"
+}

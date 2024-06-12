@@ -3014,7 +3014,7 @@ func TestTerraformName(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, test.expected, TerraformName(test.given))
+			assert.Equal(t, test.expected, tools.TerraformName(test.given))
 		})
 	}
 }
