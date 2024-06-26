@@ -25,6 +25,13 @@
 
 
 
+* PAPI 
+  * Added support for new rule format `v2024-05-31`
+
+
+
+
+
 
 
 
