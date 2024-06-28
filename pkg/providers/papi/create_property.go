@@ -52,6 +52,7 @@ type EdgeHostname struct {
 	SecurityType             string
 	UseCases                 string
 	CertificateID            int64
+	TTL                      int
 }
 
 // Hostname represents edge hostname resource
@@ -637,11 +638,16 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 					}
 				}
 			}
+			ttl := 0
+			if !edgeHostname.UseDefaultTTL {
+				ttl = edgeHostname.TTL
+			}
 			edgeHostnamesMap[cnameToResource] = EdgeHostname{
 				EdgeHostname:             cnameTo,
 				EdgeHostnameID:           hostname.EdgeHostnameID,
 				ContractID:               property.ContractID,
 				GroupID:                  property.GroupID,
+				TTL:                      ttl,
 				IPv6:                     getIPv6(papiEdgeHostnames, hostname.EdgeHostnameID),
 				EdgeHostnameResourceName: cnameToResource,
 				SecurityType:             edgeHostname.SecurityType,

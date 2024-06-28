@@ -550,7 +550,7 @@ func TestCreateProperty(t *testing.T) {
 		RecordName:        "test",
 		DNSZone:           "edgesuite.net",
 		SecurityType:      "STANDARD-TLS",
-		UseDefaultTTL:     false,
+		UseDefaultTTL:     true,
 		UseDefaultMap:     false,
 		IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
 		TTL:               21600,
@@ -558,12 +558,39 @@ func TestCreateProperty(t *testing.T) {
 		SerialNumber:      1461,
 	}
 
+	hapiGetEdgeHostnameResponseNonDefaultTTL := hapi.GetEdgeHostnameResponse{
+		EdgeHostnameID:    2867480,
+		RecordName:        "test",
+		DNSZone:           "edgesuite.net",
+		SecurityType:      "STANDARD-TLS",
+		UseDefaultTTL:     false,
+		UseDefaultMap:     false,
+		IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
+		TTL:               600,
+		Map:               "a;test.akamai.net",
+		SerialNumber:      1461,
+	}
+
+	edgeHostnameWithTTL := map[string]EdgeHostname{
+		"test-edgesuite-net": {
+			EdgeHostname:             "test.edgesuite.net",
+			EdgeHostnameID:           "ehn_2867480",
+			ContractID:               "test_contract",
+			GroupID:                  "grp_12345",
+			ID:                       "",
+			IPv6:                     "IPV6_COMPLIANCE",
+			SecurityType:             "STANDARD-TLS",
+			EdgeHostnameResourceName: "test-edgesuite-net",
+			TTL:                      600,
+		},
+	}
+
 	hapiGetEdgeHostnameResponseEnhancementTLS := hapi.GetEdgeHostnameResponse{
 		EdgeHostnameID:    2867480,
 		RecordName:        "test",
 		DNSZone:           "edgekey.net",
 		SecurityType:      "ENHANCED-TLS",
-		UseDefaultTTL:     false,
+		UseDefaultTTL:     true,
 		UseDefaultMap:     false,
 		IPVersionBehavior: "IPV6_IPV4_DUALSTACK",
 		TTL:               21600,
@@ -641,6 +668,33 @@ func TestCreateProperty(t *testing.T) {
 			},
 			dir:     "basic",
 			jsonDir: "basic/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+		},
+		"basic property with edgehostname with non default ttl": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponseNonDefaultTTL, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withEdgeHostname(edgeHostnameWithTTL).build(), noFilters, nil)
+			},
+			dir:     "basic-non-default-ttl",
+			jsonDir: "basic-non-default-ttl/property-snippets",
 			snippetFilesToCheck: []string{
 				"main.json",
 				"Content_Compression.json",
@@ -853,7 +907,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 		"basic property with empty hostname id": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -1291,13 +1345,13 @@ func TestCreateProperty(t *testing.T) {
 			dir: "basic",
 		},
 		"error property not found": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, dir string) {
 				mockSearchProperties(c, nil, fmt.Errorf("oops"))
 			},
 			withError: ErrPropertyNotFound,
 		},
 		"error group not found": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
@@ -1306,7 +1360,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrGroupNotFound,
 		},
 		"error property rules not found": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetGroups(c, &getGroupsResponse, nil)
@@ -1330,7 +1384,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrPropertyVersionNotFound,
 		},
 		"error fetching property activation": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, _ *templates.MockProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
@@ -1687,6 +1741,52 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Section: "test_section",
 			},
 			dir:          "basic",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
+		"property with edgehostname with non default ttl": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							TTL:                      600,
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							CnameFrom:                "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
+						},
+					},
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "basic-non-default-ttl",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
 		"property enhancement tls": {

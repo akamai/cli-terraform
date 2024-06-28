@@ -14,7 +14,8 @@
 
 
 
-
+* PAPI
+  * If edgehostname uses custom TTL, it is exported in the `akamai_edge_hostname` resource 
 
 
 

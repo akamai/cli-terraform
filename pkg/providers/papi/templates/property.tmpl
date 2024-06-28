@@ -21,10 +21,13 @@ data "akamai_property_rules_template" "rules" {
 }{{end}}
 {{range .Property.EdgeHostnames}}
 resource "akamai_edge_hostname" "{{.EdgeHostnameResourceName}}" {
-  contract_id = var.contract_id
-  group_id = var.group_id
-  ip_behavior = "{{.IPv6}}"
+  contract_id   = var.contract_id
+  group_id      = var.group_id
+  ip_behavior   = "{{.IPv6}}"
   edge_hostname = "{{.EdgeHostname}}"
+{{- if .TTL}}
+  ttl           = {{.TTL}}
+{{- end}}
 {{- if .CertificateID}}
   certificate = {{.CertificateID}}
 {{- end}}
