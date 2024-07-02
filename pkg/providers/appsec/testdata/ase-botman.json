@@ -3727,6 +3727,7 @@
         },
         "requestBody": {
             "requestBodyInspectionLimitInKB": "default"
+
         },
         "piiLearning": {
           "enabled": true

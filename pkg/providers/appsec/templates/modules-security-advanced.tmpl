@@ -98,6 +98,7 @@ resource "akamai_appsec_advanced_settings_request_body" "{{ escapeName $policyNa
     config_id = akamai_appsec_configuration.config.config_id
     security_policy_id = akamai_appsec_security_policy.{{ escapeName $policyName }}.security_policy_id
     request_body_inspection_limit = "{{ .RequestBody.RequestBodyInspectionLimitInKB }}"
+    request_body_inspection_limit_override = true
 }
 {{ end -}}
 {{ end -}}
