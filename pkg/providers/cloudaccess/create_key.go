@@ -2,11 +2,13 @@
 package cloudaccess
 
 import (
+	"cmp"
 	"context"
 	"embed"
 	"errors"
 	"fmt"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -186,11 +188,15 @@ func populateCloudAccessData(section string, key *cloudaccess.GetAccessKeyRespon
 			CloudAccessKeyID: *versions[0].CloudAccessKeyID,
 		}
 	default:
+		slices.SortFunc(versions, func(a, b cloudaccess.AccessKeyVersion) int {
+			return cmp.Compare(a.Version, b.Version)
+		})
+		// first version from the response from API is assigned to `credentials_b`, second version to `credentials_a`
 		tfCloudAccessData.Key.CredentialA = &Credential{
-			CloudAccessKeyID: *versions[0].CloudAccessKeyID,
+			CloudAccessKeyID: *versions[1].CloudAccessKeyID,
 		}
 		tfCloudAccessData.Key.CredentialB = &Credential{
-			CloudAccessKeyID: *versions[1].CloudAccessKeyID,
+			CloudAccessKeyID: *versions[0].CloudAccessKeyID,
 		}
 	}
 

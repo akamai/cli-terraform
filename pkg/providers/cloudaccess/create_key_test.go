@@ -350,8 +350,8 @@ func mockProcessTemplates(p *templates.MockProcessor, data testDataForCloudAcces
 		credA = &Credential{CloudAccessKeyID: *data.accessKeyVersions[0].CloudAccessKeyID}
 	}
 	if len(data.accessKeyVersions) == 2 {
-		credA = &Credential{CloudAccessKeyID: *data.accessKeyVersions[0].CloudAccessKeyID}
-		credB = &Credential{CloudAccessKeyID: *data.accessKeyVersions[1].CloudAccessKeyID}
+		credA = &Credential{CloudAccessKeyID: *data.accessKeyVersions[1].CloudAccessKeyID}
+		credB = &Credential{CloudAccessKeyID: *data.accessKeyVersions[0].CloudAccessKeyID}
 	}
 	var netConf *NetworkConfiguration
 	if data.networkConfiguration != nil {
