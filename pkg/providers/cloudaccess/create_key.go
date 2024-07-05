@@ -46,7 +46,7 @@ type (
 
 	// NetworkConfiguration represents CLoudAccess network configuration
 	NetworkConfiguration struct {
-		AdditionalCDN   string
+		AdditionalCDN   *string
 		SecurityNetwork string
 	}
 )
@@ -148,8 +148,10 @@ func populateCloudAccessData(section string, key *cloudaccess.GetAccessKeyRespon
 	var netConf *NetworkConfiguration
 	if key.NetworkConfiguration != nil {
 		netConf = &NetworkConfiguration{
-			AdditionalCDN:   string(key.NetworkConfiguration.AdditionalCDN),
 			SecurityNetwork: string(key.NetworkConfiguration.SecurityNetwork),
+		}
+		if key.NetworkConfiguration.AdditionalCDN != nil {
+			netConf.AdditionalCDN = tools.StringPtr(string(*key.NetworkConfiguration.AdditionalCDN))
 		}
 	}
 

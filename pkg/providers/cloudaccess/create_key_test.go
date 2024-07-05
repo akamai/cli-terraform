@@ -41,6 +41,7 @@ var (
 			},
 		}
 	}
+	chinaCDN     = cloudaccess.ChinaCDN
 	accessKeyUID = int64(1)
 	section      = "test_section"
 )
@@ -65,7 +66,7 @@ func TestCreateCloudAccess(t *testing.T) {
 				accessKeyName:        "name1",
 				authenticationMethod: "AWS4_HMAC_SHA256",
 				networkConfiguration: &cloudaccess.SecureNetwork{
-					AdditionalCDN:   "CHINA_CDN",
+					AdditionalCDN:   &chinaCDN,
 					SecurityNetwork: "ENHANCED_TLS",
 				},
 				groups: []cloudaccess.Group{
@@ -100,7 +101,7 @@ func TestCreateCloudAccess(t *testing.T) {
 				accessKeyName:        "Test name1",
 				authenticationMethod: "AWS4_HMAC_SHA256",
 				networkConfiguration: &cloudaccess.SecureNetwork{
-					AdditionalCDN:   "CHINA_CDN",
+					AdditionalCDN:   &chinaCDN,
 					SecurityNetwork: "ENHANCED_TLS",
 				},
 				groups: []cloudaccess.Group{
@@ -131,7 +132,7 @@ func TestCreateCloudAccess(t *testing.T) {
 				accessKeyName:        "name1",
 				authenticationMethod: "AWS4_HMAC_SHA256",
 				networkConfiguration: &cloudaccess.SecureNetwork{
-					AdditionalCDN:   "CHINA_CDN",
+					AdditionalCDN:   &chinaCDN,
 					SecurityNetwork: "ENHANCED_TLS",
 				},
 				groups: []cloudaccess.Group{
@@ -164,7 +165,7 @@ func TestCreateCloudAccess(t *testing.T) {
 				accessKeyName:        "name1",
 				authenticationMethod: "AWS4_HMAC_SHA256",
 				networkConfiguration: &cloudaccess.SecureNetwork{
-					AdditionalCDN:   "CHINA_CDN",
+					AdditionalCDN:   &chinaCDN,
 					SecurityNetwork: "ENHANCED_TLS",
 				},
 				groups: []cloudaccess.Group{
@@ -224,7 +225,7 @@ func TestProcessCloudAccessTemplates(t *testing.T) {
 					CredentialA:          &Credential{CloudAccessKeyID: "testAccessKey1"},
 					CredentialB:          &Credential{CloudAccessKeyID: "testAccessKey2"},
 					NetworkConfiguration: &NetworkConfiguration{
-						AdditionalCDN:   "CHINA_CDN",
+						AdditionalCDN:   tools.StringPtr("CHINA_CDN"),
 						SecurityNetwork: "ENHANCED_TLS",
 					},
 				},
@@ -244,7 +245,7 @@ func TestProcessCloudAccessTemplates(t *testing.T) {
 					AccessKeyUID:         1,
 					CredentialA:          &Credential{CloudAccessKeyID: "testAccessKey1"},
 					NetworkConfiguration: &NetworkConfiguration{
-						AdditionalCDN:   "CHINA_CDN",
+						AdditionalCDN:   tools.StringPtr("CHINA_CDN"),
 						SecurityNetwork: "ENHANCED_TLS",
 					},
 				},
@@ -263,13 +264,31 @@ func TestProcessCloudAccessTemplates(t *testing.T) {
 					ContractID:           "C-Contract123",
 					AccessKeyUID:         1,
 					NetworkConfiguration: &NetworkConfiguration{
-						AdditionalCDN:   "CHINA_CDN",
+						AdditionalCDN:   tools.StringPtr("CHINA_CDN"),
 						SecurityNetwork: "ENHANCED_TLS",
 					},
 				},
 				Section: "test_section",
 			},
 			dir:          "no_versions",
+			filesToCheck: []string{"cloudaccess.tf", "import.sh", "variables.tf"},
+		},
+		"access key with no versions and no additional cdn": {
+			givenData: TFCloudAccessData{
+				Key: TFCloudAccessKey{
+					KeyResourceName:      "TestKeyName",
+					AccessKeyName:        "TestKeyName",
+					AuthenticationMethod: "AWS4_HMAC_SHA256",
+					GroupID:              1234,
+					ContractID:           "C-Contract123",
+					AccessKeyUID:         1,
+					NetworkConfiguration: &NetworkConfiguration{
+						SecurityNetwork: "ENHANCED_TLS",
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "no_additional_cdn",
 			filesToCheck: []string{"cloudaccess.tf", "import.sh", "variables.tf"},
 		},
 	}
@@ -337,8 +356,10 @@ func mockProcessTemplates(p *templates.MockProcessor, data testDataForCloudAcces
 	var netConf *NetworkConfiguration
 	if data.networkConfiguration != nil {
 		netConf = &NetworkConfiguration{
-			AdditionalCDN:   string(data.networkConfiguration.AdditionalCDN),
 			SecurityNetwork: string(data.networkConfiguration.SecurityNetwork),
+		}
+		if data.networkConfiguration.AdditionalCDN != nil {
+			netConf.AdditionalCDN = tools.StringPtr(string(*data.networkConfiguration.AdditionalCDN))
 		}
 	}
 	p.On("ProcessTemplates", TFCloudAccessData{

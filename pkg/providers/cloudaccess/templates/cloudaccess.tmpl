@@ -21,7 +21,9 @@ resource "akamai_cloudaccess_key" "{{.Key.KeyResourceName}}" {
   contract_id               = "{{.Key.ContractID}}"
   {{- if .Key.NetworkConfiguration }}
   network_configuration = {
+    {{- if .Key.NetworkConfiguration.AdditionalCDN }}
     additional_cdn          = "{{.Key.NetworkConfiguration.AdditionalCDN}}"
+    {{- end}}
     security_network        = "{{.Key.NetworkConfiguration.SecurityNetwork}}"
   }
   {{- end}}
