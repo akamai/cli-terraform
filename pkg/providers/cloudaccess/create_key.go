@@ -67,6 +67,8 @@ var (
 	ErrSavingFiles = errors.New("saving terraform project files")
 	// ErrNoGroup is returned when key does not have group and contract assigned
 	ErrNoGroup = errors.New("access key has no defined group or contract")
+	// ErrNonUniqueCloudAccessKeyID is returned when key have the same `cloud_access_key_id` for both pairs of credentials
+	ErrNonUniqueCloudAccessKeyID = errors.New("'cloud_access_key_id' should be unique for each pair of credentials")
 )
 
 // CmdCreateCloudAccess is an entrypoint to export-cloudaccess command
@@ -132,6 +134,12 @@ func createCloudAccess(ctx context.Context, accessKeyUID int64, section string, 
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrListingKeyVersions, err)
 	}
+	if len(versions.AccessKeyVersions) > 1 {
+		if *versions.AccessKeyVersions[0].CloudAccessKeyID == *versions.AccessKeyVersions[1].CloudAccessKeyID {
+			term.Spinner().Fail()
+			return fmt.Errorf("%w", ErrNonUniqueCloudAccessKeyID)
+		}
+	}
 	tfCloudAccessData := populateCloudAccessData(section, key, versions.AccessKeyVersions)
 
 	term.Spinner().Start("Saving TF configurations ")
@@ -160,9 +168,13 @@ func populateCloudAccessData(section string, key *cloudaccess.GetAccessKeyRespon
 	var contractID string
 	var groupID int64
 	if len(key.Groups) > 0 {
-		groupID = key.Groups[0].GroupID
-		if len(key.Groups[0].ContractIDs) > 0 {
-			contractID = key.Groups[0].ContractIDs[0]
+		groups := key.Groups
+		slices.SortFunc(groups, func(a, b cloudaccess.Group) int {
+			return cmp.Compare(a.GroupID, b.GroupID)
+		})
+		groupID = groups[len(groups)-1].GroupID
+		if len(groups[len(groups)-1].ContractIDs) > 0 {
+			contractID = groups[len(groups)-1].ContractIDs[0]
 		}
 	}
 
@@ -193,10 +205,10 @@ func populateCloudAccessData(section string, key *cloudaccess.GetAccessKeyRespon
 		})
 		// first version from the response from API is assigned to `credentials_b`, second version to `credentials_a`
 		tfCloudAccessData.Key.CredentialA = &Credential{
-			CloudAccessKeyID: *versions[1].CloudAccessKeyID,
+			CloudAccessKeyID: *versions[0].CloudAccessKeyID,
 		}
 		tfCloudAccessData.Key.CredentialB = &Credential{
-			CloudAccessKeyID: *versions[0].CloudAccessKeyID,
+			CloudAccessKeyID: *versions[1].CloudAccessKeyID,
 		}
 	}
 

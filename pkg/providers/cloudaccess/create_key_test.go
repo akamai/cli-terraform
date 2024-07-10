@@ -177,6 +177,40 @@ func TestCreateCloudAccess(t *testing.T) {
 				},
 			},
 		},
+		"error non unique cloud access key id": {
+			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, dir string, data testDataForCloudAccess) {
+				mockGetAccessKey(c, data, nil)
+				mockListAccessKeyVersions(c, data, nil)
+			},
+			withError: ErrNonUniqueCloudAccessKeyID,
+			testData: testDataForCloudAccess{
+				section:              section,
+				accessKeyUID:         1,
+				accessKeyName:        "name1",
+				authenticationMethod: "AWS4_HMAC_SHA256",
+				networkConfiguration: &cloudaccess.SecureNetwork{
+					AdditionalCDN:   &chinaCDN,
+					SecurityNetwork: "ENHANCED_TLS",
+				},
+				groups: []cloudaccess.Group{
+					{
+						ContractIDs: []string{"ctr_111"},
+						GroupID:     11,
+						GroupName:   tools.StringPtr("group11"),
+					},
+				},
+				accessKeyVersions: []cloudaccess.AccessKeyVersion{
+					{
+						AccessKeyUID:     1,
+						CloudAccessKeyID: tools.StringPtr("key1"),
+					},
+					{
+						AccessKeyUID:     1,
+						CloudAccessKeyID: tools.StringPtr("key1"),
+					},
+				},
+			},
+		},
 		"error key has no group and contract safeguard": {
 			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, dir string, data testDataForCloudAccess) {
 				mockGetAccessKey(c, data, nil)
@@ -350,8 +384,8 @@ func mockProcessTemplates(p *templates.MockProcessor, data testDataForCloudAcces
 		credA = &Credential{CloudAccessKeyID: *data.accessKeyVersions[0].CloudAccessKeyID}
 	}
 	if len(data.accessKeyVersions) == 2 {
-		credA = &Credential{CloudAccessKeyID: *data.accessKeyVersions[1].CloudAccessKeyID}
-		credB = &Credential{CloudAccessKeyID: *data.accessKeyVersions[0].CloudAccessKeyID}
+		credA = &Credential{CloudAccessKeyID: *data.accessKeyVersions[0].CloudAccessKeyID}
+		credB = &Credential{CloudAccessKeyID: *data.accessKeyVersions[1].CloudAccessKeyID}
 	}
 	var netConf *NetworkConfiguration
 	if data.networkConfiguration != nil {
