@@ -400,8 +400,6 @@ Flags:
 
 Flags:
    --tfworkpath path         Directory used to store files created when running commands. (default: current directory)
-   --policy-json-dir path    Path location for placement of policy jsons. Default: same value as tfworkpath
-   --policy-as-hcl           Generate content of the policy using HCL instead of JSON file (default: false)
 ```
 
 ## General Notes

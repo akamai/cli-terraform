@@ -1,98 +1,16 @@
 # Release Notes
 
-## Version X.XX.X (Month XX, XXXX)
+## Version 1.16.0 (July 16, 2024)
 
 ### Features/Enhancements
 * Migrated go version to 1.21.12 for builds.
 
-
-
-
-
-
-
 * [IMPORTANT] Cloud Access Manager
   * Added command `export-cloudaccess` which allows export of `akamai_cloudaccess_key` resource
 
-
-
 * PAPI
-  * If edgehostname uses custom TTL, it is exported in the `akamai_edge_hostname` resource 
-
-
-
-
-
-
-
-
-
-
-* PAPI 
+  * If edgehostname uses custom TTL, it is exported in the `akamai_edge_hostname` resource
   * Added support for new rule format `v2024-05-31`
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Bug fixes
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Deprecations
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## Version 1.15.0 (May 28, 2024)
 
