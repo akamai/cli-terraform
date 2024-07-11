@@ -355,13 +355,6 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
-		Name:               "list",
-		Description:        "List commands",
-		Action:             cmdList,
-		CustomHelpTemplate: apphelp.SimplifiedHelpTemplate,
-	})
-
-	commands = append(commands, &cli.Command{
 		Name:        "export-cloudaccess",
 		Description: "Generates Terraform configuration for CAM (Cloud Access Manager) resources",
 		Usage:       "export-cloudaccess",
