@@ -3,7 +3,7 @@
 ## Version X.XX.X (Month XX, XXXX)
 
 ### Features/Enhancements
-
+* Migrated go version to 1.21.12 for builds.
 
 
 
