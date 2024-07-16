@@ -1,0 +1,44 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/cloudaccess.TFCloudAccessData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 6.3.0"
+    }
+  }
+  required_version = ">= 1.0"
+}
+
+provider "akamai" {
+  edgerc         = var.edgerc_path
+  config_section = var.config_section
+}
+
+resource "akamai_cloudaccess_key" "{{.Key.KeyResourceName}}" {
+  access_key_name           = "{{.Key.AccessKeyName}}"
+  authentication_method     = "{{.Key.AuthenticationMethod}}"
+  group_id                  = {{.Key.GroupID}}
+  contract_id               = "{{.Key.ContractID}}"
+  {{- if .Key.NetworkConfiguration }}
+  network_configuration = {
+    {{- if .Key.NetworkConfiguration.AdditionalCDN }}
+    additional_cdn          = "{{.Key.NetworkConfiguration.AdditionalCDN}}"
+    {{- end}}
+    security_network        = "{{.Key.NetworkConfiguration.SecurityNetwork}}"
+  }
+  {{- end}}
+  {{- if .Key.CredentialA }}
+  credentials_a = {
+    cloud_access_key_id     = "{{.Key.CredentialA.CloudAccessKeyID}}"
+    cloud_secret_access_key = "PASTE YOUR SECRET HERE WHEN ROTATING A KEY"
+    primary_key             = false
+  }
+  {{- end}}
+  {{- if .Key.CredentialB }}
+  credentials_b = {
+    cloud_access_key_id     = "{{.Key.CredentialB.CloudAccessKeyID}}"
+    cloud_secret_access_key = "PASTE YOUR SECRET HERE WHEN ROTATING A KEY"
+    primary_key             = false
+  }
+  {{- end}}
+}

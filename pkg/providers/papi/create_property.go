@@ -52,6 +52,7 @@ type EdgeHostname struct {
 	SecurityType             string
 	UseCases                 string
 	CertificateID            int64
+	TTL                      int
 }
 
 // Hostname represents edge hostname resource
@@ -206,7 +207,7 @@ var (
 
 var additionalFuncs = tools.DecorateWithMultilineHandlingFunctions(
 	map[string]any{
-		"TerraformName": TerraformName,
+		"TerraformName": tools.TerraformName,
 		"AsInt":         AsInt,
 		"ReportError":   ReportError,
 		"CheckErrors":   CheckErrors,
@@ -524,12 +525,12 @@ func flattenRules(property string, rule papi.Rules) []*WrappedRules {
 	result = append(result, flattenWrappedRules(wrappedRules)...)
 	var names = map[string]int{}
 	for _, wrappedRules := range result {
-		name := TerraformName(wrappedRules.Rule.Name)
+		name := tools.TerraformName(wrappedRules.Rule.Name)
 		names[name]++
 		if count := names[name]; count > 1 {
 			name = fmt.Sprintf("%s%d", name, count-1)
 		}
-		wrappedRules.TerraformName = fmt.Sprintf("%s_rule_%s", TerraformName(property), name)
+		wrappedRules.TerraformName = fmt.Sprintf("%s_rule_%s", tools.TerraformName(property), name)
 	}
 	return result
 }
@@ -637,11 +638,16 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 					}
 				}
 			}
+			ttl := 0
+			if !edgeHostname.UseDefaultTTL {
+				ttl = edgeHostname.TTL
+			}
 			edgeHostnamesMap[cnameToResource] = EdgeHostname{
 				EdgeHostname:             cnameTo,
 				EdgeHostnameID:           hostname.EdgeHostnameID,
 				ContractID:               property.ContractID,
 				GroupID:                  property.GroupID,
+				TTL:                      ttl,
 				IPv6:                     getIPv6(papiEdgeHostnames, hostname.EdgeHostnameID),
 				EdgeHostnameResourceName: cnameToResource,
 				SecurityType:             edgeHostname.SecurityType,
@@ -977,28 +983,6 @@ func ruleNameNormalizer() func(string) string {
 
 func normalizeRuleName(name string) string {
 	return normalizeRuleNameRegexp.ReplaceAllString(name, "_")
-}
-
-var matchFirstCap = regexp.MustCompile("([^ _])([A-Z][a-z]+)")
-var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
-
-// ToSnakeCase returns name using snake case notation - SomeName -> some_name
-func ToSnakeCase(str string) string {
-	snake := strings.Replace(str, " ", "_", -1)
-	snake = matchFirstCap.ReplaceAllString(snake, "${1}_${2}")
-	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
-	return strings.ToLower(snake)
-}
-
-var nameRegexp = regexp.MustCompile(`[^\p{L}\p{Nl}\p{Mn}\p{Mc}\p{Nd}\p{Pc}\d\-_ ]`)
-
-// TerraformName is used to convert rule name into valid name of the exported data source
-// Current implementation is not covering all the cases defined in the terraform specification
-// https://github.com/hashicorp/hcl/blob/main/hclsyntax/spec.md#identifiers and http://unicode.org/reports/tr31/ ,
-// but only a reasonable subset.
-func TerraformName(str string) string {
-	str = nameRegexp.ReplaceAllString(str, "-")
-	return ToSnakeCase(str)
 }
 
 // AsInt provides proper conversion of values which are integers in reality

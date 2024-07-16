@@ -382,13 +382,24 @@ $ akamai terraform export-cps
 
 ## Client Lists
 
-Export Client List.
+### Export Client List.
 
 ```
 akamai terraform [global flags] export-clientlist [flags] <list_id>
 
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
+```
+
+## Cloud Access Manager
+
+### Export Cloud Access key configuration
+
+```
+   akamai terraform [global flags] export-cloudaccess [flags] <cloud_access_key_uid>
+
+Flags:
+   --tfworkpath path         Directory used to store files created when running commands. (default: current directory)
 ```
 
 ## General Notes
