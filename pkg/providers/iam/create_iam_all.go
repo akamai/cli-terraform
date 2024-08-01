@@ -56,6 +56,7 @@ func CmdCreateIAMAll(c *cli.Context) error {
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
+		AdditionalFuncs: additionalFunctions,
 	}
 
 	section := edgegrid.GetEdgercSection(c)

@@ -232,6 +232,7 @@ func TestProcessIAMGroupTemplates(t *testing.T) {
 					"users.tmpl":     fmt.Sprintf("./testdata/res/%s/users.tf", test.dir),
 					"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
 				},
+				AdditionalFuncs: additionalFunctions,
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 

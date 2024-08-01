@@ -1,0 +1,17 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/iam.TFData*/ -}}
+
+{{- define "Text"}}
+    {{- if . | IsMultiline}}
+        {{- if . | NoNewlineAtTheEnd}}
+{{- "trimsuffix(<<"}}{{. | GetEOT}}
+{{. | RemoveLastNewline}}
+{{. | GetEOT}}
+, "\n")
+        {{- else}}
+{{- "<<"}}{{. | GetEOT}}
+{{. | RemoveLastNewline}}
+{{. | GetEOT}}
+        {{- end}}
+    {{- else}}"{{. | Escape}}"
+    {{- end}}
+{{- end}}

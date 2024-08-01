@@ -37,7 +37,8 @@
 
 ### Bug fixes
 
-
+* Identity and Access Management (IAM)
+  * Fixed handling of new line character in fields from exported `akamai_iam_user` resource
 
 
 
