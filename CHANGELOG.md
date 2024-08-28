@@ -1,85 +1,19 @@
 # Release Notes
 
-## Version X.XX.X (Month XX, XXXX)
-
-
-
-
-
-
-
-
-
-
-
+## Version 1.17.0 (September 04, 2024)
 
 ### Features/Enhancements
+
 * Appsec
   * The `request_body_inspection_limit_override` field is added to `akamai_appsec_advanced_settings_request_body` resource
 
-
-
-
-
-
 * PAPI
   * Added support for new rule format `v2024-08-13`
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### Bug fixes
 
 * Identity and Access Management (IAM)
   * Fixed handling of new line character in fields from exported `akamai_iam_user` resource
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Deprecations
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## Version 1.16.0 (July 16, 2024)
 

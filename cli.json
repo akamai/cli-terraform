@@ -5,7 +5,7 @@
   "commands": [
     {
       "name": "terraform",
-      "version": "1.16.0",
+      "version": "1.17.0",
       "description": "Administer and Manage Akamai Terraform configurations",
       "bin": "https://github.com/akamai/cli-terraform/releases/download/v{{.Version}}/akamai-{{.Name}}-{{.Version}}-{{.OS}}{{.Arch}}{{.BinSuffix}}",
       "auto-complete": true,
