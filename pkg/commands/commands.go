@@ -198,6 +198,27 @@ func CommandLocator() ([]*cli.Command, error) {
 	})
 
 	commands = append(commands, &cli.Command{
+		Name:        "export-property-include-rule",
+		Description: "Generates Terraform configuration for a single Include rule",
+		Usage:       "export-property-include-rule",
+		ArgsUsage:   "<contract_id> <include_name> <rule_name>",
+		Action:      validatedAction(papi.CmdCreateIncludeRule, requireValidWorkpath, requireNArguments(3)),
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "tfworkpath",
+				Usage:       "Directory used to store files created when running commands.",
+				DefaultText: "current directory",
+			},
+			&cli.BoolFlag{
+				Name:    "rules-as-hcl",
+				Aliases: []string{"schema"},
+				Usage:   "Referenced rules will be exported as data source",
+			},
+		},
+		BashComplete: autocomplete.Default,
+	})
+
+	commands = append(commands, &cli.Command{
 		Name:        "export-cloudwrapper",
 		Description: "Generates Terraform configuration for CloudWrapper resources",
 		Usage:       "export-cloudwrapper",
