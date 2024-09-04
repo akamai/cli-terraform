@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/iam"
+	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )
@@ -71,6 +72,8 @@ type (
 var (
 	//go:embed templates/*
 	templateFiles embed.FS
+
+	additionalFunctions = tools.DecorateWithMultilineHandlingFunctions(map[string]any{})
 
 	// ErrFetchingUsers is returned when fetching users fails
 	ErrFetchingUsers = errors.New("unable to fetch users under this account")

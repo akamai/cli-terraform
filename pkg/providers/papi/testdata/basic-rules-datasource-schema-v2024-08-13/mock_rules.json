@@ -1,0 +1,35 @@
+{
+  "accountId": "test_account",
+  "contractId": "test_contract",
+  "groupId": "grp_12345",
+  "propertyId": "prp_12345",
+  "propertyVersion": 5,
+  "etag": "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
+  "ruleFormat": "v2024-08-13",
+  "rules": {
+    "behaviors": [
+      {
+        "name": "datastream",
+        "options": {
+          "beaconStreamTitle": "test",
+          "collectMidgressTraffic": false,
+          "datastreamIds": "77-85-6",
+          "enabled": true,
+          "logEnabled": false,
+          "logStreamName": [
+            "60"
+          ],
+          "logStreamTitle": "test",
+          "samplingPercentage": 100,
+          "streamType": "LOG"
+        }
+      }
+    ],
+    "children": [],
+    "name": "default",
+    "options": {},
+    "variables": [],
+    "uuid": "default",
+    "criteriaMustSatisfy": "all"
+  }
+}

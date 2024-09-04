@@ -206,6 +206,71 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 			dir:          "iam_user_by_email_basic",
 			filesToCheck: []string{"user.tf", "variables.tf", "import.sh", "roles.tf", "groups.tf"},
 		},
+		"basic user with newlines": {
+			givenData: TFData{
+				TFUsers: []*TFUser{
+					{
+						TFUserBasicInfo: getTFUserBasicInfoWithNewlines(),
+						IsLocked:        false,
+						AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]",
+					},
+				},
+				TFRoles: []TFRole{
+					{
+						RoleID:          12345,
+						RoleName:        "Custom role",
+						RoleDescription: "Custom role description",
+						GrantedRoles:    []int{992, 707, 452, 677, 726, 296, 457, 987},
+					},
+				},
+				TFGroups: []TFGroup{
+					{
+						GroupID:       56789,
+						ParentGroupID: 98765,
+						GroupName:     "Custom group",
+					},
+				},
+				Section:    section,
+				Subcommand: "user",
+			},
+			dir:          "iam_user_by_email_newlines",
+			filesToCheck: []string{"user.tf", "variables.tf", "import.sh", "roles.tf", "groups.tf"},
+		},
+		"basic user with newline at the end of address": {
+			givenData: TFData{
+				TFUsers: []*TFUser{
+					{
+						TFUserBasicInfo: func() TFUserBasicInfo {
+							info := getTFUserBasicInfo()
+							info.Address = info.Address + "\n"
+							return info
+
+						}(),
+						IsLocked:   false,
+						AuthGrants: "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]",
+					},
+				},
+				TFRoles: []TFRole{
+					{
+						RoleID:          12345,
+						RoleName:        "Custom role",
+						RoleDescription: "Custom role description",
+						GrantedRoles:    []int{992, 707, 452, 677, 726, 296, 457, 987},
+					},
+				},
+				TFGroups: []TFGroup{
+					{
+						GroupID:       56789,
+						ParentGroupID: 98765,
+						GroupName:     "Custom group",
+					},
+				},
+				Section:    section,
+				Subcommand: "user",
+			},
+			dir:          "iam_user_by_email_end_newline",
+			filesToCheck: []string{"user.tf", "variables.tf", "import.sh", "roles.tf", "groups.tf"},
+		},
 		"user with multiple auth grants": {
 			givenData: TFData{
 				TFUsers: []*TFUser{
@@ -261,6 +326,7 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 					"users.tmpl":     fmt.Sprintf("./testdata/res/%s/user.tf", test.dir),
 					"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
 				},
+				AdditionalFuncs: additionalFunctions,
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 
@@ -312,6 +378,29 @@ func getTFUserBasicInfo() TFUserBasicInfo {
 		SecondaryEmail:    "secondary-email-a@akamai.net",
 		MobilePhone:       "(617) 444-4649",
 		Address:           "123 A Street",
+		City:              "A-Town",
+		State:             "TBD",
+		ZipCode:           "34567",
+		PreferredLanguage: "English",
+		SessionTimeOut:    tools.IntPtr(900),
+	}
+}
+
+func getTFUserBasicInfoWithNewlines() TFUserBasicInfo {
+	return TFUserBasicInfo{
+		ID:                "123",
+		FirstName:         "Terraform\n newline",
+		LastName:          "Test\n newline",
+		Email:             "terraform8@akamai.com",
+		Country:           "Canada",
+		Phone:             "(617) 444-4649",
+		TFAEnabled:        true,
+		ContactType:       "Technical Decision Maker",
+		JobTitle:          "job\n title ",
+		TimeZone:          "GMT",
+		SecondaryEmail:    "secondary-email-a@akamai.net",
+		MobilePhone:       "(617) 444-4649",
+		Address:           "123\nA\nStreet",
 		City:              "A-Town",
 		State:             "TBD",
 		ZipCode:           "34567",

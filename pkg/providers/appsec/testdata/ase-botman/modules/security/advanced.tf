@@ -61,7 +61,8 @@ resource "akamai_appsec_advanced_settings_request_body" "config_settings" {
 
 // RequestBody Overrides
 resource "akamai_appsec_advanced_settings_request_body" "default_policy" {
-  config_id                     = akamai_appsec_configuration.config.config_id
-  security_policy_id            = akamai_appsec_security_policy.default_policy.security_policy_id
-  request_body_inspection_limit = "default"
+  config_id                              = akamai_appsec_configuration.config.config_id
+  security_policy_id                     = akamai_appsec_security_policy.default_policy.security_policy_id
+  request_body_inspection_limit          = "default"
+  request_body_inspection_limit_override = true
 }

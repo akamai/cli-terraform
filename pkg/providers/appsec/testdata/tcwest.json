@@ -11176,7 +11176,8 @@
                 "override": false
             },
             "requestBody": {
-                "requestBodyInspectionLimitInKB": "default"
+                "requestBodyInspectionLimitInKB": "default",
+                "override": true
             }
         }
     ],
@@ -11327,7 +11328,8 @@
             ]
         },
         "requestBody": {
-            "requestBodyInspectionLimitInKB": "16"
+            "requestBodyInspectionLimitInKB": "16",
+            "override": true
         },
         "piiLearning": {
           "enabled": true

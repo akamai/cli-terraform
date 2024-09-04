@@ -3588,7 +3588,8 @@
                 ]
             },
             "requestBody": {
-                "requestBodyInspectionLimitInKB": "default"
+                "requestBodyInspectionLimitInKB": "default",
+                "override": true
             }
         }
     ],
