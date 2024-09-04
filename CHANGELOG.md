@@ -1,5 +1,82 @@
 # Release Notes
 
+## Version X.XX.X (Month XX, XXXX)
+
+### Features/Enhancements
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Bug fixes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Deprecations
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Version 1.17.0 (September 04, 2024)
 
 ### Features/Enhancements
