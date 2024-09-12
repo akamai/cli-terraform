@@ -55,6 +55,16 @@ var (
 					GroupName:       "Custom group",
 				},
 			},
+			Notifications: iam.UserNotifications{
+				EnableEmail: true,
+				Options: iam.UserNotificationOptions{
+					NewUser:                   true,
+					PasswordExpiry:            true,
+					Proactive:                 []string{"NetStorage", "EdgeScape"},
+					Upgrade:                   []string{"NetStorage"},
+					APIClientCredentialExpiry: true,
+				},
+			},
 		}
 
 		client.On("GetUser", mock.Anything, getUserReq).Return(&user, nil).Once()
@@ -102,9 +112,10 @@ var (
 		tfData := TFData{
 			TFUsers: []*TFUser{
 				{
-					IsLocked:        false,
-					AuthGrants:      "[{\"groupId\":56789,\"isBlocked\":false,\"roleId\":12345}]",
-					TFUserBasicInfo: getTFUserBasicInfo(),
+					IsLocked:          false,
+					AuthGrants:        "[{\"groupId\":56789,\"isBlocked\":false,\"roleId\":12345}]",
+					TFUserBasicInfo:   getTFUserBasicInfo(),
+					UserNotifications: getTFUserNotifications(),
 				},
 			},
 			TFRoles: []TFRole{
@@ -204,6 +215,37 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 				Subcommand: "user",
 			},
 			dir:          "iam_user_by_email_basic",
+			filesToCheck: []string{"user.tf", "variables.tf", "import.sh", "roles.tf", "groups.tf"},
+		},
+		"basic user with MFA authentication and notifications": {
+			givenData: TFData{
+				TFUsers: []*TFUser{
+					{
+						TFUserBasicInfo:   getTFUserBasicInfoWithMFA(),
+						IsLocked:          false,
+						AuthGrants:        "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]",
+						UserNotifications: getTFUserNotifications(),
+					},
+				},
+				TFRoles: []TFRole{
+					{
+						RoleID:          12345,
+						RoleName:        "Custom role",
+						RoleDescription: "Custom role description",
+						GrantedRoles:    []int{992, 707, 452, 677, 726, 296, 457, 987},
+					},
+				},
+				TFGroups: []TFGroup{
+					{
+						GroupID:       56789,
+						ParentGroupID: 98765,
+						GroupName:     "Custom group",
+					},
+				},
+				Section:    section,
+				Subcommand: "user",
+			},
+			dir:          "iam_user_by_email_basic_mfa_notifications",
 			filesToCheck: []string{"user.tf", "variables.tf", "import.sh", "roles.tf", "groups.tf"},
 		},
 		"basic user with newlines": {
@@ -363,26 +405,47 @@ func getUserBasicInfo() iam.UserBasicInfo {
 	}
 }
 
+var tfUserBasicInfo = TFUserBasicInfo{
+	ID:                "123",
+	FirstName:         "Terraform",
+	LastName:          "Test",
+	Email:             "terraform8@akamai.com",
+	Country:           "Canada",
+	Phone:             "(617) 444-4649",
+	ContactType:       "Technical Decision Maker",
+	JobTitle:          "job title ",
+	TimeZone:          "GMT",
+	SecondaryEmail:    "secondary-email-a@akamai.net",
+	MobilePhone:       "(617) 444-4649",
+	Address:           "123 A Street",
+	City:              "A-Town",
+	State:             "TBD",
+	ZipCode:           "34567",
+	PreferredLanguage: "English",
+	SessionTimeOut:    tools.IntPtr(900),
+}
+
 func getTFUserBasicInfo() TFUserBasicInfo {
-	return TFUserBasicInfo{
-		ID:                "123",
-		FirstName:         "Terraform",
-		LastName:          "Test",
-		Email:             "terraform8@akamai.com",
-		Country:           "Canada",
-		Phone:             "(617) 444-4649",
-		TFAEnabled:        true,
-		ContactType:       "Technical Decision Maker",
-		JobTitle:          "job title ",
-		TimeZone:          "GMT",
-		SecondaryEmail:    "secondary-email-a@akamai.net",
-		MobilePhone:       "(617) 444-4649",
-		Address:           "123 A Street",
-		City:              "A-Town",
-		State:             "TBD",
-		ZipCode:           "34567",
-		PreferredLanguage: "English",
-		SessionTimeOut:    tools.IntPtr(900),
+	info := tfUserBasicInfo
+	info.TFAEnabled = true
+	return info
+}
+
+func getTFUserBasicInfoWithMFA() TFUserBasicInfo {
+	info := tfUserBasicInfo
+	info.TFAEnabled = false
+	info.AdditionalAuthentication = "MFA"
+	return info
+}
+
+func getTFUserNotifications() TFUserNotifications {
+	return TFUserNotifications{
+		EnableEmailNotifications:              true,
+		NewUserNotification:                   true,
+		PasswordExpiry:                        true,
+		Proactive:                             []string{"NetStorage", "EdgeScape"},
+		Upgrade:                               []string{"NetStorage"},
+		APIClientCredentialExpiryNotification: true,
 	}
 }
 

@@ -37,7 +37,8 @@
 
 
 
-
+* Identity and Access Management (IAM)
+    * Added support for generation of `enable_mfa` and `user_notifications` attributes when exporting `akamai_iam_user` configuration
 
 
 
@@ -83,6 +84,10 @@
 
 
 ### Deprecations
+
+
+
+
 
 
 

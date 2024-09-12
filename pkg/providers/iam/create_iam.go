@@ -27,30 +27,42 @@ type (
 	// TFUser represents the user data used in templates
 	TFUser struct {
 		TFUserBasicInfo
-		IsLocked   bool
-		AuthGrants string
+		IsLocked          bool
+		AuthGrants        string
+		UserNotifications TFUserNotifications
 	}
 
 	// TFUserBasicInfo represents user basic info data used in templates
 	TFUserBasicInfo struct {
-		ID                string
-		FirstName         string
-		LastName          string
-		Email             string
-		Country           string
-		Phone             string
-		TFAEnabled        bool
-		ContactType       string
-		JobTitle          string
-		TimeZone          string
-		SecondaryEmail    string
-		MobilePhone       string
-		Address           string
-		City              string
-		State             string
-		ZipCode           string
-		PreferredLanguage string
-		SessionTimeOut    *int
+		ID                       string
+		FirstName                string
+		LastName                 string
+		Email                    string
+		Country                  string
+		Phone                    string
+		TFAEnabled               bool
+		ContactType              string
+		JobTitle                 string
+		TimeZone                 string
+		SecondaryEmail           string
+		MobilePhone              string
+		Address                  string
+		City                     string
+		State                    string
+		ZipCode                  string
+		PreferredLanguage        string
+		SessionTimeOut           *int
+		AdditionalAuthentication string
+	}
+
+	// TFUserNotifications represents a user's notifications
+	TFUserNotifications struct {
+		EnableEmailNotifications              bool
+		APIClientCredentialExpiryNotification bool
+		NewUserNotification                   bool
+		PasswordExpiry                        bool
+		Proactive                             []string
+		Upgrade                               []string
 	}
 
 	// TFRole represents a role used in templates
@@ -118,27 +130,29 @@ func getTFUser(user *iam.User) (*TFUser, error) {
 
 	return &TFUser{
 		TFUserBasicInfo: TFUserBasicInfo{
-			ID:                user.IdentityID,
-			FirstName:         user.FirstName,
-			LastName:          user.LastName,
-			Email:             user.Email,
-			Country:           user.Country,
-			Phone:             user.Phone,
-			TFAEnabled:        user.TFAEnabled,
-			ContactType:       user.ContactType,
-			JobTitle:          user.JobTitle,
-			TimeZone:          user.TimeZone,
-			SecondaryEmail:    user.SecondaryEmail,
-			MobilePhone:       user.MobilePhone,
-			Address:           user.Address,
-			City:              user.City,
-			State:             user.State,
-			ZipCode:           user.ZipCode,
-			PreferredLanguage: user.PreferredLanguage,
-			SessionTimeOut:    user.SessionTimeOut,
+			ID:                       user.IdentityID,
+			FirstName:                user.FirstName,
+			LastName:                 user.LastName,
+			Email:                    user.Email,
+			Country:                  user.Country,
+			Phone:                    user.Phone,
+			TFAEnabled:               user.TFAEnabled,
+			ContactType:              user.ContactType,
+			JobTitle:                 user.JobTitle,
+			TimeZone:                 user.TimeZone,
+			SecondaryEmail:           user.SecondaryEmail,
+			MobilePhone:              user.MobilePhone,
+			Address:                  user.Address,
+			City:                     user.City,
+			State:                    user.State,
+			ZipCode:                  user.ZipCode,
+			PreferredLanguage:        user.PreferredLanguage,
+			SessionTimeOut:           user.SessionTimeOut,
+			AdditionalAuthentication: string(user.AdditionalAuthentication),
 		},
-		IsLocked:   user.IsLocked,
-		AuthGrants: authGrants,
+		IsLocked:          user.IsLocked,
+		AuthGrants:        authGrants,
+		UserNotifications: getUserNotifications(user),
 	}, nil
 }
 
@@ -201,4 +215,15 @@ func getGrantedRolesID(grantedRoles []iam.RoleGrantedRole) []int {
 		rolesIDs = append(rolesIDs, int(v.RoleID))
 	}
 	return rolesIDs
+}
+
+func getUserNotifications(user *iam.User) TFUserNotifications {
+	return TFUserNotifications{
+		EnableEmailNotifications:              user.Notifications.EnableEmail,
+		APIClientCredentialExpiryNotification: user.Notifications.Options.APIClientCredentialExpiry,
+		NewUserNotification:                   user.Notifications.Options.NewUser,
+		PasswordExpiry:                        user.Notifications.Options.PasswordExpiry,
+		Proactive:                             user.Notifications.Options.Proactive,
+		Upgrade:                               user.Notifications.Options.Upgrade,
+	}
 }

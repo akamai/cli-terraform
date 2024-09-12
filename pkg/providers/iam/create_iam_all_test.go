@@ -63,6 +63,16 @@ var (
 					GroupName:       "grp_101",
 				},
 			},
+			Notifications: iam.UserNotifications{
+				EnableEmail: true,
+				Options: iam.UserNotificationOptions{
+					NewUser:                   true,
+					PasswordExpiry:            true,
+					Proactive:                 []string{"NetStorage", "EdgeScape"},
+					Upgrade:                   []string{"NetStorage"},
+					APIClientCredentialExpiry: true,
+				},
+			},
 		}
 
 		client.On("GetUser", mock.Anything, getUserReq).Return(&user, nil).Once()
@@ -80,6 +90,16 @@ var (
 			IdentityID:    "002",
 			IsLocked:      false,
 			AuthGrants:    []iam.AuthGrant{},
+			Notifications: iam.UserNotifications{
+				EnableEmail: true,
+				Options: iam.UserNotificationOptions{
+					NewUser:                   true,
+					PasswordExpiry:            true,
+					Proactive:                 []string{"NetStorage", "EdgeScape"},
+					Upgrade:                   []string{"NetStorage"},
+					APIClientCredentialExpiry: true,
+				},
+			},
 		}
 
 		client.On("GetUser", mock.Anything, getUserReq).Return(&user, nil).Once()
@@ -221,9 +241,10 @@ func TestCreateIAMAll(t *testing.T) {
 
 				expectedTestData := getTestData(section)
 				expectedTestData.TFUsers = []*TFUser{{
-					IsLocked:        false,
-					AuthGrants:      "[{\"groupId\":101,\"isBlocked\":false,\"roleId\":201}]",
-					TFUserBasicInfo: getTFUserBasicInfo(),
+					IsLocked:          false,
+					AuthGrants:        "[{\"groupId\":101,\"isBlocked\":false,\"roleId\":201}]",
+					TFUserBasicInfo:   getTFUserBasicInfo(),
+					UserNotifications: getTFUserNotifications(),
 				}}
 				expectedTestData.TFUsers[0].ID = "001"
 				p.On("ProcessTemplates", expectedTestData).Return(nil)
@@ -315,14 +336,16 @@ func getTestData(section string) TFData {
 	tfData := TFData{
 		TFUsers: []*TFUser{
 			{
-				IsLocked:        false,
-				AuthGrants:      "[{\"groupId\":101,\"isBlocked\":false,\"roleId\":201}]",
-				TFUserBasicInfo: getTFUserBasicInfo(),
+				IsLocked:          false,
+				AuthGrants:        "[{\"groupId\":101,\"isBlocked\":false,\"roleId\":201}]",
+				TFUserBasicInfo:   getTFUserBasicInfo(),
+				UserNotifications: getTFUserNotifications(),
 			},
 			{
-				IsLocked:        false,
-				AuthGrants:      "",
-				TFUserBasicInfo: getTFUserBasicInfo(),
+				IsLocked:          false,
+				AuthGrants:        "",
+				TFUserBasicInfo:   getTFUserBasicInfo(),
+				UserNotifications: getTFUserNotifications(),
 			},
 		},
 		TFGroups: []TFGroup{

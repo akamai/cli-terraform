@@ -57,6 +57,16 @@ var (
 					GroupName:       "Custom group",
 				},
 			},
+			Notifications: iam.UserNotifications{
+				EnableEmail: true,
+				Options: iam.UserNotificationOptions{
+					APIClientCredentialExpiry: true,
+					NewUser:                   true,
+					PasswordExpiry:            true,
+					Proactive:                 []string{"NetStorage", "EdgeScape"},
+					Upgrade:                   []string{"NetStorage"},
+				},
+			},
 		}
 
 		client.On("GetUser", mock.Anything, getUserReq).Return(&user, nil).Once()
@@ -118,9 +128,10 @@ var (
 		tfData := TFData{
 			TFUsers: []*TFUser{
 				{
-					IsLocked:        false,
-					AuthGrants:      "[{\"groupId\":56789,\"isBlocked\":false,\"roleId\":12345}]",
-					TFUserBasicInfo: getTFUserBasicInfo(),
+					IsLocked:          false,
+					AuthGrants:        "[{\"groupId\":56789,\"isBlocked\":false,\"roleId\":12345}]",
+					TFUserBasicInfo:   getTFUserBasicInfo(),
+					UserNotifications: getTFUserNotifications(),
 				},
 			},
 			TFRoles: []TFRole{
@@ -192,9 +203,10 @@ func TestProcessIAMGroupTemplates(t *testing.T) {
 			givenData: TFData{
 				TFUsers: []*TFUser{
 					{
-						TFUserBasicInfo: getTFUserBasicInfo(),
-						IsLocked:        false,
-						AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]",
+						TFUserBasicInfo:   getTFUserBasicInfo(),
+						IsLocked:          false,
+						AuthGrants:        "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]",
+						UserNotifications: getTFUserNotifications(),
 					},
 				},
 				TFGroups: []TFGroup{
