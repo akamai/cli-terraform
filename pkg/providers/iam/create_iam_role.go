@@ -2,7 +2,6 @@ package iam
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strconv"
@@ -14,11 +13,6 @@ import (
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
-)
-
-var (
-	// ErrFetchingRole is returned when fetching role fails
-	ErrFetchingRole = errors.New("unable to fetch role by role_id")
 )
 
 // CmdCreateIAMRole is an entrypoint to create-iam role command

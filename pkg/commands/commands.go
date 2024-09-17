@@ -278,8 +278,13 @@ func CommandLocator() ([]*cli.Command, error) {
 		Subcommands: []*cli.Command{
 			{
 				Name:        "all",
-				Description: "Exports all available Terraform Users, Groups and Roles",
+				Description: "Exports all available Terraform Users, Groups, Roles and Allowlist details",
 				Action:      validatedAction(iam.CmdCreateIAMAll, requireValidWorkpath),
+			},
+			{
+				Name:        "allowlist",
+				Description: "Exports Terraform IP Allowlist and CIDR blocks resources",
+				Action:      validatedAction(iam.CmdCreateIAMAllowlist, requireValidWorkpath),
 			},
 			{
 				Name:        "group",

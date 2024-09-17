@@ -17,11 +17,25 @@ import (
 type (
 	// TFData represents the iam data used in templates
 	TFData struct {
-		TFUsers    []*TFUser
-		TFRoles    []TFRole
-		TFGroups   []TFGroup
-		Section    string
-		Subcommand string
+		TFUsers     []*TFUser
+		TFRoles     []TFRole
+		TFGroups    []TFGroup
+		TFAllowlist TFAllowlist
+		Section     string
+		Subcommand  string
+	}
+
+	// TFAllowlist represents iam allowlist data used in templates
+	TFAllowlist struct {
+		CIDRBlocks []TFCIDRBlock
+		Enabled    bool
+	}
+
+	// TFCIDRBlock represent iam cidr blocks data used in templates
+	TFCIDRBlock struct {
+		CIDRBlock string
+		Enabled   bool
+		Comments  *string
 	}
 
 	// TFUser represents the user data used in templates
@@ -89,6 +103,26 @@ var (
 
 	// ErrFetchingUsers is returned when fetching users fails
 	ErrFetchingUsers = errors.New("unable to fetch users under this account")
+	// ErrFetchingGroups is returned when fetching groups fails
+	ErrFetchingGroups = errors.New("unable to fetch groups under this account")
+	// ErrFetchingRoles is returned when fetching roles fails
+	ErrFetchingRoles = errors.New("unable to fetch roles under this account")
+	// ErrFetchingCIDRBlocks is returned when fetching CIDR blocks fails
+	ErrFetchingCIDRBlocks = errors.New("unable to fetch cidr blocks under this account")
+	// ErrFetchingIPAllowlistStatus is returned when fetching IP allowlist status fails
+	ErrFetchingIPAllowlistStatus = errors.New("unable to fetch ip allowlist status for this account")
+	// ErrFetchingUsersWithinGroup is returned when fetching users within group fails
+	ErrFetchingUsersWithinGroup = errors.New("unable to fetch users within group")
+	// ErrFetchingRolesWithinGroup is returned when fetching roles within group fails
+	ErrFetchingRolesWithinGroup = errors.New("unable to fetch roles within group")
+	// ErrFetchingRole is returned when fetching role fails
+	ErrFetchingRole = errors.New("unable to fetch role by role_id")
+	// ErrFetchingUser is returned when fetching user fails
+	ErrFetchingUser = errors.New("unable to fetch user by email")
+	// ErrUserNotExist is returned when user does not exist
+	ErrUserNotExist = errors.New("user does not exist with given email")
+	// ErrMarshalUserAuthGrants is returned when marshal user auth grants failed
+	ErrMarshalUserAuthGrants = errors.New("unable to marshal AuthGrants ")
 )
 
 // CmdCreateIAM is an entrypoint to create-iam command. This is only for action validation purpose
@@ -226,4 +260,25 @@ func getUserNotifications(user *iam.User) TFUserNotifications {
 		Proactive:                             user.Notifications.Options.Proactive,
 		Upgrade:                               user.Notifications.Options.Upgrade,
 	}
+}
+
+func getTFCIDRBlocks(ctx context.Context, client iam.IAM) ([]TFCIDRBlock, error) {
+
+	cidrBlocks, err := client.ListCIDRBlocks(ctx, iam.ListCIDRBlocksRequest{
+		Actions: true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var tfCIDRBlocks []TFCIDRBlock
+	for _, cidr := range cidrBlocks {
+		tfCIDRBlocks = append(tfCIDRBlocks, TFCIDRBlock{
+			CIDRBlock: cidr.CIDRBlock,
+			Enabled:   cidr.Enabled,
+			Comments:  cidr.Comments,
+		})
+	}
+
+	return tfCIDRBlocks, nil
 }

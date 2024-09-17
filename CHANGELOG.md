@@ -46,8 +46,9 @@
 
 
 
-
-
+* Identity and Access Management (IAM)
+  * Added `allowlist` subcommand to command `export-iam` that exports terraform configuration files for account's IP allowlist and CIDR blocks
+  * Modified `all` subcommand for `export-iam` command to export account's IP allowlist and CIDR blocks details
 
 
 

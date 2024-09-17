@@ -2,7 +2,6 @@ package iam
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -13,15 +12,6 @@ import (
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
-)
-
-var (
-	// ErrFetchingUser is returned when fetching user fails
-	ErrFetchingUser = errors.New("unable to fetch user by email")
-	// ErrUserNotExist is returned when user does not exist
-	ErrUserNotExist = errors.New("user does not exist with given email")
-	// ErrMarshalUserAuthGrants is returned when marshal user auth grants failed
-	ErrMarshalUserAuthGrants = errors.New("unable to marshal AuthGrants ")
 )
 
 // CmdCreateIAMUser is an entrypoint to create-iam user command

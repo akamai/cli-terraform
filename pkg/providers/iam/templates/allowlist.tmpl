@@ -1,0 +1,24 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/iam.TFData*/ -}}
+
+{{ if eq .Subcommand "allowlist" -}}
+{{template "terraform_config.tmpl"}}
+{{end -}}
+
+resource "akamai_iam_ip_allowlist" "allowlist" {
+  enable = {{.TFAllowlist.Enabled}}
+}
+{{ if .TFAllowlist.CIDRBlocks }}
+resource "akamai_iam_cidr_blocks" "cidr_blocks" {
+    cidr_blocks = [
+    {{ range .TFAllowlist.CIDRBlocks -}}
+        {
+            cidr_block = "{{.CIDRBlock}}"
+            enabled    = {{.Enabled}}
+            {{ if .Comments -}}
+            comments   = "{{.Comments}}"
+            {{ end -}}
+        },
+        {{end -}}
+    ]
+}
+{{end -}}

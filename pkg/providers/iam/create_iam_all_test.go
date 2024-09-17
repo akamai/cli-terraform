@@ -2,7 +2,6 @@ package iam
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -12,12 +11,25 @@ import (
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
+	"github.com/akamai/terraform-provider-akamai/v6/pkg/common/ptr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 var (
+	cidrs = iam.ListCIDRBlocksResponse{
+		{
+			CIDRBlock: "1.1.1.1/1",
+			Comments:  ptr.To("comment"),
+			Enabled:   true,
+		},
+		{
+			CIDRBlock: "2.2.2.2/2",
+			Enabled:   false,
+		},
+	}
+
 	expectListAllUsers = func(client *iam.Mock) {
 		listUserReq := iam.ListUsersRequest{Actions: true}
 
@@ -203,7 +215,7 @@ func TestCreateIAMAll(t *testing.T) {
 		init func(*iam.Mock, *templates.MockProcessor)
 		err  error
 	}{
-		"fetch user": {
+		"fetch all": {
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
@@ -211,21 +223,23 @@ func TestCreateIAMAll(t *testing.T) {
 				expectListAllGroups(i)
 				expectListAllRoles(i)
 				expectGetRoles(i)
+				expectGetIPAllowlistStatus(i, true)
+				expectListCIDRBlocks(i, cidrs)
 				expectAllProcessTemplates(p, section)
 			},
 		},
-
 		"fail list users": {
 			init: func(i *iam.Mock, _ *templates.MockProcessor) {
 				i.On("ListUsers", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("oops")).Once()
 			},
 			err: ErrFetchingUsers,
 		},
-
 		"fail get one user": {
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
+				expectGetIPAllowlistStatus(i, true)
+				expectListCIDRBlocks(i, cidrs)
 
 				getUserReq := iam.GetUserRequest{
 					IdentityID:    "002",
@@ -250,7 +264,6 @@ func TestCreateIAMAll(t *testing.T) {
 				p.On("ProcessTemplates", expectedTestData).Return(nil)
 			},
 		},
-
 		"fail list groups": {
 			init: func(i *iam.Mock, _ *templates.MockProcessor) {
 				expectListAllUsers(i)
@@ -260,7 +273,6 @@ func TestCreateIAMAll(t *testing.T) {
 			},
 			err: ErrFetchingGroups,
 		},
-
 		"fail list roles": {
 			init: func(i *iam.Mock, _ *templates.MockProcessor) {
 				expectListAllUsers(i)
@@ -269,9 +281,35 @@ func TestCreateIAMAll(t *testing.T) {
 				expectListAllGroups(i)
 				i.On("ListRoles", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("oops")).Once()
 			},
-			err: ErrFetchingGroups,
+			err: ErrFetchingRoles,
+		},
+		"fail get IP allowlist status": {
+			init: func(i *iam.Mock, _ *templates.MockProcessor) {
+				expectListAllUsers(i)
+				expectGetUser001(i)
+				expectGetUser002(i)
+				expectListAllGroups(i)
+				expectListAllRoles(i)
+				expectGetRoles(i)
+				i.On("GetIPAllowlistStatus", mock.Anything).Return(nil, fmt.Errorf("oops")).Once()
+			},
+			err: ErrFetchingIPAllowlistStatus,
+		},
+		"fail list cidr blocks": {
+			init: func(i *iam.Mock, _ *templates.MockProcessor) {
+				expectListAllUsers(i)
+				expectGetUser001(i)
+				expectGetUser002(i)
+				expectListAllGroups(i)
+				expectListAllRoles(i)
+				expectGetRoles(i)
+				expectGetIPAllowlistStatus(i, true)
+				i.On("ListCIDRBlocks", mock.Anything, iam.ListCIDRBlocksRequest{Actions: true}).Return(nil, fmt.Errorf("oops")).Once()
+			},
+			err: ErrFetchingCIDRBlocks,
 		},
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			mi := new(iam.Mock)
@@ -280,7 +318,7 @@ func TestCreateIAMAll(t *testing.T) {
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
 			err := createIAMAll(ctx, section, mi, mp)
 			if test.err != nil {
-				errors.Is(err, test.err)
+				assert.Contains(t, err.Error(), test.err.Error())
 			} else {
 				require.NoError(t, err)
 			}
@@ -301,7 +339,7 @@ func TestProcessIAMAllTemplates(t *testing.T) {
 		"one used, one not": {
 			givenData:    getTestData(section),
 			dir:          "iam_all",
-			filesToCheck: []string{"users.tf", "variables.tf", "import.sh", "roles.tf", "groups.tf"},
+			filesToCheck: []string{"users.tf", "variables.tf", "import.sh", "roles.tf", "groups.tf", "allowlist.tf"},
 		},
 	}
 
@@ -311,6 +349,7 @@ func TestProcessIAMAllTemplates(t *testing.T) {
 			processor := templates.FSTemplateProcessor{
 				TemplatesFS: templateFiles,
 				TemplateTargets: map[string]string{
+					"allowlist.tmpl": fmt.Sprintf("./testdata/res/%s/allowlist.tf", test.dir),
 					"groups.tmpl":    fmt.Sprintf("./testdata/res/%s/groups.tf", test.dir),
 					"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
 					"roles.tmpl":     fmt.Sprintf("./testdata/res/%s/roles.tf", test.dir),
@@ -383,6 +422,20 @@ func getTestData(section string) TFData {
 				RoleDescription: "role 202 description",
 				GrantedRoles:    []int{},
 			},
+		},
+		TFAllowlist: TFAllowlist{
+			CIDRBlocks: []TFCIDRBlock{
+				{
+					CIDRBlock: "1.1.1.1/1",
+					Comments:  ptr.To("comment"),
+					Enabled:   true,
+				},
+				{
+					CIDRBlock: "2.2.2.2/2",
+					Enabled:   false,
+				},
+			},
+			Enabled: true,
 		},
 		Section:    section,
 		Subcommand: "all",
