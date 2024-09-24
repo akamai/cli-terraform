@@ -4,6 +4,13 @@ GOTEST = $(GOCMD) test
 GOBUILD = $(GOCMD) build
 M = $(shell echo ">")
 
+# Until v0.25.0 is not fixed, we have to use previous version. To install it, we must enable module aware mode.
+GOIMPORTS = $(BIN)/goimports
+GOIMPORTS_VERSION = v0.24.0
+# Rule to install goimports with version pinning
+$(GOIMPORTS): | $(BIN) ; $(info $(M) Installing goimports $(GOIMPORTS_VERSION)...)
+	$Q env GO111MODULE=on GOBIN=$(BIN) $(GOCMD) install golang.org/x/tools/cmd/goimports@$(GOIMPORTS_VERSION)
+
 $(BIN):
 	@mkdir -p $@
 $(BIN)/%: | $(BIN) ; $(info $(M) Installing $(PACKAGE)...)
@@ -11,9 +18,6 @@ $(BIN)/%: | $(BIN) ; $(info $(M) Installing $(PACKAGE)...)
 	   env GO111MODULE=off GOPATH=$$tmp GOBIN=$(BIN) $(GOCMD) get $(PACKAGE) \
 		|| ret=$$?; \
 	   rm -rf $$tmp ; exit $$ret
-
-GOIMPORTS = $(BIN)/goimports
-$(BIN)/goimports: PACKAGE=golang.org/x/tools/cmd/goimports
 
 GOCOV = $(BIN)/gocov
 $(BIN)/gocov: PACKAGE=github.com/axw/gocov/...
