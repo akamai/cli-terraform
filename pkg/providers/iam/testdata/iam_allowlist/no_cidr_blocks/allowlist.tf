@@ -16,3 +16,4 @@ provider "akamai" {
 resource "akamai_iam_ip_allowlist" "allowlist" {
   enable = false
 }
+

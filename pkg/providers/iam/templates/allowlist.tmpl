@@ -7,18 +7,14 @@
 resource "akamai_iam_ip_allowlist" "allowlist" {
   enable = {{.TFAllowlist.Enabled}}
 }
-{{ if .TFAllowlist.CIDRBlocks }}
-resource "akamai_iam_cidr_blocks" "cidr_blocks" {
-    cidr_blocks = [
-    {{ range .TFAllowlist.CIDRBlocks -}}
-        {
-            cidr_block = "{{.CIDRBlock}}"
-            enabled    = {{.Enabled}}
-            {{ if .Comments -}}
-            comments   = "{{.Comments}}"
-            {{ end -}}
-        },
-        {{end -}}
-    ]
-}
+
+{{ range .TFAllowlist.CIDRBlocks -}}
+    resource "akamai_iam_cidr_block" "{{ cidrName .CIDRBlock }}" {
+      cidr_block = "{{.CIDRBlock}}"
+      enabled    = {{.Enabled}}
+      {{ if .Comments -}}
+      comments   = "{{.Comments}}"
+      {{ end -}}
+    }
+
 {{end -}}

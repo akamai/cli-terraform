@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/iam"
 	"github.com/akamai/cli-terraform/pkg/tools"
@@ -33,9 +34,10 @@ type (
 
 	// TFCIDRBlock represent iam cidr blocks data used in templates
 	TFCIDRBlock struct {
-		CIDRBlock string
-		Enabled   bool
-		Comments  *string
+		CIDRBlockID int64
+		CIDRBlock   string
+		Enabled     bool
+		Comments    *string
 	}
 
 	// TFUser represents the user data used in templates
@@ -99,7 +101,9 @@ var (
 	//go:embed templates/*
 	templateFiles embed.FS
 
-	additionalFunctions = tools.DecorateWithMultilineHandlingFunctions(map[string]any{})
+	additionalFunctions = tools.DecorateWithMultilineHandlingFunctions(map[string]any{
+		"cidrName": cidrName,
+	})
 
 	// ErrFetchingUsers is returned when fetching users fails
 	ErrFetchingUsers = errors.New("unable to fetch users under this account")
@@ -274,11 +278,20 @@ func getTFCIDRBlocks(ctx context.Context, client iam.IAM) ([]TFCIDRBlock, error)
 	var tfCIDRBlocks []TFCIDRBlock
 	for _, cidr := range cidrBlocks {
 		tfCIDRBlocks = append(tfCIDRBlocks, TFCIDRBlock{
-			CIDRBlock: cidr.CIDRBlock,
-			Enabled:   cidr.Enabled,
-			Comments:  cidr.Comments,
+			CIDRBlockID: cidr.CIDRBlockID,
+			CIDRBlock:   cidr.CIDRBlock,
+			Enabled:     cidr.Enabled,
+			Comments:    cidr.Comments,
 		})
 	}
 
 	return tfCIDRBlocks, nil
+}
+
+func cidrName(cidr string) string {
+	cidr = strings.Replace(cidr, ".", "_", -1)
+	cidr = strings.Replace(cidr, ":", "_", -1)
+	cidr = strings.Replace(cidr, "/", "-", -1)
+
+	return fmt.Sprintf("cidr_%s", cidr)
 }

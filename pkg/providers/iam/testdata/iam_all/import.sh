@@ -8,4 +8,5 @@ terraform import akamai_iam_group.group_id_102 102
 terraform import akamai_iam_group.group_id_112 112
 terraform import akamai_iam_group.group_id_123 123
 terraform import akamai_iam_ip_allowlist.allowlist ""
-terraform import akamai_iam_cidr_blocks.cidr_blocks ""
+terraform import akamai_iam_cidr_block.cidr_1_1_1_1-1 "1"
+terraform import akamai_iam_cidr_block.cidr_2_2_2_2-2 "2"

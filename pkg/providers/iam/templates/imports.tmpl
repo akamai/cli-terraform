@@ -11,7 +11,7 @@ terraform import akamai_iam_user.iam_user_{{.ID}} {{.ID}}
 {{end -}}
 {{ if or (eq .Subcommand "all") (eq .Subcommand "allowlist") -}}
 terraform import akamai_iam_ip_allowlist.allowlist ""
-{{ if .TFAllowlist.CIDRBlocks -}}
-terraform import akamai_iam_cidr_blocks.cidr_blocks ""
+{{range .TFAllowlist.CIDRBlocks -}}
+terraform import akamai_iam_cidr_block.{{ cidrName .CIDRBlock }} "{{.CIDRBlockID}}"
 {{end -}}
 {{end}}

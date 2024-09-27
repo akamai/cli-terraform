@@ -20,13 +20,15 @@ import (
 var (
 	cidrs = iam.ListCIDRBlocksResponse{
 		{
-			CIDRBlock: "1.1.1.1/1",
-			Comments:  ptr.To("comment"),
-			Enabled:   true,
+			CIDRBlockID: 1,
+			CIDRBlock:   "1.1.1.1/1",
+			Comments:    ptr.To("comment"),
+			Enabled:     true,
 		},
 		{
-			CIDRBlock: "2.2.2.2/2",
-			Enabled:   false,
+			CIDRBlockID: 2,
+			CIDRBlock:   "2.2.2.2/2",
+			Enabled:     false,
 		},
 	}
 
@@ -426,13 +428,15 @@ func getTestData(section string) TFData {
 		TFAllowlist: TFAllowlist{
 			CIDRBlocks: []TFCIDRBlock{
 				{
-					CIDRBlock: "1.1.1.1/1",
-					Comments:  ptr.To("comment"),
-					Enabled:   true,
+					CIDRBlockID: 1,
+					CIDRBlock:   "1.1.1.1/1",
+					Comments:    ptr.To("comment"),
+					Enabled:     true,
 				},
 				{
-					CIDRBlock: "2.2.2.2/2",
-					Enabled:   false,
+					CIDRBlockID: 2,
+					CIDRBlock:   "2.2.2.2/2",
+					Enabled:     false,
 				},
 			},
 			Enabled: true,

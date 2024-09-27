@@ -39,9 +39,10 @@ var (
 
 		for _, cidr := range response {
 			tfData.TFAllowlist.CIDRBlocks = append(tfData.TFAllowlist.CIDRBlocks, TFCIDRBlock{
-				CIDRBlock: cidr.CIDRBlock,
-				Comments:  cidr.Comments,
-				Enabled:   cidr.Enabled,
+				CIDRBlockID: cidr.CIDRBlockID,
+				CIDRBlock:   cidr.CIDRBlock,
+				Comments:    cidr.Comments,
+				Enabled:     cidr.Enabled,
 			})
 		}
 		tfData.TFAllowlist.Enabled = enabled
@@ -104,9 +105,10 @@ func TestProcessIAMAllowlistTemplates(t *testing.T) {
 				TFAllowlist: TFAllowlist{
 					CIDRBlocks: []TFCIDRBlock{
 						{
-							CIDRBlock: "1.1.1.1/1",
-							Enabled:   true,
-							Comments:  ptr.To("comment"),
+							CIDRBlockID: 1,
+							CIDRBlock:   "1.1.1.1/1",
+							Enabled:     true,
+							Comments:    ptr.To("comment"),
 						},
 					},
 					Enabled: true,
@@ -122,13 +124,15 @@ func TestProcessIAMAllowlistTemplates(t *testing.T) {
 				TFAllowlist: TFAllowlist{
 					CIDRBlocks: []TFCIDRBlock{
 						{
-							CIDRBlock: "1.1.1.1/1",
-							Enabled:   true,
-							Comments:  ptr.To("comment"),
+							CIDRBlockID: 1,
+							CIDRBlock:   "1.1.1.1/1",
+							Enabled:     true,
+							Comments:    ptr.To("comment"),
 						},
 						{
-							CIDRBlock: "2.2.2.2/2",
-							Enabled:   false,
+							CIDRBlockID: 2,
+							CIDRBlock:   "2.2.2.2/2",
+							Enabled:     false,
 						},
 					},
 					Enabled: false,

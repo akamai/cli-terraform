@@ -283,7 +283,7 @@ func CommandLocator() ([]*cli.Command, error) {
 			},
 			{
 				Name:        "allowlist",
-				Description: "Exports Terraform IP Allowlist and CIDR blocks resources",
+				Description: "Exports Terraform IP Allowlist and CIDR block resources",
 				Action:      validatedAction(iam.CmdCreateIAMAllowlist, requireValidWorkpath),
 			},
 			{
