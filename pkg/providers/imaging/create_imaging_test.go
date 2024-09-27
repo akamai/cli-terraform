@@ -14,7 +14,7 @@ import (
 	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/imaging"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/tools"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/ptr"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/assert"
@@ -35,7 +35,7 @@ func TestMain(m *testing.M) {
 
 var (
 	veryDeepPolicy = imaging.PolicyInputImage{
-		RolloutDuration: tools.IntPtr(3600),
+		RolloutDuration: ptr.To(3600),
 		Hosts:           []string{"host1", "host2"},
 		Variables: []imaging.Variable{
 			{
@@ -84,29 +84,29 @@ var (
 				Transformation: "RegionOfInterestCrop",
 				Style:          &imaging.RegionOfInterestCropStyleVariableInline{Value: imaging.RegionOfInterestCropStylePtr("fill")},
 				Gravity:        &imaging.GravityVariableInline{Value: imaging.GravityPtr("Center")},
-				Width:          &imaging.IntegerVariableInline{Value: tools.IntPtr(7)},
-				Height:         &imaging.IntegerVariableInline{Value: tools.IntPtr(8)},
+				Width:          &imaging.IntegerVariableInline{Value: ptr.To(7)},
+				Height:         &imaging.IntegerVariableInline{Value: ptr.To(8)},
 				RegionOfInterest: &imaging.RectangleShapeType{
 					Anchor: &imaging.PointShapeType{
-						X: &imaging.NumberVariableInline{Value: tools.Float64Ptr(4)},
-						Y: &imaging.NumberVariableInline{Value: tools.Float64Ptr(5)},
+						X: &imaging.NumberVariableInline{Value: ptr.To(float64(4))},
+						Y: &imaging.NumberVariableInline{Value: ptr.To(float64(5))},
 					},
-					Width:  &imaging.NumberVariableInline{Value: tools.Float64Ptr(8)},
-					Height: &imaging.NumberVariableInline{Value: tools.Float64Ptr(9)},
+					Width:  &imaging.NumberVariableInline{Value: ptr.To(float64(8))},
+					Height: &imaging.NumberVariableInline{Value: ptr.To(float64(9))},
 				},
 			},
 			&imaging.Append{
 				Transformation:         "Append",
 				Gravity:                &imaging.GravityVariableInline{Value: imaging.GravityPtr("Center")},
 				GravityPriority:        &imaging.AppendGravityPriorityVariableInline{Value: imaging.AppendGravityPriorityPtr("horizontal")},
-				PreserveMinorDimension: &imaging.BooleanVariableInline{Value: tools.BoolPtr(true)},
+				PreserveMinorDimension: &imaging.BooleanVariableInline{Value: ptr.To(true)},
 				Image: &imaging.TextImageType{
 					Type:       "Text",
-					Fill:       &imaging.StringVariableInline{Value: tools.StringPtr("#000000")},
-					Size:       &imaging.NumberVariableInline{Value: tools.Float64Ptr(72)},
-					Stroke:     &imaging.StringVariableInline{Value: tools.StringPtr("#FFFFFF")},
-					StrokeSize: &imaging.NumberVariableInline{Value: tools.Float64Ptr(0)},
-					Text:       &imaging.StringVariableInline{Value: tools.StringPtr("test")},
+					Fill:       &imaging.StringVariableInline{Value: ptr.To("#000000")},
+					Size:       &imaging.NumberVariableInline{Value: ptr.To(float64(72))},
+					Stroke:     &imaging.StringVariableInline{Value: ptr.To("#FFFFFF")},
+					StrokeSize: &imaging.NumberVariableInline{Value: ptr.To(float64(0))},
+					Text:       &imaging.StringVariableInline{Value: ptr.To("test")},
 					Transformation: &imaging.Compound{
 						Transformation: "Compound",
 					},
@@ -115,10 +115,10 @@ var (
 			&imaging.Trim{
 				Transformation: "Trim",
 				Fuzz: &imaging.NumberVariableInline{
-					Value: tools.Float64Ptr(0.08),
+					Value: ptr.To(0.08),
 				},
 				Padding: &imaging.IntegerVariableInline{
-					Value: tools.IntPtr(0),
+					Value: ptr.To(0),
 				},
 			},
 			&imaging.IfDimension{
@@ -127,7 +127,7 @@ var (
 					Value: imaging.IfDimensionDimensionPtr("width"),
 				},
 				Value: &imaging.IntegerVariableInline{
-					Name: tools.StringPtr("MaxDimOld"),
+					Name: ptr.To("MaxDimOld"),
 				},
 				Default: &imaging.Compound{
 					Transformation: "Compound",
@@ -138,7 +138,7 @@ var (
 								Value: imaging.IfDimensionDimensionPtr("width"),
 							},
 							Value: &imaging.IntegerVariableInline{
-								Name: tools.StringPtr("MinDim"),
+								Name: ptr.To("MinDim"),
 							},
 							LessThan: &imaging.Compound{
 								Transformation: "Compound",
@@ -152,37 +152,37 @@ var (
 											Value: imaging.ResizeTypePtr("normal"),
 										},
 										Width: &imaging.IntegerVariableInline{
-											Name: tools.StringPtr("ResizeDimWithBorder"),
+											Name: ptr.To("ResizeDimWithBorder"),
 										},
 										Height: &imaging.IntegerVariableInline{
-											Name: tools.StringPtr("ResizeDimWithBorder"),
+											Name: ptr.To("ResizeDimWithBorder"),
 										},
 									},
 									&imaging.Crop{
 										Transformation: "Crop",
 										XPosition: &imaging.IntegerVariableInline{
-											Value: tools.IntPtr(0),
+											Value: ptr.To(0),
 										},
 										YPosition: &imaging.IntegerVariableInline{
-											Value: tools.IntPtr(0),
+											Value: ptr.To(0),
 										},
 										Gravity: &imaging.GravityVariableInline{
 											Value: imaging.GravityPtr("Center"),
 										},
 										AllowExpansion: &imaging.BooleanVariableInline{
-											Value: tools.BoolPtr(true),
+											Value: ptr.To(true),
 										},
 										Width: &imaging.IntegerVariableInline{
-											Name: tools.StringPtr("ResizeDim"),
+											Name: ptr.To("ResizeDim"),
 										},
 										Height: &imaging.IntegerVariableInline{
-											Name: tools.StringPtr("ResizeDim"),
+											Name: ptr.To("ResizeDim"),
 										},
 									},
 									&imaging.BackgroundColor{
 										Transformation: "BackgroundColor",
 										Color: &imaging.StringVariableInline{
-											Value: tools.StringPtr("#ffffff"),
+											Value: ptr.To("#ffffff"),
 										},
 									},
 								},
@@ -196,7 +196,7 @@ var (
 											Value: imaging.IfDimensionDimensionPtr("height"),
 										},
 										Value: &imaging.IntegerVariableInline{
-											Name: tools.StringPtr("MinDim"),
+											Name: ptr.To("MinDim"),
 										},
 										LessThan: &imaging.Compound{
 											Transformation: "Compound",
@@ -210,37 +210,37 @@ var (
 														Value: imaging.ResizeTypePtr("normal"),
 													},
 													Width: &imaging.IntegerVariableInline{
-														Name: tools.StringPtr("ResizeDimWithBorder"),
+														Name: ptr.To("ResizeDimWithBorder"),
 													},
 													Height: &imaging.IntegerVariableInline{
-														Name: tools.StringPtr("ResizeDimWithBorder"),
+														Name: ptr.To("ResizeDimWithBorder"),
 													},
 												},
 												&imaging.Crop{
 													Transformation: "Crop",
 													XPosition: &imaging.IntegerVariableInline{
-														Value: tools.IntPtr(0),
+														Value: ptr.To(0),
 													},
 													YPosition: &imaging.IntegerVariableInline{
-														Value: tools.IntPtr(0),
+														Value: ptr.To(0),
 													},
 													Gravity: &imaging.GravityVariableInline{
 														Value: imaging.GravityPtr("Center"),
 													},
 													AllowExpansion: &imaging.BooleanVariableInline{
-														Value: tools.BoolPtr(true),
+														Value: ptr.To(true),
 													},
 													Width: &imaging.IntegerVariableInline{
-														Name: tools.StringPtr("ResizeDim"),
+														Name: ptr.To("ResizeDim"),
 													},
 													Height: &imaging.IntegerVariableInline{
-														Name: tools.StringPtr("ResizeDim"),
+														Name: ptr.To("ResizeDim"),
 													},
 												},
 												&imaging.BackgroundColor{
 													Transformation: "BackgroundColor",
 													Color: &imaging.StringVariableInline{
-														Value: tools.StringPtr("#ffffff"),
+														Value: ptr.To("#ffffff"),
 													},
 												},
 											},
@@ -254,7 +254,7 @@ var (
 														Value: imaging.IfDimensionDimensionPtr("height"),
 													},
 													Value: &imaging.IntegerVariableInline{
-														Name: tools.StringPtr("MaxDimOld"),
+														Name: ptr.To("MaxDimOld"),
 													},
 													GreaterThan: &imaging.Compound{
 														Transformation: "Compound",
@@ -269,37 +269,37 @@ var (
 																},
 
 																Width: &imaging.IntegerVariableInline{
-																	Name: tools.StringPtr("ResizeDimWithBorder"),
+																	Name: ptr.To("ResizeDimWithBorder"),
 																},
 																Height: &imaging.IntegerVariableInline{
-																	Name: tools.StringPtr("ResizeDimWithBorder"),
+																	Name: ptr.To("ResizeDimWithBorder"),
 																},
 															},
 															&imaging.Crop{
 																Transformation: "Crop",
 																XPosition: &imaging.IntegerVariableInline{
-																	Value: tools.IntPtr(0),
+																	Value: ptr.To(0),
 																},
 																YPosition: &imaging.IntegerVariableInline{
-																	Value: tools.IntPtr(0),
+																	Value: ptr.To(0),
 																},
 																Gravity: &imaging.GravityVariableInline{
 																	Value: imaging.GravityPtr("Center"),
 																},
 																AllowExpansion: &imaging.BooleanVariableInline{
-																	Value: tools.BoolPtr(true),
+																	Value: ptr.To(true),
 																},
 																Width: &imaging.IntegerVariableInline{
-																	Name: tools.StringPtr("ResizeDim"),
+																	Name: ptr.To("ResizeDim"),
 																},
 																Height: &imaging.IntegerVariableInline{
-																	Name: tools.StringPtr("ResizeDim"),
+																	Name: ptr.To("ResizeDim"),
 																},
 															},
 															&imaging.BackgroundColor{
 																Transformation: "BackgroundColor",
 																Color: &imaging.StringVariableInline{
-																	Value: tools.StringPtr("#ffffff"),
+																	Value: ptr.To("#ffffff"),
 																},
 															},
 														},
@@ -316,37 +316,37 @@ var (
 																	Value: imaging.ResizeTypePtr("normal"),
 																},
 																Width: &imaging.IntegerVariableInline{
-																	Name: tools.StringPtr("ResizeDim"),
+																	Name: ptr.To("ResizeDim"),
 																},
 																Height: &imaging.IntegerVariableInline{
-																	Name: tools.StringPtr("ResizeDim"),
+																	Name: ptr.To("ResizeDim"),
 																},
 															},
 															&imaging.Crop{
 																Transformation: "Crop",
 																XPosition: &imaging.IntegerVariableInline{
-																	Value: tools.IntPtr(0),
+																	Value: ptr.To(0),
 																},
 																YPosition: &imaging.IntegerVariableInline{
-																	Value: tools.IntPtr(0),
+																	Value: ptr.To(0),
 																},
 																Gravity: &imaging.GravityVariableInline{
 																	Value: imaging.GravityPtr("Center"),
 																},
 																AllowExpansion: &imaging.BooleanVariableInline{
-																	Value: tools.BoolPtr(true),
+																	Value: ptr.To(true),
 																},
 																Width: &imaging.IntegerVariableInline{
-																	Name: tools.StringPtr("ResizeDim"),
+																	Name: ptr.To("ResizeDim"),
 																},
 																Height: &imaging.IntegerVariableInline{
-																	Name: tools.StringPtr("ResizeDim"),
+																	Name: ptr.To("ResizeDim"),
 																},
 															},
 															&imaging.BackgroundColor{
 																Transformation: "BackgroundColor",
 																Color: &imaging.StringVariableInline{
-																	Value: tools.StringPtr("#ffffff"),
+																	Value: ptr.To("#ffffff"),
 																},
 															},
 														},
@@ -366,7 +366,7 @@ var (
 			&imaging.BackgroundColor{
 				Transformation: "BackgroundColor",
 				Color: &imaging.StringVariableInline{
-					Value: tools.StringPtr("#ffffff"),
+					Value: ptr.To("#ffffff"),
 				},
 			},
 			&imaging.IfDimensionPost{
@@ -375,7 +375,7 @@ var (
 					Value: imaging.IfDimensionPostDimensionPtr("height"),
 				},
 				Value: &imaging.IntegerVariableInline{
-					Name: tools.StringPtr("MaxDimOld"),
+					Name: ptr.To("MaxDimOld"),
 				},
 				GreaterThan: &imaging.CompoundPost{
 					Transformation: "Compound",
@@ -383,7 +383,7 @@ var (
 						&imaging.BackgroundColor{
 							Transformation: "BackgroundColor",
 							Color: &imaging.StringVariableInline{
-								Value: tools.StringPtr("#ffffff"),
+								Value: ptr.To("#ffffff"),
 							},
 						},
 					},
@@ -394,7 +394,7 @@ var (
 						&imaging.BackgroundColor{
 							Transformation: "BackgroundColor",
 							Color: &imaging.StringVariableInline{
-								Value: tools.StringPtr("#ffffff"),
+								Value: ptr.To("#ffffff"),
 							},
 						},
 					},
@@ -403,11 +403,11 @@ var (
 			&imaging.CompositePost{
 				Gravity: &imaging.GravityPostVariableInline{Value: imaging.GravityPostPtr("NorthWest")},
 				Image: &imaging.TextImageTypePost{
-					Fill:       &imaging.StringVariableInline{Value: tools.StringPtr("#000000")},
-					Size:       &imaging.NumberVariableInline{Value: tools.Float64Ptr(72)},
-					Stroke:     &imaging.StringVariableInline{Value: tools.StringPtr("#FFFFFF")},
-					StrokeSize: &imaging.NumberVariableInline{Value: tools.Float64Ptr(0)},
-					Text:       &imaging.StringVariableInline{Value: tools.StringPtr("test")},
+					Fill:       &imaging.StringVariableInline{Value: ptr.To("#000000")},
+					Size:       &imaging.NumberVariableInline{Value: ptr.To(float64(72))},
+					Stroke:     &imaging.StringVariableInline{Value: ptr.To("#FFFFFF")},
+					StrokeSize: &imaging.NumberVariableInline{Value: ptr.To(float64(0))},
+					Text:       &imaging.StringVariableInline{Value: ptr.To("test")},
 					Type:       imaging.TextImageTypePostTypeText,
 					Transformation: &imaging.CompoundPost{
 						Transformation: imaging.CompoundPostTransformationCompound,
@@ -415,8 +415,8 @@ var (
 				},
 				Placement:      &imaging.CompositePostPlacementVariableInline{Value: imaging.CompositePostPlacementPtr(imaging.CompositePostPlacementOver)},
 				Transformation: imaging.CompositePostTransformationComposite,
-				XPosition:      &imaging.IntegerVariableInline{Value: tools.IntPtr(0)},
-				YPosition:      &imaging.IntegerVariableInline{Value: tools.IntPtr(0)},
+				XPosition:      &imaging.IntegerVariableInline{Value: ptr.To(0)},
+				YPosition:      &imaging.IntegerVariableInline{Value: ptr.To(0)},
 			},
 		},
 		Breakpoints: &imaging.Breakpoints{
@@ -426,7 +426,7 @@ var (
 			PerceptualQuality: &imaging.OutputImagePerceptualQualityVariableInline{
 				Value: imaging.OutputImagePerceptualQualityPtr("mediumHigh"),
 			},
-			AdaptiveQuality: tools.IntPtr(50),
+			AdaptiveQuality: ptr.To(50),
 		},
 	}
 
@@ -484,13 +484,13 @@ var (
 			Transformations: []imaging.TransformationType{
 				&imaging.MaxColors{
 					Colors: &imaging.IntegerVariableInline{
-						Value: tools.IntPtr(2),
+						Value: ptr.To(2),
 					},
 					Transformation: imaging.MaxColorsTransformationMaxColors,
 				},
 			},
 			Version: 1,
-			Video:   tools.BoolPtr(false),
+			Video:   ptr.To(false),
 		},
 		&imaging.PolicyOutputImage{
 			ID: "test_policy_image",
@@ -505,13 +505,13 @@ var (
 			Transformations: []imaging.TransformationType{
 				&imaging.MaxColors{
 					Colors: &imaging.IntegerVariableInline{
-						Value: tools.IntPtr(2),
+						Value: ptr.To(2),
 					},
 					Transformation: imaging.MaxColorsTransformationMaxColors,
 				},
 			},
 			Version: 2,
-			Video:   tools.BoolPtr(false),
+			Video:   ptr.To(false),
 		},
 		&imaging.PolicyOutputImage{
 			// Return object for GetPolicy when older version is in production
@@ -527,13 +527,13 @@ var (
 			Transformations: []imaging.TransformationType{
 				&imaging.MaxColors{
 					Colors: &imaging.IntegerVariableInline{
-						Value: tools.IntPtr(2),
+						Value: ptr.To(2),
 					},
 					Transformation: imaging.MaxColorsTransformationMaxColors,
 				},
 			},
 			Version: 1,
-			Video:   tools.BoolPtr(false),
+			Video:   ptr.To(false),
 		},
 	}
 
@@ -568,7 +568,7 @@ var (
 				},
 			},
 			Version: 1,
-			Video:   tools.BoolPtr(true),
+			Video:   ptr.To(true),
 		},
 		&imaging.PolicyOutputVideo{
 			ID: "test_policy_video",
@@ -581,7 +581,7 @@ var (
 				},
 			},
 			Version: 2,
-			Video:   tools.BoolPtr(true),
+			Video:   ptr.To(true),
 		},
 		&imaging.PolicyOutputVideo{
 			// Return object for GetPolicy when older version is in production
@@ -595,7 +595,7 @@ var (
 				},
 			},
 			Version: 1,
-			Video:   tools.BoolPtr(true),
+			Video:   ptr.To(true),
 		},
 	}
 
@@ -992,11 +992,11 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						ActivateOnProduction: true,
 						Policy: &imaging.PolicyInputImage{
 							Output: &imaging.OutputImage{
-								AllowPristineOnDownsize: tools.BoolPtr(true),
+								AllowPristineOnDownsize: ptr.To(true),
 								PerceptualQuality: &imaging.OutputImagePerceptualQualityVariableInline{
 									Value: imaging.OutputImagePerceptualQualityPtr(imaging.OutputImagePerceptualQualityMediumHigh),
 								},
-								PreferModernFormats: tools.BoolPtr(false),
+								PreferModernFormats: ptr.To(false),
 							},
 							Transformations: []imaging.TransformationType{
 								&imaging.Append{
@@ -1020,25 +1020,25 @@ func TestProcessPolicyTemplates(t *testing.T) {
 																		Transformation: &imaging.Compound{},
 																		Type:           "Box",
 																	},
-																	PreserveMinorDimension: &imaging.BooleanVariableInline{Value: tools.BoolPtr(false)},
+																	PreserveMinorDimension: &imaging.BooleanVariableInline{Value: ptr.To(false)},
 																	Transformation:         "Append",
 																},
 															},
 														},
 														Type: "Box",
 													},
-													PreserveMinorDimension: &imaging.BooleanVariableInline{Value: tools.BoolPtr(false)},
+													PreserveMinorDimension: &imaging.BooleanVariableInline{Value: ptr.To(false)},
 													Transformation:         "Append",
 												},
 											},
 										},
 										Type: "Box",
 									},
-									PreserveMinorDimension: &imaging.BooleanVariableInline{Value: tools.BoolPtr(false)},
+									PreserveMinorDimension: &imaging.BooleanVariableInline{Value: ptr.To(false)},
 									Transformation:         "Append",
 								},
 							},
-							ServeStaleDuration: tools.IntPtr(3600),
+							ServeStaleDuration: ptr.To(3600),
 						},
 					},
 				},
@@ -1076,7 +1076,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						PolicyID:             "test_policy_video",
 						ActivateOnProduction: true,
 						Policy: &imaging.PolicyInputVideo{
-							RolloutDuration: tools.IntPtr(3600),
+							RolloutDuration: ptr.To(3600),
 							Hosts:           []string{"host1", "host2"},
 							Variables: []imaging.Variable{
 								{
@@ -1123,7 +1123,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 									Value: imaging.OutputVideoPerceptualQualityPtr("mediumHigh"),
 								},
 								PlaceholderVideoURL: &imaging.StringVariableInline{
-									Value: tools.StringPtr("some"),
+									Value: ptr.To("some"),
 								},
 							},
 						},
