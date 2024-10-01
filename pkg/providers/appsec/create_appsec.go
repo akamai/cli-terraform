@@ -114,6 +114,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"modules-security-advanced-settings.tmpl":       filepath.Join(securityModulePath, "advanced-settings.tf"),
 		"modules-security-javascript-injection.tmpl":    filepath.Join(securityModulePath, "javascript-injection.tf"),
 		"modules-security-transactional-endpoints.tmpl": filepath.Join(securityModulePath, "transactional-endpoints.tf"),
+		"modules-security-content-protection.tmpl":      filepath.Join(securityModulePath, "content-protection.tf"),
 		"modules-wap-selected-hostnames.tmpl":           filepath.Join(securityModulePath, "wap-selected-hostnames.tf"),
 		"variables.tmpl":                                filepath.Join(tfWorkPath, "appsec-variables.tf"),
 		"versions.tmpl":                                 filepath.Join(tfWorkPath, "appsec-versions.tf"),
@@ -121,25 +122,26 @@ func CmdCreateAppsec(c *cli.Context) error {
 
 	// Provide custom helper functions to get data that does not exist in the security config export
 	additionalFuncs := tools.DecorateWithMultilineHandlingFunctions(map[string]any{
-		"exportJSON":                             exportJSON,
-		"getConfigDescription":                   getConfigDescription,
-		"getCustomRuleNameByID":                  getCustomRuleNameByID,
-		"getMalwareNameByID":                     getMalwareNameByID,
-		"getPolicyNameByID":                      getPolicyNameByID,
-		"getPrefixFromID":                        getPrefixFromID,
-		"getRateNameByID":                        getRateNameByID,
-		"getRepNameByID":                         getRepNameByID,
-		"getRuleDescByID":                        getRuleDescByID,
-		"getRuleNameByID":                        getRuleNameByID,
-		"getSection":                             getSection,
-		"getWAFMode":                             getWAFMode,
-		"isStructuredRule":                       isStructuredRule,
-		"exportJSONWithoutKeys":                  exportJSONWithoutKeys,
-		"getCustomBotCategoryResourceNamesByIDs": getCustomBotCategoryResourceNamesByIDs,
-		"getCustomBotCategoryNameByID":           getCustomBotCategoryNameByID,
-		"getCustomClientResourceNamesByIDs":      getCustomClientResourceNamesByIDs,
-		"getProtectedHostsByID":                  getProtectedHostsByID,
-		"getEvaluatedHostsByID":                  getEvaluatedHostsByID,
+		"exportJSON":                                 exportJSON,
+		"getConfigDescription":                       getConfigDescription,
+		"getCustomRuleNameByID":                      getCustomRuleNameByID,
+		"getMalwareNameByID":                         getMalwareNameByID,
+		"getPolicyNameByID":                          getPolicyNameByID,
+		"getPrefixFromID":                            getPrefixFromID,
+		"getRateNameByID":                            getRateNameByID,
+		"getRepNameByID":                             getRepNameByID,
+		"getRuleDescByID":                            getRuleDescByID,
+		"getRuleNameByID":                            getRuleNameByID,
+		"getSection":                                 getSection,
+		"getWAFMode":                                 getWAFMode,
+		"isStructuredRule":                           isStructuredRule,
+		"exportJSONWithoutKeys":                      exportJSONWithoutKeys,
+		"getCustomBotCategoryResourceNamesByIDs":     getCustomBotCategoryResourceNamesByIDs,
+		"getCustomBotCategoryNameByID":               getCustomBotCategoryNameByID,
+		"getCustomClientResourceNamesByIDs":          getCustomClientResourceNamesByIDs,
+		"getContentProtectionRuleResourceNamesByIDs": getContentProtectionRuleResourceNamesByIDs,
+		"getProtectedHostsByID":                      getProtectedHostsByID,
+		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
 	})
 
 	// The template processor
@@ -594,6 +596,35 @@ func getCustomClientResourceNamesByIDs(customClients []map[string]interface{}, c
 		customClientResourceNames[i] = fmt.Sprintf("akamai_botman_custom_client.%s_%s.custom_client_id", customClientName, customClientID)
 	}
 	return strings.Join(customClientResourceNames, ",\n"), nil
+}
+
+// getContentProtectionRuleResourceNamesByIDs returns comma separated content-protection-rule resource names in the same order as the provided contentProtectionRuleIDs
+func getContentProtectionRuleResourceNamesByIDs(policyID string, contentProtectionRules []map[string]interface{}, contentProtectionRuleIDs []string) (string, error) {
+	contentProtectionRuleMap := make(map[string]string)
+	for _, contentProtectionRule := range contentProtectionRules {
+		contentProtectionRuleName, ok := contentProtectionRule["contentProtectionRuleName"].(string)
+		if !ok {
+			return "", fmt.Errorf("cannot convert content protection rule name %s to string", contentProtectionRule["contentProtectionRuleName"])
+		}
+		name, err := tools.EscapeName(contentProtectionRuleName)
+		if err != nil {
+			return "", err
+		}
+		contentProtectionRuleID, ok := contentProtectionRule["contentProtectionRuleId"].(string)
+		if !ok {
+			return "", errors.New("cannot convert contentProtectionRuleId to string")
+		}
+		contentProtectionRuleMap[contentProtectionRuleID] = name
+	}
+	contentProtectionRuleResourceNames := make([]string, len(contentProtectionRuleIDs))
+	for i, contentProtectionRuleID := range contentProtectionRuleIDs {
+		contentProtectionRuleName, ok := contentProtectionRuleMap[contentProtectionRuleID]
+		if !ok {
+			return "", fmt.Errorf("cannot find content protection rule for id %s", contentProtectionRuleID)
+		}
+		contentProtectionRuleResourceNames[i] = fmt.Sprintf("akamai_botman_content_protection_rule.%s_%s_%s.content_protection_rule_id", policyID, contentProtectionRuleName, contentProtectionRuleID)
+	}
+	return strings.Join(contentProtectionRuleResourceNames, ",\n"), nil
 }
 
 // Get the protected hosts by policy id

@@ -6,8 +6,17 @@
 
 * PAPI
   * Added attribute `product_id` to the exported `akamai_property_include` resource.
+
+
+* APPSEC
+  *  Added support to export `akamai_botman_content_protection_rule` for the specified policy.
+  *  Added support to export `akamai_botman_content_protection_rule_sequence` for the specified policy.
+  *  Added support to export `akamai_botman_content_protection_javascript_injection_rule` for the specified policy.
+
+
 * Cloud Access Manager
   * Added flags `group_id` and `contract_id` for `export-cloudaccess` which allows export of `akamai_cloudaccess_key` resource with specified groupID and contractID.
+
 
 * General
   * Added retryable logic for all GET requests to the API.
