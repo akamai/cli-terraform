@@ -63,7 +63,8 @@
 
 ### Bug fixes
 
-
+* PAPI
+  * Fixed an issue with property export where the hostname cnameTo begins with a number or contains a space.
 
 
 

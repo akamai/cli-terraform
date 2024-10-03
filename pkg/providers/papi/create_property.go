@@ -29,6 +29,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/hapi"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/papi"
@@ -311,7 +312,7 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 	tfData.Property.ContractID = property.ContractID
 	tfData.Property.PropertyName = property.PropertyName
 	tfData.Property.PropertyID = property.PropertyID
-	tfData.Property.PropertyResourceName = strings.Replace(property.PropertyName, ".", "-", -1)
+	tfData.Property.PropertyResourceName = formatResourceName(property.PropertyName)
 
 	term.Spinner().OK()
 
@@ -593,7 +594,7 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 	for _, hostname := range hostnames.Items {
 		cnameTo := hostname.CnameTo
 		cnameFrom := hostname.CnameFrom
-		cnameToResource := strings.Replace(cnameTo, ".", "-", -1)
+		cnameToResource := formatResourceName(cnameTo)
 
 		if hostname.EdgeHostnameID != "" {
 			// Get slot details
@@ -1007,4 +1008,15 @@ func CheckErrors() (string, error) {
 		return "", fmt.Errorf("there were errors reported: %v", strings.Join(reportedErrors, ", "))
 	}
 	return "", nil
+}
+
+func formatResourceName(name string) string {
+	// Replace dots with dashes and spaces with underscores
+	formattedName := strings.NewReplacer(".", "-", " ", "_").Replace(name)
+
+	// Prepend underscore if the first character is not a letter
+	if !unicode.IsLetter(rune(formattedName[0])) {
+		return "_" + formattedName
+	}
+	return formattedName
 }
