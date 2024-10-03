@@ -301,6 +301,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"getCustomBotCategoryNameByID":           getCustomBotCategoryNameByID,
 		"getCustomBotCategoryResourceNamesByIDs": getCustomBotCategoryResourceNamesByIDs,
 		"getCustomClientResourceNamesByIDs":      getCustomClientResourceNamesByIDs,
+		"getProtectedHostsByID":                  getProtectedHostsByID,
+		"getEvaluatedHostsByID":                  getEvaluatedHostsByID,
 	})
 
 	// Template to path mappings
@@ -324,7 +326,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"modules-security-main.tmpl":                   filepath.Join(security, "main.tf"),
 		"modules-security-malware-policies.tmpl":       filepath.Join(security, "malware-policies.tf"),
 		"modules-security-malware-policy-actions.tmpl": filepath.Join(security, "malware-policy-actions.tf"),
-		"modules-security-match-targets.tmpl":          filepath.Join(security, "match-targets.tf"),
 		"modules-security-penalty-box.tmpl":            filepath.Join(security, "penalty-box.tf"),
 		"modules-security-policies.tmpl":               filepath.Join(security, "policies.tf"),
 		"modules-security-protections.tmpl":            filepath.Join(security, "protections.tf"),
@@ -337,6 +338,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"modules-security-variables.tmpl":              filepath.Join(security, "variables.tf"),
 		"modules-security-versions.tmpl":               filepath.Join(security, "versions.tf"),
 		"modules-security-waf.tmpl":                    filepath.Join(security, "waf.tf"),
+		"modules-wap-selected-hostnames.tmpl":          filepath.Join(security, "wap-selected-hostnames.tf"),
 	}
 
 	// Let's run our tests
@@ -422,6 +424,8 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 		"getCustomBotCategoryNameByID":           getCustomBotCategoryNameByID,
 		"getCustomBotCategoryResourceNamesByIDs": getCustomBotCategoryResourceNamesByIDs,
 		"getCustomClientResourceNamesByIDs":      getCustomClientResourceNamesByIDs,
+		"getProtectedHostsByID":                  getProtectedHostsByID,
+		"getEvaluatedHostsByID":                  getEvaluatedHostsByID,
 	})
 
 	// Template to path mappings

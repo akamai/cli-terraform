@@ -30,7 +30,9 @@
 
 ### Features/Enhancements
 
-
+* Appsec
+  * Resource `akamai_appsec_match_target` created only if target product is not an AAP account
+  * Resource `akamai_appsec_wap_selected_hostnames` exported for AAP accounts
 
 
 

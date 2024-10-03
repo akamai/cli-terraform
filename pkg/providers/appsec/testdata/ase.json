@@ -20,6 +20,7 @@
     "selectableHosts": [
         "test.akamai.com"
     ],
+    "targetProduct" : "WAP",
     "ratePolicies": [
         {
             "additionalMatchOptions": [

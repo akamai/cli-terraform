@@ -114,6 +114,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"modules-security-advanced-settings.tmpl":       filepath.Join(securityModulePath, "advanced-settings.tf"),
 		"modules-security-javascript-injection.tmpl":    filepath.Join(securityModulePath, "javascript-injection.tf"),
 		"modules-security-transactional-endpoints.tmpl": filepath.Join(securityModulePath, "transactional-endpoints.tf"),
+		"modules-wap-selected-hostnames.tmpl":           filepath.Join(securityModulePath, "wap-selected-hostnames.tf"),
 		"variables.tmpl":                                filepath.Join(tfWorkPath, "appsec-variables.tf"),
 		"versions.tmpl":                                 filepath.Join(tfWorkPath, "appsec-versions.tf"),
 	}
@@ -137,6 +138,8 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"getCustomBotCategoryResourceNamesByIDs": getCustomBotCategoryResourceNamesByIDs,
 		"getCustomBotCategoryNameByID":           getCustomBotCategoryNameByID,
 		"getCustomClientResourceNamesByIDs":      getCustomClientResourceNamesByIDs,
+		"getProtectedHostsByID":                  getProtectedHostsByID,
+		"getEvaluatedHostsByID":                  getEvaluatedHostsByID,
 	})
 
 	// The template processor
@@ -186,6 +189,7 @@ func createAppsec(ctx context.Context, configName string, client appsec.APPSEC, 
 	term.Spinner().Start("Saving TF configurations")
 	if err := templateProcessor.ProcessTemplates(configuration); err != nil {
 		term.Spinner().Fail()
+		fmt.Printf("------------------FAILED ----------------------")
 		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
 	}
 	term.Spinner().OK()
@@ -217,6 +221,7 @@ func exportConfiguration(ctx context.Context, id int, version int, client appsec
 	getExportConfigurationResponse, err := client.GetExportConfiguration(ctx, appsec.GetExportConfigurationRequest{
 		ConfigID: id,
 		Version:  version,
+		Source:   "TF",
 	})
 	if err != nil {
 		return nil, err
@@ -589,4 +594,26 @@ func getCustomClientResourceNamesByIDs(customClients []map[string]interface{}, c
 		customClientResourceNames[i] = fmt.Sprintf("akamai_botman_custom_client.%s_%s.custom_client_id", customClientName, customClientID)
 	}
 	return strings.Join(customClientResourceNames, ",\n"), nil
+}
+
+// Get the protected hosts by policy id
+func getProtectedHostsByID(configuration *appsec.GetExportConfigurationResponse, id string) ([]string, error) {
+	protectedHosts := make([]string, 0)
+	for _, websiteTarget := range configuration.MatchTargets.WebsiteTargets {
+		if websiteTarget.SecurityPolicy.PolicyID == id {
+			return websiteTarget.Hostnames, nil
+		}
+	}
+	return protectedHosts, nil
+}
+
+// Get the protected hosts by policy id
+func getEvaluatedHostsByID(configuration *appsec.GetExportConfigurationResponse, id string) ([]string, error) {
+	evaluatingHostnames := make([]string, 0)
+	for _, policy := range configuration.Evaluating.SecurityPolicies {
+		if policy.SecurityPolicyID == id {
+			return policy.Hostnames, nil
+		}
+	}
+	return evaluatingHostnames, nil
 }
