@@ -13,7 +13,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/edgeworkers"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/edgeworkers"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"

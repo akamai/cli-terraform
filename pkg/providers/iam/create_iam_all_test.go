@@ -7,11 +7,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/ptr"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
-	"github.com/akamai/terraform-provider-akamai/v6/pkg/common/ptr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

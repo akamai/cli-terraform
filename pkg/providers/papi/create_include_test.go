@@ -8,8 +8,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/papi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/ptr"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/ptr"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/assert"
