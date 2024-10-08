@@ -398,8 +398,8 @@ func inventorZone(ctx context.Context, configDNS dns.DNS, configuration configSt
 			recordSets[zName] = make([]string, 0, 0)
 		} else {
 			nameTypesResp, err := configDNS.GetZoneNameTypes(ctx, dns.GetZoneNameTypesRequest{
-				ZoneName: zoneName,
-				Zone:     zName,
+				ZoneName: zName,
+				Zone:     zoneName,
 			})
 			if err != nil {
 				return nil, cli.Exit(color.RedString("Zone Name types retrieval failed"), 1)
