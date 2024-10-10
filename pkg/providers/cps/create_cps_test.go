@@ -10,8 +10,8 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/cps"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/tools"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/cps"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/ptr"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/jinzhu/copier"
@@ -226,9 +226,9 @@ var (
 			ClientMutualAuthentication: &cps.ClientMutualAuthentication{
 				AuthenticationOptions: &cps.AuthenticationOptions{
 					OCSP: &cps.OCSP{
-						Enabled: tools.BoolPtr(true),
+						Enabled: ptr.To(true),
 					},
-					SendCAListToClient: tools.BoolPtr(true),
+					SendCAListToClient: ptr.To(true),
 				},
 				SetID: "2",
 			},
@@ -316,9 +316,9 @@ var (
 				ClientMutualAuthentication: &cps.ClientMutualAuthentication{
 					AuthenticationOptions: &cps.AuthenticationOptions{
 						OCSP: &cps.OCSP{
-							Enabled: tools.BoolPtr(true),
+							Enabled: ptr.To(true),
 						},
-						SendCAListToClient: tools.BoolPtr(true),
+						SendCAListToClient: ptr.To(true),
 					},
 					SetID: "2",
 				},

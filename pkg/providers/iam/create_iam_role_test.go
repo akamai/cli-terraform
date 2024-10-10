@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/iam"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
@@ -61,6 +61,16 @@ var (
 				GroupName:       group1.GroupName,
 			},
 		},
+		Notifications: iam.UserNotifications{
+			EnableEmail: true,
+			Options: iam.UserNotificationOptions{
+				APIClientCredentialExpiry: true,
+				NewUser:                   true,
+				PasswordExpiry:            true,
+				Proactive:                 []string{"NetStorage", "EdgeScape"},
+				Upgrade:                   []string{"NetStorage"},
+			},
+		},
 	}
 
 	user2 = iam.User{
@@ -99,6 +109,16 @@ var (
 				RoleDescription: "Other custom role description",
 				GroupID:         group2.GroupID,
 				GroupName:       group2.GroupName,
+			},
+		},
+		Notifications: iam.UserNotifications{
+			EnableEmail: true,
+			Options: iam.UserNotificationOptions{
+				APIClientCredentialExpiry: true,
+				NewUser:                   true,
+				PasswordExpiry:            true,
+				Proactive:                 []string{"NetStorage", "EdgeScape"},
+				Upgrade:                   []string{"NetStorage"},
 			},
 		},
 	}
@@ -182,6 +202,7 @@ var (
 						PreferredLanguage: "English",
 						SessionTimeOut:    tools.IntPtr(900),
 					},
+					UserNotifications: getTFUserNotifications(),
 				},
 				{
 					IsLocked:   false,
@@ -206,6 +227,7 @@ var (
 						PreferredLanguage: "English",
 						SessionTimeOut:    tools.IntPtr(900),
 					},
+					UserNotifications: getTFUserNotifications(),
 				},
 			},
 			TFRoles: []TFRole{
@@ -426,6 +448,7 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 							PreferredLanguage: "English",
 							SessionTimeOut:    tools.IntPtr(900),
 						},
+						UserNotifications: getTFUserNotifications(),
 					},
 				},
 				TFRoles: []TFRole{
@@ -475,6 +498,7 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 							PreferredLanguage: "English",
 							SessionTimeOut:    tools.IntPtr(900),
 						},
+						UserNotifications: getTFUserNotifications(),
 					},
 					{
 						IsLocked:   false,
@@ -499,6 +523,7 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 							PreferredLanguage: "English",
 							SessionTimeOut:    tools.IntPtr(900),
 						},
+						UserNotifications: getTFUserNotifications(),
 					},
 				},
 				TFRoles: []TFRole{

@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/iam"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
@@ -55,6 +55,16 @@ var (
 					RoleDescription: "Custom role description",
 					GroupID:         56789,
 					GroupName:       "Custom group",
+				},
+			},
+			Notifications: iam.UserNotifications{
+				EnableEmail: true,
+				Options: iam.UserNotificationOptions{
+					APIClientCredentialExpiry: true,
+					NewUser:                   true,
+					PasswordExpiry:            true,
+					Proactive:                 []string{"NetStorage", "EdgeScape"},
+					Upgrade:                   []string{"NetStorage"},
 				},
 			},
 		}
@@ -118,9 +128,10 @@ var (
 		tfData := TFData{
 			TFUsers: []*TFUser{
 				{
-					IsLocked:        false,
-					AuthGrants:      "[{\"groupId\":56789,\"isBlocked\":false,\"roleId\":12345}]",
-					TFUserBasicInfo: getTFUserBasicInfo(),
+					IsLocked:          false,
+					AuthGrants:        "[{\"groupId\":56789,\"isBlocked\":false,\"roleId\":12345}]",
+					TFUserBasicInfo:   getTFUserBasicInfo(),
+					UserNotifications: getTFUserNotifications(),
 				},
 			},
 			TFRoles: []TFRole{
@@ -192,9 +203,10 @@ func TestProcessIAMGroupTemplates(t *testing.T) {
 			givenData: TFData{
 				TFUsers: []*TFUser{
 					{
-						TFUserBasicInfo: getTFUserBasicInfo(),
-						IsLocked:        false,
-						AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]",
+						TFUserBasicInfo:   getTFUserBasicInfo(),
+						IsLocked:          false,
+						AuthGrants:        "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]",
+						UserNotifications: getTFUserNotifications(),
 					},
 				},
 				TFGroups: []TFGroup{

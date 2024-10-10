@@ -1,3 +1,4 @@
+{{ if ne .TargetProduct "WAP" -}}
 {{ if .MatchTargets -}}
 {{ if .MatchTargets.WebsiteTargets -}}
 {{ range .MatchTargets.WebsiteTargets -}}
@@ -44,6 +45,7 @@ resource "akamai_appsec_match_target" "api_{{ .ID }}" {
 }
 )
 }
+{{ end -}}
 {{ end -}}
 {{ end -}}
 {{ end -}}

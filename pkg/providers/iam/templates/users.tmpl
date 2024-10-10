@@ -11,6 +11,11 @@
       country            = "{{.Country}}"
       phone              = "{{.Phone}}"
       enable_tfa         = {{.TFAEnabled}}
+      {{- if eq .AdditionalAuthentication "MFA" }}
+      enable_mfa         = true
+      {{ else }}
+      enable_mfa         = false
+      {{end -}}
       contact_type       = "{{.ContactType}}"
       job_title          = "{{escape .JobTitle}}"
       time_zone          = "{{.TimeZone}}"
@@ -24,6 +29,22 @@
       session_timeout    = {{.SessionTimeOut}}
       auth_grants_json   = "{{escape .AuthGrants}}"
       lock               = {{.IsLocked}}
+      user_notifications {
+        api_client_credential_expiry_notification = {{.UserNotifications.APIClientCredentialExpiryNotification}}
+        new_user_notification                     = {{.UserNotifications.NewUserNotification}}
+        password_expiry                           = {{.UserNotifications.PasswordExpiry}}
+        proactive = [
+          {{- range $index, $element := .UserNotifications.Proactive -}}
+            {{- if $index}},{{- end -}}
+          "{{- $element -}}"
+          {{- end}}]
+        upgrade = [
+          {{- range $index, $element := .UserNotifications.Upgrade -}}
+            {{- if $index}},{{- end -}}
+          "{{- $element -}}"
+          {{- end}}]
+        enable_email_notifications = {{.UserNotifications.EnableEmailNotifications}}
+      }
     }
 
 {{end -}}

@@ -1,5 +1,23 @@
 # Release Notes
 
+## Version 1.18.0 (October 10, 2024)
+
+### Features/Enhancements
+
+* Appsec
+  * Resource `akamai_appsec_match_target` created only if target product is not an AAP account
+  * Resource `akamai_appsec_wap_selected_hostnames` exported for AAP accounts
+
+* Identity and Access Management (IAM)
+  * Added support for generation of `enable_mfa` and `user_notifications` attributes when exporting `akamai_iam_user` configuration
+  * Added `allowlist` subcommand to command `export-iam` that exports terraform configuration files for account's IP allowlist and CIDR blocks
+  * Modified `all` subcommand for `export-iam` command to export account's IP allowlist and CIDR blocks details
+
+### Bug fixes
+
+* PAPI
+  * Fixed an issue with property export where the hostname cnameTo begins with a number or contains a space.
+
 ## Version 1.17.0 (September 04, 2024)
 
 ### Features/Enhancements

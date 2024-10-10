@@ -2,7 +2,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 2.0.0"
+      version = ">= 6.5.0"
     }
   }
   required_version = ">= 1.0"
@@ -20,6 +20,7 @@ resource "akamai_iam_user" "iam_user_123" {
   country            = "Canada"
   phone              = "(617) 444-4649"
   enable_tfa         = true
+  enable_mfa         = false
   contact_type       = "Technical Decision Maker"
   job_title          = "job title "
   time_zone          = "GMT"
@@ -33,5 +34,13 @@ resource "akamai_iam_user" "iam_user_123" {
   session_timeout    = 900
   auth_grants_json   = "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]"
   lock               = false
+  user_notifications {
+    api_client_credential_expiry_notification = false
+    new_user_notification                     = false
+    password_expiry                           = false
+    proactive                                 = []
+    upgrade                                   = []
+    enable_email_notifications                = false
+  }
 }
 

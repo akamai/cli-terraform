@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/hapi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/hapi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/papi"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
@@ -80,11 +80,9 @@ func TestCreateProperty(t *testing.T) {
 					GroupID:           "grp_12345",
 					LatestVersion:     5,
 					Note:              "",
-					ProductID:         "prd_HTTP_Content_Del",
 					ProductionVersion: nil,
 					PropertyID:        "prp_12345",
 					PropertyName:      "test.edgesuite.net",
-					RuleFormat:        "latest",
 					StagingVersion:    nil,
 				},
 			},
@@ -96,11 +94,9 @@ func TestCreateProperty(t *testing.T) {
 			GroupID:           "grp_12345",
 			LatestVersion:     5,
 			Note:              "",
-			ProductID:         "prd_HTTP_Content_Del",
 			ProductionVersion: nil,
 			PropertyID:        "prp_12345",
 			PropertyName:      "test.edgesuite.net",
-			RuleFormat:        "latest",
 			StagingVersion:    nil,
 		},
 	}
@@ -115,11 +111,9 @@ func TestCreateProperty(t *testing.T) {
 					GroupID:           "grp_12345",
 					LatestVersion:     5,
 					Note:              "",
-					ProductID:         "prd_HTTP_Content_Del",
 					ProductionVersion: nil,
 					PropertyID:        "prp_12345",
 					PropertyName:      "test.edgekey.net",
-					RuleFormat:        "latest",
 					StagingVersion:    nil,
 				},
 			},
@@ -131,11 +125,9 @@ func TestCreateProperty(t *testing.T) {
 			GroupID:           "grp_12345",
 			LatestVersion:     5,
 			Note:              "",
-			ProductID:         "prd_HTTP_Content_Del",
 			ProductionVersion: nil,
 			PropertyID:        "prp_12345",
 			PropertyName:      "test.edgekey.net",
-			RuleFormat:        "latest",
 			StagingVersion:    nil,
 		},
 	}
@@ -325,6 +317,26 @@ func TestCreateProperty(t *testing.T) {
 					EdgeHostnameID:       "ehn_2867480",
 					CnameFrom:            "test.edgesuite.net",
 					CnameTo:              "test.edgesuite.net",
+					CertProvisioningType: "CPS_MANAGED",
+				},
+			},
+		},
+	}
+
+	getPropertyVersionWithDigitsAndSpacesInHostnamesResponse := papi.GetPropertyVersionHostnamesResponse{
+		AccountID:       "test_account",
+		ContractID:      "test_contract",
+		GroupID:         "grp_12345",
+		PropertyID:      "prp_12345",
+		PropertyVersion: 5,
+		Etag:            "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
+		Hostnames: papi.HostnameResponseItems{
+			Items: []papi.Hostname{
+				{
+					CnameType:            "EDGE_HOSTNAME",
+					EdgeHostnameID:       "ehn_2867480",
+					CnameFrom:            "test.edgesuite.net",
+					CnameTo:              "1 test.edgesuite.net",
 					CertProvisioningType: "CPS_MANAGED",
 				},
 			},
@@ -648,7 +660,7 @@ func TestCreateProperty(t *testing.T) {
 		rulesAsHCL          bool
 		withBootstrap       bool
 	}{
-		"basic property": {
+		"basic property (with hostname's cnameTo starting with a digit)": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
@@ -659,12 +671,12 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
 				mockGetLatestVersion(c, &getLatestVersionResponse)
 				mockGetProducts(c, &getProductsResponse, nil)
-				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionWithDigitsAndSpacesInHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().build(), noFilters, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaultsHavingDigitsAndSpacesInHostnameDetails().build(), noFilters, nil)
 			},
 			dir:     "basic",
 			jsonDir: "basic/property-snippets",
@@ -3075,6 +3087,53 @@ func (t *tfDataBuilder) withDefaults() *tfDataBuilder {
 					CnameFrom:                "test.edgesuite.net",
 					CnameTo:                  "test.edgesuite.net",
 					EdgeHostnameResourceName: "test-edgesuite-net",
+					CertProvisioningType:     "CPS_MANAGED",
+					IsActive:                 true,
+				},
+			},
+			StagingInfo: NetworkInfo{
+				Emails:                  []string{"jsmith@akamai.com"},
+				HasActivation:           true,
+				Version:                 5,
+				IsActiveOnLatestVersion: true,
+			},
+			ReadVersion: "LATEST",
+		},
+		Section: "test_section",
+	}
+	return t
+}
+
+func (t *tfDataBuilder) withDefaultsHavingDigitsAndSpacesInHostnameDetails() *tfDataBuilder {
+	t.tfData = TFData{
+		Property: TFPropertyData{
+			GroupName:            "test_group",
+			GroupID:              "grp_12345",
+			ContractID:           "test_contract",
+			PropertyResourceName: "test-edgesuite-net",
+			PropertyName:         "test.edgesuite.net",
+			PropertyID:           "prp_12345",
+			ProductID:            "prd_HTTP_Content_Del",
+			ProductName:          "HTTP_Content_Del",
+			RuleFormat:           "latest",
+			IsSecure:             "false",
+			EdgeHostnames: map[string]EdgeHostname{
+				"_1_test-edgesuite-net": {
+					EdgeHostname:             "1 test.edgesuite.net",
+					EdgeHostnameID:           "ehn_2867480",
+					ContractID:               "test_contract",
+					GroupID:                  "grp_12345",
+					ID:                       "",
+					IPv6:                     "IPV6_COMPLIANCE",
+					SecurityType:             "STANDARD-TLS",
+					EdgeHostnameResourceName: "_1_test-edgesuite-net",
+				},
+			},
+			Hostnames: map[string]Hostname{
+				"test.edgesuite.net": {
+					CnameFrom:                "test.edgesuite.net",
+					CnameTo:                  "1 test.edgesuite.net",
+					EdgeHostnameResourceName: "_1_test-edgesuite-net",
 					CertProvisioningType:     "CPS_MANAGED",
 					IsActive:                 true,
 				},

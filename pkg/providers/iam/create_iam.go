@@ -7,8 +7,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/iam"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/urfave/cli/v2"
@@ -17,40 +18,67 @@ import (
 type (
 	// TFData represents the iam data used in templates
 	TFData struct {
-		TFUsers    []*TFUser
-		TFRoles    []TFRole
-		TFGroups   []TFGroup
-		Section    string
-		Subcommand string
+		TFUsers     []*TFUser
+		TFRoles     []TFRole
+		TFGroups    []TFGroup
+		TFAllowlist TFAllowlist
+		Section     string
+		Subcommand  string
+	}
+
+	// TFAllowlist represents iam allowlist data used in templates
+	TFAllowlist struct {
+		CIDRBlocks []TFCIDRBlock
+		Enabled    bool
+	}
+
+	// TFCIDRBlock represent iam cidr blocks data used in templates
+	TFCIDRBlock struct {
+		CIDRBlockID int64
+		CIDRBlock   string
+		Enabled     bool
+		Comments    *string
 	}
 
 	// TFUser represents the user data used in templates
 	TFUser struct {
 		TFUserBasicInfo
-		IsLocked   bool
-		AuthGrants string
+		IsLocked          bool
+		AuthGrants        string
+		UserNotifications TFUserNotifications
 	}
 
 	// TFUserBasicInfo represents user basic info data used in templates
 	TFUserBasicInfo struct {
-		ID                string
-		FirstName         string
-		LastName          string
-		Email             string
-		Country           string
-		Phone             string
-		TFAEnabled        bool
-		ContactType       string
-		JobTitle          string
-		TimeZone          string
-		SecondaryEmail    string
-		MobilePhone       string
-		Address           string
-		City              string
-		State             string
-		ZipCode           string
-		PreferredLanguage string
-		SessionTimeOut    *int
+		ID                       string
+		FirstName                string
+		LastName                 string
+		Email                    string
+		Country                  string
+		Phone                    string
+		TFAEnabled               bool
+		ContactType              string
+		JobTitle                 string
+		TimeZone                 string
+		SecondaryEmail           string
+		MobilePhone              string
+		Address                  string
+		City                     string
+		State                    string
+		ZipCode                  string
+		PreferredLanguage        string
+		SessionTimeOut           *int
+		AdditionalAuthentication string
+	}
+
+	// TFUserNotifications represents a user's notifications
+	TFUserNotifications struct {
+		EnableEmailNotifications              bool
+		APIClientCredentialExpiryNotification bool
+		NewUserNotification                   bool
+		PasswordExpiry                        bool
+		Proactive                             []string
+		Upgrade                               []string
 	}
 
 	// TFRole represents a role used in templates
@@ -73,10 +101,32 @@ var (
 	//go:embed templates/*
 	templateFiles embed.FS
 
-	additionalFunctions = tools.DecorateWithMultilineHandlingFunctions(map[string]any{})
+	additionalFunctions = tools.DecorateWithMultilineHandlingFunctions(map[string]any{
+		"cidrName": cidrName,
+	})
 
 	// ErrFetchingUsers is returned when fetching users fails
 	ErrFetchingUsers = errors.New("unable to fetch users under this account")
+	// ErrFetchingGroups is returned when fetching groups fails
+	ErrFetchingGroups = errors.New("unable to fetch groups under this account")
+	// ErrFetchingRoles is returned when fetching roles fails
+	ErrFetchingRoles = errors.New("unable to fetch roles under this account")
+	// ErrFetchingCIDRBlocks is returned when fetching CIDR blocks fails
+	ErrFetchingCIDRBlocks = errors.New("unable to fetch cidr blocks under this account")
+	// ErrFetchingIPAllowlistStatus is returned when fetching IP allowlist status fails
+	ErrFetchingIPAllowlistStatus = errors.New("unable to fetch ip allowlist status for this account")
+	// ErrFetchingUsersWithinGroup is returned when fetching users within group fails
+	ErrFetchingUsersWithinGroup = errors.New("unable to fetch users within group")
+	// ErrFetchingRolesWithinGroup is returned when fetching roles within group fails
+	ErrFetchingRolesWithinGroup = errors.New("unable to fetch roles within group")
+	// ErrFetchingRole is returned when fetching role fails
+	ErrFetchingRole = errors.New("unable to fetch role by role_id")
+	// ErrFetchingUser is returned when fetching user fails
+	ErrFetchingUser = errors.New("unable to fetch user by email")
+	// ErrUserNotExist is returned when user does not exist
+	ErrUserNotExist = errors.New("user does not exist with given email")
+	// ErrMarshalUserAuthGrants is returned when marshal user auth grants failed
+	ErrMarshalUserAuthGrants = errors.New("unable to marshal AuthGrants ")
 )
 
 // CmdCreateIAM is an entrypoint to create-iam command. This is only for action validation purpose
@@ -118,27 +168,29 @@ func getTFUser(user *iam.User) (*TFUser, error) {
 
 	return &TFUser{
 		TFUserBasicInfo: TFUserBasicInfo{
-			ID:                user.IdentityID,
-			FirstName:         user.FirstName,
-			LastName:          user.LastName,
-			Email:             user.Email,
-			Country:           user.Country,
-			Phone:             user.Phone,
-			TFAEnabled:        user.TFAEnabled,
-			ContactType:       user.ContactType,
-			JobTitle:          user.JobTitle,
-			TimeZone:          user.TimeZone,
-			SecondaryEmail:    user.SecondaryEmail,
-			MobilePhone:       user.MobilePhone,
-			Address:           user.Address,
-			City:              user.City,
-			State:             user.State,
-			ZipCode:           user.ZipCode,
-			PreferredLanguage: user.PreferredLanguage,
-			SessionTimeOut:    user.SessionTimeOut,
+			ID:                       user.IdentityID,
+			FirstName:                user.FirstName,
+			LastName:                 user.LastName,
+			Email:                    user.Email,
+			Country:                  user.Country,
+			Phone:                    user.Phone,
+			TFAEnabled:               user.TFAEnabled,
+			ContactType:              user.ContactType,
+			JobTitle:                 user.JobTitle,
+			TimeZone:                 user.TimeZone,
+			SecondaryEmail:           user.SecondaryEmail,
+			MobilePhone:              user.MobilePhone,
+			Address:                  user.Address,
+			City:                     user.City,
+			State:                    user.State,
+			ZipCode:                  user.ZipCode,
+			PreferredLanguage:        user.PreferredLanguage,
+			SessionTimeOut:           user.SessionTimeOut,
+			AdditionalAuthentication: string(user.AdditionalAuthentication),
 		},
-		IsLocked:   user.IsLocked,
-		AuthGrants: authGrants,
+		IsLocked:          user.IsLocked,
+		AuthGrants:        authGrants,
+		UserNotifications: getUserNotifications(user),
 	}, nil
 }
 
@@ -201,4 +253,45 @@ func getGrantedRolesID(grantedRoles []iam.RoleGrantedRole) []int {
 		rolesIDs = append(rolesIDs, int(v.RoleID))
 	}
 	return rolesIDs
+}
+
+func getUserNotifications(user *iam.User) TFUserNotifications {
+	return TFUserNotifications{
+		EnableEmailNotifications:              user.Notifications.EnableEmail,
+		APIClientCredentialExpiryNotification: user.Notifications.Options.APIClientCredentialExpiry,
+		NewUserNotification:                   user.Notifications.Options.NewUser,
+		PasswordExpiry:                        user.Notifications.Options.PasswordExpiry,
+		Proactive:                             user.Notifications.Options.Proactive,
+		Upgrade:                               user.Notifications.Options.Upgrade,
+	}
+}
+
+func getTFCIDRBlocks(ctx context.Context, client iam.IAM) ([]TFCIDRBlock, error) {
+
+	cidrBlocks, err := client.ListCIDRBlocks(ctx, iam.ListCIDRBlocksRequest{
+		Actions: true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var tfCIDRBlocks []TFCIDRBlock
+	for _, cidr := range cidrBlocks {
+		tfCIDRBlocks = append(tfCIDRBlocks, TFCIDRBlock{
+			CIDRBlockID: cidr.CIDRBlockID,
+			CIDRBlock:   cidr.CIDRBlock,
+			Enabled:     cidr.Enabled,
+			Comments:    cidr.Comments,
+		})
+	}
+
+	return tfCIDRBlocks, nil
+}
+
+func cidrName(cidr string) string {
+	cidr = strings.Replace(cidr, ".", "_", -1)
+	cidr = strings.Replace(cidr, ":", "_", -1)
+	cidr = strings.Replace(cidr, "/", "-", -1)
+
+	return fmt.Sprintf("cidr_%s", cidr)
 }

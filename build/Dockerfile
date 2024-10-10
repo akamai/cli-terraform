@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.0-experimental
 # This script was copied from 'terraform-provider-akamai'
-FROM golang:1.21.12-alpine3.20
+FROM golang:1.21.12-alpine3.19
 ENV PROVIDER_VERSION="1.0.0" \
     GO111MODULE="on" \
     CGO_ENABLED=0 \
@@ -11,7 +11,7 @@ ENV PROVIDER_VERSION="1.0.0" \
 ARG SSH_PRV_KEY
 ARG SSH_PUB_KEY
 ARG SSH_KNOWN_HOSTS
-ARG TERRAFORM_VERSION="1.4.6"
+ARG TERRAFORM_VERSION="1.9.5"
 WORKDIR $GOPATH/src/github.com/akamai
 
 RUN apk add --update git bash sudo openssh gcc musl-dev openssl-dev ca-certificates unzip curl make && \

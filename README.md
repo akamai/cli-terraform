@@ -329,7 +329,8 @@ $ akamai terraform [global flags] export-edgeworker [command flags] <edgeworker_
    akamai terraform [global flags] export-iam [subcommand]
 
 Subcommands:
-    all                     Exports all available Terraform Users, Groups and Roles
+    all                     Exports all available Terraform Users, Groups, Roles, IP Allowlist and CIDR block resources
+    allowlist               Exports Terraform IP Allowlist and CIDR block resources
     group [group id]        Exports group by id with relevant users and their roles
     role [role id]          Exports role by id with relevant users and their groups
     user [user's email]     Exports user by email with relevant user's groups and roles

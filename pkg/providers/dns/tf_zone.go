@@ -17,11 +17,11 @@ package dns
 import (
 	"context"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/dns"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/dns"
 )
 
 // process zone
-func processZone(ctx context.Context, zone *dns.ZoneResponse, resourceZoneName string, modSegment bool, fileUtils fileUtils, tfWorkPath string) (string, error) {
+func processZone(ctx context.Context, zone *dns.GetZoneResponse, resourceZoneName string, modSegment bool, fileUtils fileUtils, tfWorkPath string) (string, error) {
 	data := ZoneData{
 		BlockName:             resourceZoneName,
 		Zone:                  zone.Zone,

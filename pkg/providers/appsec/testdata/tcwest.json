@@ -12,6 +12,7 @@
     "production": {
         "status": "Inactive"
     },
+    "targetProduct" : "WAP",
     "createDate": "2022-01-27T21:17:45Z",
     "createdBy": "aetsai",
     "selectedHosts": [

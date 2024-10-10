@@ -9,3 +9,9 @@ terraform import akamai_iam_user.iam_user_{{.ID}} {{.ID}}
 {{range .TFGroups -}}
     terraform import akamai_iam_group.group_id_{{.GroupID}} {{.GroupID}}
 {{end -}}
+{{ if or (eq .Subcommand "all") (eq .Subcommand "allowlist") -}}
+terraform import akamai_iam_ip_allowlist.allowlist ""
+{{range .TFAllowlist.CIDRBlocks -}}
+terraform import akamai_iam_cidr_block.{{ cidrName .CIDRBlock }} "{{.CIDRBlockID}}"
+{{end -}}
+{{end}}

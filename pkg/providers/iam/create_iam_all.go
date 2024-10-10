@@ -2,24 +2,16 @@ package iam
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"path/filepath"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/iam"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
-)
-
-var (
-	// ErrFetchingGroups is returned when fetching groups fails
-	ErrFetchingGroups = errors.New("unable to fetch groups under this account")
-	// ErrFetchingRoles is returned when fetching roles fails
-	ErrFetchingRoles = errors.New("unable to fetch roles under this account")
 )
 
 // CmdCreateIAMAll is an entrypoint to create-iam all command
@@ -38,9 +30,10 @@ func CmdCreateIAMAll(c *cli.Context) error {
 	importPath := filepath.Join(tfWorkPath, "import.sh")
 	rolesPath := filepath.Join(tfWorkPath, "roles.tf")
 	usersPath := filepath.Join(tfWorkPath, "users.tf")
+	allowlistPath := filepath.Join(tfWorkPath, "allowlist.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 
-	err := tools.CheckFiles(groupsPath, importPath, rolesPath, usersPath, variablesPath)
+	err := tools.CheckFiles(groupsPath, importPath, rolesPath, usersPath, allowlistPath, variablesPath)
 	if err != nil {
 		return cli.Exit(color.RedString(err.Error()), 1)
 	}
@@ -50,6 +43,7 @@ func CmdCreateIAMAll(c *cli.Context) error {
 		"imports.tmpl":   importPath,
 		"roles.tmpl":     rolesPath,
 		"users.tmpl":     usersPath,
+		"allowlist.tmpl": allowlistPath,
 		"variables.tmpl": variablesPath,
 	}
 
@@ -74,6 +68,7 @@ func createIAMAll(ctx context.Context, section string, client iam.IAM, templateP
 		return err
 	}
 
+	// Fetch users
 	term.Spinner().Start("Fetching all available users")
 	users, err := client.ListUsers(ctx, iam.ListUsersRequest{Actions: true})
 	if err != nil {
@@ -87,6 +82,7 @@ func createIAMAll(ctx context.Context, section string, client iam.IAM, templateP
 	}
 	term.Spinner().OK()
 
+	// Fetch groups
 	term.Spinner().Start("Fetching all available groups")
 	groups, err := client.ListGroups(ctx, iam.ListGroupsRequest{Actions: true})
 	if err != nil {
@@ -101,6 +97,7 @@ func createIAMAll(ctx context.Context, section string, client iam.IAM, templateP
 	}
 	term.Spinner().OK()
 
+	// Fetch groups
 	term.Spinner().Start("Fetching all available roles")
 	roles, err := client.ListRoles(ctx, iam.ListRolesRequest{
 		Actions:       true,
@@ -118,12 +115,33 @@ func createIAMAll(ctx context.Context, section string, client iam.IAM, templateP
 	}
 	term.Spinner().OK()
 
+	// Fetch IP allowlist status
+	var tfAllowlist TFAllowlist
+	term.Spinner().Start("Fetching IP allowlist status")
+	status, err := client.GetIPAllowlistStatus(ctx)
+	if err != nil {
+		term.Spinner().Fail()
+		return fmt.Errorf("%w: %s", ErrFetchingIPAllowlistStatus, err)
+	}
+	tfAllowlist.Enabled = status.Enabled
+
+	// Fetch CIDR blocks
+	term.Spinner().Start("Fetching all CIDR blocks")
+	tfCIDRBlocks, err := getTFCIDRBlocks(ctx, client)
+	if err != nil {
+		term.Spinner().Fail()
+		return fmt.Errorf("%w: %s", ErrFetchingCIDRBlocks, err)
+	}
+	tfAllowlist.CIDRBlocks = tfCIDRBlocks
+	term.Spinner().OK()
+
 	tfData := TFData{
-		TFUsers:    tfUsers,
-		TFRoles:    tfRoles,
-		TFGroups:   tfGroups,
-		Section:    section,
-		Subcommand: "all",
+		TFUsers:     tfUsers,
+		TFRoles:     tfRoles,
+		TFGroups:    tfGroups,
+		TFAllowlist: tfAllowlist,
+		Section:     section,
+		Subcommand:  "all",
 	}
 
 	term.Spinner().Start("Saving TF configurations ")

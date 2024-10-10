@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/dns"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/dns"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -80,8 +80,8 @@ func TestProcessRecordset(t *testing.T) {
 			}
 			recordSets := make([]dns.RecordSet, 0)
 			recordSets = append(recordSets, recordset)
-			response := dns.RecordSetResponse{Metadata: metadata, RecordSets: recordSets}
-			m.On("GetRecordSets", ctx, zone, mock.Anything).Return(&response, nil).Once()
+			response := dns.GetRecordSetsResponse{Metadata: metadata, RecordSets: recordSets}
+			m.On("GetRecordSets", ctx, mock.AnythingOfType("dns.GetRecordSetsRequest")).Return(&response, nil).Once()
 			parsedRData := map[string]interface{}{"hardware": "INTEL-386", "software": "Unix"}
 			m.On("ParseRData", ctx, recordset.Type, recordset.Rdata).Return(parsedRData).Once()
 

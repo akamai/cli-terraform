@@ -2,23 +2,17 @@ package iam
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strconv"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/iam"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli-terraform/pkg/tools"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
-)
-
-var (
-	// ErrFetchingRole is returned when fetching role fails
-	ErrFetchingRole = errors.New("unable to fetch role by role_id")
 )
 
 // CmdCreateIAMRole is an entrypoint to create-iam role command

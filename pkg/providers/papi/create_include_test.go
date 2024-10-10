@@ -8,8 +8,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/papi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v8/pkg/tools"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/ptr"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
 	"github.com/stretchr/testify/assert"
@@ -38,8 +38,8 @@ var (
 						IncludeName:       "test_include",
 						IncludeType:       papi.IncludeTypeMicroServices,
 						LatestVersion:     2,
-						StagingVersion:    tools.IntPtr(1),
-						ProductionVersion: tools.IntPtr(1),
+						StagingVersion:    ptr.To(1),
+						ProductionVersion: ptr.To(1),
 					},
 					{
 						AccountID:      "test_account_1",
@@ -50,7 +50,7 @@ var (
 						IncludeName:    "test_include_1",
 						IncludeType:    papi.IncludeTypeCommonSettings,
 						LatestVersion:  1,
-						StagingVersion: tools.IntPtr(1),
+						StagingVersion: ptr.To(1),
 					},
 				},
 			},
