@@ -1,5 +1,97 @@
 # Release Notes
 
+## Version X.XX.X (Month XX, XXXX)
+
+### Features/Enhancements
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Bug fixes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Deprecations
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Version 1.18.0 (October 10, 2024)
 
 ### Features/Enhancements
