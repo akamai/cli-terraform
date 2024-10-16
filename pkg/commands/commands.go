@@ -371,6 +371,14 @@ func CommandLocator() ([]*cli.Command, error) {
 				Usage:       "Directory used to store files created when running commands.",
 				DefaultText: "current directory",
 			},
+			&cli.StringFlag{
+				Name:  "group_id",
+				Usage: "The unique identifier assigned to the access control group assigned to the access key",
+			},
+			&cli.StringFlag{
+				Name:  "contract_id",
+				Usage: "The unique identifier for the contract assigned to the access key",
+			},
 		},
 		BashComplete: autocomplete.Default,
 	})

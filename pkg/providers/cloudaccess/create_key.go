@@ -26,6 +26,7 @@ type (
 	TFCloudAccessData struct {
 		Key     TFCloudAccessKey
 		Section string
+		Flag    bool
 	}
 
 	// TFCloudAccessKey represents the data used for export CloudAccess key
@@ -106,13 +107,35 @@ func CmdCreateCloudAccess(c *cli.Context) error {
 		return cli.Exit(color.RedString(err.Error()), 1)
 	}
 	section := edgegrid.GetEdgercSection(c)
-	if err = createCloudAccess(ctx, keyUID, section, client, processor); err != nil {
+
+	// Get groupID and contractId from flags
+	var groupID int64
+	var contractID string
+
+	if c.IsSet("group_id") {
+		groupID, err = strconv.ParseInt(c.String("group_id"), 10, 64)
+		if err != nil {
+			return cli.Exit(color.RedString("Invalid group_id: "+err.Error()), 1)
+		}
+		if groupID <= 0 {
+			// Check if group ID is less than or equal to 0
+			return fmt.Errorf("Invalid group ID: group ID must be greater than 0")
+		}
+		if !c.IsSet("contract_id") {
+			return cli.Exit(color.RedString("contract_id is mandatory when group_id is provided"), 1)
+		}
+		contractID = c.String("contract_id")
+	} else if c.IsSet("contract_id") {
+		return cli.Exit(color.RedString("contract_id cannot be set without group_id"), 1)
+	}
+
+	if err = createCloudAccess(ctx, keyUID, groupID, contractID, section, client, processor); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting cloudaccess: %s", err)), 1)
 	}
 	return nil
 }
 
-func createCloudAccess(ctx context.Context, accessKeyUID int64, section string, client cloudaccess.CloudAccess, templateProcessor templates.TemplateProcessor) error {
+func createCloudAccess(ctx context.Context, accessKeyUID int64, groupID int64, contractID string, section string, client cloudaccess.CloudAccess, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 	term.Spinner().Start("Fetching cloudaccess key " + strconv.Itoa(int(accessKeyUID)))
 	key, err := client.GetAccessKey(ctx, cloudaccess.AccessKeyRequest{
@@ -140,7 +163,11 @@ func createCloudAccess(ctx context.Context, accessKeyUID int64, section string, 
 			return fmt.Errorf("%w", ErrNonUniqueCloudAccessKeyID)
 		}
 	}
-	tfCloudAccessData := populateCloudAccessData(section, key, versions.AccessKeyVersions)
+	tfCloudAccessData, err := populateCloudAccessData(section, key, groupID, contractID, versions.AccessKeyVersions)
+	if err != nil {
+		term.Spinner().Fail()
+		return fmt.Errorf("error populating cloud access data: %w", err)
+	}
 
 	term.Spinner().Start("Saving TF configurations ")
 	if err = templateProcessor.ProcessTemplates(tfCloudAccessData); err != nil {
@@ -154,7 +181,7 @@ func createCloudAccess(ctx context.Context, accessKeyUID int64, section string, 
 	return nil
 }
 
-func populateCloudAccessData(section string, key *cloudaccess.GetAccessKeyResponse, versions []cloudaccess.AccessKeyVersion) TFCloudAccessData {
+func populateCloudAccessData(section string, key *cloudaccess.GetAccessKeyResponse, providedGroupID int64, providedContractID string, versions []cloudaccess.AccessKeyVersion) (TFCloudAccessData, error) {
 	var netConf *NetworkConfiguration
 	if key.NetworkConfiguration != nil {
 		netConf = &NetworkConfiguration{
@@ -167,7 +194,26 @@ func populateCloudAccessData(section string, key *cloudaccess.GetAccessKeyRespon
 
 	var contractID string
 	var groupID int64
-	if len(key.Groups) > 0 {
+	var flag bool
+	// Check if both providedGroupId and providedContractId are supplied
+	if providedGroupID != 0 && providedContractID != "" {
+		// Validate the group and contract combination
+		for _, group := range key.Groups {
+			if group.GroupID == providedGroupID {
+				for _, contract := range group.ContractIDs {
+					if contract == providedContractID {
+						groupID = providedGroupID
+						contractID = providedContractID
+						flag = true
+					}
+				}
+			}
+		}
+		// If no match found, return error
+		if !flag {
+			return TFCloudAccessData{}, fmt.Errorf("invalid combination of groupId (%d) and contractId (%s) for this access key", providedGroupID, providedContractID)
+		}
+	} else if len(key.Groups) > 0 {
 		groups := key.Groups
 		slices.SortFunc(groups, func(a, b cloudaccess.Group) int {
 			return cmp.Compare(a.GroupID, b.GroupID)
@@ -189,12 +235,13 @@ func populateCloudAccessData(section string, key *cloudaccess.GetAccessKeyRespon
 			AccessKeyUID:         key.AccessKeyUID,
 			NetworkConfiguration: netConf,
 		},
+		Flag: flag,
 	}
 
 	versionNum := len(versions)
 	switch versionNum {
 	case 0:
-		return tfCloudAccessData
+		return tfCloudAccessData, nil
 	case 1:
 		tfCloudAccessData.Key.CredentialA = &Credential{
 			CloudAccessKeyID: *versions[0].CloudAccessKeyID,
@@ -212,5 +259,5 @@ func populateCloudAccessData(section string, key *cloudaccess.GetAccessKeyRespon
 		}
 	}
 
-	return tfCloudAccessData
+	return tfCloudAccessData, nil
 }

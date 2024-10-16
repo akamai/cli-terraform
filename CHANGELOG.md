@@ -5,8 +5,8 @@
 ### Features/Enhancements
 
 
-
-
+* Cloud Access Manager
+  * Added flags `group_id` and `contract_id` for `export-cloudaccess` which allows export of `akamai_cloudaccess_key` resource with specified groupID and contractID.
 
 
 
