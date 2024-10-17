@@ -4,7 +4,8 @@
 
 ### Features/Enhancements
 
-
+* PAPI
+  * Added attribute `product_id` to the exported `akamai_property_include` resource.
 * Cloud Access Manager
   * Added flags `group_id` and `contract_id` for `export-cloudaccess` which allows export of `akamai_cloudaccess_key` resource with specified groupID and contractID.
 

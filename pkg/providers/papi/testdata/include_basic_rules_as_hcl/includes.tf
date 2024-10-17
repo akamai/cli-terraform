@@ -27,6 +27,7 @@ resource "akamai_property_include" "test_include" {
   contract_id = "test_contract"
   group_id    = "test_group"
   name        = "test_include"
+  product_id  = "test_product"
   type        = "MICROSERVICES"
   rule_format = data.akamai_property_rules_builder.test_include_rule_default.rule_format
   rules       = data.akamai_property_rules_builder.test_include_rule_default.json

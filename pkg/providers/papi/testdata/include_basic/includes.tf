@@ -30,6 +30,7 @@ resource "akamai_property_include" "test_include" {
   contract_id = "test_contract"
   group_id    = "test_group"
   name        = "test_include"
+  product_id  = "test_product"
   type        = "MICROSERVICES"
   rule_format = "v2020-11-02"
   rules       = data.akamai_property_rules_template.rules_test_include.json

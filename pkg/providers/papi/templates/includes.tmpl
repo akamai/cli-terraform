@@ -35,6 +35,7 @@ resource "akamai_property_include" "{{.IncludeName}}" {
   contract_id = "{{.ContractID}}"
   group_id = "{{.GroupID}}"
   name = "{{.IncludeName}}"
+  product_id = "{{.ProductID}}"
   type = "{{.IncludeType}}"
 {{- if $.RulesAsHCL}}
 {{- if .Rules}}

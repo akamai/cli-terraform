@@ -628,6 +628,7 @@ func TestCreateProperty(t *testing.T) {
 		IncludeID:   "inc_123456",
 		IncludeName: "test_include",
 		IncludeType: string(papi.IncludeTypeMicroServices),
+		ProductID:   "test_product",
 		RuleFormat:  "v2020-11-02",
 	}
 
@@ -643,6 +644,7 @@ func TestCreateProperty(t *testing.T) {
 		IncludeID:   "inc_78910",
 		IncludeName: "test_include_1",
 		IncludeType: string(papi.IncludeTypeMicroServices),
+		ProductID:   "test_product2",
 		RuleFormat:  "v2020-11-02",
 	}
 
@@ -2056,6 +2058,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						IncludeID:   "inc_123456",
 						IncludeName: "test_include",
 						IncludeType: string(papi.IncludeTypeMicroServices),
+						ProductID:   "test_product",
 						RuleFormat:  "v2020-11-02",
 					},
 				},
@@ -2127,6 +2130,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						IncludeID:   "inc_123456",
 						IncludeName: "test_include",
 						IncludeType: string(papi.IncludeTypeMicroServices),
+						ProductID:   "test_product",
 						RuleFormat:  "v2020-11-02",
 					},
 					{
@@ -2141,6 +2145,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						IncludeID:   "inc_78910",
 						IncludeName: "test_include_1",
 						IncludeType: string(papi.IncludeTypeMicroServices),
+						ProductID:   "test_product2",
 						RuleFormat:  "v2020-11-02",
 					},
 				},
@@ -2212,6 +2217,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						IncludeID:   "inc_123456",
 						IncludeName: "test_include",
 						IncludeType: string(papi.IncludeTypeMicroServices),
+						ProductID:   "test_product",
 						RuleFormat:  "v2023-01-05",
 						Rules:       flattenRules("test_include", getIncludeRuleResponse("basic_property_with_multiple_includes_rules_as_hcl", t, "mock_include_rules.json").Rules),
 					},
@@ -2227,6 +2233,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						IncludeID:   "inc_78910",
 						IncludeName: "test_include_1",
 						IncludeType: string(papi.IncludeTypeMicroServices),
+						ProductID:   "test_product2",
 						RuleFormat:  "v2023-01-05",
 						Rules:       flattenRules("test_include_1", getIncludeRuleResponse("basic_property_with_multiple_includes_rules_as_hcl", t, "mock_second_include_rules.json").Rules),
 					},

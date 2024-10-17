@@ -92,6 +92,7 @@ type TFIncludeData struct {
 	IncludeType    string
 	RuleFormat     string
 	Rules          []*WrappedRules
+	ProductID      string
 	ProductionInfo NetworkInfo
 	StagingInfo    NetworkInfo
 }

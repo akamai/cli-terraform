@@ -195,6 +195,7 @@ func getIncludeData(ctx context.Context, include *papi.Include, client papi.PAPI
 		IncludeID:   include.IncludeID,
 		IncludeName: include.IncludeName,
 		IncludeType: string(include.IncludeType),
+		ProductID:   latestVersion.IncludeVersion.ProductID,
 		RuleFormat:  latestVersion.IncludeVersion.RuleFormat,
 	}
 
