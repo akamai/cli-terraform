@@ -24,12 +24,12 @@ resource "akamai_cloudaccess_key" "TestKeyName" {
   }
   credentials_a = {
     cloud_access_key_id     = "testAccessKey1"
-    cloud_secret_access_key = "PASTE YOUR SECRET HERE WHEN ROTATING A KEY"
+    cloud_secret_access_key = var.secret_access_key_a
     primary_key             = false
   }
   credentials_b = {
     cloud_access_key_id     = "testAccessKey2"
-    cloud_secret_access_key = "PASTE YOUR SECRET HERE WHEN ROTATING A KEY"
+    cloud_secret_access_key = var.secret_access_key_b
     primary_key             = false
   }
 }

@@ -8,3 +8,17 @@ variable "config_section" {
   type = string
   default = "{{.Section}}"
 }
+{{- with .Key.CredentialA}}
+
+variable "secret_access_key_a" {
+  type    = string
+  sensitive = true
+}
+{{- end -}}
+{{with .Key.CredentialB}}
+
+variable "secret_access_key_b" {
+  type    = string
+  sensitive = true
+}
+{{- end}}
