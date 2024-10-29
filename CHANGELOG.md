@@ -87,7 +87,7 @@
 
 ### Deprecations
 
-
+* Excluded the deprecated `akamai_appsec_wap_selected_hostnames` resource from the `export-appsec` command. Exported `akamai_appsec_aap_selected_hostnames` should be used instead
 
 
 

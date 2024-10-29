@@ -339,7 +339,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"modules-security-variables.tmpl":              filepath.Join(security, "variables.tf"),
 		"modules-security-versions.tmpl":               filepath.Join(security, "versions.tf"),
 		"modules-security-waf.tmpl":                    filepath.Join(security, "waf.tf"),
-		"modules-wap-selected-hostnames.tmpl":          filepath.Join(security, "wap-selected-hostnames.tf"),
+		"modules-aap-selected-hostnames.tmpl":          filepath.Join(security, "aap-selected-hostnames.tf"),
 	}
 
 	// Let's run our tests

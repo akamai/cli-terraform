@@ -1,7 +1,7 @@
 {{ if eq .TargetProduct "WAP" -}}
 {{ range .SecurityPolicies -}}
 {{ $policyName := escapeName .Name -}}
-resource "akamai_appsec_wap_selected_hostnames" "{{$policyName}}" {
+resource "akamai_appsec_aap_selected_hostnames" "{{$policyName}}" {
     config_id          = akamai_appsec_configuration.config.config_id
     security_policy_id = akamai_appsec_security_policy.{{$policyName}}.security_policy_id
     protected_hosts    =  [{{ getProtectedHostsByID $ .ID | toList }}]

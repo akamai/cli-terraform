@@ -115,7 +115,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"modules-security-javascript-injection.tmpl":    filepath.Join(securityModulePath, "javascript-injection.tf"),
 		"modules-security-transactional-endpoints.tmpl": filepath.Join(securityModulePath, "transactional-endpoints.tf"),
 		"modules-security-content-protection.tmpl":      filepath.Join(securityModulePath, "content-protection.tf"),
-		"modules-wap-selected-hostnames.tmpl":           filepath.Join(securityModulePath, "wap-selected-hostnames.tf"),
+		"modules-aap-selected-hostnames.tmpl":           filepath.Join(securityModulePath, "aap-selected-hostnames.tf"),
 		"variables.tmpl":                                filepath.Join(tfWorkPath, "appsec-variables.tf"),
 		"versions.tmpl":                                 filepath.Join(tfWorkPath, "appsec-versions.tf"),
 	}
