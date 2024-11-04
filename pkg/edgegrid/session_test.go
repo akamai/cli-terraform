@@ -13,17 +13,24 @@ import (
 
 func TestInitializeSession(t *testing.T) {
 	tests := map[string]struct {
-		edgercFile string
-		section    string
-		withError  bool
+		edgercFile         string
+		section            string
+		invalidRetryConfig bool
+		expectedErr        string
 	}{
 		"valid session initialized": {
 			edgercFile: "./testdata/.edgerc",
 			section:    "test_section",
 		},
 		"could not initialize session": {
-			edgercFile: "./testdata/edgerc-invalid",
-			withError:  true,
+			edgercFile:  "./testdata/edgerc-invalid",
+			expectedErr: "could not retrieve edgegrid configuration: unable to load config from environment or .edgerc file: loading config file: key-value delimiter not found: abc",
+		},
+		"could not get retry config": {
+			edgercFile:         "./testdata/.edgerc",
+			section:            "test_section",
+			invalidRetryConfig: true,
+			expectedErr:        `could not retrieve retry configuration: failed to parse AKAMAI_RETRY_DISABLED environment variable: strconv.ParseBool: parsing "invalid": invalid syntax`,
 		},
 	}
 
@@ -34,8 +41,12 @@ func TestInitializeSession(t *testing.T) {
 			set.String("edgerc", test.edgercFile, "")
 			set.String("section", test.section, "")
 			cliCtx := cli.NewContext(app, set, nil)
+			if test.invalidRetryConfig {
+				t.Setenv("AKAMAI_RETRY_DISABLED", "invalid")
+			}
 			s, err := InitializeSession(cliCtx)
-			if test.withError {
+			if len(test.expectedErr) > 0 {
+				assert.ErrorContains(t, err, test.expectedErr)
 				assert.Error(t, err)
 				return
 			}

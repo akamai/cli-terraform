@@ -9,8 +9,13 @@
 * Cloud Access Manager
   * Added flags `group_id` and `contract_id` for `export-cloudaccess` which allows export of `akamai_cloudaccess_key` resource with specified groupID and contractID.
 
-
-
+* General
+  * Added retryable logic for all GET requests to the API.
+  This behavior can be disabled using environment variable `AKAMAI_RETRY_DISABLED`.
+  It can be fine-tuned using following environment variables:
+    * `AKAMAI_RETRY_MAX` - The maximum number retires of API requests, default is 10
+    * `AKAMAI_RETRY_WAIT_MIN` - The minimum wait time in seconds between API requests retries, default is 1 sec
+    * `AKAMAI_RETRY_WAIT_MAX` - The maximum wait time in seconds between API requests retries, default is 30 sec
 
 
 

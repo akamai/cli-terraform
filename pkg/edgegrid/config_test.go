@@ -4,8 +4,11 @@ import (
 	"flag"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/edgegrid"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/ptr"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/session"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v2"
@@ -189,6 +192,99 @@ func TestGetEdgercSection(t *testing.T) {
 			cliCtx := cli.NewContext(app, set, nil)
 			res := GetEdgercSection(cliCtx)
 			assert.Equal(t, test.expected, res)
+		})
+	}
+}
+
+func Test_getRetryConfig(t *testing.T) {
+	tests := map[string]struct {
+		disabled    *string
+		maxRetries  *string
+		minWaitTime *string
+		maxWaitTime *string
+		expected    *session.RetryConfig
+		expectedErr string
+	}{
+		"happy path - default": {
+			expected: &session.RetryConfig{
+				RetryMax:          10,
+				RetryWaitMin:      1 * time.Second,
+				RetryWaitMax:      30 * time.Second,
+				ExcludedEndpoints: []string{},
+			},
+		},
+		"happy path - set": {
+			disabled:    ptr.To("false"),
+			maxRetries:  ptr.To("5"),
+			minWaitTime: ptr.To("10"),
+			maxWaitTime: ptr.To("300"),
+			expected: &session.RetryConfig{
+				RetryMax:          5,
+				RetryWaitMin:      10 * time.Second,
+				RetryWaitMax:      300 * time.Second,
+				ExcludedEndpoints: []string{},
+			},
+		},
+		"happy path - disabled": {
+			disabled: ptr.To("true"),
+			expected: nil,
+		},
+		"happy path - disabled with values set": {
+			disabled:    ptr.To("true"),
+			maxRetries:  ptr.To("5"),
+			minWaitTime: ptr.To("10"),
+			maxWaitTime: ptr.To("300"),
+			expected:    nil,
+		},
+		"error - invalid AKAMAI_RETRY_DISABLED": {
+			disabled:    ptr.To("123"),
+			expectedErr: `failed to parse AKAMAI_RETRY_DISABLED environment variable: strconv.ParseBool: parsing "123": invalid syntax`,
+		},
+		"error - invalid AKAMAI_RETRY_MAX": {
+			maxRetries:  ptr.To("NaN"),
+			expectedErr: `failed to parse AKAMAI_RETRY_MAX environment variable: strconv.Atoi: parsing "NaN": invalid syntax`,
+		},
+		"error - invalid AKAMAI_RETRY_WAIT_MIN": {
+			minWaitTime: ptr.To("NaN"),
+			expectedErr: `failed to parse AKAMAI_RETRY_WAIT_MIN environment variable: strconv.Atoi: parsing "NaN": invalid syntax`,
+		},
+		"error - invalid AKAMAI_RETRY_WAIT_MAX": {
+			maxWaitTime: ptr.To("NaN"),
+			expectedErr: `failed to parse AKAMAI_RETRY_WAIT_MAX environment variable: strconv.Atoi: parsing "NaN": invalid syntax`,
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			if test.disabled != nil {
+				t.Setenv("AKAMAI_RETRY_DISABLED", *test.disabled)
+			}
+			if test.maxRetries != nil {
+				t.Setenv("AKAMAI_RETRY_MAX", *test.maxRetries)
+			}
+			if test.minWaitTime != nil {
+				t.Setenv("AKAMAI_RETRY_WAIT_MIN", *test.minWaitTime)
+			}
+			if test.maxWaitTime != nil {
+				t.Setenv("AKAMAI_RETRY_WAIT_MAX", *test.maxWaitTime)
+			}
+
+			got, err := getRetryConfig()
+
+			if len(test.expectedErr) > 0 {
+				assert.ErrorContains(t, err, test.expectedErr)
+				assert.Nil(t, got)
+				return
+			}
+			if test.expected == nil {
+				assert.NoError(t, err)
+				assert.Nil(t, got)
+				return
+			}
+			assert.NoError(t, err)
+			assert.NotNil(t, got)
+			assert.Equal(t, test.expected, got)
+
 		})
 	}
 }

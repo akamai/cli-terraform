@@ -2,7 +2,13 @@
 package edgegrid
 
 import (
+	"fmt"
+	"os"
+	"strconv"
+	"time"
+
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/edgegrid"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/session"
 	"github.com/urfave/cli/v2"
 )
 
@@ -39,4 +45,44 @@ func GetEdgercSection(c *cli.Context) string {
 		return edgegrid.DefaultSection
 	}
 	return edgercSection
+}
+
+func getRetryConfig() (*session.RetryConfig, error) {
+	retryDisabled, ok := os.LookupEnv("AKAMAI_RETRY_DISABLED")
+	if ok {
+		disabled, err := strconv.ParseBool(retryDisabled)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse AKAMAI_RETRY_DISABLED environment variable: %w", err)
+		}
+		if disabled {
+			return nil, nil
+		}
+	}
+	conf := session.NewRetryConfig()
+	max, ok := os.LookupEnv("AKAMAI_RETRY_MAX")
+	if ok {
+		v, err := strconv.Atoi(max)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse AKAMAI_RETRY_MAX environment variable: %w", err)
+		}
+		conf.RetryMax = v
+	}
+	waitMin, ok := os.LookupEnv("AKAMAI_RETRY_WAIT_MIN")
+	if ok {
+		v, err := strconv.Atoi(waitMin)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse AKAMAI_RETRY_WAIT_MIN environment variable: %w", err)
+		}
+		conf.RetryWaitMin = time.Duration(v) * time.Second
+	}
+	waitMax, ok := os.LookupEnv("AKAMAI_RETRY_WAIT_MAX")
+	if ok {
+		v, err := strconv.Atoi(waitMax)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse AKAMAI_RETRY_WAIT_MAX environment variable: %w", err)
+		}
+		conf.RetryWaitMax = time.Duration(v) * time.Second
+	}
+
+	return &conf, nil
 }
