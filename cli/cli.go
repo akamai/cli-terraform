@@ -55,7 +55,7 @@ func Run() error {
 		app.Commands = append(cmds, app.Commands...)
 	}
 
-	app.Before = ensureBefore(putSessionInContext, putLoggerInContext, deprecationInfoForCreateCommands, deprecationInfoForSchemaFlags)
+	app.Before = ensureBefore(putLoggerInContext, putSessionInContext, deprecationInfoForCreateCommands, deprecationInfoForSchemaFlags)
 	return app.RunContext(ctx, os.Args)
 }
 
