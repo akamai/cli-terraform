@@ -1,6 +1,8 @@
 module "security" {
     source      = "./modules/security"
+    {{ if ne .TargetProduct "WAP" -}}
     hostnames   = var.hostnames
+    {{ end -}}
     name        = var.name
     description = var.description
     contract_id = var.contract_id

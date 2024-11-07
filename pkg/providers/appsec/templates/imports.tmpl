@@ -1,7 +1,9 @@
 terraform init
 {{ $configID:= .ConfigID -}}
 {{ $version:= .Version -}}
+{{ if ne .TargetProduct "WAP" -}}
 terraform import module.security.akamai_appsec_configuration.config {{ $configID }}
+{{ end -}}
 terraform import module.security.akamai_appsec_advanced_settings_logging.logging {{ $configID }}
 {{ if .AdvancedOptions -}}
 {{ if .AdvancedOptions.AttackPayloadLogging -}}

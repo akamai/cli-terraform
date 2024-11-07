@@ -56,6 +56,13 @@
 
 ### Bug fixes
 
+* APPSEC
+  * Fixed improper resource generation for AAP/AAP accounts in export-appsec output:
+    * Removed `akamai_appsec_configuration` resource and added `akamai_appsec_configuration` data source
+    * Removed `hostnames` variable from `appsec-variables.tf`
+    * Removed `hostnames` field from `security` module
+
+
 * Cloudaccess
   *  Marked `cloud_secret_access_key` field as sensitive in template for `akamai_cloudaccess_key` resource and moved it's definition to `variables.tf` file. ([I#580](https://github.com/akamai/terraform-provider-akamai/issues/580))
 

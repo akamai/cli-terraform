@@ -18,11 +18,6 @@ variable "description" {
   default = "A security config for demo"
 }
 
-variable "hostnames" {
-  type    = list(string)
-  default = ["test.akamai.com"]
-}
-
 variable "emails" {
   type    = list(string)
   default = ["noreply@example.org"]
