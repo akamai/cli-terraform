@@ -42,6 +42,8 @@
 
 
 
+* PAPI
+  * Added support for new rule format `v2024-10-21`.
 
 
 
