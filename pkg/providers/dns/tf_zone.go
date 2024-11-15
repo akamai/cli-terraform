@@ -16,6 +16,7 @@ func processZone(ctx context.Context, zone *dns.GetZoneResponse, resourceZoneNam
 		Comment:               zone.Comment,
 		SignAndServe:          zone.SignAndServe,
 		SignAndServeAlgorithm: zone.SignAndServeAlgorithm,
+		OutboundZoneTransfer:  zone.OutboundZoneTransfer,
 		TSIGKey:               zone.TSIGKey,
 		Target:                zone.Target,
 		EndCustomerID:         zone.EndCustomerID,

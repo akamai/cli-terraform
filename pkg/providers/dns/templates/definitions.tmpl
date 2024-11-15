@@ -25,6 +25,20 @@ resource "akamai_dns_zone" "{{.BlockName}}" {
     comment = {{template "Text" .Comment}}
     sign_and_serve = {{.SignAndServe}}
     sign_and_serve_algorithm = "{{.SignAndServeAlgorithm}}"
+    {{- with .OutboundZoneTransfer}}
+    outbound_zone_transfer {
+        acl = [{{range $i, $v := .ACL}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+        enabled = {{.Enabled}}
+        notify_targets = [{{range $i, $v := .NotifyTargets}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+    {{- with .TSIGKey}}
+        tsig_key {
+            name = "{{.Name}}"
+            algorithm = "{{.Algorithm}}"
+            secret = "{{.Secret}}"
+            }
+    {{- end}}
+    }
+    {{- end}}
     {{- with .TSIGKey}}
     tsig_key {
         name = "{{.Name}}"
