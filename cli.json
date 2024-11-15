@@ -6,7 +6,7 @@
     {
       "name": "terraform",
       "version": "1.18.0",
-      "description": "Administer and Manage Akamai Terraform configurations",
+      "description": "Export selected resources for faster adoption in Terraform",
       "bin": "https://github.com/akamai/cli-terraform/releases/download/v{{.Version}}/akamai-{{.Name}}-{{.Version}}-{{.OS}}{{.Arch}}{{.BinSuffix}}",
       "auto-complete": true,
       "ldflags": "-X 'github.com/akamai/cli-terraform/cli.Version=%s'"
