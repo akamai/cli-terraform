@@ -959,8 +959,9 @@ func ruleNameNormalizer() func(string) string {
 	names := map[string]int{}
 	return func(name string) string {
 		name = normalizeRuleName(name)
-		names[name]++
-		if count := names[name]; count > 1 {
+		caseInsensitiveName := strings.ToLower(name)
+		names[caseInsensitiveName]++
+		if count := names[caseInsensitiveName]; count > 1 {
 			name = fmt.Sprintf("%s%d", name, count-1)
 		}
 		return name

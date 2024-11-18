@@ -61,6 +61,8 @@ data "akamai_property_rules_builder" "test_include_rule_default" {
       data.akamai_property_rules_builder.test_include_rule_content_compression.json,
       data.akamai_property_rules_builder.test_include_rule_static_content.json,
       data.akamai_property_rules_builder.test_include_rule_dynamic_content.json,
+      data.akamai_property_rules_builder.test_include_rule_ipcuid_invalidation.json,
+      data.akamai_property_rules_builder.test_include_rule_ipcuid_invalidation1.json,
     ]
   }
 }
@@ -121,5 +123,19 @@ data "akamai_property_rules_builder" "test_include_rule_dynamic_content" {
         behavior = "TUNNEL_ORIGIN"
       }
     }
+  }
+}
+
+data "akamai_property_rules_builder" "test_include_rule_ipcuid_invalidation" {
+  rules_v2023_01_05 {
+    name                  = "IPCUID Invalidation"
+    criteria_must_satisfy = "all"
+  }
+}
+
+data "akamai_property_rules_builder" "test_include_rule_ipcuid_invalidation1" {
+  rules_v2023_01_05 {
+    name                  = "ipcuid invalidation"
+    criteria_must_satisfy = "all"
   }
 }

@@ -1248,6 +1248,8 @@ func TestCreateProperty(t *testing.T) {
 				"Content_Compression.json",
 				"Static_Content.json",
 				"Dynamic_Content.json",
+				"IPCUID_Invalidation.json",
+				"ipcuid_invalidation1.json",
 			},
 		},
 		"import not the latest property version": {
@@ -2929,6 +2931,11 @@ func TestRuleNameNormalizer(t *testing.T) {
 			given:    "test@name",
 			expected: "test_name2",
 			preTest:  []string{"test%name", "testName", "test name"},
+		},
+		"two duplicates different case": {
+			given:    "ipcuid invalidation",
+			expected: "ipcuid_invalidation1",
+			preTest:  []string{"IPCUID Invalidation"},
 		},
 	}
 

@@ -76,7 +76,9 @@
     "children": [
       "#include:Content_Compression.json",
       "#include:Static_Content.json",
-      "#include:Dynamic_Content.json"
+      "#include:Dynamic_Content.json",
+      "#include:IPCUID_Invalidation.json",
+      "#include:ipcuid_invalidation1.json"
     ],
     "uuid": "default",
     "options": {},

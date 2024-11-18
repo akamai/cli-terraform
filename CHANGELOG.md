@@ -81,7 +81,8 @@
 
 
 
-
+* PAPI
+  * Fixed missing child file when using uppercase letters for a second rule with lowercase letters ([#78](https://github.com/akamai/cli-terraform/issues/78)).
 
 
 
