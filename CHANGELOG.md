@@ -1,62 +1,31 @@
 # RELEASE NOTES
 
-##  X.XX.X (Month XX, XXXX)
+##  1.19.0 (Nov 21, 2024)
 
 ### FEATURES/ENHANCEMENTS:
 
-* PAPI
-  * Added the `product_id` attribute to the exported `akamai_property_include` resource.
-
+* General
+  * Added retryable logic for all GET requests to the API.
+    This behavior can be disabled using the `AKAMAI_RETRY_DISABLED` environment variable.
+    It can be fine-tuned using these environment variables:
+    * `AKAMAI_RETRY_MAX` - The maximum retires number of API requests, default is 10.
+    * `AKAMAI_RETRY_WAIT_MIN` - The minimum wait time in seconds between API requests retries, default is 1 sec.
+    * `AKAMAI_RETRY_WAIT_MAX` - The maximum wait time in seconds between API requests retries, default is 30 sec.
 
 * AppSec
   *  Added support to export the `akamai_botman_content_protection_rule` resource for the specified policy.
   *  Added support to export the `akamai_botman_content_protection_rule_sequence` resource for the specified policy.
   *  Added support to export the `akamai_botman_content_protection_javascript_injection_rule` resource for the specified policy.
 
-
 * Cloud Access Manager
   * Added the `group_id` and `contract_id` flags for `export-cloudaccess` which allows exporting the `akamai_cloudaccess_key` resource with the specified group and contract IDs.
 
-
-* General
-  * Added retryable logic for all GET requests to the API.
-  This behavior can be disabled using the `AKAMAI_RETRY_DISABLED` environment variable.
-  It can be fine-tuned using these environment variables:
-    * `AKAMAI_RETRY_MAX` - The maximum retires number of API requests, default is 10.
-    * `AKAMAI_RETRY_WAIT_MIN` - The minimum wait time in seconds between API requests retries, default is 1 sec.
-    * `AKAMAI_RETRY_WAIT_MAX` - The maximum wait time in seconds between API requests retries, default is 30 sec.
-
-
-
-
-
-
-
-
-
 * DNS
-  * Added new field `outbound_zone_transfer` to `akamai_dns_zone` resource.
-
-
-
-
-
-
-
+  * Added the new `outbound_zone_transfer` field to the `akamai_dns_zone` resource.
 
 * PAPI
-  * Added support for new rule format `v2024-10-21`.
-
-
-
-
-
-
-
-
-
-
-
+  * Added support for the new rule format `v2024-10-21`.
+  * Added the `product_id` attribute to the exported `akamai_property_include` resource.
 
 ### BUG FIXES:
 
@@ -70,56 +39,12 @@
 * Cloud Access Manager
   *  Marked the `cloud_secret_access_key` field as sensitive in a template for the `akamai_cloudaccess_key` resource and moved its definition to the `variables.tf` file. ([I#580](https://github.com/akamai/terraform-provider-akamai/issues/580))
 
-
-
-
-
-
-
-
-
-
-
-
 * PAPI
-  * Fixed missing child file when using uppercase letters for a second rule with lowercase letters ([#78](https://github.com/akamai/cli-terraform/issues/78)).
-
-
-
-
-
-
-
-
-
-
-
-
-
+  * Fixed a missing child file when using uppercase letters for a second rule with lowercase letters ([#78](https://github.com/akamai/cli-terraform/issues/78)).
 
 ### DEPRECATIONS:
 
 * Excluded the deprecated `akamai_appsec_wap_selected_hostnames` resource from the `export-appsec` command. Instead, use the `akamai_appsec_aap_selected_hostnames` resource to export.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## 1.18.0 (Oct 10, 2024)
 
