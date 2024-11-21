@@ -1,0 +1,39 @@
+{{ range .SecurityPolicies -}}
+{{ if .BotManagement -}}
+{{ $policyName := escapeName .Name -}}
+{{ if .BotManagement.ContentProtectionRules -}}
+{{ range .BotManagement.ContentProtectionRules -}}
+resource "akamai_botman_content_protection_rule" "{{ $policyName }}_{{ escapeName (index . "contentProtectionRuleName") }}_{{  index . "contentProtectionRuleId" }}" {
+    config_id = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_botman_bot_management_settings.{{ $policyName}}.security_policy_id
+    content_protection_rule = jsonencode(
+    {{ exportJSONWithoutKeys . "contentProtectionRuleId" }}
+)
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.ContentProtectionRuleSequence -}}
+resource "akamai_botman_content_protection_rule_sequence" "{{ $policyName }}_sequence" {
+    config_id = akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_botman_bot_management_settings.{{ $policyName}}.security_policy_id
+    content_protection_rule_ids = [
+        {{getContentProtectionRuleResourceNamesByIDs $policyName .BotManagement.ContentProtectionRules .BotManagement.ContentProtectionRuleSequence}}
+    ]
+}
+
+{{ end -}}
+{{ if .BotManagement.ContentProtectionJavaScriptInjectionRules -}}
+{{ range .BotManagement.ContentProtectionJavaScriptInjectionRules -}}
+resource "akamai_botman_content_protection_javascript_injection_rule" "{{ $policyName }}_{{ escapeName (index . "contentProtectionJavaScriptInjectionRuleName") }}_{{  index . "contentProtectionJavaScriptInjectionRuleId" }}" {
+    config_id =akamai_appsec_configuration.config.config_id
+    security_policy_id = akamai_botman_bot_management_settings.{{ $policyName}}.security_policy_id
+    content_protection_javascript_injection_rule = jsonencode(
+    {{ exportJSONWithoutKeys . "contentProtectionJavaScriptInjectionRuleId" }}
+)
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}

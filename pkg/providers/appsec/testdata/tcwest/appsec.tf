@@ -1,6 +1,5 @@
 module "security" {
   source      = "./modules/security"
-  hostnames   = var.hostnames
   name        = var.name
   description = var.description
   contract_id = var.contract_id

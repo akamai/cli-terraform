@@ -213,6 +213,20 @@
         "name": "Dynamic Content",
         "options": {},
         "criteriaMustSatisfy": "all"
+      },
+      {
+        "name": "IPCUID Invalidation",
+        "children": [],
+        "behaviors": [],
+        "criteria": [],
+        "criteriaMustSatisfy": "all"
+      },
+      {
+        "name": "ipcuid invalidation",
+        "children": [],
+        "behaviors": [],
+        "criteria": [],
+        "criteriaMustSatisfy": "all"
       }
     ],
     "name": "default",

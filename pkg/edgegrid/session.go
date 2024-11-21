@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/session"
+	"github.com/akamai/cli/pkg/log"
 	"github.com/urfave/cli/v2"
 )
 
@@ -19,10 +20,24 @@ func InitializeSession(c *cli.Context) (session.Session, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve edgegrid configuration: %s", err)
 	}
-	s, err := session.New(
+
+	retryConfig, err := getRetryConfig()
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve retry configuration: %w", err)
+	}
+
+	options := []session.Option{
 		session.WithSigner(edgerc),
 		session.WithHTTPTracing(os.Getenv("AKAMAI_HTTP_TRACE_ENABLED") == "true"),
-	)
+		session.WithLog(log.FromContext(c.Context)),
+	}
+	if retryConfig != nil {
+		// Exclude get user endpoint from retries as it may fail for some users returned by list users endpoint during `export-iam all` command.
+		retryConfig.ExcludedEndpoints = []string{"/identity-management/v3/user-admin/ui-identities/*"}
+		options = append(options, session.WithRetries(*retryConfig))
+	}
+
+	s, err := session.New(options...)
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize edgegrid session: %s", err)
 	}

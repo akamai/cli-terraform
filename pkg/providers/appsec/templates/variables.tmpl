@@ -18,10 +18,13 @@ variable "description" {
     default = {{template "Text" (getConfigDescription .ConfigID)}}
 }
 
+{{ if ne .TargetProduct "WAP" -}}
 variable "hostnames" {
     type    = list(string)
     default = [{{ toList .SelectedHosts }}]
 }
+
+{{ end -}}
 
 variable "emails" {
     type    = list(string)

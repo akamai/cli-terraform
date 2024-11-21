@@ -31,6 +31,7 @@ type (
 		Comment               string
 		SignAndServe          bool
 		SignAndServeAlgorithm string
+		OutboundZoneTransfer  *dns.OutboundZoneTransfer
 		TSIGKey               *dns.TSIGKey
 		Target                string
 		EndCustomerID         string

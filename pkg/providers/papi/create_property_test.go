@@ -628,6 +628,7 @@ func TestCreateProperty(t *testing.T) {
 		IncludeID:   "inc_123456",
 		IncludeName: "test_include",
 		IncludeType: string(papi.IncludeTypeMicroServices),
+		ProductID:   "test_product",
 		RuleFormat:  "v2020-11-02",
 	}
 
@@ -643,6 +644,7 @@ func TestCreateProperty(t *testing.T) {
 		IncludeID:   "inc_78910",
 		IncludeName: "test_include_1",
 		IncludeType: string(papi.IncludeTypeMicroServices),
+		ProductID:   "test_product2",
 		RuleFormat:  "v2020-11-02",
 	}
 
@@ -1246,6 +1248,8 @@ func TestCreateProperty(t *testing.T) {
 				"Content_Compression.json",
 				"Static_Content.json",
 				"Dynamic_Content.json",
+				"IPCUID_Invalidation.json",
+				"ipcuid_invalidation1.json",
 			},
 		},
 		"import not the latest property version": {
@@ -2056,6 +2060,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						IncludeID:   "inc_123456",
 						IncludeName: "test_include",
 						IncludeType: string(papi.IncludeTypeMicroServices),
+						ProductID:   "test_product",
 						RuleFormat:  "v2020-11-02",
 					},
 				},
@@ -2127,6 +2132,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						IncludeID:   "inc_123456",
 						IncludeName: "test_include",
 						IncludeType: string(papi.IncludeTypeMicroServices),
+						ProductID:   "test_product",
 						RuleFormat:  "v2020-11-02",
 					},
 					{
@@ -2141,6 +2147,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						IncludeID:   "inc_78910",
 						IncludeName: "test_include_1",
 						IncludeType: string(papi.IncludeTypeMicroServices),
+						ProductID:   "test_product2",
 						RuleFormat:  "v2020-11-02",
 					},
 				},
@@ -2212,6 +2219,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						IncludeID:   "inc_123456",
 						IncludeName: "test_include",
 						IncludeType: string(papi.IncludeTypeMicroServices),
+						ProductID:   "test_product",
 						RuleFormat:  "v2023-01-05",
 						Rules:       flattenRules("test_include", getIncludeRuleResponse("basic_property_with_multiple_includes_rules_as_hcl", t, "mock_include_rules.json").Rules),
 					},
@@ -2227,6 +2235,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						IncludeID:   "inc_78910",
 						IncludeName: "test_include_1",
 						IncludeType: string(papi.IncludeTypeMicroServices),
+						ProductID:   "test_product2",
 						RuleFormat:  "v2023-01-05",
 						Rules:       flattenRules("test_include_1", getIncludeRuleResponse("basic_property_with_multiple_includes_rules_as_hcl", t, "mock_second_include_rules.json").Rules),
 					},
@@ -2743,6 +2752,28 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2024-08-13")},
 		},
+		"property with rules as datasource - hcl rules version v2024-10-21": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "v2024-10-21",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+				},
+				Section: "test_section",
+			},
+			dir:          "basic-rules-datasource-schema-v2024-10-21",
+			rulesAsHCL:   true,
+			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2024-10-21")},
+		},
 		"property with bootstrap": {
 			givenData: TFData{
 				Property: TFPropertyData{
@@ -2900,6 +2931,11 @@ func TestRuleNameNormalizer(t *testing.T) {
 			given:    "test@name",
 			expected: "test_name2",
 			preTest:  []string{"test%name", "testName", "test name"},
+		},
+		"two duplicates different case": {
+			given:    "ipcuid invalidation",
+			expected: "ipcuid_invalidation1",
+			preTest:  []string{"IPCUID Invalidation"},
 		},
 	}
 

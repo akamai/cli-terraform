@@ -229,7 +229,7 @@ func TestCreateCloudAccess(t *testing.T) {
 			templateProcessor := new(templates.MockProcessor)
 			test.init(mock, templateProcessor, test.dir, test.testData)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createCloudAccess(ctx, accessKeyUID, section, mock, templateProcessor)
+			err := createCloudAccess(ctx, accessKeyUID, 0, "", section, mock, templateProcessor)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -241,6 +241,97 @@ func TestCreateCloudAccess(t *testing.T) {
 	}
 }
 
+func TestCreateCloudAccess_GroupIDAndConractIDSupplied(t *testing.T) {
+	tests := map[string]struct {
+		init      func(*cloudaccess.Mock, *templates.MockProcessor, string, testDataForCloudAccess)
+		dir       string
+		testData  testDataForCloudAccess
+		withError error
+	}{
+		"access key with valid groupID and contractID": {
+			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, dir string, data testDataForCloudAccess) {
+				mockGetAccessKey(c, data, nil)
+				mockListAccessKeyVersions(c, data, nil)
+				mockProcessTemplates(p, data)
+			},
+			dir: "groudId_contractId",
+			testData: testDataForCloudAccess{
+				section:              section,
+				flag:                 true,
+				accessKeyUID:         1,
+				accessKeyName:        "Test name1",
+				authenticationMethod: "AWS4_HMAC_SHA256",
+				networkConfiguration: &cloudaccess.SecureNetwork{
+					AdditionalCDN:   &chinaCDN,
+					SecurityNetwork: "ENHANCED_TLS",
+				},
+				groups: []cloudaccess.Group{
+					{
+						ContractIDs: []string{"C-Contract123"},
+						GroupID:     1234,
+						GroupName:   tools.StringPtr("group11"),
+					},
+				},
+				accessKeyVersions: []cloudaccess.AccessKeyVersion{
+					{
+						AccessKeyUID:     1,
+						CloudAccessKeyID: tools.StringPtr("key1"),
+					},
+				},
+			},
+		},
+		"error - access key with invalid groupID and contractID combination": {
+			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, dir string, data testDataForCloudAccess) {
+				mockGetAccessKey(c, data, nil)
+				mockListAccessKeyVersions(c, data, nil)
+				mockProcessTemplates(p, data)
+			},
+			withError: errors.New("error populating cloud access data: invalid combination of groupId (1234) and contractId (C-Contract123) for this access key"),
+			testData: testDataForCloudAccess{
+				section:              section,
+				flag:                 true,
+				accessKeyUID:         1,
+				accessKeyName:        "Test name1",
+				authenticationMethod: "AWS4_HMAC_SHA256",
+				networkConfiguration: &cloudaccess.SecureNetwork{
+					AdditionalCDN:   &chinaCDN,
+					SecurityNetwork: "ENHANCED_TLS",
+				},
+				groups: []cloudaccess.Group{
+					{
+						ContractIDs: []string{"C-Contract12"},
+						GroupID:     1234,
+						GroupName:   tools.StringPtr("group11"),
+					},
+				},
+				accessKeyVersions: []cloudaccess.AccessKeyVersion{
+					{
+						AccessKeyUID:     1,
+						CloudAccessKeyID: tools.StringPtr("key1"),
+					},
+				},
+			},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
+			mock := new(cloudaccess.Mock)
+			templateProcessor := new(templates.MockProcessor)
+			test.init(mock, templateProcessor, test.dir, test.testData)
+			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
+			err := createCloudAccess(ctx, accessKeyUID, 1234, "C-Contract123", section, mock, templateProcessor)
+			if test.withError != nil {
+				assert.Equal(t, test.withError.Error(), err.Error(), "expected: %s; got: %s", test.withError, err)
+				return
+			}
+			require.NoError(t, err)
+			mock.AssertExpectations(t)
+			templateProcessor.AssertExpectations(t)
+		})
+	}
+}
 func TestProcessCloudAccessTemplates(t *testing.T) {
 	tests := map[string]struct {
 		givenData    TFCloudAccessData
@@ -347,6 +438,7 @@ type testDataForCloudAccess struct {
 	accessKeyUID         int64
 	accessKeyName        string
 	authenticationMethod string
+	flag                 bool
 	networkConfiguration *cloudaccess.SecureNetwork
 	groups               []cloudaccess.Group
 	accessKeyVersions    []cloudaccess.AccessKeyVersion
@@ -409,5 +501,6 @@ func mockProcessTemplates(p *templates.MockProcessor, data testDataForCloudAcces
 			NetworkConfiguration: netConf,
 		},
 		Section: data.section,
+		Flag:    data.flag,
 	}).Return(nil).Once()
 }

@@ -284,25 +284,26 @@ func TestProcessPolicyTemplates(t *testing.T) {
 
 	// Additional functions for the template processor
 	additionalFuncs := tools.DecorateWithMultilineHandlingFunctions(map[string]any{
-		"getCustomRuleNameByID":                  getCustomRuleNameByID,
-		"getRepNameByID":                         getRepNameByID,
-		"getRuleNameByID":                        getRuleNameByID,
-		"getRuleDescByID":                        getRuleDescByID,
-		"getRateNameByID":                        getRateNameByID,
-		"getMalwareNameByID":                     getMalwareNameByID,
-		"getPolicyNameByID":                      getPolicyNameByID,
-		"getWAFMode":                             getWAFMode,
-		"getConfigDescription":                   getConfigDescription,
-		"getPrefixFromID":                        getPrefixFromID,
-		"getSection":                             getSection,
-		"isStructuredRule":                       isStructuredRule,
-		"exportJSON":                             exportJSON,
-		"exportJSONWithoutKeys":                  exportJSONWithoutKeys,
-		"getCustomBotCategoryNameByID":           getCustomBotCategoryNameByID,
-		"getCustomBotCategoryResourceNamesByIDs": getCustomBotCategoryResourceNamesByIDs,
-		"getCustomClientResourceNamesByIDs":      getCustomClientResourceNamesByIDs,
-		"getProtectedHostsByID":                  getProtectedHostsByID,
-		"getEvaluatedHostsByID":                  getEvaluatedHostsByID,
+		"getCustomRuleNameByID":                      getCustomRuleNameByID,
+		"getRepNameByID":                             getRepNameByID,
+		"getRuleNameByID":                            getRuleNameByID,
+		"getRuleDescByID":                            getRuleDescByID,
+		"getRateNameByID":                            getRateNameByID,
+		"getMalwareNameByID":                         getMalwareNameByID,
+		"getPolicyNameByID":                          getPolicyNameByID,
+		"getWAFMode":                                 getWAFMode,
+		"getConfigDescription":                       getConfigDescription,
+		"getPrefixFromID":                            getPrefixFromID,
+		"getSection":                                 getSection,
+		"isStructuredRule":                           isStructuredRule,
+		"exportJSON":                                 exportJSON,
+		"exportJSONWithoutKeys":                      exportJSONWithoutKeys,
+		"getCustomBotCategoryNameByID":               getCustomBotCategoryNameByID,
+		"getCustomBotCategoryResourceNamesByIDs":     getCustomBotCategoryResourceNamesByIDs,
+		"getCustomClientResourceNamesByIDs":          getCustomClientResourceNamesByIDs,
+		"getContentProtectionRuleResourceNamesByIDs": getContentProtectionRuleResourceNamesByIDs,
+		"getProtectedHostsByID":                      getProtectedHostsByID,
+		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
 	})
 
 	// Template to path mappings
@@ -338,7 +339,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"modules-security-variables.tmpl":              filepath.Join(security, "variables.tf"),
 		"modules-security-versions.tmpl":               filepath.Join(security, "versions.tf"),
 		"modules-security-waf.tmpl":                    filepath.Join(security, "waf.tf"),
-		"modules-wap-selected-hostnames.tmpl":          filepath.Join(security, "wap-selected-hostnames.tf"),
+		"modules-aap-selected-hostnames.tmpl":          filepath.Join(security, "aap-selected-hostnames.tf"),
 	}
 
 	// Let's run our tests
@@ -407,25 +408,26 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 
 	// Additional functions for the template processor
 	additionalFuncs := tools.DecorateWithMultilineHandlingFunctions(map[string]any{
-		"getCustomRuleNameByID":                  getCustomRuleNameByID,
-		"getRepNameByID":                         getRepNameByID,
-		"getRuleNameByID":                        getRuleNameByID,
-		"getRuleDescByID":                        getRuleDescByID,
-		"getRateNameByID":                        getRateNameByID,
-		"getMalwareNameByID":                     getMalwareNameByID,
-		"getPolicyNameByID":                      getPolicyNameByID,
-		"getWAFMode":                             getWAFMode,
-		"getConfigDescription":                   getConfigDescription,
-		"getPrefixFromID":                        getPrefixFromID,
-		"getSection":                             getSection,
-		"isStructuredRule":                       isStructuredRule,
-		"exportJSON":                             exportJSON,
-		"exportJSONWithoutKeys":                  exportJSONWithoutKeys,
-		"getCustomBotCategoryNameByID":           getCustomBotCategoryNameByID,
-		"getCustomBotCategoryResourceNamesByIDs": getCustomBotCategoryResourceNamesByIDs,
-		"getCustomClientResourceNamesByIDs":      getCustomClientResourceNamesByIDs,
-		"getProtectedHostsByID":                  getProtectedHostsByID,
-		"getEvaluatedHostsByID":                  getEvaluatedHostsByID,
+		"getCustomRuleNameByID":                      getCustomRuleNameByID,
+		"getRepNameByID":                             getRepNameByID,
+		"getRuleNameByID":                            getRuleNameByID,
+		"getRuleDescByID":                            getRuleDescByID,
+		"getRateNameByID":                            getRateNameByID,
+		"getMalwareNameByID":                         getMalwareNameByID,
+		"getPolicyNameByID":                          getPolicyNameByID,
+		"getWAFMode":                                 getWAFMode,
+		"getConfigDescription":                       getConfigDescription,
+		"getPrefixFromID":                            getPrefixFromID,
+		"getSection":                                 getSection,
+		"isStructuredRule":                           isStructuredRule,
+		"exportJSON":                                 exportJSON,
+		"exportJSONWithoutKeys":                      exportJSONWithoutKeys,
+		"getCustomBotCategoryNameByID":               getCustomBotCategoryNameByID,
+		"getCustomBotCategoryResourceNamesByIDs":     getCustomBotCategoryResourceNamesByIDs,
+		"getCustomClientResourceNamesByIDs":          getCustomClientResourceNamesByIDs,
+		"getContentProtectionRuleResourceNamesByIDs": getContentProtectionRuleResourceNamesByIDs,
+		"getProtectedHostsByID":                      getProtectedHostsByID,
+		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
 	})
 
 	// Template to path mappings
@@ -469,6 +471,7 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 		"modules-security-advanced-settings.tmpl":       filepath.Join(security, "advanced-settings.tf"),
 		"modules-security-javascript-injection.tmpl":    filepath.Join(security, "javascript-injection.tf"),
 		"modules-security-transactional-endpoints.tmpl": filepath.Join(security, "transactional-endpoints.tf"),
+		"modules-security-content-protection.tmpl":      filepath.Join(security, "content-protection.tf"),
 	}
 
 	// Let's run our tests

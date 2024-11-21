@@ -14,19 +14,16 @@ $(GOIMPORTS): | $(BIN) ; $(info $(M) Installing goimports $(GOIMPORTS_VERSION)..
 $(BIN):
 	@mkdir -p $@
 $(BIN)/%: | $(BIN) ; $(info $(M) Installing $(PACKAGE)...)
-	@tmp=$$(mktemp -d); \
-	   env GO111MODULE=off GOPATH=$$tmp GOBIN=$(BIN) $(GOCMD) get $(PACKAGE) \
-		|| ret=$$?; \
-	   rm -rf $$tmp ; exit $$ret
+	env GOBIN=$(BIN) $(GOCMD) install $(PACKAGE)
 
 GOCOV = $(BIN)/gocov
-$(BIN)/gocov: PACKAGE=github.com/axw/gocov/...
+$(BIN)/gocov: PACKAGE=github.com/axw/gocov/gocov@v1.1.0
 
 GOCOVXML = $(BIN)/gocov-xml
-$(BIN)/gocov-xml: PACKAGE=github.com/AlekSi/gocov-xml
+$(BIN)/gocov-xml: PACKAGE=github.com/AlekSi/gocov-xml@v1.1.0
 
 GOJUNITREPORT = $(BIN)/go-junit-report
-$(BIN)/go-junit-report: PACKAGE=github.com/jstemmer/go-junit-report
+$(BIN)/go-junit-report: PACKAGE=github.com/jstemmer/go-junit-report/v2@v2.1.0
 
 TFLINT = $(BIN)/tflint
 $(BIN)/tflint: $(BIN) ; $(info $(M) Installing tflint...)

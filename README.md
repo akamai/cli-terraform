@@ -6,16 +6,17 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![GoDoc](https://pkg.go.dev/badge/github.com/akamai/cli-terraform?utm_source=godoc)](https://pkg.go.dev/github.com/akamai/cli-terraform)
 
-## Getting Started
+## Get started
 
-### Creating authentication credentials
+### Create authentication credentials
+
 Before you can use this CLI, you need to [Create authentication credentials.](https://techdocs.akamai.com/developer/docs/set-up-authentication-credentials)
 
-### Installing
+### Install
 
 To install this package, use Akamai CLI:
 
-```sh
+```shell
 $ akamai install terraform
 ```
 
@@ -23,81 +24,78 @@ You may also use this as a stand-alone command by downloading the
 [latest release binary](https://github.com/akamai/cli-terraform/releases)
 for your system, or by cloning this repository and compiling it yourself.
 
-### Compiling from Source
+### Compile from source
 
-If you want to compile it from source, you will need Go 1.21 or later:
+If you want to compile it from the source, you need Go 1.21 or later:
 
 1. Create a clone of the target repository:
   `git clone https://github.com/akamai/cli-terraform.git`
-2. Change to the package directory and compile the binary:
-  - Linux/macOS/*nix: `go build -o akamai-terraform`
-  - Windows: `go build -o akamai-terraform.exe`
+1. Change to the package directory and compile the binary:
+   - Linux/macOS/*nix: `go build -o akamai-terraform`
+   - Windows: `go build -o akamai-terraform.exe`
 
-## General Usage
+## General usage
 
-```
+```shell
+Usage:
   akamai terraform [global flags] command [command flags] [arguments...]
 
 Description:
-   Administer and manage available Akamai resources with Terraform
+  Export selected resources for faster adoption in Terraform.
 
-Built-In Commands:
-  export-cloudwrapper
+Commands:
   export-domain (alias: create-domain)
   export-zone (alias: create-zone)
   export-appsec (alias: create-appsec)
+  export-clientlist
   export-property (alias: create-property)
+  export-property-include
+  export-cloudwrapper
   export-cloudlets-policy (alias: create-cloudlets-policy)
   export-edgekv (alias: create-edgekv)
   export-edgeworker (alias: create-edgeworker)
   export-iam (alias: create-iam)
   export-imaging (alias: create-imaging)
-  export-clientlist (alias: create-clientlist)
+  export-cps (alias: create-cps)
+  export-cloudaccess
   list
   help
 
 Global Flags:
-   --help                                   show help (default: false)
-   --edgerc value, -e value                 Location of the credentials file (default: "/home/user/.edgerc") [$AKAMAI_EDGERC]
-   --section value, -s value                Section of the credentials file (default: "default") [$AKAMAI_EDGERC_SECTION]
-   --accountkey value, --account-key value  Account switch key [$AKAMAI_EDGERC_ACCOUNT_KEY]
-   --version                                Output CLI version (default: false)
+  --edgerc value, -e value                 Location of the credentials file (default: "/home/user/.edgerc") [$AKAMAI_EDGERC]
+  --section value, -s value                Section of the credentials file (default: "default") [$AKAMAI_EDGERC_SECTION]
+  --accountkey value, --account-key value  Account switch key [$AKAMAI_EDGERC_ACCOUNT_KEY]
+  --help                                   show help (default: false)
+  --version                                Output CLI version (default: false)
 ```
 
 ## GTM Domains
 
 ### Usage
 
-```
+```shell
    akamai terraform [global flags] export-domain [flags] <domain>
 
 Flags:
    --tfworkpath path       Directory used to store files created when running commands. (default: current directory)
-   --resources             Creates a JSON-formatted resource file for import: <domain>_resources.json. The createconfig flag uses this file as an input. (default: false)
-   --createconfig          Creates these Terraform configuration files based on the values in <domain>_resources.json: <domain>.tf and gtmvars.tf. Also creates this import script: <domain>_import.script. (default: false)
 ```
 
-### Export list of all domain objects. Written in json format to <domain>_resources.json
+### Export Terraform GTM domain configuration
 
-```
-$ akamai terraform export-domain --resources example.akadns.net
-```
-
-### Generate Terraform GTM Domain configuration file <domain>.tf, vars config file, gtmvars.tf, and import script, <domain>_resource_import.script
-
-```
-$ akamai terraform export-domain --createconfig example.akadns.net
+```shell
+$ akamai terraform export-domain example.akadns.net
 ```
 
-### Domain Notes:
-1. Mapping GTM entity names to TF resource names may require normalization. Invalid TF resource name characters will be replaced by underscores, '_' in config generation.
+### Domain notes
+
+Mapping GTM entity names to TF resource names may require normalization. Invalid TF resource name characters are replaced by underscores, '_' in config generation.
 
 
-## EdgeDNS Zones
+## Edge DNS Zones
 
 ### Usage
 
-```
+```shell
    akamai terraform [global flags] export-zone [flags] <zone>
 
 Flags:
@@ -112,45 +110,52 @@ Flags:
    --recordname value      Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.
 ```
 
-### Export List of Zone Recordsets. Written in json format to <zone>_resources.json
+### Export list of zone record sets
 
-```
+The command creates a `<zone>_resources.json` file.
+
+```shell
 $ akamai terraform export-zone --resources testprimaryzone.com
 ```
 
-### Generate Terraform Zone configuration file. Default args create <zone>.tf, vars config file, dnsvars.tf
+### Generate Terraform zone configuration file
 
-```
+Default arguments create these files: `<zone>.tf`, `<zone>_zoneconfig.json`, and `dnsvars.tf`.
+
+```shell
 $ akamai terraform export-zone --createconfig testprimaryzone.com
 ```
 
-### Generate Zone import script, <zone>_resource_import.script
+### Generate zone import script
 
-```
+The command creates a `<zone>_resource_import.script` file.
+
+```shell
 $ akamai terraform export-zone --importscript testprimaryzone.com
 ```
 
 
-### Zone Notes
+### Zone notes
 
-1. The resources directive generates a <zone>_resources.json file for consumption by createconfig
-2. The createconfig directive generates a <zone>_zoneconfig.json file for consumption by importscript
+1. The resources directive generates a `<zone>_resources.json` file for consumption by `createconfig`.
+2. The `createconfig` directive generates a `<zone>_zoneconfig.json` file for consumption by `importscript`.
 
 ####  Advanced options for --resources
 
-1. recordname - filters generated resources list by record name(s)
-2. namesonly - Generates resource file with recordset names only. All associated Types will be represented.
+1. `recordname`. Filters the generated resources list by a record name or record names.
+2. `namesonly`. Generates a resource file with record set names only. All associated Types are represented.
 
 #### Advanced options for --createconfig
 
-1. namesonly - Resources for all associated Types will be generated
-2. segmentconfig - Generate a modularized configuration.
-3. configonly - Generates a zone configuration without JSON itemization. The configuration generated varies based on which set of flags you use.
+1. `namesonly`. Generates resources for all associated Types.
+2. `segmentconfig`. Generates a modularized configuration.
+3. `configonly`. Generates a zone configuration without the JSON itemization. The configuration generated varies based on which set of flags you use.
 
-## Appsec
+## AppSec
 
 ### Usage
-```
+
+```shell
    akamai terraform [global flags] export-appsec [flags] <name_of_security_config>
 
 Flags:
@@ -159,7 +164,7 @@ Flags:
 
 ## Property Manager Properties
 
-Certain export conditions require the use of a particular property rule format. Verify your rule format matches the use case requirement and [update your rule format](https://techdocs.akamai.com/terraform/docs/set-up-includes#update-rule-format) as needed.
+Certain export conditions require the use of a particular property rule format. Verify whether your rule format matches the use case requirement and [update your rule format](https://techdocs.akamai.com/terraform/docs/set-up-includes#update-rule-format) as needed.
 
 <table>
 <thead>
@@ -176,12 +181,12 @@ Certain export conditions require the use of a particular property rule format. 
     <td>Any supported format.</td>
   </tr>
   <tr>
-    <td>Addition of <code>--rules-as-hcl</code> flag</td>
+    <td>Addition of the <code>--rules-as-hcl</code> flag</td>
     <td>Your declarative property configuration and HCL-formatted rules. <strong>Does not return includes</strong> as includes are JSON-formatted.</td>
     <td>Must be a dated rule format ≥ <code>v2023-01-05</code>. Cannot use <code>latest</code>.</td>
   </tr>
   <tr>
-    <td>Addition of <code>include</code> subcommand</td>
+    <td>Addition of the <code>include</code> subcommand</td>
     <td>Your property configuration and its JSON-formatted rules and includes.</td>
     <td>Any supported format, <em>but</em> your rules and includes must use the same rule format version.</td>
   </tr>
@@ -190,7 +195,7 @@ Certain export conditions require the use of a particular property rule format. 
 
 ### Usage
 
-```
+```shell
    akamai terraform [global flags] export-property [subcommand] [flags] <property name>
 
 Subcommand:
@@ -204,11 +209,11 @@ Flags:
    --akamai-property-bootstrap   Referenced property will be exported using combination of `akamai-property-bootstrap` and `akamai-property` resources (default: false)
 ```
 
-> Flag `rules-as-hcl` works now with `include` sub-command as well with `with-includes` flag.
+> The `rules-as-hcl` flag works now with the `include` subcommand and the `with-includes` flag.
 
-### Export property manager property configuration.
+### Export property manager property configuration
 
-```
+```shell
 $ akamai terraform export-property
 ```
 
@@ -231,7 +236,7 @@ Certain export conditions require the use of a particular property rule format. 
     <td>Any supported format.</td>
   </tr>
   <tr>
-    <td>Addition of <code>--rules-as-hcl</code> flag</td>
+    <td>Addition of the <code>--rules-as-hcl</code> flag</td>
     <td>Your declarative include configuration and HCL-formatted rules. <strong>Does not return includes</strong> as includes are JSON-formatted.</td>
     <td>Must be a dated rule format ≥ <code>v2023-01-05</code>. Cannot use <code>latest</code>.</td>
   </tr>
@@ -240,7 +245,7 @@ Certain export conditions require the use of a particular property rule format. 
 
 ### Usage
 
-```
+```shell
    akamai terraform [global flags] export-property-include [flags] <contract_id> <include_name>
 
 Flags:
@@ -248,9 +253,9 @@ Flags:
    --rules-as-hcl         Rules will be exported as `akamai_property_rules_builder` data source in HCL format.
 ```
 
-### Export property manager include configuration.
+### Export property manager include configuration
 
-```
+```shell
 $ akamai terraform export-property-include
 ```
 
@@ -258,16 +263,16 @@ $ akamai terraform export-property-include
 
 ### Usage
 
-```
+```shell
    akamai terraform [global flags] export-cloudlets-policy [flags] <policy_name>
 
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
-### Export Cloudlets Policy configuration.
+### Export Cloudlets policy configuration
 
-```
+```shell
 $ akamai terraform export-cloudlets-policy
 ```
 
@@ -275,55 +280,55 @@ $ akamai terraform export-cloudlets-policy
 
 ### Usage
 
-```
+```shell
    akamai terraform [global flags] export-cloudwrapper [flags] <configuration_id>
 
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
-### Export CloudWrapper configuration.
+### Export CloudWrapper configuration
 
-```
+```shell
 $ akamai terraform export-cloudwrapper
 ```
 
 ## EdgeWorkers
 
-### Export EdgeKV Usage
+### EdgeKV usage
 
-```
+```shell
    akamai terraform [global flags] export-edgekv [flags] <namespace_name> <network>
 
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
-### Export edgekv configuration.
+### Export EdgeKV configuration
 
-```
-$ akamai terraform [global flags] export-edgekv [command flags] <namespace_name> <network>
+```shell
+$ akamai terraform [global flags] export-edgekv [flags] <namespace_name> <network>
 ```
 
-### Export EdgeWorker Usage
+### EdgeWorker usage
 
-```
-   akamai terraform [global flags] export-edgeworker [command flags] <edgeworker_id>
+```shell
+   akamai terraform [global flags] export-edgeworker [flags] <edgeworker_id>
 
 Flags:
    --bundlepath path      Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
-### Export EdgeWorker configuration.
+### Export EdgeWorker configuration
 
-```
-$ akamai terraform [global flags] export-edgeworker [command flags] <edgeworker_id>
+```shell
+$ akamai terraform [global flags] export-edgeworker [flags] <edgeworker_id>
 ```
 
 ## Identity and Access Management
 
-### Export Identity and Access Management usage
+### Usage
 
 ```
    akamai terraform [global flags] export-iam [subcommand]
@@ -339,17 +344,17 @@ Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
-### Export Identity and Access Management configuration.
+### Export Identity and Access Management configuration
 
-```
+```shell
 $ akamai terraform export-iam
 ```
 
 ## Image and Video Manager
 
-### Export Image and Video policy usage
+### Usage
 
-```
+```shell
    akamai terraform [global flags] export-imaging [flags] <contract_id> <policy_set_id>
 
 Flags:
@@ -358,34 +363,34 @@ Flags:
    --policy-as-hcl           Generate content of the policy using HCL instead of JSON file (default: false)
 ```
 
-### Export Image and Video policy configuration.
+### Export Image and Video policy configuration
 
-```
+```shell
 $ akamai terraform export-imaging
 ```
 
 ## Certificate Provisioning System (CPS)
 
-### Export CPS usage
+### Usage
 
-```
+```shell
    akamai terraform [global flags] export-cps [flags] <enrollment_id> <contract_id>
 
 Flags:
    --tfworkpath path                        Directory used to store files created when running commands. (default: current directory)
 ```
 
-### Export CPS configuration.
+### Export CPS configuration
 
-```
+```shell
 $ akamai terraform export-cps
 ```
 
 ## Client Lists
 
-### Export Client List.
+### Usage
 
-```
+```shell
 akamai terraform [global flags] export-clientlist [flags] <list_id>
 
 Flags:
@@ -394,23 +399,25 @@ Flags:
 
 ## Cloud Access Manager
 
-### Export Cloud Access key configuration
+### Usage
 
-```
+```shell
    akamai terraform [global flags] export-cloudaccess [flags] <cloud_access_key_uid>
 
 Flags:
    --tfworkpath path         Directory used to store files created when running commands. (default: current directory)
+   --group_id                The unique identifier for the group (without the `grp_` prefix) assigned to the access key.
+   --contract_id             The unique identifier for the contract (without the `ctr_` prefix) assigned to the access key.
 ```
 
-## General Notes
+## General notes
 
-1. Terraform variable configuration is generated in a separately named TF file for each Akamai entity type. These files
-   will need to be merged by the Admin in the case where multiple entities are managed concurrently with the Terraform
-   client.
+Terraform variable configuration is generated in a separately named TF file for each Akamai entity type. These files will need to be merged by the Admin in the case where multiple entities are managed concurrently with the Terraform client.
 
 ## License
 
-This package is licensed under the Apache 2.0 License. See [LICENSE](LICENSE) for details.
+Copyright 2024 Akamai Technologies, Inc. All rights reserved.
 
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fakamai%2Fcli-terraform?ref=badge_large)
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use these files except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.

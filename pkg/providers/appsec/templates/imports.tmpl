@@ -1,7 +1,9 @@
 terraform init
 {{ $configID:= .ConfigID -}}
 {{ $version:= .Version -}}
+{{ if ne .TargetProduct "WAP" -}}
 terraform import module.security.akamai_appsec_configuration.config {{ $configID }}
+{{ end -}}
 terraform import module.security.akamai_appsec_advanced_settings_logging.logging {{ $configID }}
 {{ if .AdvancedOptions -}}
 {{ if .AdvancedOptions.AttackPayloadLogging -}}
@@ -257,6 +259,19 @@ terraform import module.security.akamai_botman_transactional_endpoint.{{$policyN
 {{ if .BotManagement.TransactionalEndpoints -}}
 {{ if .BotManagement.TransactionalEndpoints.BotProtectionExceptions -}}
 terraform import module.security.akamai_botman_bot_category_exception.{{$policyName}} {{$configID}}:{{$policyID}}
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.ContentProtectionRules -}}
+{{ range .BotManagement.ContentProtectionRules -}}
+terraform import module.security.akamai_botman_content_protection_rule.{{$policyName}}_{{ escapeName (index . "contentProtectionRuleName") }}_{{ index . "contentProtectionRuleId" }} {{$configID}}:{{$policyID}}:{{index . "contentProtectionRuleId"}}
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.ContentProtectionRuleSequence -}}
+terraform import module.security.akamai_botman_content_protection_rule_sequence.{{$policyName}}_sequence {{$configID}}:{{$policyID}}
+{{ end -}}
+{{ if .BotManagement.ContentProtectionJavaScriptInjectionRules -}}
+{{ range .BotManagement.ContentProtectionJavaScriptInjectionRules -}}
+terraform import module.security.akamai_botman_content_protection_javascript_injection_rule.{{ $policyName }}_{{ escapeName (index . "contentProtectionJavaScriptInjectionRuleName") }}_{{  index . "contentProtectionJavaScriptInjectionRuleId" }} {{$configID}}:{{$policyID}}:{{index . "contentProtectionJavaScriptInjectionRuleId"}}
 {{ end -}}
 {{ end -}}
 {{ end -}}

@@ -220,6 +220,8 @@ EOT
       data.akamai_property_rules_builder.test-edgesuite-net_rule_new_rule3.json,
       data.akamai_property_rules_builder.test-edgesuite-net_rule_strange_characters--a-------------ą1.json,
       data.akamai_property_rules_builder.test-edgesuite-net_rule_m_pulse.json,
+      data.akamai_property_rules_builder.test-edgesuite-net_rule_ipcuid_invalidation.json,
+      data.akamai_property_rules_builder.test-edgesuite-net_rule_ipcuid_invalidation1.json,
     ]
   }
 }
@@ -346,5 +348,19 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_m_pulse" {
         title_optional  = ""
       }
     }
+  }
+}
+
+data "akamai_property_rules_builder" "test-edgesuite-net_rule_ipcuid_invalidation" {
+  rules_v2023_01_05 {
+    name                  = "IPCUID Invalidation"
+    criteria_must_satisfy = "all"
+  }
+}
+
+data "akamai_property_rules_builder" "test-edgesuite-net_rule_ipcuid_invalidation1" {
+  rules_v2023_01_05 {
+    name                  = "ipcuid invalidation"
+    criteria_must_satisfy = "all"
   }
 }

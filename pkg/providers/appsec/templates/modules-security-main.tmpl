@@ -1,3 +1,9 @@
+{{ if eq .TargetProduct "WAP" -}}
+data "akamai_appsec_configuration" "config" {
+    name        = var.name
+}
+
+{{ else -}}
 resource "akamai_appsec_configuration" "config" {
     name        = var.name
     description = var.description
@@ -5,6 +11,8 @@ resource "akamai_appsec_configuration" "config" {
     group_id    = trimprefix(data.akamai_group.group.id, "grp_")
     host_names  = var.hostnames
 }
+
+{{ end -}}
 
 data "akamai_group" "group" {
     group_name = var.group_name
