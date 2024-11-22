@@ -1,5 +1,52 @@
 # RELEASE NOTES
 
+## X.XX.X (Month XX, XXXX)
+
+### FEATURES/ENHANCEMENTS:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### BUG FIXES:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### DEPRECATIONS:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ##  1.19.0 (Nov 21, 2024)
 
 ### FEATURES/ENHANCEMENTS:
