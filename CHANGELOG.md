@@ -9,6 +9,8 @@
 
 
 
+* Logic responsible for excluding endpoints from retries is now configurable with the `AKAMAI_RETRY_EXCLUDED_ENDPOINTS` environment variable.
+
 
 
 

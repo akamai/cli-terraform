@@ -32,8 +32,6 @@ func InitializeSession(c *cli.Context) (session.Session, error) {
 		session.WithLog(log.FromContext(c.Context)),
 	}
 	if retryConfig != nil {
-		// Exclude get user endpoint from retries as it may fail for some users returned by list users endpoint during `export-iam all` command.
-		retryConfig.ExcludedEndpoints = []string{"/identity-management/v3/user-admin/ui-identities/*"}
 		options = append(options, session.WithRetries(*retryConfig))
 	}
 

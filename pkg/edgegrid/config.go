@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/edgegrid"
@@ -82,6 +83,12 @@ func getRetryConfig() (*session.RetryConfig, error) {
 			return nil, fmt.Errorf("failed to parse AKAMAI_RETRY_WAIT_MAX environment variable: %w", err)
 		}
 		conf.RetryWaitMax = time.Duration(v) * time.Second
+	}
+	excludedEndpoints, ok := os.LookupEnv("AKAMAI_RETRY_EXCLUDED_ENDPOINTS")
+	if ok {
+		conf.ExcludedEndpoints = strings.Split(excludedEndpoints, ",")
+	} else {
+		conf.ExcludedEndpoints = append(conf.ExcludedEndpoints, "/identity-management/v3/user-admin/ui-identities/*")
 	}
 
 	return &conf, nil
