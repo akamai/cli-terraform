@@ -11,9 +11,9 @@ import (
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/clientlists"
 	"github.com/akamai/cli-terraform/pkg/templates"
 	"github.com/akamai/cli/pkg/terminal"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"github.com/tj/assert"
 )
 
 func TestMain(m *testing.M) {

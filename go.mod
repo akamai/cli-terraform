@@ -10,7 +10,6 @@ require (
 	github.com/jinzhu/copier v0.4.0
 	github.com/shirou/gopsutil v2.20.4+incompatible
 	github.com/stretchr/testify v1.8.4
-	github.com/tj/assert v0.0.3
 	github.com/urfave/cli/v2 v2.3.0
 )
 
