@@ -331,7 +331,7 @@ $ akamai terraform [global flags] export-edgeworker [flags] <edgeworker_id>
 ### Usage
 
 ```
-   akamai terraform [global flags] export-iam [subcommand]
+   akamai terraform [global flags] export-iam [subcommand] [flags]
 
 Subcommands:
     all                     Exports all available Terraform Users, Groups, Roles, IP Allowlist and CIDR block resources
@@ -342,6 +342,7 @@ Subcommands:
 
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
+   --only                 Exports only the specified Identity and Access Management resource, excluding additional details when present. (Can only be used with `group`, `role`, or `user` subcommands.)
 ```
 
 ### Export Identity and Access Management configuration

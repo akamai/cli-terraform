@@ -27,6 +27,8 @@ func CmdCreateIAMGroup(c *cli.Context) error {
 	}
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
 
+	groupOnly := c.Bool("only")
+
 	groupPath := filepath.Join(tfWorkPath, "group.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
 	rolesPath := filepath.Join(tfWorkPath, "roles.tf")
@@ -57,16 +59,21 @@ func CmdCreateIAMGroup(c *cli.Context) error {
 	if err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Wrong format of group id %v must be a number: %s", groupID, err)), 1)
 	}
-	if err = createIAMGroupByID(ctx, groupID, section, client, processor); err != nil {
+	if err = createIAMGroupByID(ctx, groupID, section, client, processor, groupOnly); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting HCL for IAM: %s", err)), 1)
 	}
 	return nil
 }
 
-func createIAMGroupByID(ctx context.Context, groupID int64, section string, client iam.IAM, templateProcessor templates.TemplateProcessor) error {
+func createIAMGroupByID(ctx context.Context, groupID int64, section string, client iam.IAM, templateProcessor templates.TemplateProcessor, groupOnly bool) error {
 	term := terminal.Get(ctx)
-	_, err := term.Writeln("Exporting Identity and Access Management group configuration with related users and groups")
-	if err != nil {
+
+	message := "Exporting Identity and Access Management group configuration"
+	if !groupOnly {
+		message += " with related roles and users"
+	}
+
+	if _, err := term.Writeln(message); err != nil {
 		return err
 	}
 
@@ -82,30 +89,30 @@ func createIAMGroupByID(ctx context.Context, groupID int64, section string, clie
 
 	tfGroup := getTFGroup(group)
 
-	term.Spinner().Start("Fetching users within group with id " + strconv.FormatInt(groupID, 10))
-	tfUsers, err := getUsersWithinGroup(ctx, client, groupID, term)
-	if err != nil {
-		term.Spinner().Fail()
-		return err
-	}
-	term.Spinner().OK()
-
-	term.Spinner().Start("Fetching user's relative roles within group " + strconv.FormatInt(groupID, 10))
-	tfRoles, err := getRolesWithinGroup(ctx, client, groupID)
-	if err != nil {
-		term.Spinner().Fail()
-		return err
-	}
-	term.Spinner().OK()
-
 	tfData := TFData{
-		TFUsers: tfUsers,
-		TFRoles: tfRoles,
 		TFGroups: []TFGroup{
 			tfGroup,
 		},
 		Section:    section,
 		Subcommand: "group",
+	}
+
+	if !groupOnly {
+		term.Spinner().Start("Fetching users within group with id " + strconv.FormatInt(groupID, 10))
+		tfData.TFUsers, err = getUsersWithinGroup(ctx, client, groupID, term)
+		if err != nil {
+			term.Spinner().Fail()
+			return err
+		}
+		term.Spinner().OK()
+
+		term.Spinner().Start("Fetching user's relative roles within group " + strconv.FormatInt(groupID, 10))
+		tfData.TFRoles, err = getRolesWithinGroup(ctx, client, groupID)
+		if err != nil {
+			term.Spinner().Fail()
+			return err
+		}
+		term.Spinner().OK()
 	}
 
 	term.Spinner().Start("Saving TF configurations ")

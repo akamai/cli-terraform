@@ -5,7 +5,9 @@
 ### FEATURES/ENHANCEMENTS:
 
 
-
+* IAM
+  * Added option `--only` to the `group`, `role`, and `user` subcommands of the `export-iam` command, allowing export of only specific information.
+  
 
 
 

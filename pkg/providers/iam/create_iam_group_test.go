@@ -158,15 +158,36 @@ var (
 		)
 		return call.Return(nil)
 	}
+
+	expectGroupOnlyByIDProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
+		tfData := TFData{
+			TFGroups: []TFGroup{
+				{
+					GroupID:       56789,
+					ParentGroupID: 98765,
+					GroupName:     "Custom group",
+				},
+			},
+			Section:    section,
+			Subcommand: "group",
+		}
+		call := p.On(
+			"ProcessTemplates",
+			tfData,
+		)
+		return call.Return(nil)
+	}
 )
 
 func TestCreateIAMGroupByID(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		init func(*iam.Mock, *templates.MockProcessor)
+		groupOnly bool
+		init      func(*iam.Mock, *templates.MockProcessor)
 	}{
 		"fetch group": {
+			groupOnly: false,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListUsersWithinGroup(i)
 				expectGetUserWithinGroup(i)
@@ -176,14 +197,22 @@ func TestCreateIAMGroupByID(t *testing.T) {
 				expectGroupByIDProcessTemplates(p, section)
 			},
 		},
+		"fetch group only (without user and role details)": {
+			groupOnly: true,
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
+				expectGetGroupWithinRole(i)
+				expectGroupOnlyByIDProcessTemplates(p, section)
+			},
+		},
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			mi := new(iam.Mock)
 			mp := new(templates.MockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createIAMGroupByID(ctx, groupID, section, mi, mp)
+			err := createIAMGroupByID(ctx, groupID, section, mi, mp, test.groupOnly)
 			require.NoError(t, err)
 			mi.AssertExpectations(t)
 			mp.AssertExpectations(t)
@@ -229,6 +258,21 @@ func TestProcessIAMGroupTemplates(t *testing.T) {
 			},
 			dir:          "iam_group_by_id",
 			filesToCheck: []string{"users.tf", "variables.tf", "import.sh", "roles.tf", "group.tf"},
+		},
+		"group only": {
+			givenData: TFData{
+				TFGroups: []TFGroup{
+					{
+						GroupID:       56789,
+						ParentGroupID: 98765,
+						GroupName:     "Custom group",
+					},
+				},
+				Section:    section,
+				Subcommand: "group",
+			},
+			dir:          "iam_group_only_by_id",
+			filesToCheck: []string{"variables.tf", "import.sh", "group.tf"},
 		},
 	}
 

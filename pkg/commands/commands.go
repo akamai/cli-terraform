@@ -274,21 +274,39 @@ func CommandLocator() ([]*cli.Command, error) {
 			},
 			{
 				Name:        "group",
-				Description: "Exports Terraform Group resource with relevant users and roles resources",
+				Description: "Exports the Terraform group resource with relevant user and role resources",
 				ArgsUsage:   "<group_id>",
 				Action:      validatedAction(iam.CmdCreateIAMGroup, requireValidWorkpath, requireNArguments(1)),
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "only",
+						Usage: "Exports only the Terraform group resource; excludes the role and user resources when specified.",
+					},
+				},
 			},
 			{
 				Name:        "role",
-				Description: "Exports Terraform Role resource with relevant users and groups resources",
+				Description: "Exports the Terraform role resource with relevant user and group resources",
 				ArgsUsage:   "<role_id>",
 				Action:      validatedAction(iam.CmdCreateIAMRole, requireValidWorkpath, requireNArguments(1)),
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "only",
+						Usage: "Exports only the Terraform role resource; excludes the user and group resources when specified.",
+					},
+				},
 			},
 			{
 				Name:        "user",
-				Description: "Exports Terraform User resource with relevant groups and roles resources",
+				Description: "Exports the Terraform user resource with relevant group and role resources",
 				ArgsUsage:   "<user_email>",
 				Action:      validatedAction(iam.CmdCreateIAMUser, requireValidWorkpath, requireNArguments(1)),
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "only",
+						Usage: "Exports only the Terraform user resource; excludes the group and role resources when specified.",
+					},
+				},
 			},
 		},
 		Flags: []cli.Flag{

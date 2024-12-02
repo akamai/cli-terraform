@@ -26,6 +26,8 @@ func CmdCreateIAMUser(c *cli.Context) error {
 	}
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
 
+	userOnly := c.Bool("only")
+
 	groupPath := filepath.Join(tfWorkPath, "groups.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
 	rolesPath := filepath.Join(tfWorkPath, "roles.tf")
@@ -53,18 +55,24 @@ func CmdCreateIAMUser(c *cli.Context) error {
 
 	section := edgegrid.GetEdgercSection(c)
 	email := c.Args().First()
-	if err = createIAMUserByEmail(ctx, email, section, client, processor); err != nil {
+	if err = createIAMUserByEmail(ctx, email, section, client, processor, userOnly); err != nil {
 		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting HCL for IAM: %s", err)), 1)
 	}
 	return nil
 }
 
-func createIAMUserByEmail(ctx context.Context, userEmail, section string, client iam.IAM, templateProcessor templates.TemplateProcessor) error {
+func createIAMUserByEmail(ctx context.Context, userEmail, section string, client iam.IAM, templateProcessor templates.TemplateProcessor, userOnly bool) error {
 	term := terminal.Get(ctx)
-	_, err := term.Writeln("Exporting Identity and Access Management user configuration with relevant roles and groups")
-	if err != nil {
+
+	message := "Exporting Identity and Access Management user configuration"
+	if !userOnly {
+		message += " with relevant roles and groups"
+	}
+
+	if _, err := term.Writeln(message); err != nil {
 		return err
 	}
+
 	term.Spinner().Start("Fetching user by email " + userEmail)
 
 	user, err := getUserByEmail(ctx, client, userEmail)
@@ -90,7 +98,7 @@ func createIAMUserByEmail(ctx context.Context, userEmail, section string, client
 		Subcommand: "user",
 	}
 
-	if len(authGrantsList) > 0 {
+	if !userOnly && len(authGrantsList) > 0 {
 		term.Spinner().Start("Fetching roles for user " + userEmail)
 		tfData.TFRoles, err = getTFUserRoles(ctx, client, authGrantsList)
 		if err != nil {
