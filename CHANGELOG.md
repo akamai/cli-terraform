@@ -15,6 +15,26 @@
 
 
 
+* PAPI
+  * Introduced the `split-depth` flag for the `export-property` and `export-property-include` command. When used, each rule up to a specified nesting level will be generated in its own `.tf` file. Rules with higher nesting levels will be placed in a file of their closest ancestor. All rules will be generated in a dedicated `rules` module.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -22,6 +42,17 @@
 
 
 ### BUG FIXES:
+
+
+
+
+
+
+
+
+
+
+
 
 
 

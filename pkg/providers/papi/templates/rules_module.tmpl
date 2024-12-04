@@ -1,0 +1,33 @@
+{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/papi.TFData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 6.6.0"
+    }
+  }
+  required_version = ">= 1.0"
+}
+
+{{- if.Property.PropertyID }}
+
+output "rules" {
+  value = data.akamai_property_rules_builder.{{.RootRule}}.json
+}
+
+output "rule_format" {
+  value = data.akamai_property_rules_builder.{{.RootRule}}.rule_format
+}
+{{- end}}
+
+
+{{- range $include := .Includes }}
+
+output "rules_{{$include.RootRule}}" {
+  value = data.akamai_property_rules_builder.{{$include.RootRule}}.json
+}
+
+output "rule_format_{{$include.RootRule}}" {
+  value = data.akamai_property_rules_builder.{{$include.RootRule}}.rule_format
+}
+{{- end}}

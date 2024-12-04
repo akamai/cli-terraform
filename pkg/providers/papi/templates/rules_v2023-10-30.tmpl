@@ -9719,16 +9719,17 @@ visitor_prioritization_request {
 {{- range $i, $r := .Rules}}
 data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
 	{{- $children := $r.Children}}
+	{{- $isRoot := $r.IsRoot}}
 	{{- with $r.Rule}}
 	rules_v2023_10_30 {
         name = "{{.Name | Escape}}"
-		{{- if eq $i 0}}
+		{{- if $isRoot}}
         is_secure = {{.Options.IsSecure}}
 		{{- end}}
         {{- if .Comments}}
         comments = {{template "Text" .Comments}}
         {{- end}}
-		{{- if ne $i 0}}
+		{{- if not $isRoot}}
 		{{- if .CriteriaMustSatisfy}}
         criteria_must_satisfy = "{{.CriteriaMustSatisfy}}"
         {{- end}}
@@ -9742,12 +9743,12 @@ data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
         {{- if .TemplateLink}}
         template_link = "{{.TemplateLink}}"
         {{- end}}
-		{{- if ne $i 0}}
+		{{- if not $isRoot}}
         {{- if .CriteriaLocked}}
         criteria_locked = "{{.CriteriaLocked}}"
         {{- end}}
 		{{- end}}
-{{- if eq $i 0}}
+{{- if $isRoot}}
 {{- range .Variables}}
         variable {
             name        = "{{.Name | Escape}}"
@@ -9771,7 +9772,7 @@ data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
 		}
 		{{- end}}
 {{- end}}
-{{- if ne $i 0}}
+{{- if not $isRoot}}
 {{- range .Criteria}}
         criterion {
 {{- template "Criteria" .}}

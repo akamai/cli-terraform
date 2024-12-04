@@ -48,6 +48,16 @@ func requireNArguments(n int) actionValidator {
 	}
 }
 
+func validateSplitDepth(ctx *cli.Context) error {
+	if ctx.IsSet("split-depth") && !ctx.IsSet("rules-as-hcl") {
+		return cli.Exit(color.RedString(`"split-depth" option must be used along with "rules-as-hcl"`), 1)
+	}
+	if ctx.IsSet("split-depth") && ctx.Int("split-depth") < 0 {
+		return cli.Exit(color.RedString(`"split-depth" cannot have a negative value`), 1)
+	}
+	return nil
+}
+
 func validateSubCommands(ctx *cli.Context) error {
 	if ctx.NArg() == 0 {
 		return showHelpCommandWithErr(ctx, fmt.Sprintf("One of the subcommands is required : %s", getSubcommandsNames(ctx)))

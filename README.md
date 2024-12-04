@@ -190,6 +190,12 @@ Certain export conditions require the use of a particular property rule format. 
     <td>Your property configuration and its JSON-formatted rules and includes.</td>
     <td>Any supported format, <em>but</em> your rules and includes must use the same rule format version.</td>
   </tr>
+  <tr>
+    <td>Addition of the <code>--split-depth=X</code> flag</td>
+    <td>Rules will be exported into a module. Each rule up to an <code>X</code> nesting level will be placed in dedicated file. 
+For example, <code>--split-depth=1</code> means that the default/root rule and all its direct children will be placed in dedicated files. Rules with higher nesting levels will be placed in a file of their closest ancestor.</td>
+    <td>Any supported format.</td>
+  </tr>
 </tbody>
 </table>
 
@@ -207,9 +213,12 @@ Flags:
    --with-includes               Referenced includes will also be exported along with property. Deprecated.
    --rules-as-hcl                Rules will be exported as `akamai_property_rules_builder` data source in HCL format.
    --akamai-property-bootstrap   Referenced property will be exported using combination of `akamai-property-bootstrap` and `akamai-property` resources (default: false)
+   --split-depth value           Rules will be exported into a dedicated module; each rule up to a specified nesting level will be placed in a separate file.
 ```
 
 > The `rules-as-hcl` flag works now with the `include` subcommand and the `with-includes` flag.
+
+> You can use the `split-depth` flag only along with the `rules-as-hcl` flag.
 
 ### Export property manager property configuration
 
@@ -240,6 +249,12 @@ Certain export conditions require the use of a particular property rule format. 
     <td>Your declarative include configuration and HCL-formatted rules. <strong>Does not return includes</strong> as includes are JSON-formatted.</td>
     <td>Must be a dated rule format ≥ <code>v2023-01-05</code>. Cannot use <code>latest</code>.</td>
   </tr>
+  <tr>
+    <td>Addition of the <code>--split-depth=X</code> flag</td>
+    <td>Rules will be exported into a module. Each rule up to a specified nesting level <code>X</code> will be placed in a dedicated file. 
+For example, <code>--split-depth=1</code> means that the default/root rule and all its direct children will be placed in dedicated files. Rules with higher nesting levels will be placed in a file of their closest ancestor.</td>
+    <td>Any supported format.</td>
+  </tr>
 </tbody>
 </table>
 
@@ -251,7 +266,10 @@ Certain export conditions require the use of a particular property rule format. 
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
    --rules-as-hcl         Rules will be exported as `akamai_property_rules_builder` data source in HCL format.
+   --split-depth value    Rules will be exported into dedicated a module; each rule up to a specified nesting level will be placed in a separate file.
 ```
+
+> You can use the `split-depth` flag only along with the `rules-as-hcl` flag.
 
 ### Export property manager include configuration
 

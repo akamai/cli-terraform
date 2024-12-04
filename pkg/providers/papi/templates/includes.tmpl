@@ -16,6 +16,12 @@ provider "akamai" {
 }
 
 {{ end }}
+{{- $useSplitDepth := .UseSplitDepth}}
+{{- if and (not .Property.PropertyID) $useSplitDepth -}}
+module "rules" {
+  source = "./rules"
+}
+{{- end}}
 {{- range $include := .Includes }}
 {{- if not $.RulesAsHCL}}
 data "akamai_property_rules_template" "rules_{{.IncludeName}}" {
@@ -38,11 +44,16 @@ resource "akamai_property_include" "{{.IncludeName}}" {
   product_id = "{{.ProductID}}"
   type = "{{.IncludeType}}"
 {{- if $.RulesAsHCL}}
+{{- if $useSplitDepth}}
+  rule_format = module.rules.rule_format_{{$include.RootRule}}
+  rules       = module.rules.rules_{{$include.RootRule}}
+{{- else}}
 {{- if .Rules}}
   rule_format = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.rule_format
   rules       = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.json
 {{- else}}
   rule_format = "{{.RuleFormat}}"
+{{- end}}
 {{- end}}
 {{- else}}
   rule_format = "{{.RuleFormat}}"

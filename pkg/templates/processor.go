@@ -42,6 +42,8 @@ type (
 )
 
 var (
+	errEmptyProcessingOutput = errors.New("empty processing output")
+	errTemplateCreation      = errors.New("creating template")
 	// ErrTemplateExecution is returned when template.Execute method fails
 	ErrTemplateExecution = errors.New("executing template")
 	// ErrSavingFiles is returned when an issue with processing templates occurs
@@ -53,6 +55,20 @@ var (
 // ProcessTemplates parses templates located in fs.FS and executes them using the provided data
 // result of each template execution is persisted in location provided in FSTemplateProcessor.TemplateTargets
 func (t FSTemplateProcessor) ProcessTemplates(data interface{}, filterFuncs ...func([]string) ([]string, error)) error {
+	tmpl, err := getTemplate(t.TemplatesFS, t.AdditionalFuncs, filterFuncs)
+	if err != nil {
+		return fmt.Errorf("%w: %s", errTemplateCreation, err)
+	}
+
+	for templateName, targetPath := range t.TemplateTargets {
+		if err = processTemplateToFile(tmpl, templateName, targetPath, data); err != nil && !errors.Is(err, errEmptyProcessingOutput) {
+			return err
+		}
+	}
+	return nil
+}
+
+func getTemplate(templatesFS fs.FS, additionalFuncs template.FuncMap, filterFuncs []func([]string) ([]string, error)) (*template.Template, error) {
 	funcs := template.FuncMap{
 		"escape":        tools.EscapeQuotedStringLit,
 		"formatIntList": formatIntList,
@@ -60,39 +76,21 @@ func (t FSTemplateProcessor) ProcessTemplates(data interface{}, filterFuncs ...f
 		"escapeName":    tools.EscapeName,
 		"toList":        tools.ToList,
 	}
-	files, err := findTemplateFiles(t.TemplatesFS)
+	files, err := findTemplateFiles(templatesFS)
 	if err != nil {
-		return fmt.Errorf("%s: %s", "error filtering template files", err)
+		return nil, fmt.Errorf("%s: %s", "error filtering template files", err)
 	}
 
 	for _, f := range filterFuncs {
 		files, err = f(files)
 		if err != nil {
-			return fmt.Errorf("%w: error filtering template files", err)
+			return nil, fmt.Errorf("%w: error filtering template files", err)
 		}
 	}
 
-	tmpl := template.Must(template.New("templates").Funcs(funcs).Funcs(t.AdditionalFuncs).
-		ParseFS(t.TemplatesFS, files...))
-
-	for templateName, targetPath := range t.TemplateTargets {
-		buf := bytes.Buffer{}
-
-		if err := tmpl.Lookup(templateName).Execute(&buf, data); err != nil {
-			return fmt.Errorf("%w: %s: %s", ErrTemplateExecution, templateName, err)
-		}
-		out := buf.Bytes()
-		if len(bytes.TrimSpace(out)) == 0 {
-			continue
-		}
-		if filepath.Ext(targetPath) == ".tf" {
-			out = hclwrite.Format(out)
-		}
-		if err := os.WriteFile(targetPath, out, 0644); err != nil {
-			return fmt.Errorf("%w: '%s': %s", ErrSavingFiles, targetPath, err)
-		}
-	}
-	return nil
+	tmpl := template.Must(template.New("templates").Funcs(funcs).Funcs(additionalFuncs).
+		ParseFS(templatesFS, files...))
+	return tmpl, nil
 }
 
 // AddTemplateTarget provides ability to specify additional template target after the processor was created
@@ -102,7 +100,11 @@ func (t FSTemplateProcessor) AddTemplateTarget(templateName, targetPath string) 
 
 // TemplateExists returns information if given template exists
 func (t FSTemplateProcessor) TemplateExists(fileName string) bool {
-	files, err := findTemplateFiles(t.TemplatesFS)
+	return templateExistInFS(fileName, t.TemplatesFS)
+}
+
+func templateExistInFS(fileName string, fs fs.FS) bool {
+	files, err := findTemplateFiles(fs)
 	if err != nil {
 		return false
 	}
@@ -113,6 +115,25 @@ func (t FSTemplateProcessor) TemplateExists(fileName string) bool {
 		}
 	}
 	return false
+}
+
+func processTemplateToFile(tmpl *template.Template, templateName, targetPath string, data interface{}) error {
+	buf := bytes.Buffer{}
+
+	if err := tmpl.Lookup(templateName).Execute(&buf, data); err != nil {
+		return fmt.Errorf("%w: %s: %s", ErrTemplateExecution, templateName, err)
+	}
+	out := buf.Bytes()
+	if len(bytes.TrimSpace(out)) == 0 {
+		return errEmptyProcessingOutput
+	}
+	if filepath.Ext(targetPath) == ".tf" {
+		out = hclwrite.Format(out)
+	}
+	if err := os.WriteFile(targetPath, out, 0644); err != nil {
+		return fmt.Errorf("%w: '%s': %s", ErrSavingFiles, targetPath, err)
+	}
+	return nil
 }
 
 func formatIntList(items []int) string {

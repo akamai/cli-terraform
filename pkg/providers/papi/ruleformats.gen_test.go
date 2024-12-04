@@ -214,7 +214,7 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			ruleResponse := getRuleTreeResponse(test.dir, t)
-			test.givenData.Rules = flattenRules("test.edgesuite.net", ruleResponse.Rules)
+			test.givenData.Rules = flattenRules(wrapAndNameRules("test.edgesuite.net", ruleResponse.Rules))
 			test.givenData.RulesAsHCL = true
 
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))

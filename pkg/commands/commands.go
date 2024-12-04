@@ -125,13 +125,13 @@ func CommandLocator() ([]*cli.Command, error) {
 		Description: "Generates Terraform configuration for Property resources",
 		Usage:       "export-property",
 		ArgsUsage:   "<property name>",
-		Action:      validatedAction(papi.CmdCreateProperty, requireValidWorkpath, requireNArguments(1)),
+		Action:      validatedAction(papi.CmdCreateProperty, requireValidWorkpath, requireNArguments(1), validateSplitDepth),
 		Subcommands: []*cli.Command{
 			{
 				Name:        "include",
 				Description: "Generates Terraform configuration for Include resources. Deprecated, use `export-property-include` command instead",
 				ArgsUsage:   "<contract_id> <include_name>",
-				Action:      validatedAction(papi.CmdCreateInclude, requireValidWorkpath, requireNArguments(2)),
+				Action:      validatedAction(papi.CmdCreateInclude, requireValidWorkpath, requireNArguments(2), validateSplitDepth),
 			},
 		},
 		Flags: []cli.Flag{
@@ -152,11 +152,15 @@ func CommandLocator() ([]*cli.Command, error) {
 			&cli.BoolFlag{
 				Name:    "rules-as-hcl",
 				Aliases: []string{"schema"},
-				Usage:   "Referenced rules will be exported as data source",
+				Usage:   "The referenced rules will be exported as a data source.",
 			},
 			&cli.BoolFlag{
 				Name:  "akamai-property-bootstrap",
-				Usage: "Referenced property will be exported using combination of 'akamai-property-bootstrap' and 'akamai-property' resources",
+				Usage: "The referenced property will be exported using a combination of the `akamai-property-bootstrap` and `akamai-property` resources.",
+			},
+			&cli.IntFlag{
+				Name:  "split-depth",
+				Usage: "Rules will be exported into a dedicated module; each rule up to a specified nesting level will be placed in a separate file.",
 			},
 		},
 		BashComplete: autocomplete.Default,
@@ -167,7 +171,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Description: "Generates Terraform configuration for Include resources",
 		Usage:       "export-property-include",
 		ArgsUsage:   "<contract_id> <include_name>",
-		Action:      validatedAction(papi.CmdCreateInclude, requireValidWorkpath, requireNArguments(2)),
+		Action:      validatedAction(papi.CmdCreateInclude, requireValidWorkpath, requireNArguments(2), validateSplitDepth),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "tfworkpath",
@@ -177,7 +181,11 @@ func CommandLocator() ([]*cli.Command, error) {
 			&cli.BoolFlag{
 				Name:    "rules-as-hcl",
 				Aliases: []string{"schema"},
-				Usage:   "Referenced rules will be exported as data source",
+				Usage:   "The referenced rules will be exported as a data source.",
+			},
+			&cli.IntFlag{
+				Name:  "split-depth",
+				Usage: "Rules will be exported into a dedicated module; each rule up to a specified nesting level will be placed in a separate file.",
 			},
 		},
 		BashComplete: autocomplete.Default,

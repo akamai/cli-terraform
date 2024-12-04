@@ -329,16 +329,17 @@ var (
 
 func TestCreateInclude(t *testing.T) {
 	tests := map[string]struct {
-		init                func(*papi.Mock, *templates.MockProcessor, string)
+		init                func(*papi.Mock, *templates.MockProcessor, *templates.MockMultiTargetProcessor, string)
 		includeName         string
 		dir                 string
 		snippetFilesToCheck []string
 		jsonDir             string
 		withError           error
 		rulesAsHCL          bool
+		splitDepth          *int
 	}{
 		"include basic": {
-			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				expectListIncludes(c)
 				expectGetIncludeVersion(c, "v2020-11-02")
 
@@ -364,7 +365,7 @@ func TestCreateInclude(t *testing.T) {
 			},
 		},
 		"include basic rules as hcl": {
-			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				expectListIncludes(c)
 				expectGetIncludeVersion(c, "v2023-01-05")
 
@@ -377,7 +378,7 @@ func TestCreateInclude(t *testing.T) {
 
 				expectListIncludeActivations(c)
 				expectAllProcessTemplates(p, (&tfDataBuilder{}).withData(getTestData("include basic rules as hcl")).
-					withIncludeRules(0, flattenRules("test_include", ruleResponse.Rules)).
+					withIncludeRules(0, flattenRules(wrapAndNameRules("test_include", ruleResponse.Rules))).
 					build(), useThisOnlyRuleFormat("v2023-01-05"))
 				mockAddTemplateTargetRules(p)
 				mockAddTemplateTargetIncludesRules(p)
@@ -390,7 +391,7 @@ func TestCreateInclude(t *testing.T) {
 			rulesAsHCL:  true,
 		},
 		"include basic, unsupported schema version": {
-			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				expectListIncludes(c)
 				expectGetIncludeVersion(c, "v2020-11-02")
 
@@ -403,7 +404,7 @@ func TestCreateInclude(t *testing.T) {
 
 				expectListIncludeActivations(c)
 				expectAllProcessTemplates(p, (&tfDataBuilder{}).withData(getTestData("include basic")).
-					withIncludeRules(0, flattenRules("test_include", ruleResponse.Rules)).
+					withIncludeRules(0, flattenRules(wrapAndNameRules("test_include", ruleResponse.Rules))).
 					build())
 				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_v2020-11-02.tmpl", false)
@@ -414,15 +415,99 @@ func TestCreateInclude(t *testing.T) {
 			rulesAsHCL:  true,
 			withError:   ErrUnsupportedRuleFormat,
 		},
+		"include with children with split-depth=0": {
+			init: func(c *papi.Mock, p *templates.MockProcessor, mm *templates.MockMultiTargetProcessor, dir string) {
+				expectListIncludes(c)
+				expectGetIncludeVersion(c, "v2023-01-05")
+
+				// Rule Tree
+				var ruleResponse papi.GetIncludeRuleTreeResponse
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				assert.NoError(t, err)
+				assert.NoError(t, json.Unmarshal(rules, &ruleResponse))
+				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReqRulesAsHCL).Return(&ruleResponse, nil).Once()
+
+				expectListIncludeActivations(c)
+				tfData := (&tfDataBuilder{}).withData(getTestData("include basic rules as hcl")).
+					withSplitDepth(true, "").
+					asHCL(true).
+					build()
+				tfData.Includes[0].RootRule = "test_include_rule_default"
+				expectAllProcessTemplates(p, tfData, useThisOnlyRuleFormat("v2023-01-05"))
+				mockModuleConfig(p)
+				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
+
+				multiTargetData := templates.MultiTargetData{
+					"includes_rules.tmpl": templates.DataForTarget{
+						"rules/test_include_default.tf": (&tfDataBuilder{}).
+							withIncludes([]TFIncludeData{{}}).
+							withIncludeRules(0, flattenRules(wrapAndNameRules("test_include", ruleResponse.Rules))).
+							withSplitDepth(true, "").build(),
+					},
+				}
+				mm.On("ProcessTemplates", multiTargetData, mock.AnythingOfType("func([]string) ([]string, error)")).Return(nil).Once()
+			},
+
+			includeName: "test_include",
+			dir:         "include_multitarget",
+			rulesAsHCL:  true,
+			splitDepth:  ptr.To(0),
+		},
+		"include with children with split-depth=2": {
+			init: func(c *papi.Mock, p *templates.MockProcessor, mm *templates.MockMultiTargetProcessor, dir string) {
+				expectListIncludes(c)
+				expectGetIncludeVersion(c, "v2023-01-05")
+
+				// Rule Tree
+				var ruleResponse papi.GetIncludeRuleTreeResponse
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				assert.NoError(t, err)
+				assert.NoError(t, json.Unmarshal(rules, &ruleResponse))
+				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReqRulesAsHCL).Return(&ruleResponse, nil).Once()
+
+				expectListIncludeActivations(c)
+				tfData := (&tfDataBuilder{}).withData(getTestData("include basic rules as hcl")).
+					withSplitDepth(true, "").
+					asHCL(true).
+					build()
+				tfData.Includes[0].RootRule = "test_include_rule_default"
+				expectAllProcessTemplates(p, tfData, useThisOnlyRuleFormat("v2023-01-05"))
+				mockModuleConfig(p)
+				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
+
+				multiTargetData := templates.MultiTargetData{
+					"includes_rules.tmpl": templates.DataForTarget{
+						"rules/test_include_default.tf": (&tfDataBuilder{}).
+							withIncludes([]TFIncludeData{{}}).
+							withIncludeRules(0, []*WrappedRules{flattenRules(wrapAndNameRules("test_include", ruleResponse.Rules))[0]}).
+							withSplitDepth(true, "").build(),
+						"rules/test_include_default_new_rule.tf": (&tfDataBuilder{}).
+							withIncludes([]TFIncludeData{{}}).
+							withIncludeRules(0, []*WrappedRules{flattenRules(wrapAndNameRules("test_include", ruleResponse.Rules))[1]}).
+							withSplitDepth(true, "").build(),
+						"rules/test_include_default_new_rule_new_rule_1.tf": (&tfDataBuilder{}).
+							withIncludes([]TFIncludeData{{}}).
+							withIncludeRules(0, []*WrappedRules{flattenRules(wrapAndNameRules("test_include", ruleResponse.Rules))[2]}).
+							withSplitDepth(true, "").build(),
+					},
+				}
+				mm.On("ProcessTemplates", multiTargetData, mock.AnythingOfType("func([]string) ([]string, error)")).Return(nil).Once()
+			},
+
+			includeName: "test_include",
+			dir:         "include_multitarget_flatten",
+			rulesAsHCL:  true,
+			splitDepth:  ptr.To(2),
+		},
 		"error include not found": {
-			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				c.On("ListIncludes", mock.Anything, papi.ListIncludesRequest{ContractID: "test_contract"}).
 					Return(nil, fmt.Errorf("oops")).Once()
 			},
 			withError: ErrIncludeNotFound,
 		},
 		"error fetching include version": {
-			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				expectListIncludes(c)
 				c.On("GetIncludeVersion", mock.Anything, papi.GetIncludeVersionRequest{
 					ContractID: "test_contract",
@@ -435,7 +520,7 @@ func TestCreateInclude(t *testing.T) {
 			includeName: "test_include",
 		},
 		"error include rules not found": {
-			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				expectListIncludes(c)
 				expectGetIncludeVersion(c, "v2020-11-02")
 				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReq).Return(nil, fmt.Errorf("oops")).Once()
@@ -444,7 +529,7 @@ func TestCreateInclude(t *testing.T) {
 			includeName: "test_include",
 		},
 		"error fetching activations": {
-			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				expectListIncludes(c)
 				expectGetIncludeVersion(c, "v2020-11-02")
 
@@ -466,7 +551,7 @@ func TestCreateInclude(t *testing.T) {
 			dir:         "include_basic",
 		},
 		"error saving files": {
-			init: func(c *papi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				expectListIncludes(c)
 				expectGetIncludeVersion(c, "v2020-11-02")
 
@@ -492,9 +577,19 @@ func TestCreateInclude(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			mc := new(papi.Mock)
 			mp := new(templates.MockProcessor)
-			test.init(mc, mp, test.dir)
+			mm := new(templates.MockMultiTargetProcessor)
+			test.init(mc, mp, mm, test.dir)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createInclude(ctx, contractID, test.includeName, section, fmt.Sprintf("./testdata/res/%s", test.jsonDir), "./", test.rulesAsHCL, mc, mp)
+			options := includeOptions{
+				contractID:  contractID,
+				includeName: test.includeName,
+				section:     section,
+				jsonDir:     fmt.Sprintf("./testdata/res/%s", test.jsonDir),
+				tfWorkPath:  "./",
+				rulesAsHCL:  test.rulesAsHCL,
+				splitDepth:  test.splitDepth,
+			}
+			err := createInclude(ctx, options, mc, mp, mm)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -509,6 +604,7 @@ func TestCreateInclude(t *testing.T) {
 			require.NoError(t, err)
 			mc.AssertExpectations(t)
 			mp.AssertExpectations(t)
+			mm.AssertExpectations(t)
 		})
 	}
 }
@@ -533,6 +629,13 @@ func TestProcessIncludeTemplates(t *testing.T) {
 			rulesAsHCL:   true,
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
 		},
+		"include basic rules using split-depth": {
+			givenData:    getTestData("include basic rules using split-depth"),
+			dir:          "include_multitarget",
+			filesToCheck: []string{"includes.tf", "variables.tf", "import.sh", "module_config.tf"},
+			rulesAsHCL:   true,
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
+		},
 		"include single network": {
 			givenData:    getTestData("include single network"),
 			dir:          "include_single_network",
@@ -553,7 +656,7 @@ func TestProcessIncludeTemplates(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			if test.rulesAsHCL {
 				ruleResponse := getRuleTreeResponse(test.dir, t)
-				test.givenData.Includes[0].Rules = flattenRules(test.givenData.Includes[0].IncludeName, ruleResponse.Rules)
+				test.givenData.Includes[0].Rules = flattenRules(wrapAndNameRules(test.givenData.Includes[0].IncludeName, ruleResponse.Rules))
 				test.givenData.RulesAsHCL = true
 			}
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
@@ -562,8 +665,11 @@ func TestProcessIncludeTemplates(t *testing.T) {
 				"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
 				"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
 			}
-			if test.rulesAsHCL {
+			if test.rulesAsHCL && !test.givenData.UseSplitDepth {
 				templateToFile["includes_rules.tmpl"] = fmt.Sprintf("./testdata/res/%s/includes_rules.tf", test.dir)
+			}
+			if test.givenData.UseSplitDepth {
+				templateToFile["rules_module.tmpl"] = fmt.Sprintf("./testdata/res/%s/module_config.tf", test.dir)
 			}
 			processor := templates.FSTemplateProcessor{
 				TemplatesFS:     templateFiles,
@@ -582,6 +688,222 @@ func TestProcessIncludeTemplates(t *testing.T) {
 		})
 	}
 
+}
+
+func TestMultiTargetProcessIncludeTemplates(t *testing.T) {
+	tests := map[string]struct {
+		givenData    templates.MultiTargetData
+		dir          string
+		filesToCheck []string
+	}{
+		"property with include with children (split-depth=0)": {
+			givenData: templates.MultiTargetData{
+				"includes_rules.tmpl": {
+					"./testdata/res/include_multitarget/include_default.tf": TFData{
+						RulesAsHCL:    true,
+						UseSplitDepth: true,
+						WithIncludes:  true,
+						Includes: []TFIncludeData{
+							{
+								Rules: []*WrappedRules{
+									{
+										IsRoot: true,
+										Rule: papi.Rules{
+											Name: "default",
+											Children: []papi.Rules{
+												{
+													Name: "New Rule",
+													Children: []papi.Rules{
+														{
+															Name: "New Rule 1",
+														},
+													},
+												},
+											},
+										},
+										Children: []*WrappedRules{
+											{
+												Rule: papi.Rules{
+													Name: "New Rule",
+													Children: []papi.Rules{
+														{
+															Name: "New Rule 1",
+														},
+													},
+												},
+												FileName:      "include_default_new_rule",
+												TerraformName: "include_rule_new_rule",
+												Children: []*WrappedRules{
+													{
+														Rule:          papi.Rules{Name: "New Rule 1"},
+														FileName:      "include_default_new_rule_new_rule_1",
+														TerraformName: "include_rule_new_rule_1",
+													},
+												},
+											},
+										},
+										FileName:      "include_default",
+										TerraformName: "include_rule_default",
+									},
+									{
+										Rule: papi.Rules{
+											Name: "New Rule",
+											Children: []papi.Rules{
+												{
+													Name: "New Rule 1",
+												},
+											},
+										},
+										FileName:      "include_default_new_rule",
+										TerraformName: "include_rule_new_rule",
+										Children: []*WrappedRules{
+											{
+												Rule:          papi.Rules{Name: "New Rule 1"},
+												FileName:      "include_default_new_rule_new_rule_1",
+												TerraformName: "include_rule_new_rule_1",
+											},
+										},
+									},
+									{
+										Rule:          papi.Rules{Name: "New Rule 1"},
+										FileName:      "include_default_new_rule_new_rule_1",
+										TerraformName: "include_rule_new_rule_1",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			dir:          "include_multitarget",
+			filesToCheck: []string{"include_default.tf"},
+		},
+		"property with include with children (split-depth=2)": {
+			givenData: templates.MultiTargetData{
+				"includes_rules.tmpl": {
+					"./testdata/res/include_multitarget_flatten/include_default.tf": TFData{
+						RulesAsHCL:    true,
+						UseSplitDepth: true,
+						WithIncludes:  true,
+						Includes: []TFIncludeData{
+							{
+								Rules: []*WrappedRules{
+									{
+										IsRoot: true,
+										Rule: papi.Rules{
+											Name: "default",
+											Children: []papi.Rules{
+												{
+													Name: "New Rule",
+													Children: []papi.Rules{
+														{
+															Name: "New Rule 1",
+														},
+													},
+												},
+											},
+										},
+										Children: []*WrappedRules{
+											{
+												Rule: papi.Rules{
+													Name: "New Rule",
+													Children: []papi.Rules{
+														{
+															Name: "New Rule 1",
+														},
+													},
+												},
+												FileName:      "include_default_new_rule",
+												TerraformName: "include_rule_new_rule",
+												Children: []*WrappedRules{
+													{
+														Rule:          papi.Rules{Name: "New Rule 1"},
+														FileName:      "include_default_new_rule_new_rule_1",
+														TerraformName: "include_rule_new_rule_1",
+													},
+												},
+											},
+										},
+										FileName:      "include_default",
+										TerraformName: "include_rule_default",
+									},
+								},
+							},
+						},
+					},
+					"./testdata/res/include_multitarget_flatten/include_default_new_rule.tf": TFData{
+						RulesAsHCL:    true,
+						UseSplitDepth: true,
+						WithIncludes:  true,
+						Includes: []TFIncludeData{
+							{
+								Rules: []*WrappedRules{
+									{
+										Rule: papi.Rules{
+											Name: "New Rule",
+											Children: []papi.Rules{
+												{
+													Name: "New Rule 1",
+												},
+											},
+										},
+										FileName:      "include_default_new_rule",
+										TerraformName: "include_rule_new_rule",
+										Children: []*WrappedRules{
+											{
+												Rule:          papi.Rules{Name: "New Rule 1"},
+												FileName:      "include_default_new_rule_new_rule_1",
+												TerraformName: "include_rule_new_rule_1",
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"./testdata/res/include_multitarget_flatten/include_default_new_rule_new_rule_1.tf": TFData{
+						RulesAsHCL:    true,
+						UseSplitDepth: true,
+						WithIncludes:  true,
+						Includes: []TFIncludeData{
+							{
+								Rules: []*WrappedRules{
+									{
+										Rule:          papi.Rules{Name: "New Rule 1"},
+										FileName:      "include_default_new_rule_new_rule_1",
+										TerraformName: "include_rule_new_rule_1",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			dir:          "include_multitarget_flatten",
+			filesToCheck: []string{"include_default.tf", "include_default_new_rule_new_rule_1.tf", "include_default_new_rule.tf"},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
+			processor := templates.FSMultiTargetProcessor{
+				TemplatesFS:     templateFiles,
+				AdditionalFuncs: additionalFuncs,
+			}
+			err := processor.ProcessTemplates(test.givenData, useThisOnlyRuleFormat("v2023-01-05"))
+			reportedErrors = []string{}
+			require.NoError(t, err)
+
+			for _, f := range test.filesToCheck {
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				require.NoError(t, err)
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				require.NoError(t, err)
+				assert.Equal(t, string(expected), string(result))
+			}
+		})
+	}
 }
 
 func getTestData(key string) TFData {
@@ -639,6 +961,35 @@ func getTestData(key string) TFData {
 					RuleFormat:  "v2023-01-05",
 				},
 			},
+		},
+		"include basic rules using split-depth": {
+			Section: section,
+			Includes: []TFIncludeData{
+				{
+					StagingInfo: NetworkInfo{
+						ActivationNote: "test staging activation",
+						Emails:         []string{"test@example.com"},
+						Version:        1,
+						HasActivation:  true,
+					},
+					ProductionInfo: NetworkInfo{
+						ActivationNote: "test production activation",
+						Emails:         []string{"test@example.com", "test1@example.com"},
+						Version:        1,
+						HasActivation:  true,
+					},
+					ContractID:  "test_contract",
+					GroupID:     "test_group",
+					IncludeID:   "inc_123456",
+					IncludeName: "test_include",
+					IncludeType: string(papi.IncludeTypeMicroServices),
+					ProductID:   "test_product",
+					RuleFormat:  "v2023-01-05",
+					RootRule:    "test_include_default",
+				},
+			},
+			UseSplitDepth: true,
+			RulesAsHCL:    true,
 		},
 		"include single network": {
 			Section: section,
