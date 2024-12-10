@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/log"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/session"
 	"github.com/akamai/cli/pkg/log"
 	"github.com/urfave/cli/v2"
@@ -29,7 +30,7 @@ func InitializeSession(c *cli.Context) (session.Session, error) {
 	options := []session.Option{
 		session.WithSigner(edgerc),
 		session.WithHTTPTracing(os.Getenv("AKAMAI_HTTP_TRACE_ENABLED") == "true"),
-		session.WithLog(log.FromContext(c.Context)),
+		session.WithLog(sesslog.SlogAdapter{Logger: log.FromContext(c.Context)}),
 	}
 	if retryConfig != nil {
 		options = append(options, session.WithRetries(*retryConfig))
