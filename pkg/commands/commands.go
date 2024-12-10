@@ -156,7 +156,7 @@ func CommandLocator() ([]*cli.Command, error) {
 			},
 			&cli.BoolFlag{
 				Name:  "akamai-property-bootstrap",
-				Usage: "The referenced property will be exported using a combination of the `akamai-property-bootstrap` and `akamai-property` resources.",
+				Usage: "The referenced property will be exported using a combination of the 'akamai-property-bootstrap' and 'akamai-property' resources.",
 			},
 			&cli.IntFlag{
 				Name:  "split-depth",
