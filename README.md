@@ -26,7 +26,7 @@ for your system, or by cloning this repository and compiling it yourself.
 
 ### Compile from source
 
-If you want to compile it from the source, you need Go 1.21 or later:
+If you want to compile it from the source, you need Go 1.22 or later:
 
 1. Create a clone of the target repository:
   `git clone https://github.com/akamai/cli-terraform.git`
