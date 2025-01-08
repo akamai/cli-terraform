@@ -319,7 +319,7 @@ func CmdCreateProperty(c *cli.Context) error {
 		splitDepth:    splitDepth,
 	}
 	if err = createProperty(ctx, options, "property-snippets", client, clientHapi, processor, multiTargetProcessor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting property: %s", err)), 1)
+		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting property \"%s\": %s", options.propertyName, err)), 1)
 	}
 	return nil
 }
@@ -524,7 +524,7 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 	if options.rulesAsHCL {
 		ruleTemplate := fmt.Sprintf("rules_%s.tmpl", rules.RuleFormat)
 		if !templateProcessor.TemplateExists(ruleTemplate) {
-			return fmt.Errorf("%w: %s", ErrUnsupportedRuleFormat, rules.RuleFormat)
+			return fmt.Errorf("%w: \"%s\"", ErrUnsupportedRuleFormat, rules.RuleFormat)
 		}
 		filterFuncs = append(filterFuncs, useThisOnlyRuleFormat(rules.RuleFormat))
 		wrappedRules := wrapAndNameRules(tfData.Property.PropertyName, rules.Rules)
@@ -566,7 +566,7 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 	}
 
 	term.Spinner().OK()
-	term.Printf("Terraform configuration for property '%s' was saved successfully\n", property.PropertyName)
+	term.Printf("Terraform configuration for property \"%s\" was saved successfully\n", property.PropertyName)
 
 	return nil
 }
@@ -709,7 +709,7 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 
 			edgeHostname, err := clientHAPI.GetEdgeHostname(ctx, edgeHostnameID)
 			if err != nil {
-				return nil, nil, fmt.Errorf("edge hostname %d not found: %s", edgeHostnameID, err)
+				return nil, nil, fmt.Errorf("edge hostname \"%d\" not found: %s", edgeHostnameID, err)
 			}
 			papiEdgeHostnames, err := clientPAPI.GetEdgeHostnames(ctx, papi.GetEdgeHostnamesRequest{
 				ContractID: property.ContractID,
