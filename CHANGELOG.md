@@ -49,6 +49,9 @@
 ### BUG FIXES:
 
 
+### Fixes
+
+* Fixed problem with invisible output in light background by converting all colors to monochromatic representation.
 
 
 

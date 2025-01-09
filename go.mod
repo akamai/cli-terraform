@@ -5,7 +5,6 @@ go 1.22
 require (
 	github.com/akamai/AkamaiOPEN-edgegrid-golang/v9 v9.1.0
 	github.com/akamai/cli v1.6.0
-	github.com/fatih/color v1.18.0
 	github.com/hashicorp/hcl/v2 v2.23.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/shirou/gopsutil v3.21.11+incompatible

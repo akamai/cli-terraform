@@ -11,9 +11,9 @@ import (
 	"github.com/akamai/cli-terraform/pkg/commands"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	akacli "github.com/akamai/cli/pkg/app"
+	"github.com/akamai/cli/pkg/color"
 	"github.com/akamai/cli/pkg/log"
 	"github.com/akamai/cli/pkg/terminal"
-	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 )
 
@@ -35,7 +35,7 @@ func Run() error {
 
 	cmds, err := commands.CommandLocator()
 	if err != nil {
-		return fmt.Errorf(color.RedString("An error occurred initializing commands: %s"), err)
+		return fmt.Errorf(color.RedString("An error occurred initializing commands: %s", err))
 	}
 	if len(cmds) > 0 {
 		app.Commands = append(cmds, app.Commands...)
