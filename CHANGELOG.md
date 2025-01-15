@@ -22,6 +22,9 @@
 
 * General
   * Migrated to go 1.22
+  
+
+  * Updated vulnerable dependencies
 
 
 
