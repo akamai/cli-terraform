@@ -97,7 +97,7 @@ func CmdCreateEdgeWorker(c *cli.Context) error {
 	section := edgegrid.GetEdgercSection(c)
 
 	if err = createEdgeWorker(ctx, edgeWorkerID, bundleDir, section, client, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting edgeworker HCL: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting edgeworker HCL: %s", err), 1)
 	}
 	return nil
 }

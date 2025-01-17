@@ -3,7 +3,7 @@ package dns
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"sort"
 	"strings"
 	"testing"
@@ -30,7 +30,7 @@ func (m *fileUtilsMock) appendRootModuleTF(configText string) error {
 }
 
 func assertFileWithContent(t *testing.T, expectedPath, actual string) {
-	expectedResult, err := ioutil.ReadFile(expectedPath)
+	expectedResult, err := os.ReadFile(expectedPath)
 	if err != nil {
 		fmt.Print("incorrect expected file")
 		return

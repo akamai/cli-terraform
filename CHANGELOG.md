@@ -21,9 +21,8 @@
 
 
 * General
-  * Migrated to go 1.22
-  
-
+  * Migrated to go `1.22`.
+  * Improved code by resolving issues reported by linter.
   * Updated vulnerable dependencies
 
 

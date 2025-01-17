@@ -2,7 +2,6 @@ package templates
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -91,7 +90,7 @@ func TestProcessMultitargetTemplates(t *testing.T) {
 					assert.True(t, errors.Is(err, os.ErrNotExist), "expected no file but found '%s'", path)
 					return
 				}
-				res, err := ioutil.ReadFile(path)
+				res, err := os.ReadFile(path)
 				require.NoError(t, err)
 				assert.Equal(t, val, string(res))
 			}

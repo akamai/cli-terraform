@@ -84,7 +84,7 @@ func CmdCreateCPS(c *cli.Context) error {
 	contractID := c.Args().Get(1)
 	section := edgegrid.GetEdgercSection(c)
 	if err = createCPS(ctx, contractID, enrollmentID, section, client, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting enrollment HCL: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting enrollment HCL: %s", err), 1)
 	}
 	return nil
 }

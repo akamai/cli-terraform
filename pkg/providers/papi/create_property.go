@@ -304,7 +304,7 @@ func CmdCreateProperty(c *cli.Context) error {
 		}
 		err = createSplitRulesDir(tfWorkPath)
 		if err != nil {
-			return cli.Exit(color.RedString(fmt.Sprintf("Error creating directory for rules: %s", err)), 1)
+			return cli.Exit(color.RedString("Error creating directory for rules: %s", err), 1)
 		}
 	}
 
@@ -319,7 +319,7 @@ func CmdCreateProperty(c *cli.Context) error {
 		splitDepth:    splitDepth,
 	}
 	if err = createProperty(ctx, options, "property-snippets", client, clientHapi, processor, multiTargetProcessor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting property \"%s\": %s", options.propertyName, err)), 1)
+		return cli.Exit(color.RedString("Error exporting property \"%s\": %s", options.propertyName, err), 1)
 	}
 	return nil
 }

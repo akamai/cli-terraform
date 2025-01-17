@@ -9,6 +9,9 @@ linters:
     - ineffassign
     - misspell
     - revive
+    - gosimple
+    - staticcheck
+    - unused
 
 output:
   sort-results: true
@@ -47,3 +50,6 @@ linters-settings:
       - name: unused-parameter
       - name: var-declaration
       - name: var-naming
+  govet:
+    disable:
+      - printf

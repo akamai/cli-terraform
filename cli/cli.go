@@ -3,6 +3,7 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -36,7 +37,7 @@ func Run() error {
 
 	cmds, err := commands.CommandLocator()
 	if err != nil {
-		return fmt.Errorf(color.RedString("An error occurred initializing commands: %s", err))
+		return errors.New(color.RedString("An error occurred initializing commands: %s", err))
 	}
 	if len(cmds) > 0 {
 		app.Commands = append(cmds, app.Commands...)
@@ -123,8 +124,14 @@ func deprecationInfoForCreateCommands(c *cli.Context) error {
 		command = c.Args().Get(1)
 	}
 	if strings.HasPrefix(command, "create-") {
-		fmt.Fprintln(c.App.Writer, color.HiYellowString("Warning:"), "create command names are now deprecated, use export commands instead.")
-		fmt.Fprintln(c.App.Writer)
+		_, err := fmt.Fprintln(c.App.Writer, color.HiYellowString("Warning:"), "create command names are now deprecated, use export commands instead.")
+		if err != nil {
+			return err
+		}
+		_, err = fmt.Fprintln(c.App.Writer)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -154,8 +161,14 @@ func deprecationInfoForSchemaFlags(c *cli.Context) error {
 	}
 
 	if hasSchemaFlag {
-		fmt.Fprint(c.App.Writer, color.HiYellowString("Warning: "))
-		fmt.Fprintf(c.App.Writer, "flag --schema is now deprecated, use %s flag instead.\n\n", newFlagName)
+		_, err := fmt.Fprint(c.App.Writer, color.HiYellowString("Warning: "))
+		if err != nil {
+			return err
+		}
+		_, err = fmt.Fprintf(c.App.Writer, "flag --schema is now deprecated, use %s flag instead.\n\n", newFlagName)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

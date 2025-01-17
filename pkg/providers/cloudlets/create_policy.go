@@ -88,9 +88,8 @@ var (
 	ErrFetchingVersion = errors.New("unable to fetch latest policy version")
 	// ErrCloudletTypeNotSupported is returned when a provided cloudlet type is not yet supported
 	ErrCloudletTypeNotSupported = errors.New("cloudlet type not supported")
-
-	errPolicyNotFound   = errors.New("policy does not exist")
-	errVersionsNotFound = errors.New("no policy versions found for given policy")
+	// ErrPolicyNotFound is returned when policy does not exist
+	ErrPolicyNotFound = errors.New("policy does not exist")
 )
 
 // CmdCreatePolicy is an entrypoint to create-policy command
@@ -135,7 +134,7 @@ func CmdCreatePolicy(c *cli.Context) error {
 	policyName := c.Args().First()
 	section := edgegrid.GetEdgercSection(c)
 	if err = createPolicy(ctx, policyName, section, clientV2, clientV3, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting policy HCL: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting policy HCL: %s", err), 1)
 	}
 	return nil
 }
@@ -361,7 +360,7 @@ func (strategy *v2ActivationStrategy) initializeWithPolicy(ctx context.Context, 
 		}
 		offset += pageSize
 	}
-	return errPolicyNotFound
+	return ErrPolicyNotFound
 }
 
 func (strategy *v2ActivationStrategy) populateWithLatestPolicyVersion(ctx context.Context) error {
@@ -464,7 +463,7 @@ func (strategy *v3ActivationStrategy) initializeWithPolicy(ctx context.Context, 
 		}
 		page++
 	}
-	return errPolicyNotFound
+	return ErrPolicyNotFound
 }
 
 func (strategy *v3ActivationStrategy) validatePolicy() error {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -318,7 +317,7 @@ func TestGetUsersByRole(t *testing.T) {
 					},
 				}},
 			},
-			init: func(m *iam.Mock, t *terminal.Mock) {
+			init: func(m *iam.Mock, _ *terminal.Mock) {
 				m.On("GetUser", mock.Anything, iam.GetUserRequest{
 					IdentityID:    "a",
 					Actions:       true,
@@ -633,9 +632,9 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 
 			for _, f := range test.filesToCheck {
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 
@@ -199,62 +199,62 @@ func TestExportCustomRule(t *testing.T) {
 }
 
 func TestGetRepNameByID(t *testing.T) {
-	getExportConfigurationResponse := getExportConfiguratonResponse("ase")
+	getExportConfigurationResponse := getExportConfigurationResponse("ase")
 	desc, err := getRepNameByID(getExportConfigurationResponse, 3017089)
 	assert.NoError(t, err)
 	assert.Equal(t, "dos_attackers_high_threat", desc)
 }
 
 func TestGetPolicyNameByID(t *testing.T) {
-	getExportConfigurationResponse := getExportConfiguratonResponse("ase")
+	getExportConfigurationResponse := getExportConfigurationResponse("ase")
 	desc, err := getPolicyNameByID(getExportConfigurationResponse, "ASE1_156138")
 	assert.NoError(t, err)
 	assert.Equal(t, "default_policy", desc)
 }
 
 func TestGetRateNameByID(t *testing.T) {
-	getExportConfigurationResponse := getExportConfiguratonResponse("ase")
+	getExportConfigurationResponse := getExportConfigurationResponse("ase")
 	desc, err := getRateNameByID(getExportConfigurationResponse, 177906)
 	assert.NoError(t, err)
 	assert.Equal(t, "page_view_requests", desc)
 }
 
 func TestGetMalwareNameByID(t *testing.T) {
-	getExportConfigurationResponse := getExportConfiguratonResponse("ase")
+	getExportConfigurationResponse := getExportConfigurationResponse("ase")
 	desc, err := getMalwareNameByID(getExportConfigurationResponse, 1187)
 	assert.NoError(t, err)
 	assert.Equal(t, "fms_configuration_1", desc)
 }
 
 func TestGetCustomRuleNameByID(t *testing.T) {
-	getExportConfigurationResponse := getExportConfiguratonResponse("ase")
+	getExportConfigurationResponse := getExportConfigurationResponse("ase")
 	desc, err := getCustomRuleNameByID(getExportConfigurationResponse, 60088542)
 	assert.NoError(t, err)
 	assert.Equal(t, "custom_rule_1", desc)
 }
 
 func TestGetRuleNameByID(t *testing.T) {
-	getExportConfigurationResponse := getExportConfiguratonResponse("ase")
+	getExportConfigurationResponse := getExportConfigurationResponse("ase")
 	desc, err := getRuleNameByID(getExportConfigurationResponse, 3000080)
 	assert.NoError(t, err)
 	assert.Equal(t, "aseweb_attackxss", desc)
 }
 
 func TestGetRuleDescByID(t *testing.T) {
-	getExportConfigurationResponse := getExportConfiguratonResponse("ase")
+	getExportConfigurationResponse := getExportConfigurationResponse("ase")
 	desc, err := getRuleDescByID(getExportConfigurationResponse, 3000080)
 	assert.NoError(t, err)
 	assert.Equal(t, "Cross-site Scripting (XSS) Attack (Attribute Injection 1)", desc)
 }
 
-func getExportConfiguratonResponse(filename string) *appsec.GetExportConfigurationResponse {
+func getExportConfigurationResponse(filename string) *appsec.GetExportConfigurationResponse {
 
 	jsonFile, err := os.Open(fmt.Sprintf("./testdata/%s.json", filename))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	byteValue, err := ioutil.ReadAll(jsonFile)
+	byteValue, err := io.ReadAll(jsonFile)
 
 	if err != nil {
 		log.Fatal(err)
@@ -275,7 +275,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 	configs := []string{"ase", "tcwest"}
 
 	// Mocked API calls
-	mocks := func(c *appsec.Mock, p *templates.MockProcessor) {
+	mocks := func(c *appsec.Mock, _ *templates.MockProcessor) {
 		//c.On("GetWAFMode", mock.Anything, appsec.GetWAFModeRequest{ConfigID: 79947, Version: 1, PolicyID: "ASE1_156138"}).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)
 		c.On("GetWAFMode", mock.Anything, mock.Anything).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)
 		//c.On("GetConfiguration", mock.Anything, appsec.GetConfigurationRequest{ConfigID: 79947}).Return(&appsec.GetConfigurationResponse{Description: "A security config for demo"}, nil)
@@ -366,13 +366,13 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					AdditionalFuncs: additionalFuncs,
 				}
 
-				getExportConfigurationResponse := getExportConfiguratonResponse(config)
+				getExportConfigurationResponse := getExportConfigurationResponse(config)
 				require.NoError(t, processor.ProcessTemplates(getExportConfigurationResponse))
 
 				// Validate output
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", config, output))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", config, output))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", config, output))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", config, output))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			})
@@ -386,12 +386,12 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 	configs := []string{"ase-botman"}
 
 	// Mocked API calls
-	mocks := func(c *appsec.Mock, p *templates.MockProcessor) {
+	mocks := func(c *appsec.Mock, _ *templates.MockProcessor) {
 		c.On("GetWAFMode", mock.Anything, mock.Anything).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)
 		c.On("GetConfiguration", mock.Anything, mock.Anything).Return(&appsec.GetConfigurationResponse{Description: "A security config for\ndemo\n"}, nil)
 	}
 
-	botmanMocks := func(c *botman.Mock, p *templates.MockProcessor) {
+	botmanMocks := func(c *botman.Mock, _ *templates.MockProcessor) {
 		c.On("GetAkamaiBotCategoryList", mock.Anything, mock.Anything).Return(&botman.GetAkamaiBotCategoryListResponse{Categories: []map[string]interface{}{
 			{"categoryId": "0b116152-1d20-4715-8fa7-dcacb1c697e2", "categoryName": "Akamai Bot Category A"},
 			{"categoryId": "da0596ba-2379-4657-9b84-79b460d66070", "categoryName": "Akamai Bot Category B"},
@@ -501,14 +501,14 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 					AdditionalFuncs: additionalFuncs,
 				}
 
-				getExportConfigurationResponse := getExportConfiguratonResponse(config)
+				getExportConfigurationResponse := getExportConfigurationResponse(config)
 				require.NoError(t, addBotmanCommonResources(context.Background(), getExportConfigurationResponse))
 				require.NoError(t, processor.ProcessTemplates(getExportConfigurationResponse))
 
 				// Validate output
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", config, output))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", config, output))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", config, output))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", config, output))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			})
@@ -558,7 +558,7 @@ func TestExportJSONWithoutKeys(t *testing.T) {
 }
 
 func TestGetCustomBotCategoryNameByID(t *testing.T) {
-	getExportConfigurationResponse := getExportConfiguratonResponse("ase-botman")
+	getExportConfigurationResponse := getExportConfigurationResponse("ase-botman")
 	name, err := getCustomBotCategoryNameByID(getExportConfigurationResponse.CustomBotCategories, "dae597b8-b552-4c95-ab8b-066a3fef2f75")
 	assert.NoError(t, err)
 	assert.Equal(t, "category_a", name)

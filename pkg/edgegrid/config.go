@@ -60,9 +60,9 @@ func getRetryConfig() (*session.RetryConfig, error) {
 		}
 	}
 	conf := session.NewRetryConfig()
-	max, ok := os.LookupEnv("AKAMAI_RETRY_MAX")
+	retryMax, ok := os.LookupEnv("AKAMAI_RETRY_MAX")
 	if ok {
-		v, err := strconv.Atoi(max)
+		v, err := strconv.Atoi(retryMax)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse AKAMAI_RETRY_MAX environment variable: %w", err)
 		}

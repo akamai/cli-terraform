@@ -88,7 +88,7 @@ func CmdCreateEdgeKV(c *cli.Context) error {
 	section := edgegrid.GetEdgercSection(c)
 
 	if err = createEdgeKV(ctx, namespace, network, section, client, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting edgekv HCL: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting edgekv HCL: %s", err), 1)
 	}
 	return nil
 }
@@ -106,7 +106,7 @@ func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.Nam
 
 	term.Spinner().OK()
 	term.Spinner().Start("Fetching EdgeKV groups in %s", namespace)
-	groupItems := make(map[string]map[string]edgeworkers.Item, 0)
+	groupItems := make(map[string]map[string]edgeworkers.Item)
 	edgeKVGroups, err := getEdgeKVGroups(ctx, namespace, network, client)
 	if err != nil {
 		term.Spinner().Fail()
@@ -121,7 +121,7 @@ func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.Nam
 			return fmt.Errorf("%w: %s", ErrFetchingEdgeKV, err)
 		}
 
-		items := make(map[string]edgeworkers.Item, 0)
+		items := make(map[string]edgeworkers.Item)
 		for _, itemID := range *edgeKVItems {
 			item, err := getEdgeKVItem(ctx, namespace, network, group, itemID, client)
 			if err != nil {

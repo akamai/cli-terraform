@@ -11,7 +11,7 @@ clean() {
 }
 
 list_branches() {
-  git log --pretty=format:'%D' | sed 's@HEAD -> @@' | grep . | sed 's@origin/@@g' | sed 's@release/.*@@g' | sed -E $'s@master, (.+)@\\1, master@g' | tr ', ' '\n' | grep -v 'tag:' | sed -E 's@v([0-9]+\.?){2,}(-rc\.[0-9]+)?@@g' | grep -v release/ | grep -v HEAD | sed '/^$/d'
+  git log --pretty=format:'%D' | sed 's@HEAD -> @@' | grep . | sed 's@origin/@@g' | sed 's@release/.*@@g' | sed -E $'s@master, (.+)@\\1, master@g' | tr ', ' '\n' | grep -v 'tag:' | sed -E 's@^v([0-9]+\.?){2,}(-rc\.[0-9]+)?@@g' | grep -v release/ | grep -v HEAD | sed '/^$/d'
 }
 
 find_edgegrid_branch() {

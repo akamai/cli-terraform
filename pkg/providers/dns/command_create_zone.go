@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -60,7 +59,7 @@ var zoneTFConfig = ""
 // CmdCreateZone is an entrypoint to create-zone command
 func CmdCreateZone(c *cli.Context) error {
 	ctx := c.Context
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 
 	sess := edgegrid.GetSession(ctx)
 	configDNS := dns.Client(sess)
@@ -233,11 +232,11 @@ func calculateTfConfig(ctx context.Context, zoneObject *dns.GetZoneResponse, res
 	if len(zoneTFConfig) > 0 {
 		if strings.Contains(zoneTFConfig, "module") && strings.Contains(zoneTFConfig, "zonename") {
 			if !config.fetchConfig.ModSegment {
-				// already have a top level zone config and its modularized!
+				// already have a top level zone config and it's modularized!
 				return cli.Exit(color.RedString("Failed. Existing zone config is modularized"), 1)
 			}
 		} else if config.fetchConfig.ModSegment {
-			// already have a top level zone config and its not modularized!
+			// already have a top level zone config and it's not modularized!
 			return cli.Exit(color.RedString("Failed. Existing zone config is not modularized"), 1)
 		}
 	} else {
@@ -381,7 +380,7 @@ func inventorZone(ctx context.Context, configDNS dns.DNS, configuration configSt
 	}
 	for _, zName := range configuration.recordNames {
 		if configuration.fetchConfig.NamesOnly {
-			recordSets[zName] = make([]string, 0, 0)
+			recordSets[zName] = make([]string, 0)
 		} else {
 			nameTypesResp, err := configDNS.GetZoneNameTypes(ctx, dns.GetZoneNameTypesRequest{
 				ZoneName: zName,
@@ -488,7 +487,7 @@ func openZoneConfigFile(zoneName string, tfWorkPath string) (*os.File, string, e
 	}
 	tfConfig := ""
 	if charsRead > 0 {
-		tfConfig = fmt.Sprintf("%s", tfScratch[0:charsRead-1])
+		tfConfig = string(tfScratch[0 : charsRead-1])
 	}
 
 	return tfHandle, tfConfig, nil
@@ -508,7 +507,7 @@ func retrieveZoneImportList(rscName string, configuration configStruct) (*zoneIm
 	if _, err := os.Stat(importListFilename); err != nil {
 		return nil, err
 	}
-	importData, err := ioutil.ReadFile(importListFilename)
+	importData, err := os.ReadFile(importListFilename)
 	if err != nil {
 		return nil, err
 	}
@@ -531,7 +530,7 @@ func retrieveZoneResourceConfig(rscName string, config configStruct) (map[string
 	if _, err := os.Stat(resourceConfigFilename); err != nil {
 		return configList, err
 	}
-	configData, err := ioutil.ReadFile(resourceConfigFilename)
+	configData, err := os.ReadFile(resourceConfigFilename)
 	if err != nil {
 		return configList, err
 	}

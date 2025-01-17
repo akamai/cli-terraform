@@ -107,7 +107,7 @@ func CmdCreateCloudWrapper(c *cli.Context) error {
 	}
 	section := edgegrid.GetEdgercSection(c)
 	if err = createCloudWrapper(ctx, configID, section, client, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting cloudwraper: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting cloudwraper: %s", err), 1)
 	}
 	return nil
 }

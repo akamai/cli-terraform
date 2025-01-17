@@ -100,7 +100,7 @@ func CmdCreateClientList(c *cli.Context) error {
 	edgercPath := edgegrid.GetEdgercPath(c)
 
 	if err := createClientList(ctx, listID, edgercPath, section, tfWorkPath, client, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting client list: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting client list: %s", err), 1)
 	}
 
 	return nil

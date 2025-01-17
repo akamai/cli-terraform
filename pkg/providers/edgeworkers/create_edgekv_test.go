@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -101,8 +100,7 @@ var (
 
 	expectProcessTemplates = func(p *templates.MockProcessor, network edgeworkers.NamespaceNetwork, name string, geoLocation string,
 		retention int, groupID *int, section string, items map[string]map[string]edgeworkers.Item, err error) *mock.Call {
-		var tfData TFEdgeKVData
-		tfData = TFEdgeKVData{
+		tfData := TFEdgeKVData{
 			Name:        name,
 			Network:     network,
 			Retention:   retention,
@@ -173,7 +171,7 @@ func TestCreateEdgeKV(t *testing.T) {
 			},
 		},
 		"error fetching edgekv": {
-			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
+			init: func(e *edgeworkers.Mock, _ *templates.MockProcessor) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), fmt.Errorf("error")).Once()
 			},
 			withError: ErrFetchingEdgeKV,
@@ -282,9 +280,9 @@ func TestProcessEdgeKVTemplates(t *testing.T) {
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 
 			for _, f := range test.filesToCheck {
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}

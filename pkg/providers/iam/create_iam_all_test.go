@@ -3,7 +3,6 @@ package iam
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -363,9 +362,9 @@ func TestProcessIAMAllTemplates(t *testing.T) {
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 
 			for _, f := range test.filesToCheck {
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}

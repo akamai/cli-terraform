@@ -1665,13 +1665,13 @@ func TestCreateProperty(t *testing.T) {
 			dir: "basic",
 		},
 		"error property not found": {
-			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, nil, fmt.Errorf("oops"))
 			},
 			withError: ErrPropertyNotFound,
 		},
 		"error group not found": {
-			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
@@ -1693,7 +1693,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrPropertyRulesNotFound,
 		},
 		"error property version not found": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
@@ -1720,7 +1720,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrFetchingActivationDetails,
 		},
 		"error product name not found": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
@@ -1733,7 +1733,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrProductNameNotFound,
 		},
 		"error hostnames not found": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
@@ -1746,7 +1746,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrHostnamesNotFound,
 		},
 		"error hostname details": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
@@ -3899,11 +3899,6 @@ func (t *tfDataBuilder) withEdgeHostname(edgeHostname map[string]EdgeHostname) *
 	return t
 }
 
-func (t *tfDataBuilder) withHostnames(hostnames map[string]Hostname) *tfDataBuilder {
-	t.tfData.Property.Hostnames = hostnames
-	return t
-}
-
 func (t *tfDataBuilder) withIsActive(isActive bool) *tfDataBuilder {
 	hostname := t.tfData.Property.Hostnames["test.edgesuite.net"]
 	hostname.IsActive = isActive
@@ -3917,11 +3912,10 @@ func (t *tfDataBuilder) withEmails(emails []string) *tfDataBuilder {
 }
 
 func (t *tfDataBuilder) withOnlyProductionActivation(emails []string, activationNote string, version int) *tfDataBuilder {
-	t.tfData.Property.ProductionInfo.HasActivation = true
+
+	t.withProductionVersion(version, true)
 	t.tfData.Property.ProductionInfo.Emails = emails
 	t.tfData.Property.ProductionInfo.ActivationNote = activationNote
-	t.tfData.Property.ProductionInfo.Version = version
-	t.tfData.Property.ProductionInfo.IsActiveOnLatestVersion = true
 	t.tfData.Property.StagingInfo.HasActivation = false
 	t.tfData.Property.StagingInfo.ActivationNote = ""
 	t.tfData.Property.StagingInfo.Version = 0

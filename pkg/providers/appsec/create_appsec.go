@@ -62,7 +62,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 	for _, path := range paths {
 		err := os.MkdirAll(path, 0755)
 		if err != nil {
-			return cli.NewExitError(color.RedString(err.Error()), 1)
+			return cli.Exit(color.RedString(err.Error()), 1)
 		}
 	}
 
@@ -71,7 +71,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 
 	err := tools.CheckFiles(appsecPath)
 	if err != nil {
-		return cli.NewExitError(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString(err.Error()), 1)
 	}
 
 	// Save our section for use later
@@ -153,7 +153,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 
 	appsecName := c.Args().First()
 	if err = createAppsec(ctx, appsecName, client, processor); err != nil {
-		return cli.NewExitError(color.RedString(fmt.Sprintf("Error exporting appsec config HCL: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting appsec config HCL: %s", err), 1)
 	}
 	return nil
 }
@@ -277,7 +277,7 @@ func exportJSON(source interface{}) (string, error) {
 
 	// Unmarshal into our anonymous struct
 	dest := map[string]interface{}{}
-	err = json.Unmarshal([]byte(string(js)), &dest)
+	err = json.Unmarshal(js, &dest)
 	if err != nil {
 		return "", err
 	}
@@ -295,11 +295,11 @@ func exportJSON(source interface{}) (string, error) {
 }
 
 // Get the WAF mode for the given security policy
-func getWAFMode(configid int, version int, policyid string) (string, error) {
+func getWAFMode(configID int, version int, policyID string) (string, error) {
 
 	getWAFModeResponse, err := client.GetWAFMode(context.Background(), appsec.GetWAFModeRequest{
-		ConfigID: configid,
-		PolicyID: policyid,
+		ConfigID: configID,
+		PolicyID: policyID,
 		Version:  version,
 	})
 	if err != nil {

@@ -127,7 +127,7 @@ func CmdCreateDomain(c *cli.Context) error {
 	domainName := c.Args().First()
 	section := edgegrid.GetEdgercSection(c)
 	if err := createDomain(ctx, client, domainName, section, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting domain HCL: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting domain HCL: %s", err), 1)
 	}
 	return nil
 }

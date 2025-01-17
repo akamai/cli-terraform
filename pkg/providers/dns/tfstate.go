@@ -2,7 +2,6 @@ package dns
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -34,7 +33,7 @@ func readTfState(tfWorkPath string) error {
 	if _, err := os.Stat(tfStateFileName); err != nil {
 		return err
 	}
-	stateData, err := ioutil.ReadFile(tfStateFileName)
+	stateData, err := os.ReadFile(tfStateFileName)
 	if err != nil {
 		return err
 	}

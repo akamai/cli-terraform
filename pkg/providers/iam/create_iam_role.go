@@ -57,11 +57,11 @@ func CmdCreateIAMRole(c *cli.Context) error {
 	section := edgegrid.GetEdgercSection(c)
 	roleID, err := strconv.ParseInt(c.Args().First(), 10, 64)
 	if err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Wrong format of role id %v must be a number: %s", roleID, err)), 1)
+		return cli.Exit(color.RedString("Wrong format of role id %v must be a number: %s", roleID, err), 1)
 	}
 
 	if err = createIAMRoleByID(ctx, roleID, section, client, processor, roleOnly); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting HCL for IAM: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}
 	return nil
 }

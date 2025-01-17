@@ -57,10 +57,10 @@ func CmdCreateIAMGroup(c *cli.Context) error {
 	section := edgegrid.GetEdgercSection(c)
 	groupID, err := strconv.ParseInt(c.Args().First(), 10, 64)
 	if err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Wrong format of group id %v must be a number: %s", groupID, err)), 1)
+		return cli.Exit(color.RedString("Wrong format of group id %v must be a number: %s", groupID, err), 1)
 	}
 	if err = createIAMGroupByID(ctx, groupID, section, client, processor, groupOnly); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting HCL for IAM: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}
 	return nil
 }

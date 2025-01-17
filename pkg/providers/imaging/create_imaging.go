@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -57,7 +56,7 @@ var templateFiles embed.FS
 
 var (
 	// RemoveSymbols is a regexp used to remove special characters from policy json file names.
-	RemoveSymbols = regexp.MustCompile(`[^\w]`)
+	RemoveSymbols = regexp.MustCompile(`\W`)
 	// ErrFetchingPolicySet is returned when fetching policy set fails
 	ErrFetchingPolicySet = errors.New("unable to fetch policy set with given name")
 	// ErrFetchingPolicy is returned when fetching policy set fails
@@ -123,7 +122,7 @@ func CmdCreateImaging(c *cli.Context) error {
 	contractID, policySetID := c.Args().Get(0), c.Args().Get(1)
 	section := edgegrid.GetEdgercSection(c)
 	if err = createImaging(ctx, contractID, policySetID, tfWorkPath, jsonDir, section, client, processor, tools.PolicyAsHCL); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting policy HCL: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting policy HCL: %s", err), 1)
 	}
 	return nil
 }
@@ -273,7 +272,7 @@ func getPoliciesImageData(ctx context.Context, policies []imaging.PolicyOutput, 
 			})
 		} else {
 			jsonPath := filepath.Join(jsonDir, RemoveSymbols.ReplaceAllString(policy.ID, "_")+".json")
-			err = ioutil.WriteFile(filepath.Join(tfWorkPath, jsonPath), []byte(policyJSON), 0644)
+			err = os.WriteFile(filepath.Join(tfWorkPath, jsonPath), []byte(policyJSON), 0644)
 			if err != nil {
 				return nil, err
 			}
@@ -344,7 +343,7 @@ func getPoliciesVideoData(ctx context.Context, policies []imaging.PolicyOutput, 
 			})
 		} else {
 			jsonPath := filepath.Join(jsonDir, RemoveSymbols.ReplaceAllString(policy.ID, "_")+".json")
-			err = ioutil.WriteFile(filepath.Join(tfWorkPath, jsonPath), []byte(policyJSON), 0644)
+			err = os.WriteFile(filepath.Join(tfWorkPath, jsonPath), []byte(policyJSON), 0644)
 			if err != nil {
 				return nil, err
 			}
@@ -400,36 +399,36 @@ func getPolicyVideoJSON(policy *imaging.PolicyOutputVideo) (string, error) {
 	return string(policyJSON), nil
 }
 
-func equalPolicyImage(old, new string) (bool, error) {
-	if old == new {
+func equalPolicyImage(o, n string) (bool, error) {
+	if o == n {
 		return true, nil
 	}
 	var oldPolicy, newPolicy imaging.PolicyInputImage
-	if old == "" || new == "" {
-		return old == new, nil
+	if o == "" || n == "" {
+		return o == n, nil
 	}
-	if err := json.Unmarshal([]byte(old), &oldPolicy); err != nil {
+	if err := json.Unmarshal([]byte(o), &oldPolicy); err != nil {
 		return false, err
 	}
-	if err := json.Unmarshal([]byte(new), &newPolicy); err != nil {
+	if err := json.Unmarshal([]byte(n), &newPolicy); err != nil {
 		return false, err
 	}
 
 	return reflect.DeepEqual(oldPolicy, newPolicy), nil
 }
 
-func equalPolicyVideo(old, new string) (bool, error) {
-	if old == new {
+func equalPolicyVideo(o, n string) (bool, error) {
+	if o == n {
 		return true, nil
 	}
 	var oldPolicy, newPolicy imaging.PolicyInputVideo
-	if old == "" || new == "" {
-		return old == new, nil
+	if o == "" || n == "" {
+		return o == n, nil
 	}
-	if err := json.Unmarshal([]byte(old), &oldPolicy); err != nil {
+	if err := json.Unmarshal([]byte(o), &oldPolicy); err != nil {
 		return false, err
 	}
-	if err := json.Unmarshal([]byte(new), &newPolicy); err != nil {
+	if err := json.Unmarshal([]byte(n), &newPolicy); err != nil {
 		return false, err
 	}
 

@@ -94,12 +94,12 @@ func CmdCreateInclude(c *cli.Context) error {
 		}
 		err = createSplitRulesDir(tfWorkPath)
 		if err != nil {
-			return cli.Exit(color.RedString(fmt.Sprintf("Error creating directory for include rules: %s", err)), 1)
+			return cli.Exit(color.RedString("Error creating directory for include rules: %s", err), 1)
 		}
 	}
 
 	if err = createInclude(ctx, options, client, processor, multiTargetProcessor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting include: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting include: %s", err), 1)
 	}
 
 	return nil
@@ -364,19 +364,4 @@ func findIncludeByName(ctx context.Context, client papi.PAPI, contractID, includ
 	}
 
 	return nil, fmt.Errorf("unable to find include: \"%s\"", includeName)
-}
-
-// getActivatedNetworks returns a list of networks on which the given include is activated
-func getActivatedNetworks(include *papi.Include) []string {
-	var result []string
-
-	if include.StagingVersion != nil {
-		result = append(result, string(papi.ActivationNetworkStaging))
-	}
-
-	if include.ProductionVersion != nil {
-		result = append(result, string(papi.ActivationNetworkProduction))
-	}
-
-	return result
 }

@@ -56,7 +56,7 @@ func CmdCreateIAMAll(c *cli.Context) error {
 	section := edgegrid.GetEdgercSection(c)
 
 	if err := createIAMAll(ctx, section, client, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting HCL for IAM: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}
 	return nil
 }

@@ -500,14 +500,14 @@ func TestCreateInclude(t *testing.T) {
 			splitDepth:  ptr.To(2),
 		},
 		"error include not found": {
-			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+			init: func(c *papi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				c.On("ListIncludes", mock.Anything, papi.ListIncludesRequest{ContractID: "test_contract"}).
 					Return(nil, fmt.Errorf("oops")).Once()
 			},
 			withError: ErrIncludeNotFound,
 		},
 		"error fetching include version": {
-			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+			init: func(c *papi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				expectListIncludes(c)
 				c.On("GetIncludeVersion", mock.Anything, papi.GetIncludeVersionRequest{
 					ContractID: "test_contract",
@@ -520,7 +520,7 @@ func TestCreateInclude(t *testing.T) {
 			includeName: "test_include",
 		},
 		"error include rules not found": {
-			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+			init: func(c *papi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				expectListIncludes(c)
 				expectGetIncludeVersion(c, "v2020-11-02")
 				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReq).Return(nil, fmt.Errorf("oops")).Once()
@@ -529,7 +529,7 @@ func TestCreateInclude(t *testing.T) {
 			includeName: "test_include",
 		},
 		"error fetching activations": {
-			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+			init: func(c *papi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				expectListIncludes(c)
 				expectGetIncludeVersion(c, "v2020-11-02")
 

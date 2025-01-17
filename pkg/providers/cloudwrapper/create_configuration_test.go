@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -56,28 +55,28 @@ func TestCreateCloudWrapper(t *testing.T) {
 		withError error
 	}{
 		"configuration all fields": {
-			init: func(c *cloudwrapper.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *cloudwrapper.Mock, p *templates.MockProcessor, _ string) {
 				mockGetConfiguration(c, getConfigurationReq, &getConfigurationActiveResponse, nil)
 				mockProcessTemplates(p, (&tfCloudWrapperDataBuilder{}).withDefaults().withStatus(cloudwrapper.StatusActive).build(), nil)
 			},
 			dir: "all_fields_config",
 		},
 		"configuration not active status": {
-			init: func(c *cloudwrapper.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *cloudwrapper.Mock, p *templates.MockProcessor, _ string) {
 				mockGetConfiguration(c, getConfigurationReq, &getConfigurationNoActiveResponse, nil)
 				mockProcessTemplates(p, (&tfCloudWrapperDataBuilder{}).withDefaults().withStatus(cloudwrapper.StatusFailed).build(), nil)
 			},
 			dir: "not_active_configuration",
 		},
 		"error problem with fetching configuration": {
-			init: func(c *cloudwrapper.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *cloudwrapper.Mock, _ *templates.MockProcessor, _ string) {
 				mockGetConfiguration(c, getConfigurationReq, nil, ErrFetchingConfiguration)
 			},
 			dir:       "all_fields_config",
 			withError: ErrFetchingConfiguration,
 		},
 		"error configuration contains multi cdn": {
-			init: func(c *cloudwrapper.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *cloudwrapper.Mock, _ *templates.MockProcessor, _ string) {
 				mockGetConfiguration(c, getConfigurationReq, &getConfigurationResponseWithMultiCDN, nil)
 			},
 			dir:       "all_fields_config",
@@ -257,9 +256,9 @@ func TestProcessCloudWrapperTemplates(t *testing.T) {
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
 			require.NoError(t, processor(test.dir).ProcessTemplates(test.givenData))
 			for _, f := range test.filesToCheck {
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}

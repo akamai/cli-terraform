@@ -56,7 +56,7 @@ func CmdCreateIAMUser(c *cli.Context) error {
 	section := edgegrid.GetEdgercSection(c)
 	email := c.Args().First()
 	if err = createIAMUserByEmail(ctx, email, section, client, processor, userOnly); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting HCL for IAM: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}
 	return nil
 }

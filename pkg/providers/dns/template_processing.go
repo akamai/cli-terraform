@@ -61,7 +61,7 @@ func useTemplate(data interface{}, templateName string, trimBeginning bool) stri
 		return ""
 	}
 
-	res := string(buf.Bytes())
+	res := buf.String()
 
 	if trimBeginning {
 		res = strings.TrimLeft(res, "\n")

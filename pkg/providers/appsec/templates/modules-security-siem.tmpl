@@ -7,7 +7,7 @@ resource "akamai_appsec_siem_settings" "siem" {
     enable_for_all_policies = {{ .Siem.EnableForAllPolicies }}
     enable_botman_siem = {{ .Siem.EnabledBotmanSiemEvents }}
     siem_id = {{ .Siem.SiemDefinitionID }}
-    security_policy_ids = [{{ toList .Siem.FirewallPolicyIds }}]
+    security_policy_ids = [{{ toList .Siem.FirewallPolicyIDs }}]
 }
 {{ end -}}
 {{ end -}}
