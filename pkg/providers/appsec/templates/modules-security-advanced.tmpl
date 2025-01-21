@@ -1,6 +1,6 @@
 // Global Advanced
 resource "akamai_appsec_advanced_settings_logging" "logging" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     logging   = jsonencode(
 {{toJSON .AdvancedOptions.Logging }}
 )
@@ -8,7 +8,7 @@ resource "akamai_appsec_advanced_settings_logging" "logging" {
 {{ if .AdvancedOptions -}}
 {{ if .AdvancedOptions.Prefetch }}
 resource "akamai_appsec_advanced_settings_prefetch" "prefetch" {
-    config_id        = akamai_appsec_configuration.config.config_id
+    config_id        = local.config_id
     enable_app_layer = {{ .AdvancedOptions.Prefetch.EnableAppLayer }}
     all_extensions = {{ .AdvancedOptions.Prefetch.AllExtensions }}
     enable_rate_controls = {{ .AdvancedOptions.Prefetch.EnableRateControls }}
@@ -17,7 +17,7 @@ resource "akamai_appsec_advanced_settings_prefetch" "prefetch" {
 {{ end -}}
 {{ if .AdvancedOptions.PragmaHeader }}
 resource "akamai_appsec_advanced_settings_pragma_header" "pragma_header" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     pragma_header = jsonencode(
 {{ toJSON .AdvancedOptions.PragmaHeader }}
 )
@@ -25,19 +25,19 @@ resource "akamai_appsec_advanced_settings_pragma_header" "pragma_header" {
 {{ end -}}
 {{ if .AdvancedOptions.EvasivePathMatch }}
 resource "akamai_appsec_advanced_settings_evasive_path_match" "evasive_path_match" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   enable_path_match = {{ .AdvancedOptions.EvasivePathMatch.EnablePathMatch }}
 }
 {{ end -}}
 {{ if .AdvancedOptions.PIILearning }}
 resource "akamai_appsec_advanced_settings_pii_learning" "pii_learning" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     enable_pii_learning = {{ .AdvancedOptions.PIILearning.EnablePIILearning }}
 }
 {{ end -}}
 {{ if .AdvancedOptions.AttackPayloadLogging }}
 resource "akamai_appsec_advanced_settings_attack_payload_logging" "attack_payload_logging" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   attack_payload_logging   = jsonencode(
 {{toJSON .AdvancedOptions.AttackPayloadLogging }}
 )
@@ -45,7 +45,7 @@ resource "akamai_appsec_advanced_settings_attack_payload_logging" "attack_payloa
 {{ end -}}
 {{ if .AdvancedOptions.RequestBody }}
 resource "akamai_appsec_advanced_settings_request_body" "config_settings" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   request_body_inspection_limit = "{{ .AdvancedOptions.RequestBody.RequestBodyInspectionLimitInKB }}"
 }
 {{ end -}}
@@ -55,7 +55,7 @@ resource "akamai_appsec_advanced_settings_request_body" "config_settings" {
 {{ if .LoggingOverrides }}
 // Logging Overides
 resource "akamai_appsec_advanced_settings_logging" "{{ escapeName $policyName}}" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     security_policy_id = akamai_appsec_security_policy.{{ escapeName $policyName }}.security_policy_id
     logging = jsonencode(
 {{ toJSON .LoggingOverrides }}
@@ -66,7 +66,7 @@ resource "akamai_appsec_advanced_settings_logging" "{{ escapeName $policyName}}"
 {{ if .PragmaHeader.Action }}
 // Pragma Header
 resource "akamai_appsec_advanced_settings_pragma_header" "{{ escapeName $policyName}}" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     security_policy_id = akamai_appsec_security_policy.{{ escapeName $policyName }}.security_policy_id
     pragma_header = jsonencode(
 {{ toJSON .PragmaHeader }}
@@ -77,7 +77,7 @@ resource "akamai_appsec_advanced_settings_pragma_header" "{{ escapeName $policyN
 {{ if .EvasivePathMatch }}
 // Evasive Path Match
 resource "akamai_appsec_advanced_settings_evasive_path_match" "{{ escapeName $policyName}}" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     security_policy_id = akamai_appsec_security_policy.{{ escapeName $policyName }}.security_policy_id
     enable_path_match = {{ .EvasivePathMatch.EnablePathMatch }}
 }
@@ -85,7 +85,7 @@ resource "akamai_appsec_advanced_settings_evasive_path_match" "{{ escapeName $po
 {{ if .AttackPayloadLoggingOverrides }}
 // AttackPayloadLogging Overrides
 resource "akamai_appsec_advanced_settings_attack_payload_logging" "{{ escapeName $policyName}}" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     security_policy_id = akamai_appsec_security_policy.{{ escapeName $policyName }}.security_policy_id
     attack_payload_logging = jsonencode(
 {{ toJSON .AttackPayloadLoggingOverrides }}
@@ -95,7 +95,7 @@ resource "akamai_appsec_advanced_settings_attack_payload_logging" "{{ escapeName
 {{ if .RequestBody }}
 // RequestBody Overrides
 resource "akamai_appsec_advanced_settings_request_body" "{{ escapeName $policyName}}" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     security_policy_id = akamai_appsec_security_policy.{{ escapeName $policyName }}.security_policy_id
     request_body_inspection_limit = "{{ .RequestBody.RequestBodyInspectionLimitInKB }}"
     request_body_inspection_limit_override = true

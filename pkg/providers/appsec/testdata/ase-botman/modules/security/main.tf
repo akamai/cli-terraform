@@ -11,6 +11,10 @@ data "akamai_group" "group" {
   contract_id = var.contract_id
 }
 
+locals {
+  config_id = akamai_appsec_configuration.config.config_id
+}
+
 output "config_id" {
-  value = akamai_appsec_configuration.config.config_id
+  value = local.config_id
 }

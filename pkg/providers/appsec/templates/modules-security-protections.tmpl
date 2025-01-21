@@ -2,43 +2,43 @@
 {{ $policyName := escapeName .Name -}}
 // Enable/Disable Protections for policy {{ $policyName }}
 resource "akamai_appsec_waf_protection" "{{ $policyName }}" {
-    config_id          = akamai_appsec_configuration.config.config_id
+    config_id          = local.config_id
     security_policy_id = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
     enabled            = {{ .SecurityControls.ApplyApplicationLayerControls }}
 }
 
 resource "akamai_appsec_api_constraints_protection" "{{ $policyName }}" {
-    config_id          = akamai_appsec_configuration.config.config_id
+    config_id          = local.config_id
     security_policy_id = akamai_appsec_waf_protection.{{ $policyName }}.security_policy_id
     enabled            = {{ .SecurityControls.ApplyAPIConstraints }}
 }
 
 resource "akamai_appsec_ip_geo_protection" "{{ $policyName }}" {
-    config_id          = akamai_appsec_configuration.config.config_id
+    config_id          = local.config_id
     security_policy_id = akamai_appsec_api_constraints_protection.{{ $policyName }}.security_policy_id
     enabled            = {{ .SecurityControls.ApplyNetworkLayerControls }}
 }
 
 resource "akamai_appsec_malware_protection" "{{ $policyName }}" {
-    config_id          = akamai_appsec_configuration.config.config_id
+    config_id          = local.config_id
     security_policy_id = akamai_appsec_ip_geo_protection.{{ $policyName }}.security_policy_id
     enabled            = {{ .SecurityControls.ApplyMalwareControls }}
 }
 
 resource "akamai_appsec_rate_protection" "{{ $policyName }}" {
-    config_id          = akamai_appsec_configuration.config.config_id
+    config_id          = local.config_id
     security_policy_id = akamai_appsec_malware_protection.{{ $policyName }}.security_policy_id
     enabled            = {{ .SecurityControls.ApplyRateControls }}
 }
 
 resource "akamai_appsec_reputation_protection" "{{ $policyName }}" {
-    config_id          = akamai_appsec_configuration.config.config_id
+    config_id          = local.config_id
     security_policy_id = akamai_appsec_rate_protection.{{ $policyName }}.security_policy_id
     enabled            = {{ .SecurityControls.ApplyReputationControls }}
 }
 
 resource "akamai_appsec_slowpost_protection" "{{ $policyName }}" {
-    config_id          = akamai_appsec_configuration.config.config_id
+    config_id          = local.config_id
     security_policy_id = akamai_appsec_reputation_protection.{{ $policyName }}.security_policy_id
     enabled            = {{ .SecurityControls.ApplySlowPostControls }}
 }
@@ -46,7 +46,7 @@ resource "akamai_appsec_slowpost_protection" "{{ $policyName }}" {
 {{ if .BotManagement -}}
 {{ if .BotManagement.BotManagementSettings -}}
 resource "akamai_botman_bot_management_settings" "{{ $policyName}}" {
-    config_id          = akamai_appsec_configuration.config.config_id
+    config_id          = local.config_id
     security_policy_id = akamai_appsec_slowpost_protection.{{ $policyName}}.security_policy_id
     bot_management_settings = jsonencode(
 {{ exportJSON .BotManagement.BotManagementSettings }}

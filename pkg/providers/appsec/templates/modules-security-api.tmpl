@@ -5,7 +5,7 @@
 // API Request Constraints
 {{- range .APIRequestConstraints.APIEndpoints }}
 resource "akamai_appsec_api_request_constraints" "{{ $policyName}}_{{ .ID }}" {
-    config_id          = akamai_appsec_configuration.config.config_id
+    config_id          = local.config_id
     security_policy_id = akamai_appsec_api_constraints_protection.{{ $policyName}}.security_policy_id
     api_endpoint_id    = {{ .ID }} // Note: We don't have an API Endpoint Definitions in our provider yet so can't reference this ID to another resource
     action = "{{ .Action }}"

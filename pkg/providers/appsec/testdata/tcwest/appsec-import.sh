@@ -8,10 +8,7 @@ terraform import module.security.akamai_appsec_advanced_settings_request_body.co
 terraform import module.security.akamai_appsec_custom_rule.custom_rule_1_60088542 32641:60088542
 terraform import module.security.akamai_appsec_custom_deny.deny_message_deny_custom_78842 32641:deny_custom_78842
 terraform import module.security.akamai_appsec_custom_deny.deny_message_2_deny_custom_80270 32641:deny_custom_80270
-terraform import module.security.akamai_appsec_match_target.website_4092331 32641:4092331
-terraform import module.security.akamai_appsec_match_target.website_2034325 32641:2034325
-terraform import module.security.akamai_appsec_match_target.website_4092261 32641:4092261
-terraform import module.security.akamai_appsec_match_target.api_4124908 32641:4124908
+terraform import module.security.akamai_appsec_aap_selected_hostnames.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_security_policy.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_waf_protection.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_api_constraints_protection.policy2 32641:hard_150670
@@ -313,6 +310,7 @@ terraform import module.security.akamai_appsec_malware_policy_action.policy2_fms
 terraform import module.security.akamai_appsec_ip_geo.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_slow_post.policy2 32641:hard_150670
 terraform import module.security.akamai_appsec_advanced_settings_request_body.policy2 32641:hard_150670
+terraform import module.security.akamai_appsec_aap_selected_hostnames.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_security_policy.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_waf_protection.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_api_constraints_protection.andrew 32641:last_150674
@@ -506,6 +504,7 @@ terraform import module.security.akamai_appsec_eval_penalty_box_conditions.andre
 terraform import module.security.akamai_appsec_eval_penalty_box.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_slow_post.andrew 32641:last_150674
 terraform import module.security.akamai_appsec_advanced_settings_request_body.andrew 32641:last_150674
+terraform import module.security.akamai_appsec_aap_selected_hostnames.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_security_policy.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_waf_protection.policy1 32641:easy_80433
 terraform import module.security.akamai_appsec_api_constraints_protection.policy1 32641:easy_80433

@@ -2,7 +2,7 @@
 {{ if .ResponseActions.ServeAlternateActions  -}}
 {{ range .ResponseActions.ServeAlternateActions  -}}
 resource "akamai_botman_serve_alternate_action" "{{escapeName (index . "actionName")}}_{{index . "actionId"}}" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     serve_alternate_action = jsonencode(
 {{ exportJSONWithoutKeys . "actionId" }}
 )
@@ -13,7 +13,7 @@ resource "akamai_botman_serve_alternate_action" "{{escapeName (index . "actionNa
 {{ if .ResponseActions.ChallengeActions  -}}
 {{ range .ResponseActions.ChallengeActions  -}}
     resource "akamai_botman_challenge_action" "{{escapeName (index . "actionName")}}_{{index . "actionId"}}" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     challenge_action = jsonencode(
 {{ exportJSONWithoutKeys . "actionId" }}
 )
@@ -24,7 +24,7 @@ resource "akamai_botman_serve_alternate_action" "{{escapeName (index . "actionNa
 {{ if .ResponseActions.ConditionalActions  -}}
 {{ range .ResponseActions.ConditionalActions  -}}
     resource "akamai_botman_conditional_action" "{{escapeName (index . "actionName")}}_{{index . "actionId"}}" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     conditional_action = jsonencode(
 {{ exportJSONWithoutKeys . "actionId" }}
 )
@@ -34,7 +34,7 @@ resource "akamai_botman_serve_alternate_action" "{{escapeName (index . "actionNa
 {{ end -}}
 {{ if .ResponseActions.ChallengeInjectionRules  -}}
 resource "akamai_botman_challenge_injection_rules" "challenge_injection_rules" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     challenge_injection_rules = jsonencode(
 {{ exportJSON .ResponseActions.ChallengeInjectionRules }}
 )

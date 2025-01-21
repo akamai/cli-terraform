@@ -1,6 +1,6 @@
 // IP/GEO/ASN Firewall
 resource "akamai_appsec_ip_geo" "policy2" {
-  config_id                  = akamai_appsec_configuration.config.config_id
+  config_id                  = local.config_id
   security_policy_id         = akamai_appsec_ip_geo_protection.policy2.security_policy_id
   mode                       = "block"
   asn_network_lists          = ["119711_ASNLIST"]
@@ -11,14 +11,14 @@ resource "akamai_appsec_ip_geo" "policy2" {
 
 // IP/GEO/ASN Firewall
 resource "akamai_appsec_ip_geo" "andrew" {
-  config_id          = akamai_appsec_configuration.config.config_id
+  config_id          = local.config_id
   security_policy_id = akamai_appsec_ip_geo_protection.andrew.security_policy_id
   mode               = "block"
 }
 
 // IP/GEO/ASN Firewall
 resource "akamai_appsec_ip_geo" "policy1" {
-  config_id                  = akamai_appsec_configuration.config.config_id
+  config_id                  = local.config_id
   security_policy_id         = akamai_appsec_ip_geo_protection.policy1.security_policy_id
   mode                       = "block"
   geo_network_lists          = ["113698_CUSTOMERGEOBLOCK"]

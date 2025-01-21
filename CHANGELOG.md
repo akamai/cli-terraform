@@ -75,8 +75,15 @@
 
 ### BUG FIXES:
 
+* AppSec
+  *  Fixed issues with AAP/WAP terraform export
+    * Removed `hostnames` block from `variables.tf` file
+    * Modified `imports.tmpl` to import correct resources for AAP/WAP accounts
+    * Renamed all references from `akamai_appsec_configuration.config` to `data.akamai_appsec_configuration.config` for WAP/AAP accounts
+
 
 * Fixed a problem with invisible output in the light background by converting all colors to the monochromatic representation.
+
 
 
 

@@ -3,7 +3,7 @@
 {{ if .MatchTargets.WebsiteTargets -}}
 {{ range .MatchTargets.WebsiteTargets -}}
 resource "akamai_appsec_match_target" "website_{{ .ID }}" {
-    config_id    = akamai_appsec_configuration.config.config_id
+    config_id    = local.config_id
     match_target = jsonencode(
 {
     "defaultFile": "{{ .DefaultFile }}",
@@ -30,7 +30,7 @@ resource "akamai_appsec_match_target" "website_{{ .ID }}" {
 {{ if .MatchTargets.APITargets -}}
 {{ range .MatchTargets.APITargets }}
 resource "akamai_appsec_match_target" "api_{{ .ID }}" {
-    config_id    = akamai_appsec_configuration.config.config_id
+    config_id    = local.config_id
     match_target = jsonencode(
 {
     "apis": {{ toJSON .Apis }},

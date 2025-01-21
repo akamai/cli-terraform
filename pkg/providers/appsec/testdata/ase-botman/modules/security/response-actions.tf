@@ -1,5 +1,5 @@
 resource "akamai_botman_serve_alternate_action" "serve_alternate_action_a_action_A" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   serve_alternate_action = jsonencode(
     {
       "actionName" : "Serve Alternate Action A",
@@ -16,7 +16,7 @@ resource "akamai_botman_serve_alternate_action" "serve_alternate_action_a_action
 }
 
 resource "akamai_botman_serve_alternate_action" "serve_alternate_action_b_action_B" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   serve_alternate_action = jsonencode(
     {
       "actionName" : "Serve Alternate Action B",
@@ -33,7 +33,7 @@ resource "akamai_botman_serve_alternate_action" "serve_alternate_action_b_action
 }
 
 resource "akamai_botman_challenge_action" "challenge_action_a_action_A" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   challenge_action = jsonencode(
     {
       "actionName" : "Challenge Action A",
@@ -50,7 +50,7 @@ resource "akamai_botman_challenge_action" "challenge_action_a_action_A" {
 }
 
 resource "akamai_botman_challenge_action" "challenge_action_b_action_B" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   challenge_action = jsonencode(
     {
       "actionName" : "Challenge Action B",
@@ -67,7 +67,7 @@ resource "akamai_botman_challenge_action" "challenge_action_b_action_B" {
 }
 
 resource "akamai_botman_conditional_action" "conditional_action_a_action_A" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   conditional_action = jsonencode(
     {
       "actionName" : "Conditional Action A",
@@ -84,7 +84,7 @@ resource "akamai_botman_conditional_action" "conditional_action_a_action_A" {
 }
 
 resource "akamai_botman_conditional_action" "conditional_action_b_action_B" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   conditional_action = jsonencode(
     {
       "actionName" : "Conditional Action B",
@@ -101,7 +101,7 @@ resource "akamai_botman_conditional_action" "conditional_action_b_action_B" {
 }
 
 resource "akamai_botman_challenge_injection_rules" "challenge_injection_rules" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   challenge_injection_rules = jsonencode(
     {
       "arrayKey" : [

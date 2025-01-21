@@ -1,7 +1,8 @@
 terraform init
 {{ $configID:= .ConfigID -}}
 {{ $version:= .Version -}}
-{{ if ne .TargetProduct "WAP" -}}
+{{ $targetProduct:= .TargetProduct -}}
+{{ if ne $targetProduct "WAP" -}}
 terraform import module.security.akamai_appsec_configuration.config {{ $configID }}
 {{ end -}}
 terraform import module.security.akamai_appsec_advanced_settings_logging.logging {{ $configID }}
@@ -37,6 +38,7 @@ terraform import module.security.akamai_appsec_custom_rule.{{escapeName .Name}}_
 terraform import module.security.akamai_appsec_custom_deny.{{escapeName .Name}}_{{ .ID }} {{ $configID }}:{{ .ID }}
 {{ end -}}
 {{ end -}}
+{{ if ne $targetProduct "WAP" -}}
 {{ if .MatchTargets -}}
 {{ if .MatchTargets.WebsiteTargets -}}
 {{ range .MatchTargets.WebsiteTargets -}}
@@ -49,10 +51,18 @@ terraform import module.security.akamai_appsec_match_target.api_{{ .ID }} {{ $co
 {{ end -}}
 {{ end -}}
 {{ end -}}
+{{ end -}}
 {{ range .SecurityPolicies -}}
 {{ $policyName:= escapeName .Name -}}
 {{ $policyID:= .ID -}}
 {{ $wafMode:= getWAFMode $configID $version .ID -}}
+{{ if eq $targetProduct "WAP" -}}
+{{ $protectedHosts := getProtectedHostsByID $ .ID | toList -}}
+{{ $evaluatedHosts := getEvaluatedHostsByID $ .ID | toList -}}
+{{ if or (gt (len $protectedHosts) 0) (gt (len $evaluatedHosts) 0) -}}
+    terraform import module.security.akamai_appsec_aap_selected_hostnames.{{$policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ end -}}
 terraform import module.security.akamai_appsec_security_policy.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 terraform import module.security.akamai_appsec_waf_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 terraform import module.security.akamai_appsec_api_constraints_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}

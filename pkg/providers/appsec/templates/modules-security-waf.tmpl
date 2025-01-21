@@ -5,7 +5,7 @@
 {{ $policyID := .ID -}}
 {{ $wafMode := getWAFMode $configID $version .ID -}}
 resource "akamai_appsec_waf_mode" "{{ $policyName }}" {
-    config_id          = akamai_appsec_configuration.config.config_id
+    config_id          = local.config_id
     security_policy_id = akamai_appsec_waf_protection.{{ $policyName }}.security_policy_id
     mode               = "{{ $wafMode }}"
 }
@@ -15,7 +15,7 @@ resource "akamai_appsec_waf_mode" "{{ $policyName }}" {
 {{ range .WebApplicationFirewall.RuleActions -}}
 // {{ getRuleDescByID $ .ID }}
 resource "akamai_appsec_rule" "{{ $policyName }}_{{ getRuleNameByID $ .ID }}_{{ .ID }}" {
-    config_id           = akamai_appsec_configuration.config.config_id
+    config_id           = local.config_id
     security_policy_id  = akamai_appsec_waf_protection.{{ $policyName }}.security_policy_id
     rule_id             = "{{ .ID }}"
     rule_action         = "{{ .Action }}"
@@ -41,7 +41,7 @@ resource "akamai_appsec_rule" "{{ $policyName }}_{{ getRuleNameByID $ .ID }}_{{ 
 {{ range .CustomRuleActions -}}
 {{ if isStructuredRule $ .ID -}}
 resource "akamai_appsec_custom_rule_action" "{{ $policyName }}_{{ .ID }}" {
-    config_id          = akamai_appsec_configuration.config.config_id
+    config_id          = local.config_id
     security_policy_id = akamai_appsec_waf_protection.{{ $policyName }}.security_policy_id
     custom_rule_id     = akamai_appsec_custom_rule.{{ getCustomRuleNameByID $ .ID }}_{{ .ID }}.custom_rule_id
     custom_rule_action = "{{ .Action }}"
@@ -55,7 +55,7 @@ resource "akamai_appsec_custom_rule_action" "{{ $policyName }}_{{ .ID }}" {
 // WAF Attack Group Actions
 {{ range .WebApplicationFirewall.AttackGroupActions -}}
 resource "akamai_appsec_attack_group" "{{ $policyName }}_{{ .Group }}" {
-    config_id           = akamai_appsec_configuration.config.config_id
+    config_id           = local.config_id
     security_policy_id  = akamai_appsec_waf_protection.{{ $policyName }}.security_policy_id
     attack_group        = "{{ .Group }}"
     attack_group_action = "{{ .Action }}"
