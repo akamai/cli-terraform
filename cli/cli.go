@@ -4,9 +4,7 @@ package cli
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
-	"strings"
 
 	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/log"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/session"
@@ -43,7 +41,7 @@ func Run() error {
 		app.Commands = append(cmds, app.Commands...)
 	}
 
-	app.Before = ensureBefore(putLoggerInContext, putSessionInContext, deprecationInfoForCreateCommands, deprecationInfoForSchemaFlags)
+	app.Before = ensureBefore(putLoggerInContext, putSessionInContext)
 	return app.RunContext(ctx, os.Args)
 }
 
@@ -112,63 +110,5 @@ func putLoggerInContext(c *cli.Context) error {
 
 	c.Context = session.ContextWithOptions(c.Context, session.WithContextLog(sessionLogger))
 
-	return nil
-}
-
-func deprecationInfoForCreateCommands(c *cli.Context) error {
-	if !c.Args().Present() {
-		return nil
-	}
-	command := c.Args().First()
-	if command == "help" {
-		command = c.Args().Get(1)
-	}
-	if strings.HasPrefix(command, "create-") {
-		_, err := fmt.Fprintln(c.App.Writer, color.HiYellowString("Warning:"), "create command names are now deprecated, use export commands instead.")
-		if err != nil {
-			return err
-		}
-		_, err = fmt.Fprintln(c.App.Writer)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func deprecationInfoForSchemaFlags(c *cli.Context) error {
-	if !c.Args().Present() {
-		return nil
-	}
-	command := c.Args().First()
-	newFlagName := ""
-	if strings.HasSuffix(command, "property") {
-		newFlagName = "--rules-as-hcl"
-	}
-	if strings.HasSuffix(command, "imaging") {
-		newFlagName = "--policy-as-hcl"
-	}
-	if newFlagName == "" {
-		return nil
-	}
-
-	hasSchemaFlag := false
-	for _, f := range c.Args().Slice() {
-		if f == "--schema" {
-			hasSchemaFlag = true
-			break
-		}
-	}
-
-	if hasSchemaFlag {
-		_, err := fmt.Fprint(c.App.Writer, color.HiYellowString("Warning: "))
-		if err != nil {
-			return err
-		}
-		_, err = fmt.Fprintf(c.App.Writer, "flag --schema is now deprecated, use %s flag instead.\n\n", newFlagName)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }

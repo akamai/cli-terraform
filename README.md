@@ -44,19 +44,19 @@ Description:
   Export selected resources for faster adoption in Terraform.
 
 Commands:
-  export-domain (alias: create-domain)
-  export-zone (alias: create-zone)
-  export-appsec (alias: create-appsec)
+  export-domain
+  export-zone
+  export-appsec
   export-clientlist
-  export-property (alias: create-property)
+  export-property
   export-property-include
   export-cloudwrapper
-  export-cloudlets-policy (alias: create-cloudlets-policy)
-  export-edgekv (alias: create-edgekv)
-  export-edgeworker (alias: create-edgeworker)
-  export-iam (alias: create-iam)
-  export-imaging (alias: create-imaging)
-  export-cps (alias: create-cps)
+  export-cloudlets-policy
+  export-edgekv
+  export-edgeworker
+  export-iam
+  export-imaging
+  export-cps
   export-cloudaccess
   list
   help
@@ -100,14 +100,14 @@ Mapping GTM entity names to TF resource names may require normalization. Invalid
 
 Flags:
    --tfworkpath path       Directory used to store files created when running commands. (default: current directory)
-   --resources             Creates a JSON-formatted resource file for import: <zone>_resources.json. The createconfig flag uses this file as an input. (default: false)
-   --createconfig          Creates these Terraform configuration files based on the values in <zone>_resources.json: <zone>.tf and dnsvars.tf. (default: false)
-   --importscript          Creates import script for generated Terraform configuration script (<zone>_import.script) files. (default: false)
-   --segmentconfig         Use with the createconfig flag to group and segment records by name into separate config files. (default: false)
+   --resources             Creates a JSON-formatted resource file for import: `<zone>_resources.json`. The `--createconfig` flag uses this file as an input. (default: false)
+   --createconfig          Creates these Terraform configuration files based on the values in `<zone>_resources.json`: `<zone>.tf` and `dnsvars.tf`. (default: false)
+   --importscript          Creates an import script for the generated Terraform configuration script files (<zone>_import.script). (default: false)
+   --segmentconfig         Use with the `--createconfig` flag to group and segment records by name into separate config files. (default: false)
    --configonly            Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Saves zone config for
                            importscript. Ignores any existing resource JSON file. (default: false)
-   --namesonly             Directive for both resource gathering and config generation. All record set types assumed. (default: false)
-   --recordname value      Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.
+   --namesonly             Directive for both gathering resources and generating a config file. All record set types are assumed. (default: false)
+   --recordname value      Used when gathering resources or with the `--configonly` to filter recordsets. You can specify the `--recordname` flag multiple times.
 ```
 
 ### Export list of zone record sets
@@ -149,7 +149,7 @@ $ akamai terraform export-zone --importscript testprimaryzone.com
 
 1. `namesonly`. Generates resources for all associated Types.
 2. `segmentconfig`. Generates a modularized configuration.
-3. `configonly`. Generates a zone configuration without the JSON itemization. The configuration generated varies based on which set of flags you use.
+3. `configonly`. Generates a zone configuration without the JSON itemization. The configuration generated varies based on the set of flags you use.
 
 ## AppSec
 
@@ -186,11 +186,6 @@ Certain export conditions require the use of a particular property rule format. 
     <td>Must be a dated rule format ≥ <code>v2023-01-05</code>. Cannot use <code>latest</code>.</td>
   </tr>
   <tr>
-    <td>Addition of the <code>include</code> subcommand</td>
-    <td>Your property configuration and its JSON-formatted rules and includes.</td>
-    <td>Any supported format, <em>but</em> your rules and includes must use the same rule format version.</td>
-  </tr>
-  <tr>
     <td>Addition of the <code>--split-depth=X</code> flag</td>
     <td>Rules will be exported into a module. Each rule up to an <code>X</code> nesting level will be placed in dedicated file. 
 For example, <code>--split-depth=1</code> means that the default/root rule and all its direct children will be placed in dedicated files. Rules with higher nesting levels will be placed in a file of their closest ancestor.</td>
@@ -202,21 +197,15 @@ For example, <code>--split-depth=1</code> means that the default/root rule and a
 ### Usage
 
 ```shell
-   akamai terraform [global flags] export-property [subcommand] [flags] <property name>
-
-Subcommand:
-    include <contract_id> <include_name>    Generates Terraform configuration for Include resources. Deprecated, use `export-property-include` instead.
+   akamai terraform [global flags] export-property [flags] <property name>
 
 Flags:
    --tfworkpath path             Directory used to store files created when running commands. (default: current directory)
    --version value               Property version to import  (default: LATEST)
-   --with-includes               Referenced includes will also be exported along with property. Deprecated.
-   --rules-as-hcl                Rules will be exported as `akamai_property_rules_builder` data source in HCL format.
-   --akamai-property-bootstrap   Referenced property will be exported using combination of `akamai-property-bootstrap` and `akamai-property` resources (default: false)
-   --split-depth value           Rules will be exported into a dedicated module; each rule up to a specified nesting level will be placed in a separate file.
+   --rules-as-hcl                Exports rules as the `akamai_property_rules_builder` data source in HCL format.
+   --akamai-property-bootstrap   Exports the referenced property using a combination of `akamai-property-bootstrap` and `akamai-property` resources. (default: false)
+   --split-depth value           Exports the rules into a dedicated module. Each rule will be placed in a separate file up to a specified nesting level.
 ```
-
-> The `rules-as-hcl` flag works now with the `include` subcommand and the `with-includes` flag.
 
 > You can use the `split-depth` flag only along with the `rules-as-hcl` flag.
 
@@ -251,7 +240,7 @@ Certain export conditions require the use of a particular property rule format. 
   </tr>
   <tr>
     <td>Addition of the <code>--split-depth=X</code> flag</td>
-    <td>Rules will be exported into a module. Each rule up to a specified nesting level <code>X</code> will be placed in a dedicated file. 
+    <td>Rules will be exported into a module. Each rule will be placed in a dedicated file up to a specified nesting level. 
 For example, <code>--split-depth=1</code> means that the default/root rule and all its direct children will be placed in dedicated files. Rules with higher nesting levels will be placed in a file of their closest ancestor.</td>
     <td>Any supported format.</td>
   </tr>
@@ -265,8 +254,8 @@ For example, <code>--split-depth=1</code> means that the default/root rule and a
 
 Flags:
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
-   --rules-as-hcl         Rules will be exported as `akamai_property_rules_builder` data source in HCL format.
-   --split-depth value    Rules will be exported into dedicated a module; each rule up to a specified nesting level will be placed in a separate file.
+   --rules-as-hcl         Exports rules as the `akamai_property_rules_builder` data source in HCL format.
+   --split-depth value    Exports the rules into a dedicated module. Each rule will be placed in a separate file up to a specified nesting level.
 ```
 
 > You can use the `split-depth` flag only along with the `rules-as-hcl` flag.
@@ -334,7 +323,7 @@ $ akamai terraform [global flags] export-edgekv [flags] <namespace_name> <networ
    akamai terraform [global flags] export-edgeworker [flags] <edgeworker_id>
 
 Flags:
-   --bundlepath path      Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath
+   --bundlepath path      Path location of the EdgeWorkers `tgz` code bundle. Its default value is the same as for the `--tfworkpath` flag.
    --tfworkpath path      Directory used to store files created when running commands. (default: current directory)
 ```
 
@@ -352,7 +341,7 @@ $ akamai terraform [global flags] export-edgeworker [flags] <edgeworker_id>
    akamai terraform [global flags] export-iam [subcommand] [flags]
 
 Subcommands:
-    all                     Exports all available Terraform Users, Groups, Roles, IP Allowlist and CIDR block resources
+    all                     Exports all available Terraform users, groups, roles, IP allowlist and CIDR block resources.
     allowlist               Exports Terraform IP Allowlist and CIDR block resources
     group [group id]        Exports group by id with relevant users and their roles
     role [role id]          Exports role by id with relevant users and their groups
@@ -378,8 +367,8 @@ $ akamai terraform export-iam
 
 Flags:
    --tfworkpath path         Directory used to store files created when running commands. (default: current directory)
-   --policy-json-dir path    Path location for placement of policy jsons. Default: same value as tfworkpath
-   --policy-as-hcl           Generate content of the policy using HCL instead of JSON file (default: false)
+   --policy-json-dir path    Path location for a policy in JSON format. Its default value is the same as for the `--tfworkpath` flag.
+   --policy-as-hcl           Generates content of the policy using HCL format instead of JSON. (default: false)
 ```
 
 ### Export Image and Video policy configuration

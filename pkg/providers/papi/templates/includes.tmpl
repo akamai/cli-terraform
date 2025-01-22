@@ -69,11 +69,7 @@ resource "akamai_property_include_activation" "{{$include.IncludeName}}_staging"
   include_id = akamai_property_include.{{$include.IncludeName}}.id
   network = "STAGING"
   auto_acknowledge_rule_warnings = false
-{{- if $.WithIncludes }}
-  version = "{{$include.StagingInfo.Version}}"
-{{- else}}
   version = var.activate_latest_on_staging ? akamai_property_include.{{$include.IncludeName}}.latest_version : akamai_property_include.{{$include.IncludeName}}.staging_version
-{{- end}}
 {{- if $include.StagingInfo.ActivationNote}}
   note = {{template "Text" $include.StagingInfo.ActivationNote}}
 {{- end}}
@@ -87,11 +83,7 @@ resource "akamai_property_include_activation" "{{$include.IncludeName}}_staging"
 #  include_id = akamai_property_include.{{$include.IncludeName}}.id
 #  network = "STAGING"
 #  auto_acknowledge_rule_warnings = false
-{{- if $.WithIncludes }}
-#  version = "{{$include.StagingInfo.Version}}"
-{{- else}}
 #  version = var.activate_latest_on_staging ? akamai_property_include.{{$include.IncludeName}}.latest_version : akamai_property_include.{{$include.IncludeName}}.staging_version
-{{- end}}
 {{- if $include.StagingInfo.ActivationNote}}
 #  note = {{template "Text" $include.StagingInfo.ActivationNote}}
 {{- end}}
@@ -106,11 +98,7 @@ resource "akamai_property_include_activation" "{{$include.IncludeName}}_producti
   include_id = akamai_property_include.{{$include.IncludeName}}.id
   network = "PRODUCTION"
   auto_acknowledge_rule_warnings = false
-{{- if $.WithIncludes }}
-  version = "{{$include.ProductionInfo.Version}}"
-{{- else}}
   version = var.activate_latest_on_production ? akamai_property_include.{{$include.IncludeName}}.latest_version : akamai_property_include.{{$include.IncludeName}}.production_version
-{{- end}}
 {{- if $include.ProductionInfo.ActivationNote}}
   note = {{template "Text" $include.ProductionInfo.ActivationNote}}
 {{- end}}
@@ -124,11 +112,7 @@ resource "akamai_property_include_activation" "{{$include.IncludeName}}_producti
 #  include_id = akamai_property_include.{{$include.IncludeName}}.id
 #  network = "PRODUCTION"
 #  auto_acknowledge_rule_warnings = false
-{{- if $.WithIncludes }}
-#  version = "{{$include.ProductionInfo.Version}}"
-{{- else}}
 #  version = var.activate_latest_on_production ? akamai_property_include.{{$include.IncludeName}}.latest_version : akamai_property_include.{{$include.IncludeName}}.production_version
-{{- end}}
 {{- if $include.ProductionInfo.ActivationNote}}
 #  note = {{template "Text" $include.ProductionInfo.ActivationNote}}
 {{- end}}

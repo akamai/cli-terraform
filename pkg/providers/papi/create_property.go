@@ -66,7 +66,6 @@ type TFData struct {
 	Section       string
 	Rules         []*WrappedRules
 	RulesAsHCL    bool
-	WithIncludes  bool
 	UseBootstrap  bool
 	UseSplitDepth bool
 	RootRule      string
@@ -157,7 +156,6 @@ type propertyOptions struct {
 	section       string
 	tfWorkPath    string
 	version       string
-	withIncludes  bool
 	rulesAsHCL    bool
 	withBootstrap bool
 	splitDepth    *int
@@ -184,8 +182,6 @@ var (
 	ErrFetchingActivationDetails = errors.New("fetching activations")
 	// ErrFetchingHostnameDetails is returned when fetching hostname details request failed
 	ErrFetchingHostnameDetails = errors.New("fetching hostnames")
-	// ErrFetchingReferencedIncludes is returned when fetching referenced includes request failed
-	ErrFetchingReferencedIncludes = errors.New("fetching referenced includes")
 	// ErrSavingSnippets is returned when error appeared while saving property snippet JSON files
 	ErrSavingSnippets = errors.New("saving snippets")
 	// ErrPropertyRulesNotFound is returned when property rules couldn't be found
@@ -222,7 +218,6 @@ var includeRuleWrapper splitDepthRuleWrapper = func(rules []*WrappedRules) TFDat
 	return TFData{
 		RulesAsHCL:    true,
 		UseSplitDepth: true,
-		WithIncludes:  true,
 		Includes: []TFIncludeData{
 			{
 				Rules: rules,
@@ -262,14 +257,6 @@ func CmdCreateProperty(c *cli.Context) error {
 		"imports.tmpl":   importPath,
 	}
 
-	var withIncludes bool
-	if c.IsSet("with-includes") {
-		withIncludes = c.Bool("with-includes")
-		if withIncludes {
-			templateToFile["includes.tmpl"] = filepath.Join(tfWorkPath, "includes.tf")
-		}
-	}
-
 	var rulesAsHCL bool
 	if c.IsSet("rules-as-hcl") {
 		rulesAsHCL = c.Bool("rules-as-hcl")
@@ -283,10 +270,6 @@ func CmdCreateProperty(c *cli.Context) error {
 	var isBootstrap bool
 	if c.IsSet("akamai-property-bootstrap") {
 		isBootstrap = c.Bool("akamai-property-bootstrap")
-	}
-
-	if withIncludes && rulesAsHCL && splitDepth == nil {
-		templateToFile["includes_rules.tmpl"] = filepath.Join(tfWorkPath, "includes_rules.tf")
 	}
 
 	processor := templates.FSTemplateProcessor{
@@ -313,7 +296,6 @@ func CmdCreateProperty(c *cli.Context) error {
 		section:       edgegrid.GetEdgercSection(c),
 		tfWorkPath:    tfWorkPath,
 		version:       version,
-		withIncludes:  withIncludes,
 		rulesAsHCL:    rulesAsHCL,
 		withBootstrap: isBootstrap,
 		splitDepth:    splitDepth,
@@ -346,7 +328,6 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 		},
 		Section:       options.section,
 		RulesAsHCL:    options.rulesAsHCL,
-		WithIncludes:  options.withIncludes,
 		UseBootstrap:  options.withBootstrap,
 		UseSplitDepth: options.splitDepth != nil,
 	}
@@ -397,52 +378,6 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 	term.Spinner().OK()
 
 	multiTargetData := make(templates.MultiTargetData)
-
-	// Get Includes if withIncludes is set
-	if options.withIncludes {
-		term.Spinner().Start("Fetching referenced includes with property " + options.propertyName)
-		includes, err := client.ListReferencedIncludes(ctx, papi.ListReferencedIncludesRequest{
-			PropertyID:      property.PropertyID,
-			ContractID:      property.ContractID,
-			GroupID:         property.GroupID,
-			PropertyVersion: version.Version.PropertyVersion,
-		})
-		if err != nil {
-			term.Spinner().Fail()
-			return fmt.Errorf("%w: %s", ErrFetchingReferencedIncludes, err)
-		}
-		term.Spinner().OK()
-
-		tfData.Includes = make([]TFIncludeData, 0)
-		for _, include := range includes.Includes.Items {
-			includeData, rules, err := getIncludeData(ctx, &include, client)
-			if err != nil {
-				return err
-			}
-
-			// Save snippets
-			if !options.rulesAsHCL {
-				term.Spinner().Start("Saving snippets ")
-				ruleTemplate, rulesTemplate := setIncludeRuleTemplates(rules)
-				if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(options.tfWorkPath, jsonDir), fmt.Sprintf("%s.json", include.IncludeName)); err != nil {
-					term.Spinner().Fail()
-					return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
-				}
-				term.Spinner().OK()
-			} else {
-				wrappedRules := wrapAndNameRules(includeData.IncludeName, rules.Rules)
-
-				if options.splitDepth != nil {
-					includeData.RootRule = wrappedRules.TerraformName
-					multiTargetData.AddData("includes_rules.tmpl", prepareRulesForSplitRule(wrappedRules, *options.splitDepth, options.tfWorkPath, includeRuleWrapper))
-				} else {
-					includeData.Rules = flattenRules(wrappedRules)
-				}
-			}
-
-			tfData.Includes = append(tfData.Includes, *includeData)
-		}
-	}
 
 	// Get Property Rules
 	term.Spinner().Start("Fetching property rules ")

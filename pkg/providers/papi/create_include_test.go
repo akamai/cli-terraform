@@ -104,51 +104,6 @@ var (
 		client.On("GetIncludeVersion", mock.Anything, getIncludeVersionReq).Return(&version, nil).Once()
 	}
 
-	expectGetSecondIncludeVersion = func(client *papi.Mock, format string) {
-		getIncludeVersionReq := papi.GetIncludeVersionRequest{
-			ContractID: "test_contract",
-			GroupID:    "test_group",
-			IncludeID:  "inc_78910",
-			Version:    2,
-		}
-
-		version := papi.GetIncludeVersionResponse{
-			AccountID:   "test_account",
-			AssetID:     "test_asset",
-			ContractID:  "test_contract",
-			GroupID:     "test_group",
-			IncludeID:   "inc_78910",
-			IncludeName: "test_include_1",
-			IncludeType: papi.IncludeTypeMicroServices,
-			IncludeVersions: papi.Versions{
-				Items: []papi.IncludeVersion{
-					{
-						UpdatedByUser:    "test_user",
-						UpdatedDate:      "2022-08-22T07:17:48Z",
-						ProductID:        "test_product2",
-						ProductionStatus: papi.VersionStatusInactive,
-						Etag:             "1d8ed19bce0833a3fe93e62ae5d5579a38cc2dbe",
-						RuleFormat:       format,
-						IncludeVersion:   2,
-						StagingStatus:    papi.VersionStatusInactive,
-					},
-				},
-			},
-			IncludeVersion: papi.IncludeVersion{
-				UpdatedByUser:    "test_user",
-				UpdatedDate:      "2022-08-22T07:17:48Z",
-				ProductID:        "test_product2",
-				ProductionStatus: papi.VersionStatusInactive,
-				Etag:             "1d8ed19bce0833a3fe93e62ae5d5579a38cc2dbe",
-				RuleFormat:       format,
-				IncludeVersion:   2,
-				StagingStatus:    papi.VersionStatusInactive,
-			},
-		}
-
-		client.On("GetIncludeVersion", mock.Anything, getIncludeVersionReq).Return(&version, nil).Once()
-	}
-
 	getIncludeRuleTreeReq = papi.GetIncludeRuleTreeRequest{
 		ContractID:     "test_contract",
 		GroupID:        "test_group",
@@ -263,48 +218,6 @@ var (
 						},
 						IncludeID:      "inc_123456",
 						IncludeName:    "test_include",
-						IncludeType:    papi.IncludeTypeMicroServices,
-						IncludeVersion: 1,
-					},
-				},
-			},
-		}
-
-		client.On("ListIncludeActivations", mock.Anything, listIncludeActivationsReq).Return(&activations, nil).Once()
-	}
-
-	expectListSecondIncludeActivations = func(client *papi.Mock) {
-		listIncludeActivationsReq := papi.ListIncludeActivationsRequest{
-			ContractID: "test_contract",
-			GroupID:    "test_group",
-			IncludeID:  "inc_78910",
-		}
-
-		activations := papi.ListIncludeActivationsResponse{
-			AccountID:  "test_account",
-			ContractID: "test_contract",
-			GroupID:    "test_group",
-			Activations: papi.IncludeActivationsRes{
-				Items: []papi.IncludeActivation{
-					{
-						ActivationID:       "atv_12344",
-						Network:            papi.ActivationNetworkStaging,
-						ActivationType:     papi.ActivationTypeActivate,
-						Status:             papi.ActivationStatusActive,
-						SubmitDate:         "2022-10-27T12:27:54Z",
-						UpdateDate:         "2022-10-27T12:28:54Z",
-						Note:               "test staging activation",
-						NotifyEmails:       []string{"test@example.com"},
-						FMAActivationState: "steady",
-						FallbackInfo: &papi.ActivationFallbackInfo{
-							FastFallbackAttempted:      false,
-							FallbackVersion:            1,
-							CanFastFallback:            false,
-							SteadyStateTime:            1666873734,
-							FastFallbackExpirationTime: 1666877334,
-						},
-						IncludeID:      "inc_78910",
-						IncludeName:    "test_include_1",
 						IncludeType:    papi.IncludeTypeMicroServices,
 						IncludeVersion: 1,
 					},
@@ -696,13 +609,12 @@ func TestMultiTargetProcessIncludeTemplates(t *testing.T) {
 		dir          string
 		filesToCheck []string
 	}{
-		"property with include with children (split-depth=0)": {
+		"include with children (split-depth=0)": {
 			givenData: templates.MultiTargetData{
 				"includes_rules.tmpl": {
 					"./testdata/res/include_multitarget/include_default.tf": TFData{
 						RulesAsHCL:    true,
 						UseSplitDepth: true,
-						WithIncludes:  true,
 						Includes: []TFIncludeData{
 							{
 								Rules: []*WrappedRules{
@@ -778,13 +690,12 @@ func TestMultiTargetProcessIncludeTemplates(t *testing.T) {
 			dir:          "include_multitarget",
 			filesToCheck: []string{"include_default.tf"},
 		},
-		"property with include with children (split-depth=2)": {
+		"include with children (split-depth=2)": {
 			givenData: templates.MultiTargetData{
 				"includes_rules.tmpl": {
 					"./testdata/res/include_multitarget_flatten/include_default.tf": TFData{
 						RulesAsHCL:    true,
 						UseSplitDepth: true,
-						WithIncludes:  true,
 						Includes: []TFIncludeData{
 							{
 								Rules: []*WrappedRules{
@@ -834,7 +745,6 @@ func TestMultiTargetProcessIncludeTemplates(t *testing.T) {
 					"./testdata/res/include_multitarget_flatten/include_default_new_rule.tf": TFData{
 						RulesAsHCL:    true,
 						UseSplitDepth: true,
-						WithIncludes:  true,
 						Includes: []TFIncludeData{
 							{
 								Rules: []*WrappedRules{
@@ -864,7 +774,6 @@ func TestMultiTargetProcessIncludeTemplates(t *testing.T) {
 					"./testdata/res/include_multitarget_flatten/include_default_new_rule_new_rule_1.tf": TFData{
 						RulesAsHCL:    true,
 						UseSplitDepth: true,
-						WithIncludes:  true,
 						Includes: []TFIncludeData{
 							{
 								Rules: []*WrappedRules{
@@ -1052,7 +961,7 @@ func getTestData(key string) TFData {
 				},
 			},
 		},
-		"basic property with multiple includes as hcl": {
+		"basic property with multiple children as hcl": {
 			Property: TFPropertyData{
 				GroupName:            "test_group",
 				GroupID:              "grp_12345",

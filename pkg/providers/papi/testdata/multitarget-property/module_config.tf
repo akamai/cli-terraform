@@ -15,11 +15,3 @@ output "rules" {
 output "rule_format" {
   value = data.akamai_property_rules_builder.test-edgesuite-net.rule_format
 }
-
-output "rules_include1_rule_default" {
-  value = data.akamai_property_rules_builder.include1_rule_default.json
-}
-
-output "rule_format_include1_rule_default" {
-  value = data.akamai_property_rules_builder.include1_rule_default.rule_format
-}

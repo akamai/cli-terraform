@@ -26,8 +26,7 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:        "export-domain",
-		Aliases:     []string{"create-domain"},
-		Description: "Generates Terraform configuration for Domain resources",
+		Description: "Generates Terraform configuration for Domain resources.",
 		Usage:       "export-domain",
 		ArgsUsage:   "<domain>",
 		Action:      validatedAction(gtm.CmdCreateDomain, requireValidWorkpath, requireNArguments(1)),
@@ -43,8 +42,7 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:        "export-zone",
-		Aliases:     []string{"create-zone"},
-		Description: "Generates Terraform configuration for Zone resources",
+		Description: "Generates Terraform configuration for Zone resources.",
 		Usage:       "export-zone",
 		ArgsUsage:   "<zone>",
 		Action:      validatedAction(dns.CmdCreateZone, requireValidWorkpath, requireNArguments(1)),
@@ -56,31 +54,31 @@ func CommandLocator() ([]*cli.Command, error) {
 			},
 			&cli.BoolFlag{
 				Name:  "resources",
-				Usage: "Create json formatted resource import list file, <zone>_resources.json. Used as input by createconfig.",
+				Usage: "Creates a JSON-formatted resource import list file, '<zone>_resources.json'. Used as input by the '--createconfig' flag.",
 			},
 			&cli.BoolFlag{
 				Name:  "createconfig",
-				Usage: "Create Terraform configuration (<zone>.tf), dnsvars.tf from generated resources file. Saves zone config for import.",
+				Usage: "Creates these Terraform configuration files based on the values in '<zone>_resources.json': '<zone>.tf' and 'dnsvars.tf'. Saves the zone config for import.",
 			},
 			&cli.BoolFlag{
 				Name:  "importscript",
-				Usage: "Create import script for generated Terraform configuration script (<zone>_import.script) files",
+				Usage: "Creates an import script for the generated Terraform configuration script files ('<zone>_import.script').",
 			},
 			&cli.BoolFlag{
 				Name:  "segmentconfig",
-				Usage: "Directive for createconfig. Group and segment records by name into separate config files.",
+				Usage: "Directive for the '--createconfig' flag. Groups and segments records by name into separate config files.",
 			},
 			&cli.BoolFlag{
 				Name:  "configonly",
-				Usage: "Directive for createconfig. Create entire Terraform zone and recordsets configuration (<zone>.tf), dnsvars.tf. Saves zone config for importscript. Ignores any existing resource json file.",
+				Usage: "Directive for the '--createconfig' flag. Creates the entire Terraform zone and recordsets configuration ('<zone>.tf') and 'dnsvars.tf'. Saves the zone config for the '--importscript' flag. Ignores any existing resource json file.",
 			},
 			&cli.BoolFlag{
 				Name:  "namesonly",
-				Usage: "Directive for both resource gathering and config generation. All record set types assumed.",
+				Usage: "Directive for both gathering resources and generating a config file. All record set types are assumed.",
 			},
 			&cli.StringSliceFlag{
 				Name:  "recordname",
-				Usage: "Used in resources gathering or with configonly to filter recordsets. Multiple recordname flags may be specified.",
+				Usage: "Used when gathering resources or with the '--configonly' flag to filter recordsets. You can provide the '--recordname' flag multiple times.",
 			},
 		},
 		BashComplete: autocomplete.Default,
@@ -88,8 +86,7 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:        "export-appsec",
-		Aliases:     []string{"create-appsec"},
-		Description: "Generates Terraform configuration for Application Security resources",
+		Description: "Generates Terraform configuration for Application Security resources.",
 		Usage:       "export-appsec",
 		ArgsUsage:   "<security configuration name>",
 		Action:      validatedAction(appsec.CmdCreateAppsec, requireValidWorkpath, requireNArguments(1)),
@@ -105,7 +102,7 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:        "export-clientlist",
-		Description: "Generates Terraform configuration for Client List resources",
+		Description: "Generates Terraform configuration for Client List resources.",
 		Usage:       "export-clientlist",
 		ArgsUsage:   "<list_id>",
 		Action:      validatedAction(clientlists.CmdCreateClientList, requireValidWorkpath, requireNArguments(1)),
@@ -121,19 +118,10 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:        "export-property",
-		Aliases:     []string{"create-property"},
-		Description: "Generates Terraform configuration for Property resources",
+		Description: "Generates Terraform configuration for Property resources.",
 		Usage:       "export-property",
 		ArgsUsage:   "<property name>",
 		Action:      validatedAction(papi.CmdCreateProperty, requireValidWorkpath, requireNArguments(1), validateSplitDepth),
-		Subcommands: []*cli.Command{
-			{
-				Name:        "include",
-				Description: "Generates Terraform configuration for Include resources. Deprecated, use `export-property-include` command instead",
-				ArgsUsage:   "<contract_id> <include_name>",
-				Action:      validatedAction(papi.CmdCreateInclude, requireValidWorkpath, requireNArguments(2), validateSplitDepth),
-			},
-		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "tfworkpath",
@@ -142,25 +130,20 @@ func CommandLocator() ([]*cli.Command, error) {
 			},
 			&cli.StringFlag{
 				Name:        "version",
-				Usage:       "Property version to import",
+				Usage:       "Property version to import.",
 				DefaultText: "LATEST",
 			},
 			&cli.BoolFlag{
-				Name:  "with-includes",
-				Usage: "Referenced includes will also be exported along with property. Deprecated.",
-			},
-			&cli.BoolFlag{
-				Name:    "rules-as-hcl",
-				Aliases: []string{"schema"},
-				Usage:   "The referenced rules will be exported as a data source.",
+				Name:  "rules-as-hcl",
+				Usage: "Exports the referenced rules as the 'akamai_property_rules_builder' data source.",
 			},
 			&cli.BoolFlag{
 				Name:  "akamai-property-bootstrap",
-				Usage: "The referenced property will be exported using a combination of the 'akamai-property-bootstrap' and 'akamai-property' resources.",
+				Usage: "Exports the referenced property using a combination of the 'akamai-property-bootstrap' and 'akamai-property' resources.",
 			},
 			&cli.IntFlag{
 				Name:  "split-depth",
-				Usage: "Rules will be exported into a dedicated module; each rule up to a specified nesting level will be placed in a separate file.",
+				Usage: "Exports the rules into a dedicated module. Each rule will be placed in a separate file up to a specified nesting level.",
 			},
 		},
 		BashComplete: autocomplete.Default,
@@ -168,7 +151,7 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:        "export-property-include",
-		Description: "Generates Terraform configuration for Include resources",
+		Description: "Generates Terraform configuration for Include resources.",
 		Usage:       "export-property-include",
 		ArgsUsage:   "<contract_id> <include_name>",
 		Action:      validatedAction(papi.CmdCreateInclude, requireValidWorkpath, requireNArguments(2), validateSplitDepth),
@@ -179,13 +162,12 @@ func CommandLocator() ([]*cli.Command, error) {
 				DefaultText: "current directory",
 			},
 			&cli.BoolFlag{
-				Name:    "rules-as-hcl",
-				Aliases: []string{"schema"},
-				Usage:   "The referenced rules will be exported as a data source.",
+				Name:  "rules-as-hcl",
+				Usage: "Exports the referenced rules as the 'akamai_property_rules_builder' data source.",
 			},
 			&cli.IntFlag{
 				Name:  "split-depth",
-				Usage: "Rules will be exported into a dedicated module; each rule up to a specified nesting level will be placed in a separate file.",
+				Usage: "Exports the rules into a dedicated module. Each rule will be placed in a separate file up to a specified nesting level.",
 			},
 		},
 		BashComplete: autocomplete.Default,
@@ -209,8 +191,7 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:        "export-cloudlets-policy",
-		Aliases:     []string{"create-cloudlets-policy"},
-		Description: "Generates Terraform configuration for Cloudlets Policy resources",
+		Description: "Generates Terraform configuration for Cloudlets Policy resources.",
 		Usage:       "export-cloudlets-policy",
 		ArgsUsage:   "<policy_name>",
 		Action:      validatedAction(cloudlets.CmdCreatePolicy, requireValidWorkpath, requireNArguments(1)),
@@ -226,8 +207,7 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:        "export-edgekv",
-		Aliases:     []string{"create-edgekv"},
-		Description: "Generates Terraform configuration for EdgeKV resources",
+		Description: "Generates Terraform configuration for EdgeKV resources.",
 		Usage:       "export-edgekv",
 		ArgsUsage:   "<namespace_name> <network>",
 		Action:      validatedAction(edgeworkers.CmdCreateEdgeKV, requireValidWorkpath, requireNArguments(2)),
@@ -243,15 +223,14 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:        "export-edgeworker",
-		Aliases:     []string{"create-edgeworker"},
-		Description: "Generates Terraform configuration for EdgeWorker resources",
+		Description: "Generates Terraform configuration for EdgeWorker resources.",
 		Usage:       "export-edgeworker",
 		ArgsUsage:   "<edgeworker_id>",
 		Action:      validatedAction(edgeworkers.CmdCreateEdgeWorker, requireValidWorkpath, requireNArguments(1)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "bundlepath",
-				Usage: "Path location for placement of EdgeWorkers tgz code bundle. Default: same value as tfworkpath",
+				Usage: "Path location of the EdgeWorkers 'tgz' code bundle. Its default value is the same as for the '--tfworkpath' flag.",
 			},
 			&cli.StringFlag{
 				Name:        "tfworkpath",
@@ -264,25 +243,24 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:            "export-iam",
-		Aliases:         []string{"create-iam"},
-		Description:     "Generates Terraform configuration for Identity and Access Management resources",
+		Description:     "Generates Terraform configuration for Identity and Access Management resources.",
 		Usage:           "export-iam",
 		HideHelpCommand: true,
 		Action:          validatedAction(iam.CmdCreateIAM, requireValidWorkpath, validateSubCommands),
 		Subcommands: []*cli.Command{
 			{
 				Name:        "all",
-				Description: "Exports all available Terraform Users, Groups, Roles and Allowlist details",
+				Description: "Exports all available Terraform users, groups, roles, and allowlist details.",
 				Action:      validatedAction(iam.CmdCreateIAMAll, requireValidWorkpath),
 			},
 			{
 				Name:        "allowlist",
-				Description: "Exports Terraform IP Allowlist and CIDR block resources",
+				Description: "Exports Terraform IP Allowlist and CIDR block resources.",
 				Action:      validatedAction(iam.CmdCreateIAMAllowlist, requireValidWorkpath),
 			},
 			{
 				Name:        "group",
-				Description: "Exports the Terraform group resource with relevant user and role resources",
+				Description: "Exports the Terraform group resource with relevant user and role resources.",
 				ArgsUsage:   "<group_id>",
 				Action:      validatedAction(iam.CmdCreateIAMGroup, requireValidWorkpath, requireNArguments(1)),
 				Flags: []cli.Flag{
@@ -294,7 +272,7 @@ func CommandLocator() ([]*cli.Command, error) {
 			},
 			{
 				Name:        "role",
-				Description: "Exports the Terraform role resource with relevant user and group resources",
+				Description: "Exports the Terraform role resource with relevant user and group resources.",
 				ArgsUsage:   "<role_id>",
 				Action:      validatedAction(iam.CmdCreateIAMRole, requireValidWorkpath, requireNArguments(1)),
 				Flags: []cli.Flag{
@@ -306,7 +284,7 @@ func CommandLocator() ([]*cli.Command, error) {
 			},
 			{
 				Name:        "user",
-				Description: "Exports the Terraform user resource with relevant group and role resources",
+				Description: "Exports the Terraform user resource with relevant group and role resources.",
 				ArgsUsage:   "<user_email>",
 				Action:      validatedAction(iam.CmdCreateIAMUser, requireValidWorkpath, requireNArguments(1)),
 				Flags: []cli.Flag{
@@ -329,15 +307,14 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:        "export-imaging",
-		Aliases:     []string{"create-imaging"},
-		Description: "Generates Terraform configuration for Image and Video Manager resources",
+		Description: "Generates Terraform configuration for Image and Video Manager resources.",
 		Usage:       "export-imaging",
 		ArgsUsage:   "<contract_id> <policy_set_id>",
 		Action:      validatedAction(imaging.CmdCreateImaging, requireValidWorkpath, requireNArguments(2)),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "policy-json-dir",
-				Usage: "Path location for placement of policy jsons. Default: same value as tfworkpath",
+				Usage: "Path location for a policy in JSON format. Its default value is the same as for the '--tfworkpath' flag.",
 			},
 			&cli.StringFlag{
 				Name:        "tfworkpath",
@@ -346,8 +323,7 @@ func CommandLocator() ([]*cli.Command, error) {
 			},
 			&cli.BoolFlag{
 				Name:        "policy-as-hcl",
-				Aliases:     []string{"schema"},
-				Usage:       "Generate content of the policy using HCL instead of JSON file",
+				Usage:       "Generates content of the policy using HCL format instead of JSON.",
 				Destination: &tools.PolicyAsHCL,
 			},
 		},
@@ -356,8 +332,7 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:        "export-cps",
-		Aliases:     []string{"create-cps"},
-		Description: "Generates Terraform configuration for CPS (Certificate Provisioning System) resources",
+		Description: "Generates Terraform configuration for CPS (Certificate Provisioning System) resources.",
 		Usage:       "export-cps",
 		ArgsUsage:   "<enrollment_id> <contract_id>",
 		Action:      validatedAction(cps.CmdCreateCPS, requireValidWorkpath, requireNArguments(2)),
@@ -373,7 +348,7 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:        "export-cloudaccess",
-		Description: "Generates Terraform configuration for CAM (Cloud Access Manager) resources",
+		Description: "Generates Terraform configuration for CAM (Cloud Access Manager) resources.",
 		Usage:       "export-cloudaccess",
 		ArgsUsage:   "<access_key_uid>",
 		Action:      validatedAction(cloudaccess.CmdCreateCloudAccess, requireValidWorkpath, requireNArguments(1)),
@@ -385,11 +360,11 @@ func CommandLocator() ([]*cli.Command, error) {
 			},
 			&cli.StringFlag{
 				Name:  "group_id",
-				Usage: "The unique identifier for the group assigned to the access key.",
+				Usage: "The unique identifier for the group (without the 'grp_' prefix) assigned to the access key.",
 			},
 			&cli.StringFlag{
 				Name:  "contract_id",
-				Usage: "The unique identifier for the contract assigned to the access key.",
+				Usage: "The unique identifier for the contract (without the 'ctr_' prefix) assigned to the access key.",
 			},
 		},
 		BashComplete: autocomplete.Default,
@@ -397,7 +372,7 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:               "list",
-		Description:        "List commands",
+		Description:        "List commands.",
 		Action:             cmdList,
 		CustomHelpTemplate: apphelp.SimplifiedHelpTemplate,
 	})

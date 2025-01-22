@@ -2,11 +2,29 @@
 
 ## X.XX.X (Month XX, XXXX)
 
+### BREAKING CHANGES:
+
+* Removed deprecated commands:
+  * `create-domain`
+  * `create-zone`
+  * `create-appsec`
+  * `create-property`
+  * `create-cloudlets-policy`
+  * `create-edgekv`
+  * `create-edgeworker`
+  * `create-iam`
+  * `create-imaging`
+  * `create-cps`
+
+* Removed the `include` subcommand from the `export-property` command.
+* Removed the `with-includes` flag from the `export-property` command.
+* Removed the `schema` flag from the `export-property`, `export-property-include` and `export-imaging` commands.
+
 ### FEATURES/ENHANCEMENTS:
 
 
 * IAM
-  * Added option `--only` to the `group`, `role`, and `user` subcommands of the `export-iam` command, allowing export of only specific information.
+  * Added the `--only` option to the `group`, `role`, and `user` subcommands of the `export-iam` command. This option allows exporting only specific information.
   
 
 
@@ -21,9 +39,9 @@
 
 
 * General
-  * Migrated to go `1.22`.
+  * Migrated to Go `1.22`.
   * Improved code by resolving issues reported by linter.
-  * Updated vulnerable dependencies
+  * Updated vulnerable dependencies.
 
 
 
@@ -32,7 +50,7 @@
 
 
 * PAPI
-  * Added property name in the error message.
+  * Added a property name in the error message.
 
 
 
@@ -58,9 +76,7 @@
 ### BUG FIXES:
 
 
-### Fixes
-
-* Fixed problem with invisible output in light background by converting all colors to monochromatic representation.
+* Fixed a problem with invisible output in the light background by converting all colors to the monochromatic representation.
 
 
 
