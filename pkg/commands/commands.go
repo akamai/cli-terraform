@@ -175,7 +175,7 @@ func CommandLocator() ([]*cli.Command, error) {
 
 	commands = append(commands, &cli.Command{
 		Name:        "export-cloudwrapper",
-		Description: "Generates Terraform configuration for CloudWrapper resources",
+		Description: "Generates Terraform configuration for CloudWrapper resources.",
 		Usage:       "export-cloudwrapper",
 		ArgsUsage:   "<config_id>",
 		Action:      validatedAction(cloudwrapper.CmdCreateCloudWrapper, requireValidWorkpath, requireNArguments(1)),
