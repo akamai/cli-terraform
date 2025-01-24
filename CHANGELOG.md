@@ -67,7 +67,8 @@
 
 
 
-
+* Appsec
+  * Renamed `clientIdentifier` field to `clientIdentifiers` and changed field from `string` to `[]string`
 
 
 
@@ -83,6 +84,7 @@
 
 
 * Fixed a problem with invisible output in the light background by converting all colors to the monochromatic representation.
+
 
 
 
