@@ -3,7 +3,7 @@ package dns
 import (
 	"context"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/dns"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/dns"
 )
 
 // process zone

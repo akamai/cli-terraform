@@ -3,7 +3,7 @@ module github.com/akamai/cli-terraform
 go 1.22
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v9 v9.1.0
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v10 v10.0.0
 	github.com/akamai/cli v1.6.0
 	github.com/hashicorp/hcl/v2 v2.23.0
 	github.com/jinzhu/copier v0.4.0
@@ -57,5 +57,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v9 => ../akamaiopen-edgegrid-golang
+//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v10 => ../akamaiopen-edgegrid-golang
 //replace github.com/akamai/cli => ../cli

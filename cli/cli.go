@@ -6,8 +6,8 @@ import (
 	"errors"
 	"os"
 
-	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/log"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/session"
+	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/log"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/session"
 	"github.com/akamai/cli-terraform/pkg/commands"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
 	akacli "github.com/akamai/cli/pkg/app"
