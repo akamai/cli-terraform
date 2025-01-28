@@ -35,9 +35,7 @@
             ],
             "averageThreshold": 12,
             "burstThreshold": 18,
-            "clientIdentifiers": [
-                "ip"
-            ],
+            "clientIdentifier": "ip",
             "createDate": "2022-01-11T13:13:15Z",
             "description": "A popular brute force attack that consists of sending a large number of requests for base page, HTML page or XHR requests (usually non-cacheable). This could destabilize the origin.",
             "fileExtensions": {
@@ -145,9 +143,7 @@
             ],
             "averageThreshold": 5,
             "burstThreshold": 8,
-            "clientIdentifiers": [
-                "ip"
-            ],
+            "clientIdentifier": "ip",
             "createDate": "2022-01-11T13:13:16Z",
             "description": "An excessive error rate from the origin could indicate malicious activity by a bot scanning the site or a publishing error. In both cases, this would increase the origin traffic and could potentially destabilize it.",
             "id": 177907,
@@ -174,9 +170,7 @@
             ],
             "averageThreshold": 3,
             "burstThreshold": 5,
-            "clientIdentifiers": [
-                "ip"
-            ],
+            "clientIdentifier": "ip",
             "createDate": "2022-01-11T13:17:17Z",
             "description": "Mitigating HTTP flood attacks using POST requests",
             "id": 177908,

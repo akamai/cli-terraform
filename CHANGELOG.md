@@ -67,9 +67,6 @@
 
 
 
-* Appsec
-  * Renamed `clientIdentifier` field to `clientIdentifiers` and changed field from `string` to `[]string`
-
 
 
 

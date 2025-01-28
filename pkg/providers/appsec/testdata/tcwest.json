@@ -58,9 +58,7 @@
         {
             "averageThreshold": 100,
             "burstThreshold": 500,
-            "clientIdentifiers": [
-                "ip"
-            ],
+            "clientIdentifier": "ip",
             "createDate": "2022-01-27T21:17:45Z",
             "id": 172320,
             "matchType": "path",
@@ -77,9 +75,7 @@
         {
             "averageThreshold": 75,
             "burstThreshold": 250,
-            "clientIdentifiers": [
-                "ip"
-            ],
+            "clientIdentifier": "ip",
             "createDate": "2022-01-27T21:17:45Z",
             "id": 172321,
             "matchType": "path",

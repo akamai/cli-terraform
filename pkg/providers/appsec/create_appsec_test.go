@@ -119,9 +119,7 @@ func TestExportRatePolicy(t *testing.T) {
     "additionalMatchOptions": null,
     "averageThreshold": 100,
     "burstThreshold": 500,
-    "clientIdentifiers": [
-        "ip"
-    ],
+    "clientIdentifier": "ip",
     "matchType": "path",
     "name": "High Rate",
     "pathMatchType": "Custom",
@@ -136,9 +134,7 @@ func TestExportRatePolicy(t *testing.T) {
     "additionalMatchOptions": null,
     "averageThreshold": 100,
     "burstThreshold": 500,
-    "clientIdentifiers": [
-        "ip"
-    ],
+    "clientIdentifier": "ip",
     "matchType": "path",
     "name": "High Rate",
     "pathMatchType": "Custom",
