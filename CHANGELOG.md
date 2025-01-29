@@ -45,7 +45,9 @@
 
 
 
-
+* PAPI
+  * Added support for the new rule format `v2025-01-13`.
+  * Adjusted exported fields for current schema definition for the rule format `v2024-10-21` inside the `gov_cloud` behaviour 
 
 
 

@@ -4978,11 +4978,11 @@ media_origin_failover {
 {{- if and (eq $k "originUnresponsiveDetectionLevel") (ne $v nil)}}
         origin_unresponsive_detection_level = {{template "Text" $v}}
 {{- end}}
-{{- if and (eq $k "originUnresponsiveBlacklistOriginIp") (ne $v nil)}}
-		origin_unresponsive_blacklist_origin_ip = {{$v}}
+{{- if and (eq $k "originUnresponsiveBlocklistOriginIp") (ne $v nil)}}
+		origin_unresponsive_blocklist_origin_ip = {{$v}}
 {{- end}}
-{{- if and (eq $k "originUnresponsiveBlacklistWindow") (ne $v nil)}}
-        origin_unresponsive_blacklist_window = {{template "Text" $v}}
+{{- if and (eq $k "originUnresponsiveBlocklistWindow") (ne $v nil)}}
+        origin_unresponsive_blocklist_window = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnresponsiveRecovery") (ne $v nil)}}
         origin_unresponsive_recovery = {{template "Text" $v}}
@@ -5026,11 +5026,11 @@ media_origin_failover {
 {{- if eq $k "originUnavailableResponseCodes"}}
 		origin_unavailable_response_codes = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
-{{- if and (eq $k "originUnavailableBlacklistOriginIp") (ne $v nil)}}
-		origin_unavailable_blacklist_origin_ip = {{$v}}
+{{- if and (eq $k "originUnavailableBlocklistOriginIp") (ne $v nil)}}
+		origin_unavailable_blocklist_origin_ip = {{$v}}
 {{- end}}
-{{- if and (eq $k "originUnavailableBlacklistWindow") (ne $v nil)}}
-        origin_unavailable_blacklist_window = {{template "Text" $v}}
+{{- if and (eq $k "originUnavailableBlocklistWindow") (ne $v nil)}}
+        origin_unavailable_blocklist_window = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "originUnavailableRecovery") (ne $v nil)}}
         origin_unavailable_recovery = {{template "Text" $v}}
@@ -5074,11 +5074,11 @@ media_origin_failover {
 {{- if eq $k "objectUnavailableResponseCodes"}}
 		object_unavailable_response_codes = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
-{{- if and (eq $k "objectUnavailableBlacklistOriginIp") (ne $v nil)}}
-		object_unavailable_blacklist_origin_ip = {{$v}}
+{{- if and (eq $k "objectUnavailableBlocklistOriginIp") (ne $v nil)}}
+		object_unavailable_blocklist_origin_ip = {{$v}}
 {{- end}}
-{{- if and (eq $k "objectUnavailableBlacklistWindow") (ne $v nil)}}
-        object_unavailable_blacklist_window = {{template "Text" $v}}
+{{- if and (eq $k "objectUnavailableBlocklistWindow") (ne $v nil)}}
+        object_unavailable_blocklist_window = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "objectUnavailableRecovery") (ne $v nil)}}
         object_unavailable_recovery = {{template "Text" $v}}
@@ -5820,6 +5820,15 @@ origin_characteristics {
 {{- end}}
 {{- if and (eq $k "endPointService") (ne $v nil)}}
         end_point_service = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "sortQueryParams") (ne $v nil)}}
+		sort_query_params = {{$v}}
+{{- end}}
+{{- if and (eq $k "encodeQueryParams") (ne $v nil)}}
+		encode_query_params = {{$v}}
+{{- end}}
+{{- if and (eq $k "encodeEquals") (ne $v nil)}}
+		encode_equals = {{$v}}
 {{- end}}
 {{- if and (eq $k "originLocationTitle") (ne $v nil)}}
         origin_location_title = {{template "Text" $v}}
@@ -9883,7 +9892,7 @@ data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
 	{{- $children := $r.Children}}
 	{{- $isRoot := $r.IsRoot}}
 	{{- with $r.Rule}}
-	rules_v2024_10_21 {
+	rules_v2025_01_13 {
         name = "{{.Name | Escape}}"
 		{{- if $isRoot}}
         is_secure = {{.Options.IsSecure}}
