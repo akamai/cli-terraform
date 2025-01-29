@@ -1,6 +1,6 @@
 # RELEASE NOTES
 
-## X.XX.X (Month XX, XXXX)
+## 2.0.0 (Jan 5, 2025)
 
 ### BREAKING CHANGES:
 
@@ -22,106 +22,35 @@
 
 ### FEATURES/ENHANCEMENTS:
 
-
-* IAM
-  * Added the `--only` option to the `group`, `role`, and `user` subcommands of the `export-iam` command. This option allows exporting only specific information.
-  
-
-
-
-* Logic responsible for excluding endpoints from retries is now configurable with the `AKAMAI_RETRY_EXCLUDED_ENDPOINTS` environment variable.
-
-
-
-* PAPI
-  * Introduced the `split-depth` flag for the `export-property` and `export-property-include` command. When used, each rule up to a specified nesting level will be generated in its own `.tf` file. Rules with higher nesting levels will be placed in a file of their closest ancestor. All rules will be generated in a dedicated `rules` module.
-
-
-
 * General
   * Migrated to Go `1.22`.
   * Improved code by resolving issues reported by linter.
   * Updated vulnerable dependencies.
+  * Logic responsible for excluding endpoints from retries is now configurable with the `AKAMAI_RETRY_EXCLUDED_ENDPOINTS` environment variable.
 
+* IAM
+  * Added the `--only` option to the `group`, `role`, and `user` subcommands of the `export-iam` command. This option allows exporting only specific information.
 
+* Logging
+  * Changed logger from `apex` to `slog`.
+    * Log output has not been changed.
 
 * PAPI
   * Added support for the new rule format `v2025-01-13`.
-  * Adjusted exported fields for current schema definition for the rule format `v2024-10-21` inside the `gov_cloud` behaviour 
-
-
-
-* PAPI
+  * Adjusted exported fields for current schema definition for the rule format `v2024-10-21` inside the `gov_cloud` behaviour.
   * Added a property name in the error message.
-
-
-
-
-
-
-
-
-
-
-* Logging
-    * Changed logger from `apex` to `slog`
-        * Log output has not been changed
-
-
-
-
-
-
+  * Introduced the `split-depth` flag for the `export-property` and `export-property-include` command. When used, each rule up to a specified nesting level will be generated in its own `.tf` file. Rules with higher nesting levels will be placed in a file of their closest ancestor. All rules will be generated in a dedicated `rules` module.
 
 ### BUG FIXES:
+
+* General
+  * Fixed a problem with invisible output in the light background by converting all colors to the monochromatic representation.
 
 * AppSec
   *  Fixed issues with AAP/WAP terraform export
     * Removed `hostnames` block from `variables.tf` file
     * Modified `imports.tmpl` to import correct resources for AAP/WAP accounts
     * Renamed all references from `akamai_appsec_configuration.config` to `data.akamai_appsec_configuration.config` for WAP/AAP accounts
-
-
-* Fixed a problem with invisible output in the light background by converting all colors to the monochromatic representation.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### DEPRECATIONS:
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ##  1.19.0 (Nov 21, 2024)
 
