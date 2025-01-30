@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/akamai/cli/pkg/terminal"
+	"github.com/akamai/cli/v2/pkg/terminal"
 )
 
 type fileUtils interface {

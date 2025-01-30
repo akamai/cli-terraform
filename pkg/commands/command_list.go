@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/akamai/cli/pkg/color"
+	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/urfave/cli/v2"
 )
 

@@ -7,7 +7,7 @@ import (
 
 	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/log"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/session"
-	"github.com/akamai/cli/pkg/log"
+	"github.com/akamai/cli/v2/pkg/log"
 	"github.com/urfave/cli/v2"
 )
 

@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/cli/pkg/color"
+	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v2"

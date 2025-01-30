@@ -15,8 +15,8 @@ import (
 	"github.com/akamai/cli-terraform/pkg/providers/imaging"
 	"github.com/akamai/cli-terraform/pkg/providers/papi"
 	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/apphelp"
-	"github.com/akamai/cli/pkg/autocomplete"
+	"github.com/akamai/cli/v2/pkg/apphelp"
+	"github.com/akamai/cli/v2/pkg/autocomplete"
 	"github.com/urfave/cli/v2"
 )
 

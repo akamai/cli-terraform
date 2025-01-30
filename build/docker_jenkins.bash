@@ -92,7 +92,7 @@ docker exec akatf-container sh -c 'cd edgegrid; git checkout ${EDGEGRID_BRANCH_N
                                    go mod tidy;
                                    cd ../cli-terraform; git checkout ${CLI_TERRAFORM_BRANCH_NAME};
                                    go mod edit -replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v10=../edgegrid;
-                                   go mod edit -replace github.com/akamai/cli=../cli;
+                                   go mod edit -replace github.com/akamai/cli/v2=../cli;
                                    go mod tidy'
 
 echo "Running checks"

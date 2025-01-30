@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/akamai/AkamaiOPEN-edgegrid-golang/v10 v10.0.0
-	github.com/akamai/cli v1.6.0
+	github.com/akamai/cli/v2 v2.0.0
 	github.com/hashicorp/hcl/v2 v2.23.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
@@ -58,4 +58,4 @@ require (
 )
 
 //replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v10 => ../akamaiopen-edgegrid-golang
-//replace github.com/akamai/cli => ../cli
+//replace github.com/akamai/cli/v2 => ../cli

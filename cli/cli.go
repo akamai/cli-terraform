@@ -10,10 +10,10 @@ import (
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/session"
 	"github.com/akamai/cli-terraform/pkg/commands"
 	"github.com/akamai/cli-terraform/pkg/edgegrid"
-	akacli "github.com/akamai/cli/pkg/app"
-	"github.com/akamai/cli/pkg/color"
-	"github.com/akamai/cli/pkg/log"
-	"github.com/akamai/cli/pkg/terminal"
+	akacli "github.com/akamai/cli/v2/pkg/app"
+	"github.com/akamai/cli/v2/pkg/color"
+	"github.com/akamai/cli/v2/pkg/log"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )
 
