@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/cli-terraform/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

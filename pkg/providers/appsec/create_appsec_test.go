@@ -13,8 +13,8 @@ import (
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/appsec"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/botman"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

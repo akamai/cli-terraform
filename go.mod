@@ -1,4 +1,4 @@
-module github.com/akamai/cli-terraform
+module github.com/akamai/cli-terraform/v2
 
 go 1.22
 

@@ -1,10 +1,10 @@
 # Akamai CLI for Akamai Terraform Provider
 
 ![Build Status](https://github.com/akamai/cli-terraform/actions/workflows/checks.yml/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/akamai/cli-terraform)](https://goreportcard.com/report/github.com/akamai/cli-terraform)
+[![Go Report Card](https://goreportcard.com/badge/github.com/akamai/cli-terraform/v2)](https://goreportcard.com/report/github.com/akamai/cli-terraform/v2)
 ![GitHub release](https://img.shields.io/github/v/release/akamai/cli-terraform)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![GoDoc](https://pkg.go.dev/badge/github.com/akamai/cli-terraform?utm_source=godoc)](https://pkg.go.dev/github.com/akamai/cli-terraform)
+[![GoDoc](https://pkg.go.dev/badge/github.com/akamai/cli-terraform?utm_source=godoc)](https://pkg.go.dev/github.com/akamai/cli-terraform/v2)
 
 ## Get started
 

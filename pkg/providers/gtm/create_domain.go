@@ -11,9 +11,9 @@ import (
 	"strings"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/gtm"
-	"github.com/akamai/cli-terraform/pkg/edgegrid"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
+	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"

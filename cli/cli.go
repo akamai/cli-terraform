@@ -8,8 +8,8 @@ import (
 
 	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/log"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/session"
-	"github.com/akamai/cli-terraform/pkg/commands"
-	"github.com/akamai/cli-terraform/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/v2/pkg/commands"
+	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
 	akacli "github.com/akamai/cli/v2/pkg/app"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/log"

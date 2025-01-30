@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/iam"
-	"github.com/akamai/cli-terraform/pkg/tools"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )

@@ -1,8 +1,12 @@
 name: build
 on:
+  push:
+    branches:
+      - "*"
   pull_request:
     branches:
       - master
+      - v1
 jobs:
   test:
     runs-on: ubuntu-latest
