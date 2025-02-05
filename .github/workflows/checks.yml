@@ -17,6 +17,10 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version-file: 'go.mod'
+      - name: Setup terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.5
       - name: Fmt check
         run: make fmt-check
       - name: Linter check
