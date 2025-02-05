@@ -10,12 +10,12 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/edgeworkers"
-	"github.com/akamai/cli-terraform/pkg/edgegrid"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
-	"github.com/fatih/color"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/edgeworkers"
+	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/color"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )
 
@@ -88,7 +88,7 @@ func CmdCreateEdgeKV(c *cli.Context) error {
 	section := edgegrid.GetEdgercSection(c)
 
 	if err = createEdgeKV(ctx, namespace, network, section, client, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting edgekv HCL: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting edgekv HCL: %s", err), 1)
 	}
 	return nil
 }
@@ -106,7 +106,7 @@ func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.Nam
 
 	term.Spinner().OK()
 	term.Spinner().Start("Fetching EdgeKV groups in %s", namespace)
-	groupItems := make(map[string]map[string]edgeworkers.Item, 0)
+	groupItems := make(map[string]map[string]edgeworkers.Item)
 	edgeKVGroups, err := getEdgeKVGroups(ctx, namespace, network, client)
 	if err != nil {
 		term.Spinner().Fail()
@@ -121,7 +121,7 @@ func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.Nam
 			return fmt.Errorf("%w: %s", ErrFetchingEdgeKV, err)
 		}
 
-		items := make(map[string]edgeworkers.Item, 0)
+		items := make(map[string]edgeworkers.Item)
 		for _, itemID := range *edgeKVItems {
 			item, err := getEdgeKVItem(ctx, namespace, network, group, itemID, client)
 			if err != nil {

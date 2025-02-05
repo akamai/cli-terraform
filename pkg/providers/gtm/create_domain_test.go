@@ -4,19 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/gtm"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/gtm"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/terminal"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"github.com/tj/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -327,154 +326,6 @@ var (
 		},
 	}
 
-	domainDataError = TFDomainData{
-		Section:                 "test_section",
-		Name:                    "1test.name.akadns.net",
-		NormalizedName:          "_1test_name",
-		Type:                    "test",
-		Comment:                 "cli-terraform test domain",
-		EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
-		DefaultTimeoutPenalty:   10,
-		LoadImbalancePercentage: 50,
-		DefaultErrorPenalty:     90,
-		CNameCoalescingEnabled:  true,
-		LoadFeedback:            true,
-		EndUserMappingEnabled:   true,
-		DefaultDatacenters: []TFDatacenterData{
-			{
-				Nickname: "DEFAULT",
-				ID:       5400,
-			},
-		},
-		Datacenters: []TFDatacenterData{
-			{
-				Nickname: "TEST1",
-				ID:       123,
-			},
-			{
-				Nickname: "TEST2",
-				ID:       124,
-			},
-		},
-		ASMaps: []gtm.ASMap{
-			{
-				Name: "test_asmap",
-				DefaultDatacenter: &gtm.DatacenterBase{
-					Nickname:     "default",
-					DatacenterID: 5004,
-				},
-			},
-		},
-		GeoMaps: []gtm.GeoMap{
-			{
-				Name: "test_geomap",
-				DefaultDatacenter: &gtm.DatacenterBase{
-					Nickname:     "default",
-					DatacenterID: 5004,
-				},
-			},
-		},
-		CIDRMaps: []gtm.CIDRMap{
-			{
-				Name: "test_cidrmap",
-				DefaultDatacenter: &gtm.DatacenterBase{
-					Nickname:     "default",
-					DatacenterID: 5004,
-				},
-			},
-		},
-		Resources: []gtm.Resource{
-			{
-				Name: "test resource1",
-			},
-			{
-				Name: "test resource2",
-			},
-		},
-		Properties: []gtm.Property{
-			{
-				Name:                 "test property1",
-				Type:                 "performance",
-				ScoreAggregationType: "worst",
-				DynamicTTL:           60,
-				HandoutLimit:         8,
-				HandoutMode:          "normal",
-				TrafficTargets: []gtm.TrafficTarget{
-					{
-						DatacenterID: 123,
-						Enabled:      true,
-						Weight:       1,
-						Servers:      []string{"1.2.3.4"},
-					},
-				},
-				LivenessTests: []gtm.LivenessTest{
-					{
-						Name:               "HTTP",
-						TestInterval:       60,
-						TestObject:         "/",
-						HTTPError3xx:       true,
-						HTTPError4xx:       true,
-						HTTPError5xx:       true,
-						TestObjectProtocol: "HTTP",
-						TestObjectPort:     80,
-						TestTimeout:        10,
-					},
-				},
-			},
-			{
-				Name:                 "test property2",
-				Type:                 "performance",
-				ScoreAggregationType: "worst",
-				DynamicTTL:           60,
-				HandoutLimit:         8,
-				HandoutMode:          "normal",
-				StaticRRSets: []gtm.StaticRRSet{
-					{
-						Type:  "test type",
-						Rdata: []string{"rdata1", "rdata2"},
-					},
-				},
-				TrafficTargets: []gtm.TrafficTarget{
-					{
-						DatacenterID: 123,
-						Enabled:      true,
-						Weight:       1,
-						Servers:      []string{"1.2.3.4"},
-					},
-					{
-						DatacenterID: 124,
-						Enabled:      true,
-						Weight:       1,
-						Servers:      []string{"7.6.5.4"},
-					},
-				},
-				LivenessTests: []gtm.LivenessTest{
-					{
-						Name:               "HTTP",
-						TestInterval:       60,
-						TestObject:         "/",
-						HTTPError3xx:       true,
-						HTTPError4xx:       true,
-						HTTPError5xx:       true,
-						TestObjectProtocol: "HTTP",
-						TestObjectPort:     80,
-						TestTimeout:        10,
-						HTTPHeaders: []gtm.HTTPHeader{
-							{
-								Name:  "header1",
-								Value: "header1Value",
-							},
-							{
-								Name:  "header2",
-								Value: "header2Value",
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-
 	expectGTMProcessTemplates = func(mp *templates.MockProcessor, data TFDomainData, err error) *mock.Call {
 		call := mp.On("ProcessTemplates", data)
 		if err != nil {
@@ -483,7 +334,7 @@ var (
 		return call.Return(nil)
 	}
 
-	expectGetDomain = func(mg *gtm.Mock, params gtm.GetDomainRequest, err error) *mock.Call {
+	expectGetDomain = func(mg *gtm.Mock, _ gtm.GetDomainRequest, err error) *mock.Call {
 		call := mg.On("GetDomain", mock.Anything, mock.AnythingOfType("gtm.GetDomainRequest"))
 		if err != nil {
 			return call.Return(nil, err)
@@ -507,7 +358,7 @@ func TestCreateDomain(t *testing.T) {
 			},
 		},
 		"error fetching domain": {
-			init: func(mg *gtm.Mock, mp *templates.MockProcessor) {
+			init: func(mg *gtm.Mock, _ *templates.MockProcessor) {
 				expectGetDomain(mg, gtm.GetDomainRequest{DomainName: domain.Name}, fmt.Errorf("oops")).Once()
 			},
 			withError: ErrFetchingDomain,
@@ -1561,9 +1412,9 @@ func TestProcessDomainTemplates(t *testing.T) {
 			}
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 			for _, f := range test.filesToCheck {
-				expected, err := ioutil.ReadFile(filepath.Join("./testdata", test.dir, f))
+				expected, err := os.ReadFile(filepath.Join("./testdata", test.dir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(filepath.Join(outDir, f))
+				result, err := os.ReadFile(filepath.Join(outDir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}

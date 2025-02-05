@@ -5,20 +5,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/edgeworkers"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/edgeworkers"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/terminal"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"github.com/tj/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -166,7 +165,7 @@ func TestCreateEdgeWorker(t *testing.T) {
 	section := "test_section"
 	localBundlePath := "testdata/res/bundle"
 	localBundle := fmt.Sprintf("%s/1.24.5.tgz", localBundlePath)
-	bundleBytes, err := ioutil.ReadFile("./testdata/bundle/sampleBundle.tgz")
+	bundleBytes, err := os.ReadFile("./testdata/bundle/sampleBundle.tgz")
 	if err != nil {
 		require.NoError(t, err)
 	}
@@ -195,20 +194,20 @@ func TestCreateEdgeWorker(t *testing.T) {
 			withBundle: true,
 		},
 		"error fetching edgeworker": {
-			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
+			init: func(e *edgeworkers.Mock, _ *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, fmt.Errorf("error")).Once()
 			},
 			withError: ErrFetchingEdgeWorker,
 		},
 		"error fetching edgeworker versions": {
-			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
+			init: func(e *edgeworkers.Mock, _ *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, false, fmt.Errorf("error")).Once()
 			},
 			withError: ErrFetchingEdgeWorker,
 		},
 		"error fetching edgeworker version content": {
-			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
+			init: func(e *edgeworkers.Mock, _ *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, false, nil).Once()
 				expectListActivations(e, 123, "1.24.5", nil).Once()
@@ -305,9 +304,9 @@ func TestProcessEdgeWorkerTemplates(t *testing.T) {
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 
 			for _, f := range test.filesToCheck {
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}

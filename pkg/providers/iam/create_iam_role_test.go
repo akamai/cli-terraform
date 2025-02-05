@@ -4,14 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/iam"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/iam"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -143,6 +142,12 @@ var (
 		},
 	}
 
+	roleWithoutUsers = iam.Role{
+		RoleID:          12345,
+		RoleName:        "Custom role",
+		RoleDescription: "Custom role description",
+	}
+
 	expectGetRoleWithUsers = func(client *iam.Mock) {
 		getRoleReq := iam.GetRoleRequest{
 			ID:           role.RoleID,
@@ -151,6 +156,16 @@ var (
 		}
 
 		client.On("GetRole", mock.Anything, getRoleReq).Return(&role, nil).Once()
+	}
+
+	expectGetRoleWithoutUsers = func(client *iam.Mock) {
+		getRoleReq := iam.GetRoleRequest{
+			ID:           roleWithoutUsers.RoleID,
+			GrantedRoles: true,
+			Users:        false,
+		}
+
+		client.On("GetRole", mock.Anything, getRoleReq).Return(&roleWithoutUsers, nil).Once()
 	}
 
 	expectRoleGetUser = func(client *iam.Mock, user iam.User, err error) {
@@ -259,6 +274,26 @@ var (
 		)
 		return call.Return(nil)
 	}
+
+	expectRoleOnlyProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
+		tfData := TFData{
+			TFRoles: []TFRole{
+				{
+					RoleID:          12345,
+					RoleName:        "Custom role",
+					RoleDescription: "Custom role description",
+					GrantedRoles:    []int{},
+				},
+			},
+			Section:    section,
+			Subcommand: "role",
+		}
+		call := p.On(
+			"ProcessTemplates",
+			tfData,
+		)
+		return call.Return(nil)
+	}
 )
 
 func TestGetUsersByRole(t *testing.T) {
@@ -282,7 +317,7 @@ func TestGetUsersByRole(t *testing.T) {
 					},
 				}},
 			},
-			init: func(m *iam.Mock, t *terminal.Mock) {
+			init: func(m *iam.Mock, _ *terminal.Mock) {
 				m.On("GetUser", mock.Anything, iam.GetUserRequest{
 					IdentityID:    "a",
 					Actions:       true,
@@ -384,9 +419,11 @@ func TestCreateIAMRole(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		init func(*iam.Mock, *templates.MockProcessor)
+		roleOnly bool
+		init     func(*iam.Mock, *templates.MockProcessor)
 	}{
 		"fetch role": {
+			roleOnly: false,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetRoleWithUsers(i)
 				expectRoleGetUser(i, user1, nil)
@@ -399,14 +436,22 @@ func TestCreateIAMRole(t *testing.T) {
 				expectRoleProcessTemplates(p, section)
 			},
 		},
+		"fetch role only (without user and group details)": {
+			roleOnly: true,
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
+				expectGetRoleWithoutUsers(i)
+				expectRoleOnlyProcessTemplates(p, section)
+			},
+		},
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			mi := new(iam.Mock)
 			mp := new(templates.MockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createIAMRoleByID(ctx, 12345, section, mi, mp)
+			err := createIAMRoleByID(ctx, 12345, section, mi, mp, test.roleOnly)
 			require.NoError(t, err)
 			mi.AssertExpectations(t)
 			mp.AssertExpectations(t)
@@ -552,6 +597,22 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 			dir:          "iam_role_by_id_multiple",
 			filesToCheck: []string{"role.tf", "variables.tf", "import.sh", "users.tf", "groups.tf"},
 		},
+		"role only": {
+			givenData: TFData{
+				TFRoles: []TFRole{
+					{
+						RoleID:          12345,
+						RoleName:        "Custom role",
+						RoleDescription: "Custom role\ndescription",
+						GrantedRoles:    []int{992, 707, 452, 677, 726, 296, 457, 987},
+					},
+				},
+				Section:    section,
+				Subcommand: "role",
+			},
+			dir:          "iam_role_only_by_id",
+			filesToCheck: []string{"variables.tf", "import.sh", "role.tf"},
+		},
 	}
 
 	for name, test := range tests {
@@ -571,9 +632,9 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 
 			for _, f := range test.filesToCheck {
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}

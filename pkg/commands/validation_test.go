@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/fatih/color"
+	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v2"
@@ -16,7 +16,7 @@ import (
 
 func TestValidatedAction(t *testing.T) {
 	t.Run("empty validation list", func(t *testing.T) {
-		action := func(ctx *cli.Context) error {
+		action := func(_ *cli.Context) error {
 			return nil
 		}
 		actionFunc := validatedAction(action)
@@ -26,7 +26,7 @@ func TestValidatedAction(t *testing.T) {
 	})
 
 	t.Run("action error", func(t *testing.T) {
-		action := func(ctx *cli.Context) error {
+		action := func(_ *cli.Context) error {
 			return fmt.Errorf("action error")
 		}
 		actionFunc := validatedAction(action)
@@ -36,10 +36,10 @@ func TestValidatedAction(t *testing.T) {
 	})
 
 	t.Run("action with validation", func(t *testing.T) {
-		action := func(ctx *cli.Context) error {
+		action := func(_ *cli.Context) error {
 			return nil
 		}
-		validation := func(ctx *cli.Context) error {
+		validation := func(_ *cli.Context) error {
 			return nil
 		}
 		actionFunc := validatedAction(action, validation)
@@ -50,15 +50,15 @@ func TestValidatedAction(t *testing.T) {
 
 	t.Run("assert function call order", func(t *testing.T) {
 		var callOrder []string
-		action := func(ctx *cli.Context) error {
+		action := func(_ *cli.Context) error {
 			callOrder = append(callOrder, "action")
 			return nil
 		}
-		firstValidation := func(ctx *cli.Context) error {
+		firstValidation := func(_ *cli.Context) error {
 			callOrder = append(callOrder, "first_validation")
 			return nil
 		}
-		secondValidation := func(ctx *cli.Context) error {
+		secondValidation := func(_ *cli.Context) error {
 			callOrder = append(callOrder, "second_validation")
 			return nil
 		}
@@ -72,10 +72,10 @@ func TestValidatedAction(t *testing.T) {
 	})
 
 	t.Run("validation error", func(t *testing.T) {
-		action := func(ctx *cli.Context) error {
+		action := func(_ *cli.Context) error {
 			return fmt.Errorf("action error")
 		}
-		validation := func(ctx *cli.Context) error {
+		validation := func(_ *cli.Context) error {
 			return fmt.Errorf("validation error")
 		}
 		actionFunc := validatedAction(action, validation)
@@ -193,7 +193,7 @@ func TestShowHelpCommandWithErr(t *testing.T) {
 				Name: cmdName,
 			},
 			App: &cli.App{
-				CommandNotFound: func(c *cli.Context, command string) {},
+				CommandNotFound: func(_ *cli.Context, _ string) {},
 				ErrWriter:       os.Stderr,
 			},
 		}

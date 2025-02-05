@@ -1,5 +1,5 @@
 resource "akamai_appsec_rate_policy" "high_rate" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   rate_policy = jsonencode(
     {
       "averageThreshold" : 100,
@@ -18,7 +18,7 @@ resource "akamai_appsec_rate_policy" "high_rate" {
 }
 
 resource "akamai_appsec_rate_policy" "low_rate" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   rate_policy = jsonencode(
     {
       "averageThreshold" : 75,
@@ -37,7 +37,7 @@ resource "akamai_appsec_rate_policy" "low_rate" {
 }
 
 resource "akamai_appsec_rate_policy" "bot_rate" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   rate_policy = jsonencode(
     {
       "averageThreshold" : 25,

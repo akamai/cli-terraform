@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"context"
 	"flag"
-	"io"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/session"
-	"github.com/akamai/cli/pkg/log"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/session"
+	"github.com/akamai/cli/v2/pkg/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
 )
@@ -114,123 +113,15 @@ func TestPutLoggerInContext(t *testing.T) {
 	err := putLoggerInContext(cliCtx)
 	assert.NoError(t, err)
 
-	logger := log.FromContext(cliCtx.Context)
+	ctxLogger := log.FromContext(cliCtx.Context)
 	buffer.Reset()
-	logger.Info("oops")
+	ctxLogger.Info("oops")
 	assert.Contains(t, buffer.String(), "oops")
 
 	sess, err := session.New()
 	assert.NoError(t, err)
-	logger = sess.Log(cliCtx.Context)
+	sessLogger := sess.Log(cliCtx.Context)
 	buffer.Reset()
-	logger.Info("oops")
+	sessLogger.Info("oops")
 	assert.Contains(t, buffer.String(), "oops")
-}
-
-func TestDeprecationInfo(t *testing.T) {
-	app := cli.NewApp()
-	app.Commands = []*cli.Command{{Name: "export-command", Aliases: []string{"create-command"}}, {Name: "help"}, {Name: "list"}}
-
-	buf := &bytes.Buffer{}
-	app.Writer = buf
-	app.ErrWriter = io.Discard
-	app.Before = ensureBefore(deprecationInfoForCreateCommands)
-
-	tests := map[string]struct {
-		args          []string
-		expectWarning bool
-	}{
-		"create": {
-			args:          []string{"cmd", "create-command"},
-			expectWarning: true,
-		},
-		"export": {
-			args:          []string{"cmd", "export-command"},
-			expectWarning: false,
-		},
-		"help create": {
-			args:          []string{"cmd", "help", "create-command"},
-			expectWarning: true,
-		},
-		"help export": {
-			args:          []string{"cmd", "help", "export-command"},
-			expectWarning: false,
-		},
-	}
-
-	for name, test := range tests {
-		buf.Reset()
-		t.Run(name, func(t *testing.T) {
-			err := app.Run(test.args)
-			assert.NoError(t, err)
-
-			if test.expectWarning {
-				assert.Contains(t, buf.String(), "Warning: create command names are now deprecated, use export commands instead")
-			} else {
-				assert.NotContains(t, buf.String(), "Warning")
-			}
-		})
-	}
-}
-func TestDeprecationInfoForSchemaFlag(t *testing.T) {
-	app := cli.NewApp()
-	app.Commands = []*cli.Command{
-		{
-			Name: "export-property", Aliases: []string{"create-property"}, Flags: []cli.Flag{
-				&cli.BoolFlag{
-					Name:    "rules-as-hcl",
-					Aliases: []string{"schema"},
-				},
-			},
-		},
-		{
-			Name: "export-imaging", Aliases: []string{"create-imaging"}, Flags: []cli.Flag{
-				&cli.BoolFlag{
-					Name:    "policy-as-hcl",
-					Aliases: []string{"schema"},
-				},
-			},
-		},
-	}
-
-	buf := &bytes.Buffer{}
-	app.Writer = buf
-	app.ErrWriter = io.Discard
-	app.Before = ensureBefore(deprecationInfoForSchemaFlags)
-
-	tests := map[string]struct {
-		args          []string
-		expectWarning bool
-	}{
-		"property cmd when --schema flag passed": {
-			args:          []string{"cmd", "create-property", "--schema"},
-			expectWarning: true,
-		},
-		"property cmd when no --schema flag passed": {
-			args:          []string{"cmd", "export-property"},
-			expectWarning: false,
-		},
-		"imaging cmd when --schema flag passed": {
-			args:          []string{"cmd", "create-imaging", "--schema"},
-			expectWarning: true,
-		},
-		"imaging cmd when no --schema flag passed": {
-			args:          []string{"cmd", "export-imaging"},
-			expectWarning: false,
-		},
-	}
-
-	for name, test := range tests {
-		buf.Reset()
-		t.Run(name, func(t *testing.T) {
-			err := app.Run(test.args)
-			assert.NoError(t, err)
-
-			if test.expectWarning {
-				assert.Contains(t, buf.String(), "Warning: flag --schema is now deprecated")
-			} else {
-				assert.NotContains(t, buf.String(), "Warning")
-			}
-		})
-	}
 }

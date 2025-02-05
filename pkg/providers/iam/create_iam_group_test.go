@@ -3,14 +3,13 @@ package iam
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/iam"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/iam"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -158,15 +157,36 @@ var (
 		)
 		return call.Return(nil)
 	}
+
+	expectGroupOnlyByIDProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
+		tfData := TFData{
+			TFGroups: []TFGroup{
+				{
+					GroupID:       56789,
+					ParentGroupID: 98765,
+					GroupName:     "Custom group",
+				},
+			},
+			Section:    section,
+			Subcommand: "group",
+		}
+		call := p.On(
+			"ProcessTemplates",
+			tfData,
+		)
+		return call.Return(nil)
+	}
 )
 
 func TestCreateIAMGroupByID(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		init func(*iam.Mock, *templates.MockProcessor)
+		groupOnly bool
+		init      func(*iam.Mock, *templates.MockProcessor)
 	}{
 		"fetch group": {
+			groupOnly: false,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListUsersWithinGroup(i)
 				expectGetUserWithinGroup(i)
@@ -176,14 +196,22 @@ func TestCreateIAMGroupByID(t *testing.T) {
 				expectGroupByIDProcessTemplates(p, section)
 			},
 		},
+		"fetch group only (without user and role details)": {
+			groupOnly: true,
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
+				expectGetGroupWithinRole(i)
+				expectGroupOnlyByIDProcessTemplates(p, section)
+			},
+		},
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			mi := new(iam.Mock)
 			mp := new(templates.MockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createIAMGroupByID(ctx, groupID, section, mi, mp)
+			err := createIAMGroupByID(ctx, groupID, section, mi, mp, test.groupOnly)
 			require.NoError(t, err)
 			mi.AssertExpectations(t)
 			mp.AssertExpectations(t)
@@ -230,6 +258,21 @@ func TestProcessIAMGroupTemplates(t *testing.T) {
 			dir:          "iam_group_by_id",
 			filesToCheck: []string{"users.tf", "variables.tf", "import.sh", "roles.tf", "group.tf"},
 		},
+		"group only": {
+			givenData: TFData{
+				TFGroups: []TFGroup{
+					{
+						GroupID:       56789,
+						ParentGroupID: 98765,
+						GroupName:     "Custom group",
+					},
+				},
+				Section:    section,
+				Subcommand: "group",
+			},
+			dir:          "iam_group_only_by_id",
+			filesToCheck: []string{"variables.tf", "import.sh", "group.tf"},
+		},
 	}
 
 	for name, test := range tests {
@@ -249,9 +292,9 @@ func TestProcessIAMGroupTemplates(t *testing.T) {
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 
 			for _, f := range test.filesToCheck {
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}

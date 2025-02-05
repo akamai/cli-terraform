@@ -1,6 +1,6 @@
 {{ range .ReputationProfiles  -}}
 resource "akamai_appsec_reputation_profile" "{{escapeName .Name}}" {
-    config_id          = akamai_appsec_configuration.config.config_id
+    config_id          = local.config_id
     reputation_profile = jsonencode(
 {{ exportJSON . }}
 )

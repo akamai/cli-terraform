@@ -10,12 +10,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/cps"
-	"github.com/akamai/cli-terraform/pkg/edgegrid"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
-	"github.com/fatih/color"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/cps"
+	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/color"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )
 
@@ -84,7 +84,7 @@ func CmdCreateCPS(c *cli.Context) error {
 	contractID := c.Args().Get(1)
 	section := edgegrid.GetEdgercSection(c)
 	if err = createCPS(ctx, contractID, enrollmentID, section, client, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting enrollment HCL: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting enrollment HCL: %s", err), 1)
 	}
 	return nil
 }

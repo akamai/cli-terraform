@@ -10,12 +10,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/clientlists"
-	"github.com/akamai/cli-terraform/pkg/edgegrid"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
-	"github.com/fatih/color"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/clientlists"
+	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/color"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )
 
@@ -100,7 +100,7 @@ func CmdCreateClientList(c *cli.Context) error {
 	edgercPath := edgegrid.GetEdgercPath(c)
 
 	if err := createClientList(ctx, listID, edgercPath, section, tfWorkPath, client, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting client list: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting client list: %s", err), 1)
 	}
 
 	return nil

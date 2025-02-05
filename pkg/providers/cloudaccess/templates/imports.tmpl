@@ -1,4 +1,4 @@
-{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/cloudwrapper.TFCloudAccessData*/ -}}
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/cloudwrapper.TFCloudAccessData*/ -}}
 terraform init
 {{- if .Flag}}
 terraform import akamai_cloudaccess_key.{{.Key.KeyResourceName}} "{{.Key.AccessKeyUID}},{{.Key.GroupID}},{{.Key.ContractID}}"

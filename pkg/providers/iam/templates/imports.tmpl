@@ -1,4 +1,4 @@
-{{- /*gotype: github.com/akamai/cli-terraform/iam.TFUserData*/ -}}
+{{- /*gotype: github.com/akamai/cli-terraform/v2/iam.TFUserData*/ -}}
 terraform init
 {{range .TFUsers -}}
 terraform import akamai_iam_user.iam_user_{{.ID}} {{.ID}}

@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/cloudaccess"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/cloudaccess"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -54,7 +54,7 @@ func TestCreateCloudAccess(t *testing.T) {
 		withError error
 	}{
 		"access key with two versions and all data": {
-			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, dir string, data testDataForCloudAccess) {
+			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, _ string, data testDataForCloudAccess) {
 				mockGetAccessKey(c, data, nil)
 				mockListAccessKeyVersions(c, data, nil)
 				mockProcessTemplates(p, data)
@@ -89,7 +89,7 @@ func TestCreateCloudAccess(t *testing.T) {
 			},
 		},
 		"access key with one version": {
-			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, dir string, data testDataForCloudAccess) {
+			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, _ string, data testDataForCloudAccess) {
 				mockGetAccessKey(c, data, nil)
 				mockListAccessKeyVersions(c, data, nil)
 				mockProcessTemplates(p, data)
@@ -120,7 +120,7 @@ func TestCreateCloudAccess(t *testing.T) {
 			},
 		},
 		"access key with no versions": {
-			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, dir string, data testDataForCloudAccess) {
+			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, _ string, data testDataForCloudAccess) {
 				mockGetAccessKey(c, data, nil)
 				mockListAccessKeyVersions(c, data, nil)
 				mockProcessTemplates(p, data)
@@ -145,7 +145,7 @@ func TestCreateCloudAccess(t *testing.T) {
 			},
 		},
 		"error getting access key": {
-			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, dir string, data testDataForCloudAccess) {
+			init: func(c *cloudaccess.Mock, _ *templates.MockProcessor, _ string, data testDataForCloudAccess) {
 				mockGetAccessKey(c, data, ErrFetchingKey)
 			},
 			withError: ErrFetchingKey,
@@ -154,7 +154,7 @@ func TestCreateCloudAccess(t *testing.T) {
 			},
 		},
 		"error listing access key versions": {
-			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, dir string, data testDataForCloudAccess) {
+			init: func(c *cloudaccess.Mock, _ *templates.MockProcessor, _ string, data testDataForCloudAccess) {
 				mockGetAccessKey(c, data, nil)
 				mockListAccessKeyVersions(c, data, ErrListingKeyVersions)
 			},
@@ -178,7 +178,7 @@ func TestCreateCloudAccess(t *testing.T) {
 			},
 		},
 		"error non unique cloud access key id": {
-			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, dir string, data testDataForCloudAccess) {
+			init: func(c *cloudaccess.Mock, _ *templates.MockProcessor, _ string, data testDataForCloudAccess) {
 				mockGetAccessKey(c, data, nil)
 				mockListAccessKeyVersions(c, data, nil)
 			},
@@ -212,7 +212,7 @@ func TestCreateCloudAccess(t *testing.T) {
 			},
 		},
 		"error key has no group and contract safeguard": {
-			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, dir string, data testDataForCloudAccess) {
+			init: func(c *cloudaccess.Mock, _ *templates.MockProcessor, _ string, data testDataForCloudAccess) {
 				mockGetAccessKey(c, data, nil)
 			},
 			withError: ErrNoGroup,
@@ -225,17 +225,17 @@ func TestCreateCloudAccess(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
-			mock := new(cloudaccess.Mock)
+			mc := new(cloudaccess.Mock)
 			templateProcessor := new(templates.MockProcessor)
-			test.init(mock, templateProcessor, test.dir, test.testData)
+			test.init(mc, templateProcessor, test.dir, test.testData)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createCloudAccess(ctx, accessKeyUID, 0, "", section, mock, templateProcessor)
+			err := createCloudAccess(ctx, accessKeyUID, 0, "", section, mc, templateProcessor)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
 			}
 			require.NoError(t, err)
-			mock.AssertExpectations(t)
+			mc.AssertExpectations(t)
 			templateProcessor.AssertExpectations(t)
 		})
 	}
@@ -249,7 +249,7 @@ func TestCreateCloudAccess_GroupIDAndConractIDSupplied(t *testing.T) {
 		withError error
 	}{
 		"access key with valid groupID and contractID": {
-			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, dir string, data testDataForCloudAccess) {
+			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, _ string, data testDataForCloudAccess) {
 				mockGetAccessKey(c, data, nil)
 				mockListAccessKeyVersions(c, data, nil)
 				mockProcessTemplates(p, data)
@@ -281,7 +281,7 @@ func TestCreateCloudAccess_GroupIDAndConractIDSupplied(t *testing.T) {
 			},
 		},
 		"error - access key with invalid groupID and contractID combination": {
-			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, dir string, data testDataForCloudAccess) {
+			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, _ string, data testDataForCloudAccess) {
 				mockGetAccessKey(c, data, nil)
 				mockListAccessKeyVersions(c, data, nil)
 				mockProcessTemplates(p, data)
@@ -317,17 +317,17 @@ func TestCreateCloudAccess_GroupIDAndConractIDSupplied(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
-			mock := new(cloudaccess.Mock)
+			mc := new(cloudaccess.Mock)
 			templateProcessor := new(templates.MockProcessor)
-			test.init(mock, templateProcessor, test.dir, test.testData)
+			test.init(mc, templateProcessor, test.dir, test.testData)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createCloudAccess(ctx, accessKeyUID, 1234, "C-Contract123", section, mock, templateProcessor)
+			err := createCloudAccess(ctx, accessKeyUID, 1234, "C-Contract123", section, mc, templateProcessor)
 			if test.withError != nil {
 				assert.Equal(t, test.withError.Error(), err.Error(), "expected: %s; got: %s", test.withError, err)
 				return
 			}
 			require.NoError(t, err)
-			mock.AssertExpectations(t)
+			mc.AssertExpectations(t)
 			templateProcessor.AssertExpectations(t)
 		})
 	}

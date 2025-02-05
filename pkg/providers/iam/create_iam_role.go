@@ -6,12 +6,12 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/iam"
-	"github.com/akamai/cli-terraform/pkg/edgegrid"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
-	"github.com/fatih/color"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/iam"
+	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/color"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,6 +26,8 @@ func CmdCreateIAMRole(c *cli.Context) error {
 		tfWorkPath = c.String("tfworkpath")
 	}
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
+
+	roleOnly := c.Bool("only")
 
 	groupPath := filepath.Join(tfWorkPath, "groups.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
@@ -55,27 +57,33 @@ func CmdCreateIAMRole(c *cli.Context) error {
 	section := edgegrid.GetEdgercSection(c)
 	roleID, err := strconv.ParseInt(c.Args().First(), 10, 64)
 	if err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Wrong format of role id %v must be a number: %s", roleID, err)), 1)
+		return cli.Exit(color.RedString("Wrong format of role id %v must be a number: %s", roleID, err), 1)
 	}
 
-	if err = createIAMRoleByID(ctx, roleID, section, client, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting HCL for IAM: %s", err)), 1)
+	if err = createIAMRoleByID(ctx, roleID, section, client, processor, roleOnly); err != nil {
+		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}
 	return nil
 }
 
-func createIAMRoleByID(ctx context.Context, roleID int64, section string, client iam.IAM, templateProcessor templates.TemplateProcessor) error {
+func createIAMRoleByID(ctx context.Context, roleID int64, section string, client iam.IAM, templateProcessor templates.TemplateProcessor, roleOnly bool) error {
 	term := terminal.Get(ctx)
-	_, err := term.Writeln("Exporting Identity and Access Management role configuration with related users and groups")
-	if err != nil {
+
+	message := "Exporting Identity and Access Management role configuration"
+	if !roleOnly {
+		message += " with related users and groups"
+	}
+
+	if _, err := term.Writeln(message); err != nil {
 		return err
 	}
+
 	term.Spinner().Start(fmt.Sprintf("Fetching role by role_id %d", roleID))
 
 	role, err := client.GetRole(ctx, iam.GetRoleRequest{
 		ID:           roleID,
 		GrantedRoles: true,
-		Users:        true,
+		Users:        !roleOnly,
 	})
 	if err != nil {
 		term.Spinner().Fail()
@@ -90,49 +98,50 @@ func createIAMRoleByID(ctx context.Context, roleID int64, section string, client
 		GrantedRoles:    getGrantedRolesID(role.GrantedRoles),
 	}
 
-	term.Spinner().Start(fmt.Sprintf("Fetching users with the given role %d", roleID))
-	users, err := getUsersByRole(ctx, term, role.Users, client)
-	if err != nil {
-		term.Spinner().Fail()
-		return err
+	tfData := TFData{
+		TFRoles: []TFRole{
+			tfRole,
+		},
+		Section:    section,
+		Subcommand: "role",
 	}
-	term.Spinner().OK()
 
-	tfUsers := make([]*TFUser, 0)
-	tfGroups := make([]TFGroup, 0)
-
-	term.Spinner().Start(fmt.Sprintf("Fetching groups for users related within role %d", roleID))
-	for _, user := range users {
-		userData, err := getTFUser(user)
+	if !roleOnly {
+		term.Spinner().Start(fmt.Sprintf("Fetching users with the given role %d", roleID))
+		users, err := getUsersByRole(ctx, term, role.Users, client)
 		if err != nil {
 			term.Spinner().Fail()
 			return err
 		}
+		term.Spinner().OK()
 
-		tfUsers = append(tfUsers, userData)
-		authGrantsList := user.AuthGrants
+		tfUsers := make([]*TFUser, 0)
+		tfGroups := make([]TFGroup, 0)
 
-		if len(authGrantsList) > 0 {
-			groupsData, err := getTFUserGroups(ctx, client, authGrantsList)
+		term.Spinner().Start(fmt.Sprintf("Fetching groups for users related within role %d", roleID))
+		for _, user := range users {
+			userData, err := getTFUser(user)
 			if err != nil {
 				term.Spinner().Fail()
 				return err
 			}
 
-			tfGroups = appendUniqueGroups(tfGroups, groupsData)
+			tfUsers = append(tfUsers, userData)
+			authGrantsList := user.AuthGrants
+
+			if len(authGrantsList) > 0 {
+				groupsData, err := getTFUserGroups(ctx, client, authGrantsList)
+				if err != nil {
+					term.Spinner().Fail()
+					return err
+				}
+
+				tfGroups = appendUniqueGroups(tfGroups, groupsData)
+			}
 		}
-	}
-	term.Spinner().OK()
-
-	tfData := TFData{
-		TFUsers:  tfUsers,
-		TFGroups: tfGroups,
-		TFRoles: []TFRole{
-			tfRole,
-		},
-
-		Section:    section,
-		Subcommand: "role",
+		term.Spinner().OK()
+		tfData.TFUsers = tfUsers
+		tfData.TFGroups = tfGroups
 	}
 
 	term.Spinner().Start("Saving TF configurations ")

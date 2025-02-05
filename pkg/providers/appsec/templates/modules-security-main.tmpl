@@ -19,6 +19,20 @@ data "akamai_group" "group" {
     contract_id = var.contract_id
 }
 
+{{ if eq .TargetProduct "WAP" -}}
+{{- /* Setting config_id as a local value to avoid adding a check for account type everywhere. 
+Set config_id based off on datasource for WAP and resource for KSD accounts and use it in other configs. */ -}}
+locals {
+ config_id = data.akamai_appsec_configuration.config.config_id
+}
+
+{{ else -}}
+locals {
+ config_id = akamai_appsec_configuration.config.config_id
+}
+
+{{ end -}}
+
 output "config_id" {
-    value = akamai_appsec_configuration.config.config_id
+    value = local.config_id
 }

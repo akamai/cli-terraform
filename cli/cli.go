@@ -3,23 +3,23 @@ package cli
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"os"
-	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/session"
-	"github.com/akamai/cli-terraform/pkg/commands"
-	"github.com/akamai/cli-terraform/pkg/edgegrid"
-	akacli "github.com/akamai/cli/pkg/app"
-	"github.com/akamai/cli/pkg/log"
-	"github.com/akamai/cli/pkg/terminal"
-	"github.com/fatih/color"
+	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/log"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/session"
+	"github.com/akamai/cli-terraform/v2/pkg/commands"
+	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
+	akacli "github.com/akamai/cli/v2/pkg/app"
+	"github.com/akamai/cli/v2/pkg/color"
+	"github.com/akamai/cli/v2/pkg/log"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )
 
 var (
 	// Version holds current version of cli-terraform
-	Version = "1.19.0"
+	Version = "2.0.0"
 )
 
 // Run initializes the cli and runs it
@@ -35,13 +35,13 @@ func Run() error {
 
 	cmds, err := commands.CommandLocator()
 	if err != nil {
-		return fmt.Errorf(color.RedString("An error occurred initializing commands: %s"), err)
+		return errors.New(color.RedString("An error occurred initializing commands: %s", err))
 	}
 	if len(cmds) > 0 {
 		app.Commands = append(cmds, app.Commands...)
 	}
 
-	app.Before = ensureBefore(putLoggerInContext, putSessionInContext, deprecationInfoForCreateCommands, deprecationInfoForSchemaFlags)
+	app.Before = ensureBefore(putLoggerInContext, putSessionInContext)
 	return app.RunContext(ctx, os.Args)
 }
 
@@ -104,53 +104,11 @@ func putSessionInContext(c *cli.Context) error {
 
 func putLoggerInContext(c *cli.Context) error {
 	c.Context = log.SetupContext(c.Context, c.App.Writer)
-	c.Context = session.ContextWithOptions(c.Context, session.WithContextLog(log.FromContext(c.Context)))
 
-	return nil
-}
+	handler := log.FromContext(c.Context).Handler()
+	sessionLogger := sesslog.NewSlogAdapter(handler)
 
-func deprecationInfoForCreateCommands(c *cli.Context) error {
-	if !c.Args().Present() {
-		return nil
-	}
-	command := c.Args().First()
-	if command == "help" {
-		command = c.Args().Get(1)
-	}
-	if strings.HasPrefix(command, "create-") {
-		fmt.Fprintln(c.App.Writer, color.HiYellowString("Warning:"), "create command names are now deprecated, use export commands instead.")
-		fmt.Fprintln(c.App.Writer)
-	}
-	return nil
-}
+	c.Context = session.ContextWithOptions(c.Context, session.WithContextLog(sessionLogger))
 
-func deprecationInfoForSchemaFlags(c *cli.Context) error {
-	if !c.Args().Present() {
-		return nil
-	}
-	command := c.Args().First()
-	newFlagName := ""
-	if strings.HasSuffix(command, "property") {
-		newFlagName = "--rules-as-hcl"
-	}
-	if strings.HasSuffix(command, "imaging") {
-		newFlagName = "--policy-as-hcl"
-	}
-	if newFlagName == "" {
-		return nil
-	}
-
-	hasSchemaFlag := false
-	for _, f := range c.Args().Slice() {
-		if f == "--schema" {
-			hasSchemaFlag = true
-			break
-		}
-	}
-
-	if hasSchemaFlag {
-		fmt.Fprint(c.App.Writer, color.HiYellowString("Warning: "))
-		fmt.Fprintf(c.App.Writer, "flag --schema is now deprecated, use %s flag instead.\n\n", newFlagName)
-	}
 	return nil
 }

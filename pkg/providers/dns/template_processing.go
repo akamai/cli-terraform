@@ -6,8 +6,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/dns"
-	"github.com/akamai/cli-terraform/pkg/tools"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/dns"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
 )
 
 //go:embed templates/*
@@ -61,7 +61,7 @@ func useTemplate(data interface{}, templateName string, trimBeginning bool) stri
 		return ""
 	}
 
-	res := string(buf.Bytes())
+	res := buf.String()
 
 	if trimBeginning {
 		res = strings.TrimLeft(res, "\n")

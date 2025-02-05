@@ -15,13 +15,14 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/hapi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/papi"
-	"github.com/akamai/cli-terraform/pkg/edgegrid"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
-	"github.com/fatih/color"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/hapi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/ptr"
+	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/color"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )
 
@@ -53,18 +54,21 @@ type Hostname struct {
 type WrappedRules struct {
 	Rule          papi.Rules
 	TerraformName string
+	FileName      string
 	Children      []*WrappedRules
+	IsRoot        bool
 }
 
 // TFData holds template data
 type TFData struct {
-	Includes     []TFIncludeData
-	Property     TFPropertyData
-	Section      string
-	Rules        []*WrappedRules
-	RulesAsHCL   bool
-	WithIncludes bool
-	UseBootstrap bool
+	Includes      []TFIncludeData
+	Property      TFPropertyData
+	Section       string
+	Rules         []*WrappedRules
+	RulesAsHCL    bool
+	UseBootstrap  bool
+	UseSplitDepth bool
+	RootRule      string
 }
 
 // TFIncludeData holds template data for include
@@ -79,6 +83,7 @@ type TFIncludeData struct {
 	ProductID      string
 	ProductionInfo NetworkInfo
 	StagingInfo    NetworkInfo
+	RootRule       string
 }
 
 // TFPropertyData holds template data for property
@@ -151,10 +156,12 @@ type propertyOptions struct {
 	section       string
 	tfWorkPath    string
 	version       string
-	withIncludes  bool
 	rulesAsHCL    bool
 	withBootstrap bool
+	splitDepth    *int
 }
+
+type splitDepthRuleWrapper func([]*WrappedRules) TFData
 
 //go:embed templates/*
 var templateFiles embed.FS
@@ -175,8 +182,6 @@ var (
 	ErrFetchingActivationDetails = errors.New("fetching activations")
 	// ErrFetchingHostnameDetails is returned when fetching hostname details request failed
 	ErrFetchingHostnameDetails = errors.New("fetching hostnames")
-	// ErrFetchingReferencedIncludes is returned when fetching referenced includes request failed
-	ErrFetchingReferencedIncludes = errors.New("fetching referenced includes")
 	// ErrSavingSnippets is returned when error appeared while saving property snippet JSON files
 	ErrSavingSnippets = errors.New("saving snippets")
 	// ErrPropertyRulesNotFound is returned when property rules couldn't be found
@@ -189,6 +194,8 @@ var (
 	ErrSavingFiles = errors.New("saving terraform project files")
 	// ErrUnsupportedRuleFormat is returned when there is no template for provided rule format
 	ErrUnsupportedRuleFormat = errors.New("unsupported rule format")
+	errCreateRulesDirectory  = errors.New("create rule directory")
+	errReadRuleMode          = errors.New("reading export directory mode")
 )
 
 var additionalFuncs = tools.DecorateWithMultilineHandlingFunctions(
@@ -198,6 +205,26 @@ var additionalFuncs = tools.DecorateWithMultilineHandlingFunctions(
 		"ReportError":   ReportError,
 		"CheckErrors":   CheckErrors,
 	})
+
+var propertyRuleWrapper splitDepthRuleWrapper = func(rules []*WrappedRules) TFData {
+	return TFData{
+		RulesAsHCL:    true,
+		UseSplitDepth: true,
+		Rules:         rules,
+	}
+}
+
+var includeRuleWrapper splitDepthRuleWrapper = func(rules []*WrappedRules) TFData {
+	return TFData{
+		RulesAsHCL:    true,
+		UseSplitDepth: true,
+		Includes: []TFIncludeData{
+			{
+				Rules: rules,
+			},
+		},
+	}
+}
 
 // CmdCreateProperty is an entrypoint to create-property command
 func CmdCreateProperty(c *cli.Context) error {
@@ -230,26 +257,19 @@ func CmdCreateProperty(c *cli.Context) error {
 		"imports.tmpl":   importPath,
 	}
 
-	var withIncludes bool
-	if c.IsSet("with-includes") {
-		withIncludes = c.Bool("with-includes")
-		if withIncludes {
-			templateToFile["includes.tmpl"] = filepath.Join(tfWorkPath, "includes.tf")
-		}
-	}
-
 	var rulesAsHCL bool
 	if c.IsSet("rules-as-hcl") {
 		rulesAsHCL = c.Bool("rules-as-hcl")
 	}
 
+	var splitDepth *int
+	if c.IsSet("split-depth") {
+		splitDepth = ptr.To(c.Int("split-depth"))
+	}
+
 	var isBootstrap bool
 	if c.IsSet("akamai-property-bootstrap") {
 		isBootstrap = c.Bool("akamai-property-bootstrap")
-	}
-
-	if withIncludes && rulesAsHCL {
-		templateToFile["includes_rules.tmpl"] = filepath.Join(tfWorkPath, "includes_rules.tf")
 	}
 
 	processor := templates.FSTemplateProcessor{
@@ -258,32 +278,58 @@ func CmdCreateProperty(c *cli.Context) error {
 		AdditionalFuncs: additionalFuncs,
 	}
 
+	var multiTargetProcessor templates.MultiTargetProcessor
+
+	if splitDepth != nil {
+		multiTargetProcessor = templates.FSMultiTargetProcessor{
+			TemplatesFS:     templateFiles,
+			AdditionalFuncs: additionalFuncs,
+		}
+		err = createSplitRulesDir(tfWorkPath)
+		if err != nil {
+			return cli.Exit(color.RedString("Error creating directory for rules: %s", err), 1)
+		}
+	}
+
 	options := propertyOptions{
 		propertyName:  c.Args().First(),
 		section:       edgegrid.GetEdgercSection(c),
 		tfWorkPath:    tfWorkPath,
 		version:       version,
-		withIncludes:  withIncludes,
 		rulesAsHCL:    rulesAsHCL,
 		withBootstrap: isBootstrap,
+		splitDepth:    splitDepth,
 	}
-	if err = createProperty(ctx, options, "property-snippets", client, clientHapi, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting property: %s", err)), 1)
+	if err = createProperty(ctx, options, "property-snippets", client, clientHapi, processor, multiTargetProcessor); err != nil {
+		return cli.Exit(color.RedString("Error exporting property \"%s\": %s", options.propertyName, err), 1)
 	}
 	return nil
 }
 
-func createProperty(ctx context.Context, options propertyOptions, jsonDir string, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor) error {
+func createSplitRulesDir(tfWorkPath string) error {
+	stat, err := os.Stat(tfWorkPath)
+	if err != nil {
+		return fmt.Errorf("%w: %s", errReadRuleMode, err)
+	}
+	err = os.Mkdir(filepath.Join(tfWorkPath, "rules"), stat.Mode())
+	if err != nil {
+		return fmt.Errorf("%w: %s", errCreateRulesDirectory, err)
+	}
+	return nil
+}
+
+//nolint:gocyclo
+func createProperty(ctx context.Context, options propertyOptions, jsonDir string, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor, multiTargetProcessor templates.MultiTargetProcessor) error {
 	term := terminal.Get(ctx)
 
 	tfData := TFData{
 		Property: TFPropertyData{
 			EdgeHostnames: make(map[string]EdgeHostname),
 		},
-		Section:      options.section,
-		RulesAsHCL:   options.rulesAsHCL,
-		WithIncludes: options.withIncludes,
-		UseBootstrap: options.withBootstrap,
+		Section:       options.section,
+		RulesAsHCL:    options.rulesAsHCL,
+		UseBootstrap:  options.withBootstrap,
+		UseSplitDepth: options.splitDepth != nil,
 	}
 
 	// Get Property
@@ -331,44 +377,7 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 
 	term.Spinner().OK()
 
-	// Get Includes if withIncludes is set
-	if options.withIncludes {
-		term.Spinner().Start("Fetching referenced includes with property " + options.propertyName)
-		includes, err := client.ListReferencedIncludes(ctx, papi.ListReferencedIncludesRequest{
-			PropertyID:      property.PropertyID,
-			ContractID:      property.ContractID,
-			GroupID:         property.GroupID,
-			PropertyVersion: version.Version.PropertyVersion,
-		})
-		if err != nil {
-			term.Spinner().Fail()
-			return fmt.Errorf("%w: %s", ErrFetchingReferencedIncludes, err)
-		}
-		term.Spinner().OK()
-
-		tfData.Includes = make([]TFIncludeData, 0)
-		for _, include := range includes.Includes.Items {
-			includeData, rules, err := getIncludeData(ctx, &include, client)
-			if err != nil {
-				return err
-			}
-
-			// Save snippets
-			if !options.rulesAsHCL {
-				term.Spinner().Start("Saving snippets ")
-				ruleTemplate, rulesTemplate := setIncludeRuleTemplates(rules)
-				if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(options.tfWorkPath, jsonDir), fmt.Sprintf("%s.json", include.IncludeName)); err != nil {
-					term.Spinner().Fail()
-					return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
-				}
-				term.Spinner().OK()
-			} else {
-				includeData.Rules = flattenRules(includeData.IncludeName, rules.Rules)
-			}
-
-			tfData.Includes = append(tfData.Includes, *includeData)
-		}
-	}
+	multiTargetData := make(templates.MultiTargetData)
 
 	// Get Property Rules
 	term.Spinner().Start("Fetching property rules ")
@@ -450,12 +459,21 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 	if options.rulesAsHCL {
 		ruleTemplate := fmt.Sprintf("rules_%s.tmpl", rules.RuleFormat)
 		if !templateProcessor.TemplateExists(ruleTemplate) {
-			return fmt.Errorf("%w: %s", ErrUnsupportedRuleFormat, rules.RuleFormat)
+			return fmt.Errorf("%w: \"%s\"", ErrUnsupportedRuleFormat, rules.RuleFormat)
 		}
-		templateProcessor.AddTemplateTarget(ruleTemplate, filepath.Join(options.tfWorkPath, "rules.tf"))
-		tfData.Rules = flattenRules(tfData.Property.PropertyName, rules.Rules)
 		filterFuncs = append(filterFuncs, useThisOnlyRuleFormat(rules.RuleFormat))
+		wrappedRules := wrapAndNameRules(tfData.Property.PropertyName, rules.Rules)
+
+		if options.splitDepth != nil {
+			tfData.RootRule = wrappedRules.TerraformName
+			multiTargetData.AddData("split-depth-rules.tmpl", prepareRulesForSplitRule(wrappedRules, *options.splitDepth, options.tfWorkPath, propertyRuleWrapper))
+			templateProcessor.AddTemplateTarget("rules_module.tmpl", filepath.Join(options.tfWorkPath, "rules", "module_config.tf"))
+		} else {
+			tfData.Rules = flattenRules(wrappedRules)
+			templateProcessor.AddTemplateTarget(ruleTemplate, filepath.Join(options.tfWorkPath, "rules.tf"))
+		}
 	}
+
 	term.Spinner().Start("Saving TF configurations ")
 	if err = templateProcessor.ProcessTemplates(tfData, filterFuncs...); err != nil {
 		term.Spinner().Fail()
@@ -472,9 +490,18 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 			return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
 		}
 	}
+	if options.splitDepth != nil {
+		if err = multiTargetProcessor.ProcessTemplates(multiTargetData, filterFuncs...); err != nil {
+			term.Spinner().Fail()
+			if _, err := CheckErrors(); err != nil {
+				return fmt.Errorf("%w", err)
+			}
+			return fmt.Errorf("%w: %s", ErrSavingFiles, err)
+		}
+	}
 
 	term.Spinner().OK()
-	term.Printf("Terraform configuration for property '%s' was saved successfully\n", property.PropertyName)
+	term.Printf("Terraform configuration for property \"%s\" was saved successfully\n", property.PropertyName)
 
 	return nil
 }
@@ -504,22 +531,49 @@ func useThisOnlyRuleFormat(acceptedFormat string) func([]string) ([]string, erro
 	}
 }
 
-func flattenRules(property string, rule papi.Rules) []*WrappedRules {
-	var result []*WrappedRules
+func wrapAndNameRules(property string, rule papi.Rules) *WrappedRules {
 	wrappedRules := wrapRules(rule)
-	result = append(result, wrappedRules)
-	result = append(result, flattenWrappedRules(wrappedRules)...)
-	var names = map[string]int{}
-	for _, wrappedRules := range result {
-		name := tools.TerraformName(wrappedRules.Rule.Name)
-		names[name]++
-		if count := names[name]; count > 1 {
-			name = fmt.Sprintf("%s%d", name, count-1)
-		}
-		wrappedRules.TerraformName = fmt.Sprintf("%s_rule_%s", tools.TerraformName(property), name)
-	}
+	wrappedRules.IsRoot = true
+
+	_ = setNamesOnAllRules(property, wrappedRules, map[string]int{}, tools.TerraformName(property), true)
+	return wrappedRules
+}
+
+func flattenRules(rules *WrappedRules) []*WrappedRules {
+	var result []*WrappedRules
+
+	result = append(result, rules)
+	result = append(result, flattenWrappedRules(rules)...)
+
 	return result
 }
+
+func setNamesOnAllRules(propertyName string, rules *WrappedRules, nameOccurrence map[string]int, parentName string, isRoot bool) map[string]int {
+	if isRoot {
+		nameOccurrence = setNameOnRule(propertyName, rules, nameOccurrence, parentName)
+	}
+
+	for _, child := range rules.Children {
+		nameOccurrence = setNameOnRule(propertyName, child, nameOccurrence, rules.FileName)
+	}
+
+	for _, child := range rules.Children {
+		nameOccurrence = setNamesOnAllRules(propertyName, child, nameOccurrence, rules.FileName, false)
+	}
+	return nameOccurrence
+}
+
+func setNameOnRule(propertyName string, rules *WrappedRules, nameOccurrence map[string]int, parentName string) map[string]int {
+	name := tools.TerraformName(rules.Rule.Name)
+	nameOccurrence[name]++
+	if count := nameOccurrence[name]; count > 1 {
+		name = fmt.Sprintf("%s%d", name, count-1)
+	}
+	rules.TerraformName = fmt.Sprintf("%s_rule_%s", tools.TerraformName(propertyName), name)
+	rules.FileName = fmt.Sprintf("%s_%s", parentName, name)
+	return nameOccurrence
+}
+
 func wrapRules(rule papi.Rules) *WrappedRules {
 	var children []*WrappedRules
 	for _, child := range rule.Children {
@@ -590,7 +644,7 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 
 			edgeHostname, err := clientHAPI.GetEdgeHostname(ctx, edgeHostnameID)
 			if err != nil {
-				return nil, nil, fmt.Errorf("edge hostname %d not found: %s", edgeHostnameID, err)
+				return nil, nil, fmt.Errorf("edge hostname \"%d\" not found: %s", edgeHostnameID, err)
 			}
 			papiEdgeHostnames, err := clientPAPI.GetEdgeHostnames(ctx, papi.GetEdgeHostnamesRequest{
 				ContractID: property.ContractID,
@@ -989,6 +1043,9 @@ func ReportError(format string, a ...any) string {
 }
 
 // CheckErrors is used to fail the processing of the template in case of any unknown behaviors or criteria
+//
+// As per template.FuncMap definition, for the error to be treated as error (rather than regular value), it has to be returned as second returned value.
+// Therefor always returning "" as first returned value.
 func CheckErrors() (string, error) {
 	if len(reportedErrors) > 0 {
 		return "", fmt.Errorf("there were errors reported: %v", strings.Join(reportedErrors, ", "))
@@ -1005,4 +1062,20 @@ func formatResourceName(name string) string {
 		return "_" + formattedName
 	}
 	return formattedName
+}
+
+func prepareRulesForSplitRule(rules *WrappedRules, rulesSplitNestingLeft int, tfWorkPath string, splitRulesWrapper splitDepthRuleWrapper) templates.DataForTarget {
+	processedRules := templates.DataForTarget{}
+
+	if rulesSplitNestingLeft == 0 {
+		processedRules[filepath.Join(tfWorkPath, "rules", fmt.Sprintf("%s.tf", rules.FileName))] = splitRulesWrapper(flattenRules(rules))
+		return processedRules
+	}
+
+	processedRules[filepath.Join(tfWorkPath, "rules", fmt.Sprintf("%s.tf", rules.FileName))] = splitRulesWrapper([]*WrappedRules{rules})
+	for _, child := range rules.Children {
+		processedRules.Join(prepareRulesForSplitRule(child, rulesSplitNestingLeft-1, tfWorkPath, splitRulesWrapper))
+	}
+
+	return processedRules
 }

@@ -3,14 +3,13 @@ package iam
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/iam"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/iam"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -147,15 +146,37 @@ var (
 		)
 		return call.Return(nil)
 	}
+
+	expectUsersOnlyProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
+		tfData := TFData{
+			TFUsers: []*TFUser{
+				{
+					IsLocked:          false,
+					AuthGrants:        "[{\"groupId\":56789,\"isBlocked\":false,\"roleId\":12345}]",
+					TFUserBasicInfo:   getTFUserBasicInfo(),
+					UserNotifications: getTFUserNotifications(),
+				},
+			},
+			Section:    section,
+			Subcommand: "user",
+		}
+		call := p.On(
+			"ProcessTemplates",
+			tfData,
+		)
+		return call.Return(nil)
+	}
 )
 
 func TestCreateIAMUserByEmail(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		init func(*iam.Mock, *templates.MockProcessor)
+		userOnly bool
+		init     func(*iam.Mock, *templates.MockProcessor)
 	}{
 		"fetch user": {
+			userOnly: false,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListUsers(i)
 				expectGetUser(i)
@@ -164,14 +185,23 @@ func TestCreateIAMUserByEmail(t *testing.T) {
 				expectProcessTemplates(p, section)
 			},
 		},
+		"fetch user only (without role and group details)": {
+			userOnly: true,
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
+				expectListUsers(i)
+				expectGetUser(i)
+				expectUsersOnlyProcessTemplates(p, section)
+			},
+		},
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			mi := new(iam.Mock)
 			mp := new(templates.MockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createIAMUserByEmail(ctx, "terraform@akamai.com", section, mi, mp)
+			err := createIAMUserByEmail(ctx, "terraform@akamai.com", section, mi, mp, test.userOnly)
 			require.NoError(t, err)
 			mi.AssertExpectations(t)
 			mp.AssertExpectations(t)
@@ -216,6 +246,21 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 			},
 			dir:          "iam_user_by_email_basic",
 			filesToCheck: []string{"user.tf", "variables.tf", "import.sh", "roles.tf", "groups.tf"},
+		},
+		"user only": {
+			givenData: TFData{
+				TFUsers: []*TFUser{
+					{
+						TFUserBasicInfo: getTFUserBasicInfo(),
+						IsLocked:        false,
+						AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]",
+					},
+				},
+				Section:    section,
+				Subcommand: "user",
+			},
+			dir:          "iam_user_only_by_email",
+			filesToCheck: []string{"variables.tf", "import.sh", "user.tf"},
 		},
 		"basic user with MFA authentication and notifications": {
 			givenData: TFData{
@@ -373,9 +418,9 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 			require.NoError(t, processor.ProcessTemplates(test.givenData))
 
 			for _, f := range test.filesToCheck {
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}

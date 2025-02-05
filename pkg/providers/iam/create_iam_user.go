@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/iam"
-	"github.com/akamai/cli-terraform/pkg/edgegrid"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
-	"github.com/fatih/color"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/iam"
+	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/color"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )
 
@@ -25,6 +25,8 @@ func CmdCreateIAMUser(c *cli.Context) error {
 		tfWorkPath = c.String("tfworkpath")
 	}
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
+
+	userOnly := c.Bool("only")
 
 	groupPath := filepath.Join(tfWorkPath, "groups.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
@@ -53,18 +55,24 @@ func CmdCreateIAMUser(c *cli.Context) error {
 
 	section := edgegrid.GetEdgercSection(c)
 	email := c.Args().First()
-	if err = createIAMUserByEmail(ctx, email, section, client, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting HCL for IAM: %s", err)), 1)
+	if err = createIAMUserByEmail(ctx, email, section, client, processor, userOnly); err != nil {
+		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}
 	return nil
 }
 
-func createIAMUserByEmail(ctx context.Context, userEmail, section string, client iam.IAM, templateProcessor templates.TemplateProcessor) error {
+func createIAMUserByEmail(ctx context.Context, userEmail, section string, client iam.IAM, templateProcessor templates.TemplateProcessor, userOnly bool) error {
 	term := terminal.Get(ctx)
-	_, err := term.Writeln("Exporting Identity and Access Management user configuration with relevant roles and groups")
-	if err != nil {
+
+	message := "Exporting Identity and Access Management user configuration"
+	if !userOnly {
+		message += " with relevant roles and groups"
+	}
+
+	if _, err := term.Writeln(message); err != nil {
 		return err
 	}
+
 	term.Spinner().Start("Fetching user by email " + userEmail)
 
 	user, err := getUserByEmail(ctx, client, userEmail)
@@ -90,7 +98,7 @@ func createIAMUserByEmail(ctx context.Context, userEmail, section string, client
 		Subcommand: "user",
 	}
 
-	if len(authGrantsList) > 0 {
+	if !userOnly && len(authGrantsList) > 0 {
 		term.Spinner().Start("Fetching roles for user " + userEmail)
 		tfData.TFRoles, err = getTFUserRoles(ctx, client, authGrantsList)
 		if err != nil {

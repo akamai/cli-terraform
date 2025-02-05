@@ -3,7 +3,7 @@
 {{ $categoryID := (index . "categoryId") -}}
 {{ $categoryName := (index . "categoryName") -}}
 resource "akamai_botman_custom_bot_category" "{{escapeName $categoryName }}_{{ $categoryID }}" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     custom_bot_category = jsonencode(
 {{ exportJSONWithoutKeys . "categoryId" "metadata" "ruleId" }}
 )
@@ -12,7 +12,7 @@ resource "akamai_botman_custom_bot_category" "{{escapeName $categoryName }}_{{ $
 {{ if (index . "metadata" "akamaiDefinedBots") -}}
 {{ range (index . "metadata" "akamaiDefinedBots") -}}
 resource "akamai_botman_recategorized_akamai_defined_bot" "{{ escapeName (index . "botName") }}_{{ index . "botId" }}" {
-    config_id   = akamai_appsec_configuration.config.config_id
+    config_id   = local.config_id
     bot_id      = "{{ index . "botId" }}"
     category_id = akamai_botman_custom_bot_category.{{escapeName $categoryName }}_{{ $categoryID }}.category_id
 }
@@ -23,7 +23,7 @@ resource "akamai_botman_recategorized_akamai_defined_bot" "{{ escapeName (index 
 {{ end -}}
 {{ if .CustomBotCategorySequence  -}}
 resource "akamai_botman_custom_bot_category_sequence" "custom_bot_category_sequence" {
-    config_id    = akamai_appsec_configuration.config.config_id
+    config_id    = local.config_id
     category_ids = [{{getCustomBotCategoryResourceNamesByIDs .CustomBotCategories .CustomBotCategorySequence}}]
 }
 

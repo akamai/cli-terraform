@@ -1,5 +1,5 @@
 resource "akamai_appsec_custom_deny" "deny_message_deny_custom_78842" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   custom_deny = jsonencode(
     {
       "name" : "Deny Message",
@@ -26,7 +26,7 @@ resource "akamai_appsec_custom_deny" "deny_message_deny_custom_78842" {
 }
 
 resource "akamai_appsec_custom_deny" "deny_message_2_deny_custom_80270" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   custom_deny = jsonencode(
     {
       "name" : "deny message 2",

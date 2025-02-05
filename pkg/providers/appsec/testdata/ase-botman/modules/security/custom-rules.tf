@@ -1,5 +1,5 @@
 resource "akamai_appsec_custom_rule" "custom_rule_1_60088542" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   custom_rule = jsonencode(
     {
       "conditions" : [

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/akamai/cli-terraform/cli"
+	"github.com/akamai/cli-terraform/v2/cli"
 )
 
 func main() {

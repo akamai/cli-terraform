@@ -1,5 +1,5 @@
 resource "akamai_appsec_reputation_profile" "web_attackers_high_threat" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   reputation_profile = jsonencode(
     {
       "context" : "WEBATCK",
@@ -11,7 +11,7 @@ resource "akamai_appsec_reputation_profile" "web_attackers_high_threat" {
 }
 
 resource "akamai_appsec_reputation_profile" "dos_attackers_high_threat" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   reputation_profile = jsonencode(
     {
       "context" : "DOSATCK",
@@ -23,7 +23,7 @@ resource "akamai_appsec_reputation_profile" "dos_attackers_high_threat" {
 }
 
 resource "akamai_appsec_reputation_profile" "scanning_tools_high_threat" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   reputation_profile = jsonencode(
     {
       "context" : "SCANTL",
@@ -35,7 +35,7 @@ resource "akamai_appsec_reputation_profile" "scanning_tools_high_threat" {
 }
 
 resource "akamai_appsec_reputation_profile" "web_attackers_low_threat" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   reputation_profile = jsonencode(
     {
       "context" : "WEBATCK",
@@ -47,7 +47,7 @@ resource "akamai_appsec_reputation_profile" "web_attackers_low_threat" {
 }
 
 resource "akamai_appsec_reputation_profile" "dos_attackers_low_threat" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   reputation_profile = jsonencode(
     {
       "context" : "DOSATCK",
@@ -59,7 +59,7 @@ resource "akamai_appsec_reputation_profile" "dos_attackers_low_threat" {
 }
 
 resource "akamai_appsec_reputation_profile" "scanning_tools_low_threat" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   reputation_profile = jsonencode(
     {
       "context" : "SCANTL",
@@ -71,7 +71,7 @@ resource "akamai_appsec_reputation_profile" "scanning_tools_low_threat" {
 }
 
 resource "akamai_appsec_reputation_profile" "web_scrapers_low_threat" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   reputation_profile = jsonencode(
     {
       "context" : "WEBSCRP",
@@ -83,7 +83,7 @@ resource "akamai_appsec_reputation_profile" "web_scrapers_low_threat" {
 }
 
 resource "akamai_appsec_reputation_profile" "web_scrapers_high_threat" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   reputation_profile = jsonencode(
     {
       "context" : "WEBSCRP",

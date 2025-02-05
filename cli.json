@@ -1,15 +1,15 @@
 {
   "requirements": {
-    "go": "1.21.0"
+    "go": "1.22.0"
   },
   "commands": [
     {
       "name": "terraform",
-      "version": "1.19.0",
+      "version": "2.0.0",
       "description": "Export selected resources for faster adoption in Terraform",
       "bin": "https://github.com/akamai/cli-terraform/releases/download/v{{.Version}}/akamai-{{.Name}}-{{.Version}}-{{.OS}}{{.Arch}}{{.BinSuffix}}",
       "auto-complete": true,
-      "ldflags": "-X 'github.com/akamai/cli-terraform/cli.Version=%s'"
+      "ldflags": "-X 'github.com/akamai/cli-terraform/v2/cli.Version=%s'"
     }
   ]
 }

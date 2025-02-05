@@ -3,16 +3,15 @@ package commands
 import (
 	"fmt"
 
-	"github.com/fatih/color"
+	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/urfave/cli/v2"
 )
 
 func cmdList(c *cli.Context) error {
-	color.Yellow("\nCommands:\n\n")
+	fmt.Print(color.YellowString("\nCommands:\n\n"))
 
 	for _, command := range c.App.Commands {
-		bold := color.New(color.FgWhite, color.Bold)
-		fmt.Print(bold.Sprintf("  %s", command.Name))
+		fmt.Print(color.BoldString("  %s", command.Name))
 		if len(command.Aliases) > 0 {
 			var aliases string
 
@@ -24,7 +23,7 @@ func cmdList(c *cli.Context) error {
 
 			fmt.Printf(" (%s: ", aliases)
 			for i, alias := range command.Aliases {
-				fmt.Print(bold.Sprint(alias))
+				fmt.Print(color.BoldString(alias))
 				if i < len(command.Aliases)-1 {
 					fmt.Print(", ")
 				}

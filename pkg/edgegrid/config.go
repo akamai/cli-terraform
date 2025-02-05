@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/edgegrid"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/edgegrid"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/session"
 	"github.com/urfave/cli/v2"
 )
 
@@ -59,9 +60,9 @@ func getRetryConfig() (*session.RetryConfig, error) {
 		}
 	}
 	conf := session.NewRetryConfig()
-	max, ok := os.LookupEnv("AKAMAI_RETRY_MAX")
+	retryMax, ok := os.LookupEnv("AKAMAI_RETRY_MAX")
 	if ok {
-		v, err := strconv.Atoi(max)
+		v, err := strconv.Atoi(retryMax)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse AKAMAI_RETRY_MAX environment variable: %w", err)
 		}
@@ -82,6 +83,12 @@ func getRetryConfig() (*session.RetryConfig, error) {
 			return nil, fmt.Errorf("failed to parse AKAMAI_RETRY_WAIT_MAX environment variable: %w", err)
 		}
 		conf.RetryWaitMax = time.Duration(v) * time.Second
+	}
+	excludedEndpoints, ok := os.LookupEnv("AKAMAI_RETRY_EXCLUDED_ENDPOINTS")
+	if ok {
+		conf.ExcludedEndpoints = strings.Split(excludedEndpoints, ",")
+	} else {
+		conf.ExcludedEndpoints = append(conf.ExcludedEndpoints, "/identity-management/v3/user-admin/ui-identities/*")
 	}
 
 	return &conf, nil

@@ -10,11 +10,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/hapi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/papi"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/hapi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/ptr"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -210,55 +211,6 @@ func TestCreateProperty(t *testing.T) {
 			StagingStatus:    "INACTIVE",
 			UpdatedByUser:    "jsmith",
 			UpdatedDate:      "2019-04-24T18:54:03Z",
-		},
-	}
-
-	getListReferencedIncludesResponse := papi.ListReferencedIncludesResponse{
-		Includes: papi.IncludeItems{
-			Items: []papi.Include{
-				{
-					AccountID:         "test_account",
-					AssetID:           "test_asset",
-					ContractID:        "test_contract",
-					GroupID:           "test_group",
-					IncludeID:         "inc_123456",
-					IncludeName:       "test_include",
-					IncludeType:       papi.IncludeTypeMicroServices,
-					LatestVersion:     2,
-					StagingVersion:    tools.IntPtr(1),
-					ProductionVersion: tools.IntPtr(1),
-				},
-			},
-		},
-	}
-
-	getListReferencedMultipleIncludesResponse := papi.ListReferencedIncludesResponse{
-		Includes: papi.IncludeItems{
-			Items: []papi.Include{
-				{
-					AccountID:         "test_account",
-					AssetID:           "test_asset",
-					ContractID:        "test_contract",
-					GroupID:           "test_group",
-					IncludeID:         "inc_123456",
-					IncludeName:       "test_include",
-					IncludeType:       papi.IncludeTypeMicroServices,
-					LatestVersion:     2,
-					StagingVersion:    tools.IntPtr(1),
-					ProductionVersion: tools.IntPtr(1),
-				},
-				{
-					AccountID:      "test_account",
-					AssetID:        "test_asset",
-					ContractID:     "test_contract",
-					GroupID:        "test_group",
-					IncludeID:      "inc_78910",
-					IncludeName:    "test_include_1",
-					IncludeType:    papi.IncludeTypeMicroServices,
-					LatestVersion:  2,
-					StagingVersion: tools.IntPtr(1),
-				},
-			},
 		},
 	}
 
@@ -610,60 +562,22 @@ func TestCreateProperty(t *testing.T) {
 		SerialNumber:      1461,
 	}
 
-	tfIncludeData := TFIncludeData{
-		StagingInfo: NetworkInfo{
-			ActivationNote: "test staging activation",
-			Emails:         []string{"test@example.com"},
-			Version:        1,
-			HasActivation:  true,
-		},
-		ProductionInfo: NetworkInfo{
-			ActivationNote: "test production activation",
-			Emails:         []string{"test@example.com", "test1@example.com"},
-			Version:        1,
-			HasActivation:  true,
-		},
-		ContractID:  "test_contract",
-		GroupID:     "test_group",
-		IncludeID:   "inc_123456",
-		IncludeName: "test_include",
-		IncludeType: string(papi.IncludeTypeMicroServices),
-		ProductID:   "test_product",
-		RuleFormat:  "v2020-11-02",
-	}
-
-	tfIncludeData1 := TFIncludeData{
-		StagingInfo: NetworkInfo{
-			ActivationNote: "test staging activation",
-			Emails:         []string{"test@example.com"},
-			Version:        1,
-			HasActivation:  true,
-		},
-		ContractID:  "test_contract",
-		GroupID:     "test_group",
-		IncludeID:   "inc_78910",
-		IncludeName: "test_include_1",
-		IncludeType: string(papi.IncludeTypeMicroServices),
-		ProductID:   "test_product2",
-		RuleFormat:  "v2020-11-02",
-	}
-
 	var noFilters []func([]string) ([]string, error)
 	otherRuleFormatFilter := []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")}
 
 	tests := map[string]struct {
-		init                func(*papi.Mock, *hapi.Mock, *templates.MockProcessor, string)
+		init                func(*papi.Mock, *hapi.Mock, *templates.MockProcessor, *templates.MockMultiTargetProcessor, string)
 		dir                 string
 		snippetFilesToCheck []string
 		jsonDir             string
 		withError           error
 		readVersion         string
-		withIncludes        bool
 		rulesAsHCL          bool
 		withBootstrap       bool
+		splitDepth          *int
 	}{
 		"basic property (with hostname's cnameTo starting with a digit)": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -690,7 +604,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 		"basic property with edgehostname with non default ttl": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -717,7 +631,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 		"property with enhancement tls": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyEnhancementTLSResponse)
 
@@ -806,7 +720,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 		"property with enhancement tls but without certificate": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyEnhancementTLSResponse)
 
@@ -894,7 +808,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 		"basic property not active the latest": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -921,7 +835,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 		"basic property with empty hostname id": {
-			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -951,7 +865,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 		"basic property with rules as datasource": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -969,13 +883,13 @@ func TestCreateProperty(t *testing.T) {
 				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withRuleFormat("v2023-01-05").
-					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), otherRuleFormatFilter, nil)
+					withRules(flattenRules(wrapAndNameRules("test.edgesuite.net", ruleResponse.Rules))).build(), otherRuleFormatFilter, nil)
 			},
-			dir:        "basic-rules-datasource",
+			dir:        "ruleformats/basic-rules-datasource",
 			rulesAsHCL: true,
 		},
 		"basic property with rules as datasource with unsupported rule format": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -993,14 +907,14 @@ func TestCreateProperty(t *testing.T) {
 				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_latest.tmpl", false)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withIsActive(false).
-					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), noFilters, nil)
+					withRules(flattenRules(wrapAndNameRules("test.edgesuite.net", ruleResponse.Rules))).build(), noFilters, nil)
 			},
 			withError:  ErrUnsupportedRuleFormat,
 			dir:        "basic",
 			rulesAsHCL: true,
 		},
 		"basic property with rules as datasource with unsupported behaviors and criteria": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -1018,14 +932,14 @@ func TestCreateProperty(t *testing.T) {
 				mockAddTemplateTargetRules(p)
 				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withRuleFormat("v2023-01-05").
-					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).build(), otherRuleFormatFilter, ErrSavingFiles)
+					withRules(flattenRules(wrapAndNameRules("test.edgesuite.net", ruleResponse.Rules))).build(), otherRuleFormatFilter, ErrSavingFiles)
 			},
 			withError:  ErrSavingFiles,
-			dir:        "basic-rules-datasource-unknown",
+			dir:        "ruleformats/basic-rules-datasource-unknown",
 			rulesAsHCL: true,
 		},
-		"basic property with include": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+		"basic property with children with split-depth=0": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, mm *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -1035,141 +949,87 @@ func TestCreateProperty(t *testing.T) {
 				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
 				mockGetLatestVersion(c, &getLatestVersionResponse)
 
-				// Includes
-				mockListReferencedIncludes(c, &getListReferencedIncludesResponse)
-				expectGetIncludeVersion(c, "v2020-11-02")
-				includeRuleResponse := getIncludeRuleResponse(dir, t, "mock_include_rules.json")
-				mockGetIncludeRuleTree(c, getIncludeRuleTreeReq, &includeRuleResponse)
-				expectListIncludeActivations(c)
-
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
 				mockGetEdgeHostnames(c)
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withIncludes([]TFIncludeData{tfIncludeData}).build(), noFilters, nil)
-			},
-			dir:     "basic_property_with_include",
-			jsonDir: "basic_property_with_include/property-snippets",
-			snippetFilesToCheck: []string{
-				"main.json",
-				"test_include.json",
-				"Content_Compression.json",
-				"Static_Content.json",
-				"Dynamic_Content.json",
-			},
-			withIncludes: true,
-		},
-		"basic property with multiple includes": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
 
-				ruleResponse := getRuleTreeResponse(dir, t)
-				mockGetRuleTree(c, 5, &ruleResponse, nil)
-				mockGetGroups(c, &getGroupsResponse, nil)
-				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
-				mockGetLatestVersion(c, &getLatestVersionResponse)
-
-				// Includes
-				mockListReferencedIncludes(c, &getListReferencedMultipleIncludesResponse)
-				expectGetIncludeVersion(c, "v2020-11-02")
-
-				includeRuleResponse := getIncludeRuleResponse(dir, t, "mock_include_rules.json")
-				mockGetIncludeRuleTree(c, getIncludeRuleTreeReq, &includeRuleResponse)
-				expectListIncludeActivations(c)
-
-				secondIncludeRuleResponse := getIncludeRuleResponse(dir, t, "mock_second_include_rules.json")
-				expectGetSecondIncludeVersion(c, "v2020-11-02")
-
-				mockGetIncludeRuleTree(c, papi.GetIncludeRuleTreeRequest{
-					ContractID:     "test_contract",
-					GroupID:        "test_group",
-					IncludeID:      "inc_78910",
-					IncludeVersion: 2,
-					RuleFormat:     "v2020-11-02",
-				}, &secondIncludeRuleResponse)
-				expectListSecondIncludeActivations(c)
-
-				mockGetProducts(c, &getProductsResponse, nil)
-				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
-				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponse, nil)
-				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withIncludes([]TFIncludeData{tfIncludeData, tfIncludeData1}).build(), noFilters, nil)
-			},
-			dir:     "basic_property_with_multiple_includes",
-			jsonDir: "basic_property_with_multiple_includes/property-snippets",
-			snippetFilesToCheck: []string{
-				"main.json",
-				"test_include.json",
-				"test_include_1.json",
-				"Content_Compression.json",
-				"Static_Content.json",
-				"Dynamic_Content.json",
-			},
-			withIncludes: true,
-		},
-		"basic property with multiple includes as hcl rules": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
-				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
-
-				ruleResponse := getRuleTreeResponse(dir, t)
-				mockGetRuleTree(c, 5, &ruleResponse, nil)
-				mockGetGroups(c, &getGroupsResponse, nil)
-				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
-				mockGetLatestVersion(c, &getLatestVersionResponse)
-
-				// Includes
-				mockListReferencedIncludes(c, &getListReferencedMultipleIncludesResponse)
-				expectGetIncludeVersion(c, "v2023-01-05")
-
-				includeRuleResponse := getIncludeRuleResponse(dir, t, "mock_include_rules.json")
-				mockGetIncludeRuleTree(c, getIncludeRuleTreeReqRulesAsHCL, &includeRuleResponse)
-				expectListIncludeActivations(c)
-
-				secondIncludeRuleResponse := getIncludeRuleResponse(dir, t, "mock_second_include_rules.json")
-				expectGetSecondIncludeVersion(c, "v2023-01-05")
-
-				mockGetIncludeRuleTree(c, papi.GetIncludeRuleTreeRequest{
-					ContractID:     "test_contract",
-					GroupID:        "test_group",
-					IncludeID:      "inc_78910",
-					IncludeVersion: 2,
-					RuleFormat:     "v2023-01-05",
-				}, &secondIncludeRuleResponse)
-				expectListSecondIncludeActivations(c)
-
-				mockGetProducts(c, &getProductsResponse, nil)
-				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
-				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponse, nil)
-				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
-				tfIncludeData := tfIncludeData
-				tfIncludeData.RuleFormat = "v2023-01-05"
-				tfIncludeData1 := tfIncludeData1
-				tfIncludeData1.RuleFormat = "v2023-01-05"
-				mockProcessTemplates(p, (&tfDataBuilder{}).
-					withData(getTestData("basic property with multiple includes as hcl")).
+				tfdata := (&tfDataBuilder{}).
+					withData(getTestData("basic property with multiple children as hcl")).
+					asHCL(true).
+					withSplitDepth(true, "test-edgesuite-net_rule_default").
 					withRuleFormat("v2023-01-05").
-					withRules(flattenRules("test.edgesuite.net", ruleResponse.Rules)).
-					withIncludes([]TFIncludeData{tfIncludeData, tfIncludeData1}).
-					withIncludeRules(0, flattenRules("test_include", includeRuleResponse.Rules)).
-					withIncludeRules(1, flattenRules("test_include_1", secondIncludeRuleResponse.Rules)).
-					build(), otherRuleFormatFilter, nil)
-				mockAddTemplateTargetRules(p)
+					build()
+				mockProcessTemplates(p, tfdata, otherRuleFormatFilter, nil)
+
+				mockModuleConfig(p)
 				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
+
+				multiTargetData := templates.MultiTargetData{
+					"split-depth-rules.tmpl": templates.DataForTarget{
+						"rules/test-edgesuite-net_default.tf": (&tfDataBuilder{}).
+							withRules(flattenRules(wrapAndNameRules("test.edgesuite.net", ruleResponse.Rules))).
+							withSplitDepth(true, "").build(),
+					},
+				}
+				mm.On("ProcessTemplates", multiTargetData, mock.AnythingOfType("func([]string) ([]string, error)")).Return(nil).Once()
 			},
-			dir:          "basic_property_with_multiple_includes_rules_as_hcl",
-			withIncludes: true,
-			rulesAsHCL:   true,
+			dir:        "multitarget-property-with-children",
+			rulesAsHCL: true,
+			splitDepth: ptr.To(0),
+		},
+		"basic property with children with split-depth=2": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, mm *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+
+				tfdata := (&tfDataBuilder{}).
+					withData(getTestData("basic property with multiple children as hcl")).
+					asHCL(true).
+					withSplitDepth(true, "test-edgesuite-net_rule_default").
+					withRuleFormat("v2023-01-05").
+					build()
+				mockProcessTemplates(p, tfdata, otherRuleFormatFilter, nil)
+
+				mockModuleConfig(p)
+				mockTemplateExist(p, "rules_v2023-01-05.tmpl", true)
+
+				multiTargetData := templates.MultiTargetData{
+					"split-depth-rules.tmpl": templates.DataForTarget{
+						"rules/test-edgesuite-net_default.tf": (&tfDataBuilder{}).
+							withRules([]*WrappedRules{flattenRules(wrapAndNameRules("test.edgesuite.net", ruleResponse.Rules))[0]}).
+							withSplitDepth(true, "").build(),
+						"rules/test-edgesuite-net_default_new_rule.tf": (&tfDataBuilder{}).
+							withRules([]*WrappedRules{flattenRules(wrapAndNameRules("test.edgesuite.net", ruleResponse.Rules))[1]}).
+							withSplitDepth(true, "").build(),
+						"rules/test-edgesuite-net_default_new_rule_new_rule_1.tf": (&tfDataBuilder{}).
+							withRules([]*WrappedRules{flattenRules(wrapAndNameRules("test.edgesuite.net", ruleResponse.Rules))[2]}).
+							withSplitDepth(true, "").build(),
+					},
+				}
+				mm.On("ProcessTemplates", multiTargetData, mock.AnythingOfType("func([]string) ([]string, error)")).Return(nil).Once()
+			},
+			dir:        "multitarget-property-with-flatten-children",
+			rulesAsHCL: true,
+			splitDepth: ptr.To(2),
 		},
 		"basic property with cert provisioning type": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -1196,7 +1056,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 		"basic property with bootstrap": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -1224,7 +1084,7 @@ func TestCreateProperty(t *testing.T) {
 			withBootstrap: true,
 		},
 		"import LATEST property version": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -1253,7 +1113,7 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 		"import not the latest property version": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -1280,7 +1140,7 @@ func TestCreateProperty(t *testing.T) {
 			readVersion: "1",
 		},
 		"property activation with note": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -1301,7 +1161,7 @@ func TestCreateProperty(t *testing.T) {
 			dir: "basic",
 		},
 		"property with production activation": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				ruleResponse := getRuleTreeResponse(dir, t)
@@ -1320,7 +1180,7 @@ func TestCreateProperty(t *testing.T) {
 			dir: "basic",
 		},
 		"property with both activations": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				ruleResponse := getRuleTreeResponse(dir, t)
@@ -1340,7 +1200,7 @@ func TestCreateProperty(t *testing.T) {
 			dir: "basic",
 		},
 		"property activation with empty emails": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -1361,13 +1221,13 @@ func TestCreateProperty(t *testing.T) {
 			dir: "basic",
 		},
 		"error property not found": {
-			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, nil, fmt.Errorf("oops"))
 			},
 			withError: ErrPropertyNotFound,
 		},
 		"error group not found": {
-			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
@@ -1376,7 +1236,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrGroupNotFound,
 		},
 		"error property rules not found": {
-			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetGroups(c, &getGroupsResponse, nil)
@@ -1389,7 +1249,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrPropertyRulesNotFound,
 		},
 		"error property version not found": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
@@ -1400,7 +1260,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrPropertyVersionNotFound,
 		},
 		"error fetching property activation": {
-			init: func(c *papi.Mock, h *hapi.Mock, _ *templates.MockProcessor, _ string) {
+			init: func(c *papi.Mock, h *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
@@ -1416,7 +1276,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrFetchingActivationDetails,
 		},
 		"error product name not found": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
@@ -1429,7 +1289,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrProductNameNotFound,
 		},
 		"error hostnames not found": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
@@ -1442,7 +1302,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrHostnamesNotFound,
 		},
 		"error hostname details": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
@@ -1456,7 +1316,7 @@ func TestCreateProperty(t *testing.T) {
 			withError: ErrFetchingHostnameDetails,
 		},
 		"error saving files": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, dir string) {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, &getPropertyResponse)
 
@@ -1486,18 +1346,19 @@ func TestCreateProperty(t *testing.T) {
 			mc := new(papi.Mock)
 			mh := new(hapi.Mock)
 			mp := new(templates.MockProcessor)
-			test.init(mc, mh, mp, test.dir)
+			mm := new(templates.MockMultiTargetProcessor)
+			test.init(mc, mh, mp, mm, test.dir)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
 			options := propertyOptions{
 				propertyName:  "test.edgesuite.net",
 				section:       section,
 				tfWorkPath:    "./",
 				version:       test.readVersion,
-				withIncludes:  test.withIncludes,
 				rulesAsHCL:    test.rulesAsHCL,
 				withBootstrap: test.withBootstrap,
+				splitDepth:    test.splitDepth,
 			}
-			err := createProperty(ctx, options, fmt.Sprintf("./testdata/res/%s", test.jsonDir), mc, mh, mp)
+			err := createProperty(ctx, options, fmt.Sprintf("./testdata/res/%s", test.jsonDir), mc, mh, mp, mm)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -1512,16 +1373,9 @@ func TestCreateProperty(t *testing.T) {
 			require.NoError(t, err)
 			mc.AssertExpectations(t)
 			mp.AssertExpectations(t)
+			mm.AssertExpectations(t)
 		})
 	}
-}
-
-func getIncludeRuleResponse(dir string, t *testing.T, fileName string) papi.GetIncludeRuleTreeResponse {
-	var includeRuleResponse papi.GetIncludeRuleTreeResponse
-	includeRules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, fileName))
-	assert.NoError(t, err)
-	assert.NoError(t, json.Unmarshal(includeRules, &includeRuleResponse))
-	return includeRuleResponse
 }
 
 func mockSearchProperties(p *papi.Mock, searchPropertiesResponse *papi.SearchResponse, err error) {
@@ -1630,25 +1484,16 @@ func mockTemplateExist(t *templates.MockProcessor, templatePath string, template
 	return t.On("TemplateExists", templatePath).Return(templateExist).Once()
 }
 
-func mockListReferencedIncludes(p *papi.Mock, getListReferencedIncludesResponse *papi.ListReferencedIncludesResponse) {
-	p.On("ListReferencedIncludes", mock.Anything, papi.ListReferencedIncludesRequest{
-		PropertyID:      "prp_12345",
-		ContractID:      "test_contract",
-		GroupID:         "grp_12345",
-		PropertyVersion: 5,
-	}).Return(getListReferencedIncludesResponse, nil).Once()
-}
-
-func mockGetIncludeRuleTree(p *papi.Mock, getIncludeRuleTreeReq papi.GetIncludeRuleTreeRequest, includeRuleResponse *papi.GetIncludeRuleTreeResponse) {
-	p.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReq).Return(includeRuleResponse, nil).Once()
-}
-
 func mockProcessTemplates(t *templates.MockProcessor, tfData TFData, filterFuncs []func([]string) ([]string, error), err error) {
 	if len(filterFuncs) != 0 {
 		t.On("ProcessTemplates", tfData, mock.AnythingOfType("func([]string) ([]string, error)")).Return(err).Once()
 	} else {
 		t.On("ProcessTemplates", tfData).Return(err).Once()
 	}
+}
+
+func mockModuleConfig(p *templates.MockProcessor) {
+	p.On("AddTemplateTarget", "rules_module.tmpl", "rules/module_config.tf")
 }
 
 type activationItemData struct {
@@ -1708,7 +1553,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		givenData    TFData
 		dir          string
 		filesToCheck []string
-		withIncludes bool
 		rulesAsHCL   bool
 		ruleResponse papi.GetRuleTreeResponse
 		withError    string
@@ -1893,7 +1737,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 				Section: "test_section",
 			},
-			dir:          "basic-rules-datasource",
+			dir:          "ruleformats/basic-rules-datasource",
 			rulesAsHCL:   true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
@@ -1940,7 +1784,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 				Section: "test_section",
 			},
-			dir:          "basic-rules-datasource-serial",
+			dir:          "ruleformats/basic-rules-datasource-serial",
 			rulesAsHCL:   true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
@@ -1985,7 +1829,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 				Section: "test_section",
 			},
-			dir:          "basic-rules-datasource-unknown",
+			dir:          "ruleformats/basic-rules-datasource-unknown",
 			rulesAsHCL:   true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			withError:    "there were errors reported: Unknown behavior 'caching-unknown', Unknown behavior 'allowPost-unknown'",
@@ -2032,261 +1876,10 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				},
 				Section: "test_section",
 			},
-			dir:          "basic-rules-datasource-empty-options",
+			dir:          "ruleformats/basic-rules-datasource-empty-options",
 			rulesAsHCL:   true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2024-01-09")},
-		},
-		"property with include": {
-			givenData: TFData{
-				Includes: []TFIncludeData{
-					{
-						StagingInfo: NetworkInfo{
-							ActivationNote:          "test staging activation",
-							Emails:                  []string{"test@example.com"},
-							Version:                 1,
-							HasActivation:           true,
-							IsActiveOnLatestVersion: true,
-						},
-						ProductionInfo: NetworkInfo{
-							ActivationNote:          "test production activation",
-							Emails:                  []string{"test@example.com", "test1@example.com"},
-							Version:                 1,
-							HasActivation:           true,
-							IsActiveOnLatestVersion: true,
-						},
-						ContractID:  "test_contract",
-						GroupID:     "test_group",
-						IncludeID:   "inc_123456",
-						IncludeName: "test_include",
-						IncludeType: string(papi.IncludeTypeMicroServices),
-						ProductID:   "test_product",
-						RuleFormat:  "v2020-11-02",
-					},
-				},
-				Property: TFPropertyData{
-					GroupName:            "test_group",
-					GroupID:              "grp_12345",
-					ContractID:           "test_contract",
-					PropertyResourceName: "test-edgesuite-net",
-					PropertyName:         "test.edgesuite.net",
-					PropertyID:           "prp_12345",
-					ProductID:            "prd_HTTP_Content_Del",
-					ProductName:          "HTTP_Content_Del",
-					RuleFormat:           "latest",
-					IsSecure:             "false",
-					ReadVersion:          "LATEST",
-					EdgeHostnames: map[string]EdgeHostname{
-						"test-edgesuite-net": {
-							EdgeHostname:             "test.edgesuite.net",
-							EdgeHostnameID:           "ehn_2867480",
-							ContractID:               "test_contract",
-							GroupID:                  "grp_12345",
-							ID:                       "",
-							IPv6:                     "IPV6_COMPLIANCE",
-							SecurityType:             "STANDARD-TLS",
-							EdgeHostnameResourceName: "test-edgesuite-net",
-						},
-					},
-					Hostnames: map[string]Hostname{
-						"test.edgesuite.net": {
-							CnameFrom:                "test.edgesuite.net",
-							EdgeHostnameResourceName: "test-edgesuite-net",
-							CertProvisioningType:     "CPS_MANAGED",
-							IsActive:                 true,
-						},
-					},
-					StagingInfo: NetworkInfo{
-						HasActivation:           true,
-						Emails:                  []string{"jsmith@akamai.com"},
-						IsActiveOnLatestVersion: true,
-					},
-				},
-				Section:      "test_section",
-				WithIncludes: true,
-			},
-			dir:          "basic_property_with_include",
-			filesToCheck: []string{"property.tf", "includes.tf", "variables.tf", "import.sh"},
-			withIncludes: true,
-		},
-		"property with multiple includes": {
-			givenData: TFData{
-				Includes: []TFIncludeData{
-					{
-						StagingInfo: NetworkInfo{
-							ActivationNote:          "test staging activation",
-							Emails:                  []string{"test@example.com"},
-							Version:                 1,
-							HasActivation:           true,
-							IsActiveOnLatestVersion: true,
-						},
-						ProductionInfo: NetworkInfo{
-							ActivationNote:          "test production activation",
-							Emails:                  []string{"test@example.com", "test1@example.com"},
-							Version:                 1,
-							HasActivation:           true,
-							IsActiveOnLatestVersion: true,
-						},
-						ContractID:  "test_contract",
-						GroupID:     "test_group",
-						IncludeID:   "inc_123456",
-						IncludeName: "test_include",
-						IncludeType: string(papi.IncludeTypeMicroServices),
-						ProductID:   "test_product",
-						RuleFormat:  "v2020-11-02",
-					},
-					{
-						StagingInfo: NetworkInfo{
-							ActivationNote: "test staging activation",
-							Emails:         []string{"test@example.com"},
-							Version:        1,
-							HasActivation:  true,
-						},
-						ContractID:  "test_contract",
-						GroupID:     "test_group",
-						IncludeID:   "inc_78910",
-						IncludeName: "test_include_1",
-						IncludeType: string(papi.IncludeTypeMicroServices),
-						ProductID:   "test_product2",
-						RuleFormat:  "v2020-11-02",
-					},
-				},
-				Property: TFPropertyData{
-					GroupName:            "test_group",
-					GroupID:              "grp_12345",
-					ContractID:           "test_contract",
-					PropertyResourceName: "test-edgesuite-net",
-					PropertyName:         "test.edgesuite.net",
-					PropertyID:           "prp_12345",
-					ProductID:            "prd_HTTP_Content_Del",
-					ProductName:          "HTTP_Content_Del",
-					RuleFormat:           "latest",
-					IsSecure:             "false",
-					ReadVersion:          "LATEST",
-					EdgeHostnames: map[string]EdgeHostname{
-						"test-edgesuite-net": {
-							EdgeHostname:             "test.edgesuite.net",
-							EdgeHostnameID:           "ehn_2867480",
-							ContractID:               "test_contract",
-							GroupID:                  "grp_12345",
-							ID:                       "",
-							IPv6:                     "IPV6_COMPLIANCE",
-							SecurityType:             "STANDARD-TLS",
-							EdgeHostnameResourceName: "test-edgesuite-net",
-						},
-					},
-					Hostnames: map[string]Hostname{
-						"test.edgesuite.net": {
-							CnameFrom:                "test.edgesuite.net",
-							EdgeHostnameResourceName: "test-edgesuite-net",
-							CertProvisioningType:     "CPS_MANAGED",
-							IsActive:                 true,
-						},
-					},
-					StagingInfo: NetworkInfo{
-						HasActivation:           true,
-						Emails:                  []string{"jsmith@akamai.com"},
-						IsActiveOnLatestVersion: true,
-					},
-				},
-				Section:      "test_section",
-				WithIncludes: true,
-			},
-			dir:          "basic_property_with_multiple_includes",
-			filesToCheck: []string{"property.tf", "includes.tf", "variables.tf", "import.sh"},
-			withIncludes: true,
-		},
-		"property with multiple includes as hcl rules": {
-			givenData: TFData{
-				Includes: []TFIncludeData{
-					{
-						StagingInfo: NetworkInfo{
-							ActivationNote:          "test staging activation",
-							Emails:                  []string{"test@example.com"},
-							Version:                 1,
-							HasActivation:           true,
-							IsActiveOnLatestVersion: true,
-						},
-						ProductionInfo: NetworkInfo{
-							ActivationNote:          "test production activation",
-							Emails:                  []string{"test@example.com", "test1@example.com"},
-							Version:                 1,
-							HasActivation:           true,
-							IsActiveOnLatestVersion: true,
-						},
-						ContractID:  "test_contract",
-						GroupID:     "test_group",
-						IncludeID:   "inc_123456",
-						IncludeName: "test_include",
-						IncludeType: string(papi.IncludeTypeMicroServices),
-						ProductID:   "test_product",
-						RuleFormat:  "v2023-01-05",
-						Rules:       flattenRules("test_include", getIncludeRuleResponse("basic_property_with_multiple_includes_rules_as_hcl", t, "mock_include_rules.json").Rules),
-					},
-					{
-						StagingInfo: NetworkInfo{
-							ActivationNote: "test staging activation",
-							Emails:         []string{"test@example.com"},
-							Version:        1,
-							HasActivation:  true,
-						},
-						ContractID:  "test_contract",
-						GroupID:     "test_group",
-						IncludeID:   "inc_78910",
-						IncludeName: "test_include_1",
-						IncludeType: string(papi.IncludeTypeMicroServices),
-						ProductID:   "test_product2",
-						RuleFormat:  "v2023-01-05",
-						Rules:       flattenRules("test_include_1", getIncludeRuleResponse("basic_property_with_multiple_includes_rules_as_hcl", t, "mock_second_include_rules.json").Rules),
-					},
-				},
-				Property: TFPropertyData{
-					GroupName:            "test_group",
-					GroupID:              "grp_12345",
-					ContractID:           "test_contract",
-					PropertyResourceName: "test-edgesuite-net",
-					PropertyName:         "test.edgesuite.net",
-					PropertyID:           "prp_12345",
-					ProductID:            "prd_HTTP_Content_Del",
-					ProductName:          "HTTP_Content_Del",
-					RuleFormat:           "latest",
-					IsSecure:             "false",
-					ReadVersion:          "LATEST",
-					EdgeHostnames: map[string]EdgeHostname{
-						"test-edgesuite-net": {
-							EdgeHostname:             "test.edgesuite.net",
-							EdgeHostnameID:           "ehn_2867480",
-							ContractID:               "test_contract",
-							GroupID:                  "grp_12345",
-							ID:                       "",
-							IPv6:                     "IPV6_COMPLIANCE",
-							SecurityType:             "STANDARD-TLS",
-							EdgeHostnameResourceName: "test-edgesuite-net",
-						},
-					},
-					Hostnames: map[string]Hostname{
-						"test.edgesuite.net": {
-							CnameFrom:                "test.edgesuite.net",
-							EdgeHostnameResourceName: "test-edgesuite-net",
-							CertProvisioningType:     "CPS_MANAGED",
-							IsActive:                 true,
-						},
-					},
-					StagingInfo: NetworkInfo{
-						Emails:                  []string{"jsmith@akamai.com"},
-						Version:                 2,
-						HasActivation:           true,
-						IsActiveOnLatestVersion: true,
-					},
-				},
-				Section:      "test_section",
-				WithIncludes: true,
-			},
-			dir:          "basic_property_with_multiple_includes_rules_as_hcl",
-			filesToCheck: []string{"property.tf", "includes.tf", "variables.tf", "import.sh", "includes_rules.tf"},
-			withIncludes: true,
-			rulesAsHCL:   true,
-			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
 		},
 		"property with use cases": {
 			givenData: TFData{
@@ -2574,206 +2167,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "basic_without_activation",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
-		// property with rules as datasource - hcl rules version 1 and 2 is a pair of tests that confirms that hcl rules 1 does not use any hcl rules's 2 template definitions and vice versa
-		// the behaviour was chosen in a way, so it's easily identifiable which template inner definition was picked (e.g. there was change in field type)
-		"property with rules as datasource - hcl rules version v2023-01-05": {
-			givenData: TFData{
-				Property: TFPropertyData{
-					GroupName:            "test_group",
-					GroupID:              "grp_12345",
-					ContractID:           "test_contract",
-					PropertyResourceName: "test-edgesuite-net",
-					PropertyName:         "test.edgesuite.net",
-					PropertyID:           "prp_12345",
-					ProductID:            "prd_HTTP_Content_Del",
-					ProductName:          "HTTP_Content_Del",
-					RuleFormat:           "v2023-01-05",
-					IsSecure:             "false",
-					ReadVersion:          "LATEST",
-				},
-				Section: "test_section",
-			},
-			dir:          "basic-rules-datasource-schema-v2023-01-05",
-			rulesAsHCL:   true,
-			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
-			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
-		},
-		"property with rules as datasource - hcl rules version v2023-05-30": {
-			givenData: TFData{
-				Property: TFPropertyData{
-					GroupName:            "test_group",
-					GroupID:              "grp_12345",
-					ContractID:           "test_contract",
-					PropertyResourceName: "test-edgesuite-net",
-					PropertyName:         "test.edgesuite.net",
-					PropertyID:           "prp_12345",
-					ProductID:            "prd_HTTP_Content_Del",
-					ProductName:          "HTTP_Content_Del",
-					RuleFormat:           "v2023-05-30",
-					IsSecure:             "false",
-					ReadVersion:          "LATEST",
-				},
-				Section: "test_section",
-			},
-			dir:          "basic-rules-datasource-schema-v2023-05-30",
-			rulesAsHCL:   true,
-			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
-			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-05-30")},
-		},
-		"property with rules as datasource - hcl rules version v2023-09-20": {
-			givenData: TFData{
-				Property: TFPropertyData{
-					GroupName:            "test_group",
-					GroupID:              "grp_12345",
-					ContractID:           "test_contract",
-					PropertyResourceName: "test-edgesuite-net",
-					PropertyName:         "test.edgesuite.net",
-					PropertyID:           "prp_12345",
-					ProductID:            "prd_HTTP_Content_Del",
-					ProductName:          "HTTP_Content_Del",
-					RuleFormat:           "v2023-09-20",
-					IsSecure:             "false",
-					ReadVersion:          "LATEST",
-				},
-				Section: "test_section",
-			},
-			dir:          "basic-rules-datasource-schema-v2023-09-20",
-			rulesAsHCL:   true,
-			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
-			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-09-20")},
-		},
-		"property with rules as datasource - hcl rules version v2023-10-30": {
-			givenData: TFData{
-				Property: TFPropertyData{
-					GroupName:            "test_group",
-					GroupID:              "grp_12345",
-					ContractID:           "test_contract",
-					PropertyResourceName: "test-edgesuite-net",
-					PropertyName:         "test.edgesuite.net",
-					PropertyID:           "prp_12345",
-					ProductID:            "prd_HTTP_Content_Del",
-					ProductName:          "HTTP_Content_Del",
-					RuleFormat:           "v2023-10-30",
-					IsSecure:             "false",
-					ReadVersion:          "LATEST",
-				},
-				Section: "test_section",
-			},
-			dir:          "basic-rules-datasource-schema-v2023-10-30",
-			rulesAsHCL:   true,
-			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
-			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-10-30")},
-		},
-		"property with rules as datasource - hcl rules version v2024-01-09": {
-			givenData: TFData{
-				Property: TFPropertyData{
-					GroupName:            "test_group",
-					GroupID:              "grp_12345",
-					ContractID:           "test_contract",
-					PropertyResourceName: "test-edgesuite-net",
-					PropertyName:         "test.edgesuite.net",
-					PropertyID:           "prp_12345",
-					ProductID:            "prd_HTTP_Content_Del",
-					ProductName:          "HTTP_Content_Del",
-					RuleFormat:           "v2024-01-09",
-					IsSecure:             "false",
-					ReadVersion:          "LATEST",
-				},
-				Section: "test_section",
-			},
-			dir:          "basic-rules-datasource-schema-v2024-01-09",
-			rulesAsHCL:   true,
-			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
-			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2024-01-09")},
-		},
-		"property with rules as datasource - hcl rules version v2024-02-12": {
-			givenData: TFData{
-				Property: TFPropertyData{
-					GroupName:            "test_group",
-					GroupID:              "grp_12345",
-					ContractID:           "test_contract",
-					PropertyResourceName: "test-edgesuite-net",
-					PropertyName:         "test.edgesuite.net",
-					PropertyID:           "prp_12345",
-					ProductID:            "prd_HTTP_Content_Del",
-					ProductName:          "HTTP_Content_Del",
-					RuleFormat:           "v2024-02-12",
-					IsSecure:             "false",
-					ReadVersion:          "LATEST",
-				},
-				Section: "test_section",
-			},
-			dir:          "basic-rules-datasource-schema-v2024-02-12",
-			rulesAsHCL:   true,
-			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
-			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2024-02-12")},
-		},
-		"property with rules as datasource - hcl rules version v2024-05-31": {
-			givenData: TFData{
-				Property: TFPropertyData{
-					GroupName:            "test_group",
-					GroupID:              "grp_12345",
-					ContractID:           "test_contract",
-					PropertyResourceName: "test-edgesuite-net",
-					PropertyName:         "test.edgesuite.net",
-					PropertyID:           "prp_12345",
-					ProductID:            "prd_HTTP_Content_Del",
-					ProductName:          "HTTP_Content_Del",
-					RuleFormat:           "v2024-05-31",
-					IsSecure:             "false",
-					ReadVersion:          "LATEST",
-				},
-				Section: "test_section",
-			},
-			dir:          "basic-rules-datasource-schema-v2024-05-31",
-			rulesAsHCL:   true,
-			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
-			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2024-05-31")},
-		},
-		"property with rules as datasource - hcl rules version v2024-08-13": {
-			givenData: TFData{
-				Property: TFPropertyData{
-					GroupName:            "test_group",
-					GroupID:              "grp_12345",
-					ContractID:           "test_contract",
-					PropertyResourceName: "test-edgesuite-net",
-					PropertyName:         "test.edgesuite.net",
-					PropertyID:           "prp_12345",
-					ProductID:            "prd_HTTP_Content_Del",
-					ProductName:          "HTTP_Content_Del",
-					RuleFormat:           "v2024-08-13",
-					IsSecure:             "false",
-					ReadVersion:          "LATEST",
-				},
-				Section: "test_section",
-			},
-			dir:          "basic-rules-datasource-schema-v2024-08-13",
-			rulesAsHCL:   true,
-			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
-			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2024-08-13")},
-		},
-		"property with rules as datasource - hcl rules version v2024-10-21": {
-			givenData: TFData{
-				Property: TFPropertyData{
-					GroupName:            "test_group",
-					GroupID:              "grp_12345",
-					ContractID:           "test_contract",
-					PropertyResourceName: "test-edgesuite-net",
-					PropertyName:         "test.edgesuite.net",
-					PropertyID:           "prp_12345",
-					ProductID:            "prd_HTTP_Content_Del",
-					ProductName:          "HTTP_Content_Del",
-					RuleFormat:           "v2024-10-21",
-					IsSecure:             "false",
-					ReadVersion:          "LATEST",
-				},
-				Section: "test_section",
-			},
-			dir:          "basic-rules-datasource-schema-v2024-10-21",
-			rulesAsHCL:   true,
-			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
-			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2024-10-21")},
-		},
 		"property with bootstrap": {
 			givenData: TFData{
 				Property: TFPropertyData{
@@ -2819,13 +2212,62 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "basic-bootstrap",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
+		"property using split-depth": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							CnameFrom:                "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
+						},
+					},
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section:       "test_section",
+				UseSplitDepth: true,
+				RulesAsHCL:    true,
+				RootRule:      "test-edgesuite-net",
+			},
+			dir:          "multitarget-property",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "module_config.tf"},
+			rulesAsHCL:   true,
+		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			if test.rulesAsHCL {
 				ruleResponse := getRuleTreeResponse(test.dir, t)
-				test.givenData.Rules = flattenRules("test.edgesuite.net", ruleResponse.Rules)
+				test.givenData.Rules = flattenRules(wrapAndNameRules("test.edgesuite.net", ruleResponse.Rules))
 				test.givenData.RulesAsHCL = true
 			}
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
@@ -2835,20 +2277,13 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
 			}
 
-			if test.withIncludes {
-				templateToFile["includes.tmpl"] = fmt.Sprintf("./testdata/res/%s/includes.tf", test.dir)
-			}
 			if test.rulesAsHCL {
-				var rulesVersion string
-				if len(test.givenData.Includes) > 0 {
-					rulesVersion = test.givenData.Includes[0].RuleFormat
+				rulesVersion := test.givenData.Property.RuleFormat
+				if !test.givenData.UseSplitDepth {
+					templateToFile[fmt.Sprintf("rules_%s.tmpl", rulesVersion)] = fmt.Sprintf("./testdata/res/%s/rules.tf", test.dir)
 				} else {
-					rulesVersion = test.givenData.Property.RuleFormat
+					templateToFile["rules_module.tmpl"] = fmt.Sprintf("./testdata/res/%s/module_config.tf", test.dir)
 				}
-				templateToFile[fmt.Sprintf("rules_%s.tmpl", rulesVersion)] = fmt.Sprintf("./testdata/res/%s/rules.tf", test.dir)
-			}
-			if test.withIncludes && test.rulesAsHCL {
-				templateToFile["includes_rules.tmpl"] = fmt.Sprintf("./testdata/res/%s/includes_rules.tf", test.dir)
 			}
 
 			processor := templates.FSTemplateProcessor{
@@ -2857,6 +2292,236 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				AdditionalFuncs: additionalFuncs,
 			}
 			err := processor.ProcessTemplates(test.givenData, test.filterFuncs...)
+			reportedErrors = []string{}
+			if test.withError != "" {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), test.withError)
+				return
+			}
+			require.NoError(t, err)
+
+			for _, f := range test.filesToCheck {
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				require.NoError(t, err)
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				require.NoError(t, err)
+				assert.Equal(t, string(expected), string(result))
+			}
+		})
+	}
+}
+
+func TestMultiTargetProcessPropertyTemplates(t *testing.T) {
+	tests := map[string]struct {
+		givenData    templates.MultiTargetData
+		dir          string
+		filesToCheck []string
+		withError    string
+	}{
+		"property with children (split-depth=0)": {
+			givenData: templates.MultiTargetData{
+				"split-depth-rules.tmpl": {
+					"./testdata/res/multitarget-property-with-children/test-edgesuite-net_default.tf": TFData{
+						RulesAsHCL:    true,
+						UseSplitDepth: true,
+						Rules: []*WrappedRules{
+							{
+								IsRoot: true,
+								Rule: papi.Rules{
+									Name: "default",
+									Children: []papi.Rules{
+										{
+											Name: "New Rule",
+											Children: []papi.Rules{
+												{
+													Name: "New Rule 1",
+												},
+											},
+										},
+									},
+								},
+								Children: []*WrappedRules{
+									{
+										Rule: papi.Rules{
+											Name: "New Rule",
+											Children: []papi.Rules{
+												{
+													Name: "New Rule 1",
+												},
+											},
+										},
+										FileName:      "test-edgesuite-net_default_new_rule",
+										TerraformName: "test-edgesuite-net_rule_new_rule",
+										Children: []*WrappedRules{
+											{
+												Rule:          papi.Rules{Name: "New Rule 1"},
+												FileName:      "test-edgesuite-net_default_new_rule_new_rule_1",
+												TerraformName: "test-edgesuite-net_rule_new_rule_1",
+											},
+										},
+									},
+								},
+								FileName:      "test-edgesuite-net_default",
+								TerraformName: "test-edgesuite-net_rule_default",
+							},
+							{
+								Rule: papi.Rules{
+									Name: "New Rule",
+									Children: []papi.Rules{
+										{
+											Name: "New Rule 1",
+										},
+									},
+								},
+								Children: []*WrappedRules{
+									{
+										Rule:          papi.Rules{Name: "New Rule 1"},
+										FileName:      "test-edgesuite-net_default_new_rule_new_rule_1",
+										TerraformName: "test-edgesuite-net_rule_new_rule_1",
+									},
+								},
+								FileName:      "test-edgesuite-net_default_new_rule",
+								TerraformName: "test-edgesuite-net_rule_new_rule",
+							},
+							{
+								Rule:          papi.Rules{Name: "New Rule 1"},
+								FileName:      "test-edgesuite-net_default_new_rule_new_rule_1",
+								TerraformName: "test-edgesuite-net_rule_new_rule_1",
+							},
+						},
+					},
+				},
+			},
+			dir:          "multitarget-property-with-children",
+			filesToCheck: []string{"test-edgesuite-net_default.tf"},
+		},
+		"property with children (split-depth=2)": {
+			givenData: templates.MultiTargetData{
+				"split-depth-rules.tmpl": {
+					"./testdata/res/multitarget-property-with-flatten-children/test-edgesuite-net_default.tf": TFData{
+						RulesAsHCL:    true,
+						UseSplitDepth: true,
+						Rules: []*WrappedRules{
+							{
+								IsRoot: true,
+								Rule: papi.Rules{
+									Name: "default",
+									Children: []papi.Rules{
+										{
+											Name: "New Rule",
+											Children: []papi.Rules{
+												{
+													Name: "New Rule 1",
+												},
+											},
+										},
+									},
+								},
+								Children: []*WrappedRules{
+									{
+										Rule: papi.Rules{
+											Name: "New Rule",
+											Children: []papi.Rules{
+												{
+													Name: "New Rule 1",
+												},
+											},
+										},
+										FileName:      "test-edgesuite-net_default_new_rule",
+										TerraformName: "test-edgesuite-net_rule_new_rule",
+										Children: []*WrappedRules{
+											{
+												Rule:          papi.Rules{Name: "New Rule 1"},
+												FileName:      "test-edgesuite-net_default_new_rule_new_rule_1",
+												TerraformName: "test-edgesuite-net_rule_new_rule_1",
+											},
+										},
+									},
+								},
+								FileName:      "test-edgesuite-net_default",
+								TerraformName: "test-edgesuite-net_rule_default",
+							},
+						},
+					},
+					"./testdata/res/multitarget-property-with-flatten-children/test-edgesuite-net_default_new_rule.tf": TFData{
+						Rules: []*WrappedRules{
+							{
+								Rule: papi.Rules{
+									Name: "New Rule",
+									Children: []papi.Rules{
+										{
+											Name: "New Rule 1",
+										},
+									},
+								},
+								Children: []*WrappedRules{
+									{
+										Rule:          papi.Rules{Name: "New Rule 1"},
+										FileName:      "test-edgesuite-net_default_new_rule_new_rule_1",
+										TerraformName: "test-edgesuite-net_rule_new_rule_1",
+									},
+								},
+								FileName:      "test-edgesuite-net_default_new_rule",
+								TerraformName: "test-edgesuite-net_rule_new_rule",
+							},
+						},
+					},
+					"./testdata/res/multitarget-property-with-flatten-children/test-edgesuite-net_default_new_rule_new_rule_1.tf": TFData{
+						Rules: []*WrappedRules{
+							{
+								Rule:          papi.Rules{Name: "New Rule 1"},
+								FileName:      "test-edgesuite-net_default_new_rule_new_rule_1",
+								TerraformName: "test-edgesuite-net_rule_new_rule_1",
+							},
+						},
+					},
+				},
+			},
+			dir:          "multitarget-property-with-flatten-children",
+			filesToCheck: []string{"test-edgesuite-net_default.tf", "test-edgesuite-net_default_new_rule.tf", "test-edgesuite-net_default_new_rule_new_rule_1.tf"},
+		},
+		"property with unknown behaviors": {
+			givenData: templates.MultiTargetData{
+				"split-depth-rules.tmpl": {
+					"./testdata/res/basic-rules-datasource-unknown/test-edgesuite-net_default.tf": TFData{
+						RulesAsHCL:    true,
+						UseSplitDepth: true,
+						Rules: []*WrappedRules{
+							{
+								Rule: papi.Rules{
+									Name: "default",
+									Behaviors: []papi.RuleBehavior{
+										{
+											Name: "caching-unknown",
+										},
+										{
+											Name: "allowPost-unknown",
+										},
+										{
+											Name: "report",
+										},
+									},
+								},
+								FileName:      "test-edgesuite-net_default",
+								TerraformName: "test-edgesuite-net_rule_default",
+							},
+						},
+					},
+				},
+			},
+			dir:       "basic-rules-datasource-unknown",
+			withError: "there were errors reported: Unknown behavior 'caching-unknown', Unknown behavior 'allowPost-unknown'",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
+			processor := templates.FSMultiTargetProcessor{
+				TemplatesFS:     templateFiles,
+				AdditionalFuncs: additionalFuncs,
+			}
+			err := processor.ProcessTemplates(test.givenData, useThisOnlyRuleFormat("v2023-01-05"))
 			reportedErrors = []string{}
 			if test.withError != "" {
 				assert.Error(t, err)
@@ -3202,11 +2867,6 @@ func (t *tfDataBuilder) withEdgeHostname(edgeHostname map[string]EdgeHostname) *
 	return t
 }
 
-func (t *tfDataBuilder) withHostnames(hostnames map[string]Hostname) *tfDataBuilder {
-	t.tfData.Property.Hostnames = hostnames
-	return t
-}
-
 func (t *tfDataBuilder) withIsActive(isActive bool) *tfDataBuilder {
 	hostname := t.tfData.Property.Hostnames["test.edgesuite.net"]
 	hostname.IsActive = isActive
@@ -3220,11 +2880,10 @@ func (t *tfDataBuilder) withEmails(emails []string) *tfDataBuilder {
 }
 
 func (t *tfDataBuilder) withOnlyProductionActivation(emails []string, activationNote string, version int) *tfDataBuilder {
-	t.tfData.Property.ProductionInfo.HasActivation = true
+
+	t.withProductionVersion(version, true)
 	t.tfData.Property.ProductionInfo.Emails = emails
 	t.tfData.Property.ProductionInfo.ActivationNote = activationNote
-	t.tfData.Property.ProductionInfo.Version = version
-	t.tfData.Property.ProductionInfo.IsActiveOnLatestVersion = true
 	t.tfData.Property.StagingInfo.HasActivation = false
 	t.tfData.Property.StagingInfo.ActivationNote = ""
 	t.tfData.Property.StagingInfo.Version = 0
@@ -3264,6 +2923,12 @@ func (t *tfDataBuilder) withIncludeRules(index int, rules []*WrappedRules) *tfDa
 	return t
 }
 
+func (t *tfDataBuilder) withSplitDepth(useSplitDepth bool, rootRule string) *tfDataBuilder {
+	t.tfData.UseSplitDepth = useSplitDepth
+	t.tfData.RootRule = rootRule
+	return t
+}
+
 func (t *tfDataBuilder) withCertProvisioningType(certProvisioningType string) *tfDataBuilder {
 	hostname := t.tfData.Property.Hostnames["test.edgesuite.net"]
 	hostname.CertProvisioningType = certProvisioningType
@@ -3278,12 +2943,16 @@ func (t *tfDataBuilder) withActivationNote(activationNote string) *tfDataBuilder
 
 func (t *tfDataBuilder) withIncludes(includes []TFIncludeData) *tfDataBuilder {
 	t.tfData.Includes = includes
-	t.tfData.WithIncludes = true
 	return t
 }
 
 func (t *tfDataBuilder) withBootstrap(useBootstrap bool) *tfDataBuilder {
 	t.tfData.UseBootstrap = useBootstrap
+	return t
+}
+
+func (t *tfDataBuilder) asHCL(useHCL bool) *tfDataBuilder {
+	t.tfData.RulesAsHCL = useHCL
 	return t
 }
 

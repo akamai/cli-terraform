@@ -12,12 +12,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/cloudaccess"
-	"github.com/akamai/cli-terraform/pkg/edgegrid"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
-	"github.com/fatih/color"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/cloudaccess"
+	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/color"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )
 
@@ -115,11 +115,11 @@ func CmdCreateCloudAccess(c *cli.Context) error {
 	if c.IsSet("group_id") {
 		groupID, err = strconv.ParseInt(c.String("group_id"), 10, 64)
 		if err != nil {
-			return cli.Exit(color.RedString("Invalid group_id: "+err.Error()), 1)
+			return cli.Exit(color.RedString("Invalid group_id: %s", err.Error()), 1)
 		}
 		if groupID <= 0 {
 			// Check if group ID is less than or equal to 0
-			return fmt.Errorf("Invalid group ID: group ID must be greater than 0")
+			return errors.New("Invalid group ID: group ID must be greater than 0")
 		}
 		if !c.IsSet("contract_id") {
 			return cli.Exit(color.RedString("contract_id is mandatory when group_id is provided"), 1)
@@ -130,7 +130,7 @@ func CmdCreateCloudAccess(c *cli.Context) error {
 	}
 
 	if err = createCloudAccess(ctx, keyUID, groupID, contractID, section, client, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting cloudaccess: %s", err)), 1)
+		return cli.Exit(color.RedString("Error exporting cloudaccess: %s", err), 1)
 	}
 	return nil
 }

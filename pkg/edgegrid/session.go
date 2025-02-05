@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/session"
-	"github.com/akamai/cli/pkg/log"
+	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/log"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/session"
+	"github.com/akamai/cli/v2/pkg/log"
 	"github.com/urfave/cli/v2"
 )
 
@@ -29,11 +30,9 @@ func InitializeSession(c *cli.Context) (session.Session, error) {
 	options := []session.Option{
 		session.WithSigner(edgerc),
 		session.WithHTTPTracing(os.Getenv("AKAMAI_HTTP_TRACE_ENABLED") == "true"),
-		session.WithLog(log.FromContext(c.Context)),
+		session.WithLog(sesslog.SlogAdapter{Logger: log.FromContext(c.Context)}),
 	}
 	if retryConfig != nil {
-		// Exclude get user endpoint from retries as it may fail for some users returned by list users endpoint during `export-iam all` command.
-		retryConfig.ExcludedEndpoints = []string{"/identity-management/v3/user-admin/ui-identities/*"}
 		options = append(options, session.WithRetries(*retryConfig))
 	}
 

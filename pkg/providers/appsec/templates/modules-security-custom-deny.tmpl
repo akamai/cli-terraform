@@ -1,7 +1,7 @@
 {{ if .CustomDenyList  -}}
 {{ range .CustomDenyList  -}}
 resource "akamai_appsec_custom_deny" "{{escapeName .Name}}_{{ .ID }}" {
-    config_id   = akamai_appsec_configuration.config.config_id
+    config_id   = local.config_id
     custom_deny = jsonencode(
 {{ exportJSON . }}
 )

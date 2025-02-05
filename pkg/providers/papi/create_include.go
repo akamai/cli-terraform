@@ -7,12 +7,13 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/papi"
-	"github.com/akamai/cli-terraform/pkg/edgegrid"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli-terraform/pkg/tools"
-	"github.com/akamai/cli/pkg/terminal"
-	"github.com/fatih/color"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/ptr"
+	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/cli/v2/pkg/color"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,6 +27,16 @@ var (
 	// ErrIncludeRulesNotFound is returned when include rules couldn't be found
 	ErrIncludeRulesNotFound = errors.New("include rules not found")
 )
+
+type includeOptions struct {
+	contractID  string
+	includeName string
+	section     string
+	jsonDir     string
+	tfWorkPath  string
+	rulesAsHCL  bool
+	splitDepth  *int
+}
 
 // CmdCreateInclude is an entrypoint to export-include include sub-command
 func CmdCreateInclude(c *cli.Context) error {
@@ -53,9 +64,20 @@ func CmdCreateInclude(c *cli.Context) error {
 		"imports.tmpl":   importPath,
 	}
 
-	var rulesAsHCL bool
+	options := includeOptions{
+		contractID:  c.Args().First(),
+		includeName: c.Args().Get(1),
+		section:     edgegrid.GetEdgercSection(c),
+		jsonDir:     "property-snippets",
+		tfWorkPath:  tfWorkPath,
+	}
+
 	if c.IsSet("rules-as-hcl") {
-		rulesAsHCL = c.Bool("rules-as-hcl")
+		options.rulesAsHCL = c.Bool("rules-as-hcl")
+	}
+
+	if c.IsSet("split-depth") {
+		options.splitDepth = ptr.To(c.Int("split-depth"))
 	}
 
 	processor := templates.FSTemplateProcessor{
@@ -64,29 +86,39 @@ func CmdCreateInclude(c *cli.Context) error {
 		AdditionalFuncs: additionalFuncs,
 	}
 
-	contractID := c.Args().First()
-	includeName := c.Args().Get(1)
-	section := edgegrid.GetEdgercSection(c)
+	var multiTargetProcessor templates.MultiTargetProcessor
+	if options.splitDepth != nil {
+		multiTargetProcessor = templates.FSMultiTargetProcessor{
+			TemplatesFS:     templateFiles,
+			AdditionalFuncs: additionalFuncs,
+		}
+		err = createSplitRulesDir(tfWorkPath)
+		if err != nil {
+			return cli.Exit(color.RedString("Error creating directory for include rules: %s", err), 1)
+		}
+	}
 
-	if err = createInclude(ctx, contractID, includeName, section, "property-snippets", tfWorkPath, rulesAsHCL, client, processor); err != nil {
-		return cli.Exit(color.RedString(fmt.Sprintf("Error exporting include: %s", err)), 1)
+	if err = createInclude(ctx, options, client, processor, multiTargetProcessor); err != nil {
+		return cli.Exit(color.RedString("Error exporting include: %s", err), 1)
 	}
 
 	return nil
 }
 
-func createInclude(ctx context.Context, contractID, includeName, section, jsonDir, tfWorkPath string, rulesAsHCL bool, client papi.PAPI, processor templates.TemplateProcessor) error {
+func createInclude(ctx context.Context, options includeOptions, client papi.PAPI, processor templates.TemplateProcessor, multiTargetProcessor templates.MultiTargetProcessor) error {
 	term := terminal.Get(ctx)
+
+	multiTargetData := make(templates.MultiTargetData)
 
 	tfData := TFData{
 		Includes:   make([]TFIncludeData, 0),
-		Section:    section,
-		RulesAsHCL: rulesAsHCL,
+		Section:    options.section,
+		RulesAsHCL: options.rulesAsHCL,
 	}
 
 	// Get Include
-	term.Spinner().Start("Fetching include " + includeName)
-	include, err := findIncludeByName(ctx, client, contractID, includeName)
+	term.Spinner().Start("Fetching include " + options.includeName)
+	include, err := findIncludeByName(ctx, client, options.contractID, options.includeName)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrIncludeNotFound, err)
@@ -99,33 +131,56 @@ func createInclude(ctx context.Context, contractID, includeName, section, jsonDi
 	}
 
 	// Save snippets
-	if !rulesAsHCL {
+	if !options.rulesAsHCL {
 		term.Spinner().Start("Saving snippets ")
 		ruleTemplate, rulesTemplate := setIncludeRuleTemplates(rules)
-		if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(tfWorkPath, jsonDir), fmt.Sprintf("%s.json", include.IncludeName)); err != nil {
+		if err = saveSnippets(rules.Rules, ruleTemplate, rulesTemplate, filepath.Join(options.tfWorkPath, options.jsonDir), fmt.Sprintf("%s.json", include.IncludeName)); err != nil {
 			term.Spinner().Fail()
 			return fmt.Errorf("%w: %s", ErrSavingSnippets, err)
 		}
 		term.Spinner().OK()
 	} else {
-		includeData.Rules = flattenRules(includeData.IncludeName, rules.Rules)
+		wrappedRules := wrapAndNameRules(includeData.IncludeName, rules.Rules)
+		if options.splitDepth != nil {
+			includeData.RootRule = wrappedRules.TerraformName
+			multiTargetData.AddData("includes_rules.tmpl", prepareRulesForSplitRule(wrappedRules, *options.splitDepth, options.tfWorkPath, includeRuleWrapper))
+		} else {
+			includeData.Rules = flattenRules(wrappedRules)
+		}
+
 	}
 
 	tfData.Includes = append(tfData.Includes, *includeData)
 	filterFuncs := make([]func([]string) ([]string, error), 0)
-	if rulesAsHCL {
+	if options.rulesAsHCL {
 		ruleTemplate := fmt.Sprintf("rules_%s.tmpl", rules.RuleFormat)
 		if !processor.TemplateExists(ruleTemplate) {
 			return fmt.Errorf("%w: %s", ErrUnsupportedRuleFormat, rules.RuleFormat)
 		}
-		processor.AddTemplateTarget(ruleTemplate, filepath.Join(tfWorkPath, "rules.tf"))
-		processor.AddTemplateTarget("includes_rules.tmpl", filepath.Join(tfWorkPath, "includes_rules.tf"))
+		if options.splitDepth == nil {
+			processor.AddTemplateTarget(ruleTemplate, filepath.Join(options.tfWorkPath, "rules.tf"))
+			processor.AddTemplateTarget("includes_rules.tmpl", filepath.Join(options.tfWorkPath, "includes_rules.tf"))
+		} else {
+			processor.AddTemplateTarget("rules_module.tmpl", filepath.Join(options.tfWorkPath, "rules", "module_config.tf"))
+			tfData.UseSplitDepth = true
+		}
 		filterFuncs = append(filterFuncs, useThisOnlyRuleFormat(rules.RuleFormat))
 	}
+
 	term.Spinner().Start("Saving TF configurations ")
 	if err = processor.ProcessTemplates(tfData, filterFuncs...); err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
+	}
+
+	if options.splitDepth != nil {
+		if err = multiTargetProcessor.ProcessTemplates(multiTargetData, filterFuncs...); err != nil {
+			term.Spinner().Fail()
+			if _, err := CheckErrors(); err != nil {
+				return fmt.Errorf("%w", err)
+			}
+			return fmt.Errorf("%w: %s", ErrSavingFiles, err)
+		}
 	}
 
 	term.Spinner().OK()
@@ -309,19 +364,4 @@ func findIncludeByName(ctx context.Context, client papi.PAPI, contractID, includ
 	}
 
 	return nil, fmt.Errorf("unable to find include: \"%s\"", includeName)
-}
-
-// getActivatedNetworks returns a list of networks on which the given include is activated
-func getActivatedNetworks(include *papi.Include) []string {
-	var result []string
-
-	if include.StagingVersion != nil {
-		result = append(result, string(papi.ActivationNetworkStaging))
-	}
-
-	if include.ProductionVersion != nil {
-		result = append(result, string(papi.ActivationNetworkProduction))
-	}
-
-	return result
 }

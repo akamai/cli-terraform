@@ -38,8 +38,8 @@ func EscapeName(s string) (string, error) {
 	return s, nil
 }
 
-// ToList returns a list as a comma delimited string
-// USAGE EXAMPLE: security_policy_ids = [ {{ tolist .Siem.FirewallPolicyIds }} ]
+// ToList returns a list as a comma-delimited string
+// USAGE EXAMPLE: security_policy_ids = [ {{ tolist .Siem.FirewallPolicyIDs }} ]
 func ToList(l []string) string {
 	n := []string{}
 	for _, v := range l {

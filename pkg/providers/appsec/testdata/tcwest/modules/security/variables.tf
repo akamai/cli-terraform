@@ -2,10 +2,6 @@ variable "name" {
   type = string
 }
 
-variable "hostnames" {
-  type = list(string)
-}
-
 variable "description" {
   type = string
 }

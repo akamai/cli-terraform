@@ -1,7 +1,7 @@
 {{ if .CustomClients  -}}
 {{ range .CustomClients  -}}
 resource "akamai_botman_custom_client" "{{ escapeName (index . "customClientName") }}_{{index . "customClientId"}}" {
-    config_id = akamai_appsec_configuration.config.config_id
+    config_id = local.config_id
     custom_client = jsonencode(
 {{ exportJSONWithoutKeys . "customClientId" }}
 )
@@ -11,7 +11,7 @@ resource "akamai_botman_custom_client" "{{ escapeName (index . "customClientName
 {{ end -}}
 {{ if .CustomClientSequence  -}}
 resource "akamai_botman_custom_client_sequence" "sequence" {
-    config_id         = akamai_appsec_configuration.config.config_id
+    config_id         = local.config_id
     custom_client_ids = [
         {{getCustomClientResourceNamesByIDs .CustomClients .CustomClientSequence}}
     ]

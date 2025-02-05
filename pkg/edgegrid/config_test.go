@@ -3,12 +3,13 @@ package edgegrid
 import (
 	"flag"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/edgegrid"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/ptr"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/edgegrid"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/ptr"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/session"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v2"
@@ -198,31 +199,33 @@ func TestGetEdgercSection(t *testing.T) {
 
 func Test_getRetryConfig(t *testing.T) {
 	tests := map[string]struct {
-		disabled    *string
-		maxRetries  *string
-		minWaitTime *string
-		maxWaitTime *string
-		expected    *session.RetryConfig
-		expectedErr string
+		disabled          *string
+		maxRetries        *string
+		minWaitTime       *string
+		maxWaitTime       *string
+		excludedEndpoints []string
+		expected          *session.RetryConfig
+		expectedErr       string
 	}{
 		"happy path - default": {
 			expected: &session.RetryConfig{
 				RetryMax:          10,
 				RetryWaitMin:      1 * time.Second,
 				RetryWaitMax:      30 * time.Second,
-				ExcludedEndpoints: []string{},
+				ExcludedEndpoints: []string{"/identity-management/v3/user-admin/ui-identities/*"},
 			},
 		},
 		"happy path - set": {
-			disabled:    ptr.To("false"),
-			maxRetries:  ptr.To("5"),
-			minWaitTime: ptr.To("10"),
-			maxWaitTime: ptr.To("300"),
+			disabled:          ptr.To("false"),
+			maxRetries:        ptr.To("5"),
+			minWaitTime:       ptr.To("10"),
+			maxWaitTime:       ptr.To("300"),
+			excludedEndpoints: []string{"/test/endpoint"},
 			expected: &session.RetryConfig{
 				RetryMax:          5,
 				RetryWaitMin:      10 * time.Second,
 				RetryWaitMax:      300 * time.Second,
-				ExcludedEndpoints: []string{},
+				ExcludedEndpoints: []string{"/test/endpoint"},
 			},
 		},
 		"happy path - disabled": {
@@ -267,6 +270,9 @@ func Test_getRetryConfig(t *testing.T) {
 			}
 			if test.maxWaitTime != nil {
 				t.Setenv("AKAMAI_RETRY_WAIT_MAX", *test.maxWaitTime)
+			}
+			if test.excludedEndpoints != nil {
+				t.Setenv("AKAMAI_RETRY_EXCLUDED_ENDPOINTS", strings.Join(test.excludedEndpoints, ","))
 			}
 
 			got, err := getRetryConfig()

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -13,10 +12,10 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/imaging"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v9/pkg/ptr"
-	"github.com/akamai/cli-terraform/pkg/templates"
-	"github.com/akamai/cli/pkg/terminal"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/imaging"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/ptr"
+	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -888,9 +887,9 @@ func TestCreateImaging(t *testing.T) {
 
 			if test.filesToCheck != nil {
 				for _, f := range test.filesToCheck {
-					expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dataDir, f))
+					expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dataDir, f))
 					require.NoError(t, err)
-					result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dataDir, f))
+					result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dataDir, f))
 					require.NoError(t, err)
 					assert.Equal(t, string(expected), string(result))
 				}
@@ -1142,9 +1141,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			require.NoError(t, processor(test.dir).ProcessTemplates(test.givenData))
 
 			for _, f := range test.filesToCheck {
-				expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
+				expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", test.dir, f))
 				require.NoError(t, err)
-				result, err := ioutil.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
+				result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", test.dir, f))
 				require.NoError(t, err)
 				assert.Equal(t, string(expected), string(result))
 			}
@@ -1189,7 +1188,7 @@ func convertPolicyInputImage(policy imaging.PolicyInput) (*imaging.PolicyOutputI
 
 func TestEnsureDirExists(t *testing.T) {
 	t.Run("no json dir specified", func(t *testing.T) {
-		tfDir, err := ioutil.TempDir("", "tfworkpath")
+		tfDir, err := os.MkdirTemp("", "tfworkpath")
 		assert.NoError(t, err)
 		defer func() { assert.NoError(t, os.RemoveAll(tfDir)) }()
 		jsonDirPath := path.Join(tfDir, ".")
@@ -1201,7 +1200,7 @@ func TestEnsureDirExists(t *testing.T) {
 	})
 
 	t.Run("json dir already exists", func(t *testing.T) {
-		tfDir, err := ioutil.TempDir("", "tfworkpath")
+		tfDir, err := os.MkdirTemp("", "tfworkpath")
 		assert.NoError(t, err)
 		defer func() { assert.NoError(t, os.RemoveAll(tfDir)) }()
 		jsonDirPath := path.Join(tfDir, "jsondir")
@@ -1217,7 +1216,7 @@ func TestEnsureDirExists(t *testing.T) {
 	})
 
 	t.Run("json dir does not exists", func(t *testing.T) {
-		tfDir, err := ioutil.TempDir("", "tfworkpath")
+		tfDir, err := os.MkdirTemp("", "tfworkpath")
 		assert.NoError(t, err)
 		defer func() { assert.NoError(t, os.RemoveAll(tfDir)) }()
 		jsonDirPath := path.Join(tfDir, "jsondir")
@@ -1229,7 +1228,7 @@ func TestEnsureDirExists(t *testing.T) {
 	})
 
 	t.Run("path exists but is not a dir", func(t *testing.T) {
-		tfDir, err := ioutil.TempDir("", "tfworkpath")
+		tfDir, err := os.MkdirTemp("", "tfworkpath")
 		assert.NoError(t, err)
 		defer func() { assert.NoError(t, os.RemoveAll(tfDir)) }()
 		jsonDirPath := path.Join(tfDir, "jsondir")

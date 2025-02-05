@@ -1,4 +1,4 @@
-{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/cps.TFCPSData*/ -}}
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/cps.TFCPSData*/ -}}
 terraform init
 {{- if eq .Enrollment.ValidationType "dv" }}
 terraform import akamai_cps_dv_enrollment.enrollment_id_{{.EnrollmentID}} {{.EnrollmentID}},{{.ContractID}}

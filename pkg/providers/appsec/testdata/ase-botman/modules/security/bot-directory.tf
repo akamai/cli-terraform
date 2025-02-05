@@ -1,5 +1,5 @@
 resource "akamai_botman_custom_bot_category" "category_a_dae597b8-b552-4c95-ab8b-066a3fef2f75" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   custom_bot_category = jsonencode(
     {
       "arrayKey" : [
@@ -16,19 +16,19 @@ resource "akamai_botman_custom_bot_category" "category_a_dae597b8-b552-4c95-ab8b
 }
 
 resource "akamai_botman_recategorized_akamai_defined_bot" "akamai_defined_bot_a_eceac3f9-871b-4c57-9a24-c25b0237949a" {
-  config_id   = akamai_appsec_configuration.config.config_id
+  config_id   = local.config_id
   bot_id      = "eceac3f9-871b-4c57-9a24-c25b0237949a"
   category_id = akamai_botman_custom_bot_category.category_a_dae597b8-b552-4c95-ab8b-066a3fef2f75.category_id
 }
 
 resource "akamai_botman_recategorized_akamai_defined_bot" "akamai_defined_bot_b_c590d2e5-a041-4f05-8fda-71608f42d720" {
-  config_id   = akamai_appsec_configuration.config.config_id
+  config_id   = local.config_id
   bot_id      = "c590d2e5-a041-4f05-8fda-71608f42d720"
   category_id = akamai_botman_custom_bot_category.category_a_dae597b8-b552-4c95-ab8b-066a3fef2f75.category_id
 }
 
 resource "akamai_botman_custom_bot_category" "category_b_c3362371-4b98-40fe-a7b9-cd7fab93eec5" {
-  config_id = akamai_appsec_configuration.config.config_id
+  config_id = local.config_id
   custom_bot_category = jsonencode(
     {
       "arrayKey" : [
@@ -45,7 +45,7 @@ resource "akamai_botman_custom_bot_category" "category_b_c3362371-4b98-40fe-a7b9
 }
 
 resource "akamai_botman_custom_bot_category_sequence" "custom_bot_category_sequence" {
-  config_id    = akamai_appsec_configuration.config.config_id
+  config_id    = local.config_id
   category_ids = [akamai_botman_custom_bot_category.category_b_c3362371-4b98-40fe-a7b9-cd7fab93eec5.category_id, akamai_botman_custom_bot_category.category_a_dae597b8-b552-4c95-ab8b-066a3fef2f75.category_id]
 }
 

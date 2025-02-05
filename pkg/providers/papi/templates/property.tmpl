@@ -1,9 +1,9 @@
-{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/papi.TFData*/ -}}
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/papi.TFData*/ -}}
 terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 6.6.0"
+      version = ">= 7.0.0"
     }
   }
   required_version = ">= 1.0"
@@ -13,7 +13,12 @@ provider "akamai" {
   edgerc = var.edgerc_path
   config_section = var.config_section
 }
+{{- if .UseSplitDepth}}
 
+module "rules" {
+  source = "./rules"
+}
+{{- end}}
 {{- if not .RulesAsHCL}}
 
 data "akamai_property_rules_template" "rules" {
@@ -70,8 +75,13 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
   }
 {{- end}}
 {{- if .RulesAsHCL}}
+{{- if .UseSplitDepth}}
+  rule_format = module.rules.rule_format
+  rules       = module.rules.rules
+{{- else}}
   rule_format = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.rule_format
   rules       = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.json
+{{- end}}
 {{- else}}
   rule_format = "{{.Property.RuleFormat}}"
   rules       = data.akamai_property_rules_template.rules.json

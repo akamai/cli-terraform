@@ -1,10 +1,10 @@
-{{- /*gotype: github.com/akamai/cli-terraform/pkg/providers/papi.TFData*/ -}}
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/papi.TFData*/ -}}
 {{- if not .Property.PropertyID -}}
 terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 6.6.0"
+      version = ">= 7.0.0"
     }
   }
   required_version = ">= 1.0"
@@ -16,6 +16,12 @@ provider "akamai" {
 }
 
 {{ end }}
+{{- $useSplitDepth := .UseSplitDepth}}
+{{- if and (not .Property.PropertyID) $useSplitDepth -}}
+module "rules" {
+  source = "./rules"
+}
+{{- end}}
 {{- range $include := .Includes }}
 {{- if not $.RulesAsHCL}}
 data "akamai_property_rules_template" "rules_{{.IncludeName}}" {
@@ -38,11 +44,16 @@ resource "akamai_property_include" "{{.IncludeName}}" {
   product_id = "{{.ProductID}}"
   type = "{{.IncludeType}}"
 {{- if $.RulesAsHCL}}
+{{- if $useSplitDepth}}
+  rule_format = module.rules.rule_format_{{$include.RootRule}}
+  rules       = module.rules.rules_{{$include.RootRule}}
+{{- else}}
 {{- if .Rules}}
   rule_format = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.rule_format
   rules       = data.akamai_property_rules_builder.{{(index .Rules 0).TerraformName}}.json
 {{- else}}
   rule_format = "{{.RuleFormat}}"
+{{- end}}
 {{- end}}
 {{- else}}
   rule_format = "{{.RuleFormat}}"
@@ -58,11 +69,7 @@ resource "akamai_property_include_activation" "{{$include.IncludeName}}_staging"
   include_id = akamai_property_include.{{$include.IncludeName}}.id
   network = "STAGING"
   auto_acknowledge_rule_warnings = false
-{{- if $.WithIncludes }}
-  version = "{{$include.StagingInfo.Version}}"
-{{- else}}
   version = var.activate_latest_on_staging ? akamai_property_include.{{$include.IncludeName}}.latest_version : akamai_property_include.{{$include.IncludeName}}.staging_version
-{{- end}}
 {{- if $include.StagingInfo.ActivationNote}}
   note = {{template "Text" $include.StagingInfo.ActivationNote}}
 {{- end}}
@@ -76,11 +83,7 @@ resource "akamai_property_include_activation" "{{$include.IncludeName}}_staging"
 #  include_id = akamai_property_include.{{$include.IncludeName}}.id
 #  network = "STAGING"
 #  auto_acknowledge_rule_warnings = false
-{{- if $.WithIncludes }}
-#  version = "{{$include.StagingInfo.Version}}"
-{{- else}}
 #  version = var.activate_latest_on_staging ? akamai_property_include.{{$include.IncludeName}}.latest_version : akamai_property_include.{{$include.IncludeName}}.staging_version
-{{- end}}
 {{- if $include.StagingInfo.ActivationNote}}
 #  note = {{template "Text" $include.StagingInfo.ActivationNote}}
 {{- end}}
@@ -95,11 +98,7 @@ resource "akamai_property_include_activation" "{{$include.IncludeName}}_producti
   include_id = akamai_property_include.{{$include.IncludeName}}.id
   network = "PRODUCTION"
   auto_acknowledge_rule_warnings = false
-{{- if $.WithIncludes }}
-  version = "{{$include.ProductionInfo.Version}}"
-{{- else}}
   version = var.activate_latest_on_production ? akamai_property_include.{{$include.IncludeName}}.latest_version : akamai_property_include.{{$include.IncludeName}}.production_version
-{{- end}}
 {{- if $include.ProductionInfo.ActivationNote}}
   note = {{template "Text" $include.ProductionInfo.ActivationNote}}
 {{- end}}
@@ -113,11 +112,7 @@ resource "akamai_property_include_activation" "{{$include.IncludeName}}_producti
 #  include_id = akamai_property_include.{{$include.IncludeName}}.id
 #  network = "PRODUCTION"
 #  auto_acknowledge_rule_warnings = false
-{{- if $.WithIncludes }}
-#  version = "{{$include.ProductionInfo.Version}}"
-{{- else}}
 #  version = var.activate_latest_on_production ? akamai_property_include.{{$include.IncludeName}}.latest_version : akamai_property_include.{{$include.IncludeName}}.production_version
-{{- end}}
 {{- if $include.ProductionInfo.ActivationNote}}
 #  note = {{template "Text" $include.ProductionInfo.ActivationNote}}
 {{- end}}
