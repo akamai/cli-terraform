@@ -9,7 +9,7 @@ on:
       - v1
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -17,8 +17,6 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version-file: 'go.mod'
-      - name: Checkout Tofu
-        uses: opentofu/setup-opentofu@v1git
       - name: Fmt check
         run: make fmt-check
       - name: Linter check
