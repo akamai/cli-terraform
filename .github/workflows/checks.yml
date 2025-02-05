@@ -17,6 +17,8 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version-file: 'go.mod'
+      - name: Checkout Tofu
+        uses: opentofu/setup-opentofu@v1git
       - name: Fmt check
         run: make fmt-check
       - name: Linter check
