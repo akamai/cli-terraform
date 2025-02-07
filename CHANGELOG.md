@@ -4,6 +4,8 @@
 
 ### FEATURES/ENHANCEMENTS:
 
+* PAPI
+    * Added the `use_hostname_bucket` attribute to the exported `akamai_property` and `akamai_property_bootstrap` resources.
 * Migrated to Go `1.23.6` and adopted a semver-compliant Go directive.
 
 

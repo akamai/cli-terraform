@@ -48,6 +48,9 @@ resource "akamai_property_bootstrap" "{{.Property.PropertyResourceName}}" {
   contract_id = var.contract_id
   group_id = var.group_id
   product_id = "prd_{{.Property.ProductName}}"
+{{- if .Property.UseHostnameBucket}}
+  use_hostname_bucket = true
+{{- end}}
 }
 {{end}}
 resource "akamai_property" "{{.Property.PropertyResourceName}}" {
@@ -57,11 +60,17 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
   contract_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.contract_id
   group_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.group_id
   product_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.product_id
+{{- if .Property.UseHostnameBucket}}
+  use_hostname_bucket = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.use_hostname_bucket
+{{- end}}
 {{- else}}
   name = "{{.Property.PropertyName}}"
   contract_id = var.contract_id
   group_id = var.group_id
   product_id = "prd_{{.Property.ProductName}}"
+{{- if .Property.UseHostnameBucket}}
+  use_hostname_bucket = true
+{{- end}}
 {{- end}}
 {{- range .Property.Hostnames}}
   hostnames {

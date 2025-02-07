@@ -100,6 +100,7 @@ type TFPropertyData struct {
 	IsSecure             string
 	EdgeHostnames        map[string]EdgeHostname
 	Hostnames            map[string]Hostname
+	UseHostnameBucket    bool
 	ReadVersion          string
 	ProductionInfo       NetworkInfo
 	StagingInfo          NetworkInfo
@@ -318,6 +319,10 @@ func createSplitRulesDir(tfWorkPath string) error {
 	return nil
 }
 
+func isHostnameBucketProperty(p *papi.Property) bool {
+	return p.PropertyType != nil && *p.PropertyType == "HOSTNAME_BUCKET"
+}
+
 //nolint:gocyclo
 func createProperty(ctx context.Context, options propertyOptions, jsonDir string, client papi.PAPI, clientHapi hapi.HAPI, templateProcessor templates.TemplateProcessor, multiTargetProcessor templates.MultiTargetProcessor) error {
 	term := terminal.Get(ctx)
@@ -344,6 +349,9 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 	tfData.Property.PropertyName = property.PropertyName
 	tfData.Property.PropertyID = property.PropertyID
 	tfData.Property.PropertyResourceName = formatResourceName(property.PropertyName)
+	if isHostnameBucketProperty(property) {
+		tfData.Property.UseHostnameBucket = true
+	}
 
 	term.Spinner().OK()
 
@@ -410,21 +418,23 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 	term.Spinner().OK()
 
 	// Get Hostnames
-	term.Spinner().Start("Fetching hostnames ")
-	hostnames, err := getPropertyVersionHostnames(ctx, client, property, version)
-	if err != nil {
-		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrHostnamesNotFound, err)
-	}
+	if !isHostnameBucketProperty(property) {
+		term.Spinner().Start("Fetching hostnames ")
+		hostnames, err := getPropertyVersionHostnames(ctx, client, property, version)
+		if err != nil {
+			term.Spinner().Fail()
+			return fmt.Errorf("%w: %s", ErrHostnamesNotFound, err)
+		}
 
-	tfData.Property.Hostnames, tfData.Property.EdgeHostnames, err =
-		getEdgeHostnameDetail(ctx, client, clientHapi, hostnames, property)
-	if err != nil {
-		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrFetchingHostnameDetails, err)
-	}
+		tfData.Property.Hostnames, tfData.Property.EdgeHostnames, err =
+			getEdgeHostnameDetail(ctx, client, clientHapi, hostnames, property)
+		if err != nil {
+			term.Spinner().Fail()
+			return fmt.Errorf("%w: %s", ErrFetchingHostnameDetails, err)
+		}
 
-	term.Spinner().OK()
+		term.Spinner().OK()
+	}
 
 	term.Spinner().Start("Fetching activation details ")
 

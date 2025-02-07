@@ -71,35 +71,37 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 	}
-	getPropertyResponse := papi.GetPropertyResponse{
-		Properties: papi.PropertiesItems{
-			Items: []*papi.Property{
-				{
-					AccountID:         "test_account",
-					AssetID:           "aid_10541511",
-					ContractID:        "test_contract",
-					GroupID:           "grp_12345",
-					LatestVersion:     5,
-					Note:              "",
-					ProductionVersion: nil,
-					PropertyID:        "prp_12345",
-					PropertyName:      "test.edgesuite.net",
-					StagingVersion:    nil,
+	getPropertyResponse := func() *papi.GetPropertyResponse {
+		return &papi.GetPropertyResponse{
+			Properties: papi.PropertiesItems{
+				Items: []*papi.Property{
+					{
+						AccountID:         "test_account",
+						AssetID:           "aid_10541511",
+						ContractID:        "test_contract",
+						GroupID:           "grp_12345",
+						LatestVersion:     5,
+						Note:              "",
+						ProductionVersion: nil,
+						PropertyID:        "prp_12345",
+						PropertyName:      "test.edgesuite.net",
+						StagingVersion:    nil,
+					},
 				},
 			},
-		},
-		Property: &papi.Property{
-			AccountID:         "test_account",
-			AssetID:           "aid_10541511",
-			ContractID:        "test_contract",
-			GroupID:           "grp_12345",
-			LatestVersion:     5,
-			Note:              "",
-			ProductionVersion: nil,
-			PropertyID:        "prp_12345",
-			PropertyName:      "test.edgesuite.net",
-			StagingVersion:    nil,
-		},
+			Property: &papi.Property{
+				AccountID:         "test_account",
+				AssetID:           "aid_10541511",
+				ContractID:        "test_contract",
+				GroupID:           "grp_12345",
+				LatestVersion:     5,
+				Note:              "",
+				ProductionVersion: nil,
+				PropertyID:        "prp_12345",
+				PropertyName:      "test.edgesuite.net",
+				StagingVersion:    nil,
+			},
+		}
 	}
 
 	getPropertyEnhancementTLSResponse := papi.GetPropertyResponse{
@@ -579,7 +581,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property (with hostname's cnameTo starting with a digit)": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -606,7 +608,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with edgehostname with non default ttl": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -810,7 +812,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property not active the latest": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -837,7 +839,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with empty hostname id": {
 			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				var ruleResponse papi.GetRuleTreeResponse
 				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
@@ -864,10 +866,42 @@ func TestCreateProperty(t *testing.T) {
 				"Dynamic_Content.json",
 			},
 		},
+		"basic property with hostname bucket": {
+			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				propertyResponse := getPropertyResponse()
+				propertyResponse.Property.PropertyType = ptr.To("HOSTNAME_BUCKET")
+				propertyResponse.Properties.Items[0].PropertyType = ptr.To("HOSTNAME_BUCKET")
+				mockGetProperty(c, propertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).
+					withDefaults().
+					withEdgeHostname(map[string]EdgeHostname{}).
+					withHostnames(nil).
+					withUseHostnameBucket(true).
+					build(), noFilters, nil)
+			},
+			dir:     "basic-hostname-bucket",
+			jsonDir: "basic-hostname-bucket/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+		},
 		"basic property with rules as datasource": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -891,7 +925,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with rules as datasource with unsupported rule format": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -916,7 +950,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with rules as datasource with unsupported behaviors and criteria": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -941,7 +975,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with children with split-depth=0": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, mm *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -983,7 +1017,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with children with split-depth=2": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, mm *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1031,7 +1065,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with cert provisioning type": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1058,7 +1092,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with bootstrap": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1083,10 +1117,44 @@ func TestCreateProperty(t *testing.T) {
 			},
 			withBootstrap: true,
 		},
+		"basic property with hostname bucket and bootstrap": {
+			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				propertyResponse := getPropertyResponse()
+				propertyResponse.Property.PropertyType = ptr.To("HOSTNAME_BUCKET")
+				propertyResponse.Properties.Items[0].PropertyType = ptr.To("HOSTNAME_BUCKET")
+				mockGetProperty(c, propertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).
+					withDefaults().
+					withEdgeHostname(map[string]EdgeHostname{}).
+					withHostnames(nil).
+					withUseHostnameBucket(true).
+					withBootstrap(true).
+					build(), noFilters, nil)
+			},
+			dir:     "basic-hostname-bucket-bootstrap",
+			jsonDir: "basic-hostname-bucket-bootstrap/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+			withBootstrap: true,
+		},
 		"import LATEST property version": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1115,7 +1183,7 @@ func TestCreateProperty(t *testing.T) {
 		"import not the latest property version": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 1, &ruleResponse, nil)
@@ -1142,7 +1210,7 @@ func TestCreateProperty(t *testing.T) {
 		"property activation with note": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1163,7 +1231,7 @@ func TestCreateProperty(t *testing.T) {
 		"property with production activation": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
@@ -1182,7 +1250,7 @@ func TestCreateProperty(t *testing.T) {
 		"property with both activations": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
@@ -1202,7 +1270,7 @@ func TestCreateProperty(t *testing.T) {
 		"property activation with empty emails": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1229,7 +1297,7 @@ func TestCreateProperty(t *testing.T) {
 		"error group not found": {
 			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
 				mockGetGroups(c, nil, fmt.Errorf("oops"))
 			},
@@ -1238,7 +1306,7 @@ func TestCreateProperty(t *testing.T) {
 		"error property rules not found": {
 			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetGroups(c, &getGroupsResponse, nil)
 				mockGetLatestVersion(c, &getLatestVersionResponse)
 				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
@@ -1251,7 +1319,7 @@ func TestCreateProperty(t *testing.T) {
 		"error property version not found": {
 			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
 				mockGetPropertyVersions(c, nil, fmt.Errorf("oops"))
@@ -1262,7 +1330,7 @@ func TestCreateProperty(t *testing.T) {
 		"error fetching property activation": {
 			init: func(c *papi.Mock, h *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
 				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
@@ -1278,7 +1346,7 @@ func TestCreateProperty(t *testing.T) {
 		"error product name not found": {
 			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
 				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
@@ -1291,7 +1359,7 @@ func TestCreateProperty(t *testing.T) {
 		"error hostnames not found": {
 			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
 				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
@@ -1304,7 +1372,7 @@ func TestCreateProperty(t *testing.T) {
 		"error hostname details": {
 			init: func(c *papi.Mock, h *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
 				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
@@ -1318,7 +1386,7 @@ func TestCreateProperty(t *testing.T) {
 		"error saving files": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1693,6 +1761,32 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Section: "test_section",
 			},
 			dir:          "enhancement-tls",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
+		"basic property with hostname bucket": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					UseHostnameBucket:    true,
+					ReadVersion:          "LATEST",
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "basic-hostname-bucket",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
 		"property with rules as datasource": {
@@ -2210,6 +2304,33 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				UseBootstrap: true,
 			},
 			dir:          "basic-bootstrap",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
+		"basic property with hostname bucket and bootstrap": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					UseHostnameBucket:    true,
+					ReadVersion:          "LATEST",
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section:      "test_section",
+				UseBootstrap: true,
+			},
+			dir:          "basic-hostname-bucket-bootstrap",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
 		"property using split-depth": {
@@ -2862,8 +2983,18 @@ func (t *tfDataBuilder) withRuleFormat(ruleFormat string) *tfDataBuilder {
 	return t
 }
 
+func (t *tfDataBuilder) withHostnames(hostnames map[string]Hostname) *tfDataBuilder {
+	t.tfData.Property.Hostnames = hostnames
+	return t
+}
+
 func (t *tfDataBuilder) withEdgeHostname(edgeHostname map[string]EdgeHostname) *tfDataBuilder {
 	t.tfData.Property.EdgeHostnames = edgeHostname
+	return t
+}
+
+func (t *tfDataBuilder) withUseHostnameBucket(useHostnameBucket bool) *tfDataBuilder {
+	t.tfData.Property.UseHostnameBucket = useHostnameBucket
 	return t
 }
 
