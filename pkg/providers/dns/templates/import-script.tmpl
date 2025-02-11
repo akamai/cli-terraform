@@ -1,4 +1,4 @@
-{{- /*gotype: cli-terraform/pkg/providers/dns/dns.ImportData*/ -}}
+{{- /*gotype: cli-terraform/v2/pkg/providers/dns/dns.ImportData*/ -}}
 terraform init
 {{- if not (checkForResource "akamai_dns_zone" .ResourceName .TFWorkPath)}}
 terraform import akamai_dns_zone.{{.ResourceName}} {{.Zone}}

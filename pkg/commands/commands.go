@@ -2,6 +2,7 @@
 package commands
 
 import (
+	"github.com/akamai/cli-terraform/v2/pkg/providers/apidefinitions"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/appsec"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/clientlists"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/cloudaccess"
@@ -24,6 +25,31 @@ import (
 // CommandLocator creates and returns a list of subcommands.
 func CommandLocator() []*cli.Command {
 	return []*cli.Command{
+		{
+			Name:        "export-apidefinitions",
+			Description: "Generates Terraform configuration for API Definitions resources.",
+			Usage:       "export-apidefinitions",
+			ArgsUsage:   "<api_id>",
+			Action:      validatedAction(apidefinitions.CmdCreateAPIDefinition, requireValidWorkpath, requireNArguments(1)),
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:        "tfworkpath",
+					Usage:       "Directory used to store files created when running commands.",
+					DefaultText: "current directory",
+				},
+				&cli.Int64Flag{
+					Name:        "version",
+					Usage:       "API version to import.",
+					DefaultText: "latest",
+				},
+				&cli.StringFlag{
+					Name:        "format",
+					Usage:       "Format of the API file, either `openapi` or `json`.",
+					DefaultText: "openapi",
+				},
+			},
+			BashComplete: autocomplete.Default,
+		},
 		{
 			Name:        "export-appsec",
 			Description: "Generates Terraform configuration for Application Security resources.",

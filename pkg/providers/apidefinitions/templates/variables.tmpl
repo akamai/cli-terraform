@@ -1,0 +1,10 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/apidefinitions.TFAPIWrapperData*/ -}}
+variable "edgerc_path" {
+  type = string
+  default = "~/.edgerc"
+}
+
+variable "config_section" {
+  type = string
+  default = "{{.Section}}"
+}

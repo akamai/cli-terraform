@@ -527,6 +527,19 @@ akamai terraform export-zone --resources "my-dns-zone.com"
 | `--segmentconfig` (boolean) | Generates a modularized configuration. | `akamai terraform export-zone --createconfig --segmentconfig "my-dns-zone.com"` |
 | `--configonly` (boolean) | Generates a zone configuration without JSON itemization. The configuration generated varies based on which set of flags you use. | `akamai terraform export-zone --createconfig --configonly "my-dns-zone.com"` |
 
+## API Definitions
+
+### Usage
+
+```shell
+   akamai terraform [global flags] export-apidefinitions [flags] <api_id>
+
+Flags:
+   --tfworkpath path         Directory used to store files created when running commands. (default: current directory)
+   --version value           API version to import (default: latest)
+   --format value            Format of the API file, either openapi or json (default: openapi)
+```
+
 ## General notes
 
 Terraform variable configuration is generated in a separately named Terraform file for each Akamai entity type. These files will need to be merged by the Admin in the case where multiple entities are managed concurrently with the Terraform client.

@@ -1,0 +1,30 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/apidefinitions.TFAPIWrapperData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 6.5.0"
+    }
+  }
+  required_version = ">= 1.0"
+}
+
+resource "akamai_apidefinitions_api" "{{.ResourceName}}" {
+  api = file("${path.module}/api.json")
+}
+
+output "api_id" {
+  value = akamai_apidefinitions_api.{{.ResourceName}}.id
+}
+
+output "api_latest_version" {
+  value = akamai_apidefinitions_api.{{.ResourceName}}.latest_version
+}
+
+output "api_staging_version" {
+  value = akamai_apidefinitions_api.{{.ResourceName}}.staging_version
+}
+
+output "api_production_version" {
+  value = akamai_apidefinitions_api.{{.ResourceName}}.production_version
+}

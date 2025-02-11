@@ -1,0 +1,38 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/apidefinitions.TFAPIWrapperData*/ -}}
+module "definition" {
+    source      = "./modules/definition"
+}
+{{ if .IsActiveOnStaging  }}
+module "activation_staging" {
+    source              = "./modules/activation"
+    depends_on          = [module.definition]
+    api_id              = module.definition.api_id
+    api_version         = module.definition.{{.StagingVersionKey}}
+    network             = "STAGING"
+}
+{{- else}}
+#module "activation_staging" {
+#    source              = "./modules/activation"
+#    depends_on          = [module.definition]
+#    api_id              = module.definition.api_id
+#    api_version         = module.definition.{{.StagingVersionKey}}
+#    network             = "STAGING"
+#}
+{{- end}}
+{{ if .IsActiveOnProduction  }}
+module "activation_production" {
+    source              = "./modules/activation"
+    depends_on          = [module.definition]
+    api_id              = module.definition.api_id
+    api_version         = module.definition.{{.ProductionVersionKey}}
+    network             = "PRODUCTION"
+}
+{{- else}}
+#module "activation_production" {
+#    source              = "./modules/activation"
+#    depends_on          = [module.definition]
+#    api_id              = module.definition.api_id
+#    api_version         = module.definition.{{.ProductionVersionKey}}
+#    network             = "PRODUCTION"
+#}
+{{- end}}
