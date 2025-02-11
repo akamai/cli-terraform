@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var api = "{\n  \"name\": \"Pet Store\",\n  \"hostnames\": null\n}"
+var api = "{\n  \"name\": \"Pet Store\",\n  \"hostnames\": null,\n  \"contractId\": \"\",\n  \"groupId\": 0\n}"
 
 func TestMain(m *testing.M) {
 	if err := os.MkdirAll("./testdata/res", 0755); err != nil {
