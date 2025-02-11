@@ -382,7 +382,6 @@ func (strategy *v2ActivationStrategy) populateWithLatestPolicyVersion(ctx contex
 			break
 		}
 		for _, v := range versions {
-			v := v
 			if version == nil || v.Version > *version {
 				version = &v.Version
 			}
