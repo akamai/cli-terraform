@@ -13,7 +13,6 @@ EDGEGRID_BRANCH_NAME="${2:-develop}"
 CLI_BRANCH_NAME="${3:-develop}"
 RELOAD_DOCKER_IMAGE="${4:-false}"
 
-
 TIMEOUT="20m"
 # Recalculate DOCKER_IMAGE_SIZE if any changes to dockerfile.
 DOCKER_IMAGE_SIZE="551598576"
@@ -69,6 +68,7 @@ docker run -d -it --name akatf-container --entrypoint "/usr/bin/tail" \
         -e SSH_PRV_KEY="${SSH_PRV_KEY}" \
         -e SSH_KNOWN_HOSTS="${SSH_KNOWN_HOSTS}" \
         -e TIMEOUT="$TIMEOUT" \
+        -e GOTOOLCHAIN="auto" \
         -v "$HOME"/.ssh/id_rsa=/root/id_rsa \
         -v "$HOME"/.ssh/id_rsa.pub=/root/id_rsa.pub \
         -v "$HOME"/.ssh/known_hosts=/root/known_hosts \
