@@ -111,5 +111,7 @@ func EscapeQuotedStringLit(s string) string {
 func Escape(str string) string {
 	str = strings.ReplaceAll(str, `\`, `\\`)
 	str = strings.ReplaceAll(str, "\n", "\\n")
+	str = strings.ReplaceAll(str, "${", "$${")
+	str = strings.ReplaceAll(str, "%{", "%%{")
 	return strings.ReplaceAll(str, `"`, `\"`)
 }

@@ -176,7 +176,7 @@ EOT
       }
     }
     children = [
-      data.akamai_property_rules_builder.test-edgesuite-net_rule_strange_characters--a-------------ą.json,
+      data.akamai_property_rules_builder.test-edgesuite-net_rule_strange_characters--a---b-------------ą.json,
       data.akamai_property_rules_builder.test-edgesuite-net_rule_static_content.json,
       data.akamai_property_rules_builder.test-edgesuite-net_rule_dynamic_content.json,
       data.akamai_property_rules_builder.test-edgesuite-net_rule_new_rule.json,
@@ -187,9 +187,9 @@ EOT
   }
 }
 
-data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters--a-------------ą" {
+data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters--a---b-------------ą" {
   rules_v2023_01_05 {
-    name                  = "Strange Characters${a}\"\\||$%&*@#|!ą"
+    name                  = "Strange Characters$${a}%%{b}\"\\||$%&*@#|!ą"
     criteria_must_satisfy = "all"
     criterion {
       content_type {
@@ -197,6 +197,13 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters
         match_operator       = "IS_ONE_OF"
         match_wildcard       = true
         values               = ["text/html*", "text/css*", "application/x-javascript*", ]
+      }
+    }
+    criterion {
+      regular_expression {
+        case_sensitive = true
+        match_string   = "$${ { user.PMUSER_MY_HEADER } }"
+        regex          = "."
       }
     }
     behavior {
@@ -218,7 +225,7 @@ EOT
     children = [
       data.akamai_property_rules_builder.test-edgesuite-net_rule_new_rule2.json,
       data.akamai_property_rules_builder.test-edgesuite-net_rule_new_rule3.json,
-      data.akamai_property_rules_builder.test-edgesuite-net_rule_strange_characters--a-------------ą1.json,
+      data.akamai_property_rules_builder.test-edgesuite-net_rule_strange_characters--a---b-------------ą1.json,
       data.akamai_property_rules_builder.test-edgesuite-net_rule_m_pulse.json,
       data.akamai_property_rules_builder.test-edgesuite-net_rule_ipcuid_invalidation.json,
       data.akamai_property_rules_builder.test-edgesuite-net_rule_ipcuid_invalidation1.json,
@@ -326,9 +333,9 @@ data "akamai_property_rules_builder" "test-edgesuite-net_rule_new_rule3" {
   }
 }
 
-data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters--a-------------ą1" {
+data "akamai_property_rules_builder" "test-edgesuite-net_rule_strange_characters--a---b-------------ą1" {
   rules_v2023_01_05 {
-    name                  = "Strange Characters${a}\"\\&&$%&*@#|!ą"
+    name                  = "Strange Characters$${a}%%{b}\"\\&&$%&*@#|!ą"
     criteria_must_satisfy = "all"
   }
 }

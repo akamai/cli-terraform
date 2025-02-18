@@ -25,9 +25,8 @@
 
 ### BUG FIXES:
 
-
-
-
+* General
+  * Fixed inserting escape sequences that do not use backslash ([#83](https://github.com/akamai/cli-terraform/issues/83)).
 
 
 
