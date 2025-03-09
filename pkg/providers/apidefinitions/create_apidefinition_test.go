@@ -274,13 +274,13 @@ func mockGetResourceOperation(c *v0.Mock) {
 }
 
 func mockGetResourceOperationNoOperations(c *v0.Mock) {
-	emptyOperationsJson := `{
+	emptyOperationsJSON := `{
 						  		"operations": {}
                        		}`
 
 	var response v0.GetResourceOperationResponse
 
-	err := json.Unmarshal([]byte(emptyOperationsJson), &response)
+	err := json.Unmarshal([]byte(emptyOperationsJSON), &response)
 
 	if err != nil {
 		fmt.Println("Error unmarshalling operations JSON:", err)

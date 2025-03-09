@@ -14,6 +14,6 @@ provider "akamai" {
 }
 
 resource "akamai_apidefinitions_resource_operations" "pet_store" {
-  endpoint_id         = 1
+  api_id              = 1
   resource_operations = jsonencode(file("${path.module}/operations-api.json"))
 }
