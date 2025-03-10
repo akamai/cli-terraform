@@ -21,5 +21,7 @@ module "activation_production" {
 }
 
 module "operations" {
-  source = "./modules/definition"
+  source     = "./modules/definition"
+  depends_on = [module.definition]
+  api_id     = module.definition.api_id
 }

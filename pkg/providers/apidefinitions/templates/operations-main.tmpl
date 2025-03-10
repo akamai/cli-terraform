@@ -1,15 +1,5 @@
 {{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/apidefinitions.TFAPIWrapperData*/ -}}
-terraform {
-  required_providers {
-    akamai = {
-      source  = "akamai/akamai"
-      version = ">= 6.5.0"
-    }
-  }
-  required_version = ">= 1.0"
-}
-
 resource "akamai_apidefinitions_resource_operations" "{{.ResourceName}}" {
-  api_id = {{.ID}}
+  api_id = var.api_id
   resource_operations = jsonencode(file("${path.module}/operations-api.json"))
 }

@@ -41,9 +41,13 @@ module "activation_production" {
 {{ if not .IsOperationsEmpty }}
 module "operations" {
     source              = "./modules/definition"
+    depends_on          = [module.definition]
+    api_id              = module.definition.api_id
 }
 {{- else}}
 #module "operations" {
 #    source              = "./modules/definition"
+#    depends_on          = [module.definition]
+#    api_id              = module.definition.api_id
 #}
 {{- end}}

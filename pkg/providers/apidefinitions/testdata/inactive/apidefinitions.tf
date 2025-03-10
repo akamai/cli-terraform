@@ -22,4 +22,6 @@ module "definition" {
 
 #module "operations" {
 #    source              = "./modules/definition"
+#    depends_on          = [module.definition]
+#    api_id              = module.definition.api_id
 #}
