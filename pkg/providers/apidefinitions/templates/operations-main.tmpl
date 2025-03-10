@@ -9,11 +9,6 @@ terraform {
   required_version = ">= 1.0"
 }
 
-provider "akamai" {
-  edgerc         = "~/.edgerc"
-  config_section = "DEFAULT"
-}
-
 resource "akamai_apidefinitions_resource_operations" "{{.ResourceName}}" {
   api_id = {{.ID}}
   resource_operations = jsonencode(file("${path.module}/operations-api.json"))
