@@ -8,5 +8,5 @@ terraform import module.activation_staging.akamai_apidefinitions_activation.{{.R
 terraform import module.activation_production.akamai_apidefinitions_activation.{{.ResourceName}} {{.ID}}:PRODUCTION
 {{- end }}
 {{ if not .IsOperationsEmpty -}}
-terraform import module.operations.akamai_apidefinitions_resource_operations.{{.ResourceName}} {{.ID}}
+terraform import module.definition.akamai_apidefinitions_resource_operations.{{.ResourceName}} {{.ID}}
 {{- end }}

@@ -243,7 +243,6 @@ func createTemplateProcessor(rootPath string, format outputFormat) (*templates.F
 		"activation-variables.tmpl": filepath.Join(activationModulePath, "variables.tf"),
 		"operations-main.tmpl":      filepath.Join(definitionModulePath, "operations.tf"),
 		"operations-api.tmpl":       filepath.Join(definitionModulePath, "operations-api.json"),
-		"definition-variables.tmpl": filepath.Join(definitionModulePath, "variables.tf"),
 	}
 
 	switch format {

@@ -19,9 +19,3 @@ module "activation_production" {
   api_version = module.definition.api_production_version
   network     = "PRODUCTION"
 }
-
-module "operations" {
-  source     = "./modules/definition"
-  depends_on = [module.definition]
-  api_id     = module.definition.api_id
-}

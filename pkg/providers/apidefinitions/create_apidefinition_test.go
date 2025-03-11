@@ -157,7 +157,6 @@ func TestProcessAPIDefinitionTemplates(t *testing.T) {
 				"modules/activation/main.tf", "modules/activation/variables.tf",
 				"modules/definition/main.tf", "modules/definition/api.yml", "modules/definition/variables.tf",
 				"modules/definition/operations-api.json", "modules/definition/operations.tf",
-				"modules/definition/variables.tf",
 			},
 		},
 		"json - active on Staging and Production": {
@@ -168,7 +167,6 @@ func TestProcessAPIDefinitionTemplates(t *testing.T) {
 				"modules/activation/main.tf", "modules/activation/variables.tf",
 				"modules/definition/main.tf", "modules/definition/api.json",
 				"modules/definition/operations-api.json", "modules/definition/operations.tf",
-				"modules/definition/variables.tf",
 			},
 		},
 		"inactive on Staging and Production": {
