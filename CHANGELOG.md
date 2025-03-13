@@ -20,7 +20,8 @@
 
 
 
-
+* PAPI
+  * Added support for the new rule format `v2025-02-18`.
 
 
 ### BUG FIXES:
