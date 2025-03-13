@@ -1,8 +1,7 @@
 module github.com/akamai/cli-terraform/v2
 
 go 1.22.0
-
-toolchain go1.22.11
+toolchain go1.23.7
 
 require (
 	github.com/akamai/AkamaiOPEN-edgegrid-golang/v10 v10.0.0
@@ -48,11 +47,11 @@ require (
 	github.com/zclconf/go-cty v1.15.1 // indirect
 	go.uber.org/ratelimit v0.3.1 // indirect
 	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/term v0.28.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/term v0.29.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
