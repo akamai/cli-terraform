@@ -259,6 +259,7 @@ func mockGetAPIVersions(c *apidefinitions.Mock, latestVersion int64) {
 }
 
 func mockGetResourceOperation(c *v0.Mock) {
+<<<<<<< HEAD
 	operations := orderedmap.New[string, *orderedmap.OrderedMap[string, v0.Operation]]()
 	baseOperations := orderedmap.New[string, v0.Operation]()
 	baseOperations.Set("test login", v0.Operation{
@@ -270,6 +271,21 @@ func mockGetResourceOperation(c *v0.Mock) {
 	c.On("GetResourceOperation", mock.Anything, mock.Anything).
 		Return(&v0.GetResourceOperationResponse{
 			ResourceOperations: operations,
+=======
+	resourceOps := orderedmap.New[string, *orderedmap.OrderedMap[string, v0.Operation]]()
+	operationsForBase := orderedmap.New[string, v0.Operation]()
+
+	operationsForBase.Set("test login", v0.Operation{
+		Method:  ptr.To("POST"),
+		Purpose: ptr.To("SEARCH"),
+	})
+
+	resourceOps.Set("/base", operationsForBase)
+
+	c.On("GetResourceOperation", mock.Anything, mock.Anything).
+		Return(&v0.GetResourceOperationResponse{
+			ResourceOperations: resourceOps,
+>>>>>>> e7f2b62 (BOTMAN-15495 fix formatting error)
 		}, nil).Once()
 }
 
