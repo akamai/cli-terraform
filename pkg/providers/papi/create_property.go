@@ -23,6 +23,7 @@ import (
 	"github.com/akamai/cli-terraform/v2/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
+	"github.com/akamai/terraform-provider-akamai/v7/pkg/common/str"
 	"github.com/urfave/cli/v2"
 )
 
@@ -100,10 +101,40 @@ type TFPropertyData struct {
 	IsSecure             string
 	EdgeHostnames        map[string]EdgeHostname
 	Hostnames            map[string]Hostname
-	UseHostnameBucket    bool
+	HostnameBucket       *HostnameBucketDetails
 	ReadVersion          string
 	ProductionInfo       NetworkInfo
 	StagingInfo          NetworkInfo
+}
+
+// HostnameBucketDetails contains details about staging and production hostname buckets
+type HostnameBucketDetails struct {
+	StagingNotifyEmails     []string
+	ProductionNotifyEmails  []string
+	StagingNote             string
+	ProductionNote          string
+	HasStagingActivation    bool
+	HasProductionActivation bool
+	Hostnames               map[string]HostnameItem
+}
+
+// HostnameItem represents hostname in a bucket. By default, `CertProvisioningType` and `EdgeHostnameID` should be the same
+// for both STAGING and PRODUCTION networks. If they are not, `ProductionCertType` and `ProductionEdgeHostnameID` are set to
+// distinguish between them. It's needed to handle an edge case, in which there is the same hostname on STAGING and PRODUCTION
+// networks, but it differs in cert_provisioning_type or edge_hostname_id.
+// We need to generate separate configuration variable for this case.
+type HostnameItem struct {
+	CnameTo                        string
+	CertProvisioningType           string
+	EdgeHostnameID                 string
+	Staging                        bool
+	Production                     bool
+	ProductionCertProvisioningType *string
+	ProductionEdgeHostnameID       *string
+}
+
+func (h HostnameItem) equal(o HostnameItem) bool {
+	return h.CertProvisioningType == o.CertProvisioningType && h.EdgeHostnameID == o.EdgeHostnameID
 }
 
 // NetworkInfo holds details for specific network
@@ -197,6 +228,10 @@ var (
 	ErrUnsupportedRuleFormat = errors.New("unsupported rule format")
 	errCreateRulesDirectory  = errors.New("create rule directory")
 	errReadRuleMode          = errors.New("reading export directory mode")
+	// ErrListActivePropertyHostnames is returned when listing active property hostnames failed
+	ErrListActivePropertyHostnames = errors.New("list active property hostnames failed")
+	// ErrListPropertyHostnameActivations is returned when listing property hostnames activations failed
+	ErrListPropertyHostnameActivations = errors.New("list property hostnames activations failed")
 )
 
 var additionalFuncs = tools.DecorateWithMultilineHandlingFunctions(
@@ -349,9 +384,6 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 	tfData.Property.PropertyName = property.PropertyName
 	tfData.Property.PropertyID = property.PropertyID
 	tfData.Property.PropertyResourceName = formatResourceName(property.PropertyName)
-	if isHostnameBucketProperty(property) {
-		tfData.Property.UseHostnameBucket = true
-	}
 
 	term.Spinner().OK()
 
@@ -418,8 +450,39 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 	term.Spinner().OK()
 
 	// Get Hostnames
-	if !isHostnameBucketProperty(property) {
-		term.Spinner().Start("Fetching hostnames ")
+	term.Spinner().Start("Fetching hostnames ")
+	if isHostnameBucketProperty(property) {
+		actOnStaging, actOnProduction, err := findLatestActivations(ctx, client, property)
+		if err != nil {
+			term.Spinner().Fail()
+			return fmt.Errorf("%w: %s", ErrListPropertyHostnameActivations, err)
+		}
+
+		var hostnamesStaging []papi.HostnameItem
+		if actOnStaging != nil {
+			hostnamesStaging, err = listHostnames(ctx, client, property, "STAGING")
+			if err != nil {
+				term.Spinner().Fail()
+				return fmt.Errorf("%w: %s", ErrListActivePropertyHostnames, err)
+			}
+		}
+
+		var hostnamesProduction []papi.HostnameItem
+		if actOnProduction != nil {
+			hostnamesProduction, err = listHostnames(ctx, client, property, "PRODUCTION")
+			if err != nil {
+				term.Spinner().Fail()
+				return fmt.Errorf("%w: %s", ErrListActivePropertyHostnames, err)
+			}
+		}
+
+		if len(hostnamesStaging) != 0 || len(hostnamesProduction) != 0 {
+			templateProcessor.AddTemplateTarget("hostname_bucket.tmpl", filepath.Join(options.tfWorkPath, "hostname_bucket.tf"))
+			tfData.Property.HostnameBucket = createHostnameBucketTFData(hostnamesStaging, hostnamesProduction, actOnStaging, actOnProduction)
+		} else {
+			tfData.Property.HostnameBucket = &HostnameBucketDetails{}
+		}
+	} else {
 		hostnames, err := getPropertyVersionHostnames(ctx, client, property, version)
 		if err != nil {
 			term.Spinner().Fail()
@@ -514,6 +577,132 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 	term.Printf("Terraform configuration for property \"%s\" was saved successfully\n", property.PropertyName)
 
 	return nil
+}
+
+// createHostnameBucketTFData creates the TF data used in the templates from the STAGING and PRODUCTION hostnames and activations.
+func createHostnameBucketTFData(staging, production []papi.HostnameItem, actOnStaging, actOnProduction *papi.HostnameActivationListItem) *HostnameBucketDetails {
+	result := HostnameBucketDetails{
+		Hostnames: createTFHostnameItems(staging, production),
+	}
+
+	if actOnStaging != nil && len(staging) != 0 {
+		result.StagingNote = actOnStaging.Note
+		result.StagingNotifyEmails = actOnStaging.NotifyEmails
+		result.HasStagingActivation = true
+	}
+
+	if actOnProduction != nil && len(production) != 0 {
+		result.ProductionNotifyEmails = actOnProduction.NotifyEmails
+		result.ProductionNote = actOnProduction.Note
+		result.HasProductionActivation = true
+	}
+
+	return &result
+}
+
+// createTFHostnameItems creates a map of hostnames data used in templates.
+func createTFHostnameItems(staging, production []papi.HostnameItem) map[string]HostnameItem {
+	hostnameMap := make(map[string]HostnameItem)
+
+	for _, h := range staging {
+		hostnameMap[h.CnameFrom] = HostnameItem{
+			CnameTo:              h.StagingCnameTo,
+			CertProvisioningType: string(h.StagingCertType),
+			EdgeHostnameID:       h.StagingEdgeHostnameId,
+			Staging:              true,
+			Production:           false,
+		}
+	}
+
+	for _, h := range production {
+		if currentHostname, ok := hostnameMap[h.CnameFrom]; ok {
+			prodHostname := HostnameItem{
+				CertProvisioningType: string(h.ProductionCertType),
+				EdgeHostnameID:       h.ProductionEdgeHostnameId,
+			}
+			if currentHostname.equal(prodHostname) {
+				currentHostname.Production = true
+				hostnameMap[h.CnameFrom] = currentHostname
+			} else {
+				// If the hostnames differ in CertProvisioningType or EdgeHostnameID between networks, we need to indicate
+				// that there should be two separate variables generated for the hostname, depending on the network.
+				currentHostname.ProductionEdgeHostnameID = ptr.To(h.ProductionEdgeHostnameId)
+				currentHostname.ProductionCertProvisioningType = ptr.To(string(h.ProductionCertType))
+				hostnameMap[h.CnameFrom] = currentHostname
+			}
+		} else {
+			hostnameMap[h.CnameFrom] = HostnameItem{
+				CnameTo:              h.ProductionCnameTo,
+				CertProvisioningType: string(h.ProductionCertType),
+				EdgeHostnameID:       h.ProductionEdgeHostnameId,
+				Staging:              false,
+				Production:           true,
+			}
+		}
+	}
+
+	return hostnameMap
+}
+
+// listHostnames lists the hostnames in a bucket for a given network.
+func listHostnames(ctx context.Context, client papi.PAPI, property *papi.Property, network string) ([]papi.HostnameItem, error) {
+	var result []papi.HostnameItem
+	offset, limit := 0, 999
+	for {
+		res, err := client.ListActivePropertyHostnames(ctx, papi.ListActivePropertyHostnamesRequest{
+			Offset:     offset,
+			Limit:      limit,
+			PropertyID: str.AddPrefix(property.PropertyID, "prp_"),
+			ContractID: str.AddPrefix(property.ContractID, "ctr_"),
+			GroupID:    str.AddPrefix(property.GroupID, "grp_"),
+			Network:    papi.NetworkType(network),
+		})
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, res.Hostnames.Items...)
+
+		offset += limit
+		if offset >= res.Hostnames.TotalItems {
+			break
+		}
+	}
+
+	return result, nil
+}
+
+// findLatestActivations returns the latest ACTIVE activation for STAGING and PRODUCTION networks.
+func findLatestActivations(ctx context.Context, client papi.PAPI, property *papi.Property) (*papi.HostnameActivationListItem, *papi.HostnameActivationListItem, error) {
+	var actOnStaging, actOnProduction *papi.HostnameActivationListItem
+	offset, limit := 0, 999
+	for actOnStaging == nil || actOnProduction == nil {
+		activations, err := client.ListPropertyHostnameActivations(ctx, papi.ListPropertyHostnameActivationsRequest{
+			PropertyID: str.AddPrefix(property.PropertyID, "prp_"),
+			ContractID: str.AddPrefix(property.ContractID, "ctr_"),
+			GroupID:    str.AddPrefix(property.GroupID, "grp_"),
+			Offset:     offset,
+			Limit:      limit,
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+
+		for _, act := range activations.HostnameActivations.Items {
+			if actOnStaging == nil && act.Status == "ACTIVE" && act.Network == "STAGING" {
+				actOnStaging = &act
+			}
+			if actOnProduction == nil && act.Status == "ACTIVE" && act.Network == "PRODUCTION" {
+				actOnProduction = &act
+			}
+		}
+
+		offset += limit
+		if offset >= activations.HostnameActivations.TotalItems {
+			break
+		}
+	}
+
+	return actOnStaging, actOnProduction, nil
 }
 
 func useThisOnlyRuleFormat(acceptedFormat string) func([]string) ([]string, error) {

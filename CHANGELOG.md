@@ -17,7 +17,8 @@
 
 
 
-
+* PAPI
+  * Added support for exporting `akamai_property_hostname_bucket` resources when exporting property configuration.
 
 
 

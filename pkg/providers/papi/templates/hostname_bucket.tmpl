@@ -1,0 +1,20 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/papi.TFData*/ -}}
+locals {
+  hostnames = [{{range $cnameFrom, $hostname := .Property.HostnameBucket.Hostnames}}
+    {
+      cname_from             = "{{$cnameFrom}}"
+      cert_provisioning_type = "{{$hostname.CertProvisioningType}}"
+      edge_hostname_id       = "{{$hostname.EdgeHostnameID}}"
+      staging                = {{$hostname.Staging}}
+      production             = {{$hostname.Production}}
+    }{{- if $hostname.ProductionEdgeHostnameID }},
+    {
+      cname_from             = "{{$cnameFrom}}"
+      cert_provisioning_type = "{{$hostname.ProductionCertProvisioningType}}"
+      edge_hostname_id       = "{{$hostname.ProductionEdgeHostnameID}}"
+      staging                = false
+      production             = true
+    }
+    {{- end }}{{if $cnameFrom}},{{end}}{{end}}
+  ]
+}
