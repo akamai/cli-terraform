@@ -1767,7 +1767,7 @@ func mockListActivePropertyHostnames(p *papi.Mock, n int, network, certType stri
 			PropertyID: "prp_12345",
 			Limit:      999,
 			Offset:     offset,
-			Network:    papi.NetworkType(network),
+			Network:    papi.ActivationNetwork(network),
 			ContractID: "ctr_test_contract",
 			GroupID:    "grp_12345",
 		}
@@ -1790,7 +1790,7 @@ func mockListActivePropertyHostnames(p *papi.Mock, n int, network, certType stri
 		PropertyID: "prp_12345",
 		Limit:      999,
 		Offset:     offset,
-		Network:    papi.NetworkType(network),
+		Network:    papi.ActivationNetwork(network),
 		ContractID: "ctr_test_contract",
 		GroupID:    "grp_12345",
 	}
@@ -1897,7 +1897,7 @@ func generateHostnames(n int, certType, network, ehnID string) []papi.HostnameIt
 				CnameType:             "EDGE_HOSTNAME",
 				StagingCertType:       papi.CertType(certType),
 				StagingCnameTo:        fmt.Sprintf("www.test.cname_to.%d.com", i),
-				StagingEdgeHostnameId: ehnID,
+				StagingEdgeHostnameID: ehnID,
 			}
 		} else {
 			item = papi.HostnameItem{
@@ -1905,7 +1905,7 @@ func generateHostnames(n int, certType, network, ehnID string) []papi.HostnameIt
 				CnameType:                "EDGE_HOSTNAME",
 				ProductionCertType:       papi.CertType(certType),
 				ProductionCnameTo:        fmt.Sprintf("www.test.cname_to.%d.com", i),
-				ProductionEdgeHostnameId: ehnID,
+				ProductionEdgeHostnameID: ehnID,
 			}
 		}
 		result[i] = item
@@ -3965,13 +3965,13 @@ func TestCreateTFHostnameItems(t *testing.T) {
 					CnameFrom:             "www.test.cname_from.0.com",
 					StagingCertType:       "CPS_MANAGED",
 					StagingCnameTo:        "www.test.cname_to.0.com",
-					StagingEdgeHostnameId: "ehn_12345",
+					StagingEdgeHostnameID: "ehn_12345",
 				},
 				{
 					CnameFrom:             "www.test.cname_from.1.com",
 					StagingCertType:       "DEFAULT",
 					StagingCnameTo:        "www.test.cname_to.1.com",
-					StagingEdgeHostnameId: "ehn_12345",
+					StagingEdgeHostnameID: "ehn_12345",
 				},
 			},
 			production: []papi.HostnameItem{
@@ -3979,13 +3979,13 @@ func TestCreateTFHostnameItems(t *testing.T) {
 					CnameFrom:                "www.test.cname_from.0.com",
 					ProductionCertType:       "CPS_MANAGED",
 					ProductionCnameTo:        "www.test.cname_to.0.com",
-					ProductionEdgeHostnameId: "ehn_12345",
+					ProductionEdgeHostnameID: "ehn_12345",
 				},
 				{
 					CnameFrom:                "www.test.cname_from.1.com",
 					ProductionCertType:       "DEFAULT",
 					ProductionCnameTo:        "www.test.cname_to.1.com",
-					ProductionEdgeHostnameId: "ehn_67890",
+					ProductionEdgeHostnameID: "ehn_67890",
 				},
 			},
 			expected: map[string]HostnameItem{

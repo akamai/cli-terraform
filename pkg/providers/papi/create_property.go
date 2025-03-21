@@ -608,7 +608,7 @@ func createTFHostnameItems(staging, production []papi.HostnameItem) map[string]H
 		hostnameMap[h.CnameFrom] = HostnameItem{
 			CnameTo:              h.StagingCnameTo,
 			CertProvisioningType: string(h.StagingCertType),
-			EdgeHostnameID:       h.StagingEdgeHostnameId,
+			EdgeHostnameID:       h.StagingEdgeHostnameID,
 			Staging:              true,
 			Production:           false,
 		}
@@ -618,7 +618,7 @@ func createTFHostnameItems(staging, production []papi.HostnameItem) map[string]H
 		if currentHostname, ok := hostnameMap[h.CnameFrom]; ok {
 			prodHostname := HostnameItem{
 				CertProvisioningType: string(h.ProductionCertType),
-				EdgeHostnameID:       h.ProductionEdgeHostnameId,
+				EdgeHostnameID:       h.ProductionEdgeHostnameID,
 			}
 			if currentHostname.equal(prodHostname) {
 				currentHostname.Production = true
@@ -626,7 +626,7 @@ func createTFHostnameItems(staging, production []papi.HostnameItem) map[string]H
 			} else {
 				// If the hostnames differ in CertProvisioningType or EdgeHostnameID between networks, we need to indicate
 				// that there should be two separate variables generated for the hostname, depending on the network.
-				currentHostname.ProductionEdgeHostnameID = ptr.To(h.ProductionEdgeHostnameId)
+				currentHostname.ProductionEdgeHostnameID = ptr.To(h.ProductionEdgeHostnameID)
 				currentHostname.ProductionCertProvisioningType = ptr.To(string(h.ProductionCertType))
 				hostnameMap[h.CnameFrom] = currentHostname
 			}
@@ -634,7 +634,7 @@ func createTFHostnameItems(staging, production []papi.HostnameItem) map[string]H
 			hostnameMap[h.CnameFrom] = HostnameItem{
 				CnameTo:              h.ProductionCnameTo,
 				CertProvisioningType: string(h.ProductionCertType),
-				EdgeHostnameID:       h.ProductionEdgeHostnameId,
+				EdgeHostnameID:       h.ProductionEdgeHostnameID,
 				Staging:              false,
 				Production:           true,
 			}
@@ -655,7 +655,7 @@ func listHostnames(ctx context.Context, client papi.PAPI, property *papi.Propert
 			PropertyID: str.AddPrefix(property.PropertyID, "prp_"),
 			ContractID: str.AddPrefix(property.ContractID, "ctr_"),
 			GroupID:    str.AddPrefix(property.GroupID, "grp_"),
-			Network:    papi.NetworkType(network),
+			Network:    papi.ActivationNetwork(network),
 		})
 		if err != nil {
 			return nil, err
