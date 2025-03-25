@@ -23,7 +23,6 @@ import (
 	"github.com/akamai/cli-terraform/v2/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/akamai/terraform-provider-akamai/v7/pkg/common/str"
 	"github.com/urfave/cli/v2"
 )
 
@@ -652,9 +651,9 @@ func listHostnames(ctx context.Context, client papi.PAPI, property *papi.Propert
 		res, err := client.ListActivePropertyHostnames(ctx, papi.ListActivePropertyHostnamesRequest{
 			Offset:     offset,
 			Limit:      limit,
-			PropertyID: str.AddPrefix(property.PropertyID, "prp_"),
-			ContractID: str.AddPrefix(property.ContractID, "ctr_"),
-			GroupID:    str.AddPrefix(property.GroupID, "grp_"),
+			PropertyID: tools.AddPrefix(property.PropertyID, "prp_"),
+			ContractID: tools.AddPrefix(property.ContractID, "ctr_"),
+			GroupID:    tools.AddPrefix(property.GroupID, "grp_"),
 			Network:    papi.ActivationNetwork(network),
 		})
 		if err != nil {
@@ -677,9 +676,9 @@ func findLatestActivations(ctx context.Context, client papi.PAPI, property *papi
 	offset, limit := 0, 999
 	for actOnStaging == nil || actOnProduction == nil {
 		activations, err := client.ListPropertyHostnameActivations(ctx, papi.ListPropertyHostnameActivationsRequest{
-			PropertyID: str.AddPrefix(property.PropertyID, "prp_"),
-			ContractID: str.AddPrefix(property.ContractID, "ctr_"),
-			GroupID:    str.AddPrefix(property.GroupID, "grp_"),
+			PropertyID: tools.AddPrefix(property.PropertyID, "prp_"),
+			ContractID: tools.AddPrefix(property.ContractID, "ctr_"),
+			GroupID:    tools.AddPrefix(property.GroupID, "grp_"),
 			Offset:     offset,
 			Limit:      limit,
 		})
