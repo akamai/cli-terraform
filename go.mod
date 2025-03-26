@@ -12,6 +12,7 @@ require (
 	github.com/urfave/cli/v2 v2.19.3
 )
 
+
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
@@ -57,3 +58,4 @@ require (
 
 //replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v10 => ../akamaiopen-edgegrid-golang
 //replace github.com/akamai/cli/v2 => ../cli
+replace gopkg.in/yaml.v2 v2.2.2 => gopkg.in/yaml.v2 v2.4.0 // Fix security vulnerability
