@@ -30,6 +30,8 @@ type (
 		API                  string
 		ID                   int64
 		Version              int64
+		ContractID           string
+		GroupID              int64
 		ResourceName         string
 		IsActiveOnStaging    bool
 		IsActiveOnProduction bool
@@ -164,6 +166,8 @@ func populateAPIData(section, content string, id, versionNumber, latestVersionNu
 		API:                  content,
 		ID:                   id,
 		Version:              versionNumber,
+		ContractID:           api.ContractID,
+		GroupID:              api.GroupID,
 		ResourceName:         sanitizeName(api.APIEndpointName),
 		Section:              section,
 		IsActiveOnStaging:    isActive(api.StagingVersion),
@@ -174,7 +178,7 @@ func populateAPIData(section, content string, id, versionNumber, latestVersionNu
 }
 
 func serializeIndent(version *v0.GetAPIVersionResponse) (*string, error) {
-	jsonBody, err := json.MarshalIndent(version.RegisterAPIRequest, "", "  ")
+	jsonBody, err := json.MarshalIndent(version.RegisterAPIRequest.APIAttributes, "", "  ")
 	if err != nil {
 		return nil, err
 	}
@@ -200,6 +204,7 @@ func createTemplateProcessor(rootPath string, format outputFormat) (*templates.F
 		"import.tmpl":               filepath.Join(rootPath, "import.sh"),
 		"activation-main.tmpl":      filepath.Join(activationModulePath, "main.tf"),
 		"activation-variables.tmpl": filepath.Join(activationModulePath, "variables.tf"),
+		"definition-variables.tmpl": filepath.Join(definitionModulePath, "variables.tf"),
 	}
 
 	switch format {

@@ -10,11 +10,13 @@ terraform {
 }
 
 data "akamai_apidefinitions_openapi" "{{.ResourceName}}_openapi" {
-  file = file("${path.module}/api.yml")
+  file_path = "${path.module}/api.yml"
 }
 
 resource "akamai_apidefinitions_api" "{{.ResourceName}}" {
- api = data.akamai_apidefinitions_openapi.{{.ResourceName}}_openapi.api
+ api         = data.akamai_apidefinitions_openapi.{{.ResourceName}}_openapi.api
+ contract_id = var.contract_id
+ group_id    = var.group_id
 }
 
 output "api_id" {

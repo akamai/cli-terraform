@@ -9,7 +9,9 @@ terraform {
 }
 
 resource "akamai_apidefinitions_api" "pet_store" {
-  api = file("${path.module}/api.json")
+  api         = file("${path.module}/api.json")
+  contract_id = var.contract_id
+  group_id    = var.group_id
 }
 
 output "api_id" {

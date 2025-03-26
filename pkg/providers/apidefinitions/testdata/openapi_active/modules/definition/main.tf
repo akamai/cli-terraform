@@ -9,11 +9,13 @@ terraform {
 }
 
 data "akamai_apidefinitions_openapi" "pet_store_openapi" {
-  file = file("${path.module}/api.yml")
+  file_path = "${path.module}/api.yml"
 }
 
 resource "akamai_apidefinitions_api" "pet_store" {
-  api = data.akamai_apidefinitions_openapi.pet_store_openapi.api
+  api         = data.akamai_apidefinitions_openapi.pet_store_openapi.api
+  contract_id = var.contract_id
+  group_id    = var.group_id
 }
 
 output "api_id" {

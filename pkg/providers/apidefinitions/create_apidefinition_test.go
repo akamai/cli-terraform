@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var api = "{\n  \"name\": \"Pet Store\",\n  \"hostnames\": null,\n  \"contractId\": \"\",\n  \"groupId\": 0\n}"
+var api = "{\n  \"name\": \"Pet Store\",\n  \"hostnames\": null\n}"
 
 func TestMain(m *testing.M) {
 	if err := os.MkdirAll("./testdata/res", 0755); err != nil {
@@ -133,7 +133,7 @@ func TestProcessAPIDefinitionTemplates(t *testing.T) {
 			dir:       "openapi_active",
 			filesToCheck: []string{"apidefinitions.tf", "import.sh", "variables.tf",
 				"modules/activation/main.tf", "modules/activation/variables.tf",
-				"modules/definition/main.tf", "modules/definition/api.yml",
+				"modules/definition/main.tf", "modules/definition/api.yml", "modules/definition/variables.tf",
 			},
 		},
 		"json - active on Staging and Production": {
@@ -198,7 +198,9 @@ func mockGetAPI(c *apidefinitions.Mock, version *int64, status *apidefinitions.A
 					VersionNumber: version,
 					Status:        status,
 				},
-				Locked: false,
+				Locked:     false,
+				ContractID: "Contract-1",
+				GroupID:    1,
 			},
 		}, nil).
 		Once()
@@ -208,7 +210,9 @@ func mockGetAPIVersion(c *v0.Mock) {
 	c.On("GetAPIVersion", mock.Anything, mock.Anything).
 		Return(&v0.GetAPIVersionResponse{
 			RegisterAPIRequest: v0.RegisterAPIRequest{
-				Name: "Pet Store",
+				APIAttributes: v0.APIAttributes{
+					Name: "Pet Store",
+				},
 			},
 		}, nil).
 		Once()
@@ -239,6 +243,8 @@ var (
 		API:                  api,
 		ID:                   1,
 		Version:              1,
+		ContractID:           "Contract-1",
+		GroupID:              1,
 		ResourceName:         "pet_store",
 		IsActiveOnStaging:    false,
 		IsActiveOnProduction: false,
@@ -251,6 +257,8 @@ var (
 		API:                  api,
 		ID:                   1,
 		Version:              2,
+		ContractID:           "Contract-1",
+		GroupID:              1,
 		ResourceName:         "pet_store",
 		IsActiveOnStaging:    true,
 		IsActiveOnProduction: true,
@@ -263,6 +271,8 @@ var (
 		API:                  api,
 		ID:                   1,
 		Version:              1,
+		ContractID:           "Contract-1",
+		GroupID:              1,
 		ResourceName:         "pet_store",
 		IsActiveOnStaging:    true,
 		IsActiveOnProduction: true,
