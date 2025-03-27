@@ -236,13 +236,13 @@ func createTemplateProcessor(rootPath string, format outputFormat) (*templates.F
 	}
 
 	templateToFile := map[string]string{
-		"apidefinitions.tmpl":       filepath.Join(rootPath, "apidefinitions.tf"),
-		"variables.tmpl":            filepath.Join(rootPath, "variables.tf"),
-		"import.tmpl":               filepath.Join(rootPath, "import.sh"),
-		"activation-main.tmpl":      filepath.Join(activationModulePath, "main.tf"),
-		"activation-variables.tmpl": filepath.Join(activationModulePath, "variables.tf"),
-		"operations-main.tmpl":      filepath.Join(definitionModulePath, "operations.tf"),
-		"operations-api.tmpl":       filepath.Join(definitionModulePath, "operations-api.json"),
+		"apidefinitions.tmpl":             filepath.Join(rootPath, "apidefinitions.tf"),
+		"variables.tmpl":                  filepath.Join(rootPath, "variables.tf"),
+		"import.tmpl":                     filepath.Join(rootPath, "import.sh"),
+		"activation-main.tmpl":            filepath.Join(activationModulePath, "main.tf"),
+		"activation-variables.tmpl":       filepath.Join(activationModulePath, "variables.tf"),
+		"definition-operations-main.tmpl": filepath.Join(definitionModulePath, "operations.tf"),
+		"definition-operations-api.tmpl":  filepath.Join(definitionModulePath, "operations-api.json"),
 	}
 
 	switch format {
