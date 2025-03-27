@@ -38,3 +38,12 @@ module "activation_production" {
 #    network     = "PRODUCTION"
 #}
 {{- end}}
+{{ if not .IsOperationsEmpty }}
+module "operations" {
+    source              = "./modules/definition"
+}
+{{- else}}
+#module "operations" {
+#    source              = "./modules/definition"
+#}
+{{- end}}

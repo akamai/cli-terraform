@@ -2,6 +2,7 @@ package apidefinitions
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -22,6 +23,8 @@ import (
 var api = "{\n  \"name\": \"Pet Store\",\n  \"hostnames\": null,\n  \"contractId\": \"\",\n  \"groupId\": 0\n}"
 
 var apiOperations = "{\n  \"operations\": {\n    \"/base\": {\n      \"test login\": {\n        \"method\": \"POST\",\n        \"purpose\": \"SEARCH\"\n      }\n    }\n  }\n}"
+
+var emptyOperations = "{\n  \"operations\": {}\n}"
 
 func TestMain(m *testing.M) {
 	if err := os.MkdirAll("./testdata/res", 0755); err != nil {
@@ -58,7 +61,7 @@ func TestCreateAPIDefinition(t *testing.T) {
 				mockToOpenAPIFile(clientV0)
 				mockGetAPIVersions(client, 1)
 				mockProcessTemplates(p, nil)
-				mockGetResourceOperation(clientV0)
+				mockGetResourceOperationNoOperations(clientV0)
 			},
 			expectedResult: inActive,
 		},
@@ -69,7 +72,7 @@ func TestCreateAPIDefinition(t *testing.T) {
 				mockGetAPIVersion(clientV0)
 				mockGetAPIVersions(client, 1)
 				mockProcessTemplates(p, nil)
-				mockGetResourceOperation(clientV0)
+				mockGetResourceOperationNoOperations(clientV0)
 			},
 			expectedResult: inActive,
 		},
@@ -106,6 +109,17 @@ func TestCreateAPIDefinition(t *testing.T) {
 			},
 			expectedResult: latestActive,
 		},
+		"no_operations_available": {
+			format: openAPIFormat,
+			init: func(client *apidefinitions.Mock, clientV0 *v0.Mock, p *templates.MockProcessor) {
+				mockGetAPI(client, ptr.To(int64(1)), ptr.To(apidefinitions.ActivationStatusActive))
+				mockToOpenAPIFile(clientV0)
+				mockGetAPIVersions(client, 1)
+				mockProcessTemplates(p, nil)
+				mockGetResourceOperationNoOperations(clientV0)
+			},
+			expectedResult: noOperationsAvailable,
+		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -140,8 +154,9 @@ func TestProcessAPIDefinitionTemplates(t *testing.T) {
 			givenData: active,
 			dir:       "openapi_active",
 			filesToCheck: []string{"apidefinitions.tf", "import.sh", "variables.tf",
+				"modules/activation/main.tf", "modules/activation/variables.tf",
 				"modules/definition/main.tf", "modules/definition/api.yml", "modules/definition/variables.tf",
-				"modules/operations/operations.tf",
+				"modules/definition/operations-api.json", "modules/definition/operations.tf",
 			},
 		},
 		"json - active on Staging and Production": {
@@ -151,7 +166,7 @@ func TestProcessAPIDefinitionTemplates(t *testing.T) {
 			filesToCheck: []string{"apidefinitions.tf", "import.sh", "variables.tf",
 				"modules/activation/main.tf", "modules/activation/variables.tf",
 				"modules/definition/main.tf", "modules/definition/api.json",
-				"modules/operations/operations.tf",
+				"modules/definition/operations-api.json", "modules/definition/operations.tf",
 			},
 		},
 		"inactive on Staging and Production": {
@@ -258,6 +273,24 @@ func mockGetResourceOperation(c *v0.Mock) {
 		}, nil).Once()
 }
 
+func mockGetResourceOperationNoOperations(c *v0.Mock) {
+	emptyOperationsJson := `{
+						  		"operations": {}
+                       		}`
+
+	var response v0.GetResourceOperationResponse
+
+	err := json.Unmarshal([]byte(emptyOperationsJson), &response)
+
+	if err != nil {
+		fmt.Println("Error unmarshalling operations JSON:", err)
+		return
+	}
+
+	c.On("GetResourceOperation", mock.Anything, mock.Anything).
+		Return(&response, nil).Once()
+}
+
 func mockProcessTemplates(p *templates.MockProcessor, err error) {
 	p.On("ProcessTemplates", mock.Anything).Return(err).Once()
 }
@@ -275,7 +308,8 @@ var (
 		StagingVersionKey:    "api_latest_version",
 		ProductionVersionKey: "api_latest_version",
 		Section:              "test_section",
-		Operations:           apiOperations,
+		Operations:           emptyOperations,
+		IsOperationsEmpty:    true,
 	}
 
 	active = TFAPIWrapperData{
@@ -291,6 +325,7 @@ var (
 		ProductionVersionKey: "api_production_version",
 		Section:              "test_section",
 		Operations:           apiOperations,
+		IsOperationsEmpty:    false,
 	}
 
 	latestActive = TFAPIWrapperData{
@@ -306,5 +341,20 @@ var (
 		ProductionVersionKey: "api_latest_version",
 		Section:              "test_section",
 		Operations:           apiOperations,
+		IsOperationsEmpty:    false,
+	}
+
+	noOperationsAvailable = TFAPIWrapperData{
+		API:                  api,
+		ID:                   1,
+		Version:              1,
+		ResourceName:         "pet_store",
+		IsActiveOnStaging:    true,
+		IsActiveOnProduction: true,
+		StagingVersionKey:    "api_latest_version",
+		ProductionVersionKey: "api_latest_version",
+		Section:              "test_section",
+		Operations:           emptyOperations,
+		IsOperationsEmpty:    true,
 	}
 )

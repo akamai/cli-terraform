@@ -19,3 +19,7 @@ module "definition" {
 #    api_version = module.definition.api_latest_version
 #    network     = "PRODUCTION"
 #}
+
+#module "operations" {
+#    source              = "./modules/definition"
+#}

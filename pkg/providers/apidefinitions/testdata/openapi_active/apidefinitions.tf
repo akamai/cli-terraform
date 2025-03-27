@@ -19,3 +19,7 @@ module "activation_production" {
   api_version = module.definition.api_production_version
   network     = "PRODUCTION"
 }
+
+module "operations" {
+  source = "./modules/definition"
+}

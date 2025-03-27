@@ -1,0 +1,10 @@
+{
+  "operations": {
+    "/base": {
+      "test login": {
+        "method": "POST",
+        "purpose": "SEARCH"
+      }
+    }
+  }
+}

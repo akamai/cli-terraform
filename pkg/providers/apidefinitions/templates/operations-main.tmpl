@@ -16,5 +16,5 @@ provider "akamai" {
 
 resource "akamai_apidefinitions_resource_operations" "{{.ResourceName}}" {
   endpoint_id = {{.ID}}
-  resource_operations = jsonencode({{.Operations}})
+  resource_operations = jsonencode(file("${path.module}/operations-api.json"))
 }

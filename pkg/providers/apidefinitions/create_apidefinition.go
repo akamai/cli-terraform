@@ -168,7 +168,7 @@ func createAPIDefinition(ctx context.Context, section string, format outputForma
 
 	isOperationsEmpty := false
 
-	if operations.ResourceOperations.Len() == 0 {
+	if operations.ResourceOperations == nil || operations.ResourceOperations.Len() == 0 {
 		isOperationsEmpty = true
 	}
 
@@ -225,9 +225,8 @@ func createTemplateProcessor(rootPath string, format outputFormat) (*templates.F
 	modulesPath := filepath.Join(rootPath, "modules")
 	definitionModulePath := filepath.Join(modulesPath, "definition")
 	activationModulePath := filepath.Join(modulesPath, "activation")
-	operationsModulePath := filepath.Join(modulesPath, "operations")
 
-	paths := []string{modulesPath, definitionModulePath, activationModulePath, operationsModulePath}
+	paths := []string{modulesPath, definitionModulePath, activationModulePath}
 
 	for _, path := range paths {
 		err := os.MkdirAll(path, 0755)
