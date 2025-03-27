@@ -38,6 +38,8 @@ type (
 		StagingVersionKey    string
 		ProductionVersionKey string
 		Section              string
+		Operations           string
+		IsOperationsEmpty    bool
 	}
 
 	outputFormat string
@@ -45,12 +47,13 @@ type (
 
 var (
 	//go:embed templates/*
-	templateFiles       embed.FS
-	additionalFunctions              = tools.DecorateWithMultilineHandlingFunctions(map[string]any{})
-	errFetchingAPI                   = errors.New("problem with fetching API")
-	errSavingFiles                   = errors.New("saving terraform project files")
-	openAPIFormat       outputFormat = "openapi"
-	jsonFormat          outputFormat = "json"
+	templateFiles                    embed.FS
+	additionalFunctions                           = tools.DecorateWithMultilineHandlingFunctions(map[string]any{})
+	errFetchingAPI                                = errors.New("problem with fetching API")
+	errFetchingResourceOperationsAPI              = errors.New("problem with fetching API Operations")
+	errSavingFiles                                = errors.New("saving terraform project files")
+	openAPIFormat                    outputFormat = "openapi"
+	jsonFormat                       outputFormat = "json"
 )
 
 // CmdCreateAPIDefinition is an entrypoint to export-apidefinition command
@@ -146,7 +149,30 @@ func createAPIDefinition(ctx context.Context, section string, format outputForma
 		return nil, fmt.Errorf("value %s is invalid. Must be: '%s' or '%s'", format, openAPIFormat, jsonFormat)
 	}
 
-	tfAPIData := populateAPIData(section, *content, id, *versionNumber, *latestVersionNumber, API)
+	var operationsContent *string
+
+	operations, err := clientV0.GetResourceOperation(ctx, v0.GetResourceOperationRequest{APIID: id, VersionNumber: *versionNumber})
+
+	if err != nil {
+		term.Spinner().Fail()
+		return nil, fmt.Errorf("%w: %s", errFetchingResourceOperationsAPI, err)
+	}
+
+	term.Spinner().OK()
+
+	operationsContent, err = serializeResourceOperationResponseIndent(operations)
+
+	if err != nil {
+		return nil, fmt.Errorf("unable to serialize API Operations : %s", err)
+	}
+
+	isOperationsEmpty := false
+
+	if operations.ResourceOperations.Len() == 0 {
+		isOperationsEmpty = true
+	}
+
+	tfAPIData := populateAPIData(section, *content, id, *versionNumber, *latestVersionNumber, API, isOperationsEmpty, *operationsContent)
 
 	term.Spinner().Start("Saving TF configurations ")
 
@@ -161,7 +187,7 @@ func createAPIDefinition(ctx context.Context, section string, format outputForma
 	return &tfAPIData, nil
 }
 
-func populateAPIData(section, content string, id, versionNumber, latestVersionNumber int64, api *apidefinitions.GetEndpointResponse) TFAPIWrapperData {
+func populateAPIData(section, content string, id, versionNumber, latestVersionNumber int64, api *apidefinitions.GetEndpointResponse, isOperationsEmpty bool, operationsContent string) TFAPIWrapperData {
 	return TFAPIWrapperData{
 		API:                  content,
 		ID:                   id,
@@ -174,11 +200,21 @@ func populateAPIData(section, content string, id, versionNumber, latestVersionNu
 		StagingVersionKey:    versionKey("staging", api.StagingVersion, latestVersionNumber),
 		IsActiveOnProduction: isActive(api.ProductionVersion),
 		ProductionVersionKey: versionKey("production", api.ProductionVersion, latestVersionNumber),
+		Operations:           operationsContent,
+		IsOperationsEmpty:    isOperationsEmpty,
 	}
 }
 
 func serializeIndent(version *v0.GetAPIVersionResponse) (*string, error) {
-	jsonBody, err := json.MarshalIndent(version.RegisterAPIRequest.APIAttributes, "", "  ")
+	jsonBody, err := json.MarshalIndent(version.RegisterAPIRequest, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return ptr.To(string(jsonBody)), nil
+}
+
+func serializeResourceOperationResponseIndent(response *v0.GetResourceOperationResponse) (*string, error) {
+	jsonBody, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +225,9 @@ func createTemplateProcessor(rootPath string, format outputFormat) (*templates.F
 	modulesPath := filepath.Join(rootPath, "modules")
 	definitionModulePath := filepath.Join(modulesPath, "definition")
 	activationModulePath := filepath.Join(modulesPath, "activation")
-	paths := []string{modulesPath, definitionModulePath, activationModulePath}
+	operationsModulePath := filepath.Join(modulesPath, "operations")
+
+	paths := []string{modulesPath, definitionModulePath, activationModulePath, operationsModulePath}
 
 	for _, path := range paths {
 		err := os.MkdirAll(path, 0755)
@@ -204,7 +242,8 @@ func createTemplateProcessor(rootPath string, format outputFormat) (*templates.F
 		"import.tmpl":               filepath.Join(rootPath, "import.sh"),
 		"activation-main.tmpl":      filepath.Join(activationModulePath, "main.tf"),
 		"activation-variables.tmpl": filepath.Join(activationModulePath, "variables.tf"),
-		"definition-variables.tmpl": filepath.Join(definitionModulePath, "variables.tf"),
+		"operations-main.tmpl":      filepath.Join(definitionModulePath, "operations.tf"),
+		"operations-api.tmpl":       filepath.Join(definitionModulePath, "operations-api.json"),
 	}
 
 	switch format {

@@ -16,9 +16,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"github.com/wk8/go-ordered-map/v2"
 )
 
 var api = "{\n  \"name\": \"Pet Store\",\n  \"hostnames\": null,\n  \"contractId\": \"\",\n  \"groupId\": 0\n}"
+
+var apiOperations = "{\n  \"operations\": {\n    \"/base\": {\n      \"test login\": {\n        \"method\": \"POST\",\n        \"purpose\": \"SEARCH\"\n      }\n    }\n  }\n}"
 
 func TestMain(m *testing.M) {
 	if err := os.MkdirAll("./testdata/res", 0755); err != nil {
@@ -55,6 +58,7 @@ func TestCreateAPIDefinition(t *testing.T) {
 				mockToOpenAPIFile(clientV0)
 				mockGetAPIVersions(client, 1)
 				mockProcessTemplates(p, nil)
+				mockGetResourceOperation(clientV0)
 			},
 			expectedResult: inActive,
 		},
@@ -65,6 +69,7 @@ func TestCreateAPIDefinition(t *testing.T) {
 				mockGetAPIVersion(clientV0)
 				mockGetAPIVersions(client, 1)
 				mockProcessTemplates(p, nil)
+				mockGetResourceOperation(clientV0)
 			},
 			expectedResult: inActive,
 		},
@@ -75,6 +80,7 @@ func TestCreateAPIDefinition(t *testing.T) {
 				mockToOpenAPIFile(clientV0)
 				mockGetAPIVersions(client, 2)
 				mockProcessTemplates(p, nil)
+				mockGetResourceOperation(clientV0)
 			},
 			expectedResult: active,
 		},
@@ -85,6 +91,7 @@ func TestCreateAPIDefinition(t *testing.T) {
 				mockGetAPIVersion(clientV0)
 				mockGetAPIVersions(client, 2)
 				mockProcessTemplates(p, nil)
+				mockGetResourceOperation(clientV0)
 			},
 			expectedResult: active,
 		},
@@ -95,6 +102,7 @@ func TestCreateAPIDefinition(t *testing.T) {
 				mockToOpenAPIFile(clientV0)
 				mockGetAPIVersions(client, 1)
 				mockProcessTemplates(p, nil)
+				mockGetResourceOperation(clientV0)
 			},
 			expectedResult: latestActive,
 		},
@@ -132,8 +140,8 @@ func TestProcessAPIDefinitionTemplates(t *testing.T) {
 			givenData: active,
 			dir:       "openapi_active",
 			filesToCheck: []string{"apidefinitions.tf", "import.sh", "variables.tf",
-				"modules/activation/main.tf", "modules/activation/variables.tf",
 				"modules/definition/main.tf", "modules/definition/api.yml", "modules/definition/variables.tf",
+				"modules/operations/operations.tf",
 			},
 		},
 		"json - active on Staging and Production": {
@@ -143,6 +151,7 @@ func TestProcessAPIDefinitionTemplates(t *testing.T) {
 			filesToCheck: []string{"apidefinitions.tf", "import.sh", "variables.tf",
 				"modules/activation/main.tf", "modules/activation/variables.tf",
 				"modules/definition/main.tf", "modules/definition/api.json",
+				"modules/operations/operations.tf",
 			},
 		},
 		"inactive on Staging and Production": {
@@ -234,6 +243,21 @@ func mockGetAPIVersions(c *apidefinitions.Mock, latestVersion int64) {
 		Once()
 }
 
+func mockGetResourceOperation(c *v0.Mock) {
+	operations := orderedmap.New[string, *orderedmap.OrderedMap[string, v0.Operation]]()
+	baseOperations := orderedmap.New[string, v0.Operation]()
+	baseOperations.Set("test login", v0.Operation{
+		Method:  ptr.To("POST"),
+		Purpose: ptr.To("SEARCH"),
+	})
+	operations.Set("/base", baseOperations)
+
+	c.On("GetResourceOperation", mock.Anything, mock.Anything).
+		Return(&v0.GetResourceOperationResponse{
+			ResourceOperations: operations,
+		}, nil).Once()
+}
+
 func mockProcessTemplates(p *templates.MockProcessor, err error) {
 	p.On("ProcessTemplates", mock.Anything).Return(err).Once()
 }
@@ -251,6 +275,7 @@ var (
 		StagingVersionKey:    "api_latest_version",
 		ProductionVersionKey: "api_latest_version",
 		Section:              "test_section",
+		Operations:           apiOperations,
 	}
 
 	active = TFAPIWrapperData{
@@ -265,6 +290,7 @@ var (
 		StagingVersionKey:    "api_staging_version",
 		ProductionVersionKey: "api_production_version",
 		Section:              "test_section",
+		Operations:           apiOperations,
 	}
 
 	latestActive = TFAPIWrapperData{
@@ -279,5 +305,6 @@ var (
 		StagingVersionKey:    "api_latest_version",
 		ProductionVersionKey: "api_latest_version",
 		Section:              "test_section",
+		Operations:           apiOperations,
 	}
 )
