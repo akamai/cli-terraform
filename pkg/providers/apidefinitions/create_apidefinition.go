@@ -241,6 +241,7 @@ func createTemplateProcessor(rootPath string, format outputFormat) (*templates.F
 		"import.tmpl":                     filepath.Join(rootPath, "import.sh"),
 		"activation-main.tmpl":            filepath.Join(activationModulePath, "main.tf"),
 		"activation-variables.tmpl":       filepath.Join(activationModulePath, "variables.tf"),
+		"definition-variables.tmpl":       filepath.Join(definitionModulePath, "variables.tf"),
 		"definition-operations-main.tmpl": filepath.Join(definitionModulePath, "operations.tf"),
 		"definition-operations-api.tmpl":  filepath.Join(definitionModulePath, "operations-api.json"),
 	}

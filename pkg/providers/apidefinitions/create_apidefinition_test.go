@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"github.com/wk8/go-ordered-map/v2"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 var api = "{\n  \"name\": \"Pet Store\",\n  \"hostnames\": null,\n  \"contractId\": \"\",\n  \"groupId\": 0\n}"
@@ -349,6 +349,8 @@ var (
 		ID:                   1,
 		Version:              1,
 		ResourceName:         "pet_store",
+		ContractID:           "Contract-1",
+		GroupID:              1,
 		IsActiveOnStaging:    true,
 		IsActiveOnProduction: true,
 		StagingVersionKey:    "api_latest_version",
