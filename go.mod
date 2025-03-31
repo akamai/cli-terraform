@@ -3,7 +3,7 @@ module github.com/akamai/cli-terraform/v2
 go 1.23.6
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v10 v10.0.0
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v10 v10.1.0
 	github.com/akamai/cli/v2 v2.0.0
 	github.com/hashicorp/hcl/v2 v2.23.0
 	github.com/jinzhu/copier v0.4.0
@@ -11,7 +11,6 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.19.3
 )
-
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7 // indirect
