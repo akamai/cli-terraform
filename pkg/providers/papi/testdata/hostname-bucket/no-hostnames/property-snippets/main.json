@@ -1,0 +1,88 @@
+{
+  "accountId": "test_account",
+  "contractId": "test_contract",
+  "groupId": "grp_12345",
+  "propertyId": "prp_12345",
+  "propertyVersion": 5,
+  "etag": "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
+  "ruleFormat": "latest",
+  "comments": "some comment",
+  "rules": {
+    "name": "default",
+    "behaviors": [
+      {
+        "name": "origin",
+        "options": {
+          "cacheKeyHostname": "ORIGIN_HOSTNAME",
+          "compress": true,
+          "enableTrueClientIp": false,
+          "forwardHostHeader": "REQUEST_HOST_HEADER",
+          "hostname": "1.2.3.4",
+          "httpPort": 80,
+          "httpsPort": 443,
+          "originSni": false,
+          "originType": "CUSTOMER",
+          "useUniqueCacheKey": false,
+          "verificationMode": "PLATFORM_SETTINGS"
+        }
+      },
+      {
+        "name": "cpCode",
+        "options": {
+          "value": {
+            "createdDate": 1506429558000,
+            "description": "Test-NewHire",
+            "id": 626358,
+            "name": "Test-NewHire",
+            "products": [
+              "Site_Defender"
+            ]
+          }
+        }
+      },
+      {
+        "name": "caching",
+        "options": {
+          "behavior": "NO_STORE"
+        }
+      },
+      {
+        "name": "allowPost",
+        "options": {
+          "allowWithoutContentLength": false,
+          "enabled": true
+        }
+      },
+      {
+        "name": "report",
+        "options": {
+          "logAcceptLanguage": false,
+          "logCookies": "OFF",
+          "logCustomLogField": false,
+          "logHost": false,
+          "logReferer": false,
+          "logUserAgent": true
+        }
+      },
+      {
+        "name": "advanced",
+        "options": {
+          "description": "extract inputs",
+          "xml": "\u003cassign:extract-value\u003e\n   \u003cvariable-name\u003eENDUSER\u003c/variable-name\u003e\n   \u003clocation\u003eQuery_String\u003c/location\u003e\n   \u003clocation-id\u003eenduser\u003c/location-id\u003e\n   \u003cseparator\u003e=\u003c/separator\u003e\n\u003c/assign:extract-value\u003e\n\u003cassign:extract-value\u003e\n   \u003cvariable-name\u003eGHOST\u003c/variable-name\u003e\n   \u003clocation\u003eQuery_String\u003c/location\u003e\n   \u003clocation-id\u003eghost\u003c/location-id\u003e\n   \u003cseparator\u003e=\u003c/separator\u003e\n\u003c/assign:extract-value\u003e\n\n\u003cassign:variable\u003e\n   \u003cname\u003eDISTANCE\u003c/name\u003e\n   \u003ctransform\u003e\n      \u003cgeo-distance\u003e\n         \u003cip1\u003e%(ENDUSER)\u003c/ip1\u003e\n         \u003cip2\u003e%(GHOST)\u003c/ip2\u003e\n      \u003c/geo-distance\u003e\n   \u003c/transform\u003e\n\u003c/assign:variable\u003e\n\n\n\n\u003cedgeservices:construct-response\u003e\n   \u003cstatus\u003eon\u003c/status\u003e\n   \u003chttp-status\u003e200\u003c/http-status\u003e\n   \u003cbody\u003e%(DISTANCE)\u003c/body\u003e\n   \u003cforce-cache-eviction\u003eoff\u003c/force-cache-eviction\u003e\n\u003c/edgeservices:construct-response\u003e\n\n\u003cedgeservices:modify-outgoing-response.add-header\u003e\n      \u003cname\u003eDistance\u003c/name\u003e\n      \u003cvalue\u003e%(DISTANCE)\u003c/value\u003e\n   \u003c/edgeservices:modify-outgoing-response.add-header\u003e"
+        },
+        "uuid": "feeaeff9-fe7e-4e27-ba0c-7b1dcecdba8b"
+      }
+    ],
+    "children": [
+      "#include:Content_Compression.json",
+      "#include:Static_Content.json",
+      "#include:Dynamic_Content.json"
+    ],
+    "uuid": "default",
+    "options": {},
+    "customOverride": {
+      "name": "mdc",
+      "overrideId": "cbo_12345"
+    }
+  }
+}

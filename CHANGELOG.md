@@ -1,6 +1,23 @@
 # RELEASE NOTES
 
-## 2.0.0 (Jan 5, 2025)
+## 2.1.0 (Apr 3, 2025)
+
+### FEATURES/ENHANCEMENTS:
+
+* General
+  * Migrated to Go `1.23.6` and adopted a semver-compliant Go directive.
+
+* PAPI
+  * Added the `use_hostname_bucket` attribute to the exported `akamai_property` and `akamai_property_bootstrap` resources.
+  * Updated an export for a property configuration to include the `akamai_property_hostname_bucket` resource.
+  * Added support for the new rule format `v2025-02-18`.
+
+### BUG FIXES:
+
+* General
+  * Fixed inserting escape sequences that do not use a backslash ([#83](https://github.com/akamai/cli-terraform/issues/83)).
+
+## 2.0.0 (Feb 5, 2025)
 
 ### BREAKING CHANGES:
 

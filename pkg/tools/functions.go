@@ -111,5 +111,18 @@ func EscapeQuotedStringLit(s string) string {
 func Escape(str string) string {
 	str = strings.ReplaceAll(str, `\`, `\\`)
 	str = strings.ReplaceAll(str, "\n", "\\n")
+	str = strings.ReplaceAll(str, "${", "$${")
+	str = strings.ReplaceAll(str, "%{", "%%{")
 	return strings.ReplaceAll(str, `"`, `\"`)
+}
+
+// AddPrefix will add prefix to given string.
+func AddPrefix(str, pre string) string {
+	if str == "" {
+		return ""
+	}
+	if strings.HasPrefix(str, pre) {
+		return str
+	}
+	return pre + str
 }

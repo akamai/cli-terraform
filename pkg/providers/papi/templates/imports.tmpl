@@ -26,3 +26,9 @@ terraform import akamai_property_include_activation.{{$include.IncludeName}}_sta
 terraform import akamai_property_include_activation.{{$include.IncludeName}}_production {{$include.ContractID}}:{{$include.GroupID}}:{{$include.IncludeID}}:PRODUCTION
 {{- end}}
 {{- end}}
+{{- if and .Property.HostnameBucket .Property.HostnameBucket.HasStagingActivation}}
+terraform import akamai_property_hostname_bucket.{{.Property.PropertyResourceName}}-hostname-bucket-staging {{.Property.PropertyID}}:STAGING:{{.Property.ContractID}}:{{.Property.GroupID}}
+{{- end}}
+{{- if and .Property.HostnameBucket .Property.HostnameBucket.HasProductionActivation}}
+terraform import akamai_property_hostname_bucket.{{.Property.PropertyResourceName}}-hostname-bucket-production {{.Property.PropertyID}}:PRODUCTION:{{.Property.ContractID}}:{{.Property.GroupID}}
+{{- end}}

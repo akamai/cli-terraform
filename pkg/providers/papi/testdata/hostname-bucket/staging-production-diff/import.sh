@@ -1,0 +1,6 @@
+terraform init
+terraform import akamai_property.test-edgesuite-net prp_12345,test_contract,grp_12345,LATEST
+terraform import akamai_property_activation.test-edgesuite-net-staging prp_12345:STAGING
+terraform import akamai_property_activation.test-edgesuite-net-production prp_12345:PRODUCTION
+terraform import akamai_property_hostname_bucket.test-edgesuite-net-hostname-bucket-staging prp_12345:STAGING:test_contract:grp_12345
+terraform import akamai_property_hostname_bucket.test-edgesuite-net-hostname-bucket-production prp_12345:PRODUCTION:test_contract:grp_12345

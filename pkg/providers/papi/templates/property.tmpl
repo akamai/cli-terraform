@@ -3,7 +3,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 7.0.0"
+      version = ">= 7.1.0"
     }
   }
   required_version = ">= 1.0"
@@ -48,6 +48,9 @@ resource "akamai_property_bootstrap" "{{.Property.PropertyResourceName}}" {
   contract_id = var.contract_id
   group_id = var.group_id
   product_id = "prd_{{.Property.ProductName}}"
+{{- if .Property.HostnameBucket}}
+  use_hostname_bucket = true
+{{- end}}
 }
 {{end}}
 resource "akamai_property" "{{.Property.PropertyResourceName}}" {
@@ -57,11 +60,17 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
   contract_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.contract_id
   group_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.group_id
   product_id = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.product_id
+{{- if .Property.HostnameBucket}}
+  use_hostname_bucket = akamai_property_bootstrap.{{.Property.PropertyResourceName}}.use_hostname_bucket
+{{- end}}
 {{- else}}
   name = "{{.Property.PropertyName}}"
   contract_id = var.contract_id
   group_id = var.group_id
   product_id = "prd_{{.Property.ProductName}}"
+{{- if .Property.HostnameBucket}}
+  use_hostname_bucket = true
+{{- end}}
 {{- end}}
 {{- range .Property.Hostnames}}
   hostnames {
@@ -136,3 +145,47 @@ resource "akamai_property_activation" "{{.Property.PropertyResourceName}}-produc
 #  auto_acknowledge_rule_warnings = false
 #}
 {{ end}}
+{{- if and (.Property.HostnameBucket) (.Property.HostnameBucket.HasStagingActivation)}}
+resource "akamai_property_hostname_bucket" "{{.Property.PropertyResourceName}}-hostname-bucket-staging" {
+  property_id   = akamai_property_activation.{{.Property.PropertyResourceName}}-staging.property_id
+  contract_id   = var.contract_id
+  group_id      = var.group_id
+  network       = "STAGING"
+  {{- if .Property.HostnameBucket.StagingNote}}
+  note          = "{{.Property.HostnameBucket.StagingNote}}"
+  {{- end}}
+  {{- if .Property.HostnameBucket.StagingNotifyEmails}}
+  notify_emails = [{{range $index, $element := .Property.HostnameBucket.StagingNotifyEmails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+  {{- end}}
+  hostnames     = {
+  for hostname in local.hostnames :
+  hostname.cname_from => {
+    cert_provisioning_type = hostname.cert_provisioning_type
+    edge_hostname_id       = hostname.edge_hostname_id
+  }
+  if hostname.staging == true
+  }
+}
+{{ end}}
+{{- if and (.Property.HostnameBucket) (.Property.HostnameBucket.HasProductionActivation)}}
+resource "akamai_property_hostname_bucket" "{{.Property.PropertyResourceName}}-hostname-bucket-production" {
+  property_id   = akamai_property_activation.{{.Property.PropertyResourceName}}-production.property_id
+  contract_id   = var.contract_id
+  group_id      = var.group_id
+  network       = "PRODUCTION"
+  {{- if .Property.HostnameBucket.ProductionNote}}
+  note          = "{{.Property.HostnameBucket.ProductionNote}}"
+  {{- end}}
+  {{- if .Property.HostnameBucket.ProductionNotifyEmails}}
+  notify_emails = [{{range $index, $element := .Property.HostnameBucket.ProductionNotifyEmails}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+  {{- end}}
+  hostnames     = {
+  for hostname in local.hostnames :
+  hostname.cname_from => {
+    cert_provisioning_type = hostname.cert_provisioning_type
+    edge_hostname_id       = hostname.edge_hostname_id
+  }
+  if hostname.production == true
+  }
+}
+{{- end}}

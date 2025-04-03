@@ -182,9 +182,17 @@
                 "application/x-javascript*"
               ]
             }
+          },
+          {
+            "name": "regularExpression",
+            "options": {
+                "caseSensitive": true,
+                "matchString": "${ { user.PMUSER_MY_HEADER } }",
+                "regex": "."
+            }
           }
         ],
-        "name": "Strange Characters${a}\"\\||$%&*@#|!ą",
+        "name": "Strange Characters${a}%{b}\"\\||$%&*@#|!ą",
         "options": {},
         "children": [
           {
@@ -204,7 +212,7 @@
             "comments": ""
           },
           {
-            "name": "Strange Characters${a}\"\\&&$%&*@#|!ą",
+            "name": "Strange Characters${a}%{b}\"\\&&$%&*@#|!ą",
             "children": [],
             "behaviors": [],
             "criteria": [],

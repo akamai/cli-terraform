@@ -1,0 +1,28 @@
+{
+  "behaviors": [
+    {
+      "name": "gzipResponse",
+      "options": {
+        "behavior": "ALWAYS"
+      }
+    }
+  ],
+  "criteria": [
+    {
+      "name": "contentType",
+      "options": {
+        "matchCaseSensitive": false,
+        "matchOperator": "IS_ONE_OF",
+        "matchWildcard": true,
+        "values": [
+          "text/html*",
+          "text/css*",
+          "application/x-javascript*"
+        ]
+      }
+    }
+  ],
+  "name": "Content Compression",
+  "options": {},
+  "criteriaMustSatisfy": "all"
+}

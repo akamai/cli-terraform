@@ -71,35 +71,37 @@ func TestCreateProperty(t *testing.T) {
 			},
 		},
 	}
-	getPropertyResponse := papi.GetPropertyResponse{
-		Properties: papi.PropertiesItems{
-			Items: []*papi.Property{
-				{
-					AccountID:         "test_account",
-					AssetID:           "aid_10541511",
-					ContractID:        "test_contract",
-					GroupID:           "grp_12345",
-					LatestVersion:     5,
-					Note:              "",
-					ProductionVersion: nil,
-					PropertyID:        "prp_12345",
-					PropertyName:      "test.edgesuite.net",
-					StagingVersion:    nil,
+	getPropertyResponse := func() *papi.GetPropertyResponse {
+		return &papi.GetPropertyResponse{
+			Properties: papi.PropertiesItems{
+				Items: []*papi.Property{
+					{
+						AccountID:         "test_account",
+						AssetID:           "aid_10541511",
+						ContractID:        "test_contract",
+						GroupID:           "grp_12345",
+						LatestVersion:     5,
+						Note:              "",
+						ProductionVersion: nil,
+						PropertyID:        "prp_12345",
+						PropertyName:      "test.edgesuite.net",
+						StagingVersion:    nil,
+					},
 				},
 			},
-		},
-		Property: &papi.Property{
-			AccountID:         "test_account",
-			AssetID:           "aid_10541511",
-			ContractID:        "test_contract",
-			GroupID:           "grp_12345",
-			LatestVersion:     5,
-			Note:              "",
-			ProductionVersion: nil,
-			PropertyID:        "prp_12345",
-			PropertyName:      "test.edgesuite.net",
-			StagingVersion:    nil,
-		},
+			Property: &papi.Property{
+				AccountID:         "test_account",
+				AssetID:           "aid_10541511",
+				ContractID:        "test_contract",
+				GroupID:           "grp_12345",
+				LatestVersion:     5,
+				Note:              "",
+				ProductionVersion: nil,
+				PropertyID:        "prp_12345",
+				PropertyName:      "test.edgesuite.net",
+				StagingVersion:    nil,
+			},
+		}
 	}
 
 	getPropertyEnhancementTLSResponse := papi.GetPropertyResponse{
@@ -579,7 +581,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property (with hostname's cnameTo starting with a digit)": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -606,7 +608,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with edgehostname with non default ttl": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -810,7 +812,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property not active the latest": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -837,7 +839,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with empty hostname id": {
 			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				var ruleResponse papi.GetRuleTreeResponse
 				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
@@ -864,10 +866,260 @@ func TestCreateProperty(t *testing.T) {
 				"Dynamic_Content.json",
 			},
 		},
+		"basic property with hostname bucket and no hostname activations": {
+			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				propertyResponse := getPropertyResponse()
+				propertyResponse.Property.PropertyType = ptr.To("HOSTNAME_BUCKET")
+				propertyResponse.Properties.Items[0].PropertyType = ptr.To("HOSTNAME_BUCKET")
+				mockGetProperty(c, propertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockEmptyListPropertyHostnameActivations(c)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).
+					withDefaults().
+					withEdgeHostname(map[string]EdgeHostname{}).
+					withHostnames(nil).
+					withHostnameBucket(nil, nil, "", "", nil, nil).
+					build(), noFilters, nil)
+			},
+			dir:     "hostname-bucket/no-hostnames",
+			jsonDir: "hostname-bucket/no-hostnames/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+		},
+		"basic property with hostname bucket and only STAGING hostnames": {
+			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				propertyResponse := getPropertyResponse()
+				propertyResponse.Property.PropertyType = ptr.To("HOSTNAME_BUCKET")
+				propertyResponse.Properties.Items[0].PropertyType = ptr.To("HOSTNAME_BUCKET")
+				mockGetProperty(c, propertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockListPropertyHostnameActivations(c, true, false)
+				mockListActivePropertyHostnames(c, 10, "STAGING", "CPS_MANAGED")
+				mockAddTemplateTargetHostnameBucket(p)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).
+					withDefaults().
+					withEdgeHostname(map[string]EdgeHostname{}).
+					withHostnames(nil).
+					withHostnameBucket(generateHostnames(10, "CPS_MANAGED", "STAGING", "ehn_12345"),
+						nil, "staging note", "", []string{"test@mail.com"}, nil).
+					build(), noFilters, nil)
+			},
+			dir: "hostname-bucket/staging",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+			jsonDir: "hostname-bucket/staging/property-snippets",
+		},
+		"basic property with hostname bucket and only STAGING hostnames with paging": {
+			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				propertyResponse := getPropertyResponse()
+				propertyResponse.Property.PropertyType = ptr.To("HOSTNAME_BUCKET")
+				propertyResponse.Properties.Items[0].PropertyType = ptr.To("HOSTNAME_BUCKET")
+				mockGetProperty(c, propertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockListPropertyHostnameActivations(c, true, false)
+				mockListActivePropertyHostnames(c, 2500, "STAGING", "CPS_MANAGED")
+				mockAddTemplateTargetHostnameBucket(p)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).
+					withDefaults().
+					withEdgeHostname(map[string]EdgeHostname{}).
+					withHostnames(nil).
+					withHostnameBucket(generateHostnames(2500, "CPS_MANAGED", "STAGING", "ehn_12345"),
+						nil, "staging note", "", []string{"test@mail.com"}, nil).
+					build(), noFilters, nil)
+			},
+			dir: "hostname-bucket/staging",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+			jsonDir: "hostname-bucket/staging/property-snippets",
+		},
+		"basic property with hostname bucket and only PRODUCTION hostnames": {
+			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				propertyResponse := getPropertyResponse()
+				propertyResponse.Property.PropertyType = ptr.To("HOSTNAME_BUCKET")
+				propertyResponse.Properties.Items[0].PropertyType = ptr.To("HOSTNAME_BUCKET")
+				mockGetProperty(c, propertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockListPropertyHostnameActivations(c, false, true)
+				mockListActivePropertyHostnames(c, 10, "PRODUCTION", "DEFAULT")
+				mockAddTemplateTargetHostnameBucket(p)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).
+					withDefaults().
+					withEdgeHostname(map[string]EdgeHostname{}).
+					withHostnames(nil).
+					withHostnameBucket(nil, generateHostnames(10, "DEFAULT", "PRODUCTION", "ehn_12345"),
+						"", "production note", nil, []string{"test@mail.com"}).
+					build(), noFilters, nil)
+			},
+			dir: "hostname-bucket/production",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+			jsonDir: "hostname-bucket/production/property-snippets",
+		},
+		"basic property with hostname bucket and both STAGING and PRODUCTION hostnames": {
+			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				propertyResponse := getPropertyResponse()
+				propertyResponse.Property.PropertyType = ptr.To("HOSTNAME_BUCKET")
+				propertyResponse.Properties.Items[0].PropertyType = ptr.To("HOSTNAME_BUCKET")
+				mockGetProperty(c, propertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockListPropertyHostnameActivations(c, true, true)
+				mockListActivePropertyHostnames(c, 10, "STAGING", "DEFAULT")
+				mockListActivePropertyHostnames(c, 10, "PRODUCTION", "DEFAULT")
+				mockAddTemplateTargetHostnameBucket(p)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).
+					withDefaults().
+					withEdgeHostname(map[string]EdgeHostname{}).
+					withHostnames(nil).
+					withHostnameBucket(generateHostnames(10, "DEFAULT", "STAGING", "ehn_12345"),
+						generateHostnames(10, "DEFAULT", "PRODUCTION", "ehn_12345"), "staging note", "production note", []string{"test@mail.com"}, []string{"test@mail.com"}).
+					build(), noFilters, nil)
+			},
+			dir: "hostname-bucket/staging-production",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+			jsonDir: "hostname-bucket/staging-production/property-snippets",
+		},
+		"basic property with hostname bucket and both STAGING and PRODUCTION hostnames with differences": {
+			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				propertyResponse := getPropertyResponse()
+				propertyResponse.Property.PropertyType = ptr.To("HOSTNAME_BUCKET")
+				propertyResponse.Properties.Items[0].PropertyType = ptr.To("HOSTNAME_BUCKET")
+				mockGetProperty(c, propertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockListPropertyHostnameActivations(c, true, true)
+				mockListActivePropertyHostnames(c, 5, "STAGING", "DEFAULT")
+				mockListActivePropertyHostnames(c, 10, "PRODUCTION", "DEFAULT")
+				mockAddTemplateTargetHostnameBucket(p)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).
+					withDefaults().
+					withEdgeHostname(map[string]EdgeHostname{}).
+					withHostnames(nil).
+					withHostnameBucket(generateHostnames(5, "DEFAULT", "STAGING", "ehn_12345"),
+						generateHostnames(10, "DEFAULT", "PRODUCTION", "ehn_12345"), "staging note", "production note", []string{"test@mail.com"}, []string{"test@mail.com"}).
+					build(), noFilters, nil)
+			},
+			dir: "hostname-bucket/staging-production-diff",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+			jsonDir: "hostname-bucket/staging-production-diff/property-snippets",
+		},
+		"basic property with hostname bucket and only STAGING activation but no hostnames": {
+			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				propertyResponse := getPropertyResponse()
+				propertyResponse.Property.PropertyType = ptr.To("HOSTNAME_BUCKET")
+				propertyResponse.Properties.Items[0].PropertyType = ptr.To("HOSTNAME_BUCKET")
+				mockGetProperty(c, propertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockListPropertyHostnameActivations(c, true, false)
+				mockListActivePropertyHostnames(c, 0, "STAGING", "CPS_MANAGED")
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).
+					withDefaults().
+					withEdgeHostname(map[string]EdgeHostname{}).
+					withHostnames(nil).
+					withHostnameBucket(generateHostnames(0, "CPS_MANAGED", "STAGING", "ehn_12345"),
+						nil, "staging note", "", []string{"test@mail.com"}, nil).
+					build(), noFilters, nil)
+			},
+			dir: "hostname-bucket/staging",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+			jsonDir: "hostname-bucket/staging/property-snippets",
+		},
 		"basic property with rules as datasource": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -891,7 +1143,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with rules as datasource with unsupported rule format": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -916,7 +1168,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with rules as datasource with unsupported behaviors and criteria": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -941,7 +1193,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with children with split-depth=0": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, mm *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -983,7 +1235,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with children with split-depth=2": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, mm *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1031,7 +1283,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with cert provisioning type": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1058,7 +1310,7 @@ func TestCreateProperty(t *testing.T) {
 		"basic property with bootstrap": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1083,10 +1335,45 @@ func TestCreateProperty(t *testing.T) {
 			},
 			withBootstrap: true,
 		},
+		"basic property with hostname bucket and bootstrap and no hostname activations": {
+			init: func(c *papi.Mock, _ *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				propertyResponse := getPropertyResponse()
+				propertyResponse.Property.PropertyType = ptr.To("HOSTNAME_BUCKET")
+				propertyResponse.Properties.Items[0].PropertyType = ptr.To("HOSTNAME_BUCKET")
+				mockGetProperty(c, propertyResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockEmptyListPropertyHostnameActivations(c)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).
+					withDefaults().
+					withEdgeHostname(map[string]EdgeHostname{}).
+					withHostnames(nil).
+					withHostnameBucket(nil, nil, "", "", nil, nil).
+					withBootstrap(true).
+					build(), noFilters, nil)
+			},
+			dir:     "hostname-bucket/bootstrap/no-hostnames",
+			jsonDir: "hostname-bucket/bootstrap/no-hostnames/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+			withBootstrap: true,
+		},
 		"import LATEST property version": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1115,7 +1402,7 @@ func TestCreateProperty(t *testing.T) {
 		"import not the latest property version": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 1, &ruleResponse, nil)
@@ -1142,7 +1429,7 @@ func TestCreateProperty(t *testing.T) {
 		"property activation with note": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1163,7 +1450,7 @@ func TestCreateProperty(t *testing.T) {
 		"property with production activation": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
@@ -1182,7 +1469,7 @@ func TestCreateProperty(t *testing.T) {
 		"property with both activations": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
@@ -1202,7 +1489,7 @@ func TestCreateProperty(t *testing.T) {
 		"property activation with empty emails": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1229,7 +1516,7 @@ func TestCreateProperty(t *testing.T) {
 		"error group not found": {
 			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
 				mockGetGroups(c, nil, fmt.Errorf("oops"))
 			},
@@ -1238,7 +1525,7 @@ func TestCreateProperty(t *testing.T) {
 		"error property rules not found": {
 			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetGroups(c, &getGroupsResponse, nil)
 				mockGetLatestVersion(c, &getLatestVersionResponse)
 				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
@@ -1251,7 +1538,7 @@ func TestCreateProperty(t *testing.T) {
 		"error property version not found": {
 			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
 				mockGetPropertyVersions(c, nil, fmt.Errorf("oops"))
@@ -1262,7 +1549,7 @@ func TestCreateProperty(t *testing.T) {
 		"error fetching property activation": {
 			init: func(c *papi.Mock, h *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
 				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
@@ -1278,7 +1565,7 @@ func TestCreateProperty(t *testing.T) {
 		"error product name not found": {
 			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
 				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
@@ -1291,7 +1578,7 @@ func TestCreateProperty(t *testing.T) {
 		"error hostnames not found": {
 			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
 				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
@@ -1304,7 +1591,7 @@ func TestCreateProperty(t *testing.T) {
 		"error hostname details": {
 			init: func(c *papi.Mock, h *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 				mockGetRuleTree(c, 5, &papi.GetRuleTreeResponse{}, nil)
 				mockGetGroups(c, &getGroupsResponse, nil)
 				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
@@ -1318,7 +1605,7 @@ func TestCreateProperty(t *testing.T) {
 		"error saving files": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, &getPropertyResponse)
+				mockGetProperty(c, getPropertyResponse())
 
 				ruleResponse := getRuleTreeResponse(dir, t)
 				mockGetRuleTree(c, 5, &ruleResponse, nil)
@@ -1420,6 +1707,110 @@ func mockGetProducts(p *papi.Mock, getProductsResponse *papi.GetProductsResponse
 		Return(getProductsResponse, err).Once()
 }
 
+func mockEmptyListPropertyHostnameActivations(p *papi.Mock) {
+	p.On("ListPropertyHostnameActivations", mock.Anything, papi.ListPropertyHostnameActivationsRequest{
+		PropertyID: "prp_12345",
+		Limit:      999,
+		ContractID: "ctr_test_contract",
+		GroupID:    "grp_12345",
+	}).Return(&papi.ListPropertyHostnameActivationsResponse{
+		ContractID: "ctr_test_contract",
+		GroupID:    "grp_12345",
+		HostnameActivations: papi.HostnameActivationsList{
+			Items: []papi.HostnameActivationListItem{},
+		},
+	}, nil).Once()
+}
+
+func mockListPropertyHostnameActivations(p *papi.Mock, staging, production bool) {
+	resp := papi.ListPropertyHostnameActivationsResponse{
+		ContractID: "ctr_test_contract",
+		GroupID:    "grp_12345",
+	}
+	if staging {
+		resp.HostnameActivations.Items = append(resp.HostnameActivations.Items, papi.HostnameActivationListItem{
+			ActivationType:       "ACTIVATE",
+			HostnameActivationID: "atv_0",
+			PropertyID:           "prp_12345",
+			Network:              "STAGING",
+			Status:               "ACTIVE",
+			Note:                 "staging note",
+			NotifyEmails:         []string{"test@mail.com"},
+		})
+	}
+	if production {
+		resp.HostnameActivations.Items = append(resp.HostnameActivations.Items, papi.HostnameActivationListItem{
+			ActivationType:       "ACTIVATE",
+			HostnameActivationID: "atv_1",
+			PropertyID:           "prp_12345",
+			Network:              "PRODUCTION",
+			Status:               "ACTIVE",
+			Note:                 "production note",
+			NotifyEmails:         []string{"test@mail.com"},
+		})
+	}
+
+	p.On("ListPropertyHostnameActivations", mock.Anything, papi.ListPropertyHostnameActivationsRequest{
+		PropertyID: "prp_12345",
+		Limit:      999,
+		ContractID: "ctr_test_contract",
+		GroupID:    "grp_12345",
+	}).Return(&resp, nil).Once()
+}
+
+func mockListActivePropertyHostnames(p *papi.Mock, n int, network, certType string) {
+	offset := 0
+	hostnameItems := generateHostnames(n, certType, network, "ehn_12345")
+
+	for len(hostnameItems) > 999 {
+		req := papi.ListActivePropertyHostnamesRequest{
+			PropertyID: "prp_12345",
+			Limit:      999,
+			Offset:     offset,
+			Network:    papi.ActivationNetwork(network),
+			ContractID: "ctr_test_contract",
+			GroupID:    "grp_12345",
+		}
+		offset += 999
+		resp := papi.ListActivePropertyHostnamesResponse{
+			ContractID: "ctr_test_contract",
+			GroupID:    "grp_12345",
+			PropertyID: "prp_12345",
+			Hostnames: papi.HostnamesResponseItems{
+				Items:            hostnameItems[:999],
+				CurrentItemCount: 999,
+				TotalItems:       n,
+			},
+		}
+		hostnameItems = hostnameItems[999:]
+		p.On("ListActivePropertyHostnames", mock.Anything, req).Return(&resp, nil).Once()
+	}
+
+	req := papi.ListActivePropertyHostnamesRequest{
+		PropertyID: "prp_12345",
+		Limit:      999,
+		Offset:     offset,
+		Network:    papi.ActivationNetwork(network),
+		ContractID: "ctr_test_contract",
+		GroupID:    "grp_12345",
+	}
+	resp := papi.ListActivePropertyHostnamesResponse{
+		ContractID: "ctr_test_contract",
+		GroupID:    "grp_12345",
+		PropertyID: "prp_12345",
+		Hostnames: papi.HostnamesResponseItems{
+			Items:            hostnameItems,
+			CurrentItemCount: len(hostnameItems),
+			TotalItems:       n,
+		},
+	}
+	p.On("ListActivePropertyHostnames", mock.Anything, req).Return(&resp, nil).Once()
+}
+
+func mockAddTemplateTargetHostnameBucket(t *templates.MockProcessor) {
+	t.On("AddTemplateTarget", "hostname_bucket.tmpl", "hostname_bucket.tf").Once()
+}
+
 func mockGetPropertyVersionHostnames(p *papi.Mock, propertyVersion int, getPropertyVersionHostnamesResponse *papi.GetPropertyVersionHostnamesResponse, err error) {
 	p.On("GetPropertyVersionHostnames", mock.Anything, papi.GetPropertyVersionHostnamesRequest{
 		PropertyID:      "prp_12345",
@@ -1496,6 +1887,33 @@ func mockModuleConfig(p *templates.MockProcessor) {
 	p.On("AddTemplateTarget", "rules_module.tmpl", "rules/module_config.tf")
 }
 
+func generateHostnames(n int, certType, network, ehnID string) []papi.HostnameItem {
+	result := make([]papi.HostnameItem, n)
+	for i := range n {
+		var item papi.HostnameItem
+		if network == "STAGING" {
+			item = papi.HostnameItem{
+				CnameFrom:             fmt.Sprintf("www.test.cname_from.%d.com", i),
+				CnameType:             "EDGE_HOSTNAME",
+				StagingCertType:       papi.CertType(certType),
+				StagingCnameTo:        fmt.Sprintf("www.test.cname_to.%d.com", i),
+				StagingEdgeHostnameID: ehnID,
+			}
+		} else {
+			item = papi.HostnameItem{
+				CnameFrom:                fmt.Sprintf("www.test.cname_from.%d.com", i),
+				CnameType:                "EDGE_HOSTNAME",
+				ProductionCertType:       papi.CertType(certType),
+				ProductionCnameTo:        fmt.Sprintf("www.test.cname_to.%d.com", i),
+				ProductionEdgeHostnameID: ehnID,
+			}
+		}
+		result[i] = item
+	}
+
+	return result
+}
+
 type activationItemData struct {
 	actType    string
 	actID      string
@@ -1537,7 +1955,7 @@ func getRuleTreeResponse(dir string, t *testing.T) papi.GetRuleTreeResponse {
 	return ruleResponse
 }
 
-func TestProcessPolicyTemplates(t *testing.T) {
+func TestProcessPropertyTemplates(t *testing.T) {
 
 	useCases := []papi.UseCase{
 		{
@@ -1694,6 +2112,305 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			},
 			dir:          "enhancement-tls",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
+		"basic property with hostname bucket and no hostname activations": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					HostnameBucket:       &HostnameBucketDetails{},
+					ReadVersion:          "LATEST",
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "hostname-bucket/no-hostnames",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
+		"basic property with hostname bucket and only STAGING hostnames": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					HostnameBucket: &HostnameBucketDetails{
+						StagingNotifyEmails:  []string{"test@mail.com"},
+						StagingNote:          "staging note",
+						HasStagingActivation: true,
+						Hostnames:            createTFHostnameItems(generateHostnames(10, "CPS_MANAGED", "STAGING", "ehn_12345"), nil),
+					},
+					ReadVersion: "LATEST",
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "hostname-bucket/staging",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
+		},
+		"basic property with hostname bucket and only PRODUCTION hostnames and no emails or note": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					HostnameBucket: &HostnameBucketDetails{
+						HasProductionActivation: true,
+						Hostnames:               createTFHostnameItems(nil, generateHostnames(1500, "DEFAULT", "PRODUCTION", "ehn_12345")),
+					},
+					ReadVersion: "LATEST",
+					ProductionInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "hostname-bucket/production",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
+		},
+		"basic property with hostname bucket and PRODUCTION hostnames with STAGING activation that has no hostnames": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					HostnameBucket: &HostnameBucketDetails{
+						ProductionNotifyEmails:  []string{"test@mail.com"},
+						ProductionNote:          "production note",
+						HasStagingActivation:    false,
+						HasProductionActivation: true,
+						Hostnames:               createTFHostnameItems(nil, generateHostnames(1, "CPS_MANAGED", "PRODUCTION", "ehn_12345")),
+					},
+					ReadVersion: "LATEST",
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+					ProductionInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "hostname-bucket/production-staging-no-hostnames",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
+		},
+		"basic property with hostname bucket and both STAGING and PRODUCTION hostnames": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					HostnameBucket: &HostnameBucketDetails{
+						HasProductionActivation: true,
+						HasStagingActivation:    true,
+						StagingNotifyEmails:     []string{"test@mail.com"},
+						ProductionNotifyEmails:  []string{"test@mail.com"},
+						StagingNote:             "staging note",
+						ProductionNote:          "production note",
+						Hostnames: createTFHostnameItems(generateHostnames(20, "DEFAULT", "STAGING", "ehn_12345"),
+							generateHostnames(20, "DEFAULT", "PRODUCTION", "ehn_12345")),
+					},
+					ReadVersion: "LATEST",
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+					ProductionInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "hostname-bucket/staging-production",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
+		},
+		"basic property with hostname bucket and both STAGING and PRODUCTION hostnames with diff": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					HostnameBucket: &HostnameBucketDetails{
+						HasProductionActivation: true,
+						HasStagingActivation:    true,
+						StagingNotifyEmails:     []string{"test@mail.com"},
+						ProductionNotifyEmails:  []string{"test@mail.com"},
+						StagingNote:             "staging note",
+						ProductionNote:          "production note",
+						Hostnames: createTFHostnameItems(generateHostnames(20, "DEFAULT", "STAGING", "ehn_12345"),
+							generateHostnames(10, "DEFAULT", "PRODUCTION", "ehn_12345")),
+					},
+					ReadVersion: "LATEST",
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+					ProductionInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "hostname-bucket/staging-production-diff",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
+		},
+		"basic property with hostname bucket and both STAGING and PRODUCTION hostnames with diff edge hostname id": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					HostnameBucket: &HostnameBucketDetails{
+						HasProductionActivation: true,
+						HasStagingActivation:    true,
+						StagingNotifyEmails:     []string{"test@mail.com"},
+						ProductionNotifyEmails:  []string{"test@mail.com"},
+						StagingNote:             "staging note",
+						ProductionNote:          "production note",
+						Hostnames: map[string]HostnameItem{
+							"www.test.cname_from.0.com": {
+								CnameTo:                        "www.test.cname_to.0.com",
+								CertProvisioningType:           "CPS_MANAGED",
+								EdgeHostnameID:                 "ehn_12345",
+								Staging:                        true,
+								ProductionCertProvisioningType: ptr.To("CPS_MANAGED"),
+								ProductionEdgeHostnameID:       ptr.To("ehn_54321"),
+							},
+						},
+					},
+					ReadVersion: "LATEST",
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+					ProductionInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "hostname-bucket/staging-production-diff-edge-hostname",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
+		},
+		"basic property with hostname bucket and both STAGING and PRODUCTION hostnames with diff cert provisioning type": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					HostnameBucket: &HostnameBucketDetails{
+						HasProductionActivation: true,
+						HasStagingActivation:    true,
+						StagingNotifyEmails:     []string{"test@mail.com"},
+						ProductionNotifyEmails:  []string{"test@mail.com"},
+						StagingNote:             "staging note",
+						ProductionNote:          "production note",
+						Hostnames: map[string]HostnameItem{
+							"www.test.cname_from.0.com": {
+								CnameTo:                        "www.test.cname_to.0.com",
+								CertProvisioningType:           "CPS_MANAGED",
+								EdgeHostnameID:                 "ehn_12345",
+								Staging:                        true,
+								ProductionCertProvisioningType: ptr.To("DEFAULT"),
+								ProductionEdgeHostnameID:       ptr.To("ehn_12345"),
+							},
+						},
+					},
+					ReadVersion: "LATEST",
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+					ProductionInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "hostname-bucket/staging-production-diff-cert-provisioning-type",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
 		},
 		"property with rules as datasource": {
 			givenData: TFData{
@@ -2212,6 +2929,106 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "basic-bootstrap",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
+		"basic property with hostname bucket and bootstrap and no hostname activations": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					HostnameBucket:       &HostnameBucketDetails{},
+					ReadVersion:          "LATEST",
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section:      "test_section",
+				UseBootstrap: true,
+			},
+			dir:          "hostname-bucket/bootstrap/no-hostnames",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
+		"basic property with hostname bucket and bootstrap and PRODUCTION activation but no hostnames": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					HostnameBucket: &HostnameBucketDetails{
+						ProductionNote:          "production note",
+						ProductionNotifyEmails:  []string{"test@mail.com"},
+						HasProductionActivation: true,
+						Hostnames:               nil,
+					},
+					ReadVersion: "LATEST",
+					ProductionInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section:      "test_section",
+				UseBootstrap: true,
+			},
+			dir:          "hostname-bucket/bootstrap/production-no-hostnames",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
+		"basic property with hostname bucket and bootstrap and hostnames in STAGING and PRODUCTION": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					HostnameBucket: &HostnameBucketDetails{
+						HasProductionActivation: true,
+						HasStagingActivation:    true,
+						StagingNotifyEmails:     []string{"test@mail.com"},
+						ProductionNotifyEmails:  []string{"test@mail.com"},
+						StagingNote:             "staging note",
+						ProductionNote:          "production note",
+						Hostnames: createTFHostnameItems(generateHostnames(20, "DEFAULT", "STAGING", "ehn_12345"),
+							generateHostnames(20, "DEFAULT", "PRODUCTION", "ehn_12345")),
+					},
+					ReadVersion: "LATEST",
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+					ProductionInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section:      "test_section",
+				UseBootstrap: true,
+			},
+			dir:          "hostname-bucket/bootstrap/staging-production",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
+		},
 		"property using split-depth": {
 			givenData: TFData{
 				Property: TFPropertyData{
@@ -2275,6 +3092,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				"property.tmpl":  fmt.Sprintf("./testdata/res/%s/property.tf", test.dir),
 				"variables.tmpl": fmt.Sprintf("./testdata/res/%s/variables.tf", test.dir),
 				"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
+			}
+			if test.givenData.Property.HostnameBucket != nil && len(test.givenData.Property.HostnameBucket.Hostnames) != 0 {
+				templateToFile["hostname_bucket.tmpl"] = fmt.Sprintf("./testdata/res/%s/hostname_bucket.tf", test.dir)
 			}
 
 			if test.rulesAsHCL {
@@ -2862,8 +3682,32 @@ func (t *tfDataBuilder) withRuleFormat(ruleFormat string) *tfDataBuilder {
 	return t
 }
 
+func (t *tfDataBuilder) withHostnames(hostnames map[string]Hostname) *tfDataBuilder {
+	t.tfData.Property.Hostnames = hostnames
+	return t
+}
+
 func (t *tfDataBuilder) withEdgeHostname(edgeHostname map[string]EdgeHostname) *tfDataBuilder {
 	t.tfData.Property.EdgeHostnames = edgeHostname
+	return t
+}
+
+func (t *tfDataBuilder) withHostnameBucket(staging, production []papi.HostnameItem, stagingNote, productionNote string, stagingMails, productionMails []string) *tfDataBuilder {
+	if len(staging) == 0 && len(production) == 0 {
+		t.tfData.Property.HostnameBucket = &HostnameBucketDetails{}
+		return t
+	}
+	hb := &HostnameBucketDetails{
+		StagingNotifyEmails:     stagingMails,
+		ProductionNotifyEmails:  productionMails,
+		StagingNote:             stagingNote,
+		ProductionNote:          productionNote,
+		HasStagingActivation:    len(staging) != 0,
+		HasProductionActivation: len(production) != 0,
+		Hostnames:               createTFHostnameItems(staging, production),
+	}
+	t.tfData.Property.HostnameBucket = hb
+
 	return t
 }
 
@@ -3000,4 +3844,175 @@ func newTimeFromString(t *testing.T, s string) *time.Time {
 	parsedTime, err := time.Parse(time.RFC3339Nano, s)
 	require.NoError(t, err)
 	return &parsedTime
+}
+
+func TestCreateTFHostnameItems(t *testing.T) {
+	tests := map[string]struct {
+		staging    []papi.HostnameItem
+		production []papi.HostnameItem
+		expected   map[string]HostnameItem
+	}{
+		"only staging - CPS_MANAGED": {
+			staging: generateHostnames(2, "CPS_MANAGED", "STAGING", "ehn_12345"),
+			expected: map[string]HostnameItem{
+				"www.test.cname_from.0.com": {
+					CnameTo:              "www.test.cname_to.0.com",
+					CertProvisioningType: "CPS_MANAGED",
+					EdgeHostnameID:       "ehn_12345",
+					Staging:              true,
+					Production:           false,
+				},
+				"www.test.cname_from.1.com": {
+					CnameTo:              "www.test.cname_to.1.com",
+					CertProvisioningType: "CPS_MANAGED",
+					EdgeHostnameID:       "ehn_12345",
+					Staging:              true,
+					Production:           false,
+				},
+			},
+		},
+		"only production - DEFAULT": {
+			production: generateHostnames(2, "DEFAULT", "PRODUCTION", "ehn_12345"),
+			expected: map[string]HostnameItem{
+				"www.test.cname_from.0.com": {
+					CnameTo:              "www.test.cname_to.0.com",
+					CertProvisioningType: "DEFAULT",
+					EdgeHostnameID:       "ehn_12345",
+					Staging:              false,
+					Production:           true,
+				},
+				"www.test.cname_from.1.com": {
+					CnameTo:              "www.test.cname_to.1.com",
+					CertProvisioningType: "DEFAULT",
+					EdgeHostnameID:       "ehn_12345",
+					Staging:              false,
+					Production:           true,
+				},
+			},
+		},
+		"staging and production - no diff between networks - DEFAULT and ehn_12345 - no additional production fields filled": {
+			staging:    generateHostnames(2, "DEFAULT", "STAGING", "ehn_12345"),
+			production: generateHostnames(2, "DEFAULT", "PRODUCTION", "ehn_12345"),
+			expected: map[string]HostnameItem{
+				"www.test.cname_from.0.com": {
+					CnameTo:              "www.test.cname_to.0.com",
+					CertProvisioningType: "DEFAULT",
+					EdgeHostnameID:       "ehn_12345",
+					Staging:              true,
+					Production:           true,
+				},
+				"www.test.cname_from.1.com": {
+					CnameTo:              "www.test.cname_to.1.com",
+					CertProvisioningType: "DEFAULT",
+					EdgeHostnameID:       "ehn_12345",
+					Staging:              true,
+					Production:           true,
+				},
+			},
+		},
+		"staging and production - diff in cert_provisioning_type between networks - expect additional production fields to be filled": {
+			staging:    generateHostnames(2, "DEFAULT", "STAGING", "ehn_12345"),
+			production: generateHostnames(2, "CPS_MANAGED", "PRODUCTION", "ehn_12345"),
+			expected: map[string]HostnameItem{
+				"www.test.cname_from.0.com": {
+					CnameTo:                        "www.test.cname_to.0.com",
+					CertProvisioningType:           "DEFAULT",
+					EdgeHostnameID:                 "ehn_12345",
+					Staging:                        true,
+					Production:                     false,
+					ProductionCertProvisioningType: ptr.To("CPS_MANAGED"),
+					ProductionEdgeHostnameID:       ptr.To("ehn_12345"),
+				},
+				"www.test.cname_from.1.com": {
+					CnameTo:                        "www.test.cname_to.1.com",
+					CertProvisioningType:           "DEFAULT",
+					EdgeHostnameID:                 "ehn_12345",
+					Staging:                        true,
+					Production:                     false,
+					ProductionCertProvisioningType: ptr.To("CPS_MANAGED"),
+					ProductionEdgeHostnameID:       ptr.To("ehn_12345"),
+				},
+			},
+		},
+		"staging and production - diff in edge_hostname_id between networks - expect additional production fields to be filled": {
+			staging:    generateHostnames(2, "DEFAULT", "STAGING", "ehn_67890"),
+			production: generateHostnames(2, "DEFAULT", "PRODUCTION", "ehn_12345"),
+			expected: map[string]HostnameItem{
+				"www.test.cname_from.0.com": {
+					CnameTo:                        "www.test.cname_to.0.com",
+					CertProvisioningType:           "DEFAULT",
+					EdgeHostnameID:                 "ehn_67890",
+					Staging:                        true,
+					Production:                     false,
+					ProductionCertProvisioningType: ptr.To("DEFAULT"),
+					ProductionEdgeHostnameID:       ptr.To("ehn_12345"),
+				},
+				"www.test.cname_from.1.com": {
+					CnameTo:                        "www.test.cname_to.1.com",
+					CertProvisioningType:           "DEFAULT",
+					EdgeHostnameID:                 "ehn_67890",
+					Staging:                        true,
+					Production:                     false,
+					ProductionCertProvisioningType: ptr.To("DEFAULT"),
+					ProductionEdgeHostnameID:       ptr.To("ehn_12345"),
+				},
+			},
+		},
+		"staging and production - first hostname is the same for both networks - no additional production fields filled, " +
+			"diff in edge_hostname_id between networks for the second hostname - expect additional production fields to be filled": {
+			staging: []papi.HostnameItem{
+				{
+					CnameFrom:             "www.test.cname_from.0.com",
+					StagingCertType:       "CPS_MANAGED",
+					StagingCnameTo:        "www.test.cname_to.0.com",
+					StagingEdgeHostnameID: "ehn_12345",
+				},
+				{
+					CnameFrom:             "www.test.cname_from.1.com",
+					StagingCertType:       "DEFAULT",
+					StagingCnameTo:        "www.test.cname_to.1.com",
+					StagingEdgeHostnameID: "ehn_12345",
+				},
+			},
+			production: []papi.HostnameItem{
+				{
+					CnameFrom:                "www.test.cname_from.0.com",
+					ProductionCertType:       "CPS_MANAGED",
+					ProductionCnameTo:        "www.test.cname_to.0.com",
+					ProductionEdgeHostnameID: "ehn_12345",
+				},
+				{
+					CnameFrom:                "www.test.cname_from.1.com",
+					ProductionCertType:       "DEFAULT",
+					ProductionCnameTo:        "www.test.cname_to.1.com",
+					ProductionEdgeHostnameID: "ehn_67890",
+				},
+			},
+			expected: map[string]HostnameItem{
+				"www.test.cname_from.0.com": {
+					CnameTo:              "www.test.cname_to.0.com",
+					CertProvisioningType: "CPS_MANAGED",
+					EdgeHostnameID:       "ehn_12345",
+					Staging:              true,
+					Production:           true,
+				},
+				"www.test.cname_from.1.com": {
+					CnameTo:                        "www.test.cname_to.1.com",
+					CertProvisioningType:           "DEFAULT",
+					EdgeHostnameID:                 "ehn_12345",
+					Staging:                        true,
+					Production:                     false,
+					ProductionCertProvisioningType: ptr.To("DEFAULT"),
+					ProductionEdgeHostnameID:       ptr.To("ehn_67890"),
+				},
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			actual := createTFHostnameItems(tc.staging, tc.production)
+			assert.Equal(t, tc.expected, actual)
+		})
+	}
 }
