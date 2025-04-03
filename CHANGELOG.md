@@ -1,6 +1,6 @@
 # RELEASE NOTES
 
-## 2.1.0 (Apr 7, 2025)
+## 2.1.0 (Apr 3, 2025)
 
 ### FEATURES/ENHANCEMENTS:
 
