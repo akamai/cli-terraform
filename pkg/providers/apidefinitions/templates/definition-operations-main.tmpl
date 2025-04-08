@@ -1,5 +1,0 @@
-{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/apidefinitions.TFAPIWrapperData*/ -}}
-resource "akamai_apidefinitions_resource_operations" "{{.ResourceName}}" {
-  api_id = akamai_apidefinitions_api.{{.ResourceName}}.id
-  resource_operations = file("${path.module}/definition-operations-api.json")
-}
