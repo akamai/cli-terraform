@@ -156,7 +156,7 @@ func TestProcessAPIDefinitionTemplates(t *testing.T) {
 			filesToCheck: []string{"apidefinitions.tf", "import.sh", "variables.tf",
 				"modules/activation/main.tf", "modules/activation/variables.tf",
 				"modules/definition/main.tf", "modules/definition/api.yml", "modules/definition/variables.tf",
-				"modules/definition/operations-api.json", "modules/definition/operations.tf",
+				"modules/definition/operations-api.json",
 			},
 		},
 		"json - active on Staging and Production": {
@@ -166,7 +166,7 @@ func TestProcessAPIDefinitionTemplates(t *testing.T) {
 			filesToCheck: []string{"apidefinitions.tf", "import.sh", "variables.tf",
 				"modules/activation/main.tf", "modules/activation/variables.tf",
 				"modules/definition/main.tf", "modules/definition/api.json",
-				"modules/definition/operations-api.json", "modules/definition/operations.tf",
+				"modules/definition/operations-api.json",
 			},
 		},
 		"inactive on Staging and Production": {

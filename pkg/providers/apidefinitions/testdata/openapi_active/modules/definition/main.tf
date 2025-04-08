@@ -33,3 +33,8 @@ output "api_staging_version" {
 output "api_production_version" {
   value = akamai_apidefinitions_api.pet_store.production_version
 }
+
+resource "akamai_apidefinitions_resource_operations" "pet_store" {
+  api_id              = akamai_apidefinitions_api.pet_store.id
+  resource_operations = file("${path.module}/operations-api.json")
+}
