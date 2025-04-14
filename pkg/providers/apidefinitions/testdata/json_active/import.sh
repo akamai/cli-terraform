@@ -2,4 +2,4 @@ terraform init
 terraform import module.definition.akamai_apidefinitions_api.pet_store 1:2
 terraform import module.activation_staging.akamai_apidefinitions_activation.pet_store 1:STAGING
 terraform import module.activation_production.akamai_apidefinitions_activation.pet_store 1:PRODUCTION
-terraform import module.definition.akamai_apidefinitions_resource_operations.pet_store 1
+terraform import module.definition.akamai_apidefinitions_resource_operations.pet_store 1:2
