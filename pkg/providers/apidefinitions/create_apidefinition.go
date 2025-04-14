@@ -167,7 +167,7 @@ func createAPIDefinition(ctx context.Context, section string, format outputForma
 
 	term.Spinner().OK()
 
-	tfAPIData := populateAPIData(section, *content, id, *versionNumber, *latestVersionNumber, API, isOperationsEmpty, *operationsContent)
+	tfAPIData := populateAPIData(section, *content, *operationsContent, id, *versionNumber, *latestVersionNumber, API, isOperationsEmpty)
 
 	term.Spinner().Start("Saving TF configurations ")
 
