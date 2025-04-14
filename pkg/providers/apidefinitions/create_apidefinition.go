@@ -140,37 +140,32 @@ func createAPIDefinition(ctx context.Context, section string, format outputForma
 			term.Spinner().Fail()
 			return nil, fmt.Errorf("%w: %s", errFetchingAPI, err)
 		}
-		term.Spinner().OK()
 		content, err = serializeIndent(version)
 		if err != nil {
+			term.Spinner().Fail()
 			return nil, fmt.Errorf("unable to serialize API : %s", err)
 		}
 	default:
+		term.Spinner().Fail()
 		return nil, fmt.Errorf("value %s is invalid. Must be: '%s' or '%s'", format, openAPIFormat, jsonFormat)
 	}
 
 	var operationsContent *string
-
 	operations, err := clientV0.GetResourceOperation(ctx, v0.GetResourceOperationRequest{APIID: id, VersionNumber: *versionNumber})
-
 	if err != nil {
 		term.Spinner().Fail()
 		return nil, fmt.Errorf("%w: %s", errFetchingResourceOperationsAPI, err)
 	}
 
-	term.Spinner().OK()
-
 	operationsContent, err = serializeResourceOperationResponseIndent(operations)
-
 	if err != nil {
+		term.Spinner().Fail()
 		return nil, fmt.Errorf("unable to serialize API Operations : %s", err)
 	}
 
-	isOperationsEmpty := false
+	isOperationsEmpty := operations.ResourceOperations == nil || operations.ResourceOperations.Len() == 0
 
-	if operations.ResourceOperations == nil || operations.ResourceOperations.Len() == 0 {
-		isOperationsEmpty = true
-	}
+	term.Spinner().OK()
 
 	tfAPIData := populateAPIData(section, *content, id, *versionNumber, *latestVersionNumber, API, isOperationsEmpty, *operationsContent)
 
