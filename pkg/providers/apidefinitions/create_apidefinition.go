@@ -182,7 +182,7 @@ func createAPIDefinition(ctx context.Context, section string, format outputForma
 	return &tfAPIData, nil
 }
 
-func populateAPIData(section, content string, id, versionNumber, latestVersionNumber int64, api *apidefinitions.GetEndpointResponse, isOperationsEmpty bool, operationsContent string) TFAPIWrapperData {
+func populateAPIData(section, content, operationsContent string, id, versionNumber, latestVersionNumber int64, api *apidefinitions.GetEndpointResponse, isOperationsEmpty bool) TFAPIWrapperData {
 	return TFAPIWrapperData{
 		API:                  content,
 		ID:                   id,
