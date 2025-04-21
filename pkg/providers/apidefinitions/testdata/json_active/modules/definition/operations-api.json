@@ -3,7 +3,7 @@
     "/base": {
       "test login": {
         "method": "POST",
-        "purpose": "SEARCH"
+        "purpose": "search"
       }
     }
   }

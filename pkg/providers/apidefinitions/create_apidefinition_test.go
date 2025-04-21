@@ -22,7 +22,7 @@ import (
 
 var api = "{\n  \"name\": \"Pet Store\",\n  \"hostnames\": null,\n  \"contractId\": \"\",\n  \"groupId\": 0\n}"
 
-var apiOperations = "{\n  \"operations\": {\n    \"/base\": {\n      \"test login\": {\n        \"method\": \"POST\",\n        \"purpose\": \"SEARCH\"\n      }\n    }\n  }\n}"
+var apiOperations = "{\n  \"operations\": {\n    \"/base\": {\n      \"test login\": {\n        \"method\": \"POST\",\n        \"purpose\": \"search\"\n      }\n    }\n  }\n}"
 
 var emptyOperations = "{\n  \"operations\": {}\n}"
 
@@ -263,7 +263,7 @@ func mockGetResourceOperation(c *v0.Mock) {
 	baseOperations := orderedmap.New[string, v0.Operation]()
 	baseOperations.Set("test login", v0.Operation{
 		Method:  ptr.To("POST"),
-		Purpose: ptr.To("SEARCH"),
+		Purpose: ptr.To("search"),
 	})
 	operations.Set("/base", baseOperations)
 

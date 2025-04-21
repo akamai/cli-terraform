@@ -37,6 +37,5 @@ output "api_production_version" {
 
 resource "akamai_apidefinitions_resource_operations" "{{.ResourceName}}" {
   api_id              = akamai_apidefinitions_api.{{.ResourceName}}.id
-  version             = akamai_apidefinitions_api.{{.ResourceName}}.version
   resource_operations = file("${path.module}/operations-api.json")
 }
