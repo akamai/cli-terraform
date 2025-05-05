@@ -165,15 +165,25 @@ func saveListItemsJSON(clientList *clientlists.GetClientListResponse, tfWorkPath
 	listItems := []clientlists.ListItemPayload{}
 
 	for _, v := range clientList.Items {
-		tags := []string{}
-		tags = append(tags, v.Tags...)
+		item := clientlists.ListItemPayload{
+			Value: v.Value, // Value is always included
+		}
 
-		listItems = append(listItems, clientlists.ListItemPayload{
-			Value:          v.Value,
-			Description:    v.Description,
-			Tags:           tags,
-			ExpirationDate: v.ExpirationDate,
-		})
+		if v.Description != "" {
+			item.Description = v.Description
+		}
+
+		if len(v.Tags) > 0 {
+			tags := make([]string, len(v.Tags))
+			copy(tags, v.Tags)
+			item.Tags = tags
+		}
+
+		if v.ExpirationDate != "" {
+			item.ExpirationDate = v.ExpirationDate
+		}
+
+		listItems = append(listItems, item)
 	}
 
 	jsonBody, err := json.MarshalIndent(listItems, "", "  ")
