@@ -226,6 +226,7 @@ func TestCreateIAMAll(t *testing.T) {
 				expectGetRoles(i)
 				expectGetIPAllowlistStatus(i, true)
 				expectListCIDRBlocks(i, cidrs)
+				expectGetSelfAPIClient(i)
 				expectAllProcessTemplates(p, section)
 			},
 		},
@@ -241,6 +242,7 @@ func TestCreateIAMAll(t *testing.T) {
 				expectGetUser001(i)
 				expectGetIPAllowlistStatus(i, true)
 				expectListCIDRBlocks(i, cidrs)
+				expectGetSelfAPIClient(i)
 
 				getUserReq := iam.GetUserRequest{
 					IdentityID:    "002",
@@ -340,7 +342,7 @@ func TestProcessIAMAllTemplates(t *testing.T) {
 		"one used, one not": {
 			givenData:    getTestData(section),
 			dir:          "iam_all",
-			filesToCheck: []string{"users.tf", "variables.tf", "import.sh", "roles.tf", "groups.tf", "allowlist.tf"},
+			filesToCheck: []string{"users.tf", "variables.tf", "import.sh", "roles.tf", "groups.tf", "allowlist.tf", "client.tf"},
 		},
 	}
 
@@ -350,6 +352,7 @@ func TestProcessIAMAllTemplates(t *testing.T) {
 			processor := templates.FSTemplateProcessor{
 				TemplatesFS: templateFiles,
 				TemplateTargets: map[string]string{
+					"client.tmpl":    fmt.Sprintf("./testdata/res/%s/client.tf", test.dir),
 					"allowlist.tmpl": fmt.Sprintf("./testdata/res/%s/allowlist.tf", test.dir),
 					"groups.tmpl":    fmt.Sprintf("./testdata/res/%s/groups.tf", test.dir),
 					"imports.tmpl":   fmt.Sprintf("./testdata/res/%s/import.sh", test.dir),
@@ -440,6 +443,7 @@ func getTestData(section string) TFData {
 			},
 			Enabled: true,
 		},
+		TFClient:   tfClient,
 		Section:    section,
 		Subcommand: "all",
 	}

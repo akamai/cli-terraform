@@ -22,6 +22,7 @@ type (
 		TFRoles     []TFRole
 		TFGroups    []TFGroup
 		TFAllowlist TFAllowlist
+		TFClient    TFClient
 		Section     string
 		Subcommand  string
 	}
@@ -95,6 +96,42 @@ type (
 		ParentGroupID int
 		GroupName     string
 	}
+
+	// TFClient represents a client used in templates
+	TFClient struct {
+		AllowAccountSwitch      bool
+		APIAccess               iam.APIAccess
+		AuthorizedUsers         []string
+		CanCreateAutoCredential bool
+		ClientDescription       string
+		ClientName              string
+		ClientType              iam.ClientType
+		GroupAccess             iam.GroupAccess
+		IPACL                   IPACL
+		NotificationEmails      []string
+		PurgeOptions            PurgeOptions
+		Lock                    bool
+		ClientID                string
+	}
+
+	// IPACL represents a client IPACL used in templates
+	IPACL struct {
+		CIDR   []string
+		Enable bool
+	}
+
+	// PurgeOptions represents a client PurgeOptions used in templates
+	PurgeOptions struct {
+		CanPurgeByCacheTag bool
+		CanPurgeByCPCode   bool
+		CPCodeAccess       CPCodeAccess
+	}
+
+	// CPCodeAccess represents the CP codes used in templates which the API client can purge
+	CPCodeAccess struct {
+		AllCurrentAndNewCPCodes bool
+		CPCodes                 []int64
+	}
 )
 
 var (
@@ -102,7 +139,8 @@ var (
 	templateFiles embed.FS
 
 	additionalFunctions = tools.DecorateWithMultilineHandlingFunctions(map[string]any{
-		"cidrName": cidrName,
+		"cidrName":     cidrName,
+		"getLastIndex": tools.GetLastIndex,
 	})
 
 	// ErrFetchingUsers is returned when fetching users fails
@@ -286,6 +324,42 @@ func getTFCIDRBlocks(ctx context.Context, client iam.IAM) ([]TFCIDRBlock, error)
 	}
 
 	return tfCIDRBlocks, nil
+}
+
+func getTFClient(apiClient *iam.GetAPIClientResponse) TFClient {
+	return TFClient{
+		APIAccess:               apiClient.APIAccess,
+		AuthorizedUsers:         apiClient.AuthorizedUsers,
+		CanCreateAutoCredential: apiClient.CanAutoCreateCredential,
+		AllowAccountSwitch:      apiClient.AllowAccountSwitch,
+		ClientDescription:       apiClient.ClientDescription,
+		ClientName:              apiClient.ClientName,
+		ClientType:              apiClient.ClientType,
+		GroupAccess:             apiClient.GroupAccess,
+		IPACL:                   getIPACL(apiClient),
+		NotificationEmails:      apiClient.NotificationEmails,
+		PurgeOptions:            getPurge(apiClient),
+		Lock:                    apiClient.IsLocked,
+		ClientID:                apiClient.ClientID,
+	}
+}
+
+func getIPACL(apiClient *iam.GetAPIClientResponse) IPACL {
+	return IPACL{
+		CIDR:   apiClient.IPACL.CIDR,
+		Enable: apiClient.IPACL.Enable,
+	}
+}
+
+func getPurge(apiClient *iam.GetAPIClientResponse) PurgeOptions {
+	return PurgeOptions{
+		CanPurgeByCacheTag: apiClient.PurgeOptions.CanPurgeByCacheTag,
+		CanPurgeByCPCode:   apiClient.PurgeOptions.CanPurgeByCPCode,
+		CPCodeAccess: CPCodeAccess{
+			AllCurrentAndNewCPCodes: apiClient.PurgeOptions.CPCodeAccess.AllCurrentAndNewCPCodes,
+			CPCodes:                 apiClient.PurgeOptions.CPCodeAccess.CPCodes,
+		},
+	}
 }
 
 func cidrName(cidr string) string {

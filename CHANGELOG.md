@@ -7,6 +7,9 @@
 
 * PAPI
   * Added support for an additional `RDN` compliant fields in `subject_rdns` under `custom_certificate_authorities` in the rule formats.
+* Identity and Access Management (IAM)
+  * Added `client` subcommand to `export-iam` command which exports terraform configuration files for optionally provided API client.
+  * Modified `all` subcommand for `export-iam` command to export configuration for self API client.
 
 
 

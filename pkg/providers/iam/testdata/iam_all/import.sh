@@ -10,3 +10,4 @@ terraform import akamai_iam_group.group_id_123 123
 terraform import akamai_iam_ip_allowlist.allowlist ""
 terraform import akamai_iam_cidr_block.cidr_1_1_1_1-1 "1"
 terraform import akamai_iam_cidr_block.cidr_2_2_2_2-2 "2"
+terraform import akamai_iam_api_client.api_client_1a2b3 1a2b3

@@ -1,0 +1,60 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/iam.TFData*/ -}}
+
+{{ if eq .Subcommand "client" -}}
+{{template "terraform_config.tmpl"}}
+{{end -}}
+resource "akamai_iam_api_client" "api_client_{{.TFClient.ClientID}}" {
+  authorized_users = [{{range $i, $v := .TFClient.AuthorizedUsers}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+  can_create_auto_credential = {{.TFClient.CanCreateAutoCredential}}
+  allow_account_switch = {{.TFClient.AllowAccountSwitch}}
+  client_type = "{{.TFClient.ClientType}}"
+  client_name = "{{.TFClient.ClientName}}"
+  notification_emails = [{{range $i, $v := .TFClient.NotificationEmails}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+  client_description = "{{.TFClient.ClientDescription}}"
+  lock = {{.TFClient.Lock}}
+  group_access = {
+      clone_authorized_user_groups = {{.TFClient.GroupAccess.CloneAuthorizedUserGroups}}
+      {{- if not .TFClient.GroupAccess.CloneAuthorizedUserGroups}}
+        {{- $gSize := len .TFClient.GroupAccess.Groups | getLastIndex}}
+          groups = [{{range $i, $v := .TFClient.GroupAccess.Groups -}}
+            {{template "clientGroup" $v}}{{if ne $i $gSize}}, {{end -}}
+          {{end}}]
+      {{- end}}
+  }
+  ip_acl = {
+    enable = {{.TFClient.IPACL.Enable}}
+    {{- with .TFClient.IPACL.CIDR}}
+      cidr = [{{range $i, $v := . }}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+    {{- end }}
+  }
+  api_access = {
+    all_accessible_apis = {{.TFClient.APIAccess.AllAccessibleAPIs}}
+    {{- if not .TFClient.APIAccess.AllAccessibleAPIs}}
+      {{- $aSize := len .TFClient.APIAccess.APIs | getLastIndex}}
+      {{- with .TFClient.APIAccess.APIs}}
+        apis = [{{range $i, $v := .}}
+          {
+            api_id = {{$v.APIID}}
+            api_name = "{{$v.APIName}}"
+            description = "{{$v.Description | Escape}}"
+            endpoint = "{{$v.Endpoint}}"
+            documentation_url = "{{$v.DocumentationURL}}"
+            access_level = "{{$v.AccessLevel}}"
+          }{{if ne $i  $aSize }}, {{end -}}
+        {{end}}]
+      {{- end }}
+    {{- end}}
+  }
+  purge_options = {
+    can_purge_by_cp_code = {{.TFClient.PurgeOptions.CanPurgeByCPCode}}
+    can_purge_by_cache_tag = {{.TFClient.PurgeOptions.CanPurgeByCacheTag}}
+    cp_code_access = {
+      all_current_and_new_cp_codes = {{.TFClient.PurgeOptions.CPCodeAccess.AllCurrentAndNewCPCodes}}
+      {{- if not .TFClient.PurgeOptions.CPCodeAccess.AllCurrentAndNewCPCodes}}
+        {{- with .TFClient.PurgeOptions.CPCodeAccess.CPCodes}}
+          cp_codes = [{{range $i, $v := . }}{{ if $i }}, {{end}}{{ $v }}{{end}}]
+        {{- end }}
+      {{- end}}
+    }
+  }
+}

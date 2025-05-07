@@ -32,6 +32,7 @@ func CmdCreateIAMAll(c *cli.Context) error {
 	usersPath := filepath.Join(tfWorkPath, "users.tf")
 	allowlistPath := filepath.Join(tfWorkPath, "allowlist.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
+	clientPath := filepath.Join(tfWorkPath, "client.tf")
 
 	err := tools.CheckFiles(groupsPath, importPath, rolesPath, usersPath, allowlistPath, variablesPath)
 	if err != nil {
@@ -45,6 +46,7 @@ func CmdCreateIAMAll(c *cli.Context) error {
 		"users.tmpl":     usersPath,
 		"allowlist.tmpl": allowlistPath,
 		"variables.tmpl": variablesPath,
+		"client.tmpl":    clientPath,
 	}
 
 	processor := templates.FSTemplateProcessor{
@@ -124,6 +126,7 @@ func createIAMAll(ctx context.Context, section string, client iam.IAM, templateP
 		return fmt.Errorf("%w: %s", ErrFetchingIPAllowlistStatus, err)
 	}
 	tfAllowlist.Enabled = status.Enabled
+	term.Spinner().OK()
 
 	// Fetch CIDR blocks
 	term.Spinner().Start("Fetching all CIDR blocks")
@@ -135,11 +138,27 @@ func createIAMAll(ctx context.Context, section string, client iam.IAM, templateP
 	tfAllowlist.CIDRBlocks = tfCIDRBlocks
 	term.Spinner().OK()
 
+	// Fetch API client
+	term.Spinner().Start("Fetching self API client")
+	apiClient, err := client.GetAPIClient(ctx, iam.GetAPIClientRequest{
+		GroupAccess: true,
+		APIAccess:   true,
+		IPACL:       true,
+	})
+	if err != nil {
+		term.Spinner().Fail()
+		return fmt.Errorf("could not get API client : %w", err)
+	}
+
+	tfAPIClient := getTFClient(apiClient)
+	term.Spinner().OK()
+
 	tfData := TFData{
 		TFUsers:     tfUsers,
 		TFRoles:     tfRoles,
 		TFGroups:    tfGroups,
 		TFAllowlist: tfAllowlist,
+		TFClient:    tfAPIClient,
 		Section:     section,
 		Subcommand:  "all",
 	}
