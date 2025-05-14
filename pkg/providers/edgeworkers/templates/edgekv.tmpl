@@ -24,7 +24,7 @@ resource "akamai_edgekv" "edgekv" {
 {{- range $group, $items := .GroupItems}}
 
 resource "akamai_edgekv_group_items" "{{$group | Escape}}" {
-  namespace_name = "{{$.Name}}"
+  namespace_name = akamai_edgekv.edgekv.namespace_name
   network        = "{{$.Network}}"
   group_name     = "{{$group}}"
   items = {

@@ -26,7 +26,9 @@
 
 
 
-
+* EdgeKV
+  * Fixed the bug where `namespace_name` in `akamai_edgekv_group_items` was generated as plain string
+    instead of a reference to the namespace name in the `akamai_edgekv` resource.
 
 
 

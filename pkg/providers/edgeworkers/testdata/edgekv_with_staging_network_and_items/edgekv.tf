@@ -22,7 +22,7 @@ resource "akamai_edgekv" "edgekv" {
 }
 
 resource "akamai_edgekv_group_items" "group1" {
-  namespace_name = "test_namespace"
+  namespace_name = akamai_edgekv.edgekv.namespace_name
   network        = "staging"
   group_name     = "group1"
   items = {
@@ -32,7 +32,7 @@ resource "akamai_edgekv_group_items" "group1" {
 }
 
 resource "akamai_edgekv_group_items" "group2" {
-  namespace_name = "test_namespace"
+  namespace_name = akamai_edgekv.edgekv.namespace_name
   network        = "staging"
   group_name     = "group2"
   items = {
