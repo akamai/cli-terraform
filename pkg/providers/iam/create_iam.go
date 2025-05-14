@@ -107,9 +107,9 @@ type (
 		ClientName              string
 		ClientType              iam.ClientType
 		GroupAccess             iam.GroupAccess
-		IPACL                   IPACL
+		IPACL                   *IPACL
 		NotificationEmails      []string
-		PurgeOptions            PurgeOptions
+		PurgeOptions            *PurgeOptions
 		Lock                    bool
 		ClientID                string
 	}
@@ -344,22 +344,28 @@ func getTFClient(apiClient *iam.GetAPIClientResponse) TFClient {
 	}
 }
 
-func getIPACL(apiClient *iam.GetAPIClientResponse) IPACL {
-	return IPACL{
-		CIDR:   apiClient.IPACL.CIDR,
-		Enable: apiClient.IPACL.Enable,
+func getIPACL(apiClient *iam.GetAPIClientResponse) *IPACL {
+	if apiClient.IPACL != nil {
+		return &IPACL{
+			CIDR:   apiClient.IPACL.CIDR,
+			Enable: apiClient.IPACL.Enable,
+		}
 	}
+	return nil
 }
 
-func getPurge(apiClient *iam.GetAPIClientResponse) PurgeOptions {
-	return PurgeOptions{
-		CanPurgeByCacheTag: apiClient.PurgeOptions.CanPurgeByCacheTag,
-		CanPurgeByCPCode:   apiClient.PurgeOptions.CanPurgeByCPCode,
-		CPCodeAccess: CPCodeAccess{
-			AllCurrentAndNewCPCodes: apiClient.PurgeOptions.CPCodeAccess.AllCurrentAndNewCPCodes,
-			CPCodes:                 apiClient.PurgeOptions.CPCodeAccess.CPCodes,
-		},
+func getPurge(apiClient *iam.GetAPIClientResponse) *PurgeOptions {
+	if apiClient.PurgeOptions != nil {
+		return &PurgeOptions{
+			CanPurgeByCacheTag: apiClient.PurgeOptions.CanPurgeByCacheTag,
+			CanPurgeByCPCode:   apiClient.PurgeOptions.CanPurgeByCPCode,
+			CPCodeAccess: CPCodeAccess{
+				AllCurrentAndNewCPCodes: apiClient.PurgeOptions.CPCodeAccess.AllCurrentAndNewCPCodes,
+				CPCodes:                 apiClient.PurgeOptions.CPCodeAccess.CPCodes,
+			},
+		}
 	}
+	return nil
 }
 
 func cidrName(cidr string) string {

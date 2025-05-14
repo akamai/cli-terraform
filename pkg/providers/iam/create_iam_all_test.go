@@ -226,7 +226,7 @@ func TestCreateIAMAll(t *testing.T) {
 				expectGetRoles(i)
 				expectGetIPAllowlistStatus(i, true)
 				expectListCIDRBlocks(i, cidrs)
-				expectGetSelfAPIClient(i)
+				expectGetSelfAPIClient(i, getAPIClientResponse(&clientIPACL, &clientPurgeOptions))
 				expectAllProcessTemplates(p, section)
 			},
 		},
@@ -242,7 +242,7 @@ func TestCreateIAMAll(t *testing.T) {
 				expectGetUser001(i)
 				expectGetIPAllowlistStatus(i, true)
 				expectListCIDRBlocks(i, cidrs)
-				expectGetSelfAPIClient(i)
+				expectGetSelfAPIClient(i, getAPIClientResponse(&clientIPACL, &clientPurgeOptions))
 
 				getUserReq := iam.GetUserRequest{
 					IdentityID:    "002",
@@ -443,7 +443,7 @@ func getTestData(section string) TFData {
 			},
 			Enabled: true,
 		},
-		TFClient:   tfClient,
+		TFClient:   getTfClient(&clientTfIPACL, &clientTfPurgeOptions),
 		Section:    section,
 		Subcommand: "all",
 	}

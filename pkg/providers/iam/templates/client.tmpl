@@ -21,12 +21,16 @@ resource "akamai_iam_api_client" "api_client_{{.TFClient.ClientID}}" {
           {{end}}]
       {{- end}}
   }
-  ip_acl = {
-    enable = {{.TFClient.IPACL.Enable}}
-    {{- with .TFClient.IPACL.CIDR}}
-      cidr = [{{range $i, $v := . }}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+  {{- with .TFClient.IPACL}}
+    {{- if .Enable}}
+      ip_acl = {
+        enable = {{.Enable}}
+        {{- with .CIDR}}
+            cidr = [{{range $i, $v := . }}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+        {{- end }}
+      }
     {{- end }}
-  }
+  {{- end}}
   api_access = {
     all_accessible_apis = {{.TFClient.APIAccess.AllAccessibleAPIs}}
     {{- if not .TFClient.APIAccess.AllAccessibleAPIs}}
@@ -45,16 +49,18 @@ resource "akamai_iam_api_client" "api_client_{{.TFClient.ClientID}}" {
       {{- end }}
     {{- end}}
   }
+  {{- with .TFClient.PurgeOptions}}
   purge_options = {
-    can_purge_by_cp_code = {{.TFClient.PurgeOptions.CanPurgeByCPCode}}
-    can_purge_by_cache_tag = {{.TFClient.PurgeOptions.CanPurgeByCacheTag}}
+    can_purge_by_cp_code = {{.CanPurgeByCPCode}}
+    can_purge_by_cache_tag = {{.CanPurgeByCacheTag}}
     cp_code_access = {
-      all_current_and_new_cp_codes = {{.TFClient.PurgeOptions.CPCodeAccess.AllCurrentAndNewCPCodes}}
-      {{- if not .TFClient.PurgeOptions.CPCodeAccess.AllCurrentAndNewCPCodes}}
-        {{- with .TFClient.PurgeOptions.CPCodeAccess.CPCodes}}
+      all_current_and_new_cp_codes = {{.CPCodeAccess.AllCurrentAndNewCPCodes}}
+      {{- if not .CPCodeAccess.AllCurrentAndNewCPCodes}}
+        {{- with .CPCodeAccess.CPCodes}}
           cp_codes = [{{range $i, $v := . }}{{ if $i }}, {{end}}{{ $v }}{{end}}]
         {{- end }}
       {{- end}}
     }
   }
+  {{- end}}
 }
