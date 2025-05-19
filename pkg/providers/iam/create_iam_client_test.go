@@ -34,6 +34,7 @@ var (
 			AccessLevel:      "READ-ONLY",
 		},
 	}
+
 	singleGroup = []iam.ClientGroup{
 		{
 			GroupID:         123,
@@ -63,7 +64,7 @@ var (
 		CIDR:   []string{"128.5.6.5/24"},
 	}
 
-	clientTfIPACL = IPACL{
+	clientTFIPACL = TFIPACL{
 		Enable: true,
 		CIDR:   []string{"128.5.6.5/24"},
 	}
@@ -77,10 +78,10 @@ var (
 		},
 	}
 
-	clientTfPurgeOptions = PurgeOptions{
+	clientTFPurgeOptions = TFPurgeOptions{
 		CanPurgeByCPCode:   true,
 		CanPurgeByCacheTag: true,
-		CPCodeAccess: CPCodeAccess{
+		CPCodeAccess: TFCPCodeAccess{
 			AllCurrentAndNewCPCodes: false,
 			CPCodes:                 []int64{101},
 		},
@@ -103,7 +104,7 @@ var (
 			ClientName:              "mw+2_1",
 			ClientType:              "CLIENT",
 			CreatedBy:               "someuser",
-			CreatedDate:             time.Time{},
+			CreatedDate:             newTimeFromStringMust("2023-06-13T14:48:08.000Z"),
 			GroupAccess: iam.GroupAccess{
 				CloneAuthorizedUserGroups: false,
 				Groups:                    singleGroup,
@@ -112,6 +113,20 @@ var (
 			IsLocked:           false,
 			NotificationEmails: []string{"mw+2@example.com"},
 			PurgeOptions:       purgeOptions,
+			Credentials: []iam.APIClientCredential{
+				{
+					Description: "Test API Client Credential 1",
+					Status:      "ACTIVE",
+					ExpiresOn:   newTimeFromStringMust("2025-06-13T14:48:08.000Z"),
+					CreatedOn:   newTimeFromStringMust("2023-06-13T14:48:08.000Z"),
+				},
+				{
+					Description: "Test API Client Credential 2",
+					Status:      "ACTIVE",
+					ExpiresOn:   newTimeFromStringMust("2025-06-13T14:48:08.000Z"),
+					CreatedOn:   newTimeFromStringMust("2022-06-13T14:48:08.000Z"),
+				},
+			},
 		}
 	}
 
@@ -121,6 +136,7 @@ var (
 			GroupAccess: true,
 			APIAccess:   true,
 			IPACL:       true,
+			Credentials: true,
 		}
 		client.On("GetAPIClient", mock.Anything, req).Return(&res, nil).Once()
 	}
@@ -130,11 +146,12 @@ var (
 			GroupAccess: true,
 			APIAccess:   true,
 			IPACL:       true,
+			Credentials: true,
 		}
 		client.On("GetAPIClient", mock.Anything, req).Return(&res, nil).Once()
 	}
 
-	getTfClient = func(ipAcl *IPACL, purgeOptions *PurgeOptions) TFClient {
+	getTfClient = func(ipACL *TFIPACL, purgeOptions *TFPurgeOptions) TFClient {
 		return TFClient{
 			ClientID:           "1a2b3",
 			AuthorizedUsers:    []string{"mw+2"},
@@ -143,6 +160,11 @@ var (
 			NotificationEmails: []string{"mw+2@example.com"},
 			ClientDescription:  "Test API Client",
 			Lock:               false,
+			Credential: &TFCredential{
+				Description: "Test API Client Credential 2",
+				Status:      "ACTIVE",
+				ExpiresOn:   "2025-06-13T14:48:08Z",
+			},
 			GroupAccess: iam.GroupAccess{
 				CloneAuthorizedUserGroups: false,
 				Groups: []iam.ClientGroup{
@@ -169,7 +191,7 @@ var (
 					},
 				},
 			},
-			IPACL: ipAcl,
+			IPACL: ipACL,
 			APIAccess: iam.APIAccess{
 				AllAccessibleAPIs: false,
 				APIs: []iam.API{
@@ -217,28 +239,28 @@ func TestCreateIAMClient(t *testing.T) {
 		"fetch API client with client ID": {
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetAPIClient(i, getAPIClientResponse(&clientIPACL, &clientPurgeOptions))
-				expectClientProcessTemplates(p, section, getTfClient(&clientTfIPACL, &clientTfPurgeOptions))
+				expectClientProcessTemplates(p, section, getTfClient(&clientTFIPACL, &clientTFPurgeOptions))
 			},
 			clientID: "1a2b3",
 		},
 		"fetch self API client": {
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetSelfAPIClient(i, getAPIClientResponse(&clientIPACL, &clientPurgeOptions))
-				expectClientProcessTemplates(p, section, getTfClient(&clientTfIPACL, &clientTfPurgeOptions))
+				expectClientProcessTemplates(p, section, getTfClient(&clientTFIPACL, &clientTFPurgeOptions))
 			},
 			clientID: "",
 		},
 		"fetch API client no IPACL": {
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetAPIClient(i, getAPIClientResponse(nil, &clientPurgeOptions))
-				expectClientProcessTemplates(p, section, getTfClient(nil, &clientTfPurgeOptions))
+				expectClientProcessTemplates(p, section, getTfClient(nil, &clientTFPurgeOptions))
 			},
 			clientID: "1a2b3",
 		},
 		"fetch API client no PurgeOptions": {
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetAPIClient(i, getAPIClientResponse(&clientIPACL, nil))
-				expectClientProcessTemplates(p, section, getTfClient(&clientTfIPACL, nil))
+				expectClientProcessTemplates(p, section, getTfClient(&clientTFIPACL, nil))
 			},
 			clientID: "1a2b3",
 		},
@@ -276,6 +298,11 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 					NotificationEmails: []string{"mw+2@example.com"},
 					ClientDescription:  "Test API Client",
 					Lock:               false,
+					Credential: &TFCredential{
+						Description: "Test API Client Credential 1",
+						Status:      "ACTIVE",
+						ExpiresOn:   "2027-04-09T12:34:13Z",
+					},
 					GroupAccess: iam.GroupAccess{
 						CloneAuthorizedUserGroups: false,
 						Groups: []iam.ClientGroup{
@@ -291,7 +318,7 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					IPACL: &IPACL{
+					IPACL: &TFIPACL{
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
@@ -316,10 +343,10 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					PurgeOptions: &PurgeOptions{
+					PurgeOptions: &TFPurgeOptions{
 						CanPurgeByCPCode:   true,
 						CanPurgeByCacheTag: true,
-						CPCodeAccess: CPCodeAccess{
+						CPCodeAccess: TFCPCodeAccess{
 							AllCurrentAndNewCPCodes: false,
 							CPCodes:                 []int64{101},
 						},
@@ -331,7 +358,7 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 			dir:          "iam_client",
 			filesToCheck: []string{"client.tf", "import.sh", "variables.tf"},
 		},
-		"client with a few groups": {
+		"client with a few groups and no credential description": {
 			givenData: TFData{
 				TFClient: TFClient{
 					ClientID:           "1a2b3",
@@ -341,6 +368,11 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 					NotificationEmails: []string{"mw+2@example.com"},
 					ClientDescription:  "Test API Client",
 					Lock:               false,
+					Credential: &TFCredential{
+						Description: "",
+						Status:      "ACTIVE",
+						ExpiresOn:   "2027-04-09T12:34:13Z",
+					},
 					GroupAccess: iam.GroupAccess{
 						CloneAuthorizedUserGroups: false,
 						Groups: []iam.ClientGroup{
@@ -366,7 +398,7 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					IPACL: &IPACL{
+					IPACL: &TFIPACL{
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
@@ -391,10 +423,10 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					PurgeOptions: &PurgeOptions{
+					PurgeOptions: &TFPurgeOptions{
 						CanPurgeByCPCode:   true,
 						CanPurgeByCacheTag: true,
-						CPCodeAccess: CPCodeAccess{
+						CPCodeAccess: TFCPCodeAccess{
 							AllCurrentAndNewCPCodes: false,
 							CPCodes:                 []int64{101},
 						},
@@ -416,6 +448,11 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 					NotificationEmails: []string{"mw+2@example.com"},
 					ClientDescription:  "Test API Client",
 					Lock:               false,
+					Credential: &TFCredential{
+						Description: "",
+						Status:      "INACTIVE",
+						ExpiresOn:   "2027-04-09T12:34:13Z",
+					},
 					GroupAccess: iam.GroupAccess{
 						CloneAuthorizedUserGroups: false,
 						Groups: []iam.ClientGroup{
@@ -425,7 +462,7 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					IPACL: &IPACL{
+					IPACL: &TFIPACL{
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
@@ -450,10 +487,10 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					PurgeOptions: &PurgeOptions{
+					PurgeOptions: &TFPurgeOptions{
 						CanPurgeByCPCode:   true,
 						CanPurgeByCacheTag: true,
-						CPCodeAccess: CPCodeAccess{
+						CPCodeAccess: TFCPCodeAccess{
 							AllCurrentAndNewCPCodes: false,
 							CPCodes:                 []int64{101},
 						},
@@ -475,6 +512,11 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 					NotificationEmails: []string{"mw+2@example.com"},
 					ClientDescription:  "Test API Client",
 					Lock:               false,
+					Credential: &TFCredential{
+						Description: "",
+						Status:      "DELETED",
+						ExpiresOn:   "2027-04-09T12:34:13Z",
+					},
 					GroupAccess: iam.GroupAccess{
 						CloneAuthorizedUserGroups: false,
 						Groups: []iam.ClientGroup{
@@ -490,7 +532,7 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					IPACL: &IPACL{
+					IPACL: &TFIPACL{
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
@@ -515,10 +557,10 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					PurgeOptions: &PurgeOptions{
+					PurgeOptions: &TFPurgeOptions{
 						CanPurgeByCPCode:   true,
 						CanPurgeByCacheTag: true,
-						CPCodeAccess: CPCodeAccess{
+						CPCodeAccess: TFCPCodeAccess{
 							AllCurrentAndNewCPCodes: false,
 						},
 					},
@@ -539,6 +581,11 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 					NotificationEmails: []string{"mw+2@example.com"},
 					ClientDescription:  "Test API Client",
 					Lock:               false,
+					Credential: &TFCredential{
+						Description: "Test API Client Credential 1",
+						Status:      "ACTIVE",
+						ExpiresOn:   "2027-04-09T12:34:13Z",
+					},
 					GroupAccess: iam.GroupAccess{
 						CloneAuthorizedUserGroups: false,
 						Groups: []iam.ClientGroup{
@@ -554,7 +601,7 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					IPACL: &IPACL{
+					IPACL: &TFIPACL{
 						Enable: true,
 					},
 					APIAccess: iam.APIAccess{
@@ -578,10 +625,10 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					PurgeOptions: &PurgeOptions{
+					PurgeOptions: &TFPurgeOptions{
 						CanPurgeByCPCode:   true,
 						CanPurgeByCacheTag: true,
-						CPCodeAccess: CPCodeAccess{
+						CPCodeAccess: TFCPCodeAccess{
 							AllCurrentAndNewCPCodes: false,
 							CPCodes:                 []int64{101},
 						},
@@ -603,6 +650,11 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 					NotificationEmails: []string{"mw+2@example.com"},
 					ClientDescription:  "Test API Client",
 					Lock:               false,
+					Credential: &TFCredential{
+						Description: "Test API Client Credential 1",
+						Status:      "ACTIVE",
+						ExpiresOn:   "2027-04-09T12:34:13Z",
+					},
 					GroupAccess: iam.GroupAccess{
 						CloneAuthorizedUserGroups: false,
 						Groups: []iam.ClientGroup{
@@ -624,7 +676,7 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					IPACL: &IPACL{
+					IPACL: &TFIPACL{
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
@@ -649,10 +701,10 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					PurgeOptions: &PurgeOptions{
+					PurgeOptions: &TFPurgeOptions{
 						CanPurgeByCPCode:   true,
 						CanPurgeByCacheTag: true,
-						CPCodeAccess: CPCodeAccess{
+						CPCodeAccess: TFCPCodeAccess{
 							AllCurrentAndNewCPCodes: false,
 							CPCodes:                 []int64{101},
 						},
@@ -674,6 +726,11 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 					NotificationEmails: []string{"mw+2@example.com"},
 					ClientDescription:  "Test API Client",
 					Lock:               false,
+					Credential: &TFCredential{
+						Description: "Test API Client Credential 1",
+						Status:      "ACTIVE",
+						ExpiresOn:   "2027-04-09T12:34:13Z",
+					},
 					GroupAccess: iam.GroupAccess{
 						CloneAuthorizedUserGroups: true,
 						Groups: []iam.ClientGroup{
@@ -689,7 +746,7 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					IPACL: &IPACL{
+					IPACL: &TFIPACL{
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
@@ -714,10 +771,10 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					PurgeOptions: &PurgeOptions{
+					PurgeOptions: &TFPurgeOptions{
 						CanPurgeByCPCode:   true,
 						CanPurgeByCacheTag: true,
-						CPCodeAccess: CPCodeAccess{
+						CPCodeAccess: TFCPCodeAccess{
 							AllCurrentAndNewCPCodes: false,
 							CPCodes:                 []int64{101},
 						},
@@ -739,6 +796,11 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 					NotificationEmails: []string{"mw+2@example.com"},
 					ClientDescription:  "Test API Client",
 					Lock:               false,
+					Credential: &TFCredential{
+						Description: "Test API Client Credential 1",
+						Status:      "ACTIVE",
+						ExpiresOn:   "2027-04-09T12:34:13Z",
+					},
 					GroupAccess: iam.GroupAccess{
 						CloneAuthorizedUserGroups: false,
 						Groups: []iam.ClientGroup{
@@ -754,7 +816,7 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					IPACL: &IPACL{
+					IPACL: &TFIPACL{
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
@@ -779,10 +841,10 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					PurgeOptions: &PurgeOptions{
+					PurgeOptions: &TFPurgeOptions{
 						CanPurgeByCPCode:   true,
 						CanPurgeByCacheTag: true,
-						CPCodeAccess: CPCodeAccess{
+						CPCodeAccess: TFCPCodeAccess{
 							AllCurrentAndNewCPCodes: false,
 							CPCodes:                 []int64{101},
 						},
@@ -804,6 +866,11 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 					NotificationEmails: []string{"mw+2@example.com"},
 					ClientDescription:  "Test API Client",
 					Lock:               false,
+					Credential: &TFCredential{
+						Description: "Test API Client Credential 1",
+						Status:      "ACTIVE",
+						ExpiresOn:   "2027-04-09T12:34:13Z",
+					},
 					GroupAccess: iam.GroupAccess{
 						CloneAuthorizedUserGroups: false,
 						Groups: []iam.ClientGroup{
@@ -819,7 +886,7 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					IPACL: &IPACL{
+					IPACL: &TFIPACL{
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
@@ -844,10 +911,10 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					PurgeOptions: &PurgeOptions{
+					PurgeOptions: &TFPurgeOptions{
 						CanPurgeByCPCode:   true,
 						CanPurgeByCacheTag: true,
-						CPCodeAccess: CPCodeAccess{
+						CPCodeAccess: TFCPCodeAccess{
 							AllCurrentAndNewCPCodes: true,
 						},
 					},
@@ -868,6 +935,11 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 					NotificationEmails: []string{"mw+2@example.com"},
 					ClientDescription:  "Test API Client",
 					Lock:               false,
+					Credential: &TFCredential{
+						Description: "Test API Client Credential 1",
+						Status:      "ACTIVE",
+						ExpiresOn:   "2027-04-09T12:34:13Z",
+					},
 					GroupAccess: iam.GroupAccess{
 						CloneAuthorizedUserGroups: false,
 						Groups: []iam.ClientGroup{
@@ -904,10 +976,10 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					PurgeOptions: &PurgeOptions{
+					PurgeOptions: &TFPurgeOptions{
 						CanPurgeByCPCode:   true,
 						CanPurgeByCacheTag: true,
-						CPCodeAccess: CPCodeAccess{
+						CPCodeAccess: TFCPCodeAccess{
 							AllCurrentAndNewCPCodes: false,
 							CPCodes:                 []int64{101},
 						},
@@ -929,6 +1001,11 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 					NotificationEmails: []string{"mw+2@example.com"},
 					ClientDescription:  "Test API Client",
 					Lock:               false,
+					Credential: &TFCredential{
+						Description: "Test API Client Credential 1",
+						Status:      "ACTIVE",
+						ExpiresOn:   "2027-04-09T12:34:13Z",
+					},
 					GroupAccess: iam.GroupAccess{
 						CloneAuthorizedUserGroups: false,
 						Groups: []iam.ClientGroup{
@@ -944,7 +1021,7 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					IPACL: &IPACL{
+					IPACL: &TFIPACL{
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
@@ -1001,4 +1078,12 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 			}
 		})
 	}
+}
+
+func newTimeFromStringMust(s string) time.Time {
+	parsedTime, err := time.Parse(time.RFC3339Nano, s)
+	if err != nil {
+		panic(err)
+	}
+	return parsedTime
 }

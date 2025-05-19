@@ -7,6 +7,11 @@ resource "akamai_iam_api_client" "api_client_1a2b3" {
   notification_emails        = ["mw+2@example.com"]
   client_description         = "Test API Client"
   lock                       = false
+  credential = {
+    description = "Test API Client Credential 2"
+    expires_on  = "2025-06-13T14:48:08Z"
+    status      = "ACTIVE"
+  }
   group_access = {
     clone_authorized_user_groups = false
     groups = [

@@ -75,6 +75,7 @@ func createIAMAPIClient(ctx context.Context, clientID, section string, client ia
 		GroupAccess: true,
 		APIAccess:   true,
 		IPACL:       true,
+		Credentials: true,
 	})
 	if err != nil {
 		term.Spinner().Fail()

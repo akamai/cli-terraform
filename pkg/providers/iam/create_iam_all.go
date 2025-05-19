@@ -144,6 +144,7 @@ func createIAMAll(ctx context.Context, section string, client iam.IAM, templateP
 		GroupAccess: true,
 		APIAccess:   true,
 		IPACL:       true,
+		Credentials: true,
 	})
 	if err != nil {
 		term.Spinner().Fail()

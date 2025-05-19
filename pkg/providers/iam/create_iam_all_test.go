@@ -443,7 +443,7 @@ func getTestData(section string) TFData {
 			},
 			Enabled: true,
 		},
-		TFClient:   getTfClient(&clientTfIPACL, &clientTfPurgeOptions),
+		TFClient:   getTfClient(&clientTFIPACL, &clientTFPurgeOptions),
 		Section:    section,
 		Subcommand: "all",
 	}

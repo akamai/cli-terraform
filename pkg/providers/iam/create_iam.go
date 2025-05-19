@@ -7,7 +7,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/iam"
 	"github.com/akamai/cli-terraform/v2/pkg/tools"
@@ -107,28 +109,36 @@ type (
 		ClientName              string
 		ClientType              iam.ClientType
 		GroupAccess             iam.GroupAccess
-		IPACL                   *IPACL
+		IPACL                   *TFIPACL
 		NotificationEmails      []string
-		PurgeOptions            *PurgeOptions
+		PurgeOptions            *TFPurgeOptions
 		Lock                    bool
 		ClientID                string
+		Credential              *TFCredential
 	}
 
-	// IPACL represents a client IPACL used in templates
-	IPACL struct {
+	// TFCredential represents a client credential used in templates.
+	TFCredential struct {
+		Description string
+		ExpiresOn   string
+		Status      string
+	}
+
+	// TFIPACL represents a client IPACL used in templates
+	TFIPACL struct {
 		CIDR   []string
 		Enable bool
 	}
 
-	// PurgeOptions represents a client PurgeOptions used in templates
-	PurgeOptions struct {
+	// TFPurgeOptions represents a client PurgeOptions used in templates
+	TFPurgeOptions struct {
 		CanPurgeByCacheTag bool
 		CanPurgeByCPCode   bool
-		CPCodeAccess       CPCodeAccess
+		CPCodeAccess       TFCPCodeAccess
 	}
 
-	// CPCodeAccess represents the CP codes used in templates which the API client can purge
-	CPCodeAccess struct {
+	// TFCPCodeAccess represents the CP codes used in templates which the API client can purge
+	TFCPCodeAccess struct {
 		AllCurrentAndNewCPCodes bool
 		CPCodes                 []int64
 	}
@@ -341,12 +351,28 @@ func getTFClient(apiClient *iam.GetAPIClientResponse) TFClient {
 		PurgeOptions:            getPurge(apiClient),
 		Lock:                    apiClient.IsLocked,
 		ClientID:                apiClient.ClientID,
+		Credential:              getCredential(apiClient),
 	}
 }
 
-func getIPACL(apiClient *iam.GetAPIClientResponse) *IPACL {
+func getCredential(c *iam.GetAPIClientResponse) *TFCredential {
+	credentialsResponse := c.Credentials
+	sort.Slice(credentialsResponse, func(i, j int) bool {
+		return credentialsResponse[i].CreatedOn.Before(credentialsResponse[j].CreatedOn)
+	})
+	if len(credentialsResponse) > 0 {
+		return &TFCredential{
+			Description: credentialsResponse[0].Description,
+			ExpiresOn:   credentialsResponse[0].ExpiresOn.Format(time.RFC3339Nano),
+			Status:      string(credentialsResponse[0].Status),
+		}
+	}
+	return &TFCredential{}
+}
+
+func getIPACL(apiClient *iam.GetAPIClientResponse) *TFIPACL {
 	if apiClient.IPACL != nil {
-		return &IPACL{
+		return &TFIPACL{
 			CIDR:   apiClient.IPACL.CIDR,
 			Enable: apiClient.IPACL.Enable,
 		}
@@ -354,12 +380,12 @@ func getIPACL(apiClient *iam.GetAPIClientResponse) *IPACL {
 	return nil
 }
 
-func getPurge(apiClient *iam.GetAPIClientResponse) *PurgeOptions {
+func getPurge(apiClient *iam.GetAPIClientResponse) *TFPurgeOptions {
 	if apiClient.PurgeOptions != nil {
-		return &PurgeOptions{
+		return &TFPurgeOptions{
 			CanPurgeByCacheTag: apiClient.PurgeOptions.CanPurgeByCacheTag,
 			CanPurgeByCPCode:   apiClient.PurgeOptions.CanPurgeByCPCode,
-			CPCodeAccess: CPCodeAccess{
+			CPCodeAccess: TFCPCodeAccess{
 				AllCurrentAndNewCPCodes: apiClient.PurgeOptions.CPCodeAccess.AllCurrentAndNewCPCodes,
 				CPCodes:                 apiClient.PurgeOptions.CPCodeAccess.CPCodes,
 			},

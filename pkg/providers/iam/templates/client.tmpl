@@ -12,6 +12,11 @@ resource "akamai_iam_api_client" "api_client_{{.TFClient.ClientID}}" {
   notification_emails = [{{range $i, $v := .TFClient.NotificationEmails}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
   client_description = "{{.TFClient.ClientDescription}}"
   lock = {{.TFClient.Lock}}
+  credential = {
+    description = "{{.TFClient.Credential.Description}}"
+    expires_on = "{{.TFClient.Credential.ExpiresOn}}"
+    status = "{{.TFClient.Credential.Status}}"
+  }
   group_access = {
       clone_authorized_user_groups = {{.TFClient.GroupAccess.CloneAuthorizedUserGroups}}
       {{- if not .TFClient.GroupAccess.CloneAuthorizedUserGroups}}
