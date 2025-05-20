@@ -44,10 +44,6 @@ resource "akamai_iam_api_client" "api_client_{{.TFClient.ClientID}}" {
         apis = [{{range $i, $v := .}}
           {
             api_id = {{$v.APIID}}
-            api_name = "{{$v.APIName}}"
-            description = "{{$v.Description | Escape}}"
-            endpoint = "{{$v.Endpoint}}"
-            documentation_url = "{{$v.DocumentationURL}}"
             access_level = "{{$v.AccessLevel}}"
           }{{if ne $i  $aSize }}, {{end -}}
         {{end}}]

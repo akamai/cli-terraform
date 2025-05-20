@@ -102,13 +102,13 @@ type (
 	// TFClient represents a client used in templates
 	TFClient struct {
 		AllowAccountSwitch      bool
-		APIAccess               iam.APIAccess
+		APIAccess               TFAPIAccessRequest
 		AuthorizedUsers         []string
 		CanCreateAutoCredential bool
 		ClientDescription       string
 		ClientName              string
 		ClientType              iam.ClientType
-		GroupAccess             iam.GroupAccess
+		GroupAccess             TFGroupAccessRequest
 		IPACL                   *TFIPACL
 		NotificationEmails      []string
 		PurgeOptions            *TFPurgeOptions
@@ -142,6 +142,34 @@ type (
 		AllCurrentAndNewCPCodes bool
 		CPCodes                 []int64
 	}
+
+	// TFGroupAccessRequest specifies the API client's group access.
+	TFGroupAccessRequest struct {
+		CloneAuthorizedUserGroups bool
+		Groups                    []TFClientGroupRequestItem
+	}
+
+	// TFClientGroupRequestItem represents a group the API client can access.
+	TFClientGroupRequestItem struct {
+		GroupID   int64
+		RoleID    int64
+		Subgroups []TFClientGroupRequestItem
+	}
+
+	// TFAPIAccessRequest represents the APIs the API client can access.
+	TFAPIAccessRequest struct {
+		AllAccessibleAPIs bool
+		APIs              []TFAPIRequestItem
+	}
+
+	// TFAPIRequestItem represents single Application Programming Interface (API).
+	TFAPIRequestItem struct {
+		APIID       int64
+		AccessLevel TFAccessLevel
+	}
+
+	// TFAccessLevel represents the access level for API.
+	TFAccessLevel string
 )
 
 var (
@@ -338,14 +366,14 @@ func getTFCIDRBlocks(ctx context.Context, client iam.IAM) ([]TFCIDRBlock, error)
 
 func getTFClient(apiClient *iam.GetAPIClientResponse) TFClient {
 	return TFClient{
-		APIAccess:               apiClient.APIAccess,
+		APIAccess:               getAPIAccess(apiClient),
 		AuthorizedUsers:         apiClient.AuthorizedUsers,
 		CanCreateAutoCredential: apiClient.CanAutoCreateCredential,
 		AllowAccountSwitch:      apiClient.AllowAccountSwitch,
 		ClientDescription:       apiClient.ClientDescription,
 		ClientName:              apiClient.ClientName,
 		ClientType:              apiClient.ClientType,
-		GroupAccess:             apiClient.GroupAccess,
+		GroupAccess:             getGroupAccess(apiClient),
 		IPACL:                   getIPACL(apiClient),
 		NotificationEmails:      apiClient.NotificationEmails,
 		PurgeOptions:            getPurge(apiClient),
@@ -392,6 +420,40 @@ func getPurge(apiClient *iam.GetAPIClientResponse) *TFPurgeOptions {
 		}
 	}
 	return nil
+}
+
+func getAPIAccess(apiClient *iam.GetAPIClientResponse) TFAPIAccessRequest {
+	apiAccess := TFAPIAccessRequest{
+		AllAccessibleAPIs: apiClient.APIAccess.AllAccessibleAPIs,
+	}
+
+	for _, api := range apiClient.APIAccess.APIs {
+		apiAccess.APIs = append(apiAccess.APIs, TFAPIRequestItem{
+			APIID:       api.APIID,
+			AccessLevel: TFAccessLevel(api.AccessLevel),
+		})
+	}
+
+	return apiAccess
+}
+
+func getGroupAccess(apiClient *iam.GetAPIClientResponse) TFGroupAccessRequest {
+	return TFGroupAccessRequest{
+		CloneAuthorizedUserGroups: apiClient.GroupAccess.CloneAuthorizedUserGroups,
+		Groups:                    buildGroupAccess(apiClient.GroupAccess.Groups),
+	}
+}
+
+func buildGroupAccess(groups []iam.ClientGroup) []TFClientGroupRequestItem {
+	var groupList []TFClientGroupRequestItem
+	for _, subgroup := range groups {
+		groupList = append(groupList, TFClientGroupRequestItem{
+			GroupID:   subgroup.GroupID,
+			RoleID:    subgroup.RoleID,
+			Subgroups: buildGroupAccess(subgroup.Subgroups),
+		})
+	}
+	return groupList
 }
 
 func cidrName(cidr string) string {

@@ -165,22 +165,17 @@ var (
 				Status:      "ACTIVE",
 				ExpiresOn:   "2025-06-13T14:48:08Z",
 			},
-			GroupAccess: iam.GroupAccess{
+			GroupAccess: TFGroupAccessRequest{
 				CloneAuthorizedUserGroups: false,
-				Groups: []iam.ClientGroup{
+				Groups: []TFClientGroupRequestItem{
 					{
-						GroupID:         123,
-						GroupName:       "group2",
-						IsBlocked:       false,
-						ParentGroupID:   0,
-						RoleDescription: "group description",
-						RoleID:          340,
-						RoleName:        "role",
-						Subgroups: []iam.ClientGroup{
+						GroupID: 123,
+						RoleID:  340,
+						Subgroups: []TFClientGroupRequestItem{
 							{
 								GroupID: 333,
 								RoleID:  540,
-								Subgroups: []iam.ClientGroup{
+								Subgroups: []TFClientGroupRequestItem{
 									{
 										GroupID: 444,
 										RoleID:  640,
@@ -192,24 +187,16 @@ var (
 				},
 			},
 			IPACL: ipACL,
-			APIAccess: iam.APIAccess{
+			APIAccess: TFAPIAccessRequest{
 				AllAccessibleAPIs: false,
-				APIs: []iam.API{
+				APIs: []TFAPIRequestItem{
 					{
-						APIID:            5801,
-						APIName:          "EdgeWorkers",
-						Description:      "EdgeWorkers",
-						Endpoint:         "/edgeworkers/",
-						DocumentationURL: "https://developer.akamai.com/api/web_performance/edgeworkers/v1.html",
-						AccessLevel:      "READ-WRITE",
+						APIID:       5801,
+						AccessLevel: "READ-WRITE",
 					},
 					{
-						APIID:            5580,
-						APIName:          "Search Data Feed",
-						Description:      "Search Data Feed",
-						Endpoint:         "/search-portal-data-feed-api/",
-						DocumentationURL: "/",
-						AccessLevel:      "READ-ONLY",
+						APIID:       5580,
+						AccessLevel: "READ-ONLY",
 					},
 				},
 			},
@@ -303,13 +290,13 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Status:      "ACTIVE",
 						ExpiresOn:   "2027-04-09T12:34:13Z",
 					},
-					GroupAccess: iam.GroupAccess{
+					GroupAccess: TFGroupAccessRequest{
 						CloneAuthorizedUserGroups: false,
-						Groups: []iam.ClientGroup{
+						Groups: []TFClientGroupRequestItem{
 							{
 								GroupID: 123,
 								RoleID:  340,
-								Subgroups: []iam.ClientGroup{
+								Subgroups: []TFClientGroupRequestItem{
 									{
 										GroupID: 333,
 										RoleID:  540,
@@ -322,24 +309,16 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
-					APIAccess: iam.APIAccess{
+					APIAccess: TFAPIAccessRequest{
 						AllAccessibleAPIs: false,
-						APIs: []iam.API{
+						APIs: []TFAPIRequestItem{
 							{
-								APIID:            5580,
-								APIName:          "Search Data Feed",
-								Description:      "Search Data Feed",
-								Endpoint:         "/search-portal-data-feed-api/",
-								DocumentationURL: "/",
-								AccessLevel:      "READ-ONLY",
+								APIID:       5580,
+								AccessLevel: "READ-ONLY",
 							},
 							{
-								APIID:            5801,
-								APIName:          "EdgeWorkers",
-								Description:      "EdgeWorkers",
-								Endpoint:         "/edgeworkers/",
-								DocumentationURL: "https://developer.akamai.com/api/web_performance/edgeworkers/v1.html",
-								AccessLevel:      "READ-WRITE",
+								APIID:       5801,
+								AccessLevel: "READ-WRITE",
 							},
 						},
 					},
@@ -373,13 +352,13 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Status:      "ACTIVE",
 						ExpiresOn:   "2027-04-09T12:34:13Z",
 					},
-					GroupAccess: iam.GroupAccess{
+					GroupAccess: TFGroupAccessRequest{
 						CloneAuthorizedUserGroups: false,
-						Groups: []iam.ClientGroup{
+						Groups: []TFClientGroupRequestItem{
 							{
 								GroupID: 123,
 								RoleID:  340,
-								Subgroups: []iam.ClientGroup{
+								Subgroups: []TFClientGroupRequestItem{
 									{
 										GroupID: 333,
 										RoleID:  540,
@@ -389,7 +368,7 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							{
 								GroupID: 345,
 								RoleID:  340,
-								Subgroups: []iam.ClientGroup{
+								Subgroups: []TFClientGroupRequestItem{
 									{
 										GroupID: 333,
 										RoleID:  540,
@@ -402,24 +381,16 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
-					APIAccess: iam.APIAccess{
+					APIAccess: TFAPIAccessRequest{
 						AllAccessibleAPIs: false,
-						APIs: []iam.API{
+						APIs: []TFAPIRequestItem{
 							{
-								APIID:            5580,
-								APIName:          "Search Data Feed",
-								Description:      "Search Data Feed",
-								Endpoint:         "/search-portal-data-feed-api/",
-								DocumentationURL: "/",
-								AccessLevel:      "READ-ONLY",
+								APIID:       5580,
+								AccessLevel: "READ-ONLY",
 							},
 							{
-								APIID:            5801,
-								APIName:          "EdgeWorkers",
-								Description:      "EdgeWorkers",
-								Endpoint:         "/edgeworkers/",
-								DocumentationURL: "https://developer.akamai.com/api/web_performance/edgeworkers/v1.html",
-								AccessLevel:      "READ-WRITE",
+								APIID:       5801,
+								AccessLevel: "READ-WRITE",
 							},
 						},
 					},
@@ -453,9 +424,9 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Status:      "INACTIVE",
 						ExpiresOn:   "2027-04-09T12:34:13Z",
 					},
-					GroupAccess: iam.GroupAccess{
+					GroupAccess: TFGroupAccessRequest{
 						CloneAuthorizedUserGroups: false,
-						Groups: []iam.ClientGroup{
+						Groups: []TFClientGroupRequestItem{
 							{
 								GroupID: 123,
 								RoleID:  340,
@@ -466,24 +437,16 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
-					APIAccess: iam.APIAccess{
+					APIAccess: TFAPIAccessRequest{
 						AllAccessibleAPIs: false,
-						APIs: []iam.API{
+						APIs: []TFAPIRequestItem{
 							{
-								APIID:            5580,
-								APIName:          "Search Data Feed",
-								Description:      "Search Data Feed",
-								Endpoint:         "/search-portal-data-feed-api/",
-								DocumentationURL: "/",
-								AccessLevel:      "READ-ONLY",
+								APIID:       5580,
+								AccessLevel: "READ-ONLY",
 							},
 							{
-								APIID:            5801,
-								APIName:          "EdgeWorkers",
-								Description:      "EdgeWorkers",
-								Endpoint:         "/edgeworkers/",
-								DocumentationURL: "https://developer.akamai.com/api/web_performance/edgeworkers/v1.html",
-								AccessLevel:      "READ-WRITE",
+								APIID:       5801,
+								AccessLevel: "READ-WRITE",
 							},
 						},
 					},
@@ -517,13 +480,13 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Status:      "DELETED",
 						ExpiresOn:   "2027-04-09T12:34:13Z",
 					},
-					GroupAccess: iam.GroupAccess{
+					GroupAccess: TFGroupAccessRequest{
 						CloneAuthorizedUserGroups: false,
-						Groups: []iam.ClientGroup{
+						Groups: []TFClientGroupRequestItem{
 							{
 								GroupID: 123,
 								RoleID:  340,
-								Subgroups: []iam.ClientGroup{
+								Subgroups: []TFClientGroupRequestItem{
 									{
 										GroupID: 333,
 										RoleID:  540,
@@ -536,24 +499,16 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
-					APIAccess: iam.APIAccess{
+					APIAccess: TFAPIAccessRequest{
 						AllAccessibleAPIs: false,
-						APIs: []iam.API{
+						APIs: []TFAPIRequestItem{
 							{
-								APIID:            5580,
-								APIName:          "Search Data Feed",
-								Description:      "Search Data Feed",
-								Endpoint:         "/search-portal-data-feed-api/",
-								DocumentationURL: "/",
-								AccessLevel:      "READ-ONLY",
+								APIID:       5580,
+								AccessLevel: "READ-ONLY",
 							},
 							{
-								APIID:            5801,
-								APIName:          "EdgeWorkers",
-								Description:      "EdgeWorkers",
-								Endpoint:         "/edgeworkers/",
-								DocumentationURL: "https://developer.akamai.com/api/web_performance/edgeworkers/v1.html",
-								AccessLevel:      "READ-WRITE",
+								APIID:       5801,
+								AccessLevel: "READ-WRITE",
 							},
 						},
 					},
@@ -586,13 +541,13 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Status:      "ACTIVE",
 						ExpiresOn:   "2027-04-09T12:34:13Z",
 					},
-					GroupAccess: iam.GroupAccess{
+					GroupAccess: TFGroupAccessRequest{
 						CloneAuthorizedUserGroups: false,
-						Groups: []iam.ClientGroup{
+						Groups: []TFClientGroupRequestItem{
 							{
 								GroupID: 123,
 								RoleID:  340,
-								Subgroups: []iam.ClientGroup{
+								Subgroups: []TFClientGroupRequestItem{
 									{
 										GroupID: 333,
 										RoleID:  540,
@@ -604,24 +559,16 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 					IPACL: &TFIPACL{
 						Enable: true,
 					},
-					APIAccess: iam.APIAccess{
+					APIAccess: TFAPIAccessRequest{
 						AllAccessibleAPIs: false,
-						APIs: []iam.API{
+						APIs: []TFAPIRequestItem{
 							{
-								APIID:            5580,
-								APIName:          "Search Data Feed",
-								Description:      "Search Data Feed",
-								Endpoint:         "/search-portal-data-feed-api/",
-								DocumentationURL: "/",
-								AccessLevel:      "READ-ONLY",
+								APIID:       5580,
+								AccessLevel: "READ-ONLY",
 							},
 							{
-								APIID:            5801,
-								APIName:          "EdgeWorkers",
-								Description:      "EdgeWorkers",
-								Endpoint:         "/edgeworkers/",
-								DocumentationURL: "https://developer.akamai.com/api/web_performance/edgeworkers/v1.html",
-								AccessLevel:      "READ-WRITE",
+								APIID:       5801,
+								AccessLevel: "READ-WRITE",
 							},
 						},
 					},
@@ -655,17 +602,17 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Status:      "ACTIVE",
 						ExpiresOn:   "2027-04-09T12:34:13Z",
 					},
-					GroupAccess: iam.GroupAccess{
+					GroupAccess: TFGroupAccessRequest{
 						CloneAuthorizedUserGroups: false,
-						Groups: []iam.ClientGroup{
+						Groups: []TFClientGroupRequestItem{
 							{
 								GroupID: 123,
 								RoleID:  340,
-								Subgroups: []iam.ClientGroup{
+								Subgroups: []TFClientGroupRequestItem{
 									{
 										GroupID: 333,
 										RoleID:  540,
-										Subgroups: []iam.ClientGroup{
+										Subgroups: []TFClientGroupRequestItem{
 											{
 												GroupID: 555,
 												RoleID:  640,
@@ -680,24 +627,16 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
-					APIAccess: iam.APIAccess{
+					APIAccess: TFAPIAccessRequest{
 						AllAccessibleAPIs: false,
-						APIs: []iam.API{
+						APIs: []TFAPIRequestItem{
 							{
-								APIID:            5580,
-								APIName:          "Search Data Feed",
-								Description:      "Search Data Feed",
-								Endpoint:         "/search-portal-data-feed-api/",
-								DocumentationURL: "/",
-								AccessLevel:      "READ-ONLY",
+								APIID:       5580,
+								AccessLevel: "READ-ONLY",
 							},
 							{
-								APIID:            5801,
-								APIName:          "EdgeWorkers",
-								Description:      "EdgeWorkers",
-								Endpoint:         "/edgeworkers/",
-								DocumentationURL: "https://developer.akamai.com/api/web_performance/edgeworkers/v1.html",
-								AccessLevel:      "READ-WRITE",
+								APIID:       5801,
+								AccessLevel: "READ-WRITE",
 							},
 						},
 					},
@@ -731,13 +670,13 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Status:      "ACTIVE",
 						ExpiresOn:   "2027-04-09T12:34:13Z",
 					},
-					GroupAccess: iam.GroupAccess{
+					GroupAccess: TFGroupAccessRequest{
 						CloneAuthorizedUserGroups: true,
-						Groups: []iam.ClientGroup{
+						Groups: []TFClientGroupRequestItem{
 							{
 								GroupID: 123,
 								RoleID:  340,
-								Subgroups: []iam.ClientGroup{
+								Subgroups: []TFClientGroupRequestItem{
 									{
 										GroupID: 333,
 										RoleID:  540,
@@ -750,24 +689,16 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
-					APIAccess: iam.APIAccess{
+					APIAccess: TFAPIAccessRequest{
 						AllAccessibleAPIs: false,
-						APIs: []iam.API{
+						APIs: []TFAPIRequestItem{
 							{
-								APIID:            5580,
-								APIName:          "Search Data Feed",
-								Description:      "Search Data Feed",
-								Endpoint:         "/search-portal-data-feed-api/",
-								DocumentationURL: "/",
-								AccessLevel:      "READ-ONLY",
+								APIID:       5580,
+								AccessLevel: "READ-ONLY",
 							},
 							{
-								APIID:            5801,
-								APIName:          "EdgeWorkers",
-								Description:      "EdgeWorkers",
-								Endpoint:         "/edgeworkers/",
-								DocumentationURL: "https://developer.akamai.com/api/web_performance/edgeworkers/v1.html",
-								AccessLevel:      "READ-WRITE",
+								APIID:       5801,
+								AccessLevel: "READ-WRITE",
 							},
 						},
 					},
@@ -801,13 +732,13 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Status:      "ACTIVE",
 						ExpiresOn:   "2027-04-09T12:34:13Z",
 					},
-					GroupAccess: iam.GroupAccess{
+					GroupAccess: TFGroupAccessRequest{
 						CloneAuthorizedUserGroups: false,
-						Groups: []iam.ClientGroup{
+						Groups: []TFClientGroupRequestItem{
 							{
 								GroupID: 123,
 								RoleID:  340,
-								Subgroups: []iam.ClientGroup{
+								Subgroups: []TFClientGroupRequestItem{
 									{
 										GroupID: 333,
 										RoleID:  540,
@@ -820,24 +751,16 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
-					APIAccess: iam.APIAccess{
+					APIAccess: TFAPIAccessRequest{
 						AllAccessibleAPIs: true,
-						APIs: []iam.API{
+						APIs: []TFAPIRequestItem{
 							{
-								APIID:            5580,
-								APIName:          "Search Data Feed",
-								Description:      "Search Data Feed",
-								Endpoint:         "/search-portal-data-feed-api/",
-								DocumentationURL: "/",
-								AccessLevel:      "READ-ONLY",
+								APIID:       5580,
+								AccessLevel: "READ-ONLY",
 							},
 							{
-								APIID:            5801,
-								APIName:          "EdgeWorkers",
-								Description:      "EdgeWorkers",
-								Endpoint:         "/edgeworkers/",
-								DocumentationURL: "https://developer.akamai.com/api/web_performance/edgeworkers/v1.html",
-								AccessLevel:      "READ-WRITE",
+								APIID:       5801,
+								AccessLevel: "READ-WRITE",
 							},
 						},
 					},
@@ -871,13 +794,13 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Status:      "ACTIVE",
 						ExpiresOn:   "2027-04-09T12:34:13Z",
 					},
-					GroupAccess: iam.GroupAccess{
+					GroupAccess: TFGroupAccessRequest{
 						CloneAuthorizedUserGroups: false,
-						Groups: []iam.ClientGroup{
+						Groups: []TFClientGroupRequestItem{
 							{
 								GroupID: 123,
 								RoleID:  340,
-								Subgroups: []iam.ClientGroup{
+								Subgroups: []TFClientGroupRequestItem{
 									{
 										GroupID: 333,
 										RoleID:  540,
@@ -890,24 +813,16 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
-					APIAccess: iam.APIAccess{
+					APIAccess: TFAPIAccessRequest{
 						AllAccessibleAPIs: false,
-						APIs: []iam.API{
+						APIs: []TFAPIRequestItem{
 							{
-								APIID:            5580,
-								APIName:          "Search Data Feed",
-								Description:      "Search Data Feed",
-								Endpoint:         "/search-portal-data-feed-api/",
-								DocumentationURL: "/",
-								AccessLevel:      "READ-ONLY",
+								APIID:       5580,
+								AccessLevel: "READ-ONLY",
 							},
 							{
-								APIID:            5801,
-								APIName:          "EdgeWorkers",
-								Description:      "EdgeWorkers",
-								Endpoint:         "/edgeworkers/",
-								DocumentationURL: "https://developer.akamai.com/api/web_performance/edgeworkers/v1.html",
-								AccessLevel:      "READ-WRITE",
+								APIID:       5801,
+								AccessLevel: "READ-WRITE",
 							},
 						},
 					},
@@ -940,13 +855,13 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Status:      "ACTIVE",
 						ExpiresOn:   "2027-04-09T12:34:13Z",
 					},
-					GroupAccess: iam.GroupAccess{
+					GroupAccess: TFGroupAccessRequest{
 						CloneAuthorizedUserGroups: false,
-						Groups: []iam.ClientGroup{
+						Groups: []TFClientGroupRequestItem{
 							{
 								GroupID: 123,
 								RoleID:  340,
-								Subgroups: []iam.ClientGroup{
+								Subgroups: []TFClientGroupRequestItem{
 									{
 										GroupID: 333,
 										RoleID:  540,
@@ -955,24 +870,16 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 							},
 						},
 					},
-					APIAccess: iam.APIAccess{
+					APIAccess: TFAPIAccessRequest{
 						AllAccessibleAPIs: false,
-						APIs: []iam.API{
+						APIs: []TFAPIRequestItem{
 							{
-								APIID:            5580,
-								APIName:          "Search Data Feed",
-								Description:      "Search Data Feed",
-								Endpoint:         "/search-portal-data-feed-api/",
-								DocumentationURL: "/",
-								AccessLevel:      "READ-ONLY",
+								APIID:       5580,
+								AccessLevel: "READ-ONLY",
 							},
 							{
-								APIID:            5801,
-								APIName:          "EdgeWorkers",
-								Description:      "EdgeWorkers",
-								Endpoint:         "/edgeworkers/",
-								DocumentationURL: "https://developer.akamai.com/api/web_performance/edgeworkers/v1.html",
-								AccessLevel:      "READ-WRITE",
+								APIID:       5801,
+								AccessLevel: "READ-WRITE",
 							},
 						},
 					},
@@ -1006,13 +913,13 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Status:      "ACTIVE",
 						ExpiresOn:   "2027-04-09T12:34:13Z",
 					},
-					GroupAccess: iam.GroupAccess{
+					GroupAccess: TFGroupAccessRequest{
 						CloneAuthorizedUserGroups: false,
-						Groups: []iam.ClientGroup{
+						Groups: []TFClientGroupRequestItem{
 							{
 								GroupID: 123,
 								RoleID:  340,
-								Subgroups: []iam.ClientGroup{
+								Subgroups: []TFClientGroupRequestItem{
 									{
 										GroupID: 333,
 										RoleID:  540,
@@ -1025,24 +932,16 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						Enable: true,
 						CIDR:   []string{"128.5.6.5/24"},
 					},
-					APIAccess: iam.APIAccess{
+					APIAccess: TFAPIAccessRequest{
 						AllAccessibleAPIs: false,
-						APIs: []iam.API{
+						APIs: []TFAPIRequestItem{
 							{
-								APIID:            5580,
-								APIName:          "Search Data Feed",
-								Description:      "Search Data Feed",
-								Endpoint:         "/search-portal-data-feed-api/",
-								DocumentationURL: "/",
-								AccessLevel:      "READ-ONLY",
+								APIID:       5580,
+								AccessLevel: "READ-ONLY",
 							},
 							{
-								APIID:            5801,
-								APIName:          "EdgeWorkers",
-								Description:      "EdgeWorkers",
-								Endpoint:         "/edgeworkers/",
-								DocumentationURL: "https://developer.akamai.com/api/web_performance/edgeworkers/v1.html",
-								AccessLevel:      "READ-WRITE",
+								APIID:       5801,
+								AccessLevel: "READ-WRITE",
 							},
 						},
 					},
