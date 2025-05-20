@@ -104,7 +104,7 @@ type (
 		AllowAccountSwitch      bool
 		APIAccess               TFAPIAccessRequest
 		AuthorizedUsers         []string
-		CanCreateAutoCredential bool
+		CanAutoCreateCredential bool
 		ClientDescription       string
 		ClientName              string
 		ClientType              iam.ClientType
@@ -368,7 +368,7 @@ func getTFClient(apiClient *iam.GetAPIClientResponse) TFClient {
 	return TFClient{
 		APIAccess:               getAPIAccess(apiClient),
 		AuthorizedUsers:         apiClient.AuthorizedUsers,
-		CanCreateAutoCredential: apiClient.CanAutoCreateCredential,
+		CanAutoCreateCredential: apiClient.CanAutoCreateCredential,
 		AllowAccountSwitch:      apiClient.AllowAccountSwitch,
 		ClientDescription:       apiClient.ClientDescription,
 		ClientName:              apiClient.ClientName,

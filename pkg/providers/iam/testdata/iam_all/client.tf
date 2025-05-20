@@ -1,6 +1,6 @@
 resource "akamai_iam_api_client" "api_client_1a2b3" {
   authorized_users           = ["mw+2"]
-  can_create_auto_credential = false
+  can_auto_create_credential = false
   allow_account_switch       = false
   client_type                = "CLIENT"
   client_name                = "mw+2_1"

@@ -5,7 +5,7 @@
 {{end -}}
 resource "akamai_iam_api_client" "api_client_{{.TFClient.ClientID}}" {
   authorized_users = [{{range $i, $v := .TFClient.AuthorizedUsers}}{{if $i}}, {{end}}"{{$v}}"{{end}}]
-  can_create_auto_credential = {{.TFClient.CanCreateAutoCredential}}
+  can_auto_create_credential = {{.TFClient.CanAutoCreateCredential}}
   allow_account_switch = {{.TFClient.AllowAccountSwitch}}
   client_type = "{{.TFClient.ClientType}}"
   client_name = "{{.TFClient.ClientName}}"
