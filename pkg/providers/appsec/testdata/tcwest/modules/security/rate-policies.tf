@@ -7,10 +7,12 @@ resource "akamai_appsec_rate_policy" "high_rate" {
       "clientIdentifiers" : [
         "ip"
       ],
+      "counterType" : "",
       "matchType" : "path",
       "name" : "High Rate",
       "pathMatchType" : "Custom",
       "pathUriPositiveMatch" : true,
+      "penaltyBoxDuration" : "THIRTY_MINUTES",
       "requestType" : "ClientRequest",
       "sameActionOnIpv6" : true,
       "type" : "WAF",
@@ -28,10 +30,12 @@ resource "akamai_appsec_rate_policy" "low_rate" {
       "clientIdentifiers" : [
         "ip"
       ],
+      "counterType" : "",
       "matchType" : "path",
       "name" : "Low Rate",
       "pathMatchType" : "Custom",
       "pathUriPositiveMatch" : true,
+      "penaltyBoxDuration" : "THIRTY_MINUTES",
       "requestType" : "ClientRequest",
       "sameActionOnIpv6" : true,
       "type" : "WAF",
@@ -46,6 +50,7 @@ resource "akamai_appsec_rate_policy" "bot_rate" {
     {
       "averageThreshold" : 25,
       "burstThreshold" : 50,
+      "counterType" : "",
       "matchType" : "path",
       "name" : "Bot Rate",
       "path" : {
@@ -56,6 +61,7 @@ resource "akamai_appsec_rate_policy" "bot_rate" {
       },
       "pathMatchType" : "Custom",
       "pathUriPositiveMatch" : true,
+      "penaltyBoxDuration" : "THIRTY_MINUTES",
       "requestType" : "ClientRequest",
       "sameActionOnIpv6" : false,
       "type" : "BOTMAN",

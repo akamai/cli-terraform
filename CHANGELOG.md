@@ -2,11 +2,6 @@
 
 ## X.XX.X (Month XX, XXXX)
 
-### BREAKING CHANGES:
-
-* Appsec
-  * Renamed `clientIdentifier` field to `clientIdentifiers` and changed field type from `string` to array of strings.
-
 ### FEATURES/ENHANCEMENTS:
 
 
@@ -23,6 +18,15 @@
   * Added support for the new rule format `v2025-04-29`.
 
 
+
+
+* Appsec
+  * Renamed `clientIdentifier` field to `clientIdentifiers` and changed field type from `string` to array of strings.
+
+
+
+* Appsec
+  * Added `penaltyBoxDuration` and `counterType` to exported fields inside `akamai_appsec_rate_policy` resource.
 
 
 * PAPI

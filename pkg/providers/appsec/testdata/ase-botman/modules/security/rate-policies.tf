@@ -17,6 +17,7 @@ resource "akamai_appsec_rate_policy" "page_view_requests" {
       "clientIdentifiers" : [
         "ip"
       ],
+      "counterType" : "",
       "description" : "A popular brute force attack that consists of sending a large number of requests for base page, HTML page or XHR requests (usually non-cacheable). This could destabilize the origin.",
       "fileExtensions" : {
         "positiveMatch" : false,
@@ -88,6 +89,7 @@ resource "akamai_appsec_rate_policy" "page_view_requests" {
       "name" : "Page View Requests",
       "pathMatchType" : "Custom",
       "pathUriPositiveMatch" : true,
+      "penaltyBoxDuration" : "TEN_MINUTES",
       "requestType" : "ClientRequest",
       "sameActionOnIpv6" : true,
       "type" : "WAF",
@@ -129,11 +131,13 @@ resource "akamai_appsec_rate_policy" "origin_error" {
       "clientIdentifiers" : [
         "ip"
       ],
+      "counterType" : "",
       "description" : "An excessive error rate from the origin could indicate malicious activity by a bot scanning the site or a publishing error. In both cases, this would increase the origin traffic and could potentially destabilize it.",
       "matchType" : "path",
       "name" : "Origin Error",
       "pathMatchType" : "Custom",
       "pathUriPositiveMatch" : true,
+      "penaltyBoxDuration" : "TEN_MINUTES",
       "requestType" : "ForwardResponse",
       "sameActionOnIpv6" : true,
       "type" : "WAF",
@@ -160,11 +164,13 @@ resource "akamai_appsec_rate_policy" "post_page_requests" {
       "clientIdentifiers" : [
         "ip"
       ],
+      "counterType" : "",
       "description" : "Mitigating HTTP flood attacks using POST requests",
       "matchType" : "path",
       "name" : "POST Page Requests",
       "pathMatchType" : "Custom",
       "pathUriPositiveMatch" : true,
+      "penaltyBoxDuration" : "TEN_MINUTES",
       "requestType" : "ClientRequest",
       "sameActionOnIpv6" : true,
       "type" : "WAF",
