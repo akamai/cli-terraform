@@ -2,6 +2,11 @@
 
 ## X.XX.X (Month XX, XXXX)
 
+### BREAKING CHANGES:
+
+* Appsec
+  * Renamed `clientIdentifier` field to `clientIdentifiers` and changed field type from `string` to array of strings.
+
 ### FEATURES/ENHANCEMENTS:
 
 

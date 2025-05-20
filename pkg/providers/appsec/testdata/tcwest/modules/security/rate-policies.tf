@@ -4,7 +4,9 @@ resource "akamai_appsec_rate_policy" "high_rate" {
     {
       "averageThreshold" : 100,
       "burstThreshold" : 500,
-      "clientIdentifier" : "ip",
+      "clientIdentifiers" : [
+        "ip"
+      ],
       "matchType" : "path",
       "name" : "High Rate",
       "pathMatchType" : "Custom",
@@ -23,7 +25,9 @@ resource "akamai_appsec_rate_policy" "low_rate" {
     {
       "averageThreshold" : 75,
       "burstThreshold" : 250,
-      "clientIdentifier" : "ip",
+      "clientIdentifiers" : [
+        "ip"
+      ],
       "matchType" : "path",
       "name" : "Low Rate",
       "pathMatchType" : "Custom",
