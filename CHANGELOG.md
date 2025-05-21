@@ -1,72 +1,27 @@
 # RELEASE NOTES
 
-## X.XX.X (Month XX, XXXX)
+## 2.2.0 (May 28, 2025)
 
 ### FEATURES/ENHANCEMENTS:
 
+* Appsec
+  * Renamed the `clientIdentifier` field to `clientIdentifiers` and changed the field type from a string to an array of strings.
+  * Added `penaltyBoxDuration` and `counterType` to exported fields inside the `akamai_appsec_rate_policy` resource.
 
-* PAPI
-  * Added support for an additional `RDN` compliant fields in `subject_rdns` under `custom_certificate_authorities` in the rule formats.
 * Identity and Access Management (IAM)
-  * Added `client` subcommand to `export-iam` command which exports terraform configuration files for optionally provided API client.
-  * Modified `all` subcommand for `export-iam` command to export configuration for self API client.
-
-
-
+  * Added the `client` subcommand to the `export-iam` command which exports terraform configuration files for an optionally provided API client.
+  * Modified the `all` subcommand for the `export-iam` command to export configuration for a self API client.
 
 * PAPI
   * Added support for the new rule format `v2025-04-29`.
-
-
-
-
-* Appsec
-  * Renamed `clientIdentifier` field to `clientIdentifiers` and changed field type from `string` to array of strings.
-
-
-
-* Appsec
-  * Added `penaltyBoxDuration` and `counterType` to exported fields inside `akamai_appsec_rate_policy` resource.
-
-
-* PAPI
+  * Added support for the additional `RDN` compliant fields in `subject_rdns` under `custom_certificate_authorities` in the rule formats.
   * Added support for the new rule format `v2025-03-24`.
-
-
 
 ### BUG FIXES:
 
-
-
-
 * EdgeKV
-  * Fixed the bug where `namespace_name` in `akamai_edgekv_group_items` was generated as plain string
-    instead of a reference to the namespace name in the `akamai_edgekv` resource.
-
-
-
-
-
-
-
-
-
-
-
-
-### DEPRECATIONS:
-
-
-
-
-
-
-
-
-
-
-
-
+  * Fixed the bug where the `namespace_name` field in the `akamai_edgekv_group_items` resource was generated as a plain string
+    instead of a reference to the namespace name from the `akamai_edgekv` resource.
 
 ## 2.1.0 (Apr 3, 2025)
 

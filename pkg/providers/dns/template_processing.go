@@ -6,7 +6,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/dns"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/dns"
 	"github.com/akamai/cli-terraform/v2/pkg/tools"
 )
 

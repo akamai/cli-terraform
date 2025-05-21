@@ -3,8 +3,8 @@ module github.com/akamai/cli-terraform/v2
 go 1.23.6
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v10 v10.1.0
-	github.com/akamai/cli/v2 v2.0.0
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v11 v11.0.0
+	github.com/akamai/cli/v2 v2.0.1
 	github.com/hashicorp/hcl/v2 v2.23.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
@@ -45,7 +45,7 @@ require (
 	github.com/zclconf/go-cty v1.15.1 // indirect
 	go.uber.org/ratelimit v0.3.1 // indirect
 	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/term v0.30.0 // indirect
@@ -55,6 +55,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v10 => ../akamaiopen-edgegrid-golang
+//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v11 => ../akamaiopen-edgegrid-golang
 //replace github.com/akamai/cli/v2 => ../cli
 replace gopkg.in/yaml.v2 v2.2.2 => gopkg.in/yaml.v2 v2.4.0 // Fix security vulnerability

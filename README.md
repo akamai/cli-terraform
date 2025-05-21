@@ -379,7 +379,7 @@ akamai terraform export-iam all
 |-----------------------|------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
 | `all` (boolean)       | Exports all available Terraform users, groups, roles, IP allowlist, client and CIDR block resources. | `akamai terraform export-iam all`                     |
 | `allowlist` (boolean) | Exports the Terraform IP allowlist and CIDR block resources.                                         | `akamai terraform export-iam allowlist`               |
-| `client` (string)     | Exports an API client. If client API ID is not provided then self API client is exported.            | `akamai terraform export-iam client 1zk2gv34gkx5crv6` |
+| `client` (string)     | Exports an API client. If the API client's ID is not provided then self API client is exported.      | `akamai terraform export-iam client 1zk2gv34gkx5crv6` |
 | `group` (string)      | Exports a group by ID with relevant users and their roles.                                           | `akamai terraform export-iam group 12345`             |
 | `role` (string)       | Exports a role by ID with relevant users and their groups.                                           | `akamai terraform export-iam role 12345`              |
 | `user` (string)       | Exports a user by their email with a relevant user's groups and roles.                               | `akamai terraform export-iam user "jsmith@email.com"` |

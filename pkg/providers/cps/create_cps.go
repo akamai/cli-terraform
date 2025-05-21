@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/cps"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/cps"
 	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v2/pkg/templates"
 	"github.com/akamai/cli-terraform/v2/pkg/tools"

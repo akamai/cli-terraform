@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/iam"
 	"github.com/stretchr/testify/assert"
 )
 
