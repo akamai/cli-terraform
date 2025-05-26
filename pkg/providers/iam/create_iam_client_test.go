@@ -130,6 +130,36 @@ var (
 		}
 	}
 
+	getAPIClientResponseNoCredentials = iam.GetAPIClientResponse{
+		AccessToken:           "access_token",
+		ActiveCredentialCount: 1,
+		AllowAccountSwitch:    false,
+		APIAccess: iam.APIAccess{
+			AllAccessibleAPIs: false,
+			APIs:              apisGet,
+		},
+		AuthorizedUsers:         []string{"mw+2"},
+		BaseURL:                 "base_url",
+		CanAutoCreateCredential: false,
+		ClientDescription:       "Test API Client",
+		ClientID:                "1a2b3",
+		ClientName:              "mw+2_1",
+		ClientType:              "CLIENT",
+		CreatedBy:               "someuser",
+		CreatedDate:             newTimeFromStringMust("2023-06-13T14:48:08.000Z"),
+		GroupAccess: iam.GroupAccess{
+			CloneAuthorizedUserGroups: false,
+			Groups:                    singleGroup,
+		},
+		IPACL: &iam.IPACL{
+			Enable: true,
+			CIDR:   []string{"128.5.6.5/24"},
+		},
+		IsLocked:           false,
+		NotificationEmails: []string{"mw+2@example.com"},
+		Credentials:        []iam.APIClientCredential{},
+	}
+
 	expectGetAPIClient = func(client *iam.Mock, res iam.GetAPIClientResponse) {
 		req := iam.GetAPIClientRequest{
 			ClientID:    "1a2b3",
@@ -220,8 +250,9 @@ func TestCreateIAMClient(t *testing.T) {
 	section := "test_section"
 
 	tests := map[string]struct {
-		init     func(*iam.Mock, *templates.MockProcessor)
-		clientID string
+		init      func(*iam.Mock, *templates.MockProcessor)
+		clientID  string
+		withError error
 	}{
 		"fetch API client with client ID": {
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
@@ -251,6 +282,13 @@ func TestCreateIAMClient(t *testing.T) {
 			},
 			clientID: "1a2b3",
 		},
+		"fetch API client no credentials - expect error": {
+			init: func(i *iam.Mock, _ *templates.MockProcessor) {
+				expectGetAPIClient(i, getAPIClientResponseNoCredentials)
+			},
+			clientID:  "1a2b3",
+			withError: fmt.Errorf("It's impossible to manage API Client with no credential via Terraform"),
+		},
 	}
 
 	for name, test := range tests {
@@ -260,6 +298,10 @@ func TestCreateIAMClient(t *testing.T) {
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
 			err := createIAMAPIClient(ctx, test.clientID, section, mi, mp)
+			if test.withError != nil {
+				require.ErrorContains(t, err, test.withError.Error())
+				return
+			}
 			require.NoError(t, err)
 			mi.AssertExpectations(t)
 			mp.AssertExpectations(t)

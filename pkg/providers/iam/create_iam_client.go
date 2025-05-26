@@ -81,6 +81,10 @@ func createIAMAPIClient(ctx context.Context, clientID, section string, client ia
 		term.Spinner().Fail()
 		return fmt.Errorf("could not get API client with ID '%v': %w", clientID, err)
 	}
+	if len(apiClient.Credentials) == 0 {
+		term.Spinner().Fail()
+		return fmt.Errorf("API client with ID '%v' has no credentials. It's impossible to manage API Client with no credential via Terraform", clientID)
+	}
 	term.Spinner().OK()
 
 	tfAPIClient := getTFClient(apiClient)
