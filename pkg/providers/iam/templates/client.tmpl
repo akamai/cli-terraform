@@ -27,14 +27,12 @@ resource "akamai_iam_api_client" "api_client_{{.TFClient.ClientID}}" {
       {{- end}}
   }
   {{- with .TFClient.IPACL}}
-    {{- if .Enable}}
-      ip_acl = {
-        enable = {{.Enable}}
-        {{- with .CIDR}}
-            cidr = [{{range $i, $v := . }}{{if $i}}, {{end}}"{{$v}}"{{end}}]
-        {{- end }}
-      }
-    {{- end }}
+    ip_acl = {
+      enable = {{.Enable}}
+      {{- with .CIDR}}
+          cidr = [{{range $i, $v := . }}{{if $i}}, {{end}}"{{$v}}"{{end}}]
+      {{- end }}
+    }
   {{- end}}
   api_access = {
     all_accessible_apis = {{.TFClient.APIAccess.AllAccessibleAPIs}}

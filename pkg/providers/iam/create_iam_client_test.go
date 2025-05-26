@@ -64,8 +64,18 @@ var (
 		CIDR:   []string{"128.5.6.5/24"},
 	}
 
+	clientIPACLDisabled = iam.IPACL{
+		Enable: false,
+		CIDR:   []string{"128.5.6.5/24"},
+	}
+
 	clientTFIPACL = TFIPACL{
 		Enable: true,
+		CIDR:   []string{"128.5.6.5/24"},
+	}
+
+	clientTFIPACLDisabled = TFIPACL{
+		Enable: false,
 		CIDR:   []string{"128.5.6.5/24"},
 	}
 
@@ -87,7 +97,7 @@ var (
 		},
 	}
 
-	getAPIClientResponse = func(IPACL *iam.IPACL, purgeOptions *iam.PurgeOptions) iam.GetAPIClientResponse {
+	getAPIClientResponse = func(ipACL *iam.IPACL, purgeOptions *iam.PurgeOptions) iam.GetAPIClientResponse {
 		return iam.GetAPIClientResponse{
 			AccessToken:           "access_token",
 			ActiveCredentialCount: 1,
@@ -109,7 +119,7 @@ var (
 				CloneAuthorizedUserGroups: false,
 				Groups:                    singleGroup,
 			},
-			IPACL:              IPACL,
+			IPACL:              ipACL,
 			IsLocked:           false,
 			NotificationEmails: []string{"mw+2@example.com"},
 			PurgeOptions:       purgeOptions,
@@ -272,6 +282,13 @@ func TestCreateIAMClient(t *testing.T) {
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetAPIClient(i, getAPIClientResponse(nil, &clientPurgeOptions))
 				expectClientProcessTemplates(p, section, getTfClient(nil, &clientTFPurgeOptions))
+			},
+			clientID: "1a2b3",
+		},
+		"fetch API client with disabled IPACL": {
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
+				expectGetAPIClient(i, getAPIClientResponse(&clientIPACLDisabled, &clientPurgeOptions))
+				expectClientProcessTemplates(p, section, getTfClient(&clientTFIPACLDisabled, &clientTFPurgeOptions))
 			},
 			clientID: "1a2b3",
 		},
@@ -938,6 +955,68 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 				Subcommand: "client",
 			},
 			dir:          "iam_client_no_ipacl",
+			filesToCheck: []string{"client.tf", "import.sh", "variables.tf"},
+		},
+		"client with disabled IPACL": {
+			givenData: TFData{
+				TFClient: TFClient{
+					ClientID:           "1a2b3",
+					AuthorizedUsers:    []string{"mw+2"},
+					ClientType:         "CLIENT",
+					ClientName:         "mw+2_1",
+					NotificationEmails: []string{"mw+2@example.com"},
+					ClientDescription:  "Test API Client",
+					Lock:               false,
+					Credential: &TFCredential{
+						Description: "Test API Client Credential 1",
+						Status:      "ACTIVE",
+						ExpiresOn:   "2027-04-09T12:34:13Z",
+					},
+					IPACL: &TFIPACL{
+						Enable: false,
+						CIDR:   []string{"1.2.3.4/24"},
+					},
+					GroupAccess: TFGroupAccessRequest{
+						CloneAuthorizedUserGroups: false,
+						Groups: []TFClientGroupRequestItem{
+							{
+								GroupID: 123,
+								RoleID:  340,
+								Subgroups: []TFClientGroupRequestItem{
+									{
+										GroupID: 333,
+										RoleID:  540,
+									},
+								},
+							},
+						},
+					},
+					APIAccess: TFAPIAccessRequest{
+						AllAccessibleAPIs: false,
+						APIs: []TFAPIRequestItem{
+							{
+								APIID:       5580,
+								AccessLevel: "READ-ONLY",
+							},
+							{
+								APIID:       5801,
+								AccessLevel: "READ-WRITE",
+							},
+						},
+					},
+					PurgeOptions: &TFPurgeOptions{
+						CanPurgeByCPCode:   true,
+						CanPurgeByCacheTag: true,
+						CPCodeAccess: TFCPCodeAccess{
+							AllCurrentAndNewCPCodes: false,
+							CPCodes:                 []int64{101},
+						},
+					},
+				},
+				Section:    section,
+				Subcommand: "client",
+			},
+			dir:          "iam_client_disabled_ipacl",
 			filesToCheck: []string{"client.tf", "import.sh", "variables.tf"},
 		},
 		"client no PurgeOptions": {
