@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/appsec"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/botman"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/appsec"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/botman"
 	"github.com/akamai/cli-terraform/v2/pkg/templates"
 	"github.com/akamai/cli-terraform/v2/pkg/tools"
 
@@ -119,7 +119,7 @@ func TestExportRatePolicy(t *testing.T) {
     "additionalMatchOptions": null,
     "averageThreshold": 100,
     "burstThreshold": 500,
-    "clientIdentifier": "ip",
+    "clientIdentifiers": ["ip"],
     "matchType": "path",
     "name": "High Rate",
     "pathMatchType": "Custom",
@@ -134,7 +134,9 @@ func TestExportRatePolicy(t *testing.T) {
     "additionalMatchOptions": null,
     "averageThreshold": 100,
     "burstThreshold": 500,
-    "clientIdentifier": "ip",
+    "clientIdentifiers": [
+        "ip"
+    ],
     "matchType": "path",
     "name": "High Rate",
     "pathMatchType": "Custom",

@@ -126,6 +126,7 @@ Description:
 Subcommands:
   all
   allowlist
+  client
   group
   role
   user
@@ -374,13 +375,14 @@ akamai terraform export-iam all
 
 ### Subcommands
 
-| Subcommand | Description | Example |
-| ------- | --------- | --------- |
-| `all` (boolean) | Exports all available Terraform users, groups, roles, IP allowlist, and CIDR block resources. | `akamai terraform export-iam all` |
-| `allowlist` (boolean) | Exports the Terraform IP allowlist and CIDR block resources. | `akamai terraform export-iam allowlist` |
-| `group` (string) | Exports a group by ID with relevant users and their roles. | `akamai terraform export-iam group 12345` |
-| `role` (string) | Exports a role by ID with relevant users and their groups. | `akamai terraform export-iam role 12345` |
-| `user` (string) | Exports a user by their email with a relevant user's groups and roles. | `akamai terraform export-iam user "jsmith@email.com"` |
+| Subcommand            | Description                                                                                          | Example                                               |
+|-----------------------|------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
+| `all` (boolean)       | Exports all available Terraform users, groups, roles, IP allowlist, client and CIDR block resources. | `akamai terraform export-iam all`                     |
+| `allowlist` (boolean) | Exports the Terraform IP allowlist and CIDR block resources.                                         | `akamai terraform export-iam allowlist`               |
+| `client` (string)     | Exports an API client. If the API client's ID is not provided then self API client is exported.<br /><br /> <blockquote><b>Note:</b> You can export the API client only if it has assigned credentials.</blockquote> | `akamai terraform export-iam client 1zk2gv34gkx5crv6` |
+| `group` (string)      | Exports a group by ID with relevant users and their roles.                                           | `akamai terraform export-iam group 12345`             |
+| `role` (string)       | Exports a role by ID with relevant users and their groups.                                           | `akamai terraform export-iam role 12345`              |
+| `user` (string)       | Exports a user by their email with a relevant user's groups and roles.                               | `akamai terraform export-iam user "jsmith@email.com"` |
 
 ### Subcommand flag
 

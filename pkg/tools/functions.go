@@ -126,3 +126,8 @@ func AddPrefix(str, pre string) string {
 	}
 	return pre + str
 }
+
+// GetLastIndex returns last index
+func GetLastIndex(size int) int {
+	return size - 1
+}

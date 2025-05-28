@@ -15,3 +15,6 @@ terraform import akamai_iam_ip_allowlist.allowlist ""
 terraform import akamai_iam_cidr_block.{{ cidrName .CIDRBlock }} "{{.CIDRBlockID}}"
 {{end -}}
 {{end}}
+{{- if or (eq .Subcommand "all") (eq .Subcommand "client") -}}
+terraform import akamai_iam_api_client.api_client_{{.TFClient.ClientID}} {{.TFClient.ClientID}}
+{{end -}}

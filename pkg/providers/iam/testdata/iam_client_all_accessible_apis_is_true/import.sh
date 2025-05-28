@@ -1,0 +1,2 @@
+terraform init
+terraform import akamai_iam_api_client.api_client_1a2b3 1a2b3

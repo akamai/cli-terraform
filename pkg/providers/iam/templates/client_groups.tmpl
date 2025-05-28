@@ -1,0 +1,14 @@
+{{/* Recursive template block to render client groups */}}
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/iam.TFData.TFClient.GroupAccessRequest.Groups*/ -}}
+
+{{define "clientGroup"}}
+  {
+    group_id = {{.GroupID}}
+    role_id = {{.RoleID}}
+    {{- with .Subgroups}}
+    sub_groups = [{{range $i, $sub := . -}}
+      {{if $i}}, {{end}}{{template "clientGroup" $sub}}
+    {{end}}]
+    {{- end}}
+  }
+{{- end}}

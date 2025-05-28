@@ -1,5 +1,28 @@
 # RELEASE NOTES
 
+## 2.2.0 (May 28, 2025)
+
+### FEATURES/ENHANCEMENTS:
+
+* Appsec
+  * Renamed the `clientIdentifier` field to `clientIdentifiers` and changed the field type from a string to an array of strings.
+  * Added `penaltyBoxDuration` and `counterType` to exported fields inside the `akamai_appsec_rate_policy` resource.
+
+* Identity and Access Management (IAM)
+  * Added the `client` subcommand to the `export-iam` command which exports terraform configuration files for an optionally provided API client.
+  * Modified the `all` subcommand for the `export-iam` command to export configuration for a self API client.
+
+* PAPI
+  * Added support for the new rule format `v2025-04-29`.
+  * Added support for the additional `RDN` compliant fields in `subject_rdns` under `custom_certificate_authorities` in the rule formats.
+  * Added support for the new rule format `v2025-03-24`.
+
+### BUG FIXES:
+
+* EdgeKV
+  * Fixed the bug where the `namespace_name` field in the `akamai_edgekv_group_items` resource was generated as a plain string
+    instead of a reference to the namespace name from the `akamai_edgekv` resource.
+
 ## 2.1.0 (Apr 3, 2025)
 
 ### FEATURES/ENHANCEMENTS:

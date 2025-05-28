@@ -58,13 +58,16 @@
         {
             "averageThreshold": 100,
             "burstThreshold": 500,
-            "clientIdentifier": "ip",
+            "clientIdentifiers": [
+                "ip"
+            ],
             "createDate": "2022-01-27T21:17:45Z",
             "id": 172320,
             "matchType": "path",
             "name": "High Rate",
             "pathMatchType": "Custom",
             "pathUriPositiveMatch": true,
+            "penaltyBoxDuration": "THIRTY_MINUTES",
             "requestType": "ClientRequest",
             "sameActionOnIpv6": true,
             "type": "WAF",
@@ -75,13 +78,16 @@
         {
             "averageThreshold": 75,
             "burstThreshold": 250,
-            "clientIdentifier": "ip",
+            "clientIdentifiers": [
+                "ip"
+            ],
             "createDate": "2022-01-27T21:17:45Z",
             "id": 172321,
             "matchType": "path",
             "name": "Low Rate",
             "pathMatchType": "Custom",
             "pathUriPositiveMatch": true,
+            "penaltyBoxDuration": "THIRTY_MINUTES",
             "requestType": "ClientRequest",
             "sameActionOnIpv6": true,
             "type": "WAF",
@@ -92,7 +98,7 @@
         {
             "averageThreshold": 25,
             "burstThreshold": 50,
-            "clientIdentifier": "",
+            "clientIdentifiers": [],
             "createDate": "2022-01-27T21:17:45Z",
             "id": 172322,
             "matchType": "path",
@@ -105,6 +111,7 @@
             },
             "pathMatchType": "Custom",
             "pathUriPositiveMatch": true,
+            "penaltyBoxDuration": "THIRTY_MINUTES",
             "requestType": "ClientRequest",
             "sameActionOnIpv6": false,
             "type": "BOTMAN",

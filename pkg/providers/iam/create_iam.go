@@ -7,9 +7,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
+	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v10/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/iam"
 	"github.com/akamai/cli-terraform/v2/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
@@ -22,6 +24,7 @@ type (
 		TFRoles     []TFRole
 		TFGroups    []TFGroup
 		TFAllowlist TFAllowlist
+		TFClient    TFClient
 		Section     string
 		Subcommand  string
 	}
@@ -95,6 +98,78 @@ type (
 		ParentGroupID int
 		GroupName     string
 	}
+
+	// TFClient represents a client used in templates
+	TFClient struct {
+		AllowAccountSwitch      bool
+		APIAccess               TFAPIAccessRequest
+		AuthorizedUsers         []string
+		CanAutoCreateCredential bool
+		ClientDescription       string
+		ClientName              string
+		ClientType              iam.ClientType
+		GroupAccess             TFGroupAccessRequest
+		IPACL                   *TFIPACL
+		NotificationEmails      []string
+		PurgeOptions            *TFPurgeOptions
+		Lock                    bool
+		ClientID                string
+		Credential              *TFCredential
+	}
+
+	// TFCredential represents a client credential used in templates.
+	TFCredential struct {
+		Description string
+		ExpiresOn   string
+		Status      string
+	}
+
+	// TFIPACL represents a client IPACL used in templates
+	TFIPACL struct {
+		CIDR   []string
+		Enable bool
+	}
+
+	// TFPurgeOptions represents a client PurgeOptions used in templates
+	TFPurgeOptions struct {
+		CanPurgeByCacheTag bool
+		CanPurgeByCPCode   bool
+		CPCodeAccess       TFCPCodeAccess
+	}
+
+	// TFCPCodeAccess represents the CP codes used in templates which the API client can purge
+	TFCPCodeAccess struct {
+		AllCurrentAndNewCPCodes bool
+		CPCodes                 []int64
+	}
+
+	// TFGroupAccessRequest specifies the API client's group access.
+	TFGroupAccessRequest struct {
+		CloneAuthorizedUserGroups bool
+		Groups                    []TFClientGroupRequestItem
+	}
+
+	// TFClientGroupRequestItem represents a group the API client can access.
+	TFClientGroupRequestItem struct {
+		GroupID   int64
+		RoleID    int64
+		Subgroups []TFClientGroupRequestItem
+	}
+
+	// TFAPIAccessRequest represents the APIs the API client can access.
+	TFAPIAccessRequest struct {
+		AllAccessibleAPIs bool
+		APIs              []TFAPIRequestItem
+	}
+
+	// TFAPIRequestItem represents single Application Programming Interface (API).
+	TFAPIRequestItem struct {
+		APIID       int64
+		AccessLevel TFAccessLevel
+	}
+
+	// TFAccessLevel represents the access level for API.
+	TFAccessLevel string
 )
 
 var (
@@ -102,7 +177,8 @@ var (
 	templateFiles embed.FS
 
 	additionalFunctions = tools.DecorateWithMultilineHandlingFunctions(map[string]any{
-		"cidrName": cidrName,
+		"cidrName":     cidrName,
+		"getLastIndex": tools.GetLastIndex,
 	})
 
 	// ErrFetchingUsers is returned when fetching users fails
@@ -286,6 +362,98 @@ func getTFCIDRBlocks(ctx context.Context, client iam.IAM) ([]TFCIDRBlock, error)
 	}
 
 	return tfCIDRBlocks, nil
+}
+
+func getTFClient(apiClient *iam.GetAPIClientResponse) TFClient {
+	return TFClient{
+		APIAccess:               getAPIAccess(apiClient),
+		AuthorizedUsers:         apiClient.AuthorizedUsers,
+		CanAutoCreateCredential: apiClient.CanAutoCreateCredential,
+		AllowAccountSwitch:      apiClient.AllowAccountSwitch,
+		ClientDescription:       apiClient.ClientDescription,
+		ClientName:              apiClient.ClientName,
+		ClientType:              apiClient.ClientType,
+		GroupAccess:             getGroupAccess(apiClient),
+		IPACL:                   getIPACL(apiClient),
+		NotificationEmails:      apiClient.NotificationEmails,
+		PurgeOptions:            getPurge(apiClient),
+		Lock:                    apiClient.IsLocked,
+		ClientID:                apiClient.ClientID,
+		Credential:              getCredential(apiClient),
+	}
+}
+
+func getCredential(c *iam.GetAPIClientResponse) *TFCredential {
+	credentialsResponse := c.Credentials
+	sort.Slice(credentialsResponse, func(i, j int) bool {
+		return credentialsResponse[i].CreatedOn.Before(credentialsResponse[j].CreatedOn)
+	})
+	if len(credentialsResponse) > 0 {
+		return &TFCredential{
+			Description: credentialsResponse[0].Description,
+			ExpiresOn:   credentialsResponse[0].ExpiresOn.Format(time.RFC3339Nano),
+			Status:      string(credentialsResponse[0].Status),
+		}
+	}
+	return &TFCredential{}
+}
+
+func getIPACL(apiClient *iam.GetAPIClientResponse) *TFIPACL {
+	if apiClient.IPACL != nil {
+		return &TFIPACL{
+			CIDR:   apiClient.IPACL.CIDR,
+			Enable: apiClient.IPACL.Enable,
+		}
+	}
+	return nil
+}
+
+func getPurge(apiClient *iam.GetAPIClientResponse) *TFPurgeOptions {
+	if apiClient.PurgeOptions != nil {
+		return &TFPurgeOptions{
+			CanPurgeByCacheTag: apiClient.PurgeOptions.CanPurgeByCacheTag,
+			CanPurgeByCPCode:   apiClient.PurgeOptions.CanPurgeByCPCode,
+			CPCodeAccess: TFCPCodeAccess{
+				AllCurrentAndNewCPCodes: apiClient.PurgeOptions.CPCodeAccess.AllCurrentAndNewCPCodes,
+				CPCodes:                 apiClient.PurgeOptions.CPCodeAccess.CPCodes,
+			},
+		}
+	}
+	return nil
+}
+
+func getAPIAccess(apiClient *iam.GetAPIClientResponse) TFAPIAccessRequest {
+	apiAccess := TFAPIAccessRequest{
+		AllAccessibleAPIs: apiClient.APIAccess.AllAccessibleAPIs,
+	}
+
+	for _, api := range apiClient.APIAccess.APIs {
+		apiAccess.APIs = append(apiAccess.APIs, TFAPIRequestItem{
+			APIID:       api.APIID,
+			AccessLevel: TFAccessLevel(api.AccessLevel),
+		})
+	}
+
+	return apiAccess
+}
+
+func getGroupAccess(apiClient *iam.GetAPIClientResponse) TFGroupAccessRequest {
+	return TFGroupAccessRequest{
+		CloneAuthorizedUserGroups: apiClient.GroupAccess.CloneAuthorizedUserGroups,
+		Groups:                    buildGroupAccess(apiClient.GroupAccess.Groups),
+	}
+}
+
+func buildGroupAccess(groups []iam.ClientGroup) []TFClientGroupRequestItem {
+	var groupList []TFClientGroupRequestItem
+	for _, subgroup := range groups {
+		groupList = append(groupList, TFClientGroupRequestItem{
+			GroupID:   subgroup.GroupID,
+			RoleID:    subgroup.RoleID,
+			Subgroups: buildGroupAccess(subgroup.Subgroups),
+		})
+	}
+	return groupList
 }
 
 func cidrName(cidr string) string {

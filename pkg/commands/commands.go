@@ -250,7 +250,7 @@ func CommandLocator() ([]*cli.Command, error) {
 		Subcommands: []*cli.Command{
 			{
 				Name:        "all",
-				Description: "Exports all available Terraform users, groups, roles, and allowlist details.",
+				Description: "Exports all available Terraform users, groups, roles, client and allowlist details.",
 				Action:      validatedAction(iam.CmdCreateIAMAll, requireValidWorkpath),
 			},
 			{
@@ -269,6 +269,12 @@ func CommandLocator() ([]*cli.Command, error) {
 						Usage: "Exports only the Terraform group resource; excludes the role and user resources when specified.",
 					},
 				},
+			},
+			{
+				Name:        "client",
+				Description: "Exports the Terraform client resource.",
+				ArgsUsage:   "<client_id>",
+				Action:      validatedAction(iam.CmdCreateIAMClient, requireValidWorkpath),
 			},
 			{
 				Name:        "role",
