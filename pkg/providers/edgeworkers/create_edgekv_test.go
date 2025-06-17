@@ -37,7 +37,7 @@ var (
 			return call.Return(nil, err)
 		}
 		return call.Return(
-			&edgeworkers.Namespace{
+			&edgeworkers.GetNamespaceResponse{
 				Name:        name,
 				GeoLocation: geoLocation,
 				Retention:   retention,

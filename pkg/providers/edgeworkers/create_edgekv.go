@@ -158,7 +158,7 @@ func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.Nam
 	return nil
 }
 
-func getEdgeKV(ctx context.Context, namespace string, network edgeworkers.NamespaceNetwork, client edgeworkers.Edgeworkers) (*edgeworkers.Namespace, error) {
+func getEdgeKV(ctx context.Context, namespace string, network edgeworkers.NamespaceNetwork, client edgeworkers.Edgeworkers) (*edgeworkers.GetNamespaceResponse, error) {
 	edgeKV, err := client.GetEdgeKVNamespace(ctx, edgeworkers.GetEdgeKVNamespaceRequest{
 		Network: network,
 		Name:    namespace,
