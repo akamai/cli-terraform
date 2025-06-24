@@ -26,4 +26,20 @@ resource "akamai_botman_transactional_endpoint_protection" "transactional_endpoi
 }
 
 {{ end -}}
+{{ if .AdvancedSettings.UserRiskResponseStrategySettings  -}}
+resource "akamai_apr_user_risk_response_strategy" "user_risk_response_strategy" {
+    config_id = local.config_id
+    user_risk_response_strategy = jsonencode(
+        {{ exportJSON .AdvancedSettings.UserRiskResponseStrategySettings }}
+    )
+}
+{{ end -}}
+{{ if .AdvancedSettings.UserAllowListIdSettings  -}}
+resource "akamai_apr_user_allow_list" "user_allow_list" {
+    config_id = local.config_id
+    user_allow_list = jsonencode(
+        {{ exportJSON .AdvancedSettings.UserAllowListIdSettings }}
+    )
+}
+{{ end -}}
 {{ end -}}

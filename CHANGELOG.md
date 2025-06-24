@@ -3,6 +3,8 @@
 ## X.XX.X (Month XX, XXXX)
 
 ### FEATURES/ENHANCEMENTS:
+* Appsec
+  * Added support for account protection when exporting appsec configuration
 
 
 

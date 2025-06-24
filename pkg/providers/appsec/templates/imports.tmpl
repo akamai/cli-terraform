@@ -233,6 +233,12 @@ terraform import module.security.akamai_botman_client_side_security.client_side_
 {{ if .AdvancedSettings.TransactionalEndpointProtectionSettings -}}
 terraform import module.security.akamai_botman_transactional_endpoint_protection.transactional_endpoint_protection {{$configID}}
 {{ end -}}
+{{ if .AdvancedSettings.UserRiskResponseStrategySettings -}}
+terraform import module.security.akamai_apr_user_risk_response_strategy.user_risk_response_strategy {{$configID}}
+{{ end -}}
+{{ if .AdvancedSettings.UserAllowListIdSettings -}}
+terraform import module.security.akamai_apr_user_allow_list.user_allow_list {{$configID}}
+{{ end -}}
 {{ end -}}
 {{ range .SecurityPolicies -}}
 {{ $policyName:= escapeName .Name -}}
@@ -283,6 +289,16 @@ terraform import module.security.akamai_botman_content_protection_rule_sequence.
 {{ range .BotManagement.ContentProtectionJavaScriptInjectionRules -}}
 terraform import module.security.akamai_botman_content_protection_javascript_injection_rule.{{ $policyName }}_{{ escapeName (index . "contentProtectionJavaScriptInjectionRuleName") }}_{{  index . "contentProtectionJavaScriptInjectionRuleId" }} {{$configID}}:{{$policyID}}:{{index . "contentProtectionJavaScriptInjectionRuleId"}}
 {{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .AccountProtection -}}
+{{ if .AccountProtection.TransactionalEndpoints -}}
+{{ range .AccountProtection.TransactionalEndpoints -}}
+terraform import module.security.akamai_apr_protected_operations.{{$policyName}}_{{(index . "operationId")}} {{$configID}}:{{$policyID}}:{{index . "operationId"}}
+{{ end -}}
+{{ end -}}
+{{ if .AccountProtection.GeneralSettings -}}
+terraform import module.security.akamai_apr_general_settings.{{$policyName}} {{$configID}}:{{$policyID}}
 {{ end -}}
 {{ end -}}
 {{ end -}}

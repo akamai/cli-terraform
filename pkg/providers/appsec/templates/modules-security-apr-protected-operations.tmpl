@@ -1,0 +1,18 @@
+{{ range .SecurityPolicies -}}
+{{ if .AccountProtection -}}
+{{ if .AccountProtection.TransactionalEndpoints -}}
+{{ $policyName := escapeName .Name -}}
+
+{{ range .AccountProtection.TransactionalEndpoints -}}
+resource "akamai_apr_protected_operations" "{{ $policyName }}_{{  index . "operationId" }}" {
+    config_id          = local.config_id
+    security_policy_id = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
+    operation_id       = "{{ index . "operationId" }}"
+    protected_operation = jsonencode(
+        {{ exportJSONWithoutKeys . "operationId" }}
+    )
+}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}
