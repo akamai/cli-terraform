@@ -20,7 +20,10 @@
 
 
 
-
+* mTLS Keystore
+  * Added command `export-mtls-keystore <certificate id>` that generates the configuration for 
+  `akamai_mtlskeystore_client_certificate_akamai` and `akamai_mtlskeystore_client_certificate_third_party` resources.
+  
 
 
 

@@ -3,7 +3,6 @@ package cli
 
 import (
 	"context"
-	"errors"
 	"os"
 
 	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/log"
@@ -11,7 +10,6 @@ import (
 	"github.com/akamai/cli-terraform/v2/pkg/commands"
 	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
 	akacli "github.com/akamai/cli/v2/pkg/app"
-	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/log"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
@@ -33,10 +31,7 @@ func Run() error {
 		"Export selected resources for faster adoption in Terraform.",
 		Version)
 
-	cmds, err := commands.CommandLocator()
-	if err != nil {
-		return errors.New(color.RedString("An error occurred initializing commands: %s", err))
-	}
+	cmds := commands.CommandLocator()
 	if len(cmds) > 0 {
 		app.Commands = append(cmds, app.Commands...)
 	}

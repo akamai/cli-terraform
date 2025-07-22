@@ -155,6 +155,7 @@ Global Flags:
   <li><a href="#exportedgeworker">export-edgeworker</a></li>
   <li><a href="#exportiam">export-iam</a></li>
   <li><a href="#exportimaging">export-imaging</a></li>
+  <li><a href="#exportmtlskeystore">export-mtls-keystore</a></li>
   <li><a href="#exportproperty">export-property</a></li>
   <li><a href="#exportproperty-include">export-property-include</a></li>
   <li><a href="#exportzone">export-zone</a></li>
@@ -412,6 +413,24 @@ akamai terraform export-imaging "C-0N7RAC7" "my-policy-set_1234"
 | ------- | --------- | --------- |
 | `--policy-as-hcl` (boolean) | Exports your imaging policy with rules in HCL format. | `akamai terraform export-imaging --policy-as-hcl "C-0N7RAC7" "my-policy-set_12345"` |
 | `--policy-json-dir` (string) | Sets the path to a directory in which you want to store your policy in JSON format. The default is your active directory.| `akamai terraform export-imaging --policy-json-dir "path/to/your/directory" "C-0N7RAC7" "my-policy-set_12345"` |
+
+## export‑mtls-keystore
+
+Export a Terraform configuration for your mTLS client certificate.
+ 
+> **Note:** For third-party certificates, version information is always exported without being commented out as there is no automatic rotation. You can manually update the version fields as needed before applying the configuration.
+
+### Syntax
+
+```shell
+akamai [global flags] terraform export-mtls-keystore [command flags] <certificate_id>
+```
+
+### Basic usage
+
+```shell
+akamai terraform export-mtls-keystore 12345
+```
 
 ## export‑property
 
