@@ -201,7 +201,7 @@ func populateAPIData(section, content, operationsContent string, id, versionNumb
 }
 
 func serializeIndent(version *v0.GetAPIVersionResponse) (*string, error) {
-	jsonBody, err := json.MarshalIndent(version.RegisterAPIRequest, "", "  ")
+	jsonBody, err := json.MarshalIndent(version.APIAttributes, "", "  ")
 	if err != nil {
 		return nil, err
 	}

@@ -20,7 +20,7 @@ import (
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
-var api = "{\n  \"name\": \"Pet Store\",\n  \"hostnames\": null,\n  \"contractId\": \"\",\n  \"groupId\": 0\n}"
+var api = "{\n  \"name\": \"Pet Store\",\n  \"hostnames\": null\n}"
 
 var apiOperations = "{\n  \"operations\": {\n    \"/base\": {\n      \"test login\": {\n        \"method\": \"POST\",\n        \"purpose\": \"search\"\n      }\n    }\n  }\n}"
 

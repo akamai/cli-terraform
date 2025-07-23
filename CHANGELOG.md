@@ -4,8 +4,9 @@
 
 ### FEATURES/ENHANCEMENTS:
 * Appsec
-  * Added support for account protection when exporting appsec configuration
-
+  * Added support for account protection when exporting appsec configuration.
+* API Definitions 
+  * Added the new `export-apidefinitions` command to create the API Definitions resources.
 
 
 
