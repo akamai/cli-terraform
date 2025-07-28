@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/mtlskeystore"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/ptr"
@@ -52,15 +53,15 @@ func akamaiCertificateMockData() certificateMockData {
 		versions: []mtlskeystore.ClientCertificateVersion{
 			{
 				Version:      2,
-				CreatedDate:  "2024-10-01T12:00:00Z",
+				CreatedDate:  parseTime("2024-10-01T12:00:00Z"),
 				VersionAlias: ptr.To("CURRENT"),
-				Status:       mtlskeystore.DeploymentPending,
+				Status:       string(mtlskeystore.DeploymentPending),
 			},
 			{
 				Version:      1,
-				CreatedDate:  "2023-10-01T12:00:00Z",
+				CreatedDate:  parseTime("2023-10-01T12:00:00Z"),
 				VersionAlias: ptr.To("PREVIOUS"),
-				Status:       mtlskeystore.Deployed,
+				Status:       string(mtlskeystore.Deployed),
 			},
 		},
 	}
@@ -81,18 +82,18 @@ func thirdPartyCertificateMockData() certificateMockData {
 		versions: []mtlskeystore.ClientCertificateVersion{
 			{
 				Version:     3,
-				CreatedDate: "2025-10-01T12:00:00Z",
-				Status:      mtlskeystore.AwaitingSigned,
+				CreatedDate: parseTime("2025-10-01T12:00:00Z"),
+				Status:      string(mtlskeystore.AwaitingSigned),
 			},
 			{
 				Version:     2,
-				CreatedDate: "2024-10-01T12:00:00Z",
-				Status:      mtlskeystore.Deployed,
+				CreatedDate: parseTime("2024-10-01T12:00:00Z"),
+				Status:      string(mtlskeystore.Deployed),
 			},
 			{
 				Version:     1,
-				CreatedDate: "2023-10-01T12:00:00Z",
-				Status:      mtlskeystore.Deployed,
+				CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+				Status:      string(mtlskeystore.Deployed),
 			},
 		},
 	}
@@ -121,8 +122,8 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.setVersions([]mtlskeystore.ClientCertificateVersion{
 					{
 						Version:     1,
-						CreatedDate: "2023-10-01T12:00:00Z",
-						Status:      mtlskeystore.Deployed,
+						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						Status:      string(mtlskeystore.Deployed),
 					},
 				})
 				d.mockAll(m)
@@ -135,13 +136,13 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.setVersions([]mtlskeystore.ClientCertificateVersion{
 					{
 						Version:     1,
-						CreatedDate: "2023-10-01T12:00:00Z",
-						Status:      mtlskeystore.DeletePending,
+						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						Status:      string(mtlskeystore.DeletePending),
 					},
 					{
 						Version:     2,
-						CreatedDate: "2023-10-01T12:00:00Z",
-						Status:      mtlskeystore.Deployed,
+						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						Status:      string(mtlskeystore.Deployed),
 					},
 				})
 				d.mockAll(m)
@@ -161,8 +162,8 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.setVersions([]mtlskeystore.ClientCertificateVersion{
 					{
 						Version:     1,
-						CreatedDate: "2023-10-01T12:00:00Z",
-						Status:      mtlskeystore.Deployed,
+						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						Status:      string(mtlskeystore.Deployed),
 					},
 				})
 				d.mockAll(m)
@@ -175,30 +176,30 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.setVersions([]mtlskeystore.ClientCertificateVersion{
 					{
 						Version:      3,
-						CreatedDate:  "2025-10-01T13:00:00Z",
+						CreatedDate:  parseTime("2025-10-01T13:00:00Z"),
 						VersionAlias: ptr.To("CURRENT"),
-						Status:       mtlskeystore.Deployed,
+						Status:       string(mtlskeystore.Deployed),
 					},
 					{
 						Version:     3,
-						CreatedDate: "2025-10-01T12:00:00Z",
-						Status:      mtlskeystore.Deployed,
+						CreatedDate: parseTime("2025-10-01T12:00:00Z"),
+						Status:      string(mtlskeystore.Deployed),
 					},
 					{
 						Version:      2,
-						CreatedDate:  "2024-10-01T13:00:00Z",
+						CreatedDate:  parseTime("2024-10-01T13:00:00Z"),
 						VersionAlias: ptr.To("PREVIOUS"),
-						Status:       mtlskeystore.Deployed,
+						Status:       string(mtlskeystore.Deployed),
 					},
 					{
 						Version:     2,
-						CreatedDate: "2024-10-01T12:00:00Z",
-						Status:      mtlskeystore.Deployed,
+						CreatedDate: parseTime("2024-10-01T12:00:00Z"),
+						Status:      string(mtlskeystore.Deployed),
 					},
 					{
 						Version:     1,
-						CreatedDate: "2023-10-01T12:00:00Z",
-						Status:      mtlskeystore.Deployed,
+						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						Status:      string(mtlskeystore.Deployed),
 					},
 				})
 				d.mockGetClientCertificate(m, nil)
@@ -220,8 +221,8 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.setVersions([]mtlskeystore.ClientCertificateVersion{
 					{
 						Version:     1,
-						CreatedDate: "2023-10-01T12:00:00Z",
-						Status:      mtlskeystore.DeletePending,
+						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						Status:      string(mtlskeystore.DeletePending),
 					},
 				})
 				d.mockAll(m)
@@ -244,13 +245,13 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.setVersions([]mtlskeystore.ClientCertificateVersion{
 					{
 						Version:     1,
-						CreatedDate: "2023-10-01T12:00:00Z",
-						Status:      mtlskeystore.DeletePending,
+						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						Status:      string(mtlskeystore.DeletePending),
 					},
 					{
 						Version:     2,
-						CreatedDate: "2023-10-01T12:00:00Z",
-						Status:      mtlskeystore.DeletePending,
+						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						Status:      string(mtlskeystore.DeletePending),
 					},
 				})
 				d.mockAll(m)
@@ -359,11 +360,11 @@ func (d *certificateMockData) mockGetClientCertificate(m *mtlskeystore.Mock, err
 	res := &mtlskeystore.GetClientCertificateResponse{
 		CertificateID:      d.id,
 		CertificateName:    d.name,
-		Geography:          mtlskeystore.Geography(d.geography),
-		KeyAlgorithm:       mtlskeystore.CryptographicAlgorithm(d.keyAlgorithm),
+		Geography:          d.geography,
+		KeyAlgorithm:       d.keyAlgorithm,
 		NotificationEmails: d.notificationEmails,
-		SecureNetwork:      mtlskeystore.SecureNetwork(d.secureNetwork),
-		Signer:             mtlskeystore.Signer(d.signer),
+		SecureNetwork:      d.secureNetwork,
+		Signer:             d.signer,
 		Subject:            d.subject,
 	}
 
@@ -446,4 +447,12 @@ func TestExtractContractAndGroup(t *testing.T) {
 			}
 		})
 	}
+}
+
+func parseTime(s string) time.Time {
+	parsedTime, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		panic(err)
+	}
+	return parsedTime
 }

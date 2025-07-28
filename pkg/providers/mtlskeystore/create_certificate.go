@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/mtlskeystore"
 	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
@@ -150,7 +151,7 @@ func createCertificate(ctx context.Context, params createCertificateParams) (e e
 	term.Spinner().OK()
 
 	// For Akamai certificate, export only if at least one version is not pending deletion.
-	if cert.Signer == mtlskeystore.SignerAkamai && versions != nil {
+	if cert.Signer == string(mtlskeystore.SignerAkamai) && versions != nil {
 		if err := checkAkamaiCertVersionsStatus(versions); err != nil {
 			return err
 		}
@@ -180,15 +181,15 @@ func populateTFData(param createCertificateParams, cert *mtlskeystore.GetClientC
 	if versions != nil {
 		for _, v := range versions.Versions {
 			// We only add the versions that have nil VersionAlias and status different then pending deletion.
-			if v.VersionAlias == nil && v.Status != mtlskeystore.DeletePending {
+			if v.VersionAlias == nil && v.Status != string(mtlskeystore.DeletePending) {
 				tfVersions = append(tfVersions, TFClientCertificateVersion{
 					Version:     v.Version,
-					CreatedDate: strings.TrimSuffix(v.CreatedDate, "Z"),
+					CreatedDate: strings.TrimSuffix(v.CreatedDate.Format(time.RFC3339), "Z"),
 				})
 			}
 		}
 	}
-	if len(tfVersions) == 0 && cert.Signer == mtlskeystore.SignerThirdParty {
+	if len(tfVersions) == 0 && cert.Signer == string(mtlskeystore.SignerThirdParty) {
 		return TFData{}, fmt.Errorf("certificate with ID '%d' has no versions or the versions are pending deletion", cert.CertificateID)
 	}
 
@@ -198,11 +199,11 @@ func populateTFData(param createCertificateParams, cert *mtlskeystore.GetClientC
 			Name:               cert.CertificateName,
 			ResourceName:       strings.ReplaceAll(cert.CertificateName, "-", "_"),
 			ID:                 strconv.FormatInt(cert.CertificateID, 10),
-			Geography:          string(cert.Geography),
-			KeyAlgorithm:       string(cert.KeyAlgorithm),
+			Geography:          cert.Geography,
+			KeyAlgorithm:       cert.KeyAlgorithm,
 			NotificationEmails: cert.NotificationEmails,
-			SecureNetwork:      string(cert.SecureNetwork),
-			Signer:             string(cert.Signer),
+			SecureNetwork:      cert.SecureNetwork,
+			Signer:             cert.Signer,
 			Subject:            cert.Subject,
 			Versions:           tfVersions,
 		},
@@ -233,7 +234,7 @@ func populateTFData(param createCertificateParams, cert *mtlskeystore.GetClientC
 // checkAkamaiCertVersionsStatus returns an error if the Akamai certificate has no versions or all versions are pending deletion.
 func checkAkamaiCertVersionsStatus(versions *mtlskeystore.ListClientCertificateVersionsResponse) error {
 	for _, v := range versions.Versions {
-		if v.Status != mtlskeystore.DeletePending {
+		if v.Status != string(mtlskeystore.DeletePending) {
 			return nil
 		}
 	}
