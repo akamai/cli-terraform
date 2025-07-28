@@ -52,6 +52,8 @@ type (
 
 	createCertificateParams struct {
 		id                int64
+		groupID           string
+		contractID        string
 		configSection     string
 		client            mtlskeystore.MTLSKeystore
 		templateProcessor templates.TemplateProcessor
@@ -95,8 +97,13 @@ func CmdCreateCertificate(c *cli.Context) error {
 		return cli.Exit(color.RedString("Invalid client certificate ID: %s", idString), 1)
 	}
 
+	groupID := c.Args().Get(1)
+	contractID := c.Args().Get(2)
+
 	params := createCertificateParams{
 		id:            id,
+		groupID:       groupID,
+		contractID:    contractID,
 		configSection: edgegrid.GetEdgercSection(c),
 		client:        mtlskeystore.Client(edgegrid.GetSession(c.Context)),
 		templateProcessor: templates.FSTemplateProcessor{
@@ -150,7 +157,7 @@ func createCertificate(ctx context.Context, params createCertificateParams) (e e
 	}
 
 	term.Spinner().Start("Extracting data")
-	tfData, err := populateTFData(params.configSection, cert, versions)
+	tfData, err := populateTFData(params, cert, versions)
 	if err != nil {
 		return fmt.Errorf("error populating terraform data: %w", err)
 	}
@@ -167,7 +174,7 @@ func createCertificate(ctx context.Context, params createCertificateParams) (e e
 	return nil
 }
 
-func populateTFData(configSection string, cert *mtlskeystore.GetClientCertificateResponse, versions *mtlskeystore.ListClientCertificateVersionsResponse) (TFData, error) {
+func populateTFData(param createCertificateParams, cert *mtlskeystore.GetClientCertificateResponse, versions *mtlskeystore.ListClientCertificateVersionsResponse) (TFData, error) {
 	var tfVersions []TFClientCertificateVersion
 	// For 'AKAMAI' versions are always nil, as we don't generate configuration for them.
 	if versions != nil {
@@ -186,7 +193,7 @@ func populateTFData(configSection string, cert *mtlskeystore.GetClientCertificat
 	}
 
 	tfData := TFData{
-		Section: configSection,
+		Section: param.configSection,
 		Certificate: TFCertificate{
 			Name:               cert.CertificateName,
 			ResourceName:       strings.ReplaceAll(cert.CertificateName, "-", "_"),
@@ -201,10 +208,18 @@ func populateTFData(configSection string, cert *mtlskeystore.GetClientCertificat
 		},
 	}
 
-	ctr, grp, err := extractContractAndGroup(cert.Subject)
-	if err != nil {
-		return TFData{}, err
+	var ctr, grp string
+	var err error
+	if param.contractID != "" && param.groupID != "" {
+		ctr = param.contractID
+		grp = param.groupID
+	} else {
+		ctr, grp, err = extractContractAndGroup(cert.Subject)
+		if err != nil {
+			return TFData{}, fmt.Errorf("unable to extract group and contract from certificate subject: %w.\nRe-run with following arguments: <certificate_id>  <group_id> <contract_id>", err)
+		}
 	}
+
 	grpInt64, err := strconv.ParseInt(grp, 10, 64)
 	if err != nil {
 		return TFData{}, fmt.Errorf("failed to convert group ID to int64: %w", err)
@@ -230,11 +245,11 @@ func extractContractAndGroup(subject string) (string, string, error) {
 	re := regexp.MustCompile(`\/([^\/]+)\/CN=`)
 	matches := re.FindStringSubmatch(subject)
 	if len(matches) < 2 {
-		return "", "", fmt.Errorf("unable to extract group and contract from subject: unexpected format: '%s'", subject)
+		return "", "", fmt.Errorf("unexpected format: '%s'", subject)
 	}
 	parts := strings.Fields(matches[1])
 	if len(parts) < 2 {
-		return "", "", fmt.Errorf("unable to extract group and contract from subject: no group or contract: '%s'", subject)
+		return "", "", fmt.Errorf("no group or contract: '%s'", subject)
 	}
 	return parts[len(parts)-2], parts[len(parts)-1], nil
 }

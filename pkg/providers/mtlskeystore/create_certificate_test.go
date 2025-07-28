@@ -278,7 +278,7 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.subject = "some custom subject value"
 				d.mockAll(m)
 			},
-			withError: "error populating terraform data: unable to extract group and contract from subject: unexpected format: 'some custom subject value'",
+			withError: "error populating terraform data: unable to extract group and contract from certificate subject: unexpected format: 'some custom subject value'.\nRe-run with following arguments: <certificate_id>  <group_id> <contract_id>",
 		},
 		"templating error": {
 			mockData: akamaiCertificateMockData(),
@@ -420,11 +420,11 @@ func TestExtractContractAndGroup(t *testing.T) {
 		},
 		"subject with OU but not enough fields": {
 			subject:     "/C=US/O=Org/OU=onlyone/CN=foo/",
-			expectError: "unable to extract group and contract from subject: no group or contract",
+			expectError: "no group or contract",
 		},
 		"subject with OU but only one field": {
 			subject:     "/C=US/O=Org/OU=12345/CN=foo/",
-			expectError: "unable to extract group and contract from subject: no group or contract",
+			expectError: "no group or contract",
 		},
 		"subject with dashes in contract": {
 			subject:        "/C=US/O=Org/OU=foo-bar C-123-456 78910/CN=foo/",

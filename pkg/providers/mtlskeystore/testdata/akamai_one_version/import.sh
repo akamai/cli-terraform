@@ -1,2 +1,2 @@
 terraform init
-terraform import akamai_mtlskeystore_client_certificate_akamai.test_akamai_cert 12345
+terraform import akamai_mtlskeystore_client_certificate_akamai.test_akamai_cert 12345,98765,C-0NTR4CT

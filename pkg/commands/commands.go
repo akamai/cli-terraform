@@ -268,9 +268,8 @@ func CommandLocator() []*cli.Command {
 			Name:        "export-mtls-keystore",
 			Description: "Generates Terraform configuration for Mutual TLS Edge Keystore certificate resources.",
 			Usage:       "export-mtls-keystore",
-			ArgsUsage:   "<certificate_id>",
-			Action: validatedAction(mtlskeystore.CmdCreateCertificate, requireValidWorkpath,
-				requireNArguments(1)),
+			ArgsUsage:   "<certificate_id> <group_id> <contract_id>",
+			Action:      validatedAction(mtlskeystore.CmdCreateCertificate, requireValidWorkpath, requiredAndOptionalArguments(1, 2)),
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:        "tfworkpath",

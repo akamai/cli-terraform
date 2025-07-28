@@ -48,6 +48,18 @@ func requireNArguments(n int) actionValidator {
 	}
 }
 
+func requiredAndOptionalArguments(required, optional int) actionValidator {
+	return func(ctx *cli.Context) error {
+		if ctx.NArg() != required && ctx.NArg() != optional+required {
+			if err := showHelpCommandWithErr(ctx, fmt.Sprintf("Invalid arguments usage, next arguments are required: %s", ctx.Command.ArgsUsage)); err != nil {
+				return err
+			}
+			osExiter(1)
+		}
+		return nil
+	}
+}
+
 func validateSplitDepth(ctx *cli.Context) error {
 	if ctx.IsSet("split-depth") && !ctx.IsSet("rules-as-hcl") {
 		return cli.Exit(color.RedString(`"split-depth" option must be used along with "rules-as-hcl"`), 1)

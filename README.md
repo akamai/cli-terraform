@@ -423,7 +423,7 @@ Export a Terraform configuration for your mTLS client certificate.
 ### Syntax
 
 ```shell
-akamai [global flags] terraform export-mtls-keystore [command flags] <certificate_id>
+akamai [global flags] terraform export-mtls-keystore [command flags] <certificate_id> [<group_id>  <contract_id>]
 ```
 
 ### Basic usage

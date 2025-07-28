@@ -1,7 +1,7 @@
 {{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/mtlskeystore.TFData*/ -}}
 terraform init
 {{ if eq .Certificate.Signer "AKAMAI" -}}
-terraform import akamai_mtlskeystore_client_certificate_akamai.{{.Certificate.ResourceName}} {{.Certificate.ID}}
+terraform import akamai_mtlskeystore_client_certificate_akamai.{{.Certificate.ResourceName}} {{.Certificate.ID}},{{.Certificate.GroupID}},{{.Certificate.ContractID}}
 {{- else -}}
-terraform import akamai_mtlskeystore_client_certificate_third_party.{{.Certificate.ResourceName}} {{.Certificate.ID}}
+terraform import akamai_mtlskeystore_client_certificate_third_party.{{.Certificate.ResourceName}} {{.Certificate.ID}},{{.Certificate.GroupID}},{{.Certificate.ContractID}}
 {{- end -}}
