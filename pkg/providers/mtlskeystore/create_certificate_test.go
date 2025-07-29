@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/mtlskeystore"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/ptr"
 	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -53,13 +53,13 @@ func akamaiCertificateMockData() certificateMockData {
 		versions: []mtlskeystore.ClientCertificateVersion{
 			{
 				Version:      2,
-				CreatedDate:  parseTime("2024-10-01T12:00:00Z"),
+				CreatedDate:  tools.ParseRFC3339("2024-10-01T12:00:00Z"),
 				VersionAlias: ptr.To("CURRENT"),
 				Status:       string(mtlskeystore.DeploymentPending),
 			},
 			{
 				Version:      1,
-				CreatedDate:  parseTime("2023-10-01T12:00:00Z"),
+				CreatedDate:  tools.ParseRFC3339("2023-10-01T12:00:00Z"),
 				VersionAlias: ptr.To("PREVIOUS"),
 				Status:       string(mtlskeystore.Deployed),
 			},
@@ -82,17 +82,17 @@ func thirdPartyCertificateMockData() certificateMockData {
 		versions: []mtlskeystore.ClientCertificateVersion{
 			{
 				Version:     3,
-				CreatedDate: parseTime("2025-10-01T12:00:00Z"),
+				CreatedDate: tools.ParseRFC3339("2025-10-01T12:00:00Z"),
 				Status:      string(mtlskeystore.AwaitingSigned),
 			},
 			{
 				Version:     2,
-				CreatedDate: parseTime("2024-10-01T12:00:00Z"),
+				CreatedDate: tools.ParseRFC3339("2024-10-01T12:00:00Z"),
 				Status:      string(mtlskeystore.Deployed),
 			},
 			{
 				Version:     1,
-				CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+				CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
 				Status:      string(mtlskeystore.Deployed),
 			},
 		},
@@ -122,7 +122,7 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.setVersions([]mtlskeystore.ClientCertificateVersion{
 					{
 						Version:     1,
-						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
 						Status:      string(mtlskeystore.Deployed),
 					},
 				})
@@ -136,12 +136,12 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.setVersions([]mtlskeystore.ClientCertificateVersion{
 					{
 						Version:     1,
-						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
 						Status:      string(mtlskeystore.DeletePending),
 					},
 					{
 						Version:     2,
-						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
 						Status:      string(mtlskeystore.Deployed),
 					},
 				})
@@ -162,7 +162,7 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.setVersions([]mtlskeystore.ClientCertificateVersion{
 					{
 						Version:     1,
-						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
 						Status:      string(mtlskeystore.Deployed),
 					},
 				})
@@ -176,29 +176,29 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.setVersions([]mtlskeystore.ClientCertificateVersion{
 					{
 						Version:      3,
-						CreatedDate:  parseTime("2025-10-01T13:00:00Z"),
+						CreatedDate:  tools.ParseRFC3339("2025-10-01T13:00:00Z"),
 						VersionAlias: ptr.To("CURRENT"),
 						Status:       string(mtlskeystore.Deployed),
 					},
 					{
 						Version:     3,
-						CreatedDate: parseTime("2025-10-01T12:00:00Z"),
+						CreatedDate: tools.ParseRFC3339("2025-10-01T12:00:00Z"),
 						Status:      string(mtlskeystore.Deployed),
 					},
 					{
 						Version:      2,
-						CreatedDate:  parseTime("2024-10-01T13:00:00Z"),
+						CreatedDate:  tools.ParseRFC3339("2024-10-01T13:00:00Z"),
 						VersionAlias: ptr.To("PREVIOUS"),
 						Status:       string(mtlskeystore.Deployed),
 					},
 					{
 						Version:     2,
-						CreatedDate: parseTime("2024-10-01T12:00:00Z"),
+						CreatedDate: tools.ParseRFC3339("2024-10-01T12:00:00Z"),
 						Status:      string(mtlskeystore.Deployed),
 					},
 					{
 						Version:     1,
-						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
 						Status:      string(mtlskeystore.Deployed),
 					},
 				})
@@ -221,7 +221,7 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.setVersions([]mtlskeystore.ClientCertificateVersion{
 					{
 						Version:     1,
-						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
 						Status:      string(mtlskeystore.DeletePending),
 					},
 				})
@@ -245,12 +245,12 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.setVersions([]mtlskeystore.ClientCertificateVersion{
 					{
 						Version:     1,
-						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
 						Status:      string(mtlskeystore.DeletePending),
 					},
 					{
 						Version:     2,
-						CreatedDate: parseTime("2023-10-01T12:00:00Z"),
+						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
 						Status:      string(mtlskeystore.DeletePending),
 					},
 				})
@@ -447,12 +447,4 @@ func TestExtractContractAndGroup(t *testing.T) {
 			}
 		})
 	}
-}
-
-func parseTime(s string) time.Time {
-	parsedTime, err := time.Parse(time.RFC3339, s)
-	if err != nil {
-		panic(err)
-	}
-	return parsedTime
 }
