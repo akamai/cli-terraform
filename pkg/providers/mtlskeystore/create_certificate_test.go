@@ -55,13 +55,13 @@ func akamaiCertificateMockData() certificateMockData {
 				Version:      2,
 				CreatedDate:  tools.ParseRFC3339("2024-10-01T12:00:00Z"),
 				VersionAlias: ptr.To("CURRENT"),
-				Status:       string(mtlskeystore.DeploymentPending),
+				Status:       string(mtlskeystore.CertificateVersionStatusDeploymentPending),
 			},
 			{
 				Version:      1,
 				CreatedDate:  tools.ParseRFC3339("2023-10-01T12:00:00Z"),
 				VersionAlias: ptr.To("PREVIOUS"),
-				Status:       string(mtlskeystore.Deployed),
+				Status:       string(mtlskeystore.CertificateVersionStatusDeployed),
 			},
 		},
 	}
@@ -83,17 +83,17 @@ func thirdPartyCertificateMockData() certificateMockData {
 			{
 				Version:     3,
 				CreatedDate: tools.ParseRFC3339("2025-10-01T12:00:00Z"),
-				Status:      string(mtlskeystore.AwaitingSigned),
+				Status:      string(mtlskeystore.CertificateVersionStatusAwaitingSigned),
 			},
 			{
 				Version:     2,
 				CreatedDate: tools.ParseRFC3339("2024-10-01T12:00:00Z"),
-				Status:      string(mtlskeystore.Deployed),
+				Status:      string(mtlskeystore.CertificateVersionStatusDeployed),
 			},
 			{
 				Version:     1,
 				CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
-				Status:      string(mtlskeystore.Deployed),
+				Status:      string(mtlskeystore.CertificateVersionStatusDeployed),
 			},
 		},
 	}
@@ -123,7 +123,7 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 					{
 						Version:     1,
 						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
-						Status:      string(mtlskeystore.Deployed),
+						Status:      string(mtlskeystore.CertificateVersionStatusDeployed),
 					},
 				})
 				d.mockAll(m)
@@ -137,12 +137,12 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 					{
 						Version:     1,
 						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
-						Status:      string(mtlskeystore.DeletePending),
+						Status:      string(mtlskeystore.CertificateVersionStatusDeletePending),
 					},
 					{
 						Version:     2,
 						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
-						Status:      string(mtlskeystore.Deployed),
+						Status:      string(mtlskeystore.CertificateVersionStatusDeployed),
 					},
 				})
 				d.mockAll(m)
@@ -163,7 +163,7 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 					{
 						Version:     1,
 						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
-						Status:      string(mtlskeystore.Deployed),
+						Status:      string(mtlskeystore.CertificateVersionStatusDeployed),
 					},
 				})
 				d.mockAll(m)
@@ -178,28 +178,28 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 						Version:      3,
 						CreatedDate:  tools.ParseRFC3339("2025-10-01T13:00:00Z"),
 						VersionAlias: ptr.To("CURRENT"),
-						Status:       string(mtlskeystore.Deployed),
+						Status:       string(mtlskeystore.CertificateVersionStatusDeployed),
 					},
 					{
 						Version:     3,
 						CreatedDate: tools.ParseRFC3339("2025-10-01T12:00:00Z"),
-						Status:      string(mtlskeystore.Deployed),
+						Status:      string(mtlskeystore.CertificateVersionStatusDeployed),
 					},
 					{
 						Version:      2,
 						CreatedDate:  tools.ParseRFC3339("2024-10-01T13:00:00Z"),
 						VersionAlias: ptr.To("PREVIOUS"),
-						Status:       string(mtlskeystore.Deployed),
+						Status:       string(mtlskeystore.CertificateVersionStatusDeployed),
 					},
 					{
 						Version:     2,
 						CreatedDate: tools.ParseRFC3339("2024-10-01T12:00:00Z"),
-						Status:      string(mtlskeystore.Deployed),
+						Status:      string(mtlskeystore.CertificateVersionStatusDeployed),
 					},
 					{
 						Version:     1,
 						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
-						Status:      string(mtlskeystore.Deployed),
+						Status:      string(mtlskeystore.CertificateVersionStatusDeployed),
 					},
 				})
 				d.mockGetClientCertificate(m, nil)
@@ -222,7 +222,7 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 					{
 						Version:     1,
 						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
-						Status:      string(mtlskeystore.DeletePending),
+						Status:      string(mtlskeystore.CertificateVersionStatusDeletePending),
 					},
 				})
 				d.mockAll(m)
@@ -246,12 +246,12 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 					{
 						Version:     1,
 						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
-						Status:      string(mtlskeystore.DeletePending),
+						Status:      string(mtlskeystore.CertificateVersionStatusDeletePending),
 					},
 					{
 						Version:     2,
 						CreatedDate: tools.ParseRFC3339("2023-10-01T12:00:00Z"),
-						Status:      string(mtlskeystore.DeletePending),
+						Status:      string(mtlskeystore.CertificateVersionStatusDeletePending),
 					},
 				})
 				d.mockAll(m)

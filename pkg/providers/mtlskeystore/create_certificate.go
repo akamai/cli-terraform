@@ -181,7 +181,7 @@ func populateTFData(param createCertificateParams, cert *mtlskeystore.GetClientC
 	if versions != nil {
 		for _, v := range versions.Versions {
 			// We only add the versions that have nil VersionAlias and status different then pending deletion.
-			if v.VersionAlias == nil && v.Status != string(mtlskeystore.DeletePending) {
+			if v.VersionAlias == nil && v.Status != string(mtlskeystore.CertificateVersionStatusDeletePending) {
 				tfVersions = append(tfVersions, TFClientCertificateVersion{
 					Version:     v.Version,
 					CreatedDate: strings.TrimSuffix(v.CreatedDate.Format(time.RFC3339), "Z"),
@@ -234,7 +234,7 @@ func populateTFData(param createCertificateParams, cert *mtlskeystore.GetClientC
 // checkAkamaiCertVersionsStatus returns an error if the Akamai certificate has no versions or all versions are pending deletion.
 func checkAkamaiCertVersionsStatus(versions *mtlskeystore.ListClientCertificateVersionsResponse) error {
 	for _, v := range versions.Versions {
-		if v.Status != string(mtlskeystore.DeletePending) {
+		if v.Status != string(mtlskeystore.CertificateVersionStatusDeletePending) {
 			return nil
 		}
 	}
