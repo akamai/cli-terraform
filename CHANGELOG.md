@@ -20,6 +20,9 @@
 
 
 
+* mTLS TrustStore:
+  * Added support for exporting the `akamai_mtlstruststore_ca_set` resource for a specified CA Set name and version.
+  For each network where the CA Set is active, the `akamai_mtlstruststore_ca_set_activation` resource will also be generated.
 ### BUG FIXES:
 
 

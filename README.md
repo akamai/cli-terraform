@@ -432,6 +432,36 @@ akamai [global flags] terraform export-mtls-keystore [command flags] <certificat
 akamai terraform export-mtls-keystore 12345
 ```
 
+## export-mtls-truststore
+
+Export a Terraform configuration for your Mutual TLS Edge Truststore CA set, along with
+associated activations if they exist.
+
+> **Note:**
+>
+> If the CA set you're exporting hasn't been activated on any networks, staging or production,
+> the `akamai_mtlstruststore_ca_set_activation` resource will still be included in your
+> configuration but commented out. This is to avoid accidental activation. To activate the CA set,
+> uncomment the `akamai_mtlstruststore_ca_set_activation` resource and run `terraform apply`.
+
+### Syntax
+
+```shell
+akamai [global flags] terraform export-mtls-truststore [command flags] <CA set name>
+```
+
+### Basic usage
+
+```shell
+akamai terraform export-mtls-truststore "my-ca-set-name"
+```
+
+### Command flags
+
+| Flag | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Example                                                                  |
+| ------- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| `--version` (string) | Exports your declarative CA set configuration with possible activations for a specific CA set version. If provided, must be a positive integer. <br /><br /> <blockquote><b>Note:</b> If you don't provide the <code>--version</code> flag, by default, it exports the <code>latest</code> CA set version whether it is active or not.</blockquote> <blockquote><b>Note:</b> Since the `akamai_mtlstruststore_ca_set` resource always represents the latest version of a CA set, generating configuration for an older version will result in a non-empty Terraform plan.</blockquote> | `akamai terraform export-mtls-truststore --version "1" "my-ca-set-name"` |
+
 ## export‑property
 
 Export a Terraform configuration for your property along with its JSON-formatted rules, but without the includes. Use the [`export-property-include`](#exportproperty-include) command to export your includes.

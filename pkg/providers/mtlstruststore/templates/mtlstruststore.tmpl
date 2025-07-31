@@ -1,0 +1,48 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/mtlstruststore.TFData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 8.1.0"
+    }
+  }
+  required_version = ">= 1.0"
+}
+
+provider "akamai" {
+  edgerc         = var.edgerc_path
+  config_section = var.config_section
+}
+
+resource "akamai_mtlstruststore_ca_set" "{{.CASet.ResourceName}}" {
+  name = "{{.CASet.Name}}"
+  {{- if .CASet.Description}}
+  description = "{{.CASet.Description}}"
+  {{- end}}
+  allow_insecure_sha1 = {{.CASet.AllowInsecureSHA1}}
+  {{- if .CASet.VersionDescription}}
+  version_description = "{{.CASet.VersionDescription}}"
+  {{- end}}
+  certificates = [
+  {{- $sz := len .CASet.Certificates | getLastIndex}}
+  {{- range $i, $cert := .CASet.Certificates}}
+    {
+      certificate_pem = <<EOT
+{{$cert.CertificatePEM}}
+EOT
+      {{- if $cert.Description}}
+      description = "{{$cert.Description}}"
+      {{- end}}
+    }{{- if ne $i $sz}},{{end -}}
+  {{- end}}
+  ]
+}
+
+{{- range .CASet.Networks}}
+
+{{if not .HasActivation}}#{{end}}resource "akamai_mtlstruststore_ca_set_activation" "{{$.CASet.ResourceName}}-{{.NetworkName}}" {
+{{if not .HasActivation}}#{{end}}  ca_set_id = akamai_mtlstruststore_ca_set.{{$.CASet.ResourceName}}.id
+{{if not .HasActivation}}#{{end}}  version   = var.activate_latest_on_{{.NetworkName}} ? akamai_mtlstruststore_ca_set.{{$.CASet.ResourceName}}.latest_version : akamai_mtlstruststore_ca_set.{{$.CASet.ResourceName}}.{{.NetworkName}}_version
+{{if not .HasActivation}}#{{end}}  network   = "{{.NetworkName | toUpper}}"
+{{if not .HasActivation}}#{{end}}}
+{{- end}}
