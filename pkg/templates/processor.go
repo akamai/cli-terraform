@@ -120,7 +120,12 @@ func templateExistInFS(fileName string, fs fs.FS) bool {
 func processTemplateToFile(tmpl *template.Template, templateName, targetPath string, data interface{}) error {
 	buf := bytes.Buffer{}
 
-	if err := tmpl.Lookup(templateName).Execute(&buf, data); err != nil {
+	t := tmpl.Lookup(templateName)
+	if t == nil {
+		return fmt.Errorf("%w: %s", ErrNoFile, templateName)
+	}
+
+	if err := t.Execute(&buf, data); err != nil {
 		return fmt.Errorf("%w: %s: %s", ErrTemplateExecution, templateName, err)
 	}
 	out := buf.Bytes()

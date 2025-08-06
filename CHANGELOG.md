@@ -1,5 +1,16 @@
 # RELEASE NOTES
 
+## 2.3.0 (Aug 6, 2025)
+
+### FEATURES/ENHANCEMENTS:
+
+* mTLS Keystore
+  * Added the `export-mtls-keystore <certificate_id> [<group_id>  <contract_id>]` command that generates the configuration for the
+  `akamai_mtlskeystore_client_certificate_akamai` and `akamai_mtlskeystore_client_certificate_third_party` resources.
+
+* PAPI
+  * Added support for the new rule formats `v2025-05-30` and `v2025-07-07`.
+
 ## 2.2.0 (May 28, 2025)
 
 ### FEATURES/ENHANCEMENTS:

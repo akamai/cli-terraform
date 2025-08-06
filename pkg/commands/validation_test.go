@@ -183,6 +183,108 @@ func TestRequireNArguments(t *testing.T) {
 	})
 }
 
+func TestRequireNOptionalArguments(t *testing.T) {
+	t.Run("require no arguments", func(t *testing.T) {
+		app := cli.NewApp()
+		flagset := flag.NewFlagSet("test", flag.PanicOnError)
+
+		ctx := cli.NewContext(app, flagset, nil)
+
+		validateNArgsFunc := requiredAndOptionalArguments(0, 0)
+
+		err := validateNArgsFunc(ctx)
+		assert.NoError(t, err)
+	})
+
+	t.Run("require 1 arguments + 2 optional", func(t *testing.T) {
+		app := cli.NewApp()
+		flagset := flag.NewFlagSet("test", flag.PanicOnError)
+		err := flagset.Parse([]string{"arg1", "arg2", "arg3"})
+		assert.NoError(t, err)
+
+		ctx := cli.NewContext(app, flagset, nil)
+
+		validateNArgsFunc := requiredAndOptionalArguments(1, 2)
+
+		err = validateNArgsFunc(ctx)
+		assert.NoError(t, err)
+	})
+
+	t.Run("require 3 arguments", func(t *testing.T) {
+		app := cli.NewApp()
+		flagset := flag.NewFlagSet("test", flag.PanicOnError)
+		err := flagset.Parse([]string{"arg1", "arg2", "arg3"})
+		assert.NoError(t, err)
+
+		ctx := cli.NewContext(app, flagset, nil)
+
+		validateNArgsFunc := requiredAndOptionalArguments(3, 0)
+
+		err = validateNArgsFunc(ctx)
+		assert.NoError(t, err)
+	})
+
+	t.Run("error not enough arguments", func(t *testing.T) {
+		app := cli.NewApp()
+		app.Writer = io.Discard
+		errBuffer := &bytes.Buffer{}
+		app.ErrWriter = errBuffer
+
+		flagSet := flag.NewFlagSet("test", flag.PanicOnError)
+		err := flagSet.Parse([]string{"arg1"}) // passing one argument
+		assert.NoError(t, err)
+
+		ctx := cli.NewContext(app, flagSet, nil)
+		ctx.Command.ArgsUsage = "<example usage>"
+
+		exitOsCalled := false
+		// patch osExiter
+		defer func(restore func(_ int)) {
+			osExiter = restore
+		}(osExiter)
+		osExiter = func(_ int) {
+			exitOsCalled = true
+		}
+
+		validateNArgsFunc := requiredAndOptionalArguments(3, 0) // expecting 3 arguments
+
+		err = validateNArgsFunc(ctx)
+		assert.NoError(t, err)
+		assert.True(t, exitOsCalled)
+		assert.Contains(t, errBuffer.String(), "Invalid arguments usage, next arguments are required: <example usage>")
+	})
+
+	t.Run("error not enough arguments", func(t *testing.T) {
+		app := cli.NewApp()
+		app.Writer = io.Discard
+		errBuffer := &bytes.Buffer{}
+		app.ErrWriter = errBuffer
+
+		flagSet := flag.NewFlagSet("test", flag.PanicOnError)
+		err := flagSet.Parse([]string{"arg1", "arg2"}) // passing two argument
+		assert.NoError(t, err)
+
+		ctx := cli.NewContext(app, flagSet, nil)
+		ctx.Command.ArgsUsage = "<arg1> <arg2> <arg3>"
+
+		exitOsCalled := false
+		// patch osExiter
+		defer func(restore func(_ int)) {
+			osExiter = restore
+		}(osExiter)
+		osExiter = func(_ int) {
+			exitOsCalled = true
+		}
+
+		validateNArgsFunc := requiredAndOptionalArguments(1, 2) // expecting 3 arguments
+
+		err = validateNArgsFunc(ctx)
+		assert.NoError(t, err)
+		assert.True(t, exitOsCalled)
+		assert.Contains(t, errBuffer.String(), "Invalid arguments usage, next arguments are required: <arg1> <arg2> <arg3>")
+	})
+}
+
 func TestShowHelpCommandWithErr(t *testing.T) {
 	cmdName := "create-command"
 

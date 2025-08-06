@@ -1,0 +1,2 @@
+terraform init
+terraform import akamai_mtlskeystore_client_certificate_third_party.test_third_party_cert 12345,98765,C-0NTR4CT

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/iam"
 	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v2/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -114,7 +114,7 @@ var (
 			ClientName:              "mw+2_1",
 			ClientType:              "CLIENT",
 			CreatedBy:               "someuser",
-			CreatedDate:             newTimeFromStringMust("2023-06-13T14:48:08.000Z"),
+			CreatedDate:             tools.ParseRFC3339("2023-06-13T14:48:08.000Z"),
 			GroupAccess: iam.GroupAccess{
 				CloneAuthorizedUserGroups: false,
 				Groups:                    singleGroup,
@@ -127,14 +127,14 @@ var (
 				{
 					Description: "Test API Client Credential 1",
 					Status:      "ACTIVE",
-					ExpiresOn:   newTimeFromStringMust("2025-06-13T14:48:08.000Z"),
-					CreatedOn:   newTimeFromStringMust("2023-06-13T14:48:08.000Z"),
+					ExpiresOn:   tools.ParseRFC3339("2025-06-13T14:48:08.000Z"),
+					CreatedOn:   tools.ParseRFC3339("2023-06-13T14:48:08.000Z"),
 				},
 				{
 					Description: "Test API Client Credential 2",
 					Status:      "ACTIVE",
-					ExpiresOn:   newTimeFromStringMust("2025-06-13T14:48:08.000Z"),
-					CreatedOn:   newTimeFromStringMust("2022-06-13T14:48:08.000Z"),
+					ExpiresOn:   tools.ParseRFC3339("2025-06-13T14:48:08.000Z"),
+					CreatedOn:   tools.ParseRFC3339("2022-06-13T14:48:08.000Z"),
 				},
 			},
 		}
@@ -156,7 +156,7 @@ var (
 		ClientName:              "mw+2_1",
 		ClientType:              "CLIENT",
 		CreatedBy:               "someuser",
-		CreatedDate:             newTimeFromStringMust("2023-06-13T14:48:08.000Z"),
+		CreatedDate:             tools.ParseRFC3339("2023-06-13T14:48:08.000Z"),
 		GroupAccess: iam.GroupAccess{
 			CloneAuthorizedUserGroups: false,
 			Groups:                    singleGroup,
@@ -1098,12 +1098,4 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 			}
 		})
 	}
-}
-
-func newTimeFromStringMust(s string) time.Time {
-	parsedTime, err := time.Parse(time.RFC3339Nano, s)
-	if err != nil {
-		panic(err)
-	}
-	return parsedTime
 }
