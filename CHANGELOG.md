@@ -1,5 +1,48 @@
 # RELEASE NOTES
 
+## X.XX.X (Month XX, XXXX)
+
+### FEATURES/ENHANCEMENTS:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### BUG FIXES:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### DEPRECATIONS:
+
+
+
+
+
+
+
+
+
+
 ## 2.3.0 (Aug 6, 2025)
 
 ### FEATURES/ENHANCEMENTS:
