@@ -8,6 +8,11 @@ terraform {
   required_version = ">= 1.0"
 }
 
+data "akamai_apidefinitions_api" "pet_store" {
+  id         = akamai_apidefinitions_api.pet_store.id
+  depends_on = [akamai_apidefinitions_api.pet_store, akamai_apidefinitions_resource_operations.pet_store]
+}
+
 data "akamai_apidefinitions_openapi" "pet_store_openapi" {
   file_path = "${path.module}/api.yml"
 }
@@ -23,7 +28,7 @@ output "api_id" {
 }
 
 output "api_latest_version" {
-  value = akamai_apidefinitions_api.pet_store.latest_version
+  value = data.akamai_apidefinitions_api.pet_store.latest_version
 }
 
 output "api_staging_version" {
