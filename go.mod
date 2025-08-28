@@ -3,14 +3,15 @@ module github.com/akamai/cli-terraform/v2
 go 1.23.6
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v11 v11.1.0
-    github.com/akamai/cli/v2 v2.0.1
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v12 v12.0.0
+	github.com/akamai/cli/v2 v2.0.2
 	github.com/fatih/color v1.18.0
 	github.com/hashicorp/hcl/v2 v2.23.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.19.3
+	github.com/wk8/go-ordered-map/v2 v2.1.8
 )
 
 require (
@@ -43,7 +44,6 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/cast v1.7.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zclconf/go-cty v1.15.1 // indirect
@@ -59,6 +59,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v11 => ../akamaiopen-edgegrid-golang
+//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v12 => ../akamaiopen-edgegrid-golang
 //replace github.com/akamai/cli/v2 => ../cli
 replace gopkg.in/yaml.v2 v2.2.2 => gopkg.in/yaml.v2 v2.4.0 // Fix security vulnerability

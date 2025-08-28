@@ -12,8 +12,8 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/imaging"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/ptr"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/imaging"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/ptr"
 	"github.com/akamai/cli-terraform/v2/pkg/templates"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"

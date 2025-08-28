@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/iam"
 	"github.com/akamai/cli-terraform/v2/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"

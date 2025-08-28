@@ -15,9 +15,9 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/hapi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/papi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/ptr"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/hapi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/ptr"
 	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v2/pkg/templates"
 	"github.com/akamai/cli-terraform/v2/pkg/tools"

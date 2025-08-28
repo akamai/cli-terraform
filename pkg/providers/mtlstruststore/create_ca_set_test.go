@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/mtlstruststore"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/ptr"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/mtlstruststore"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/ptr"
 	"github.com/akamai/cli-terraform/v2/pkg/templates"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"

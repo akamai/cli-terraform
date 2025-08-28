@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/gtm"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/gtm"
 	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v2/pkg/templates"
 	"github.com/akamai/cli-terraform/v2/pkg/tools"
