@@ -144,6 +144,7 @@ Global Flags:
 ## Core export commands
 
 <ul>
+  <li><a href="#export-apidefinitions">export-apidefinitions</a></li>
   <li><a href="#exportappsec">export-appsec</a></li>
   <li><a href="#exportclientlist">export-clientlist</a></li>
   <li><a href="#export-cloudaccess">export-cloudaccess</a></li>
@@ -155,7 +156,8 @@ Global Flags:
   <li><a href="#exportedgeworker">export-edgeworker</a></li>
   <li><a href="#exportiam">export-iam</a></li>
   <li><a href="#exportimaging">export-imaging</a></li>
-  <li><a href="#exportmtlskeystore">export-mtls-keystore</a></li>
+  <li><a href="#exportmtls-keystore">export-mtls-keystore</a></li>
+  <li><a href="#export-mtls-truststore">export-mtls-truststore</a></li>
   <li><a href="#exportproperty">export-property</a></li>
   <li><a href="#exportproperty-include">export-property-include</a></li>
   <li><a href="#exportzone">export-zone</a></li>
@@ -182,6 +184,30 @@ For details of command flags specific to individual export commands, see the inf
 |---|---|
 | <code>&#x2011;&#x2011;tfworkpath</code> (string) | Sets the path to a directory in which you want to store the files created when running the export commands. The default is your active directory. |
 | <code>&#x2011;&#x2011;help</code> (boolean) | Outputs a specific command's available options and descriptions. |
+
+
+## export-apidefinitions
+
+Export a Terraform configuration for your API definitions.
+
+### Syntax
+
+```shell
+akamai terraform [global flags] export-apidefinitions [flags] <api_id>
+```
+
+### Basic usage
+
+```shell
+akamai terraform export-apidefinitions 12345
+```
+
+### Command flags
+
+| Flag | Description | Example |
+| ------- | --------- | --------- |
+| `--version` (integer) | The API's version number. If not specified, it exports the API's `latest` version by default. | `akamai terraform export-apidefinitions --version 1 12345` |
+| `--format` (string) | The format of the API file, either `openapi` or `json`. Defaults to `openapi` if not specified. | `akamai terraform export-apidefinitions --format "openapi" 12345` |
 
 ## export‑appsec
 
@@ -460,7 +486,7 @@ akamai terraform export-mtls-truststore "my-ca-set-name"
 
 | Flag | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Example                                                                  |
 | ------- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
-| `--version` (string) | Exports your declarative CA set configuration with possible activations for a specific CA set version. If provided, must be a positive integer. <br /><br /> <blockquote><b>Note:</b> If you don't provide the <code>--version</code> flag, by default, it exports the <code>latest</code> CA set version whether it is active or not.</blockquote> <blockquote><b>Note:</b> Since the `akamai_mtlstruststore_ca_set` resource always represents the latest version of a CA set, generating configuration for an older version will result in a non-empty Terraform plan.</blockquote> | `akamai terraform export-mtls-truststore --version "1" "my-ca-set-name"` |
+| `--version` (string) | Exports your declarative CA set configuration with possible activations for a specific CA set version. If provided, must be a positive integer. <br /><br /> <blockquote><b>Notes:</b> <ul><li>If you don't provide the <code>--version</code> flag, by default, it exports the <code>latest</code> CA set version whether it is active or not.</li><li>Since the `akamai_mtlstruststore_ca_set` resource always represents the latest version of a CA set, generating configuration for an older version will result in a non-empty Terraform plan.</li></ul></blockquote> | `akamai terraform export-mtls-truststore --version "1" "my-ca-set-name"` |
 
 ## export‑property
 
@@ -556,19 +582,6 @@ akamai terraform export-zone --resources "my-dns-zone.com"
 | ------- | --------- | --------- |
 | `--segmentconfig` (boolean) | Generates a modularized configuration. | `akamai terraform export-zone --createconfig --segmentconfig "my-dns-zone.com"` |
 | `--configonly` (boolean) | Generates a zone configuration without JSON itemization. The configuration generated varies based on which set of flags you use. | `akamai terraform export-zone --createconfig --configonly "my-dns-zone.com"` |
-
-## API Definitions
-
-### Usage
-
-```shell
-   akamai terraform [global flags] export-apidefinitions [flags] <api_id>
-
-Flags:
-   --tfworkpath path         Directory used to store files created when running commands. (default: current directory)
-   --version value           API version to import (default: latest)
-   --format value            Format of the API file, either openapi or json (default: openapi)
-```
 
 ## General notes
 
