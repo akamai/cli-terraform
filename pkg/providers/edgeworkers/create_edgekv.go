@@ -10,7 +10,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v11/pkg/edgeworkers"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/edgeworkers"
 	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v2/pkg/templates"
 	"github.com/akamai/cli-terraform/v2/pkg/tools"
@@ -158,7 +158,7 @@ func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.Nam
 	return nil
 }
 
-func getEdgeKV(ctx context.Context, namespace string, network edgeworkers.NamespaceNetwork, client edgeworkers.Edgeworkers) (*edgeworkers.Namespace, error) {
+func getEdgeKV(ctx context.Context, namespace string, network edgeworkers.NamespaceNetwork, client edgeworkers.Edgeworkers) (*edgeworkers.GetNamespaceResponse, error) {
 	edgeKV, err := client.GetEdgeKVNamespace(ctx, edgeworkers.GetEdgeKVNamespaceRequest{
 		Network: network,
 		Name:    namespace,

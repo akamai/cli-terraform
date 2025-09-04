@@ -1,5 +1,19 @@
 # RELEASE NOTES
 
+## 2.4.0 (Sep 4, 2025)
+
+### FEATURES/ENHANCEMENTS:
+
+* API Definitions (Beta)
+  * Added the new `export-apidefinitions` command to create the API Definitions resources.
+  
+* AppSec
+  * Added support for Account Protection when exporting a security configuration.
+  
+* mTLS Truststore (Beta)
+  * Added support for exporting the `akamai_mtlstruststore_ca_set` resource for a specified CA set's name and version.
+  For each network where the CA set is active, the `akamai_mtlstruststore_ca_set_activation` resource will also be generated.
+
 ## 2.3.0 (Aug 6, 2025)
 
 ### FEATURES/ENHANCEMENTS:

@@ -2,6 +2,7 @@
 package commands
 
 import (
+	"github.com/akamai/cli-terraform/v2/pkg/providers/apidefinitions"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/appsec"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/clientlists"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/cloudaccess"
@@ -14,6 +15,7 @@ import (
 	"github.com/akamai/cli-terraform/v2/pkg/providers/iam"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/imaging"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/mtlskeystore"
+	"github.com/akamai/cli-terraform/v2/pkg/providers/mtlstruststore"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/papi"
 	"github.com/akamai/cli-terraform/v2/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/apphelp"
@@ -24,6 +26,31 @@ import (
 // CommandLocator creates and returns a list of subcommands.
 func CommandLocator() []*cli.Command {
 	return []*cli.Command{
+		{
+			Name:        "export-apidefinitions",
+			Description: "Generates Terraform configuration for API Definitions resources.",
+			Usage:       "export-apidefinitions",
+			ArgsUsage:   "<api_id>",
+			Action:      validatedAction(apidefinitions.CmdCreateAPIDefinition, requireValidWorkpath, requireNArguments(1)),
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:        "tfworkpath",
+					Usage:       "Directory used to store files created when running commands.",
+					DefaultText: "current directory",
+				},
+				&cli.Int64Flag{
+					Name:        "version",
+					Usage:       "API version to import.",
+					DefaultText: "latest",
+				},
+				&cli.StringFlag{
+					Name:        "format",
+					Usage:       "Format of the API file, either `openapi` or `json`.",
+					DefaultText: "openapi",
+				},
+			},
+			BashComplete: autocomplete.Default,
+		},
 		{
 			Name:        "export-appsec",
 			Description: "Generates Terraform configuration for Application Security resources.",
@@ -275,6 +302,28 @@ func CommandLocator() []*cli.Command {
 					Name:        "tfworkpath",
 					Usage:       "Directory used to store files created when running commands.",
 					DefaultText: "current directory",
+				},
+			},
+			BashComplete: autocomplete.Default,
+		},
+		{
+			Name: "export-mtls-truststore",
+			Description: "Generates Terraform configuration for Mutual TLS Edge Truststore CA set resource, " +
+				"along with associated activations if they exist.",
+			Usage:     "export-mtls-truststore",
+			ArgsUsage: "<CA set name>",
+			Action: validatedAction(mtlstruststore.CmdCreateCASet, requireValidWorkpath,
+				requireNArguments(1), validateVersion),
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:        "tfworkpath",
+					Usage:       "Directory used to store files created when running commands.",
+					DefaultText: "current directory",
+				},
+				&cli.IntFlag{
+					Name:        "version",
+					Usage:       "CA set version to import. If provided, must be a positive integer.",
+					DefaultText: "LATEST",
 				},
 			},
 			BashComplete: autocomplete.Default,

@@ -103,3 +103,13 @@ func showHelpCommandWithErr(c *cli.Context, stringErr string) error {
 	}
 	return cli.ShowCommandHelp(c, c.Command.Name)
 }
+
+func validateVersion(ctx *cli.Context) error {
+	if !ctx.IsSet("version") {
+		return nil
+	}
+	if ctx.Int64("version") <= 0 {
+		return cli.Exit(color.RedString("CA set version should be a positive integer"), 1)
+	}
+	return nil
+}

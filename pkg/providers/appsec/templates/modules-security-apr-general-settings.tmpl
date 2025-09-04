@@ -1,0 +1,14 @@
+{{ range .SecurityPolicies -}}
+{{ if .AccountProtection -}}
+{{ if .AccountProtection.GeneralSettings -}}
+{{ $policyName := escapeName .Name -}}
+resource "akamai_apr_general_settings" "{{ $policyName }}" {
+    config_id          = local.config_id
+    security_policy_id = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
+    general_settings = jsonencode(
+        {{ exportJSON .AccountProtection.GeneralSettings }}
+    )
+}
+{{ end -}}
+{{ end -}}
+{{ end -}}

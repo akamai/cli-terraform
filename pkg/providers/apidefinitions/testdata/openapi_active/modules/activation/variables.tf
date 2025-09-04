@@ -1,0 +1,26 @@
+variable "api_id" {
+  type = number
+}
+
+variable "api_version" {
+  type = number
+}
+
+variable "network" {
+  type = string
+}
+
+variable "notification_recipients" {
+  type    = list(string)
+  default = null
+}
+
+variable "notes" {
+  type    = string
+  default = null
+}
+
+variable "auto_acknowledge_warnings" {
+  type    = bool
+  default = false
+}

@@ -1,0 +1,55 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/apidefinitions.TFAPIWrapperData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 9.0.0"
+    }
+  }
+  required_version = ">= 1.0"
+}
+
+{{ if not .IsOperationsEmpty -}}
+data "akamai_apidefinitions_api" "{{.ResourceName}}" {
+  id = akamai_apidefinitions_api.{{.ResourceName}}.id
+  depends_on = [akamai_apidefinitions_api.{{.ResourceName}}, akamai_apidefinitions_resource_operations.{{.ResourceName}}]
+}
+{{- else }}
+data "akamai_apidefinitions_api" "{{.ResourceName}}" {
+  id = akamai_apidefinitions_api.{{.ResourceName}}.id
+  depends_on = [akamai_apidefinitions_api.{{.ResourceName}}]
+}
+{{- end }}
+
+data "akamai_apidefinitions_openapi" "{{.ResourceName}}_openapi" {
+  file_path = "${path.module}/api.yml"
+}
+
+resource "akamai_apidefinitions_api" "{{.ResourceName}}" {
+ api         = data.akamai_apidefinitions_openapi.{{.ResourceName}}_openapi.api
+ contract_id = var.contract_id
+ group_id    = var.group_id
+}
+
+output "api_id" {
+  value = akamai_apidefinitions_api.{{.ResourceName}}.id
+}
+
+output "api_latest_version" {
+  value = data.akamai_apidefinitions_api.{{.ResourceName}}.latest_version
+}
+
+output "api_staging_version" {
+  value = akamai_apidefinitions_api.{{.ResourceName}}.staging_version
+}
+
+output "api_production_version" {
+  value = akamai_apidefinitions_api.{{.ResourceName}}.production_version
+}
+
+{{ if not .IsOperationsEmpty -}}
+resource "akamai_apidefinitions_resource_operations" "{{.ResourceName}}" {
+  api_id              = akamai_apidefinitions_api.{{.ResourceName}}.id
+  resource_operations = file("${path.module}/operations-api.json")
+}
+{{- end }}
