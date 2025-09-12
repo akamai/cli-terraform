@@ -40,6 +40,17 @@
 
 
 
+* mTLS Truststore (Beta)
+  * Fixed an issue with the `akamai_mtlstruststore_ca_set` resource where multiline descriptions were incorrectly exported.
+
+
+
+
+
+
+
+
+
 
 
 
