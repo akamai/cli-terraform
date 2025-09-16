@@ -3919,6 +3919,7 @@
         {
             "botId": "50789280-ba99-4f8f-b4c6-ad9c1c69569a",
             "botName": "Bot A",
+            "categoryId": "dae597b8-b552-4c95-ab8b-066a3fef2f75",
             "primitiveKey": "primitiveValueA",
             "arrayKey": [
                 "arrayValueA1",
