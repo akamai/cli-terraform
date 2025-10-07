@@ -1,63 +1,19 @@
 # RELEASE NOTES
 
-## X.X.X (X X, X)
+## 2.5.0 (Oct 15, 2025)
 
 #### FEATURES/ENHANCEMENTS:
-
-
-
-
-
-
-
-
 
 * PAPI
     * Added support for the new rule format `v2025-09-09`.
 
-
-
-
-
-
-
+* AppSec
+  * Fixed the `catagoryId` dependency in `modules-security-bot-directory`.
 
 #### BUG FIXES:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 * mTLS Truststore (Beta)
   * Fixed an issue with the `akamai_mtlstruststore_ca_set` resource where multiline descriptions were incorrectly exported.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## 2.4.0 (Sep 4, 2025)
 
