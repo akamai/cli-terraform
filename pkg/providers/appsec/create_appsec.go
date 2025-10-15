@@ -138,12 +138,14 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"getWAFMode":                                 getWAFMode,
 		"isStructuredRule":                           isStructuredRule,
 		"exportJSONWithoutKeys":                      exportJSONWithoutKeys,
+		"exportJSONForCustomDefBotsWithoutKeys":      exportJSONForCustomDefBotsWithoutKeys,
 		"getCustomBotCategoryResourceNamesByIDs":     getCustomBotCategoryResourceNamesByIDs,
 		"getCustomBotCategoryNameByID":               getCustomBotCategoryNameByID,
 		"getCustomClientResourceNamesByIDs":          getCustomClientResourceNamesByIDs,
 		"getContentProtectionRuleResourceNamesByIDs": getContentProtectionRuleResourceNamesByIDs,
 		"getProtectedHostsByID":                      getProtectedHostsByID,
 		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
+		"buildCategoryMap":                           buildCategoryMap,
 	})
 
 	// The template processor
@@ -533,6 +535,55 @@ func exportJSONWithoutKeys(source map[string]interface{}, keys ...string) (strin
 	return string(js), nil
 }
 
+// exportJSONForCustomDefBotsWithoutKeys returns json string without specified keys and categoryId pointing to category resource category_id
+func exportJSONForCustomDefBotsWithoutKeys(source map[string]interface{}, categoryData map[string]string, keys ...string) (string, error) {
+	// deep copy source by converting to json
+	js, err := json.Marshal(source)
+	if err != nil {
+		return "", err
+	}
+	dest := make(map[string]interface{})
+	err = json.Unmarshal(js, &dest)
+	if err != nil {
+		return "", err
+	}
+	for _, key := range keys {
+		delete(dest, key)
+	}
+
+	// Change the value of the categoryId key
+	if _, exists := dest["categoryId"]; exists {
+		categoryName, _ := tools.EscapeName(categoryData[dest["categoryId"].(string)])
+		dest["categoryId"] = "${akamai_botman_custom_bot_category" + "." + categoryName + "_" + dest["categoryId"].(string) + "." + "category_id}"
+	}
+
+	js, err = json.MarshalIndent(dest, "", "    ")
+	if err != nil {
+		return "", err
+	}
+
+	return string(js), nil
+}
+
+func buildCategoryMap(source []map[string]interface{}) (map[string]string, error) {
+	categoryMap := make(map[string]string)
+
+	for _, category := range source {
+		categoryID, ok := category["categoryId"].(string)
+		if !ok {
+			return nil, errors.New("missing or invalid categoryId")
+		}
+
+		categoryName, ok := category["categoryName"].(string)
+		if !ok {
+			return nil, errors.New("missing or invalid categoryName")
+		}
+
+		categoryMap[categoryID] = categoryName
+	}
+
+	return categoryMap, nil
+}
 func getCustomBotCategoryNameByID(customBotCategories []map[string]interface{}, categoryID string) (string, error) {
 	for _, category := range customBotCategories {
 		if category["categoryId"].(string) == categoryID {

@@ -86,6 +86,26 @@ func TestProcessMtlsTruststoreTemplates(t *testing.T) {
 				d.mockAll(m)
 			},
 		},
+		"basic export generation with descriptions containing multilines": {
+			dir: "with_multiline",
+			init: func(d *caSetMockData, m *mtlstruststore.Mock) {
+				d.description = ptr.To("test CA set\ndescription")
+				d.versionDescription = ptr.To("test CA set\n\nversion description")
+				d.certificateDescriptions = []*string{ptr.To("test certificate\ndescription")}
+				d.noUserVersion()
+				d.mockAll(m)
+			},
+		},
+		"basic export generation with descriptions containing multilines - empty line at the end": {
+			dir: "with_multiline2",
+			init: func(d *caSetMockData, m *mtlstruststore.Mock) {
+				d.description = ptr.To("test CA set\ndescription\n")
+				d.versionDescription = ptr.To("test CA set\n\nversion description\n")
+				d.certificateDescriptions = []*string{ptr.To("test certificate\ndescription\n")}
+				d.noUserVersion()
+				d.mockAll(m)
+			},
+		},
 		"export two certificates": {
 			dir: "two_certificates",
 			init: func(d *caSetMockData, m *mtlstruststore.Mock) {

@@ -306,6 +306,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"getContentProtectionRuleResourceNamesByIDs": getContentProtectionRuleResourceNamesByIDs,
 		"getProtectedHostsByID":                      getProtectedHostsByID,
 		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
+		"exportJSONForCustomDefBotsWithoutKeys":      exportJSONForCustomDefBotsWithoutKeys,
+		"buildCategoryMap":                           buildCategoryMap,
 	})
 
 	// Template to path mappings
@@ -424,12 +426,14 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 		"isStructuredRule":                           isStructuredRule,
 		"exportJSON":                                 exportJSON,
 		"exportJSONWithoutKeys":                      exportJSONWithoutKeys,
+		"exportJSONForCustomDefBotsWithoutKeys":      exportJSONForCustomDefBotsWithoutKeys,
 		"getCustomBotCategoryNameByID":               getCustomBotCategoryNameByID,
 		"getCustomBotCategoryResourceNamesByIDs":     getCustomBotCategoryResourceNamesByIDs,
 		"getCustomClientResourceNamesByIDs":          getCustomClientResourceNamesByIDs,
 		"getContentProtectionRuleResourceNamesByIDs": getContentProtectionRuleResourceNamesByIDs,
 		"getProtectedHostsByID":                      getProtectedHostsByID,
 		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
+		"buildCategoryMap":                           buildCategoryMap,
 	})
 
 	// Template to path mappings

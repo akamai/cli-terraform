@@ -17,11 +17,11 @@ provider "akamai" {
 resource "akamai_mtlstruststore_ca_set" "{{.CASet.ResourceName}}" {
   name = "{{.CASet.Name}}"
   {{- if .CASet.Description}}
-  description = "{{.CASet.Description}}"
+  description = {{template "Text" .CASet.Description}}
   {{- end}}
   allow_insecure_sha1 = {{.CASet.AllowInsecureSHA1}}
   {{- if .CASet.VersionDescription}}
-  version_description = "{{.CASet.VersionDescription}}"
+  version_description = {{template "Text" .CASet.VersionDescription}}
   {{- end}}
   certificates = [
   {{- $sz := len .CASet.Certificates | getLastIndex}}
@@ -31,7 +31,7 @@ resource "akamai_mtlstruststore_ca_set" "{{.CASet.ResourceName}}" {
 {{$cert.CertificatePEM}}
 EOT
       {{- if $cert.Description}}
-      description = "{{$cert.Description}}"
+      description = {{template "Text" $cert.Description}}
       {{- end}}
     }{{- if ne $i $sz}},{{end -}}
   {{- end}}

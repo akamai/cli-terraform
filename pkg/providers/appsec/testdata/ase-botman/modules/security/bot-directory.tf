@@ -58,6 +58,7 @@ resource "akamai_botman_custom_defined_bot" "bot_a_50789280-ba99-4f8f-b4c6-ad9c1
         "arrayValueA2"
       ],
       "botName" : "Bot A",
+      "categoryId" : "${akamai_botman_custom_bot_category.category_a_dae597b8-b552-4c95-ab8b-066a3fef2f75.category_id}",
       "objectKey" : {
         "innerKey" : "innerValueA"
       },
