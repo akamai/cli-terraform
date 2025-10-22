@@ -30,9 +30,9 @@ resource "akamai_clientlist_list" "list_{{.ClientList.ListID}}" {
 
       content {
         value           = items.value.value
-        description     = items.value.description
-        tags            = items.value.tags
-        expiration_date = items.value.expirationDate
+        description     = try(items.value.description, "")
+        tags            = try(items.value.tags, [])
+        expiration_date = try(items.value.expirationDate, "")
       }
     }
   {{- end}}
