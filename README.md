@@ -152,6 +152,7 @@ Global Flags:
   <li><a href="#exportcloudwrapper">export-cloudwrapper</a></li>
   <li><a href="#exportcps">export-cps</a></li>
   <li><a href="#exportdomain">export-domain</a></li>
+  <li><a href="#exportdomainownership">export-domainownership</a></li>
   <li><a href="#exportedgekv">export-edgekv</a></li>
   <li><a href="#exportedgeworker">export-edgeworker</a></li>
   <li><a href="#exportiam">export-iam</a></li>
@@ -344,6 +345,29 @@ akamai [global flags] terraform export-domain [command flags] <domain>
 
 ```shell
 akamai terraform export-domain "my-domain"
+```
+
+## export‑domainownership
+
+Export a Terraform configuration for your domain ownership.
+
+> **Notes:**
+> - Each domain with a validation scope must exist as an `FQDN` for the export to succeed.
+> - If a domain doesn't have a validation scope, it should match only one type: `HOST`, `DOMAIN`, or `WILDCARD`.
+> - Domains with a domain status other than `VALIDATED` are exported as commented out for the `akamai_property_domainownership_validation` resource.
+> - You can export up to 1000 domains at once.
+> - The names of the exported Terraform resources are taken from the first domain in the list. If that domain contains invalid characters, these characters are replaced with underscores in the resources’ names.
+
+### Syntax
+
+```shell
+akamai [global flags] terraform export-domainownership [command flags] <domain_name>[:validation_scope][,<domain_name>[:validation_scope]...]
+```
+
+### Basic usage
+
+```shell
+akamai terraform export-domainownership "my-domain:HOST,another-domain"
 ```
 
 ## export‑edgekv

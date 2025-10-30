@@ -8,9 +8,14 @@
 
 
 
-
 * PAPI
-  * Added support for the new rule format `v2025-10-16`.
+    * Added support for the new rule format `v2025-10-16`.
+
+
+* PAPI Domain Ownership Validation (Beta)
+    * Added support for exporting the `akamai_property_domainownership_validation` and `akamai_property_domainownership_domains` resources 
+        for a specified domains and optionally validation scopes using `export-domainownership` command.
+      If domain is not validated, it is exported as commented out in `akamai_property_domainownership_validation` resource.
 
 
 
