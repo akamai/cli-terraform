@@ -148,6 +148,7 @@ Global Flags:
   <li><a href="#exportappsec">export-appsec</a></li>
   <li><a href="#exportclientlist">export-clientlist</a></li>
   <li><a href="#export-cloudaccess">export-cloudaccess</a></li>
+  <li><a href="#export-cloudcertificate">export-cloudcertificate</a></li>
   <li><a href="#exportcloudlets-policy">export-cloudlets-policy</a></li>
   <li><a href="#exportcloudwrapper">export-cloudwrapper</a></li>
   <li><a href="#exportcps">export-cps</a></li>
@@ -280,6 +281,27 @@ akamai terraform export-cloudaccess 98765
         </tr>
     </tbody>
 </table>
+
+## export-cloudcertificate
+
+Export a Terraform configuration for your cloud certificate.
+
+> **Note:**
+>
+> If the certificate is in the `READY_FOR_USE` or `ACTIVE` status, the `akamai_cloudcertificates_upload_signed_certificate` resource will also be included in your configuration. 
+> If the certificate is in the `CSR_READY` status, the `akamai_cloudcertificates_upload_signed_certificate` resource will be generated but commented out.
+
+### Syntax
+
+```shell
+akamai [global flags] terraform export-cloudcertificate [command flags] <cloud_certificate_name>
+```
+
+### Basic usage
+
+```shell
+akamai terraform export-cloudcertificate "my-cloudcertificate"
+```
 
 ## export‑cloudlets-policy
 

@@ -1,0 +1,3 @@
+terraform init
+terraform import akamai_cloudcertificates_certificate.test-name_example_com1234567890 12345
+#terraform import akamai_cloudcertificates_upload_signed_certificate.test-name_example_com1234567890 12345

@@ -6,6 +6,7 @@ import (
 	"github.com/akamai/cli-terraform/v2/pkg/providers/appsec"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/clientlists"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/cloudaccess"
+	"github.com/akamai/cli-terraform/v2/pkg/providers/cloudcertificates"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/cloudlets"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/cloudwrapper"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/cps"
@@ -101,6 +102,21 @@ func CommandLocator() []*cli.Command {
 				&cli.StringFlag{
 					Name:  "group_id",
 					Usage: "The unique identifier for the group (without the 'grp_' prefix) assigned to the access key.",
+				},
+			},
+			BashComplete: autocomplete.Default,
+		},
+		{
+			Name:        "export-cloudcertificate",
+			Description: "Generates Terraform configuration for CCM (Cloud Certificate Manager) resources.",
+			Usage:       "export-cloudcertificate",
+			ArgsUsage:   "<certificate_name>",
+			Action:      validatedAction(cloudcertificates.CmdCreateCloudCertificate, requireValidWorkpath, requireNArguments(1)),
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:        "tfworkpath",
+					Usage:       "Directory used to store files created when running commands.",
+					DefaultText: "current directory",
 				},
 			},
 			BashComplete: autocomplete.Default,
