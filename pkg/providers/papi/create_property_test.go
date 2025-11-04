@@ -297,6 +297,39 @@ func TestCreateProperty(t *testing.T) {
 		},
 	}
 
+	getPropertyVersionWithCCMHostnamesResponse := papi.GetPropertyVersionHostnamesResponse{
+		AccountID:       "test_account",
+		ContractID:      "test_contract",
+		GroupID:         "grp_12345",
+		PropertyID:      "prp_12345",
+		PropertyVersion: 5,
+		Etag:            "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
+		Hostnames: papi.HostnameResponseItems{
+			Items: []papi.Hostname{
+				{
+					CnameType:            "EDGE_HOSTNAME",
+					EdgeHostnameID:       "ehn_2867480",
+					CnameFrom:            "test.edgesuite.net",
+					CnameTo:              "test.edgesuite.net",
+					CertProvisioningType: "CPS_MANAGED",
+				},
+				{
+					CnameType:            "EDGE_HOSTNAME",
+					EdgeHostnameID:       "ehn_34343434",
+					CnameFrom:            "foo.com",
+					CnameTo:              "foo.com.edgekey.net",
+					CertProvisioningType: "CCM",
+					CCMCertificates: &papi.CCMCertificates{
+						RSACertID:     "2226",
+						RSACertLink:   "/ccm/v1/certificates/2226",
+						ECDSACertID:   "7890",
+						ECDSACertLink: "/ccm/v1/certificates/7890",
+					},
+				},
+			},
+		},
+	}
+
 	getPropertyVersionHostnamesEnhancementTLSResponse := papi.GetPropertyVersionHostnamesResponse{
 		AccountID:       "test_account",
 		ContractID:      "test_contract",
@@ -605,6 +638,55 @@ func TestCreateProperty(t *testing.T) {
 				"Dynamic_Content.json",
 			},
 		},
+		"basic property (with ccm hostname)": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, getPropertyResponse())
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionWithCCMHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				hostnames := map[string]Hostname{
+					"test.edgesuite.net": {
+						CnameFrom:                "test.edgesuite.net",
+						CnameTo:                  "test.edgesuite.net",
+						EdgeHostnameResourceName: "test-edgesuite-net",
+						CertProvisioningType:     "CPS_MANAGED",
+						IsActive:                 true,
+					},
+					"foo.com": {
+						CnameFrom:                "foo.com",
+						CnameTo:                  "foo.com.edgekey.net",
+						EdgeHostnameResourceName: "",
+						CertProvisioningType:     "CCM",
+						IsActive:                 true,
+						CCMCertificates: &CCMCertificates{
+							RSACertID:   "2226",
+							ECDSACertID: "7890",
+						},
+					},
+				}
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().
+					withHostnames(hostnames).build(), noFilters, nil)
+			},
+			dir:     "basic-ccm-hostnames",
+			jsonDir: "basic/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+		},
+
 		"basic property with edgehostname with non default ttl": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
@@ -2019,6 +2101,62 @@ func TestProcessPropertyTemplates(t *testing.T) {
 				Section: "test_section",
 			},
 			dir:          "basic",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
+		"property with CCM hostnames": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							CnameFrom:                "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
+						},
+						"foo.edgesuite.net": {
+							CnameFrom:                "foo.edgesuite.net",
+							CnameTo:                  "foo",
+							EdgeHostnameResourceName: "",
+							CertProvisioningType:     "CCM",
+							IsActive:                 true,
+							CCMCertificates: &CCMCertificates{
+								RSACertID:   "123456",
+								ECDSACertID: "343434",
+							},
+						},
+					},
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				Section: "test_section",
+			},
+			dir:          "basic-ccm-hostnames",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
 		"property with edgehostname with non default ttl": {

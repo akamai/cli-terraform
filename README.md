@@ -542,6 +542,7 @@ Export a Terraform configuration for your property along with its JSON-formatted
 >
 > - Certain export conditions require the use of a particular property rule format. Verify whether your rule format matches the use case requirement and [update your rule format](https://techdocs.akamai.com/terraform/docs/set-up-property-provisioning#update-rule-format) as needed.
 > - If the property you're exporting hasn't been activated on any networks, staging or production, the `akamai_property_activation` resource will still be included in your configuration but commented out. This is to avoid accidental activation. To activate the property, uncomment the `akamai_property_activation` resource and run `terraform apply`.
+> - The `akamai_edge_hostname` resource isn't generated for `CCM` related hostnames.
 
 ### Syntax
 

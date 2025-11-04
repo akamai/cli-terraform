@@ -24,6 +24,9 @@
 
 
 
+* PAPI
+  * Modified the `export-property` command to generate `CCM` specific information for hostnames in the `akamai_property` resource.
+    Additionally, for `CCM` related hostnames, the `akamai_edge_hostname` resource is not generated.
 
 
 
