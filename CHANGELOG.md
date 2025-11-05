@@ -9,7 +9,8 @@
 
 
 
-
+* PAPI
+  * Added support for the new rule format `v2025-10-16`.
 
 
 
