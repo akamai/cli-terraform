@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/ccm"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/cloudcertificates"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/ptr"
 	"github.com/akamai/cli-terraform/v2/pkg/templates"
 	"github.com/akamai/cli/v2/pkg/terminal"
@@ -26,7 +26,7 @@ type (
 		secureNetwork        string
 		sans                 []string
 		certificateStatus    string
-		subject              *ccm.Subject
+		subject              *cloudcertificates.Subject
 		signedCertificatePEM *string
 		trustChainPEM        *string
 	}
@@ -49,13 +49,13 @@ testtrustchaincertificate2
 	signedCertificatePEMWithDoubleNewline = signedCertificatePEMWithNewline + "\n"
 	trustChainPEMWithDoubleNewline        = trustChainPEMWithNewline + "\n"
 
-	emptySubject = ccm.Subject{}
+	emptySubject = cloudcertificates.Subject{}
 )
 
 func TestProcessCloudCertificateTemplates(t *testing.T) {
 	tests := map[string]struct {
 		dir                 string
-		init                func(*certificateMockData, *ccm.Mock)
+		init                func(*certificateMockData, *cloudcertificates.Mock)
 		mockData            certificateMockData
 		edgercPath          string
 		configSection       string
@@ -65,7 +65,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 		"certificate status is CSR_READY": {
 			dir:      "csr_ready",
 			mockData: getCertificateMockDataNoPEMs(),
-			init: func(d *certificateMockData, m *ccm.Mock) {
+			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
 			},
@@ -74,7 +74,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 			dir: "ready_for_use",
 			mockData: getCertificateMockData("READY_FOR_USE", "test-name.example.com1234567890",
 				&signedCertificatePEM, &trustChainPEM),
-			init: func(d *certificateMockData, m *ccm.Mock) {
+			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
 			},
@@ -82,7 +82,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 		"certificate status is READY_FOR_USE no trust_chain": {
 			dir:      "ready_for_use_no_trust_chain",
 			mockData: getCertificateMockDataNoTrustChain(),
-			init: func(d *certificateMockData, m *ccm.Mock) {
+			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
 			},
@@ -91,7 +91,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 			dir: "active",
 			mockData: getCertificateMockData("ACTIVE", "test-name.example.com1234567890",
 				&signedCertificatePEM, &trustChainPEM),
-			init: func(d *certificateMockData, m *ccm.Mock) {
+			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
 			},
@@ -100,35 +100,35 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 			dir: "active",
 			mockData: getCertificateMockData("ACTIVE", "test-name.example.com1234567890",
 				&signedCertificatePEM, &trustChainPEM),
-			init: func(d *certificateMockData, m *ccm.Mock) {
-				firstCertBatch := []ccm.Certificate{}
+			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
+				firstCertBatch := []cloudcertificates.Certificate{}
 				for i := range 100 {
-					firstCertBatch = append(firstCertBatch, ccm.Certificate{
+					firstCertBatch = append(firstCertBatch, cloudcertificates.Certificate{
 						CertificateID: fmt.Sprintf("cert-id-%d", i),
 					})
 				}
 				// Mock that the first page returns 100 certificates and a next link.
-				m.On("ListCertificates", mock.Anything, ccm.ListCertificatesRequest{
+				m.On("ListCertificates", mock.Anything, cloudcertificates.ListCertificatesRequest{
 					PageSize: maxPageSize,
 					Page:     1,
-				}).Return(&ccm.ListCertificatesResponse{
+				}).Return(&cloudcertificates.ListCertificatesResponse{
 					Certificates: firstCertBatch,
-					Links: ccm.Links{
+					Links: cloudcertificates.Links{
 						Next: ptr.To("next-page-link"),
 					},
 				}, nil).Once()
 				// Mock that the second page returns the target certificate.
-				m.On("ListCertificates", mock.Anything, ccm.ListCertificatesRequest{
+				m.On("ListCertificates", mock.Anything, cloudcertificates.ListCertificatesRequest{
 					PageSize: maxPageSize,
 					Page:     2,
-				}).Return(&ccm.ListCertificatesResponse{
-					Certificates: []ccm.Certificate{
+				}).Return(&cloudcertificates.ListCertificatesResponse{
+					Certificates: []cloudcertificates.Certificate{
 						{
 							CertificateID:     d.id,
 							ContractID:        d.contractID,
 							CertificateName:   d.name,
-							KeyType:           ccm.CryptographicAlgorithm(d.keyType),
-							KeySize:           ccm.KeySize(d.keySize),
+							KeyType:           cloudcertificates.CryptographicAlgorithm(d.keyType),
+							KeySize:           cloudcertificates.KeySize(d.keySize),
 							SecureNetwork:     d.secureNetwork,
 							SANs:              d.sans,
 							CertificateStatus: d.certificateStatus,
@@ -144,7 +144,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 			dir: "active_pems_end_in_newline",
 			mockData: getCertificateMockData("ACTIVE", "test-name.example.com1234567890",
 				&signedCertificatePEMWithNewline, &trustChainPEMWithNewline),
-			init: func(d *certificateMockData, m *ccm.Mock) {
+			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
 			},
@@ -153,7 +153,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 			dir: "active_pems_end_in_double_newline",
 			mockData: getCertificateMockData("ACTIVE", "test-name.example.com1234567890",
 				&signedCertificatePEMWithDoubleNewline, &trustChainPEMWithDoubleNewline),
-			init: func(d *certificateMockData, m *ccm.Mock) {
+			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
 			},
@@ -164,7 +164,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 			configSection: "custom-section",
 			mockData: getCertificateMockData("ACTIVE", "test-name.example.com1234567890",
 				&signedCertificatePEM, &trustChainPEM),
-			init: func(d *certificateMockData, m *ccm.Mock) {
+			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
 			},
@@ -173,7 +173,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 			dir: "name_begins_with_number",
 			mockData: getCertificateMockData("ACTIVE", "123test-name.example.com1234567890",
 				&signedCertificatePEM, &trustChainPEM),
-			init: func(d *certificateMockData, m *ccm.Mock) {
+			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
 			},
@@ -182,7 +182,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 			dir: "name_begins_with_dot",
 			mockData: getCertificateMockData("ACTIVE", ".test-name.example.com1234567890",
 				&signedCertificatePEM, &trustChainPEM),
-			init: func(d *certificateMockData, m *ccm.Mock) {
+			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
 			},
@@ -190,7 +190,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 		"empty certificate subject": {
 			dir:      "empty_subject",
 			mockData: getCertificateMockDataCustomSubject(&emptySubject),
-			init: func(d *certificateMockData, m *ccm.Mock) {
+			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
 			},
@@ -198,7 +198,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 		"nil certificate subject": {
 			dir:      "empty_subject",
 			mockData: getCertificateMockDataCustomSubject(nil),
-			init: func(d *certificateMockData, m *ccm.Mock) {
+			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
 			},
@@ -206,11 +206,11 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 		"API error": {
 			mockData: getCertificateMockData("ACTIVE", "test-name.example.com1234567890",
 				&signedCertificatePEM, &trustChainPEM),
-			init: func(_ *certificateMockData, m *ccm.Mock) {
-				m.On("ListCertificates", mock.Anything, ccm.ListCertificatesRequest{
+			init: func(_ *certificateMockData, m *cloudcertificates.Mock) {
+				m.On("ListCertificates", mock.Anything, cloudcertificates.ListCertificatesRequest{
 					PageSize: maxPageSize,
 					Page:     1,
-				}).Return(nil, ccm.ErrListCertificates).Once()
+				}).Return(nil, cloudcertificates.ErrListCertificates).Once()
 			},
 			withError: ErrListingCloudCertificates.Error(),
 		},
@@ -218,12 +218,12 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 			dir: "active",
 			mockData: getCertificateMockData("ACTIVE", "certificate_does_not_exist",
 				&signedCertificatePEM, &trustChainPEM),
-			init: func(_ *certificateMockData, m *ccm.Mock) {
-				m.On("ListCertificates", mock.Anything, ccm.ListCertificatesRequest{
+			init: func(_ *certificateMockData, m *cloudcertificates.Mock) {
+				m.On("ListCertificates", mock.Anything, cloudcertificates.ListCertificatesRequest{
 					PageSize: maxPageSize,
 					Page:     1,
-				}).Return(&ccm.ListCertificatesResponse{
-					Certificates: []ccm.Certificate{},
+				}).Return(&cloudcertificates.ListCertificatesResponse{
+					Certificates: []cloudcertificates.Certificate{},
 				}, nil).Once()
 			},
 			withError: "failed to fetch certificate: no certificate found with the name \"certificate_does_not_exist\"",
@@ -232,7 +232,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			m := &ccm.Mock{}
+			m := &cloudcertificates.Mock{}
 			test.init(&test.mockData, m)
 
 			if test.configSection == "" {
@@ -332,7 +332,7 @@ func getCertificateMockData(certStat, name string, signedCertificate, trustChain
 		secureNetwork:     "ENHANCED_TLS",
 		sans:              []string{"test.example.com", "test.example2.com"},
 		certificateStatus: certStat,
-		subject: &ccm.Subject{
+		subject: &cloudcertificates.Subject{
 			CommonName:   "test.example.com",
 			Country:      "US",
 			Organization: "Test Org",
@@ -344,18 +344,18 @@ func getCertificateMockData(certStat, name string, signedCertificate, trustChain
 	}
 }
 
-func (d *certificateMockData) mockListCertificates(m *ccm.Mock) {
-	m.On("ListCertificates", mock.Anything, ccm.ListCertificatesRequest{
+func (d *certificateMockData) mockListCertificates(m *cloudcertificates.Mock) {
+	m.On("ListCertificates", mock.Anything, cloudcertificates.ListCertificatesRequest{
 		PageSize: maxPageSize,
 		Page:     1,
-	}).Return(&ccm.ListCertificatesResponse{
-		Certificates: []ccm.Certificate{
+	}).Return(&cloudcertificates.ListCertificatesResponse{
+		Certificates: []cloudcertificates.Certificate{
 			{
 				CertificateID:     d.id,
 				ContractID:        d.contractID,
 				CertificateName:   d.name,
-				KeyType:           ccm.CryptographicAlgorithm(d.keyType),
-				KeySize:           ccm.KeySize(d.keySize),
+				KeyType:           cloudcertificates.CryptographicAlgorithm(d.keyType),
+				KeySize:           cloudcertificates.KeySize(d.keySize),
 				SecureNetwork:     d.secureNetwork,
 				SANs:              d.sans,
 				CertificateStatus: d.certificateStatus,
@@ -365,25 +365,27 @@ func (d *certificateMockData) mockListCertificates(m *ccm.Mock) {
 	}, nil).Once()
 }
 
-func (d *certificateMockData) mockGetCertificate(m *ccm.Mock) {
-	m.On("GetCertificate", mock.Anything, ccm.GetCertificateRequest{
+func (d *certificateMockData) mockGetCertificate(m *cloudcertificates.Mock) {
+	m.On("GetCertificate", mock.Anything, cloudcertificates.GetCertificateRequest{
 		CertificateID: d.id,
-	}).Return(&ccm.GetCertificateResponse{
-		CertificateID:        d.id,
-		ContractID:           d.contractID,
-		CertificateName:      d.name,
-		KeyType:              ccm.CryptographicAlgorithm(d.keyType),
-		KeySize:              ccm.KeySize(d.keySize),
-		SecureNetwork:        d.secureNetwork,
-		SANs:                 d.sans,
-		CertificateStatus:    d.certificateStatus,
-		Subject:              d.subject,
-		SignedCertificatePEM: d.signedCertificatePEM,
-		TrustChainPEM:        d.trustChainPEM,
+	}).Return(&cloudcertificates.GetCertificateResponse{
+		Certificate: cloudcertificates.Certificate{
+			CertificateID:        d.id,
+			ContractID:           d.contractID,
+			CertificateName:      d.name,
+			KeyType:              cloudcertificates.CryptographicAlgorithm(d.keyType),
+			KeySize:              cloudcertificates.KeySize(d.keySize),
+			SecureNetwork:        d.secureNetwork,
+			SANs:                 d.sans,
+			CertificateStatus:    d.certificateStatus,
+			Subject:              d.subject,
+			SignedCertificatePEM: d.signedCertificatePEM,
+			TrustChainPEM:        d.trustChainPEM,
+		},
 	}, nil).Once()
 }
 
-func getCertificateMockDataCustomSubject(subject *ccm.Subject) certificateMockData {
+func getCertificateMockDataCustomSubject(subject *cloudcertificates.Subject) certificateMockData {
 	cert := getCertificateMockData("ACTIVE", "test-name.example.com1234567890",
 		&signedCertificatePEM, &trustChainPEM)
 	cert.subject = subject

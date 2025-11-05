@@ -5,7 +5,7 @@
 #### FEATURES/ENHANCEMENTS:
 
 
-* CCM (Beta)
+* CloudCertificates (Beta)
   * Added the `export-cloudcertificate <certificate_name>` command that generates the configuration for the
     `akamai_cloudcertificates_certificate` and `akamai_cloudcertificates_upload_signed_certificate` resources.
 

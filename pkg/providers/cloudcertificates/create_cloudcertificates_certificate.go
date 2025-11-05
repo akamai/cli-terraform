@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/ccm"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/cloudcertificates"
 	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v2/pkg/templates"
 	"github.com/akamai/cli-terraform/v2/pkg/tools"
@@ -46,7 +46,7 @@ type (
 		SecureNetwork        string
 		SANs                 []string
 		CertificateStatus    string
-		Subject              *ccm.Subject
+		Subject              *cloudcertificates.Subject
 		SignedCertificatePEM *string
 		TrustChainPEM        *string
 		ResourceName         string
@@ -56,7 +56,7 @@ type (
 		name              string
 		edgercPath        string
 		configSection     string
-		client            ccm.CCM
+		client            cloudcertificates.CloudCertificates
 		templateProcessor templates.TemplateProcessor
 	}
 )
@@ -95,7 +95,7 @@ func CmdCreateCloudCertificate(c *cli.Context) error {
 		name:          name,
 		edgercPath:    edgegrid.GetEdgercPath(c),
 		configSection: edgegrid.GetEdgercSection(c),
-		client:        ccm.Client(edgegrid.GetSession(c.Context)),
+		client:        cloudcertificates.Client(edgegrid.GetSession(c.Context)),
 		templateProcessor: templates.FSTemplateProcessor{
 			TemplatesFS: templateFiles,
 			TemplateTargets: map[string]string{
@@ -137,7 +137,7 @@ func createCloudCertificate(ctx context.Context, params createCloudCertificatePa
 		return fmt.Errorf("failed to fetch certificate: no certificate found with the name %q", params.name)
 	}
 
-	cert, err := params.client.GetCertificate(ctx, ccm.GetCertificateRequest{
+	cert, err := params.client.GetCertificate(ctx, cloudcertificates.GetCertificateRequest{
 		CertificateID: certID,
 	})
 	if err != nil {
@@ -146,7 +146,7 @@ func createCloudCertificate(ctx context.Context, params createCloudCertificatePa
 	term.Spinner().OK()
 
 	term.Spinner().Start("Extracting data")
-	tfData := populateTFData(params, cert)
+	tfData := populateTFData(params, cert.Certificate)
 	term.Spinner().OK()
 
 	term.Spinner().Start("Saving TF configurations")
@@ -160,9 +160,9 @@ func createCloudCertificate(ctx context.Context, params createCloudCertificatePa
 	return nil
 }
 
-func listAllCertificates(ctx context.Context, client ccm.CCM) (*ccm.ListCertificatesResponse, error) {
-	var allCertificates ccm.ListCertificatesResponse
-	request := ccm.ListCertificatesRequest{
+func listAllCertificates(ctx context.Context, client cloudcertificates.CloudCertificates) (*cloudcertificates.ListCertificatesResponse, error) {
+	var allCertificates cloudcertificates.ListCertificatesResponse
+	request := cloudcertificates.ListCertificatesRequest{
 		PageSize: maxPageSize,
 		Page:     1,
 	}
@@ -184,8 +184,8 @@ func listAllCertificates(ctx context.Context, client ccm.CCM) (*ccm.ListCertific
 	return &allCertificates, nil
 }
 
-func populateTFData(params createCloudCertificateParams, cert *ccm.GetCertificateResponse) TFData {
-	var subject *ccm.Subject
+func populateTFData(params createCloudCertificateParams, cert cloudcertificates.Certificate) TFData {
+	var subject *cloudcertificates.Subject
 	if cert.Subject != nil && !isEmptySubject(cert.Subject) {
 		subject = cert.Subject
 	}
@@ -235,7 +235,7 @@ func extractBaseName(name string) string {
 	return name
 }
 
-func isEmptySubject(subject *ccm.Subject) bool {
+func isEmptySubject(subject *cloudcertificates.Subject) bool {
 	return subject.CommonName == "" && subject.Organization == "" && subject.Country == "" &&
 		subject.State == "" && subject.Locality == ""
 }
