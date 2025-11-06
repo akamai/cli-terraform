@@ -24,6 +24,8 @@
 #### BUG FIXES:
 
 
+* AppSec
+  * Fixed export of the `akamai_appsec_ip_geo` resource for fields `asn_controls`, `geo_controls` and `ip_controls` which wasn't working correctly since Akamai Terraform 9.0.0.
 
 
 
