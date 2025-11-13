@@ -3425,6 +3425,7 @@
                 "block": "blockSpecificIPGeo",
                 "ipControls": {
                     "blockedIPNetworkLists": {
+                        "action": "deny",
                         "networkList": [
                             "118736_TFDEMOLISTATUL"
                         ]

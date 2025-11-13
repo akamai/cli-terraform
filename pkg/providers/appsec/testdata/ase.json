@@ -3519,6 +3519,7 @@
                 "block": "blockSpecificIPGeo",
                 "asnControls": {
                     "blockedIPNetworkLists": {
+                        "action": "deny",
                         "networkList": [
                             "119711_ASNLIST"
                         ]
@@ -3526,6 +3527,7 @@
                 },
                 "ipControls": {
                     "blockedIPNetworkLists": {
+                        "action": "deny",
                         "networkList": [
                             "118736_TFDEMOLISTATUL"
                         ]

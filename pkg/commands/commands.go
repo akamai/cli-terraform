@@ -6,10 +6,12 @@ import (
 	"github.com/akamai/cli-terraform/v2/pkg/providers/appsec"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/clientlists"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/cloudaccess"
+	"github.com/akamai/cli-terraform/v2/pkg/providers/cloudcertificates"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/cloudlets"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/cloudwrapper"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/cps"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/dns"
+	"github.com/akamai/cli-terraform/v2/pkg/providers/domainownership"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/edgeworkers"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/gtm"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/iam"
@@ -105,6 +107,21 @@ func CommandLocator() []*cli.Command {
 			BashComplete: autocomplete.Default,
 		},
 		{
+			Name:        "export-cloudcertificate",
+			Description: "Generates Terraform configuration for CCM (Cloud Certificate Manager) resources.",
+			Usage:       "export-cloudcertificate",
+			ArgsUsage:   "<certificate_name>",
+			Action:      validatedAction(cloudcertificates.CmdCreateCloudCertificate, requireValidWorkpath, requireNArguments(1)),
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:        "tfworkpath",
+					Usage:       "Directory used to store files created when running commands.",
+					DefaultText: "current directory",
+				},
+			},
+			BashComplete: autocomplete.Default,
+		},
+		{
 			Name:        "export-cloudlets-policy",
 			Description: "Generates Terraform configuration for Cloudlets Policy resources.",
 			Usage:       "export-cloudlets-policy",
@@ -155,6 +172,22 @@ func CommandLocator() []*cli.Command {
 			Usage:       "export-domain",
 			ArgsUsage:   "<domain>",
 			Action:      validatedAction(gtm.CmdCreateDomain, requireValidWorkpath, requireNArguments(1)),
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:        "tfworkpath",
+					Usage:       "Directory used to store files created when running commands.",
+					DefaultText: "current directory",
+				},
+			},
+			BashComplete: autocomplete.Default,
+		},
+		{
+			Name:        "export-domainownership",
+			Description: "Generates Terraform configuration for Property Domain Ownership domains and validation resources.",
+			Usage:       "export-domainownership",
+			ArgsUsage:   "<domain_name>[:<validation_scope>][,<domain_name>[:<validation_scope>]...]",
+			Action: validatedAction(domainownership.CmdCreateDomainOwnership, requireValidWorkpath,
+				requireNArguments(1)),
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:        "tfworkpath",

@@ -1,0 +1,81 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/cloudcertificates.TFData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 9.2.0"
+    }
+  }
+  required_version = ">= 1.0"
+}
+
+provider "akamai" {
+  edgerc         = var.edgerc_path
+  config_section = var.config_section
+}
+
+resource "akamai_cloudcertificates_certificate" "{{ .Certificate.ResourceName }}" {
+  base_name      = "{{.Certificate.BaseName}}"
+  contract_id    = "{{.Certificate.ContractID}}"
+  key_size       = "{{.Certificate.KeySize}}"
+  key_type       = "{{.Certificate.KeyType}}"
+  secure_network = "{{.Certificate.SecureNetwork}}"
+  sans = [{{range $index, $element := .Certificate.SANs}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+  {{- with .Certificate.Subject}}
+  subject = {
+  {{- if .CommonName}}
+    common_name  = "{{.CommonName}}"
+  {{- end}}
+  {{- if .Organization}}
+    organization = "{{.Organization}}"
+  {{- end}}
+  {{- if .Country}}
+    country      = "{{.Country}}"
+  {{- end}}
+  {{- if .State}}
+    state        = "{{.State}}"
+  {{- end}}
+  {{- if .Locality}}
+    locality     = "{{.Locality}}"
+  {{- end}}
+  }
+  {{- end}}
+}
+
+{{- /* Conditional logic for signed certificate upload depending on certificate status */}}
+
+{{- if eq .Certificate.CertificateStatus "CSR_READY"}}
+
+/*
+# Paste the PEM‑encoded signed certificate issued by your CA (exactly one certificate)
+# in the signed_certificate_pem attribute.
+# Keep the BEGIN CERTIFICATE/END CERTIFICATE lines; replace only the body.
+
+# For the trust_chain_pem attribute, you can specify one or more PEM‑encoded certificates.
+# Multiple trust chain certificates should each be enclosed in their own BEGIN CERTIFICATE/END CERTIFICATE block.
+# If a trust chain is not required, you can remove the trust_chain_pem attribute entirely.
+{{- end }}
+
+resource "akamai_cloudcertificates_upload_signed_certificate" "{{ .Certificate.ResourceName }}" {
+  certificate_id         = "{{.Certificate.ID}}"
+{{- if eq .Certificate.CertificateStatus "CSR_READY"}}
+  signed_certificate_pem = <<-EOT
+-----BEGIN CERTIFICATE-----
+Please place your signed certificate here
+-----END CERTIFICATE-----
+EOT
+  trust_chain_pem = <<-EOT
+-----BEGIN CERTIFICATE-----
+Please place your trust chain here (optional)
+-----END CERTIFICATE-----
+EOT
+{{- else }}
+  signed_certificate_pem = {{template "Text" .Certificate.SignedCertificatePEM}}
+{{- if .Certificate.TrustChainPEM}}
+  trust_chain_pem        = {{template "Text" .Certificate.TrustChainPEM}}
+{{- end}}
+{{- end}}
+}
+{{- if eq .Certificate.CertificateStatus "CSR_READY"}}
+*/
+{{- end}}

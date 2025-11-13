@@ -3,7 +3,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 9.1.0"
+      version = ">= 9.2.0"
     }
   }
   required_version = ">= 1.0"
@@ -75,12 +75,22 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
 {{- range .Property.Hostnames}}
   hostnames {
     cname_from = "{{.CnameFrom}}"
-    {{- if .IsActive}}
+    {{- if and .IsActive (not .CCMCertificates)}}
       cname_to = akamai_edge_hostname.{{.EdgeHostnameResourceName}}.edge_hostname
     {{- else}}
       cname_to = "{{.CnameTo}}"
     {{- end}}
     cert_provisioning_type = "{{.CertProvisioningType}}"
+    {{- with .CCMCertificates}}
+    ccm_certificates {
+      {{- if .RSACertID}}
+      rsa_cert_id = "{{.RSACertID}}"
+      {{- end}}
+      {{- if .ECDSACertID}}
+      ecdasa_cert_id = "{{.ECDSACertID}}"
+      {{- end}}
+    }
+    {{- end}}
   }
 {{- end}}
 {{- if .RulesAsHCL}}

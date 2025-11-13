@@ -1,5 +1,28 @@
 # RELEASE NOTES
 
+## 2.6.0 (Nov 13, 2025)
+
+#### FEATURES/ENHANCEMENTS:
+
+* Cloud Certificates (Beta)
+  * Added the `export-cloudcertificate` command that generates the configuration for the
+    `akamai_cloudcertificates_certificate` and `akamai_cloudcertificates_upload_signed_certificate` resources.
+
+* PAPI Domain Ownership Validation (Beta)
+    * Added support for exporting the `akamai_property_domainownership_validation` and `akamai_property_domainownership_domains` resources
+      for specified domains and optionally validation scopes using the `export-domainownership` command.
+      If a domain is not validated, it is exported as commented out in the `akamai_property_domainownership_validation` resource.
+
+* PAPI
+  * Modified the `export-property` command to generate `CCM` specific information for hostnames in the `akamai_property` resource.
+    Additionally, for `CCM` related hostnames, the `akamai_edge_hostname` resource is not generated.
+  * Added support for the new rule format `v2025-10-16`.
+
+#### BUG FIXES:
+
+* AppSec
+  * Fixed an export of the `akamai_appsec_ip_geo` resource for the `asn_controls`, `geo_controls`, and `ip_controls` fields, which wasn't working correctly since Akamai Terraform 9.0.0.
+
 ## 2.5.0 (Oct 15, 2025)
 
 #### FEATURES/ENHANCEMENTS:

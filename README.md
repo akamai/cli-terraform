@@ -148,10 +148,12 @@ Global Flags:
   <li><a href="#exportappsec">export-appsec</a></li>
   <li><a href="#exportclientlist">export-clientlist</a></li>
   <li><a href="#export-cloudaccess">export-cloudaccess</a></li>
+  <li><a href="#export-cloudcertificate">export-cloudcertificate</a></li>
   <li><a href="#exportcloudlets-policy">export-cloudlets-policy</a></li>
   <li><a href="#exportcloudwrapper">export-cloudwrapper</a></li>
   <li><a href="#exportcps">export-cps</a></li>
   <li><a href="#exportdomain">export-domain</a></li>
+  <li><a href="#exportdomainownership">export-domainownership</a></li>
   <li><a href="#exportedgekv">export-edgekv</a></li>
   <li><a href="#exportedgeworker">export-edgeworker</a></li>
   <li><a href="#exportiam">export-iam</a></li>
@@ -280,6 +282,27 @@ akamai terraform export-cloudaccess 98765
     </tbody>
 </table>
 
+## export-cloudcertificate
+
+Export a Terraform configuration for your cloud certificate.
+
+> **Note:**
+>
+> If the certificate is in the `READY_FOR_USE` or `ACTIVE` status, the `akamai_cloudcertificates_upload_signed_certificate` resource will also be included in your configuration. 
+> If the certificate is in the `CSR_READY` status, the `akamai_cloudcertificates_upload_signed_certificate` resource will be generated but commented out.
+
+### Syntax
+
+```shell
+akamai [global flags] terraform export-cloudcertificate [command flags] <cloud_certificate_name>
+```
+
+### Basic usage
+
+```shell
+akamai terraform export-cloudcertificate "my-cloudcertificate"
+```
+
 ## export‑cloudlets-policy
 
 Export a Terraform configuration for your cloudlet policy.
@@ -344,6 +367,29 @@ akamai [global flags] terraform export-domain [command flags] <domain>
 
 ```shell
 akamai terraform export-domain "my-domain"
+```
+
+## export‑domainownership
+
+Export a Terraform configuration for your domain ownership.
+
+> **Notes:**
+> - Each domain with a validation scope must exist as an `FQDN` for the export to succeed.
+> - If a domain doesn't have a validation scope, it should match only one type: `HOST`, `DOMAIN`, or `WILDCARD`.
+> - Domains with a domain status other than `VALIDATED` are exported as commented out for the `akamai_property_domainownership_validation` resource.
+> - You can export up to 1000 domains at once.
+> - The names of the exported Terraform resources are taken from the first domain in the list. If that domain contains invalid characters, these characters are replaced with underscores in the resources’ names.
+
+### Syntax
+
+```shell
+akamai [global flags] terraform export-domainownership [command flags] <domain_name>[:validation_scope][,<domain_name>[:validation_scope]...]
+```
+
+### Basic usage
+
+```shell
+akamai terraform export-domainownership "my-domain:HOST,another-domain"
 ```
 
 ## export‑edgekv
@@ -496,6 +542,7 @@ Export a Terraform configuration for your property along with its JSON-formatted
 >
 > - Certain export conditions require the use of a particular property rule format. Verify whether your rule format matches the use case requirement and [update your rule format](https://techdocs.akamai.com/terraform/docs/set-up-property-provisioning#update-rule-format) as needed.
 > - If the property you're exporting hasn't been activated on any networks, staging or production, the `akamai_property_activation` resource will still be included in your configuration but commented out. This is to avoid accidental activation. To activate the property, uncomment the `akamai_property_activation` resource and run `terraform apply`.
+> - The `akamai_edge_hostname` resource isn't generated for `CCM` related hostnames.
 
 ### Syntax
 

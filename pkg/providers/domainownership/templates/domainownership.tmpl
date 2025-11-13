@@ -1,0 +1,56 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/domainownership.TFData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 9.2.0"
+    }
+  }
+  required_version = ">= 1.0"
+}
+
+provider "akamai" {
+  edgerc         = var.edgerc_path
+  config_section = var.config_section
+}
+{{ $sz := len .Domains | getLastIndex}}
+resource "akamai_property_domainownership_domains" "{{.ResourceName}}" {
+  domains = [
+  {{- range $i, $domain := .Domains}}
+    {
+        domain_name      = "{{$domain.DomainName}}"
+        validation_scope = "{{$domain.ValidationScope}}"
+    }{{- if ne $i $sz}},{{end -}}
+  {{- end}}
+  ]
+}
+{{if .ImportKeyForValidation}}
+resource "akamai_property_domainownership_validation" "{{.ResourceName}}" {
+  domains = [
+  {{- range $i, $domain := .Domains}}
+    {{- if $domain.Validated}}
+    {
+      domain_name      = "{{$domain.DomainName}}"
+      validation_scope = "{{$domain.ValidationScope}}"
+    }{{- if ne $i $sz}},{{end -}}
+    {{- else}}
+    # {
+    #   domain_name      = "{{$domain.DomainName}}"
+    #   validation_scope = "{{$domain.ValidationScope}}"
+    # }{{- if ne $i $sz}},{{end -}}
+    {{- end}}
+  {{- end}}
+  ]
+}
+{{else}}
+# resource "akamai_property_domainownership_validation" "{{.ResourceName}}" {
+#   domains = [
+  {{- range $i, $domain := .Domains}}
+#     {
+#       domain_name      = "{{$domain.DomainName}}"
+#       validation_scope = "{{$domain.ValidationScope}}"
+#     }{{- if ne $i $sz}},{{end -}}
+  {{- end}}
+#   ]
+# }
+{{end}}

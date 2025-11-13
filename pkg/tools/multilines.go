@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"maps"
 	"strings"
 	"text/template"
 )
@@ -14,9 +15,7 @@ func DecorateWithMultilineHandlingFunctions(additionalFuncs map[string]any) temp
 		"RemoveLastNewline": RemoveLastNewline,
 		"GetEOT":            GetEOT,
 	}
-	for k, v := range additionalFuncs {
-		multiLineFuncs[k] = v
-	}
+	maps.Copy(multiLineFuncs, additionalFuncs)
 	return multiLineFuncs
 }
 

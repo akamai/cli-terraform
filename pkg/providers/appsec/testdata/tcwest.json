@@ -8600,6 +8600,7 @@
                 "block": "blockSpecificIPGeo",
                 "asnControls": {
                     "blockedIPNetworkLists": {
+                        "action": "deny_custom_123456",
                         "networkList": [
                             "119711_ASNLIST"
                         ]
@@ -8607,6 +8608,7 @@
                 },
                 "geoControls": {
                     "blockedIPNetworkLists": {
+                        "action": "deny",
                         "networkList": [
                             "32346_JTONGGEOTEST"
                         ]
@@ -8619,6 +8621,7 @@
                         ]
                     },
                     "blockedIPNetworkLists": {
+                        "action": "deny",
                         "networkList": [
                             "16360_AISHTEST"
                         ]
@@ -9551,7 +9554,15 @@
                 ]
             },
             "ipGeoFirewall": {
-                "block": "blockSpecificIPGeo"
+                "block": "blockAllTrafficExceptAllowedIPs",
+                "blockAllAction": "deny",
+                "ipControls": {
+                    "allowedIPNetworkLists": {
+                        "networkList": [
+                            "118736_TFDEMOLISTATUL"
+                        ]
+                    }
+                }
             },
             "slowPost": {
                 "action": "alert",
@@ -11123,6 +11134,7 @@
                 "block": "blockSpecificIPGeo",
                 "geoControls": {
                     "blockedIPNetworkLists": {
+                        "action": "deny",
                         "networkList": [
                             "113698_CUSTOMERGEOBLOCK"
                         ]
@@ -11135,6 +11147,7 @@
                         ]
                     },
                     "blockedIPNetworkLists": {
+                        "action": "deny",
                         "networkList": [
                             "19843_TESTLIST"
                         ]

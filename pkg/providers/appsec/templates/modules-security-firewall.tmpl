@@ -7,27 +7,45 @@ resource "akamai_appsec_ip_geo" "{{ $policyName }}" {
     security_policy_id         = akamai_appsec_ip_geo_protection.{{ $policyName}}.security_policy_id
     {{ if eq .IPGeoFirewall.Block "blockAllTrafficExceptAllowedIPs" -}}
     mode                       = "allow"
+    {{ if .IPGeoFirewall.BlockAllAction -}}
+    block_action               = "{{ .IPGeoFirewall.BlockAllAction }}"
+    {{ end -}}
     {{ else -}}
     mode                       = "block"
     {{ end -}}
     {{ if .IPGeoFirewall.ASNControls -}}
     {{ if .IPGeoFirewall.ASNControls.BlockedIPNetworkLists -}}
     {{ if .IPGeoFirewall.ASNControls.BlockedIPNetworkLists.NetworkList -}}
+    asn_controls {
+    {{ if .IPGeoFirewall.ASNControls.BlockedIPNetworkLists.Action -}}
+    action                     = "{{ .IPGeoFirewall.ASNControls.BlockedIPNetworkLists.Action }}"
+    {{ end -}}
     asn_network_lists          = [{{ toList .IPGeoFirewall.ASNControls.BlockedIPNetworkLists.NetworkList }}]
+    }
     {{ end -}}
     {{ end -}}
     {{ end -}}
     {{ if .IPGeoFirewall.GeoControls -}}
     {{ if .IPGeoFirewall.GeoControls.BlockedIPNetworkLists -}}
     {{ if .IPGeoFirewall.GeoControls.BlockedIPNetworkLists.NetworkList -}}
+    geo_controls {
+    {{ if .IPGeoFirewall.GeoControls.BlockedIPNetworkLists.Action -}}
+    action                     = "{{ .IPGeoFirewall.GeoControls.BlockedIPNetworkLists.Action }}"
+    {{ end -}}
     geo_network_lists          = [{{ toList .IPGeoFirewall.GeoControls.BlockedIPNetworkLists.NetworkList }}]
+    }
     {{ end -}}
     {{ end -}}
     {{ end -}}
     {{ if .IPGeoFirewall.IPControls -}}
     {{ if .IPGeoFirewall.IPControls.BlockedIPNetworkLists -}}
     {{ if .IPGeoFirewall.IPControls.BlockedIPNetworkLists.NetworkList -}}
+    ip_controls {
+    {{ if .IPGeoFirewall.IPControls.BlockedIPNetworkLists.Action -}}
+    action                     = "{{ .IPGeoFirewall.IPControls.BlockedIPNetworkLists.Action }}"
+    {{ end -}}
     ip_network_lists           = [{{ toList .IPGeoFirewall.IPControls.BlockedIPNetworkLists.NetworkList }}]
+    }
     {{ end -}}
     {{ end -}}
     {{ if .IPGeoFirewall.IPControls.AllowedIPNetworkLists -}}

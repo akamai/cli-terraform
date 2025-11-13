@@ -48,6 +48,13 @@ type Hostname struct {
 	EdgeHostnameResourceName string
 	CertProvisioningType     string
 	IsActive                 bool
+	CCMCertificates          *CCMCertificates
+}
+
+// CCMCertificates holds CCM certificate IDs.
+type CCMCertificates struct {
+	RSACertID   string
+	ECDSACertID string
 }
 
 // WrappedRules is a wrapper around Rule which simplifies flattening rule tree into list and adjust names of the datasources
@@ -831,9 +838,11 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 	for _, hostname := range hostnames.Items {
 		cnameTo := hostname.CnameTo
 		cnameFrom := hostname.CnameFrom
-		cnameToResource := formatResourceName(cnameTo)
-
-		if hostname.EdgeHostnameID != "" {
+		cnameToResource := ""
+		if hostname.CertProvisioningType != string(papi.CertTypeCCM) {
+			cnameToResource = formatResourceName(cnameTo)
+		}
+		if hostname.EdgeHostnameID != "" && hostname.CertProvisioningType != string(papi.CertTypeCCM) {
 			// Get slot details
 			edgeHostnameID, err := strconv.Atoi(strings.Replace(hostname.EdgeHostnameID, "ehn_", "", 1))
 			if err != nil {
@@ -898,12 +907,20 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 		if hostname.CertProvisioningType != "" {
 			certProvisioningType = hostname.CertProvisioningType
 		}
+		var ccmCertificates *CCMCertificates
+		if hostname.CertProvisioningType == string(papi.CertTypeCCM) && hostname.CCMCertificates != nil {
+			ccmCertificates = &CCMCertificates{
+				RSACertID:   hostname.CCMCertificates.RSACertID,
+				ECDSACertID: hostname.CCMCertificates.ECDSACertID,
+			}
+		}
 		hostnamesMap[cnameFrom] = Hostname{
 			CnameFrom:                cnameFrom,
 			CnameTo:                  cnameTo,
 			EdgeHostnameResourceName: cnameToResource,
 			CertProvisioningType:     certProvisioningType,
 			IsActive:                 len(hostname.EdgeHostnameID) > 0,
+			CCMCertificates:          ccmCertificates,
 		}
 	}
 
