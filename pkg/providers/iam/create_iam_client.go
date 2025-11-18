@@ -32,7 +32,7 @@ func CmdCreateIAMClient(c *cli.Context) error {
 
 	err := tools.CheckFiles(clientPath, variablesPath, importPath)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	templateToFile := map[string]string{

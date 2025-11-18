@@ -4,6 +4,8 @@
 
 ### FEATURES/ENHANCEMENTS:
 
+* General
+    * Migrated to Go `1.24`.
 
 
 

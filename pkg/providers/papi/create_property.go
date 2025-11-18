@@ -291,7 +291,7 @@ func CmdCreateProperty(c *cli.Context) error {
 
 	err := tools.CheckFiles(propertyPath, variablesPath, importPath)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 	templateToFile := map[string]string{
 		"property.tmpl":  propertyPath,

@@ -23,7 +23,7 @@ func cmdList(c *cli.Context) error {
 
 			fmt.Printf(" (%s: ", aliases)
 			for i, alias := range command.Aliases {
-				fmt.Print(color.BoldString(alias))
+				fmt.Print(color.BoldString("%s", alias))
 				if i < len(command.Aliases)-1 {
 					fmt.Print(", ")
 				}

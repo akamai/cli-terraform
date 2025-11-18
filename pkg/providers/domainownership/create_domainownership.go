@@ -88,7 +88,7 @@ func CmdCreateDomainOwnership(c *cli.Context) error {
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
 	if err := tools.CheckFiles(domainownershipPath, variablesPath, importPath); err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	params := createDomainOwnershipParams{
@@ -226,11 +226,10 @@ func parseInputDomains(domainsIn string) ([]parsedDomain, error) {
 			domain := parts[0]
 			if _, ok := seenDomains[domain+":"]; ok {
 				return nil, fmt.Errorf("domain '%s' specified multiple times without validation scope", domain)
-			} else {
-				for _, scope := range validationScopes {
-					if _, ok := seenDomains[domain+":"+string(scope)]; ok {
-						return nil, fmt.Errorf("domain '%s' specified multiple times with and without validation scope", domain)
-					}
+			}
+			for _, scope := range validationScopes {
+				if _, ok := seenDomains[domain+":"+string(scope)]; ok {
+					return nil, fmt.Errorf("domain '%s' specified multiple times with and without validation scope", domain)
 				}
 			}
 			seenDomains[domain+":"] = struct{}{}

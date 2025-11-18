@@ -63,7 +63,7 @@ func CmdCreateCPS(c *cli.Context) error {
 
 	err := tools.CheckFiles(enrollmentPath, variablesPath, importPath)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	templateToFile := map[string]string{
@@ -79,7 +79,7 @@ func CmdCreateCPS(c *cli.Context) error {
 
 	enrollmentID, err := strconv.Atoi(c.Args().Get(0))
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 	contractID := c.Args().Get(1)
 	section := edgegrid.GetEdgercSection(c)

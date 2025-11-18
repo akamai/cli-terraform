@@ -113,7 +113,7 @@ func CmdCreatePolicy(c *cli.Context) error {
 
 	err := tools.CheckFiles(policyPath, matchRulesPath, loadBalancerPath, variablesPath, importPath)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 	templateToFile := map[string]string{
 		"policy.tmpl":        policyPath,

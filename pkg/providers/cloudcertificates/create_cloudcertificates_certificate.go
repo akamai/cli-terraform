@@ -86,7 +86,7 @@ func CmdCreateCloudCertificate(c *cli.Context) error {
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
 	if err := tools.CheckFiles(cloudCertificatePath, variablesPath, importPath); err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	name := c.Args().Get(0)

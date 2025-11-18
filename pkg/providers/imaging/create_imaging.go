@@ -85,7 +85,7 @@ func CmdCreateImaging(c *cli.Context) error {
 
 	err := tools.CheckFiles(imagingPath, variablesPath, importPath)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	jsonDir := "."
@@ -96,7 +96,7 @@ func CmdCreateImaging(c *cli.Context) error {
 		jsonDirPath := path.Join(tfWorkPath, jsonDir)
 		err = ensureDirExists(jsonDirPath)
 		if err != nil {
-			return cli.Exit(color.RedString(err.Error()), 1)
+			return cli.Exit(color.RedString("%s", err.Error()), 1)
 		}
 	}
 

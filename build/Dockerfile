@@ -1,5 +1,5 @@
 # This script was copied from 'terraform-provider-akamai'
-FROM golang:1.23.6-alpine3.21
+FROM golang:1.24.10-alpine3.22
 ENV PROVIDER_VERSION="1.0.0" \
     GO111MODULE="on" \
     CGO_ENABLED=0 \

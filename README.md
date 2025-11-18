@@ -8,7 +8,7 @@
 
 This library provides a command-line interface to export Akamai configuration assets that you can import later into your Terraform state.
 
-Requires Go 1.23 or later.
+Requires Go 1.24 or later.
 
 ## Install
 

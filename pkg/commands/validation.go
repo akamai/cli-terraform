@@ -97,7 +97,7 @@ func getSubcommandsNames(ctx *cli.Context) []string {
 }
 
 func showHelpCommandWithErr(c *cli.Context, stringErr string) error {
-	_, err := fmt.Fprintf(c.App.ErrWriter, "%s\n\n", color.RedString(stringErr))
+	_, err := fmt.Fprintf(c.App.ErrWriter, "%s\n\n", color.RedString("%s", stringErr))
 	if err != nil {
 		return err
 	}

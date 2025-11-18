@@ -115,7 +115,7 @@ func CmdCreateDomain(c *cli.Context) error {
 
 	err := tools.CheckFiles(datacentersPath, domainPath, importPath, mapsPath, propertiesPath, resourcesPath, variablesPath)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	processor := templates.FSTemplateProcessor{

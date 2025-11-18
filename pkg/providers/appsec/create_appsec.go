@@ -62,7 +62,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 	for _, path := range paths {
 		err := os.MkdirAll(path, 0755)
 		if err != nil {
-			return cli.Exit(color.RedString(err.Error()), 1)
+			return cli.Exit(color.RedString("%s", err.Error()), 1)
 		}
 	}
 
@@ -71,7 +71,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 
 	err := tools.CheckFiles(appsecPath)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	// Save our section for use later

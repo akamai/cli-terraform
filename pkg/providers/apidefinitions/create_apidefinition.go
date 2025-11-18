@@ -65,7 +65,7 @@ func CmdCreateAPIDefinition(c *cli.Context) error {
 
 	id, err := strconv.ParseInt(trimPrefixAPI(c.Args().Get(0)), 10, 64)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 	section := edgegrid.GetEdgercSection(c)
 

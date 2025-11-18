@@ -87,7 +87,7 @@ func CmdCreateCloudAccess(c *cli.Context) error {
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
 	if err := tools.CheckFiles(cloudAccessPath, variablesPath, importPath); err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	templateToFile := map[string]string{
@@ -104,7 +104,7 @@ func CmdCreateCloudAccess(c *cli.Context) error {
 
 	keyUID, err := strconv.ParseInt(c.Args().Get(0), 10, 64)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 	section := edgegrid.GetEdgercSection(c)
 
