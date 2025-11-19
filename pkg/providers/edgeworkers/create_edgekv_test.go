@@ -99,12 +99,13 @@ var (
 	}
 
 	expectProcessTemplates = func(p *templates.MockProcessor, network edgeworkers.NamespaceNetwork, name string, geoLocation string,
-		retention int, groupID *int, section string, items map[string]map[string]edgeworkers.Item, err error) *mock.Call {
+		retention int, groupID *int, edgercPath string, section string, items map[string]map[string]edgeworkers.Item, err error) *mock.Call {
 		tfData := TFEdgeKVData{
 			Name:        name,
 			Network:     network,
 			Retention:   retention,
 			GeoLocation: geoLocation,
+			EdgercPath:  edgercPath,
 			Section:     section,
 			GroupItems:  items,
 		}
@@ -137,20 +138,27 @@ var (
 )
 
 func TestCreateEdgeKV(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 
 	tests := map[string]struct {
-		init      func(*edgeworkers.Mock, *templates.MockProcessor)
-		withError error
+		edgercPath string
+		section    string
+		init       func(*edgeworkers.Mock, *templates.MockProcessor)
+		withError  error
 	}{
 		"fetch edgekv based on namespace and network": {
+			edgercPath: defaultEdgercPath,
+			section:    defaultSection,
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), nil).Once()
 				expectListGroupsWithinNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", []string{}, nil).Once()
-				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), section, emptyItems, nil).Once()
+				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), defaultEdgercPath, defaultSection, emptyItems, nil).Once()
 			},
 		},
 		"fetch edgekv based on namespace and network with group items": {
+			edgercPath: defaultEdgercPath,
+			section:    defaultSection,
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), nil).Once()
 				expectListGroupsWithinNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", []string{"group1", "group2"}, nil).Once()
@@ -160,29 +168,44 @@ func TestCreateEdgeKV(t *testing.T) {
 				expectGetItem(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "group1", "item1.2", "value1.2", nil).Once()
 				expectGetItem(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "group2", "item2.1", "value2.1", nil).Once()
 				expectGetItem(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "group2", "item2.2", "value\n2.2", nil).Once()
-				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), section, items, nil).Once()
+				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), defaultEdgercPath, defaultSection, items, nil).Once()
 			},
 		},
 		"fetch edgekv based on namespace and network with no group_id returned": {
+			edgercPath: defaultEdgercPath,
+			section:    defaultSection,
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), nil, nil).Once()
 				expectListGroupsWithinNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", []string{}, nil).Once()
-				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, nil, section, emptyItems, nil).Once()
+				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, nil, defaultEdgercPath, defaultSection, emptyItems, nil).Once()
 			},
 		},
 		"error fetching edgekv": {
+			edgercPath: defaultEdgercPath,
+			section:    defaultSection,
 			init: func(e *edgeworkers.Mock, _ *templates.MockProcessor) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), fmt.Errorf("error")).Once()
 			},
 			withError: ErrFetchingEdgeKV,
 		},
 		"error processing template": {
+			edgercPath: defaultEdgercPath,
+			section:    defaultSection,
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), nil).Once()
 				expectListGroupsWithinNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", []string{}, nil).Once()
-				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), section, emptyItems, fmt.Errorf("error")).Once()
+				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), defaultEdgercPath, defaultSection, emptyItems, fmt.Errorf("error")).Once()
 			},
 			withError: templates.ErrSavingFiles,
+		},
+		"non default edgerc path and section": {
+			edgercPath: "/non/default/path/to/edgerc",
+			section:    "non_default_section",
+			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
+				expectGetEdgeKVNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", intPtr(0), intPtr(123), nil).Once()
+				expectListGroupsWithinNamespace(e, edgeworkers.NamespaceStagingNetwork, "test_namespace", []string{}, nil).Once()
+				expectProcessTemplates(p, edgeworkers.NamespaceStagingNetwork, "test_namespace", "EU", 0, intPtr(123), "/non/default/path/to/edgerc", "non_default_section", emptyItems, nil).Once()
+			},
 		},
 	}
 
@@ -192,7 +215,7 @@ func TestCreateEdgeKV(t *testing.T) {
 			mp := new(templates.MockProcessor)
 			test.init(me, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createEdgeKV(ctx, "test_namespace", edgeworkers.NamespaceStagingNetwork, section, me, mp)
+			err := createEdgeKV(ctx, "test_namespace", edgeworkers.NamespaceStagingNetwork, test.edgercPath, test.section, me, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -205,6 +228,9 @@ func TestCreateEdgeKV(t *testing.T) {
 }
 
 func TestProcessEdgeKVTemplates(t *testing.T) {
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
+
 	tests := map[string]struct {
 		givenData    TFEdgeKVData
 		dir          string
@@ -217,7 +243,8 @@ func TestProcessEdgeKVTemplates(t *testing.T) {
 				GroupID:     123,
 				Retention:   0,
 				GeoLocation: "EU",
-				Section:     "test_section",
+				EdgercPath:  defaultEdgercPath,
+				Section:     defaultSection,
 			},
 			dir:          "edgekv_with_staging_network",
 			filesToCheck: []string{"edgekv.tf", "variables.tf", "import.sh"},
@@ -229,7 +256,8 @@ func TestProcessEdgeKVTemplates(t *testing.T) {
 				GroupID:     123,
 				Retention:   0,
 				GeoLocation: "EU",
-				Section:     "test_section",
+				EdgercPath:  defaultEdgercPath,
+				Section:     defaultSection,
 				GroupItems:  items,
 			},
 			dir:          "edgekv_with_staging_network_and_items",
@@ -241,7 +269,8 @@ func TestProcessEdgeKVTemplates(t *testing.T) {
 				Network:     edgeworkers.NamespaceStagingNetwork,
 				Retention:   0,
 				GeoLocation: "EU",
-				Section:     "test_section",
+				EdgercPath:  defaultEdgercPath,
+				Section:     defaultSection,
 			},
 			dir:          "edgekv_with_staging_network_no_group_id",
 			filesToCheck: []string{"edgekv.tf", "variables.tf", "import.sh"},
@@ -253,10 +282,24 @@ func TestProcessEdgeKVTemplates(t *testing.T) {
 				GroupID:     123,
 				Retention:   0,
 				GeoLocation: "EU",
-				Section:     "test_section",
+				EdgercPath:  defaultEdgercPath,
+				Section:     defaultSection,
 			},
 			dir:          "edgekv_with_production_network",
 			filesToCheck: []string{"edgekv.tf", "variables.tf", "import.sh"},
+		},
+		"non default edgerc path and section": {
+			givenData: TFEdgeKVData{
+				Name:        "test_namespace",
+				Network:     edgeworkers.NamespaceStagingNetwork,
+				GroupID:     123,
+				Retention:   0,
+				GeoLocation: "EU",
+				EdgercPath:  "/non/default/path/to/edgerc",
+				Section:     "non_default_section",
+			},
+			dir:          "edgekv_with_non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 

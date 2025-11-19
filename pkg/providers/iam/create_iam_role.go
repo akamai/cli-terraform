@@ -54,19 +54,20 @@ func CmdCreateIAMRole(c *cli.Context) error {
 		AdditionalFuncs: additionalFunctions,
 	}
 
+	edgercPath := edgegrid.GetEdgercPath(c)
 	section := edgegrid.GetEdgercSection(c)
 	roleID, err := strconv.ParseInt(c.Args().First(), 10, 64)
 	if err != nil {
 		return cli.Exit(color.RedString("Wrong format of role id %v must be a number: %s", roleID, err), 1)
 	}
 
-	if err = createIAMRoleByID(ctx, roleID, section, client, processor, roleOnly); err != nil {
+	if err = createIAMRoleByID(ctx, roleID, edgercPath, section, client, processor, roleOnly); err != nil {
 		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}
 	return nil
 }
 
-func createIAMRoleByID(ctx context.Context, roleID int64, section string, client iam.IAM, templateProcessor templates.TemplateProcessor, roleOnly bool) error {
+func createIAMRoleByID(ctx context.Context, roleID int64, edgercPath, section string, client iam.IAM, templateProcessor templates.TemplateProcessor, roleOnly bool) error {
 	term := terminal.Get(ctx)
 
 	message := "Exporting Identity and Access Management role configuration"
@@ -102,6 +103,7 @@ func createIAMRoleByID(ctx context.Context, roleID int64, section string, client
 		TFRoles: []TFRole{
 			tfRole,
 		},
+		EdgercPath: edgercPath,
 		Section:    section,
 		Subcommand: "role",
 	}

@@ -177,7 +177,159 @@ var (
 	}
 
 	domainData = TFDomainData{
+		EdgercPath:              "~/.edgerc",
 		Section:                 "test_section",
+		Name:                    "1test.name.akadns.net",
+		NormalizedName:          "_1test_name",
+		Type:                    "test",
+		Comment:                 "cli-terraform test domain",
+		EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+		DefaultTimeoutPenalty:   10,
+		LoadImbalancePercentage: 50,
+		DefaultErrorPenalty:     90,
+		CNameCoalescingEnabled:  true,
+		LoadFeedback:            true,
+		EndUserMappingEnabled:   true,
+		SignAndServe:            true,
+		SignAndServeAlgorithm:   "RSA-SHA1",
+		DefaultDatacenters: []TFDatacenterData{
+			{
+				Nickname: "DEFAULT",
+				ID:       5400,
+			},
+		},
+		Datacenters: []TFDatacenterData{
+			{
+				Nickname: "TEST1",
+				ID:       123,
+			},
+			{
+				Nickname: "TEST2",
+				ID:       124,
+			},
+		},
+		ASMaps: []gtm.ASMap{
+			{
+				Name: "test_asmap",
+				DefaultDatacenter: &gtm.DatacenterBase{
+					Nickname:     "default",
+					DatacenterID: 5004,
+				},
+			},
+		},
+		GeoMaps: []gtm.GeoMap{
+			{
+				Name: "test_geomap",
+				DefaultDatacenter: &gtm.DatacenterBase{
+					Nickname:     "default",
+					DatacenterID: 5004,
+				},
+			},
+		},
+		CIDRMaps: []gtm.CIDRMap{
+			{
+				Name: "test_cidrmap",
+				DefaultDatacenter: &gtm.DatacenterBase{
+					Nickname:     "default",
+					DatacenterID: 5004,
+				},
+			},
+		},
+		Resources: []gtm.Resource{
+			{
+				Name: "test resource1",
+			},
+			{
+				Name: "test resource2",
+			},
+		},
+		Properties: []gtm.Property{
+			{
+				Name:                 "test property1",
+				Type:                 "performance",
+				ScoreAggregationType: "worst",
+				DynamicTTL:           60,
+				HandoutLimit:         8,
+				HandoutMode:          "normal",
+				TrafficTargets: []gtm.TrafficTarget{
+					{
+						DatacenterID: 123,
+						Enabled:      true,
+						Weight:       1,
+						Servers:      []string{"1.2.3.4"},
+					},
+				},
+				LivenessTests: []gtm.LivenessTest{
+					{
+						Name:               "HTTP",
+						TestInterval:       60,
+						TestObject:         "/",
+						HTTPError3xx:       true,
+						HTTPError4xx:       true,
+						HTTPError5xx:       true,
+						TestObjectProtocol: "HTTP",
+						TestObjectPort:     80,
+						TestTimeout:        10,
+					},
+				},
+			},
+			{
+				Name:                 "test property2",
+				Type:                 "performance",
+				ScoreAggregationType: "worst",
+				DynamicTTL:           60,
+				HandoutLimit:         8,
+				HandoutMode:          "normal",
+				StaticRRSets: []gtm.StaticRRSet{
+					{
+						Type:  "test type",
+						Rdata: []string{"rdata1", "rdata2"},
+					},
+				},
+				TrafficTargets: []gtm.TrafficTarget{
+					{
+						DatacenterID: 123,
+						Enabled:      true,
+						Weight:       1,
+						Servers:      []string{"1.2.3.4"},
+					},
+					{
+						DatacenterID: 124,
+						Enabled:      true,
+						Weight:       1,
+						Servers:      []string{"7.6.5.4"},
+					},
+				},
+				LivenessTests: []gtm.LivenessTest{
+					{
+						Name:               "HTTP",
+						TestInterval:       60,
+						TestObject:         "/",
+						HTTPError3xx:       true,
+						HTTPError4xx:       true,
+						HTTPError5xx:       true,
+						TestObjectProtocol: "HTTP",
+						TestObjectPort:     80,
+						TestTimeout:        10,
+						HTTPHeaders: []gtm.HTTPHeader{
+							{
+								Name:  "header1",
+								Value: "header1Value",
+							},
+							{
+								Name:  "header2",
+								Value: "header2Value",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	domainDataWithNonDefaultEdgercPathAndSection = TFDomainData{
+		EdgercPath:              "/non/default/path/to/edgerc",
+		Section:                 "non_default_section",
 		Name:                    "1test.name.akadns.net",
 		NormalizedName:          "_1test_name",
 		Type:                    "test",
@@ -344,12 +496,13 @@ var (
 )
 
 func TestCreateDomain(t *testing.T) {
-	section := "test_section"
 	domainName := "test.name.net"
 
 	tests := map[string]struct {
-		init      func(*gtm.Mock, *templates.MockProcessor)
-		withError error
+		edgercPath string
+		section    string
+		init       func(*gtm.Mock, *templates.MockProcessor)
+		withError  error
 	}{
 		"fetch domain success": {
 			init: func(mg *gtm.Mock, mp *templates.MockProcessor) {
@@ -370,16 +523,30 @@ func TestCreateDomain(t *testing.T) {
 			},
 			withError: templates.ErrSavingFiles,
 		},
+		"non default edgerc path and section": {
+			edgercPath: "/non/default/path/to/edgerc",
+			section:    "non_default_section",
+			init: func(mg *gtm.Mock, mp *templates.MockProcessor) {
+				expectGetDomain(mg, gtm.GetDomainRequest{DomainName: domainName}, nil).Once()
+				expectGTMProcessTemplates(mp, domainDataWithNonDefaultEdgercPathAndSection, nil).Once()
+			},
+		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			if test.edgercPath == "" {
+				test.edgercPath = "~/.edgerc"
+			}
+			if test.section == "" {
+				test.section = "test_section"
+			}
 			mgtm := new(gtm.Mock)
 			mp := new(templates.MockProcessor)
 			test.init(mgtm, mp)
 
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createDomain(ctx, mgtm, domainName, section, mp)
+			err := createDomain(ctx, mgtm, domainName, test.edgercPath, test.section, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -393,6 +560,9 @@ func TestCreateDomain(t *testing.T) {
 }
 
 func TestProcessDomainTemplates(t *testing.T) {
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
+
 	tests := map[string]struct {
 		givenData    interface{}
 		dir          string
@@ -471,7 +641,8 @@ func TestProcessDomainTemplates(t *testing.T) {
 		},
 		"domain without other resources": {
 			givenData: TFDomainData{
-				Section:                 "default",
+				EdgercPath:              defaultEdgercPath,
+				Section:                 defaultSection,
 				Name:                    "test.name.akadns.net",
 				NormalizedName:          "test_name",
 				Type:                    "basic",
@@ -489,7 +660,8 @@ func TestProcessDomainTemplates(t *testing.T) {
 		},
 		"domain with sign_and_serve_algorithm": {
 			givenData: TFDomainData{
-				Section:                 "default",
+				EdgercPath:              defaultEdgercPath,
+				Section:                 defaultSection,
 				Name:                    "test.name.akadns.net",
 				NormalizedName:          "test_name",
 				Type:                    "basic",
@@ -509,7 +681,8 @@ func TestProcessDomainTemplates(t *testing.T) {
 		},
 		"simple domain with datacenters": {
 			givenData: TFDomainData{
-				Section:                 "test_section",
+				EdgercPath:              defaultEdgercPath,
+				Section:                 defaultSection,
 				Name:                    "test.name.akadns.net",
 				NormalizedName:          "test_name",
 				Type:                    "basic",
@@ -588,7 +761,8 @@ func TestProcessDomainTemplates(t *testing.T) {
 		},
 		"simple domain with maps": {
 			givenData: TFDomainData{
-				Section:                 "test_section",
+				EdgercPath:              defaultEdgercPath,
+				Section:                 defaultSection,
 				Name:                    "test.name.akadns.net",
 				NormalizedName:          "test_name",
 				Type:                    "basic",
@@ -681,7 +855,8 @@ func TestProcessDomainTemplates(t *testing.T) {
 		},
 		"simple domain with resources": {
 			givenData: TFDomainData{
-				Section:                 "test_section",
+				EdgercPath:              defaultEdgercPath,
+				Section:                 defaultSection,
 				Name:                    "test.name.akadns.net",
 				NormalizedName:          "test_name",
 				Type:                    "basic",
@@ -759,7 +934,8 @@ func TestProcessDomainTemplates(t *testing.T) {
 		},
 		"simple domain with properties": {
 			givenData: TFDomainData{
-				Section:                 "test_section",
+				EdgercPath:              defaultEdgercPath,
+				Section:                 defaultSection,
 				Name:                    "test.name.akadns.net",
 				NormalizedName:          "test_name",
 				Type:                    "basic",
@@ -916,7 +1092,8 @@ func TestProcessDomainTemplates(t *testing.T) {
 		},
 		"simple domain with ranked_failover properties": {
 			givenData: TFDomainData{
-				Section:                 "test_section",
+				EdgercPath:              defaultEdgercPath,
+				Section:                 defaultSection,
 				Name:                    "test.name.akadns.net",
 				NormalizedName:          "test_name",
 				Type:                    "basic",
@@ -1070,7 +1247,8 @@ func TestProcessDomainTemplates(t *testing.T) {
 		},
 		"simple domain with property of type 'qtr'": {
 			givenData: TFDomainData{
-				Section:                 "test_section",
+				EdgercPath:              defaultEdgercPath,
+				Section:                 defaultSection,
 				Name:                    "test.name.akadns.net",
 				NormalizedName:          "test_name",
 				Type:                    "basic",
@@ -1179,7 +1357,8 @@ func TestProcessDomainTemplates(t *testing.T) {
 		},
 		"simple domain with resources and properties with multilines": {
 			givenData: TFDomainData{
-				Section:                 "test_section",
+				EdgercPath:              defaultEdgercPath,
+				Section:                 defaultSection,
 				Name:                    "test.name.akadns.net",
 				NormalizedName:          "test_name",
 				Type:                    "basic",
@@ -1286,7 +1465,8 @@ func TestProcessDomainTemplates(t *testing.T) {
 		},
 		"simple domain with resources and properties with multilines - empty line at the end": {
 			givenData: TFDomainData{
-				Section:                 "test_section",
+				EdgercPath:              defaultEdgercPath,
+				Section:                 defaultSection,
 				Name:                    "test.name.akadns.net",
 				NormalizedName:          "test_name",
 				Type:                    "basic",
@@ -1390,6 +1570,25 @@ func TestProcessDomainTemplates(t *testing.T) {
 			},
 			dir:          "with_multiline2",
 			filesToCheck: []string{"domain.tf", "variables.tf", "import.sh", "resources.tf", "properties.tf"},
+		},
+		"non default edgerc path and section": {
+			givenData: TFDomainData{
+				EdgercPath:              "/non/default/path/to/edgerc",
+				Section:                 "non_default_section",
+				Name:                    "test.name.akadns.net",
+				NormalizedName:          "test_name",
+				Type:                    "basic",
+				Comment:                 "test",
+				EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+				DefaultTimeoutPenalty:   10,
+				LoadImbalancePercentage: 50,
+				DefaultErrorPenalty:     90,
+				CNameCoalescingEnabled:  true,
+				LoadFeedback:            true,
+				EndUserMappingEnabled:   false,
+			},
+			dir:          "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 

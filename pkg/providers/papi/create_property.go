@@ -70,6 +70,7 @@ type WrappedRules struct {
 type TFData struct {
 	Includes      []TFIncludeData
 	Property      TFPropertyData
+	EdgercPath    string
 	Section       string
 	Rules         []*WrappedRules
 	RulesAsHCL    bool
@@ -191,6 +192,7 @@ type RuleTemplate struct {
 
 type propertyOptions struct {
 	propertyName  string
+	edgercPath    string
 	section       string
 	tfWorkPath    string
 	version       string
@@ -335,6 +337,7 @@ func CmdCreateProperty(c *cli.Context) error {
 
 	options := propertyOptions{
 		propertyName:  c.Args().First(),
+		edgercPath:    edgegrid.GetEdgercPath(c),
 		section:       edgegrid.GetEdgercSection(c),
 		tfWorkPath:    tfWorkPath,
 		version:       version,
@@ -372,6 +375,7 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 		Property: TFPropertyData{
 			EdgeHostnames: make(map[string]EdgeHostname),
 		},
+		EdgercPath:    options.edgercPath,
 		Section:       options.section,
 		RulesAsHCL:    options.rulesAsHCL,
 		UseBootstrap:  options.withBootstrap,

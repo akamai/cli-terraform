@@ -26,6 +26,7 @@ type (
 	// TFData represents the data used in mTLS Keystore.
 	TFData struct {
 		Certificate TFCertificate
+		EdgercPath  string
 		Section     string
 	}
 
@@ -55,6 +56,7 @@ type (
 		id                int64
 		groupID           string
 		contractID        string
+		edgercPath        string
 		configSection     string
 		client            mtlskeystore.MTLSKeystore
 		templateProcessor templates.TemplateProcessor
@@ -105,6 +107,7 @@ func CmdCreateCertificate(c *cli.Context) error {
 		id:            id,
 		groupID:       groupID,
 		contractID:    contractID,
+		edgercPath:    edgegrid.GetEdgercPath(c),
 		configSection: edgegrid.GetEdgercSection(c),
 		client:        mtlskeystore.Client(edgegrid.GetSession(c.Context)),
 		templateProcessor: templates.FSTemplateProcessor{
@@ -194,7 +197,8 @@ func populateTFData(param createCertificateParams, cert *mtlskeystore.GetClientC
 	}
 
 	tfData := TFData{
-		Section: param.configSection,
+		EdgercPath: param.edgercPath,
+		Section:    param.configSection,
 		Certificate: TFCertificate{
 			Name:               cert.CertificateName,
 			ResourceName:       strings.ReplaceAll(cert.CertificateName, "-", "_"),

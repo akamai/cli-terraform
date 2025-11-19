@@ -43,7 +43,6 @@ var (
 	}
 	chinaCDN     = cloudaccess.ChinaCDN
 	accessKeyUID = int64(1)
-	section      = "test_section"
 )
 
 func TestCreateCloudAccess(t *testing.T) {
@@ -61,7 +60,6 @@ func TestCreateCloudAccess(t *testing.T) {
 			},
 			dir: "two-versions",
 			testData: testDataForCloudAccess{
-				section:              section,
 				accessKeyUID:         1,
 				accessKeyName:        "name1",
 				authenticationMethod: "AWS4_HMAC_SHA256",
@@ -96,7 +94,6 @@ func TestCreateCloudAccess(t *testing.T) {
 			},
 			dir: "one-version",
 			testData: testDataForCloudAccess{
-				section:              section,
 				accessKeyUID:         1,
 				accessKeyName:        "Test name1",
 				authenticationMethod: "AWS4_HMAC_SHA256",
@@ -127,7 +124,6 @@ func TestCreateCloudAccess(t *testing.T) {
 			},
 			dir: "no-versions",
 			testData: testDataForCloudAccess{
-				section:              section,
 				accessKeyUID:         1,
 				accessKeyName:        "name1",
 				authenticationMethod: "AWS4_HMAC_SHA256",
@@ -160,7 +156,6 @@ func TestCreateCloudAccess(t *testing.T) {
 			},
 			withError: ErrListingKeyVersions,
 			testData: testDataForCloudAccess{
-				section:              section,
 				accessKeyUID:         1,
 				accessKeyName:        "name1",
 				authenticationMethod: "AWS4_HMAC_SHA256",
@@ -184,7 +179,6 @@ func TestCreateCloudAccess(t *testing.T) {
 			},
 			withError: ErrNonUniqueCloudAccessKeyID,
 			testData: testDataForCloudAccess{
-				section:              section,
 				accessKeyUID:         1,
 				accessKeyName:        "name1",
 				authenticationMethod: "AWS4_HMAC_SHA256",
@@ -220,16 +214,48 @@ func TestCreateCloudAccess(t *testing.T) {
 				accessKeyUID: 1,
 			},
 		},
+		"non default edgerc path and section": {
+			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, _ string, data testDataForCloudAccess) {
+				mockGetAccessKey(c, data, nil)
+				mockListAccessKeyVersions(c, data, nil)
+				mockProcessTemplates(p, data)
+			},
+			dir: "no-versions",
+			testData: testDataForCloudAccess{
+				edgercPath:           "/non/default/path/to/edgerc",
+				section:              "non_default_section",
+				accessKeyUID:         1,
+				accessKeyName:        "name1",
+				authenticationMethod: "AWS4_HMAC_SHA256",
+				networkConfiguration: &cloudaccess.SecureNetwork{
+					AdditionalCDN:   &chinaCDN,
+					SecurityNetwork: "ENHANCED_TLS",
+				},
+				groups: []cloudaccess.Group{
+					{
+						ContractIDs: []string{"ctr_111"},
+						GroupID:     11,
+						GroupName:   tools.StringPtr("group11"),
+					},
+				},
+			},
+		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			if test.testData.edgercPath == "" {
+				test.testData.edgercPath = "~/.edgerc"
+			}
+			if test.testData.section == "" {
+				test.testData.section = "test_section"
+			}
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
 			mc := new(cloudaccess.Mock)
 			templateProcessor := new(templates.MockProcessor)
 			test.init(mc, templateProcessor, test.dir, test.testData)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createCloudAccess(ctx, accessKeyUID, 0, "", section, mc, templateProcessor)
+			err := createCloudAccess(ctx, accessKeyUID, 0, "", test.testData.edgercPath, test.testData.section, mc, templateProcessor)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -256,7 +282,6 @@ func TestCreateCloudAccess_GroupIDAndConractIDSupplied(t *testing.T) {
 			},
 			dir: "groudId_contractId",
 			testData: testDataForCloudAccess{
-				section:              section,
 				flag:                 true,
 				accessKeyUID:         1,
 				accessKeyName:        "Test name1",
@@ -288,7 +313,6 @@ func TestCreateCloudAccess_GroupIDAndConractIDSupplied(t *testing.T) {
 			},
 			withError: errors.New("error populating cloud access data: invalid combination of groupId (1234) and contractId (C-Contract123) for this access key"),
 			testData: testDataForCloudAccess{
-				section:              section,
 				flag:                 true,
 				accessKeyUID:         1,
 				accessKeyName:        "Test name1",
@@ -321,7 +345,7 @@ func TestCreateCloudAccess_GroupIDAndConractIDSupplied(t *testing.T) {
 			templateProcessor := new(templates.MockProcessor)
 			test.init(mc, templateProcessor, test.dir, test.testData)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createCloudAccess(ctx, accessKeyUID, 1234, "C-Contract123", section, mc, templateProcessor)
+			err := createCloudAccess(ctx, accessKeyUID, 1234, "C-Contract123", test.testData.edgercPath, test.testData.section, mc, templateProcessor)
 			if test.withError != nil {
 				assert.Equal(t, test.withError.Error(), err.Error(), "expected: %s; got: %s", test.withError, err)
 				return
@@ -354,7 +378,6 @@ func TestProcessCloudAccessTemplates(t *testing.T) {
 						SecurityNetwork: "ENHANCED_TLS",
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "two_versions",
 			filesToCheck: []string{"cloudaccess.tf", "import.sh", "variables.tf"},
@@ -374,7 +397,6 @@ func TestProcessCloudAccessTemplates(t *testing.T) {
 						SecurityNetwork: "ENHANCED_TLS",
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "one_version",
 			filesToCheck: []string{"cloudaccess.tf", "import.sh", "variables.tf"},
@@ -393,7 +415,6 @@ func TestProcessCloudAccessTemplates(t *testing.T) {
 						SecurityNetwork: "ENHANCED_TLS",
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "no_versions",
 			filesToCheck: []string{"cloudaccess.tf", "import.sh", "variables.tf"},
@@ -411,15 +432,40 @@ func TestProcessCloudAccessTemplates(t *testing.T) {
 						SecurityNetwork: "ENHANCED_TLS",
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "no_additional_cdn",
 			filesToCheck: []string{"cloudaccess.tf", "import.sh", "variables.tf"},
+		},
+		"non default edgerc path and section": {
+			givenData: TFCloudAccessData{
+				Key: TFCloudAccessKey{
+					KeyResourceName:      "TestKeyName",
+					AccessKeyName:        "TestKeyName",
+					AuthenticationMethod: "AWS4_HMAC_SHA256",
+					GroupID:              1234,
+					ContractID:           "C-Contract123",
+					AccessKeyUID:         1,
+					NetworkConfiguration: &NetworkConfiguration{
+						AdditionalCDN:   tools.StringPtr("CHINA_CDN"),
+						SecurityNetwork: "ENHANCED_TLS",
+					},
+				},
+				EdgercPath: "/non/default/path/to/edgerc",
+				Section:    "non_default_section",
+			},
+			dir:          "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			if test.givenData.EdgercPath == "" {
+				test.givenData.EdgercPath = "~/.edgerc"
+			}
+			if test.givenData.Section == "" {
+				test.givenData.Section = "test_section"
+			}
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
 			require.NoError(t, processor(test.dir).ProcessTemplates(test.givenData))
 			for _, f := range test.filesToCheck {
@@ -434,6 +480,7 @@ func TestProcessCloudAccessTemplates(t *testing.T) {
 }
 
 type testDataForCloudAccess struct {
+	edgercPath           string
 	section              string
 	accessKeyUID         int64
 	accessKeyName        string
@@ -500,7 +547,8 @@ func mockProcessTemplates(p *templates.MockProcessor, data testDataForCloudAcces
 			CredentialB:          credB,
 			NetworkConfiguration: netConf,
 		},
-		Section: data.section,
-		Flag:    data.flag,
+		EdgercPath: data.edgercPath,
+		Section:    data.section,
+		Flag:       data.flag,
 	}).Return(nil).Once()
 }

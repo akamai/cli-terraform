@@ -35,6 +35,7 @@ type (
 		LoadFeedback                bool
 		DefaultSSLClientCertificate string
 		EndUserMappingEnabled       bool
+		EdgercPath                  string
 		Section                     string
 		SignAndServe                bool
 		SignAndServeAlgorithm       string
@@ -125,14 +126,15 @@ func CmdCreateDomain(c *cli.Context) error {
 	}
 
 	domainName := c.Args().First()
+	edgercPath := edgegrid.GetEdgercPath(c)
 	section := edgegrid.GetEdgercSection(c)
-	if err := createDomain(ctx, client, domainName, section, processor); err != nil {
+	if err := createDomain(ctx, client, domainName, edgercPath, section, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting domain HCL: %s", err), 1)
 	}
 	return nil
 }
 
-func createDomain(ctx context.Context, client gtm.GTM, domainName, section string, templateProcessor templates.TemplateProcessor) error {
+func createDomain(ctx context.Context, client gtm.GTM, domainName, edgercPath, section string, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
 	if _, err := term.Writeln("Configuring Domain"); err != nil {
@@ -149,6 +151,7 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, section strin
 	}
 
 	tfDomainData := TFDomainData{
+		EdgercPath:                  edgercPath,
 		Section:                     section,
 		NormalizedName:              normalizeResourceName(strings.TrimSuffix(domain.Name, ".akadns.net")),
 		Name:                        domain.Name,

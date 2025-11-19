@@ -47,14 +47,15 @@ func CmdCreateIAMAllowlist(c *cli.Context) error {
 		AdditionalFuncs: additionalFunctions,
 	}
 
+	edgercPath := edgegrid.GetEdgercPath(c)
 	section := edgegrid.GetEdgercSection(c)
-	if err = createIAMAllowlist(ctx, section, client, processor); err != nil {
+	if err = createIAMAllowlist(ctx, edgercPath, section, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}
 	return nil
 }
 
-func createIAMAllowlist(ctx context.Context, section string, client iam.IAM, templateProcessor templates.TemplateProcessor) error {
+func createIAMAllowlist(ctx context.Context, edgercPath, section string, client iam.IAM, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 	_, err := term.Writeln("Exporting Identity and Access Management allowlist configuration")
 	if err != nil {
@@ -79,6 +80,7 @@ func createIAMAllowlist(ctx context.Context, section string, client iam.IAM, tem
 			Enabled:    status.Enabled,
 			CIDRBlocks: tfCIDRBlocks,
 		},
+		EdgercPath: edgercPath,
 		Section:    section,
 		Subcommand: "allowlist",
 	}

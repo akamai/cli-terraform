@@ -120,6 +120,17 @@ func TestCreateAPIDefinition(t *testing.T) {
 			},
 			expectedResult: noOperationsAvailable,
 		},
+		"non_default_edgerc_path_and_section": {
+			format: openAPIFormat,
+			init: func(client *apidefinitions.Mock, clientV0 *v0.Mock, p *templates.MockProcessor) {
+				mockGetAPI(client, ptr.To(int64(1)), ptr.To(apidefinitions.ActivationStatusActive))
+				mockToOpenAPIFile(clientV0)
+				mockGetAPIVersions(client, 1)
+				mockProcessTemplates(p, nil)
+				mockGetResourceOperationNoOperations(clientV0)
+			},
+			expectedResult: nonDefaultEdgercPathAndSection,
+		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -128,7 +139,7 @@ func TestCreateAPIDefinition(t *testing.T) {
 			templateProcessor := new(templates.MockProcessor)
 			test.init(mock, mockV0, templateProcessor)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			data, err := createAPIDefinition(ctx, "test_section", test.format, int64(1), nil, mock, mockV0, templateProcessor)
+			data, err := createAPIDefinition(ctx, test.expectedResult.EdgercPath, test.expectedResult.Section, test.format, int64(1), nil, mock, mockV0, templateProcessor)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -174,6 +185,12 @@ func TestProcessAPIDefinitionTemplates(t *testing.T) {
 			givenData:    inActive,
 			dir:          "inactive",
 			filesToCheck: []string{"apidefinitions.tf", "import.sh"},
+		},
+		"non default edgerc path and section": {
+			format:       openAPIFormat,
+			givenData:    nonDefaultEdgercPathAndSection,
+			dir:          "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 	for name, test := range tests {
@@ -307,6 +324,7 @@ var (
 		IsActiveOnProduction: false,
 		StagingVersionKey:    "api_latest_version",
 		ProductionVersionKey: "api_latest_version",
+		EdgercPath:           "~/.edgerc",
 		Section:              "test_section",
 		Operations:           emptyOperations,
 		IsOperationsEmpty:    true,
@@ -323,6 +341,7 @@ var (
 		IsActiveOnProduction: true,
 		StagingVersionKey:    "api_staging_version",
 		ProductionVersionKey: "api_production_version",
+		EdgercPath:           "~/.edgerc",
 		Section:              "test_section",
 		Operations:           apiOperations,
 		IsOperationsEmpty:    false,
@@ -339,6 +358,7 @@ var (
 		IsActiveOnProduction: true,
 		StagingVersionKey:    "api_latest_version",
 		ProductionVersionKey: "api_latest_version",
+		EdgercPath:           "~/.edgerc",
 		Section:              "test_section",
 		Operations:           apiOperations,
 		IsOperationsEmpty:    false,
@@ -355,7 +375,25 @@ var (
 		IsActiveOnProduction: true,
 		StagingVersionKey:    "api_latest_version",
 		ProductionVersionKey: "api_latest_version",
+		EdgercPath:           "~/.edgerc",
 		Section:              "test_section",
+		Operations:           emptyOperations,
+		IsOperationsEmpty:    true,
+	}
+
+	nonDefaultEdgercPathAndSection = TFAPIWrapperData{
+		API:                  api,
+		ID:                   1,
+		Version:              1,
+		ResourceName:         "pet_store",
+		ContractID:           "Contract-1",
+		GroupID:              1,
+		IsActiveOnStaging:    true,
+		IsActiveOnProduction: true,
+		StagingVersionKey:    "api_latest_version",
+		ProductionVersionKey: "api_latest_version",
+		EdgercPath:           "non/default/path/to/edgerc",
+		Section:              "non-default-section",
 		Operations:           emptyOperations,
 		IsOperationsEmpty:    true,
 	}

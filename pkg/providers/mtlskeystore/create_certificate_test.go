@@ -104,6 +104,7 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 		dir                 string
 		init                func(*certificateMockData, *mtlskeystore.Mock)
 		mockData            certificateMockData
+		edgercPath          string
 		configSection       string
 		withError           string
 		withTemplatingError bool
@@ -206,12 +207,13 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				d.mockListClientCertificateVersions(m, nil)
 			},
 		},
-		"custom config section": {
-			dir:      "custom_config_section",
+		"non default edgerc path and section": {
+			dir:      "non_default_edgerc_path_and_section",
 			mockData: akamaiCertificateMockData(),
 			init: func(d *certificateMockData, m *mtlskeystore.Mock) {
 				d.mockAll(m)
 			},
+			edgercPath:    "/non/default/path/to/edgerc",
 			configSection: "other-section",
 		},
 		"expect error: akamai signer certificate with pending deletion version": {
@@ -301,8 +303,13 @@ func TestProcessMTLSKeystoreTemplates(t *testing.T) {
 				test.configSection = "default"
 			}
 
+			if test.edgercPath == "" {
+				test.edgercPath = "~/.edgerc"
+			}
+
 			params := createCertificateParams{
 				id:            test.mockData.id,
+				edgercPath:    test.edgercPath,
 				configSection: test.configSection,
 				client:        m,
 			}

@@ -53,15 +53,16 @@ func CmdCreateIAMUser(c *cli.Context) error {
 		AdditionalFuncs: additionalFunctions,
 	}
 
+	edgercPath := edgegrid.GetEdgercPath(c)
 	section := edgegrid.GetEdgercSection(c)
 	email := c.Args().First()
-	if err = createIAMUserByEmail(ctx, email, section, client, processor, userOnly); err != nil {
+	if err = createIAMUserByEmail(ctx, email, edgercPath, section, client, processor, userOnly); err != nil {
 		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}
 	return nil
 }
 
-func createIAMUserByEmail(ctx context.Context, userEmail, section string, client iam.IAM, templateProcessor templates.TemplateProcessor, userOnly bool) error {
+func createIAMUserByEmail(ctx context.Context, userEmail, edgercPath, section string, client iam.IAM, templateProcessor templates.TemplateProcessor, userOnly bool) error {
 	term := terminal.Get(ctx)
 
 	message := "Exporting Identity and Access Management user configuration"
@@ -94,6 +95,7 @@ func createIAMUserByEmail(ctx context.Context, userEmail, section string, client
 		TFUsers: []*TFUser{
 			tfUserData,
 		},
+		EdgercPath: edgercPath,
 		Section:    section,
 		Subcommand: "user",
 	}

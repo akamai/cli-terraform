@@ -5,7 +5,7 @@ variable "edgerc_path" {
 
 variable "config_section" {
   type    = string
-  default = "default"
+  default = "test_section"
 }
 
 variable "contractid" {

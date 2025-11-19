@@ -1,6 +1,6 @@
 variable "edgerc_path" {
   type    = string
-  default = "~/.edgerc"
+  default = "/non/default/path/to/edgerc"
 }
 
 variable "config_section" {

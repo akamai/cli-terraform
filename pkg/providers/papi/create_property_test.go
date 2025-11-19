@@ -33,8 +33,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateProperty(t *testing.T) {
-	section := "test_section"
-
 	searchPropertiesResponse := papi.SearchResponse{
 		Versions: papi.SearchItems{
 			Items: []papi.SearchItem{
@@ -610,6 +608,8 @@ func TestCreateProperty(t *testing.T) {
 		rulesAsHCL          bool
 		withBootstrap       bool
 		splitDepth          *int
+		edgercPath          string
+		edgercSection       string
 	}{
 		"basic property (with hostname's cnameTo starting with a digit)": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
@@ -789,7 +789,8 @@ func TestCreateProperty(t *testing.T) {
 						},
 						ReadVersion: "LATEST",
 					},
-					Section: "test_section",
+					EdgercPath: defaultEdgercPath,
+					Section:    defaultSection,
 				}
 
 				mockProcessTemplates(p, (&tfDataBuilder{}).withData(data).build(), noFilters, nil)
@@ -877,7 +878,8 @@ func TestCreateProperty(t *testing.T) {
 						},
 						ReadVersion: "LATEST",
 					},
-					Section: "test_section",
+					EdgercPath: defaultEdgercPath,
+					Section:    defaultSection,
 				}
 
 				mockProcessTemplates(p, (&tfDataBuilder{}).withData(data).build(), noFilters, nil)
@@ -1708,10 +1710,39 @@ func TestCreateProperty(t *testing.T) {
 			dir:       "basic",
 			withError: ErrSavingFiles,
 		},
+		"non default edgerc path and section": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, getPropertyResponse())
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponseNonDefaultTTL, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withEdgeHostname(edgeHostnameWithTTL).withEdgercPathAndSection("/non/default/path/to/edgerc", "non_default_section").build(), noFilters, nil)
+			},
+			dir:           "basic-non-default-ttl",
+			jsonDir:       "basic-non-default-ttl/property-snippets",
+			edgercPath:    "/non/default/path/to/edgerc",
+			edgercSection: "non_default_section",
+		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			if test.edgercPath == "" {
+				test.edgercPath = defaultEdgercPath
+			}
+			if test.edgercSection == "" {
+				test.edgercSection = defaultSection
+			}
 			mc := new(papi.Mock)
 			mh := new(hapi.Mock)
 			mp := new(templates.MockProcessor)
@@ -1720,7 +1751,8 @@ func TestCreateProperty(t *testing.T) {
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
 			options := propertyOptions{
 				propertyName:  "test.edgesuite.net",
-				section:       section,
+				edgercPath:    test.edgercPath,
+				section:       test.edgercSection,
 				tfWorkPath:    "./",
 				version:       test.readVersion,
 				rulesAsHCL:    test.rulesAsHCL,
@@ -2098,7 +2130,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "basic",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
@@ -2200,7 +2231,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "basic-non-default-ttl",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
@@ -2246,7 +2276,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "enhancement-tls",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
@@ -2272,7 +2301,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "hostname-bucket/no-hostnames",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
@@ -2303,7 +2331,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "hostname-bucket/staging",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
@@ -2332,7 +2359,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "hostname-bucket/production",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
@@ -2369,7 +2395,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "hostname-bucket/production-staging-no-hostnames",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
@@ -2409,7 +2434,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "hostname-bucket/staging-production",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
@@ -2449,7 +2473,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "hostname-bucket/staging-production-diff",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
@@ -2497,7 +2520,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "hostname-bucket/staging-production-diff-edge-hostname",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
@@ -2545,7 +2567,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "hostname-bucket/staging-production-diff-cert-provisioning-type",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh", "hostname_bucket.tf"},
@@ -2590,7 +2611,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/basic-rules-datasource",
 			rulesAsHCL:   true,
@@ -2637,7 +2657,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/basic-rules-datasource-serial",
 			rulesAsHCL:   true,
@@ -2682,7 +2701,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						Emails:        []string{"jsmith@akamai.com"},
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/basic-rules-datasource-unknown",
 			rulesAsHCL:   true,
@@ -2729,7 +2747,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/basic-rules-datasource-empty-options",
 			rulesAsHCL:   true,
@@ -2776,7 +2793,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						Emails:        []string{"jsmith@akamai.com"},
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "basic_with_use_cases",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
@@ -2822,7 +2838,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "basic_with_activation_note",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
@@ -2874,7 +2889,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "basic_with_multiline_activation_note",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
@@ -2925,7 +2939,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "basic_with_production_activation",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
@@ -2977,7 +2990,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "basic_with_both_activations",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
@@ -3017,7 +3029,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "basic_without_activation",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
@@ -3061,7 +3072,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						Emails:        []string{"jsmith@akamai.com"},
 					},
 				},
-				Section:      "test_section",
 				UseBootstrap: true,
 			},
 			dir:          "basic-bootstrap",
@@ -3088,7 +3098,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section:      "test_section",
 				UseBootstrap: true,
 			},
 			dir:          "hostname-bucket/bootstrap/no-hostnames",
@@ -3120,7 +3129,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section:      "test_section",
 				UseBootstrap: true,
 			},
 			dir:          "hostname-bucket/bootstrap/production-no-hostnames",
@@ -3161,7 +3169,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section:      "test_section",
 				UseBootstrap: true,
 			},
 			dir:          "hostname-bucket/bootstrap/staging-production",
@@ -3207,7 +3214,6 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section:       "test_section",
 				UseSplitDepth: true,
 				RulesAsHCL:    true,
 				RootRule:      "test-edgesuite-net",
@@ -3256,17 +3262,49 @@ func TestProcessPropertyTemplates(t *testing.T) {
 						IsActiveOnLatestVersion: true,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/rules-with-rdn-details-datasource",
 			rulesAsHCL:   true,
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
 		},
+		"non default edgerc path and section": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					HostnameBucket:       &HostnameBucketDetails{},
+					ReadVersion:          "LATEST",
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+				EdgercPath: "/non/default/path/to/edgerc",
+				Section:    "non_default_section",
+			},
+			dir:          "property_non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
+		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			if test.givenData.EdgercPath == "" {
+				test.givenData.EdgercPath = defaultEdgercPath
+			}
+			if test.givenData.Section == "" {
+				test.givenData.Section = defaultSection
+			}
 			if test.rulesAsHCL {
 				ruleResponse := getRuleTreeResponse(test.dir, t)
 				test.givenData.Rules = flattenRules(wrapAndNameRules("test.edgesuite.net", ruleResponse.Rules))
@@ -3805,7 +3843,8 @@ func (t *tfDataBuilder) withDefaults() *tfDataBuilder {
 			},
 			ReadVersion: "LATEST",
 		},
-		Section: "test_section",
+		EdgercPath: defaultEdgercPath,
+		Section:    defaultSection,
 	}
 	return t
 }
@@ -3852,7 +3891,8 @@ func (t *tfDataBuilder) withDefaultsHavingDigitsAndSpacesInHostnameDetails() *tf
 			},
 			ReadVersion: "LATEST",
 		},
-		Section: "test_section",
+		EdgercPath: defaultEdgercPath,
+		Section:    defaultSection,
 	}
 	return t
 }
@@ -3982,6 +4022,12 @@ func (t *tfDataBuilder) withBootstrap(useBootstrap bool) *tfDataBuilder {
 
 func (t *tfDataBuilder) asHCL(useHCL bool) *tfDataBuilder {
 	t.tfData.RulesAsHCL = useHCL
+	return t
+}
+
+func (t *tfDataBuilder) withEdgercPathAndSection(edgercPath string, edgercSection string) *tfDataBuilder {
+	t.tfData.EdgercPath = edgercPath
+	t.tfData.Section = edgercSection
 	return t
 }
 

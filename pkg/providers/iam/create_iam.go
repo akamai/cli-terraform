@@ -25,6 +25,7 @@ type (
 		TFGroups    []TFGroup
 		TFAllowlist TFAllowlist
 		TFClient    TFClient
+		EdgercPath  string
 		Section     string
 		Subcommand  string
 	}

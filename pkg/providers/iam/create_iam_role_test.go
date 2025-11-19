@@ -191,7 +191,7 @@ var (
 		client.On("GetGroup", mock.Anything, getGroupReq).Return(&group, nil).Once()
 	}
 
-	expectRoleProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
+	expectRoleProcessTemplates = func(p *templates.MockProcessor, edgercPath string, section string) *mock.Call {
 		tfData := TFData{
 			TFUsers: []*TFUser{
 				{
@@ -265,6 +265,7 @@ var (
 					GroupName:     "Custom group 2",
 				},
 			},
+			EdgercPath: edgercPath,
 			Section:    section,
 			Subcommand: "role",
 		}
@@ -275,7 +276,7 @@ var (
 		return call.Return(nil)
 	}
 
-	expectRoleOnlyProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
+	expectRoleOnlyProcessTemplates = func(p *templates.MockProcessor, edgercPath string, section string) *mock.Call {
 		tfData := TFData{
 			TFRoles: []TFRole{
 				{
@@ -285,6 +286,7 @@ var (
 					GrantedRoles:    []int{},
 				},
 			},
+			EdgercPath: edgercPath,
 			Section:    section,
 			Subcommand: "role",
 		}
@@ -416,14 +418,19 @@ func TestGetUsersByRole(t *testing.T) {
 }
 
 func TestCreateIAMRole(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 
 	tests := map[string]struct {
-		roleOnly bool
-		init     func(*iam.Mock, *templates.MockProcessor)
+		edgercPath string
+		section    string
+		roleOnly   bool
+		init       func(*iam.Mock, *templates.MockProcessor)
 	}{
 		"fetch role": {
-			roleOnly: false,
+			edgercPath: defaultEdgercPath,
+			section:    defaultSection,
+			roleOnly:   false,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetRoleWithUsers(i)
 				expectRoleGetUser(i, user1, nil)
@@ -433,14 +440,25 @@ func TestCreateIAMRole(t *testing.T) {
 				// user2's groups
 				expectRoleGetGroup(i, group1)
 				expectRoleGetGroup(i, group2)
-				expectRoleProcessTemplates(p, section)
+				expectRoleProcessTemplates(p, defaultEdgercPath, defaultSection)
 			},
 		},
 		"fetch role only (without user and group details)": {
-			roleOnly: true,
+			edgercPath: defaultEdgercPath,
+			section:    defaultSection,
+			roleOnly:   true,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetRoleWithoutUsers(i)
-				expectRoleOnlyProcessTemplates(p, section)
+				expectRoleOnlyProcessTemplates(p, defaultEdgercPath, defaultSection)
+			},
+		},
+		"non default edgerc path and section": {
+			edgercPath: "/non/default/path/to/edgerc",
+			section:    "non_default_section",
+			roleOnly:   true,
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
+				expectGetRoleWithoutUsers(i)
+				expectRoleOnlyProcessTemplates(p, "/non/default/path/to/edgerc", "non_default_section")
 			},
 		},
 	}
@@ -451,7 +469,7 @@ func TestCreateIAMRole(t *testing.T) {
 			mp := new(templates.MockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createIAMRoleByID(ctx, 12345, section, mi, mp, test.roleOnly)
+			err := createIAMRoleByID(ctx, 12345, test.edgercPath, test.section, mi, mp, test.roleOnly)
 			require.NoError(t, err)
 			mi.AssertExpectations(t)
 			mp.AssertExpectations(t)
@@ -460,7 +478,8 @@ func TestCreateIAMRole(t *testing.T) {
 }
 
 func TestProcessIAMRoleTemplates(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 
 	tests := map[string]struct {
 		givenData    TFData
@@ -511,7 +530,8 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 						GroupName:     "Custom group 1",
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "role",
 			},
 			dir:          "iam_role_by_id_basic",
@@ -591,7 +611,8 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 						GroupName:     "Custom group 2",
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "role",
 			},
 			dir:          "iam_role_by_id_multiple",
@@ -607,11 +628,29 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 						GrantedRoles:    []int{992, 707, 452, 677, 726, 296, 457, 987},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "role",
 			},
 			dir:          "iam_role_only_by_id",
 			filesToCheck: []string{"variables.tf", "import.sh", "role.tf"},
+		},
+		"non default edgerc path and section": {
+			givenData: TFData{
+				TFRoles: []TFRole{
+					{
+						RoleID:          12345,
+						RoleName:        "Custom role",
+						RoleDescription: "Custom role\ndescription",
+						GrantedRoles:    []int{992, 707, 452, 677, 726, 296, 457, 987},
+					},
+				},
+				EdgercPath: "/non/default/path/to/edgerc",
+				Section:    "non_default_section",
+				Subcommand: "role",
+			},
+			dir:          "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 

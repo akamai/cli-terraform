@@ -1,13 +1,21 @@
+variable "edgerc_path" {
+  type    = string
+  default = "%s"
+}
+variable "config_section" {
+  type    = string
+  default = "%s"
+}
 variable "dnssection" {
-    type    = string
-    default = "default"
+  type    = string
+  default = "default"
 }
 variable "contractid" {
-    type    = string
-    default = "%s"
+  type    = string
+  default = "%s"
 }
 // Notice: groupid unknown at time of import. Please update.
 variable "groupid" {
-    type    = string
-    default = ""
+  type    = string
+  default = ""
 }

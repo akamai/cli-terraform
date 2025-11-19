@@ -65,6 +65,7 @@ func TestProcessMtlsTruststoreTemplates(t *testing.T) {
 	tests := map[string]struct {
 		dir                 string
 		init                func(*caSetMockData, *mtlstruststore.Mock)
+		edgercPath          string
 		configSection       string
 		withError           string
 		withTemplatingError bool
@@ -169,12 +170,13 @@ func TestProcessMtlsTruststoreTemplates(t *testing.T) {
 				d.mockAll(m)
 			},
 		},
-		"custom config section": {
-			dir: "custom_config_section",
+		"non default edgerc path and section": {
+			dir: "non_default_edgerc_path_and_section",
 			init: func(d *caSetMockData, m *mtlstruststore.Mock) {
 				d.noUserVersion()
 				d.mockAll(m)
 			},
+			edgercPath:    "/non/default/path/to/edgerc",
 			configSection: "other-section",
 		},
 		"funny CA set name handled properly": {
@@ -253,9 +255,14 @@ func TestProcessMtlsTruststoreTemplates(t *testing.T) {
 				test.configSection = "default"
 			}
 
+			if test.edgercPath == "" {
+				test.edgercPath = "~/.edgerc"
+			}
+
 			params := createCASetParams{
 				name:          d.name,
 				userVersion:   d.userVersion,
+				edgercPath:    test.edgercPath,
 				configSection: test.configSection,
 				client:        m,
 			}

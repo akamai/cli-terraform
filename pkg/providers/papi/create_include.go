@@ -31,6 +31,7 @@ var (
 type includeOptions struct {
 	contractID  string
 	includeName string
+	edgercPath  string
 	section     string
 	jsonDir     string
 	tfWorkPath  string
@@ -112,6 +113,7 @@ func createInclude(ctx context.Context, options includeOptions, client papi.PAPI
 
 	tfData := TFData{
 		Includes:   make([]TFIncludeData, 0),
+		EdgercPath: options.edgercPath,
 		Section:    options.section,
 		RulesAsHCL: options.rulesAsHCL,
 	}

@@ -112,7 +112,9 @@ func CmdCreateZone(c *cli.Context) error {
 			return err
 		}
 
-		err = createDNSVarsConfig(term, configuration.tfWorkPath)
+		edgercPath := edgegrid.GetEdgercPath(c)
+		edgercSection := edgegrid.GetEdgercSection(c)
+		err = createDNSVarsConfig(term, configuration.tfWorkPath, edgercPath, edgercSection)
 		if err != nil {
 			return err
 		}
@@ -276,7 +278,7 @@ func saveResourceConfigFile(resourceConfigFilename string) (err error) {
 	return nil
 }
 
-func createDNSVarsConfig(term terminal.Terminal, tfWorkPath string) (err error) {
+func createDNSVarsConfig(term terminal.Terminal, tfWorkPath string, edgercPath, edgercSection string) (err error) {
 	// Need to create dnsvars.tf dependency
 	dnsVarsFileName := filepath.Join(tfWorkPath, "dnsvars.tf")
 	dnsVarsHandle, err := os.Create(dnsVarsFileName)
@@ -290,7 +292,7 @@ func createDNSVarsConfig(term terminal.Terminal, tfWorkPath string) (err error) 
 			err = e
 		}
 	}(dnsVarsHandle)
-	_, err = dnsVarsHandle.WriteString(fmt.Sprintf(useTemplate(nil, "dnsvars.tmpl", true), contractID))
+	_, err = dnsVarsHandle.WriteString(fmt.Sprintf(useTemplate(nil, "dnsvars.tmpl", true), edgercPath, edgercSection, contractID))
 	if err != nil {
 		term.Spinner().Fail()
 		return cli.Exit(color.RedString("Unable to write dnsvars config file"), 1)

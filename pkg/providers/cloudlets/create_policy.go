@@ -34,6 +34,7 @@ type (
 		PolicyActivations       TFPolicyActivationsData
 		LoadBalancers           []LoadBalancerVersion
 		LoadBalancerActivations []cloudlets.LoadBalancerActivation
+		EdgercPath              string
 		Section                 string
 		IsV3                    bool
 	}
@@ -62,7 +63,7 @@ type (
 		initializeWithPolicy(ctx context.Context, policyName string) error
 		validatePolicy() error
 		populateWithLatestPolicyVersion(ctx context.Context) error
-		getTFPolicyData(ctx context.Context, section string) (*TFPolicyData, error)
+		getTFPolicyData(ctx context.Context, edgercPath, section string) (*TFPolicyData, error)
 	}
 
 	v2ActivationStrategy struct {
@@ -133,13 +134,14 @@ func CmdCreatePolicy(c *cli.Context) error {
 
 	policyName := c.Args().First()
 	section := edgegrid.GetEdgercSection(c)
-	if err = createPolicy(ctx, policyName, section, clientV2, clientV3, processor); err != nil {
+	edgercPath := edgegrid.GetEdgercPath(c)
+	if err = createPolicy(ctx, policyName, edgercPath, section, clientV2, clientV3, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting policy HCL: %s", err), 1)
 	}
 	return nil
 }
 
-func createPolicy(ctx context.Context, policyName, section string, clientV2 cloudlets.Cloudlets, clientV3 v3.Cloudlets, templateProcessor templates.TemplateProcessor) error {
+func createPolicy(ctx context.Context, policyName, edgercPath, section string, clientV2 cloudlets.Cloudlets, clientV3 v3.Cloudlets, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
 	fmt.Println("Configuring Policy")
@@ -161,7 +163,7 @@ func createPolicy(ctx context.Context, policyName, section string, clientV2 clou
 		return fmt.Errorf("%w: %s", ErrFetchingVersion, err)
 	}
 
-	tfPolicyData, err := strategy.getTFPolicyData(ctx, section)
+	tfPolicyData, err := strategy.getTFPolicyData(ctx, edgercPath, section)
 	if err != nil {
 		term.Spinner().Fail()
 		return err
@@ -179,8 +181,9 @@ func createPolicy(ctx context.Context, policyName, section string, clientV2 clou
 	return nil
 }
 
-func (strategy *v2ActivationStrategy) getTFPolicyData(ctx context.Context, section string) (*TFPolicyData, error) {
+func (strategy *v2ActivationStrategy) getTFPolicyData(ctx context.Context, edgercPath, section string) (*TFPolicyData, error) {
 	tfPolicyData := TFPolicyData{
+		EdgercPath:        edgercPath,
 		Section:           section,
 		Name:              strategy.policy.Name,
 		CloudletCode:      strategy.policy.CloudletCode,
@@ -504,8 +507,9 @@ func (strategy *v3ActivationStrategy) populateWithLatestPolicyVersion(ctx contex
 	return nil
 }
 
-func (strategy *v3ActivationStrategy) getTFPolicyData(_ context.Context, section string) (*TFPolicyData, error) {
+func (strategy *v3ActivationStrategy) getTFPolicyData(_ context.Context, edgercPath, section string) (*TFPolicyData, error) {
 	tfPolicyData := TFPolicyData{
+		EdgercPath:        edgercPath,
 		Section:           section,
 		Name:              strategy.policy.Name,
 		CloudletCode:      string(strategy.policy.CloudletType),

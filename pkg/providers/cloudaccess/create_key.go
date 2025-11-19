@@ -24,9 +24,10 @@ import (
 type (
 	// TFCloudAccessData represents the data used in CloudAccess
 	TFCloudAccessData struct {
-		Key     TFCloudAccessKey
-		Section string
-		Flag    bool
+		Key        TFCloudAccessKey
+		EdgercPath string
+		Section    string
+		Flag       bool
 	}
 
 	// TFCloudAccessKey represents the data used for export CloudAccess key
@@ -107,6 +108,7 @@ func CmdCreateCloudAccess(c *cli.Context) error {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 	section := edgegrid.GetEdgercSection(c)
+	edgercPath := edgegrid.GetEdgercPath(c)
 
 	// Get groupID and contractId from flags
 	var groupID int64
@@ -129,13 +131,13 @@ func CmdCreateCloudAccess(c *cli.Context) error {
 		return cli.Exit(color.RedString("contract_id cannot be set without group_id"), 1)
 	}
 
-	if err = createCloudAccess(ctx, keyUID, groupID, contractID, section, client, processor); err != nil {
+	if err = createCloudAccess(ctx, keyUID, groupID, contractID, edgercPath, section, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting cloudaccess: %s", err), 1)
 	}
 	return nil
 }
 
-func createCloudAccess(ctx context.Context, accessKeyUID int64, groupID int64, contractID string, section string, client cloudaccess.CloudAccess, templateProcessor templates.TemplateProcessor) error {
+func createCloudAccess(ctx context.Context, accessKeyUID int64, groupID int64, contractID, edgercPath, section string, client cloudaccess.CloudAccess, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 	term.Spinner().Start("Fetching cloudaccess key " + strconv.Itoa(int(accessKeyUID)))
 	key, err := client.GetAccessKey(ctx, cloudaccess.AccessKeyRequest{
@@ -163,7 +165,7 @@ func createCloudAccess(ctx context.Context, accessKeyUID int64, groupID int64, c
 			return fmt.Errorf("%w", ErrNonUniqueCloudAccessKeyID)
 		}
 	}
-	tfCloudAccessData, err := populateCloudAccessData(section, key, groupID, contractID, versions.AccessKeyVersions)
+	tfCloudAccessData, err := populateCloudAccessData(edgercPath, section, key, groupID, contractID, versions.AccessKeyVersions)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("error populating cloud access data: %w", err)
@@ -181,7 +183,7 @@ func createCloudAccess(ctx context.Context, accessKeyUID int64, groupID int64, c
 	return nil
 }
 
-func populateCloudAccessData(section string, key *cloudaccess.GetAccessKeyResponse, providedGroupID int64, providedContractID string, versions []cloudaccess.AccessKeyVersion) (TFCloudAccessData, error) {
+func populateCloudAccessData(edgercPath, section string, key *cloudaccess.GetAccessKeyResponse, providedGroupID int64, providedContractID string, versions []cloudaccess.AccessKeyVersion) (TFCloudAccessData, error) {
 	var netConf *NetworkConfiguration
 	if key.NetworkConfiguration != nil {
 		netConf = &NetworkConfiguration{
@@ -225,7 +227,8 @@ func populateCloudAccessData(section string, key *cloudaccess.GetAccessKeyRespon
 	}
 
 	tfCloudAccessData := TFCloudAccessData{
-		Section: section,
+		EdgercPath: edgercPath,
+		Section:    section,
 		Key: TFCloudAccessKey{
 			KeyResourceName:      strings.ReplaceAll(key.AccessKeyName, "-", "_"),
 			AccessKeyName:        key.AccessKeyName,

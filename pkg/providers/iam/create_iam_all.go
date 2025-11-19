@@ -55,15 +55,16 @@ func CmdCreateIAMAll(c *cli.Context) error {
 		AdditionalFuncs: additionalFunctions,
 	}
 
+	edgercPath := edgegrid.GetEdgercPath(c)
 	section := edgegrid.GetEdgercSection(c)
 
-	if err := createIAMAll(ctx, section, client, processor); err != nil {
+	if err := createIAMAll(ctx, edgercPath, section, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}
 	return nil
 }
 
-func createIAMAll(ctx context.Context, section string, client iam.IAM, templateProcessor templates.TemplateProcessor) error {
+func createIAMAll(ctx context.Context, edgercPath, section string, client iam.IAM, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 	_, err := term.Writeln("Exporting all accessible Identity and Access Management configuration")
 	if err != nil {
@@ -160,6 +161,7 @@ func createIAMAll(ctx context.Context, section string, client iam.IAM, templateP
 		TFGroups:    tfGroups,
 		TFAllowlist: tfAllowlist,
 		TFClient:    tfAPIClient,
+		EdgercPath:  edgercPath,
 		Section:     section,
 		Subcommand:  "all",
 	}

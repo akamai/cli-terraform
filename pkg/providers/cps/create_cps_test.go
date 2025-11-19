@@ -472,8 +472,9 @@ var (
 )
 
 func TestCreateCPS(t *testing.T) {
-	section := "test_section"
 	tests := map[string]struct {
+		edgercPath   string
+		section      string
 		init         func(*cps.Mock)
 		enrollmentID int
 		contractID   string
@@ -682,16 +683,33 @@ func TestCreateCPS(t *testing.T) {
 			enrollmentID: 3,
 			withError:    ErrUnsupportedEnrollmentType,
 		},
+		"non default edgerc path and section": {
+			edgercPath: "/non/default/path/to/edgerc",
+			section:    "non_default_section",
+			init: func(m *cps.Mock) {
+				expectGetEnrollment(m, 1, enrollmentDVMin, nil).Once()
+			},
+			enrollmentID: 1,
+			contractID:   "ctr_1",
+			dataDir:      "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
+		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			if test.edgercPath == "" {
+				test.edgercPath = "~/.edgerc"
+			}
+			if test.section == "" {
+				test.section = "test_section"
+			}
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("testdata/res/%s/%s", test.dataDir, test.jsonDir), 0755))
 			mi := new(cps.Mock)
 			mp := processor(test.dataDir)
 			test.init(mi)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createCPS(ctx, test.contractID, test.enrollmentID, section, mi, mp)
+			err := createCPS(ctx, test.contractID, test.enrollmentID, test.edgercPath, test.section, mi, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -713,6 +731,8 @@ func TestCreateCPS(t *testing.T) {
 }
 
 func TestProcessEnrollmentTemplates(t *testing.T) {
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 	tests := map[string]struct {
 		givenData    TFCPSData
 		dir          string
@@ -723,7 +743,8 @@ func TestProcessEnrollmentTemplates(t *testing.T) {
 				Enrollment:   enrollmentDV,
 				EnrollmentID: 1,
 				ContractID:   "ctr_1",
-				Section:      "test_section",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
 			},
 			dir:          "dv_enrollment",
 			filesToCheck: []string{"enrollment.tf", "variables.tf", "import.sh"},
@@ -733,7 +754,8 @@ func TestProcessEnrollmentTemplates(t *testing.T) {
 				Enrollment:   enrollmentDVAll,
 				EnrollmentID: 1,
 				ContractID:   "ctr_1",
-				Section:      "test_section",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
 			},
 			dir:          "dv_enrollment_all_fields",
 			filesToCheck: []string{"enrollment.tf", "variables.tf", "import.sh"},
@@ -743,7 +765,8 @@ func TestProcessEnrollmentTemplates(t *testing.T) {
 				Enrollment:   enrollmentDVMin,
 				EnrollmentID: 1,
 				ContractID:   "ctr_1",
-				Section:      "test_section",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
 			},
 			dir:          "dv_enrollment_min",
 			filesToCheck: []string{"enrollment.tf", "variables.tf", "import.sh"},
@@ -753,7 +776,8 @@ func TestProcessEnrollmentTemplates(t *testing.T) {
 				Enrollment:       enrollmentThirdPartyAll,
 				EnrollmentID:     1,
 				ContractID:       "ctr_1",
-				Section:          "test_section",
+				EdgercPath:       defaultEdgercPath,
+				Section:          defaultSection,
 				CertificateECDSA: "-----BEGIN CERTIFICATE ECDSA REQUEST-----\\n...\\n-----END CERTIFICATE ECDSA REQUEST-----",
 				CertificateRSA:   "-----BEGIN CERTIFICATE RSA REQUEST-----\\n...\\n-----END CERTIFICATE RSA REQUEST-----",
 				TrustChainECDSA:  "-----BEGIN CERTIFICATE TRUST-CHAIN ECDSA REQUEST-----\\n...\\n-----END CERTIFICATE TRUST-CHAIN ECDSA REQUEST-----",
@@ -761,6 +785,17 @@ func TestProcessEnrollmentTemplates(t *testing.T) {
 			},
 			dir:          "third_party_enrollment_all_fields_ecdsa_rsa",
 			filesToCheck: []string{"enrollment.tf", "variables.tf", "import.sh"},
+		},
+		"non default edgerc path and section": {
+			givenData: TFCPSData{
+				Enrollment:   enrollmentDV,
+				EnrollmentID: 1,
+				ContractID:   "ctr_1",
+				EdgercPath:   "/non/default/path/to/edgerc",
+				Section:      "non_default_section",
+			},
+			dir:          "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 

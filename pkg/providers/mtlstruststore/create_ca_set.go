@@ -22,8 +22,9 @@ type (
 
 	// TFData represents the data used in mTLS Truststore
 	TFData struct {
-		CASet   TruststoreCASet
-		Section string
+		CASet      TruststoreCASet
+		EdgercPath string
+		Section    string
 	}
 
 	// TruststoreCASet represents the data used for exporting mTLS Truststore CA set
@@ -90,6 +91,7 @@ func CmdCreateCASet(c *cli.Context) error {
 	params := createCASetParams{
 		name:          c.Args().Get(0),
 		userVersion:   c.Int64("version"),
+		edgercPath:    edgegrid.GetEdgercPath(c),
 		configSection: edgegrid.GetEdgercSection(c),
 		client:        mtlstruststore.Client(edgegrid.GetSession(c.Context)),
 		templateProcessor: templates.FSTemplateProcessor{
@@ -112,6 +114,7 @@ func CmdCreateCASet(c *cli.Context) error {
 type createCASetParams struct {
 	name              string
 	userVersion       int64
+	edgercPath        string
 	configSection     string
 	client            mtlstruststore.MTLSTruststore
 	templateProcessor templates.TemplateProcessor
@@ -167,7 +170,7 @@ func createCASet(ctx context.Context, params createCASetParams) (e error) {
 		return fmt.Errorf("%w: %w", ErrFetchingCASetVersion, err)
 	}
 
-	tfData := populateTFData(params.configSection, caSet, caSetVersion)
+	tfData := populateTFData(params.edgercPath, params.configSection, caSet, caSetVersion)
 	term.Spinner().OK()
 
 	term.Spinner().Start("Saving TF configurations ")
@@ -208,7 +211,7 @@ func versionEquals(a, b *int64) bool {
 	return a != nil && b != nil && *a == *b
 }
 
-func populateTFData(configSection string, caSet *mtlstruststore.GetCASetResponse,
+func populateTFData(edgercPath, configSection string, caSet *mtlstruststore.GetCASetResponse,
 	caSetVersion *mtlstruststore.GetCASetVersionResponse) TFData {
 	var certs []TruststoreCertificate
 	for _, cert := range caSetVersion.Certificates {
@@ -236,7 +239,8 @@ func populateTFData(configSection string, caSet *mtlstruststore.GetCASetResponse
 	// and period (.) with no three consecutive periods. Length must be between 3 and 64 characters."
 	// Hyphens are allowed in resource names, but we need to replace periods.
 	resp := TFData{
-		Section: configSection,
+		EdgercPath: edgercPath,
+		Section:    configSection,
 		CASet: TruststoreCASet{
 			Name:               caSet.CASetName,
 			ResourceName:       strings.ReplaceAll(caSet.CASetName, ".", "_"),

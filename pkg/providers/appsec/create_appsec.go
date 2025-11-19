@@ -37,7 +37,8 @@ var (
 	// ErrSavingFiles is returned when an issue with processing templates occurs
 	ErrSavingFiles = errors.New("saving terraform project files")
 
-	section string
+	edgercPath string
+	section    string
 )
 
 // CmdCreateAppsec is an entrypoint to create-appsec command
@@ -74,7 +75,8 @@ func CmdCreateAppsec(c *cli.Context) error {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
-	// Save our section for use later
+	// Save our edgerc path and section for use later
+	edgercPath = edgegrid.GetEdgercPath(c)
 	section = edgegrid.GetEdgercSection(c)
 
 	// Template to path mappings
@@ -134,6 +136,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"getRepNameByID":                             getRepNameByID,
 		"getRuleDescByID":                            getRuleDescByID,
 		"getRuleNameByID":                            getRuleNameByID,
+		"getEdgercPath":                              getEdgercPath,
 		"getSection":                                 getSection,
 		"getWAFMode":                                 getWAFMode,
 		"isStructuredRule":                           isStructuredRule,
@@ -325,6 +328,10 @@ func getPrefixFromID(s string) string {
 // Get our config section
 func getSection() string {
 	return section
+}
+
+func getEdgercPath() string {
+	return edgercPath
 }
 
 // Get the reputation profile name by id

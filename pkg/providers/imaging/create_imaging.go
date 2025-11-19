@@ -28,9 +28,10 @@ import (
 type (
 	// TFImagingData represents the data used in imaging templates
 	TFImagingData struct {
-		PolicySet TFPolicySet
-		Policies  []TFPolicy
-		Section   string
+		PolicySet  TFPolicySet
+		Policies   []TFPolicy
+		EdgercPath string
+		Section    string
 	}
 
 	// TFPolicySet represents policy set data used in templates
@@ -120,14 +121,15 @@ func CmdCreateImaging(c *cli.Context) error {
 	}
 
 	contractID, policySetID := c.Args().Get(0), c.Args().Get(1)
+	edgercPath := edgegrid.GetEdgercPath(c)
 	section := edgegrid.GetEdgercSection(c)
-	if err = createImaging(ctx, contractID, policySetID, tfWorkPath, jsonDir, section, client, processor, tools.PolicyAsHCL); err != nil {
+	if err = createImaging(ctx, contractID, policySetID, tfWorkPath, jsonDir, edgercPath, section, client, processor, tools.PolicyAsHCL); err != nil {
 		return cli.Exit(color.RedString("Error exporting policy HCL: %s", err), 1)
 	}
 	return nil
 }
 
-func createImaging(ctx context.Context, contractID, policySetID, tfWorkPath, jsonDir, section string, client imaging.Imaging, templateProcessor templates.TemplateProcessor, policyAsHCL bool) error {
+func createImaging(ctx context.Context, contractID, policySetID, tfWorkPath, jsonDir, edgercPath, section string, client imaging.Imaging, templateProcessor templates.TemplateProcessor, policyAsHCL bool) error {
 	term := terminal.Get(ctx)
 
 	fmt.Println("Exporting Image and Video Manager configuration")
@@ -172,7 +174,8 @@ func createImaging(ctx context.Context, contractID, policySetID, tfWorkPath, jso
 			Region:     string(policySet.Region),
 			Type:       policySet.Type,
 		},
-		Section: section,
+		EdgercPath: edgercPath,
+		Section:    section,
 	}
 
 	// Only add Policies if at least one exists

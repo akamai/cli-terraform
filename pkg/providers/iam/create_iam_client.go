@@ -47,16 +47,17 @@ func CmdCreateIAMClient(c *cli.Context) error {
 		AdditionalFuncs: additionalFunctions,
 	}
 
+	edgercPath := edgegrid.GetEdgercPath(c)
 	section := edgegrid.GetEdgercSection(c)
 	clientID := c.Args().First()
-	if err = createIAMAPIClient(ctx, clientID, section, client, processor); err != nil {
+	if err = createIAMAPIClient(ctx, clientID, edgercPath, section, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}
 	return nil
 }
 
 // createIAMAPIClient with provided id
-func createIAMAPIClient(ctx context.Context, clientID, section string, client iam.IAM, templateProcessor templates.TemplateProcessor) error {
+func createIAMAPIClient(ctx context.Context, clientID, edgercPath, section string, client iam.IAM, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
 	message := "Exporting Identity and Access Management API client configuration"
@@ -91,6 +92,7 @@ func createIAMAPIClient(ctx context.Context, clientID, section string, client ia
 
 	tfData := TFData{
 		TFClient:   tfAPIClient,
+		EdgercPath: edgercPath,
 		Section:    section,
 		Subcommand: "client",
 	}

@@ -30,6 +30,7 @@ type (
 		GroupID        int64
 		ResourceTierID int
 		LocalBundle    string
+		EdgercPath     string
 		Section        string
 		Note           string
 	}
@@ -94,15 +95,16 @@ func CmdCreateEdgeWorker(c *cli.Context) error {
 	if err != nil {
 		return cli.Exit(color.RedString("edgeworker_id is not a valid integer"), 1)
 	}
+	edgercPath := edgegrid.GetEdgercPath(c)
 	section := edgegrid.GetEdgercSection(c)
 
-	if err = createEdgeWorker(ctx, edgeWorkerID, bundleDir, section, client, processor); err != nil {
+	if err = createEdgeWorker(ctx, edgeWorkerID, bundleDir, edgercPath, section, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting edgeworker HCL: %s", err), 1)
 	}
 	return nil
 }
 
-func createEdgeWorker(ctx context.Context, edgeWorkerID int, bundleDir, section string, client edgeworkers.Edgeworkers, templateProcessor templates.TemplateProcessor) error {
+func createEdgeWorker(ctx context.Context, edgeWorkerID int, bundleDir, edgercPath, section string, client edgeworkers.Edgeworkers, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 	fmt.Println("Configuring EdgeWorker")
 	term.Spinner().Start(fmt.Sprintf("Fetching EdgeWorker %d", edgeWorkerID), "")
@@ -156,6 +158,7 @@ func createEdgeWorker(ctx context.Context, edgeWorkerID int, bundleDir, section 
 		GroupID:        edgeWorker.GroupID,
 		ResourceTierID: edgeWorker.ResourceTierID,
 		LocalBundle:    localBundle,
+		EdgercPath:     edgercPath,
 		Section:        section,
 	}
 

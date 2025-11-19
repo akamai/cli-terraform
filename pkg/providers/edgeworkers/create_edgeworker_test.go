@@ -33,13 +33,14 @@ func TestMain(m *testing.M) {
 
 var (
 	expectEdgeWorkerProcessTemplates = func(p *templates.MockProcessor, edgeWorkerID int, name string, groupID int64, resourceTierID int,
-		localBundle, section, note string, err error) *mock.Call {
+		localBundle, edgercPath, section, note string, err error) *mock.Call {
 		tfData := TFEdgeWorkerData{
 			EdgeWorkerID:   edgeWorkerID,
 			Name:           name,
 			GroupID:        groupID,
 			ResourceTierID: resourceTierID,
 			LocalBundle:    localBundle,
+			EdgercPath:     edgercPath,
 			Section:        section,
 			Note:           note,
 		}
@@ -162,7 +163,8 @@ var (
 )
 
 func TestCreateEdgeWorker(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 	localBundlePath := "testdata/res/bundle"
 	localBundle := fmt.Sprintf("%s/1.24.5.tgz", localBundlePath)
 	bundleBytes, err := os.ReadFile("./testdata/bundle/sampleBundle.tgz")
@@ -172,34 +174,51 @@ func TestCreateEdgeWorker(t *testing.T) {
 	versionContent := bytes.NewBuffer(bundleBytes)
 
 	tests := map[string]struct {
+		givenData  TFEdgeWorkerData
 		init       func(*edgeworkers.Mock, *templates.MockProcessor)
 		withError  error
 		withBundle bool
 	}{
 		"fetch edgeworker with no version": {
+			givenData: TFEdgeWorkerData{
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
+			},
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, true, nil).Once()
-				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, "", section, "", nil).Once()
+				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, "", defaultEdgercPath, defaultSection, "", nil).Once()
 			},
 		},
 		"fetch edgeworker with version": {
+			givenData: TFEdgeWorkerData{
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
+			},
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, false, nil).Once()
 				expectListActivations(e, 123, "1.24.5", nil).Once()
 				expectGetEdgeWorkerVersionContent(e, 123, "1.24.5", versionContent, nil).Once()
-				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, localBundle, section, "note", nil).Once()
+				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, localBundle, defaultEdgercPath, defaultSection, "note", nil).Once()
 			},
 			withBundle: true,
 		},
 		"error fetching edgeworker": {
+			givenData: TFEdgeWorkerData{
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
+			},
 			init: func(e *edgeworkers.Mock, _ *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, fmt.Errorf("error")).Once()
 			},
 			withError: ErrFetchingEdgeWorker,
 		},
 		"error fetching edgeworker versions": {
+			givenData: TFEdgeWorkerData{
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
+			},
 			init: func(e *edgeworkers.Mock, _ *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, false, fmt.Errorf("error")).Once()
@@ -207,6 +226,10 @@ func TestCreateEdgeWorker(t *testing.T) {
 			withError: ErrFetchingEdgeWorker,
 		},
 		"error fetching edgeworker version content": {
+			givenData: TFEdgeWorkerData{
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
+			},
 			init: func(e *edgeworkers.Mock, _ *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, false, nil).Once()
@@ -216,12 +239,27 @@ func TestCreateEdgeWorker(t *testing.T) {
 			withError: ErrFetchingEdgeWorker,
 		},
 		"error processing template": {
+			givenData: TFEdgeWorkerData{
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
+			},
 			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
 				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
 				expectListEdgeWorkerVersions(e, 123, true, nil).Once()
-				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, "", section, "", fmt.Errorf("error")).Once()
+				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, "", defaultEdgercPath, defaultSection, "", fmt.Errorf("error")).Once()
 			},
 			withError: templates.ErrSavingFiles,
+		},
+		"non default edgerc path and section": {
+			givenData: TFEdgeWorkerData{
+				EdgercPath: "/non/default/path/to/edgerc",
+				Section:    "non_default_section",
+			},
+			init: func(e *edgeworkers.Mock, p *templates.MockProcessor) {
+				expectGetEdgeWorkerID(e, 123, "test_edgeworker", 1, 2, nil).Once()
+				expectListEdgeWorkerVersions(e, 123, true, nil).Once()
+				expectEdgeWorkerProcessTemplates(p, 123, "test_edgeworker", 1, 2, "", "/non/default/path/to/edgerc", "non_default_section", "", nil).Once()
+			},
 		},
 	}
 
@@ -233,7 +271,7 @@ func TestCreateEdgeWorker(t *testing.T) {
 			mp := new(templates.MockProcessor)
 			test.init(me, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createEdgeWorker(ctx, 123, localBundlePath, section, me, mp)
+			err := createEdgeWorker(ctx, 123, localBundlePath, test.givenData.EdgercPath, test.givenData.Section, me, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -264,6 +302,7 @@ func TestProcessEdgeWorkerTemplates(t *testing.T) {
 				Name:           "test_edgeworker",
 				GroupID:        1,
 				ResourceTierID: 2,
+				EdgercPath:     "~/.edgerc",
 				Section:        "test_section",
 			},
 			dir:          "edgeworker_with_no_local_bundle",
@@ -276,11 +315,24 @@ func TestProcessEdgeWorkerTemplates(t *testing.T) {
 				GroupID:        1,
 				ResourceTierID: 2,
 				LocalBundle:    "testdata/bundle/sampleBundle.tgz",
+				EdgercPath:     "~/.edgerc",
 				Section:        "test_section",
 				Note:           "note",
 			},
 			dir:          "edgeworker_with_local_bundle",
 			filesToCheck: []string{"edgeworker.tf", "variables.tf", "import.sh"},
+		},
+		"edgeworker with non default edgerc path and section": {
+			givenData: TFEdgeWorkerData{
+				EdgeWorkerID:   123,
+				Name:           "test_edgeworker",
+				GroupID:        1,
+				ResourceTierID: 2,
+				EdgercPath:     "/non/default/path/to/edgerc",
+				Section:        "non_default_section",
+			},
+			dir:          "edgeworker_with_non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 

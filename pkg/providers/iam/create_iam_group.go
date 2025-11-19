@@ -55,17 +55,18 @@ func CmdCreateIAMGroup(c *cli.Context) error {
 	}
 
 	section := edgegrid.GetEdgercSection(c)
+	edgercPath := edgegrid.GetEdgercPath(c)
 	groupID, err := strconv.ParseInt(c.Args().First(), 10, 64)
 	if err != nil {
 		return cli.Exit(color.RedString("Wrong format of group id %v must be a number: %s", groupID, err), 1)
 	}
-	if err = createIAMGroupByID(ctx, groupID, section, client, processor, groupOnly); err != nil {
+	if err = createIAMGroupByID(ctx, groupID, edgercPath, section, client, processor, groupOnly); err != nil {
 		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}
 	return nil
 }
 
-func createIAMGroupByID(ctx context.Context, groupID int64, section string, client iam.IAM, templateProcessor templates.TemplateProcessor, groupOnly bool) error {
+func createIAMGroupByID(ctx context.Context, groupID int64, edgercPath, section string, client iam.IAM, templateProcessor templates.TemplateProcessor, groupOnly bool) error {
 	term := terminal.Get(ctx)
 
 	message := "Exporting Identity and Access Management group configuration"
@@ -93,6 +94,7 @@ func createIAMGroupByID(ctx context.Context, groupID int64, section string, clie
 		TFGroups: []TFGroup{
 			tfGroup,
 		},
+		EdgercPath: edgercPath,
 		Section:    section,
 		Subcommand: "group",
 	}
