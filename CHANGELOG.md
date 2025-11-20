@@ -8,9 +8,11 @@
     * Migrated to Go `1.24`.
 
 
+* General
+  * Migrated to Terraform 1.13.5 version.
 
-
-    * Added support for generating configs with custom `edgerc` paths to missing providers.
+    
+  * Added support for generating configs with custom `edgerc` paths to missing providers.
 
 
 

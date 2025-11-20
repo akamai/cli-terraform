@@ -10,7 +10,7 @@ ENV PROVIDER_VERSION="1.0.0" \
 ARG SSH_PRV_KEY
 ARG SSH_PUB_KEY
 ARG SSH_KNOWN_HOSTS
-ARG TERRAFORM_VERSION="1.9.5"
+ARG TERRAFORM_VERSION="1.13.5"
 WORKDIR $GOPATH/src/github.com/akamai
 
 RUN apk add --update git bash sudo openssh gcc musl-dev openssl-dev ca-certificates unzip curl make && \
