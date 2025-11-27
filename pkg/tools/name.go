@@ -11,7 +11,7 @@ var nameRegexp = regexp.MustCompile(`[^\p{L}\p{Nl}\p{Mn}\p{Mc}\p{Nd}\p{Pc}\d\-_ 
 
 // ToSnakeCase returns name using snake case notation - SomeName -> some_name
 func ToSnakeCase(str string) string {
-	snake := strings.Replace(str, " ", "_", -1)
+	snake := strings.ReplaceAll(str, " ", "_")
 	snake, _ = strings.CutSuffix(snake, "_")
 	snake = matchFirstCap.ReplaceAllString(snake, "${1}_${2}")
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")

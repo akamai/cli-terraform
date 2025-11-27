@@ -15,6 +15,10 @@
   * Added support for generating configs with custom `edgerc` paths to missing providers.
 
 
+* General
+  * Updated various dependencies.
+
+
 
 
 

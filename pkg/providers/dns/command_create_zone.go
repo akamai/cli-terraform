@@ -292,7 +292,7 @@ func createDNSVarsConfig(term terminal.Terminal, tfWorkPath string, edgercPath, 
 			err = e
 		}
 	}(dnsVarsHandle)
-	_, err = dnsVarsHandle.WriteString(fmt.Sprintf(useTemplate(nil, "dnsvars.tmpl", true), edgercPath, edgercSection, contractID))
+	_, err = fmt.Fprintf(dnsVarsHandle, useTemplate(nil, "dnsvars.tmpl", true), edgercPath, edgercSection, contractID)
 	if err != nil {
 		term.Spinner().Fail()
 		return cli.Exit(color.RedString("Unable to write dnsvars config file"), 1)

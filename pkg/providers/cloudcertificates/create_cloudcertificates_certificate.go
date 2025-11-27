@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/cloudcertificates"
 	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
@@ -215,7 +216,7 @@ func sanitizeResourceName(name string) string {
 	name = strings.ReplaceAll(name, ".", "_")
 	name = strings.ReplaceAll(name, " ", "_")
 	// If a first character is not a letter or underscore, prepend an underscore.
-	if len(name) > 0 && !((name[0] >= 'A' && name[0] <= 'Z') || (name[0] >= 'a' && name[0] <= 'z') || name[0] == '_') {
+	if len(name) > 0 && !unicode.IsLetter(rune(name[0])) && name[0] != '_' {
 		name = "_" + name
 	}
 	return name

@@ -121,7 +121,7 @@ func CmdCreateCloudAccess(c *cli.Context) error {
 		}
 		if groupID <= 0 {
 			// Check if group ID is less than or equal to 0
-			return errors.New("Invalid group ID: group ID must be greater than 0")
+			return errors.New("invalid group ID: group ID must be greater than 0")
 		}
 		if !c.IsSet("contract_id") {
 			return cli.Exit(color.RedString("contract_id is mandatory when group_id is provided"), 1)

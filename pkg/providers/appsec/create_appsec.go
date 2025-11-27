@@ -342,7 +342,7 @@ func getRepNameByID(configuration *appsec.GetExportConfigurationResponse, id int
 		}
 	}
 
-	return "", errors.New("Can't find reputation profile name")
+	return "", errors.New("can't find reputation profile name")
 }
 
 // Get the security policy name by id
@@ -353,7 +353,7 @@ func getPolicyNameByID(configuration *appsec.GetExportConfigurationResponse, id 
 		}
 	}
 
-	return "", errors.New("Can't find security policy name")
+	return "", errors.New("can't find security policy name")
 }
 
 // Get the rate name by id
@@ -364,7 +364,7 @@ func getRateNameByID(configuration *appsec.GetExportConfigurationResponse, id in
 		}
 	}
 
-	return "", errors.New("Can't find rate control name")
+	return "", errors.New("can't find rate control name")
 }
 
 // Get the malware policy name by id
@@ -375,7 +375,7 @@ func getMalwareNameByID(configuration *appsec.GetExportConfigurationResponse, id
 		}
 	}
 
-	return "", errors.New("Can't find malware policy name")
+	return "", errors.New("can't find malware policy name")
 }
 
 // Get the custom rule name by id
@@ -386,7 +386,7 @@ func getCustomRuleNameByID(configuration *appsec.GetExportConfigurationResponse,
 		}
 	}
 
-	return "", errors.New("Can't find custom rule name")
+	return "", errors.New("can't find custom rule name")
 }
 
 // Get the rule name by id
