@@ -243,16 +243,17 @@ var (
 
 func TestCreateInclude(t *testing.T) {
 	tests := map[string]struct {
-		init                func(*papi.Mock, *templates.MockProcessor, *templates.MockMultiTargetProcessor, string)
-		includeName         string
-		dir                 string
-		snippetFilesToCheck []string
-		jsonDir             string
-		withError           error
-		rulesAsHCL          bool
-		splitDepth          *int
-		edgercPath          string
-		section             string
+		init                      func(*papi.Mock, *templates.MockProcessor, *templates.MockMultiTargetProcessor, string)
+		includeName               string
+		dir                       string
+		snippetFilesToCheck       []string
+		jsonDir                   string
+		withError                 error
+		rulesAsHCL                bool
+		splitDepth                *int
+		edgercPath                string
+		section                   string
+		ruleFormatVersionOverride string
 	}{
 		"include basic": {
 			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
@@ -415,6 +416,52 @@ func TestCreateInclude(t *testing.T) {
 			rulesAsHCL:  true,
 			splitDepth:  ptr.To(2),
 		},
+		"include with rule format override": {
+			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				expectListIncludes(c)
+				expectGetIncludeVersion(c, "v2020-11-02")
+
+				// Rule Tree
+				var ruleResponse papi.GetIncludeRuleTreeResponse
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				assert.NoError(t, err)
+				assert.NoError(t, json.Unmarshal(rules, &ruleResponse))
+				ruleResponse.RuleFormat = "v2024-02-12"
+				c.On("GetIncludeRuleTree", mock.Anything, papi.GetIncludeRuleTreeRequest{
+					ContractID:     "test_contract",
+					GroupID:        "test_group",
+					IncludeID:      "inc_123456",
+					IncludeVersion: 2,
+					RuleFormat:     "v2024-02-12",
+				}).Return(&ruleResponse, nil).Once()
+
+				expectListIncludeActivations(c)
+				expectAllProcessTemplates(p, getTestData("include with rule format override"))
+			},
+			includeName:               "test_include",
+			dir:                       "include_basic",
+			ruleFormatVersionOverride: "v2024-02-12",
+		},
+		"non default edgerc path and section": {
+			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				expectListIncludes(c)
+				expectGetIncludeVersion(c, "v2020-11-02")
+
+				// Rule Tree
+				var ruleResponse papi.GetIncludeRuleTreeResponse
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				assert.NoError(t, err)
+				assert.NoError(t, json.Unmarshal(rules, &ruleResponse))
+				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReq).Return(&ruleResponse, nil).Once()
+
+				expectListIncludeActivations(c)
+				expectAllProcessTemplates(p, getTestData("non default edgerc path and section"))
+			},
+			includeName: "test_include",
+			dir:         "include_basic",
+			edgercPath:  "/non/default/path/to/edgerc",
+			section:     "non_default_section",
+		},
 		"error include not found": {
 			init: func(c *papi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				c.On("ListIncludes", mock.Anything, papi.ListIncludesRequest{ContractID: "test_contract"}).
@@ -487,26 +534,6 @@ func TestCreateInclude(t *testing.T) {
 			dir:         "include_basic",
 			jsonDir:     "include_basic/property-snippets",
 		},
-		"non default edgerc path and section": {
-			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
-				expectListIncludes(c)
-				expectGetIncludeVersion(c, "v2020-11-02")
-
-				// Rule Tree
-				var ruleResponse papi.GetIncludeRuleTreeResponse
-				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
-				assert.NoError(t, err)
-				assert.NoError(t, json.Unmarshal(rules, &ruleResponse))
-				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReq).Return(&ruleResponse, nil).Once()
-
-				expectListIncludeActivations(c)
-				expectAllProcessTemplates(p, getTestData("non default edgerc path and section"))
-			},
-			includeName: "test_include",
-			dir:         "include_basic",
-			edgercPath:  "/non/default/path/to/edgerc",
-			section:     "non_default_section",
-		},
 	}
 
 	for name, test := range tests {
@@ -523,14 +550,15 @@ func TestCreateInclude(t *testing.T) {
 			test.init(mc, mp, mm, test.dir)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
 			options := includeOptions{
-				contractID:  contractID,
-				includeName: test.includeName,
-				edgercPath:  test.edgercPath,
-				section:     test.section,
-				jsonDir:     fmt.Sprintf("./testdata/res/%s", test.jsonDir),
-				tfWorkPath:  "./",
-				rulesAsHCL:  test.rulesAsHCL,
-				splitDepth:  test.splitDepth,
+				contractID:                contractID,
+				includeName:               test.includeName,
+				edgercPath:                test.edgercPath,
+				section:                   test.section,
+				jsonDir:                   fmt.Sprintf("./testdata/res/%s", test.jsonDir),
+				tfWorkPath:                "./",
+				rulesAsHCL:                test.rulesAsHCL,
+				splitDepth:                test.splitDepth,
+				ruleFormatVersionOverride: test.ruleFormatVersionOverride,
 			}
 			err := createInclude(ctx, options, mc, mp, mm)
 			if test.withError != nil {
@@ -1072,6 +1100,35 @@ func getTestData(key string) TFData {
 					IncludeType: string(papi.IncludeTypeMicroServices),
 					ProductID:   "test_product",
 					RuleFormat:  "v2020-11-02",
+				},
+			},
+		},
+		"include with rule format override": {
+			EdgercPath: defaultEdgercPath,
+			Section:    defaultSection,
+			Includes: []TFIncludeData{
+				{
+					StagingInfo: NetworkInfo{
+						ActivationNote:          "test staging activation",
+						Emails:                  []string{"test@example.com"},
+						Version:                 1,
+						HasActivation:           true,
+						IsActiveOnLatestVersion: false,
+					},
+					ProductionInfo: NetworkInfo{
+						ActivationNote:          "test production activation",
+						Emails:                  []string{"test@example.com", "test1@example.com"},
+						Version:                 1,
+						HasActivation:           true,
+						IsActiveOnLatestVersion: false,
+					},
+					ContractID:  "test_contract",
+					GroupID:     "test_group",
+					IncludeID:   "inc_123456",
+					IncludeName: "test_include",
+					IncludeType: string(papi.IncludeTypeMicroServices),
+					ProductID:   "test_product",
+					RuleFormat:  "v2024-02-12",
 				},
 			},
 		},

@@ -29,14 +29,15 @@ var (
 )
 
 type includeOptions struct {
-	contractID  string
-	includeName string
-	edgercPath  string
-	section     string
-	jsonDir     string
-	tfWorkPath  string
-	rulesAsHCL  bool
-	splitDepth  *int
+	contractID                string
+	includeName               string
+	edgercPath                string
+	section                   string
+	jsonDir                   string
+	tfWorkPath                string
+	rulesAsHCL                bool
+	splitDepth                *int
+	ruleFormatVersionOverride string
 }
 
 // CmdCreateInclude is an entrypoint to export-include include sub-command
@@ -79,6 +80,10 @@ func CmdCreateInclude(c *cli.Context) error {
 
 	if c.IsSet("split-depth") {
 		options.splitDepth = ptr.To(c.Int("split-depth"))
+	}
+
+	if c.IsSet("rule-format") {
+		options.ruleFormatVersionOverride = c.String("rule-format")
 	}
 
 	processor := templates.FSTemplateProcessor{
@@ -127,7 +132,7 @@ func createInclude(ctx context.Context, options includeOptions, client papi.PAPI
 	}
 	term.Spinner().OK()
 
-	includeData, rules, err := getIncludeData(ctx, include, client)
+	includeData, rules, err := getIncludeData(ctx, include, client, options.ruleFormatVersionOverride)
 	if err != nil {
 		return err
 	}
@@ -191,7 +196,7 @@ func createInclude(ctx context.Context, options includeOptions, client papi.PAPI
 	return nil
 }
 
-func getIncludeData(ctx context.Context, include *papi.Include, client papi.PAPI) (*TFIncludeData, *papi.GetIncludeRuleTreeResponse, error) {
+func getIncludeData(ctx context.Context, include *papi.Include, client papi.PAPI, ruleFormatVersionOverride string) (*TFIncludeData, *papi.GetIncludeRuleTreeResponse, error) {
 	term := terminal.Get(ctx)
 
 	// Get the latest version of include
@@ -209,13 +214,7 @@ func getIncludeData(ctx context.Context, include *papi.Include, client papi.PAPI
 
 	// Get include rules
 	term.Spinner().Start("Fetching include rules ")
-	rules, err := client.GetIncludeRuleTree(ctx, papi.GetIncludeRuleTreeRequest{
-		ContractID:     include.ContractID,
-		GroupID:        include.GroupID,
-		IncludeID:      include.IncludeID,
-		IncludeVersion: include.LatestVersion,
-		RuleFormat:     latestVersion.IncludeVersion.RuleFormat,
-	})
+	rules, err := getIncludeRules(ctx, client, include, latestVersion, ruleFormatVersionOverride)
 	if err != nil {
 		term.Spinner().Fail()
 		return nil, nil, fmt.Errorf("%w: %s", ErrIncludeRulesNotFound, err)
@@ -253,7 +252,7 @@ func getIncludeData(ctx context.Context, include *papi.Include, client papi.PAPI
 		IncludeName: include.IncludeName,
 		IncludeType: string(include.IncludeType),
 		ProductID:   latestVersion.IncludeVersion.ProductID,
-		RuleFormat:  latestVersion.IncludeVersion.RuleFormat,
+		RuleFormat:  rules.RuleFormat,
 	}
 
 	if latestStagingActivation != nil {
@@ -366,4 +365,19 @@ func findIncludeByName(ctx context.Context, client papi.PAPI, contractID, includ
 	}
 
 	return nil, fmt.Errorf("unable to find include: \"%s\"", includeName)
+}
+
+func getIncludeRules(ctx context.Context, client papi.PAPI, include *papi.Include, latestVersion *papi.GetIncludeVersionResponse, ruleFormatVersionOverride string) (*papi.GetIncludeRuleTreeResponse, error) {
+	ruleFormatVersion := latestVersion.IncludeVersion.RuleFormat
+	if ruleFormatVersionOverride != "" {
+		ruleFormatVersion = ruleFormatVersionOverride
+	}
+
+	return client.GetIncludeRuleTree(ctx, papi.GetIncludeRuleTreeRequest{
+		ContractID:     include.ContractID,
+		GroupID:        include.GroupID,
+		IncludeID:      include.IncludeID,
+		IncludeVersion: include.LatestVersion,
+		RuleFormat:     ruleFormatVersion,
+	})
 }

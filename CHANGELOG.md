@@ -26,6 +26,11 @@
 
 
 
+* PAPI
+  * Added `--rule-format` flag to `property` and `property-include` that allows to export with rule tree format in specific version.
+
+
+
 ### BUG FIXES:
 
 

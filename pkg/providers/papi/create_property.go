@@ -191,14 +191,15 @@ type RuleTemplate struct {
 }
 
 type propertyOptions struct {
-	propertyName  string
-	edgercPath    string
-	section       string
-	tfWorkPath    string
-	version       string
-	rulesAsHCL    bool
-	withBootstrap bool
-	splitDepth    *int
+	propertyName              string
+	edgercPath                string
+	section                   string
+	tfWorkPath                string
+	version                   string
+	rulesAsHCL                bool
+	withBootstrap             bool
+	splitDepth                *int
+	ruleFormatVersionOverride string
 }
 
 type splitDepthRuleWrapper func([]*WrappedRules) TFData
@@ -316,6 +317,11 @@ func CmdCreateProperty(c *cli.Context) error {
 		isBootstrap = c.Bool("akamai-property-bootstrap")
 	}
 
+	var ruleFormatVersionOverride string
+	if c.IsSet("rule-format") {
+		ruleFormatVersionOverride = c.String("rule-format")
+	}
+
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
@@ -336,14 +342,15 @@ func CmdCreateProperty(c *cli.Context) error {
 	}
 
 	options := propertyOptions{
-		propertyName:  c.Args().First(),
-		edgercPath:    edgegrid.GetEdgercPath(c),
-		section:       edgegrid.GetEdgercSection(c),
-		tfWorkPath:    tfWorkPath,
-		version:       version,
-		rulesAsHCL:    rulesAsHCL,
-		withBootstrap: isBootstrap,
-		splitDepth:    splitDepth,
+		propertyName:              c.Args().First(),
+		edgercPath:                edgegrid.GetEdgercPath(c),
+		section:                   edgegrid.GetEdgercSection(c),
+		tfWorkPath:                tfWorkPath,
+		version:                   version,
+		rulesAsHCL:                rulesAsHCL,
+		withBootstrap:             isBootstrap,
+		splitDepth:                splitDepth,
+		ruleFormatVersionOverride: ruleFormatVersionOverride,
 	}
 	if err = createProperty(ctx, options, "property-snippets", client, clientHapi, processor, multiTargetProcessor); err != nil {
 		return cli.Exit(color.RedString("Error exporting property \"%s\": %s", options.propertyName, err), 1)
@@ -431,7 +438,7 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 
 	// Get Property Rules
 	term.Spinner().Start("Fetching property rules ")
-	rules, err := getPropertyRules(ctx, client, version)
+	rules, err := getPropertyRules(ctx, client, version, options.ruleFormatVersionOverride)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrPropertyRulesNotFound, err)
@@ -1072,14 +1079,18 @@ func findProperty(ctx context.Context, client papi.PAPI, name string) (*papi.Pro
 }
 
 // getPropertyRules fetches property rules for given property version
-func getPropertyRules(ctx context.Context, client papi.PAPI, version *papi.GetPropertyVersionsResponse) (*papi.GetRuleTreeResponse, error) {
+func getPropertyRules(ctx context.Context, client papi.PAPI, version *papi.GetPropertyVersionsResponse, ruleFormatVersionOverride string) (*papi.GetRuleTreeResponse, error) {
+	ruleFormatVersion := version.Version.RuleFormat
+	if ruleFormatVersionOverride != "" {
+		ruleFormatVersion = ruleFormatVersionOverride
+	}
 
 	return client.GetRuleTree(ctx, papi.GetRuleTreeRequest{
 		PropertyID:      version.PropertyID,
 		PropertyVersion: version.Version.PropertyVersion,
 		ContractID:      version.ContractID,
 		GroupID:         version.GroupID,
-		RuleFormat:      version.Version.RuleFormat,
+		RuleFormat:      ruleFormatVersion,
 		ValidateRules:   true,
 	})
 }

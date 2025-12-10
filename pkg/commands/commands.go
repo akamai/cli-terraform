@@ -366,7 +366,7 @@ func CommandLocator() []*cli.Command {
 			Description: "Generates Terraform configuration for Property resources.",
 			Usage:       "export-property",
 			ArgsUsage:   "<property name>",
-			Action:      validatedAction(papi.CmdCreateProperty, requireValidWorkpath, requireNArguments(1), validateSplitDepth),
+			Action:      validatedAction(papi.CmdCreateProperty, requireValidWorkpath, requireNArguments(1), validateSplitDepth, validateRuleFormat(true)),
 			Flags: []cli.Flag{
 				&cli.BoolFlag{
 					Name:  "akamai-property-bootstrap",
@@ -390,6 +390,10 @@ func CommandLocator() []*cli.Command {
 					Usage:       "Property version to import.",
 					DefaultText: "LATEST",
 				},
+				&cli.StringFlag{
+					Name:  "rule-format",
+					Usage: "Rule format version to use for export.",
+				},
 			},
 			BashComplete: autocomplete.Default,
 		},
@@ -398,7 +402,7 @@ func CommandLocator() []*cli.Command {
 			Description: "Generates Terraform configuration for Include resources.",
 			Usage:       "export-property-include",
 			ArgsUsage:   "<contract_id> <include_name>",
-			Action:      validatedAction(papi.CmdCreateInclude, requireValidWorkpath, requireNArguments(2), validateSplitDepth),
+			Action:      validatedAction(papi.CmdCreateInclude, requireValidWorkpath, requireNArguments(2), validateSplitDepth, validateRuleFormat(false)),
 			Flags: []cli.Flag{
 				&cli.BoolFlag{
 					Name:  "rules-as-hcl",
@@ -412,6 +416,10 @@ func CommandLocator() []*cli.Command {
 					Name:        "tfworkpath",
 					Usage:       "Directory used to store files created when running commands.",
 					DefaultText: "current directory",
+				},
+				&cli.StringFlag{
+					Name:  "rule-format",
+					Usage: "Rule format version to use for export.",
 				},
 			},
 			BashComplete: autocomplete.Default,

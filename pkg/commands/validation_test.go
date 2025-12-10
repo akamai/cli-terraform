@@ -8,8 +8,10 @@ import (
 	"os"
 	"testing"
 
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/papi"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v2"
 )
@@ -447,4 +449,114 @@ func TestValidateSubCommands(t *testing.T) {
 		_ = validateSubCommands(ctx)
 		assert.Contains(t, errBuffer.String(), fmt.Sprintf("Subcommands are not expected for '%s' command", ctx.Command.Name))
 	})
+}
+
+func TestValidateRuleFormat(t *testing.T) {
+	t.Run("rule-format flag not set - should skip validation", func(t *testing.T) {
+		app := cli.NewApp()
+		app.Writer = io.Discard
+		app.ErrWriter = io.Discard
+
+		flagSet := flag.NewFlagSet("test", flag.PanicOnError)
+		flagSet.String("rule-format", "", "")
+
+		cliCtx := cli.NewContext(app, flagSet, nil)
+
+		validateFunc := validateRuleFormat(false)
+		err := validateFunc(cliCtx)
+		assert.NoError(t, err)
+	})
+}
+
+func TestValidateRuleFormatWithPAPIClient(t *testing.T) {
+	tests := map[string]struct {
+		ruleFormatFlagValue     string
+		rulesAsHclSet           bool
+		isProperty              bool
+		mockRuleFormatsResponse []string
+		mockAPIError            error
+		expectedError           string
+	}{
+		"valid rule format": {
+			ruleFormatFlagValue:     "v2023-01-05",
+			mockRuleFormatsResponse: []string{"v2023-01-05", "v2023-05-30", "v2024-03-15", "latest"},
+		},
+		"invalid rule format - correct format but non existent": {
+			ruleFormatFlagValue:     "v2020-01-01",
+			mockRuleFormatsResponse: []string{"v2023-01-05", "v2023-05-30", "v2024-03-15", "latest"},
+			expectedError:           "Invalid rule format version: v2020-01-01",
+		},
+		"invalid rule format - incorrect format": {
+			ruleFormatFlagValue:     "2023-01-05",
+			mockRuleFormatsResponse: []string{"v2023-01-05", "v2023-05-30", "v2024-03-15", "latest"},
+			expectedError:           "Invalid rule format version: 2023-01-05",
+		},
+		"latest is valid for property and rules-as-hcl not set": {
+			ruleFormatFlagValue:     "latest",
+			isProperty:              true,
+			rulesAsHclSet:           false,
+			mockRuleFormatsResponse: []string{"v2023-01-05", "v2023-05-30", "v2024-03-15", "latest"},
+		},
+		"latest is invalid for property and rules-as-hcl set": {
+			ruleFormatFlagValue:     "latest",
+			isProperty:              true,
+			rulesAsHclSet:           true,
+			mockRuleFormatsResponse: []string{"v2023-01-05", "v2023-05-30", "v2024-03-15", "latest"},
+			expectedError:           "Invalid rule format version: latest",
+		},
+		"latest is invalid for include": {
+			ruleFormatFlagValue:     "latest",
+			isProperty:              false,
+			mockRuleFormatsResponse: []string{"v2023-01-05", "v2023-05-30", "v2024-03-15", "latest"},
+			expectedError:           "Invalid rule format version: latest",
+		},
+		"API error when fetching rule formats versions": {
+			ruleFormatFlagValue: "v2023-01-05",
+			mockAPIError:        fmt.Errorf("API connection failed"),
+			expectedError:       "Failed to fetch rule formats",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			app := cli.NewApp()
+			app.Writer = io.Discard
+			errBuffer := &bytes.Buffer{}
+			app.ErrWriter = errBuffer
+
+			flagSet := flag.NewFlagSet("test", flag.PanicOnError)
+			flagSet.String("rule-format", "", "")
+			flagSet.Bool("rules-as-hcl", false, "")
+			err := flagSet.Set("rule-format", test.ruleFormatFlagValue)
+			require.NoError(t, err)
+			if test.rulesAsHclSet {
+				err = flagSet.Set("rules-as-hcl", "true")
+				require.NoError(t, err)
+			}
+
+			cliCtx := cli.NewContext(app, flagSet, nil)
+
+			mockClient := new(papi.Mock)
+			if test.mockAPIError != nil {
+				mockClient.On("GetRuleFormats", mock.Anything).Return(nil, test.mockAPIError).Once()
+			} else {
+				response := &papi.GetRuleFormatsResponse{
+					RuleFormats: papi.RuleFormatItems{
+						Items: test.mockRuleFormatsResponse,
+					},
+				}
+				mockClient.On("GetRuleFormats", mock.Anything).Return(response, nil).Once()
+			}
+
+			err = checkRuleFormat(cliCtx, mockClient, test.isProperty)
+
+			if test.expectedError != "" {
+				assert.ErrorContains(t, err, test.expectedError)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			mockClient.AssertExpectations(t)
+		})
+	}
 }

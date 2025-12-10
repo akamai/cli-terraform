@@ -599,17 +599,18 @@ func TestCreateProperty(t *testing.T) {
 	otherRuleFormatFilter := []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")}
 
 	tests := map[string]struct {
-		init                func(*papi.Mock, *hapi.Mock, *templates.MockProcessor, *templates.MockMultiTargetProcessor, string)
-		dir                 string
-		snippetFilesToCheck []string
-		jsonDir             string
-		withError           error
-		readVersion         string
-		rulesAsHCL          bool
-		withBootstrap       bool
-		splitDepth          *int
-		edgercPath          string
-		edgercSection       string
+		init                      func(*papi.Mock, *hapi.Mock, *templates.MockProcessor, *templates.MockMultiTargetProcessor, string)
+		dir                       string
+		snippetFilesToCheck       []string
+		jsonDir                   string
+		withError                 error
+		readVersion               string
+		rulesAsHCL                bool
+		withBootstrap             bool
+		splitDepth                *int
+		edgercPath                string
+		edgercSection             string
+		ruleFormatVersionOverride string
 	}{
 		"basic property (with hostname's cnameTo starting with a digit)": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
@@ -1591,6 +1592,51 @@ func TestCreateProperty(t *testing.T) {
 			},
 			dir: "basic",
 		},
+		"basic property with rule format override": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, getPropertyResponse())
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				ruleResponse.RuleFormat = "v2024-02-12"
+				mockGetRuleTreeWithFormat(c, 5, "v2024-02-12", &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withRuleFormat("v2024-02-12").build(), noFilters, nil)
+			},
+			dir:                       "basic",
+			ruleFormatVersionOverride: "v2024-02-12",
+		},
+		"non default edgerc path and section": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, getPropertyResponse())
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponseNonDefaultTTL, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withEdgeHostname(edgeHostnameWithTTL).withEdgercPathAndSection("/non/default/path/to/edgerc", "non_default_section").build(), noFilters, nil)
+			},
+			dir:           "basic-non-default-ttl",
+			jsonDir:       "basic-non-default-ttl/property-snippets",
+			edgercPath:    "/non/default/path/to/edgerc",
+			edgercSection: "non_default_section",
+		},
 		"error property not found": {
 			init: func(c *papi.Mock, _ *hapi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				mockSearchProperties(c, nil, fmt.Errorf("oops"))
@@ -1710,29 +1756,6 @@ func TestCreateProperty(t *testing.T) {
 			dir:       "basic",
 			withError: ErrSavingFiles,
 		},
-		"non default edgerc path and section": {
-			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
-				mockSearchProperties(c, &searchPropertiesResponse, nil)
-				mockGetProperty(c, getPropertyResponse())
-
-				ruleResponse := getRuleTreeResponse(dir, t)
-				mockGetRuleTree(c, 5, &ruleResponse, nil)
-				mockGetGroups(c, &getGroupsResponse, nil)
-				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
-				mockGetLatestVersion(c, &getLatestVersionResponse)
-				mockGetProducts(c, &getProductsResponse, nil)
-				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
-				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponseNonDefaultTTL, nil)
-				mockGetEdgeHostnames(c)
-				mockGetActivations(c, &getActivationsResponse, nil)
-				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
-				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withEdgeHostname(edgeHostnameWithTTL).withEdgercPathAndSection("/non/default/path/to/edgerc", "non_default_section").build(), noFilters, nil)
-			},
-			dir:           "basic-non-default-ttl",
-			jsonDir:       "basic-non-default-ttl/property-snippets",
-			edgercPath:    "/non/default/path/to/edgerc",
-			edgercSection: "non_default_section",
-		},
 	}
 
 	for name, test := range tests {
@@ -1750,14 +1773,15 @@ func TestCreateProperty(t *testing.T) {
 			test.init(mc, mh, mp, mm, test.dir)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
 			options := propertyOptions{
-				propertyName:  "test.edgesuite.net",
-				edgercPath:    test.edgercPath,
-				section:       test.edgercSection,
-				tfWorkPath:    "./",
-				version:       test.readVersion,
-				rulesAsHCL:    test.rulesAsHCL,
-				withBootstrap: test.withBootstrap,
-				splitDepth:    test.splitDepth,
+				propertyName:              "test.edgesuite.net",
+				edgercPath:                test.edgercPath,
+				section:                   test.edgercSection,
+				tfWorkPath:                "./",
+				version:                   test.readVersion,
+				rulesAsHCL:                test.rulesAsHCL,
+				withBootstrap:             test.withBootstrap,
+				splitDepth:                test.splitDepth,
+				ruleFormatVersionOverride: test.ruleFormatVersionOverride,
 			}
 			err := createProperty(ctx, options, fmt.Sprintf("./testdata/res/%s", test.jsonDir), mc, mh, mp, mm)
 			if test.withError != nil {
@@ -1791,6 +1815,11 @@ func mockGetProperty(p *papi.Mock, getPropertyResponse *papi.GetPropertyResponse
 
 func mockGetRuleTree(p *papi.Mock, propertyVersion int, ruleResponse *papi.GetRuleTreeResponse, err error) {
 	p.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: propertyVersion, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: "latest"}).
+		Return(ruleResponse, err).Once()
+}
+
+func mockGetRuleTreeWithFormat(p *papi.Mock, propertyVersion int, ruleFormat string, ruleResponse *papi.GetRuleTreeResponse, err error) {
+	p.On("GetRuleTree", mock.Anything, papi.GetRuleTreeRequest{PropertyID: "prp_12345", PropertyVersion: propertyVersion, ContractID: "test_contract", GroupID: "grp_12345", ValidateMode: "", ValidateRules: true, RuleFormat: ruleFormat}).
 		Return(ruleResponse, err).Once()
 }
 
