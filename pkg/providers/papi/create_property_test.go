@@ -323,6 +323,55 @@ func TestCreateProperty(t *testing.T) {
 						ECDSACertID:   "7890",
 						ECDSACertLink: "/ccm/v1/certificates/7890",
 					},
+					MTLS: &papi.MTLS{
+						CASetID:         "cas_1234567890",
+						CheckClientOCSP: true,
+						SendCASetClient: true,
+					},
+					TLSConfiguration: &papi.TLSConfiguration{
+						CipherProfile:            "ak-tls-1-3",
+						DisallowedTLSVersions:    []string{"1.0", "1.1"},
+						FIPSMode:                 true,
+						StapleServerOcspResponse: true,
+					},
+				},
+			},
+		},
+	}
+
+	getPropertyVersionResponseWithoutDisallowedTLSVersionsInTLSConfiguration := papi.GetPropertyVersionHostnamesResponse{
+		AccountID:       "test_account",
+		ContractID:      "test_contract",
+		GroupID:         "grp_12345",
+		PropertyID:      "prp_12345",
+		PropertyVersion: 5,
+		Etag:            "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
+		Hostnames: papi.HostnameResponseItems{
+			Items: []papi.Hostname{
+				{
+					CnameType:            "EDGE_HOSTNAME",
+					EdgeHostnameID:       "ehn_2867480",
+					CnameFrom:            "test.edgesuite.net",
+					CnameTo:              "test.edgesuite.net",
+					CertProvisioningType: "CPS_MANAGED",
+				},
+				{
+					CnameType:            "EDGE_HOSTNAME",
+					EdgeHostnameID:       "ehn_34343434",
+					CnameFrom:            "foo.com",
+					CnameTo:              "foo.com.edgekey.net",
+					CertProvisioningType: "CCM",
+					CCMCertificates: &papi.CCMCertificates{
+						RSACertID:     "2226",
+						RSACertLink:   "/ccm/v1/certificates/2226",
+						ECDSACertID:   "7890",
+						ECDSACertLink: "/ccm/v1/certificates/7890",
+					},
+					TLSConfiguration: &papi.TLSConfiguration{
+						CipherProfile:            "ak-tls-1-3",
+						FIPSMode:                 true,
+						StapleServerOcspResponse: true,
+					},
 				},
 			},
 		},
@@ -639,7 +688,7 @@ func TestCreateProperty(t *testing.T) {
 				"Dynamic_Content.json",
 			},
 		},
-		"basic property (with ccm hostname)": {
+		"basic ccm property (with mtls and tls_configuration details)": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
 				mockGetProperty(c, getPropertyResponse())
@@ -673,12 +722,23 @@ func TestCreateProperty(t *testing.T) {
 							RSACertID:   "2226",
 							ECDSACertID: "7890",
 						},
+						MTLS: &MTLS{
+							CASetID:         "cas_1234567890",
+							CheckClientOCSP: true,
+							SendCASetClient: true,
+						},
+						TLSConfiguration: &TLSConfiguration{
+							CipherProfile:            "ak-tls-1-3",
+							DisallowedTLSVersions:    []string{"1.0", "1.1"},
+							FIPSMode:                 true,
+							StapleServerOcspResponse: true,
+						},
 					},
 				}
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().
 					withHostnames(hostnames).build(), noFilters, nil)
 			},
-			dir:     "basic-ccm-hostnames",
+			dir:     "basic-ccm-hostnames-with-mtls",
 			jsonDir: "basic/property-snippets",
 			snippetFilesToCheck: []string{
 				"main.json",
@@ -687,7 +747,59 @@ func TestCreateProperty(t *testing.T) {
 				"Dynamic_Content.json",
 			},
 		},
+		"basic ccm property with tls_configuration details (missing disallowed_tls_versions)": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, getPropertyResponse())
 
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionResponseWithoutDisallowedTLSVersionsInTLSConfiguration, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				hostnames := map[string]Hostname{
+					"test.edgesuite.net": {
+						CnameFrom:                "test.edgesuite.net",
+						CnameTo:                  "test.edgesuite.net",
+						EdgeHostnameResourceName: "test-edgesuite-net",
+						CertProvisioningType:     "CPS_MANAGED",
+						IsActive:                 true,
+					},
+					"foo.com": {
+						CnameFrom:                "foo.com",
+						CnameTo:                  "foo.com.edgekey.net",
+						EdgeHostnameResourceName: "",
+						CertProvisioningType:     "CCM",
+						IsActive:                 true,
+						CCMCertificates: &CCMCertificates{
+							RSACertID:   "2226",
+							ECDSACertID: "7890",
+						},
+						TLSConfiguration: &TLSConfiguration{
+							CipherProfile:            "ak-tls-1-3",
+							FIPSMode:                 true,
+							StapleServerOcspResponse: true,
+						},
+					},
+				}
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().
+					withHostnames(hostnames).build(), noFilters, nil)
+			},
+			dir:     "basic-ccm-hostnames-without-disallowed_tls_versions-in-tls_configuration",
+			jsonDir: "basic/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+		},
 		"basic property with edgehostname with non default ttl": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)

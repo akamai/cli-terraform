@@ -91,6 +91,23 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
       {{- end}}
     }
     {{- end}}
+    {{- with .MTLS}}
+    mtls {
+      ca_set_id          = "{{.CASetID}}"
+      check_client_ocsp  = {{.CheckClientOCSP}}
+      send_ca_set_client = {{.SendCASetClient}}
+    }
+    {{- end}}
+    {{- with .TLSConfiguration}}
+    tls_configuration {
+      cipher_profile              = "{{.CipherProfile}}"
+      {{- if .DisallowedTLSVersions}}
+      disallowed_tls_versions     = jsonencode({{.DisallowedTLSVersions}})
+      {{- end}}
+      fips_mode                   = {{.FIPSMode}}
+      staple_server_ocsp_response = {{.StapleServerOcspResponse}}
+    }
+    {{- end}}
   }
 {{- end}}
 {{- if .RulesAsHCL}}

@@ -7,6 +7,8 @@
 * General
     * Migrated to Go `1.24`.
 
+* PAPI
+  * Added support for exporting `mtls` and `tls_configuration` attributes for hostnames with a `cert_provisioning_type` of `CCM` in `export-property`.
 
 * General
   * Migrated to Terraform 1.13.5 version.

@@ -49,12 +49,29 @@ type Hostname struct {
 	CertProvisioningType     string
 	IsActive                 bool
 	CCMCertificates          *CCMCertificates
+	MTLS                     *MTLS
+	TLSConfiguration         *TLSConfiguration
 }
 
 // CCMCertificates holds CCM certificate IDs.
 type CCMCertificates struct {
 	RSACertID   string
 	ECDSACertID string
+}
+
+// MTLS holds MTLS configuration details.
+type MTLS struct {
+	CASetID         string
+	CheckClientOCSP bool
+	SendCASetClient bool
+}
+
+// TLSConfiguration holds CCM TLSConfiguration details.
+type TLSConfiguration struct {
+	CipherProfile            string
+	DisallowedTLSVersions    []string
+	StapleServerOcspResponse bool
+	FIPSMode                 bool
 }
 
 // WrappedRules is a wrapper around Rule which simplifies flattening rule tree into list and adjust names of the datasources
@@ -919,10 +936,30 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			certProvisioningType = hostname.CertProvisioningType
 		}
 		var ccmCertificates *CCMCertificates
-		if hostname.CertProvisioningType == string(papi.CertTypeCCM) && hostname.CCMCertificates != nil {
-			ccmCertificates = &CCMCertificates{
-				RSACertID:   hostname.CCMCertificates.RSACertID,
-				ECDSACertID: hostname.CCMCertificates.ECDSACertID,
+		var mtls *MTLS
+		var tlsConfiguration *TLSConfiguration
+
+		if hostname.CertProvisioningType == string(papi.CertTypeCCM) {
+			if hostname.CCMCertificates != nil {
+				ccmCertificates = &CCMCertificates{
+					RSACertID:   hostname.CCMCertificates.RSACertID,
+					ECDSACertID: hostname.CCMCertificates.ECDSACertID,
+				}
+			}
+			if hostname.MTLS != nil {
+				mtls = &MTLS{
+					CASetID:         hostname.MTLS.CASetID,
+					CheckClientOCSP: hostname.MTLS.CheckClientOCSP,
+					SendCASetClient: hostname.MTLS.SendCASetClient,
+				}
+			}
+			if hostname.TLSConfiguration != nil {
+				tlsConfiguration = &TLSConfiguration{
+					CipherProfile:            hostname.TLSConfiguration.CipherProfile,
+					DisallowedTLSVersions:    hostname.TLSConfiguration.DisallowedTLSVersions,
+					StapleServerOcspResponse: hostname.TLSConfiguration.StapleServerOcspResponse,
+					FIPSMode:                 hostname.TLSConfiguration.FIPSMode,
+				}
 			}
 		}
 		hostnamesMap[cnameFrom] = Hostname{
@@ -932,6 +969,8 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			CertProvisioningType:     certProvisioningType,
 			IsActive:                 len(hostname.EdgeHostnameID) > 0,
 			CCMCertificates:          ccmCertificates,
+			MTLS:                     mtls,
+			TLSConfiguration:         tlsConfiguration,
 		}
 	}
 
