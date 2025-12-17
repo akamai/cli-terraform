@@ -27,7 +27,7 @@
 
 
 * PAPI
-  * Added `--rule-format` flag to `property` and `property-include` that allows to export with rule tree format in specific version.
+  * Added the `--rule-format` flag to the `export-property` and `export-property-include` commands. The flag allows exporting with a rule tree in a specific format version.
 
 
 
