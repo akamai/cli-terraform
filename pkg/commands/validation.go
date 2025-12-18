@@ -141,7 +141,10 @@ func checkRuleFormat(ctx *cli.Context, client papi.PAPI, isProperty bool) error 
 	// "latest" is only allowed for properties using json format for rules
 	latestAllowed := isProperty && !ctx.IsSet("rules-as-hcl")
 	if !slices.Contains(ruleFormats.RuleFormats.Items, ruleFormat) || (ruleFormat == "latest" && !latestAllowed) {
-		return cli.Exit(color.RedString("Invalid rule format version: %s. Must be vYYYY-MM-DD (with a leading \"v\"). The 'latest' value is allowed only for properties using the JSON rule format)", ruleFormat), 1)
+		if isProperty {
+			return cli.Exit(color.RedString("Invalid rule format version: %s. Must be vYYYY-MM-DD (with a leading \"v\"). The 'latest' value is allowed only for properties using the JSON rule format.", ruleFormat), 1)
+		}
+		return cli.Exit(color.RedString("Invalid rule format version: %s. Must be vYYYY-MM-DD (with a leading \"v\").", ruleFormat), 1)
 	}
 
 	return nil

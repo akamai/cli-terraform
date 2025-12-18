@@ -481,15 +481,29 @@ func TestValidateRuleFormatWithPAPIClient(t *testing.T) {
 			ruleFormatFlagValue:     "v2023-01-05",
 			mockRuleFormatsResponse: []string{"v2023-01-05", "v2023-05-30", "v2024-03-15", "latest"},
 		},
-		"invalid rule format - correct format but non existent": {
+		"invalid rule format - correct format but non existent for property": {
 			ruleFormatFlagValue:     "v2020-01-01",
+			isProperty:              true,
 			mockRuleFormatsResponse: []string{"v2023-01-05", "v2023-05-30", "v2024-03-15", "latest"},
-			expectedError:           "Invalid rule format version: v2020-01-01",
+			expectedError:           "Invalid rule format version: v2020-01-01. Must be vYYYY-MM-DD (with a leading \"v\"). The 'latest' value is allowed only for properties using the JSON rule format.",
 		},
-		"invalid rule format - incorrect format": {
-			ruleFormatFlagValue:     "2023-01-05",
+		"invalid rule format - correct format but non existent for include": {
+			ruleFormatFlagValue:     "v2020-01-01",
+			isProperty:              false,
 			mockRuleFormatsResponse: []string{"v2023-01-05", "v2023-05-30", "v2024-03-15", "latest"},
-			expectedError:           "Invalid rule format version: 2023-01-05",
+			expectedError:           "Invalid rule format version: v2020-01-01. Must be vYYYY-MM-DD (with a leading \"v\").",
+		},
+		"invalid rule format - incorrect format for property": {
+			ruleFormatFlagValue:     "2023-01-05",
+			isProperty:              true,
+			mockRuleFormatsResponse: []string{"v2023-01-05", "v2023-05-30", "v2024-03-15", "latest"},
+			expectedError:           "Invalid rule format version: 2023-01-05. Must be vYYYY-MM-DD (with a leading \"v\"). The 'latest' value is allowed only for properties using the JSON rule format.",
+		},
+		"invalid rule format - incorrect format for include": {
+			ruleFormatFlagValue:     "2023-01-05",
+			isProperty:              false,
+			mockRuleFormatsResponse: []string{"v2023-01-05", "v2023-05-30", "v2024-03-15", "latest"},
+			expectedError:           "Invalid rule format version: 2023-01-05. Must be vYYYY-MM-DD (with a leading \"v\").",
 		},
 		"latest is valid for property and rules-as-hcl not set": {
 			ruleFormatFlagValue:     "latest",
@@ -502,13 +516,13 @@ func TestValidateRuleFormatWithPAPIClient(t *testing.T) {
 			isProperty:              true,
 			rulesAsHclSet:           true,
 			mockRuleFormatsResponse: []string{"v2023-01-05", "v2023-05-30", "v2024-03-15", "latest"},
-			expectedError:           "Invalid rule format version: latest",
+			expectedError:           "Invalid rule format version: latest. Must be vYYYY-MM-DD (with a leading \"v\"). The 'latest' value is allowed only for properties using the JSON rule format.",
 		},
 		"latest is invalid for include": {
 			ruleFormatFlagValue:     "latest",
 			isProperty:              false,
 			mockRuleFormatsResponse: []string{"v2023-01-05", "v2023-05-30", "v2024-03-15", "latest"},
-			expectedError:           "Invalid rule format version: latest",
+			expectedError:           "Invalid rule format version: latest. Must be vYYYY-MM-DD (with a leading \"v\").",
 		},
 		"API error when fetching rule formats versions": {
 			ruleFormatFlagValue: "v2023-01-05",
