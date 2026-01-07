@@ -45,8 +45,8 @@ resource "akamai_property" "test-edgesuite-net" {
     tls_configuration {
       cipher_profile              = "ak-tls-1-3"
       disallowed_tls_versions     = ["1.0", "1.1"]
-      staple_server_ocsp_response = true
       fips_mode                   = true
+      staple_server_ocsp_response = true
     }
   }
   hostnames {

@@ -102,7 +102,7 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
     tls_configuration {
       cipher_profile              = "{{.CipherProfile}}"
       {{- if .DisallowedTLSVersions}}
-      disallowed_tls_versions     = jsonencode({{.DisallowedTLSVersions}})
+      disallowed_tls_versions     = [{{range $index, $element := .DisallowedTLSVersions}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
       {{- end}}
       fips_mode                   = {{.FIPSMode}}
       staple_server_ocsp_response = {{.StapleServerOcspResponse}}
