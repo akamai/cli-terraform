@@ -113,6 +113,10 @@ validate-testdata: ; $(info $(M) Validating testdata agains terraform-provider-a
 release: ; $(info $(M) Generating release binaries and signatures...) @ ## Generate release binaries
 	@./scripts/build.sh
 
+.PHONY: build
+build: ; $(info $(M) Building the binary...) @ ## Build the akamai-terraform binary
+	@go build -o akamai-terraform
+
 .PHONY: clean
 clean: ; $(info $(M) Removing 'tools' directory and test results...) @ ## Cleanup installed packages and test reports
 	@rm -rf $(BIN)

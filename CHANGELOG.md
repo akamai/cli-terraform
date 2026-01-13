@@ -23,7 +23,8 @@
 
 
 
-
+* General
+  * Added support for building the `cli-terraform` for the `linux/arm64` architecture.
 
 
 * PAPI
