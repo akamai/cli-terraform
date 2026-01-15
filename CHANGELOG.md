@@ -1,78 +1,19 @@
 # RELEASE NOTES
 
-## X.XX.X (Month XX, XXXX)
+## 2.7.0 (Jan 21, 2026)
 
 ### FEATURES/ENHANCEMENTS:
 
 * General
-    * Migrated to Go `1.24`.
-
-* PAPI
-  * Added support for exporting `mtls` and `tls_configuration` attributes for hostnames with a `cert_provisioning_type` of `CCM` in `export-property`.
-
-* General
-  * Migrated to Terraform 1.13.5 version.
-
-    
-  * Added support for generating configs with custom `edgerc` paths to missing providers.
-
-
-* General
+  * Added support for building the `cli-terraform` for the `linux/arm64` architecture.
+  * Added support for generating configs with custom `edgerc` paths to all providers.
+  * Migrated to Go `1.24`.
+  * Migrated to Terraform `1.13.5` version.
   * Updated various dependencies.
 
-
-
-
-
-
-* General
-  * Added support for building the `cli-terraform` for the `linux/arm64` architecture.
-
-
 * PAPI
+  * Added support for exporting `mtls` and `tls_configuration` attributes for hostnames with a `cert_provisioning_type` of `CCM` when running the `export-property` command.
   * Added the `--rule-format` flag to the `export-property` and `export-property-include` commands. The flag allows exporting with a rule tree in a specific format version.
-
-
-
-### BUG FIXES:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### DEPRECATIONS:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## 2.6.0 (Nov 13, 2025)
 
