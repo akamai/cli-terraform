@@ -6,8 +6,8 @@ github.com/Netflix/go-expect v0.0.0-20220104043353-73e0943537d2 h1:+vx7roKuyA63n
 github.com/Netflix/go-expect v0.0.0-20220104043353-73e0943537d2/go.mod h1:HBCaDeC1lPdgDeDbhX8XFpy1jqjK0IBG8W5K+xYqA0w=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
-github.com/akamai/AkamaiOPEN-edgegrid-golang/v12 v12.2.0 h1:nDx/0X2EkxwCGN/W9o+a6LcUrTRaDFFJ+7wxMoh4+lU=
-github.com/akamai/AkamaiOPEN-edgegrid-golang/v12 v12.2.0/go.mod h1:Bf6hnZkloZnfL4I/gFGnMMMdMHiu/ERnSOWtFgnodDk=
+github.com/akamai/AkamaiOPEN-edgegrid-golang/v12 v12.3.0 h1:iGVPe/gPqzpXggbbmVLWR0TyJ9UoPoqKL+kspjseZzE=
+github.com/akamai/AkamaiOPEN-edgegrid-golang/v12 v12.3.0/go.mod h1:76JtkiCKMwTdTOlKe9goT4Md+oWjfMouGBQgy+u1bgc=
 github.com/akamai/cli/v2 v2.0.3 h1:kH5cchT9bb3wMD8XTF5M6NxxScyfEq5s41gHnflPR9I=
 github.com/akamai/cli/v2 v2.0.3/go.mod h1:fsyrhFLTPIpsL1t2GNrm59oRNFp6f/qe0uCZnUp94As=
 github.com/apparentlymart/go-textseg/v15 v15.0.0 h1:uYvfpb3DyLSCGWnctWKGj857c6ew1u1fNQOlOtuGxQY=

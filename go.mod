@@ -3,7 +3,7 @@ module github.com/akamai/cli-terraform/v2
 go 1.24.11
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v12 v12.2.0
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v12 v12.3.0
 	github.com/akamai/cli/v2 v2.0.3
 	github.com/fatih/color v1.18.0
 	github.com/hashicorp/hcl/v2 v2.23.0
