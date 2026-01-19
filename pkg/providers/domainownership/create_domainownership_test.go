@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/domainownership"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/ptr"
 	"github.com/akamai/cli-terraform/v2/pkg/templates"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"
@@ -34,16 +35,18 @@ func TestProcessDomainOwnershipTemplates(t *testing.T) {
 
 	basicDomainsRS := []domainownership.SearchDomainItem{
 		{
-			DomainName:      "example.com",
-			ValidationScope: "DOMAIN",
-			ValidationLevel: "FQDN",
-			DomainStatus:    "VALIDATED",
+			DomainName:       "example.com",
+			ValidationScope:  "DOMAIN",
+			ValidationMethod: ptr.To("DNS_CNAME"),
+			ValidationLevel:  "FQDN",
+			DomainStatus:     "VALIDATED",
 		},
 		{
-			DomainName:      "sub.example.com",
-			ValidationScope: "HOST",
-			ValidationLevel: "FQDN",
-			DomainStatus:    "VALIDATED",
+			DomainName:       "sub.example.com",
+			ValidationScope:  "HOST",
+			ValidationMethod: ptr.To("DNS_TXT"),
+			ValidationLevel:  "FQDN",
+			DomainStatus:     "VALIDATED",
 		},
 	}
 
@@ -101,16 +104,18 @@ func TestProcessDomainOwnershipTemplates(t *testing.T) {
 
 				d.domainsRS = []domainownership.SearchDomainItem{
 					{
-						DomainName:      "example.com",
-						ValidationScope: "DOMAIN",
-						ValidationLevel: "FQDN",
-						DomainStatus:    "VALIDATED",
+						DomainName:       "example.com",
+						ValidationScope:  "DOMAIN",
+						ValidationMethod: ptr.To("DNS_CNAME"),
+						ValidationLevel:  "FQDN",
+						DomainStatus:     "VALIDATED",
 					},
 					{
-						DomainName:      "example.com",
-						ValidationScope: "HOST",
-						ValidationLevel: "FQDN",
-						DomainStatus:    "VALIDATED",
+						DomainName:       "example.com",
+						ValidationScope:  "HOST",
+						ValidationMethod: ptr.To("DNS_TXT"),
+						ValidationLevel:  "FQDN",
+						DomainStatus:     "VALIDATED",
 					},
 				}
 
@@ -138,16 +143,18 @@ func TestProcessDomainOwnershipTemplates(t *testing.T) {
 
 				d.domainsRS = []domainownership.SearchDomainItem{
 					{
-						DomainName:      "example.com",
-						ValidationScope: "DOMAIN",
-						ValidationLevel: "FQDN",
-						DomainStatus:    "VALIDATED",
+						DomainName:       "example.com",
+						ValidationScope:  "DOMAIN",
+						ValidationMethod: ptr.To("DNS_CNAME"),
+						ValidationLevel:  "FQDN",
+						DomainStatus:     "VALIDATED",
 					},
 					{
-						DomainName:      "example.com",
-						ValidationScope: "HOST",
-						ValidationLevel: "ROOT/WILDCARD",
-						DomainStatus:    "VALIDATED",
+						DomainName:       "example.com",
+						ValidationScope:  "HOST",
+						ValidationMethod: ptr.To("DNS_TXT"),
+						ValidationLevel:  "ROOT/WILDCARD",
+						DomainStatus:     "VALIDATED",
 					},
 				}
 
@@ -170,16 +177,18 @@ func TestProcessDomainOwnershipTemplates(t *testing.T) {
 				d.domainsRQ = basicDomainsRQ
 				d.domainsRS = []domainownership.SearchDomainItem{
 					{
-						DomainName:      "example.com",
-						ValidationScope: "DOMAIN",
-						ValidationLevel: "FQDN",
-						DomainStatus:    "VALIDATED",
+						DomainName:       "example.com",
+						ValidationScope:  "DOMAIN",
+						ValidationMethod: ptr.To("DNS_CNAME"),
+						ValidationLevel:  "FQDN",
+						DomainStatus:     "VALIDATED",
 					},
 					{
-						DomainName:      "sub.example.com",
-						ValidationScope: "HOST",
-						ValidationLevel: "FQDN",
-						DomainStatus:    "VALIDATION_IN_PROGRESS",
+						DomainName:       "sub.example.com",
+						ValidationScope:  "HOST",
+						ValidationMethod: ptr.To("DNS_TXT"),
+						ValidationLevel:  "FQDN",
+						DomainStatus:     "VALIDATION_IN_PROGRESS",
 					},
 				}
 				d.mockSearchDomains(m, nil)
@@ -192,16 +201,18 @@ func TestProcessDomainOwnershipTemplates(t *testing.T) {
 				d.domainsRQ = basicDomainsRQ
 				d.domainsRS = []domainownership.SearchDomainItem{
 					{
-						DomainName:      "example.com",
-						ValidationScope: "DOMAIN",
-						ValidationLevel: "FQDN",
-						DomainStatus:    "VALIDATION_IN_PROGRESS",
+						DomainName:       "example.com",
+						ValidationScope:  "DOMAIN",
+						ValidationMethod: ptr.To("DNS_CNAME"),
+						ValidationLevel:  "FQDN",
+						DomainStatus:     "VALIDATION_IN_PROGRESS",
 					},
 					{
-						DomainName:      "sub.example.com",
-						ValidationScope: "HOST",
-						ValidationLevel: "FQDN",
-						DomainStatus:    "VALIDATION_IN_PROGRESS",
+						DomainName:       "sub.example.com",
+						ValidationScope:  "HOST",
+						ValidationMethod: ptr.To("DNS_TXT"),
+						ValidationLevel:  "FQDN",
+						DomainStatus:     "VALIDATION_IN_PROGRESS",
 					},
 				}
 				d.mockSearchDomains(m, nil)

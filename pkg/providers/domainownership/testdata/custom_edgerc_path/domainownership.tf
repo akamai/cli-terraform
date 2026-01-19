@@ -29,12 +29,14 @@ resource "akamai_property_domainownership_domains" "example-com" {
 resource "akamai_property_domainownership_validation" "example-com" {
   domains = [
     {
-      domain_name      = "example.com"
-      validation_scope = "DOMAIN"
+      domain_name       = "example.com"
+      validation_scope  = "DOMAIN"
+      validation_method = "DNS_CNAME"
     },
     {
-      domain_name      = "sub.example.com"
-      validation_scope = "HOST"
+      domain_name       = "sub.example.com"
+      validation_scope  = "HOST"
+      validation_method = "DNS_TXT"
     }
   ]
 }
