@@ -29,9 +29,10 @@ var (
 		client.On("ListCIDRBlocks", mock.Anything, req).Return(cidrs, nil).Once()
 	}
 
-	expectAllowlistProcessTemplates = func(p *templates.MockProcessor, section string, response iam.ListCIDRBlocksResponse, enabled bool) *mock.Call {
+	expectAllowlistProcessTemplates = func(p *templates.MockProcessor, edgercPath string, section string, response iam.ListCIDRBlocksResponse, enabled bool) *mock.Call {
 		tfData := TFData{
 			TFAllowlist: TFAllowlist{},
+			EdgercPath:  edgercPath,
 			Section:     section,
 			Subcommand:  "allowlist",
 		}
@@ -55,24 +56,40 @@ var (
 )
 
 func TestCreateIAMAllowlist(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 
 	tests := map[string]struct {
-		init func(*iam.Mock, *templates.MockProcessor)
+		edgercPath string
+		section    string
+		init       func(*iam.Mock, *templates.MockProcessor)
 	}{
 		"fetch ip allowlist status and CIDR blocks": {
+			edgercPath: defaultEdgercPath,
+			section:    defaultSection,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetIPAllowlistStatus(i, true)
 				expectListCIDRBlocks(i, cidrs)
-				expectAllowlistProcessTemplates(p, section, cidrs, true)
+				expectAllowlistProcessTemplates(p, defaultEdgercPath, defaultSection, cidrs, true)
 			},
 		},
 		"fetch ip allowlist status and no CIDR blocks": {
+			edgercPath: defaultEdgercPath,
+			section:    defaultSection,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				noCIDRBlocks := iam.ListCIDRBlocksResponse{}
 				expectGetIPAllowlistStatus(i, false)
 				expectListCIDRBlocks(i, noCIDRBlocks)
-				expectAllowlistProcessTemplates(p, section, noCIDRBlocks, false)
+				expectAllowlistProcessTemplates(p, defaultEdgercPath, defaultSection, noCIDRBlocks, false)
+			},
+		},
+		"non default edgerc path and section": {
+			edgercPath: "/non/default/path/to/edgerc",
+			section:    "non_default_section",
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
+				expectGetIPAllowlistStatus(i, true)
+				expectListCIDRBlocks(i, cidrs)
+				expectAllowlistProcessTemplates(p, "/non/default/path/to/edgerc", "non_default_section", cidrs, true)
 			},
 		},
 	}
@@ -83,7 +100,7 @@ func TestCreateIAMAllowlist(t *testing.T) {
 			mp := new(templates.MockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createIAMAllowlist(ctx, section, mi, mp)
+			err := createIAMAllowlist(ctx, test.edgercPath, test.section, mi, mp)
 			require.NoError(t, err)
 			mi.AssertExpectations(t)
 			mp.AssertExpectations(t)
@@ -92,7 +109,8 @@ func TestCreateIAMAllowlist(t *testing.T) {
 }
 
 func TestProcessIAMAllowlistTemplates(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 
 	tests := map[string]struct {
 		givenData    TFData
@@ -112,7 +130,8 @@ func TestProcessIAMAllowlistTemplates(t *testing.T) {
 					},
 					Enabled: true,
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "allowlist",
 			},
 			dir:          "iam_allowlist/single",
@@ -136,7 +155,8 @@ func TestProcessIAMAllowlistTemplates(t *testing.T) {
 					},
 					Enabled: false,
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "allowlist",
 			},
 			dir:          "iam_allowlist/multiple",
@@ -148,11 +168,25 @@ func TestProcessIAMAllowlistTemplates(t *testing.T) {
 					CIDRBlocks: []TFCIDRBlock{},
 					Enabled:    false,
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "allowlist",
 			},
 			dir:          "iam_allowlist/no_cidr_blocks",
 			filesToCheck: []string{"variables.tf", "import.sh", "allowlist.tf"},
+		},
+		"non default edgerc path and section": {
+			givenData: TFData{
+				TFAllowlist: TFAllowlist{
+					CIDRBlocks: []TFCIDRBlock{},
+					Enabled:    false,
+				},
+				EdgercPath: "/non/default/path/to/edgerc",
+				Section:    "non_default_section",
+				Subcommand: "allowlist",
+			},
+			dir:          "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 

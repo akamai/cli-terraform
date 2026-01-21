@@ -199,24 +199,28 @@ var (
 		client.On("GetRole", mock.Anything, getRoleReq2).Return(&role2, nil).Once()
 	}
 
-	expectAllProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
+	expectAllProcessTemplates = func(p *templates.MockProcessor, edgercPath string, section string) *mock.Call {
 
 		call := p.On(
 			"ProcessTemplates",
-			getTestData(section),
+			getTestData(edgercPath, section),
 		)
 		return call.Return(nil)
 	}
 )
 
 func TestCreateIAMAll(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
+	defaultTestData := getTestData(defaultEdgercPath, defaultSection)
 
 	tests := map[string]struct {
-		init func(*iam.Mock, *templates.MockProcessor)
-		err  error
+		givenData TFData
+		init      func(*iam.Mock, *templates.MockProcessor)
+		err       error
 	}{
 		"fetch all": {
+			givenData: defaultTestData,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
@@ -227,16 +231,18 @@ func TestCreateIAMAll(t *testing.T) {
 				expectGetIPAllowlistStatus(i, true)
 				expectListCIDRBlocks(i, cidrs)
 				expectGetSelfAPIClient(i, getAPIClientResponse(&clientIPACL, &clientPurgeOptions))
-				expectAllProcessTemplates(p, section)
+				expectAllProcessTemplates(p, defaultEdgercPath, defaultSection)
 			},
 		},
 		"fail list users": {
+			givenData: defaultTestData,
 			init: func(i *iam.Mock, _ *templates.MockProcessor) {
 				i.On("ListUsers", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("oops")).Once()
 			},
 			err: ErrFetchingUsers,
 		},
 		"fail get one user": {
+			givenData: defaultTestData,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
@@ -256,7 +262,7 @@ func TestCreateIAMAll(t *testing.T) {
 				expectListAllRoles(i)
 				expectGetRoles(i)
 
-				expectedTestData := getTestData(section)
+				expectedTestData := getTestData(defaultEdgercPath, defaultSection)
 				expectedTestData.TFUsers = []*TFUser{{
 					IsLocked:          false,
 					AuthGrants:        "[{\"groupId\":101,\"isBlocked\":false,\"roleId\":201}]",
@@ -268,6 +274,7 @@ func TestCreateIAMAll(t *testing.T) {
 			},
 		},
 		"fail list groups": {
+			givenData: defaultTestData,
 			init: func(i *iam.Mock, _ *templates.MockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
@@ -277,6 +284,7 @@ func TestCreateIAMAll(t *testing.T) {
 			err: ErrFetchingGroups,
 		},
 		"fail list roles": {
+			givenData: defaultTestData,
 			init: func(i *iam.Mock, _ *templates.MockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
@@ -287,6 +295,7 @@ func TestCreateIAMAll(t *testing.T) {
 			err: ErrFetchingRoles,
 		},
 		"fail get IP allowlist status": {
+			givenData: defaultTestData,
 			init: func(i *iam.Mock, _ *templates.MockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
@@ -299,6 +308,7 @@ func TestCreateIAMAll(t *testing.T) {
 			err: ErrFetchingIPAllowlistStatus,
 		},
 		"fail list cidr blocks": {
+			givenData: defaultTestData,
 			init: func(i *iam.Mock, _ *templates.MockProcessor) {
 				expectListAllUsers(i)
 				expectGetUser001(i)
@@ -311,6 +321,21 @@ func TestCreateIAMAll(t *testing.T) {
 			},
 			err: ErrFetchingCIDRBlocks,
 		},
+		"non default edgerc path and section": {
+			givenData: getTestData("/non/default/path/to/edgerc", "non_default_section"),
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
+				expectListAllUsers(i)
+				expectGetUser001(i)
+				expectGetUser002(i)
+				expectListAllGroups(i)
+				expectListAllRoles(i)
+				expectGetRoles(i)
+				expectGetIPAllowlistStatus(i, true)
+				expectListCIDRBlocks(i, cidrs)
+				expectGetSelfAPIClient(i, getAPIClientResponse(&clientIPACL, &clientPurgeOptions))
+				expectAllProcessTemplates(p, "/non/default/path/to/edgerc", "non_default_section")
+			},
+		},
 	}
 
 	for name, test := range tests {
@@ -319,7 +344,7 @@ func TestCreateIAMAll(t *testing.T) {
 			mp := new(templates.MockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createIAMAll(ctx, section, mi, mp)
+			err := createIAMAll(ctx, test.givenData.EdgercPath, test.givenData.Section, mi, mp)
 			if test.err != nil {
 				assert.Contains(t, err.Error(), test.err.Error())
 			} else {
@@ -332,7 +357,8 @@ func TestCreateIAMAll(t *testing.T) {
 }
 
 func TestProcessIAMAllTemplates(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 
 	tests := map[string]struct {
 		givenData    TFData
@@ -340,9 +366,14 @@ func TestProcessIAMAllTemplates(t *testing.T) {
 		filesToCheck []string
 	}{
 		"one used, one not": {
-			givenData:    getTestData(section),
+			givenData:    getTestData(defaultEdgercPath, defaultSection),
 			dir:          "iam_all",
 			filesToCheck: []string{"users.tf", "variables.tf", "import.sh", "roles.tf", "groups.tf", "allowlist.tf", "client.tf"},
+		},
+		"non default edgerc path and section": {
+			givenData:    getTestData("/non/default/path/to/edgerc", "non_default_section"),
+			dir:          "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 
@@ -375,7 +406,7 @@ func TestProcessIAMAllTemplates(t *testing.T) {
 	}
 }
 
-func getTestData(section string) TFData {
+func getTestData(edgercPath string, section string) TFData {
 	tfData := TFData{
 		TFUsers: []*TFUser{
 			{
@@ -444,6 +475,7 @@ func getTestData(section string) TFData {
 			Enabled: true,
 		},
 		TFClient:   getTfClient(&clientTFIPACL, &clientTFPurgeOptions),
+		EdgercPath: edgercPath,
 		Section:    section,
 		Subcommand: "all",
 	}

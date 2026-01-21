@@ -1,4 +1,4 @@
 provider "akamai" {
-  edgerc         = "~/.edgerc"
-  config_section = ""
+  edgerc         = "/non/default/path/to/edgerc"
+  config_section = "non-default-section"
 }

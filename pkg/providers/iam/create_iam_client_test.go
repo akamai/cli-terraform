@@ -244,9 +244,10 @@ var (
 		}
 	}
 
-	expectClientProcessTemplates = func(p *templates.MockProcessor, section string, data TFClient) *mock.Call {
+	expectClientProcessTemplates = func(p *templates.MockProcessor, edgercPath string, section string, data TFClient) *mock.Call {
 		tfData := TFData{
 			TFClient:   data,
+			EdgercPath: edgercPath,
 			Section:    section,
 			Subcommand: "client",
 		}
@@ -257,54 +258,71 @@ var (
 )
 
 func TestCreateIAMClient(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
+	defaultTestData := getTestData(defaultEdgercPath, defaultSection)
 
 	tests := map[string]struct {
+		givenData TFData
 		init      func(*iam.Mock, *templates.MockProcessor)
 		clientID  string
 		withError error
 	}{
 		"fetch API client with client ID": {
+			givenData: defaultTestData,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetAPIClient(i, getAPIClientResponse(&clientIPACL, &clientPurgeOptions))
-				expectClientProcessTemplates(p, section, getTfClient(&clientTFIPACL, &clientTFPurgeOptions))
+				expectClientProcessTemplates(p, defaultEdgercPath, defaultSection, getTfClient(&clientTFIPACL, &clientTFPurgeOptions))
 			},
 			clientID: "1a2b3",
 		},
 		"fetch self API client": {
+			givenData: defaultTestData,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetSelfAPIClient(i, getAPIClientResponse(&clientIPACL, &clientPurgeOptions))
-				expectClientProcessTemplates(p, section, getTfClient(&clientTFIPACL, &clientTFPurgeOptions))
+				expectClientProcessTemplates(p, defaultEdgercPath, defaultSection, getTfClient(&clientTFIPACL, &clientTFPurgeOptions))
 			},
 			clientID: "",
 		},
 		"fetch API client no IPACL": {
+			givenData: defaultTestData,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetAPIClient(i, getAPIClientResponse(nil, &clientPurgeOptions))
-				expectClientProcessTemplates(p, section, getTfClient(nil, &clientTFPurgeOptions))
+				expectClientProcessTemplates(p, defaultEdgercPath, defaultSection, getTfClient(nil, &clientTFPurgeOptions))
 			},
 			clientID: "1a2b3",
 		},
 		"fetch API client with disabled IPACL": {
+			givenData: defaultTestData,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetAPIClient(i, getAPIClientResponse(&clientIPACLDisabled, &clientPurgeOptions))
-				expectClientProcessTemplates(p, section, getTfClient(&clientTFIPACLDisabled, &clientTFPurgeOptions))
+				expectClientProcessTemplates(p, defaultEdgercPath, defaultSection, getTfClient(&clientTFIPACLDisabled, &clientTFPurgeOptions))
 			},
 			clientID: "1a2b3",
 		},
 		"fetch API client no PurgeOptions": {
+			givenData: defaultTestData,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetAPIClient(i, getAPIClientResponse(&clientIPACL, nil))
-				expectClientProcessTemplates(p, section, getTfClient(&clientTFIPACL, nil))
+				expectClientProcessTemplates(p, defaultEdgercPath, defaultSection, getTfClient(&clientTFIPACL, nil))
 			},
 			clientID: "1a2b3",
 		},
 		"fetch API client no credentials - expect error": {
+			givenData: defaultTestData,
 			init: func(i *iam.Mock, _ *templates.MockProcessor) {
 				expectGetAPIClient(i, getAPIClientResponseNoCredentials)
 			},
 			clientID:  "1a2b3",
 			withError: fmt.Errorf("It's impossible to manage API Client with no credential via Terraform"),
+		},
+		"non default edgerc path and section": {
+			givenData: getTestData("/non/default/path/to/edgerc", "non_default_section"),
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
+				expectGetAPIClient(i, getAPIClientResponse(&clientIPACL, &clientPurgeOptions))
+				expectClientProcessTemplates(p, "/non/default/path/to/edgerc", "non_default_section", getTfClient(&clientTFIPACL, &clientTFPurgeOptions))
+			},
+			clientID: "1a2b3",
 		},
 	}
 
@@ -314,7 +332,7 @@ func TestCreateIAMClient(t *testing.T) {
 			mp := new(templates.MockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createIAMAPIClient(ctx, test.clientID, section, mi, mp)
+			err := createIAMAPIClient(ctx, test.clientID, test.givenData.EdgercPath, test.givenData.Section, mi, mp)
 			if test.withError != nil {
 				require.ErrorContains(t, err, test.withError.Error())
 				return
@@ -327,7 +345,8 @@ func TestCreateIAMClient(t *testing.T) {
 }
 
 func TestProcessIAMClientTemplates(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 
 	tests := map[string]struct {
 		givenData    TFData
@@ -390,7 +409,8 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "client",
 			},
 			dir:          "iam_client",
@@ -462,7 +482,8 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "client",
 			},
 			dir:          "iam_client_with_groups",
@@ -518,7 +539,8 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "client",
 			},
 			dir:          "iam_client_no_subgroups",
@@ -579,7 +601,8 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "client",
 			},
 			dir:          "iam_client_empty_cp_codes",
@@ -640,7 +663,8 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "client",
 			},
 			dir:          "iam_client_no_cidr",
@@ -708,7 +732,8 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "client",
 			},
 			dir:          "iam_client_recursion",
@@ -770,7 +795,8 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "client",
 			},
 			dir:          "iam_client_clone_authorized_user_groups_is_true",
@@ -832,7 +858,8 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "client",
 			},
 			dir:          "iam_client_all_accessible_apis_is_true",
@@ -893,7 +920,8 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "client",
 			},
 			dir:          "iam_client_all_current_and_new_cp_codes_is_true",
@@ -951,7 +979,8 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "client",
 			},
 			dir:          "iam_client_no_ipacl",
@@ -1013,7 +1042,8 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "client",
 			},
 			dir:          "iam_client_disabled_ipacl",
@@ -1067,11 +1097,75 @@ func TestProcessIAMClientTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "client",
 			},
 			dir:          "iam_client_no_purge_options",
 			filesToCheck: []string{"client.tf", "import.sh", "variables.tf"},
+		},
+		"non default edgerc path and section": {
+			givenData: TFData{
+				TFClient: TFClient{
+					ClientID:           "1a2b3",
+					AuthorizedUsers:    []string{"mw+2"},
+					ClientType:         "CLIENT",
+					ClientName:         "mw+2_1",
+					NotificationEmails: []string{"mw+2@example.com"},
+					ClientDescription:  "Test API Client",
+					Lock:               false,
+					Credential: &TFCredential{
+						Description: "Test API Client Credential 1",
+						Status:      "ACTIVE",
+						ExpiresOn:   "2027-04-09T12:34:13Z",
+					},
+					GroupAccess: TFGroupAccessRequest{
+						CloneAuthorizedUserGroups: false,
+						Groups: []TFClientGroupRequestItem{
+							{
+								GroupID: 123,
+								RoleID:  340,
+								Subgroups: []TFClientGroupRequestItem{
+									{
+										GroupID: 333,
+										RoleID:  540,
+									},
+								},
+							},
+						},
+					},
+					IPACL: &TFIPACL{
+						Enable: true,
+						CIDR:   []string{"128.5.6.5/24"},
+					},
+					APIAccess: TFAPIAccessRequest{
+						AllAccessibleAPIs: false,
+						APIs: []TFAPIRequestItem{
+							{
+								APIID:       5580,
+								AccessLevel: "READ-ONLY",
+							},
+							{
+								APIID:       5801,
+								AccessLevel: "READ-WRITE",
+							},
+						},
+					},
+					PurgeOptions: &TFPurgeOptions{
+						CanPurgeByCPCode:   true,
+						CanPurgeByCacheTag: true,
+						CPCodeAccess: TFCPCodeAccess{
+							AllCurrentAndNewCPCodes: false,
+							CPCodes:                 []int64{101},
+						},
+					},
+				},
+				EdgercPath: "/non/default/path/to/edgerc",
+				Section:    "non_default_section",
+				Subcommand: "client",
+			},
+			dir:          "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 

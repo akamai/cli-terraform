@@ -8,7 +8,7 @@
 
 This library provides a command-line interface to export Akamai configuration assets that you can import later into your Terraform state.
 
-Requires Go 1.23 or later.
+Requires Go 1.24 or later.
 
 ## Install
 
@@ -39,8 +39,8 @@ There are different types of API clients that grant access based on your need, r
 | API client type| Description |
 |---|---|
 | [Basic](#create-a-basic-api-client)| Access to the first 99 API associated with your account without any specific configuration. Individual service read/write permissions are based on your role. |
-| [Advanced](https://techdocs.akamai.com/developer/docs/create-a-client-with-custom-permissions) | Configurable permissions to limit or narrow down the scope of the API for your account.|
-| [Managed](https://techdocs.akamai.com/developer/docs/manage-many-accounts-with-one-api-client)| Configurable permissions that work for multiple accounts.|
+| [Advanced](https://techdocs.akamai.com/developer/docs/edgegrid#advanced-client) | Configurable permissions to limit or narrow down the scope of the API for your account.|
+| [Managed](https://techdocs.akamai.com/developer/docs/edgegrid#managed-client)| Configurable permissions that work for multiple accounts.|
 
 To set up and use multiple clients, clients that use an account switch key, or clients as environment variables, see [Alternative authentication](https://techdocs.akamai.com/terraform/docs/gs-authentication).
 
@@ -65,8 +65,8 @@ To set up and use multiple clients, clients that use an account switch key, or c
 ## Use
 
 1. To use the library, provide the path to your `.edgerc` file, your credentials section header, and the export command for the asset you need.
-   
-    If you manage multiple accounts, pass your account switch key using the global `--accountkey` flag. Use other additional flags or arguments to further define the output.
+
+    If you manage multiple accounts, pass your account switch key using the `--accountkey` global flag. Use other additional flags or arguments to further define the output.
 
     > **Notes:**
     > - If you pass the command without the `--edgerc` and `--section` global flags, the command, by default, will point to the local home directory of your `.edgerc` file and the `default` credentials section header of that file.
@@ -178,7 +178,7 @@ For details of command flags specific to individual export commands, see the inf
 | <code>&#x2011;&#x2011;edgerc</code> (string) | Alias `-e`. The location of your credentials file. The default is <code>$HOME/.edgerc</code>. |
 | <code>&#x2011;&#x2011;section</code> (string) | Alias `-s`. A credential set's section name. The default is <code>default</code>. |
 | <code>&#x2011;&#x2011;accountkey</code> (string) | Alias `--account-key`. An account switch key.|
-| <code>&#x2011;&#x2011;version</code> (integer) | Outputs the CLI version number.|
+| <code>&#x2011;&#x2011;version</code> (boolean) | Outputs the CLI version number.|
 
 ### Command flags
 
@@ -563,6 +563,7 @@ akamai terraform export-property "my-property"
 | `--version` (string) | Exports your declarative property configuration and the property's JSON-formatted rules without includes for a specific property version. <br /><br /> <blockquote><b>Note:</b> If you don't provide the <code>--version</code> flag, by default, it exports the <code>latest</code> property version whether it is active or not.</blockquote> | `akamai terraform export-property --version "1" "my-property-name"` |
 | `--rules-as-hcl` (boolean) | Exports your declarative property configuration and the property's rules as the `akamai_property_rules_builder` data source in HCL format. <br /><br /> <blockquote><b>Note:</b> Must be a dated rule format ≥ <code>v2023-01-05</code>. Cannot use <code>latest</code>.</blockquote> | `akamai terraform export-property --rules-as-hcl "my-property-name"` |
 | `--split-depth` (integer)| Exports rules into a dedicated module. Each rule will be placed in a separate file up to a specified nesting level. For example, `--split-depth=1` means that the default/root rule and all its direct children will be placed in dedicated files. Rules with higher nesting levels will be placed in a file of their closest ancestor. <br /><br /> <blockquote><b>Note:</b> You can use this flag only along with the <code>--rules-as-hcl</code> flag.</blockquote> | `akamai terraform export-property --split-depth=1 --rules-as-hcl "my-property-name"` |
+| `--rule-format` (string) | Exports your property configuration using the specified rule format version. This only affects the exported configuration and doesn't modify the property on the server. <br /><br /> <blockquote><b>Notes:</b><ul><li>Must be a valid dated rule format, for example, <code>v2024-02-12</code>. The <code>latest</code> value is allowed only for properties that use the JSON rule format.</li><li>To protect your settings for behaviors and criteria that aren't backwards compatible, updating your rule format after import only works with versions greater than the one you're on.</li></ul></blockquote> | `akamai terraform export-property --rule-format "v2024-02-12" "my-property-name"` |
 
 ## export‑property-include
 
@@ -589,8 +590,9 @@ akamai terraform export-property-include "C-0N7RAC7" "my-property-include"
 
 | Flag | Description | Example |
 | ------- | --------- | --------- |
-| `--rules-as-hcl` (boolean) | Exports your property's include as the `akamai_property_rules_builder` data source in HCL format. <br /><br /> <blockquote><b>Note:</b> Must be a dated rule format ≥ <code>v2023-01-05</code>. Cannot use <code>latest</code>.</blockquote> | `akamai terraform export-property-include --rules-as-hcl "my-property-include"` |
-| `--split-depth` (integer)| Exports rules into a dedicated module. Each rule will be placed in a separate file up to a specified nesting level. For example, `--split-depth=1` means that the default/root rule and all its direct children will be placed in dedicated files. Rules with higher nesting levels will be placed in a file of their closest ancestor. <br /><br /> <blockquote><b>Note:</b> You can use this flag only along with the <code>--rules-as-hcl</code> flag.</blockquote> | `akamai terraform export-property-include --split-depth=1 --rules-as-hcl "my-property-include"` |
+| `--rules-as-hcl` (boolean) | Exports your property's include as the `akamai_property_rules_builder` data source in HCL format. <br /><br /> <blockquote><b>Note:</b> Must be a dated rule format ≥ <code>v2023-01-05</code>. Cannot use <code>latest</code>.</blockquote> | `akamai terraform export-property-include --rules-as-hcl "C-0N7RAC7" "my-property-include"` |
+| `--split-depth` (integer)| Exports rules into a dedicated module. Each rule will be placed in a separate file up to a specified nesting level. For example, `--split-depth=1` means that the default/root rule and all its direct children will be placed in dedicated files. Rules with higher nesting levels will be placed in a file of their closest ancestor. <br /><br /> <blockquote><b>Note:</b> You can use this flag only along with the <code>--rules-as-hcl</code> flag.</blockquote> | `akamai terraform export-property-include --split-depth=1 --rules-as-hcl "C-0N7RAC7" "my-property-include"` |
+| `--rule-format` (string) | Exports your property include configuration using the specified rule format version. This affects only the exported configuration and doesn't modify the include on the server. <br /><br /> <blockquote><b>Notes:</b><ul><li> Must be a valid dated rule format, for example, <code>v2024-02-12</code>. Cannot use <code>latest</code>.</li><li>To protect your settings for behaviors and criteria that aren't backwards compatible, updating your rule format after import only works with versions greater than the one you're on.</li></ul></blockquote> | `akamai terraform export-property-include --rule-format "v2024-02-12" "C-0N7RAC7" "my-property-include"` |
 
 ## export‑zone
 
@@ -636,7 +638,7 @@ Terraform variable configuration is generated in a separately named Terraform fi
 
 ## License
 
-Copyright 2025 Akamai Technologies, Inc. All rights reserved.
+Copyright 2026 Akamai Technologies, Inc. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use these files except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
 

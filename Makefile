@@ -2,7 +2,7 @@ GOIMPORTS_VERSION = v0.24.0
 GOCOV_VERSION = v1.1.0
 GO_JUNIT_REPORT_VERSION = v2.1.0
 GOCOVXML_VERSION = v1.1.0
-GOLANGCI_LINT_VERSION = v1.63.4
+GOLANGCI_LINT_VERSION = v2.6.1
 
 BIN = $(CURDIR)/bin
 GOCMD = go
@@ -112,6 +112,10 @@ validate-testdata: ; $(info $(M) Validating testdata agains terraform-provider-a
 .PHONY: release
 release: ; $(info $(M) Generating release binaries and signatures...) @ ## Generate release binaries
 	@./scripts/build.sh
+
+.PHONY: build
+build: ; $(info $(M) Building the binary...) @ ## Build the akamai-terraform binary
+	@go build -o akamai-terraform
 
 .PHONY: clean
 clean: ; $(info $(M) Removing 'tools' directory and test results...) @ ## Cleanup installed packages and test reports

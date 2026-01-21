@@ -200,19 +200,20 @@ func recordValueForSlice(fVal interface{}, rs dns.RecordSet) string {
 	listString := ""
 	if len(fVal.([]string)) > 0 {
 		listString += "["
-		if rs.Type == "MX" {
+		switch rs.Type {
+		case "MX":
 			for _, rstr := range rs.Rdata {
 				listString += "\"" + rstr + "\""
 				listString += ", "
 			}
-		} else if rs.Type == "CAA" {
+		case "CAA":
 			for _, rstr := range rs.Rdata {
 				caaparts := strings.Split(rstr, " ")
 				caaparts[2] = strings.ReplaceAll(caaparts[2], "\"", "\\\"")
 				listString += "\"" + strings.Join(caaparts, " ") + "\""
 				listString += ", "
 			}
-		} else {
+		default:
 			for _, str := range fVal.([]string) {
 				if strings.HasPrefix(str, "\"") {
 					str = strings.Trim(str, "\"")

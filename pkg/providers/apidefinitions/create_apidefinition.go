@@ -37,6 +37,7 @@ type (
 		IsActiveOnProduction bool
 		StagingVersionKey    string
 		ProductionVersionKey string
+		EdgercPath           string
 		Section              string
 		Operations           string
 		IsOperationsEmpty    bool
@@ -65,9 +66,10 @@ func CmdCreateAPIDefinition(c *cli.Context) error {
 
 	id, err := strconv.ParseInt(trimPrefixAPI(c.Args().Get(0)), 10, 64)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 	section := edgegrid.GetEdgercSection(c)
+	edgercPath := edgegrid.GetEdgercPath(c)
 
 	var rootPath = "./"
 	if c.IsSet("tfworkpath") {
@@ -89,7 +91,7 @@ func CmdCreateAPIDefinition(c *cli.Context) error {
 		return cli.Exit(color.RedString("Error exporting API Definition: %s", err), 1)
 	}
 
-	if _, err = createAPIDefinition(ctx, section, format, id, versionNumber, client, clientV0, processor); err != nil {
+	if _, err = createAPIDefinition(ctx, edgercPath, section, format, id, versionNumber, client, clientV0, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting API Definition: %s", err), 1)
 	}
 
@@ -100,7 +102,7 @@ func CmdCreateAPIDefinition(c *cli.Context) error {
 	return nil
 }
 
-func createAPIDefinition(ctx context.Context, section string, format outputFormat, id int64, versionNumber *int64, client apidefinitions.APIDefinitions, clientV0 v0.APIDefinitions, templateProcessor templates.TemplateProcessor) (*TFAPIWrapperData, error) {
+func createAPIDefinition(ctx context.Context, edgercPath, section string, format outputFormat, id int64, versionNumber *int64, client apidefinitions.APIDefinitions, clientV0 v0.APIDefinitions, templateProcessor templates.TemplateProcessor) (*TFAPIWrapperData, error) {
 	term := terminal.Get(ctx)
 	term.Spinner().Start("Fetching API Definition details for API ID: " + strconv.Itoa(int(id)))
 
@@ -167,7 +169,7 @@ func createAPIDefinition(ctx context.Context, section string, format outputForma
 
 	term.Spinner().OK()
 
-	tfAPIData := populateAPIData(section, *content, *operationsContent, id, *versionNumber, *latestVersionNumber, API, isOperationsEmpty)
+	tfAPIData := populateAPIData(edgercPath, section, *content, *operationsContent, id, *versionNumber, *latestVersionNumber, API, isOperationsEmpty)
 
 	term.Spinner().Start("Saving TF configurations ")
 
@@ -182,7 +184,7 @@ func createAPIDefinition(ctx context.Context, section string, format outputForma
 	return &tfAPIData, nil
 }
 
-func populateAPIData(section, content, operationsContent string, id, versionNumber, latestVersionNumber int64, api *apidefinitions.GetEndpointResponse, isOperationsEmpty bool) TFAPIWrapperData {
+func populateAPIData(edgercPath, section, content, operationsContent string, id, versionNumber, latestVersionNumber int64, api *apidefinitions.GetEndpointResponse, isOperationsEmpty bool) TFAPIWrapperData {
 	return TFAPIWrapperData{
 		API:                  content,
 		ID:                   id,
@@ -190,6 +192,7 @@ func populateAPIData(section, content, operationsContent string, id, versionNumb
 		ContractID:           api.ContractID,
 		GroupID:              api.GroupID,
 		ResourceName:         sanitizeName(api.APIEndpointName),
+		EdgercPath:           edgercPath,
 		Section:              section,
 		IsActiveOnStaging:    isActive(api.StagingVersion),
 		StagingVersionKey:    versionKey("staging", api.StagingVersion, latestVersionNumber),

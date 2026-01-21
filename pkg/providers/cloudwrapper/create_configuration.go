@@ -23,6 +23,7 @@ type (
 	// TFCloudWrapperData represents the data used in CloudWrapper
 	TFCloudWrapperData struct {
 		Configuration TFCWConfiguration
+		EdgercPath    string
 		Section       string
 	}
 
@@ -87,7 +88,7 @@ func CmdCreateCloudWrapper(c *cli.Context) error {
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
 	if err := tools.CheckFiles(cloudwrapperPath, variablesPath, importPath); err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	templateToFile := map[string]string{
@@ -103,16 +104,17 @@ func CmdCreateCloudWrapper(c *cli.Context) error {
 	}
 	configID, err := strconv.ParseInt(c.Args().Get(0), 10, 64)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
+	edgercPath := edgegrid.GetEdgercPath(c)
 	section := edgegrid.GetEdgercSection(c)
-	if err = createCloudWrapper(ctx, configID, section, client, processor); err != nil {
+	if err = createCloudWrapper(ctx, configID, edgercPath, section, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting cloudwraper: %s", err), 1)
 	}
 	return nil
 }
 
-func createCloudWrapper(ctx context.Context, configID int64, section string, client cloudwrapper.CloudWrapper, templateProcessor templates.TemplateProcessor) error {
+func createCloudWrapper(ctx context.Context, configID int64, edgercPath, section string, client cloudwrapper.CloudWrapper, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 	term.Spinner().Start("Fetching configuration " + strconv.Itoa(int(configID)))
 	configuration, err := client.GetConfiguration(ctx, cloudwrapper.GetConfigurationRequest{
@@ -126,7 +128,7 @@ func createCloudWrapper(ctx context.Context, configID int64, section string, cli
 		term.Spinner().Fail()
 		return fmt.Errorf("%s: %w", ErrExportingCloudWrapper, ErrContainMultiCDNSettings)
 	}
-	tfCloudWrapperData := populateCloudWrapperData(configID, section, configuration)
+	tfCloudWrapperData := populateCloudWrapperData(configID, edgercPath, section, configuration)
 
 	term.Spinner().Start("Saving TF configurations ")
 	if err = templateProcessor.ProcessTemplates(tfCloudWrapperData); err != nil {
@@ -140,7 +142,7 @@ func createCloudWrapper(ctx context.Context, configID int64, section string, cli
 	return nil
 }
 
-func populateCloudWrapperData(configID int64, section string, configuration *cloudwrapper.Configuration) TFCloudWrapperData {
+func populateCloudWrapperData(configID int64, edgercPath, section string, configuration *cloudwrapper.Configuration) TFCloudWrapperData {
 	tfCloudWrapperData := TFCloudWrapperData{
 		Configuration: TFCWConfiguration{
 			ID:                        configID,
@@ -153,7 +155,8 @@ func populateCloudWrapperData(configID int64, section string, configuration *clo
 			RetainIdleObjects:         configuration.RetainIdleObjects,
 			CapacityAlertsThreshold:   configuration.CapacityAlertsThreshold,
 		},
-		Section: section,
+		EdgercPath: edgercPath,
+		Section:    section,
 	}
 	tfCloudWrapperData.Configuration.Status = string(configuration.Status)
 	for _, configLocation := range configuration.Locations {

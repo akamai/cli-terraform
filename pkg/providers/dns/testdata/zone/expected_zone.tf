@@ -8,6 +8,11 @@ terraform {
   }
 }
 
+provider "akamai" {
+  edgerc         = var.edgerc_path
+  config_section = var.config_section
+}
+
 locals {
   zone = "0007770b-08a8-4b5f-a46b-081b772ba605-test.com"
 }

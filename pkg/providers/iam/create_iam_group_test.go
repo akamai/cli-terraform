@@ -123,7 +123,7 @@ var (
 		client.On("GetRole", mock.Anything, getRoleReq).Return(&role, nil).Once()
 	}
 
-	expectGroupByIDProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
+	expectGroupByIDProcessTemplates = func(p *templates.MockProcessor, edgercPath string, section string) *mock.Call {
 		tfData := TFData{
 			TFUsers: []*TFUser{
 				{
@@ -148,6 +148,7 @@ var (
 					GroupName:     "Custom group",
 				},
 			},
+			EdgercPath: edgercPath,
 			Section:    section,
 			Subcommand: "group",
 		}
@@ -158,7 +159,7 @@ var (
 		return call.Return(nil)
 	}
 
-	expectGroupOnlyByIDProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
+	expectGroupOnlyByIDProcessTemplates = func(p *templates.MockProcessor, edgercPath string, section string) *mock.Call {
 		tfData := TFData{
 			TFGroups: []TFGroup{
 				{
@@ -167,6 +168,7 @@ var (
 					GroupName:     "Custom group",
 				},
 			},
+			EdgercPath: edgercPath,
 			Section:    section,
 			Subcommand: "group",
 		}
@@ -179,28 +181,44 @@ var (
 )
 
 func TestCreateIAMGroupByID(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 
 	tests := map[string]struct {
-		groupOnly bool
-		init      func(*iam.Mock, *templates.MockProcessor)
+		edgercPath string
+		section    string
+		groupOnly  bool
+		init       func(*iam.Mock, *templates.MockProcessor)
 	}{
 		"fetch group": {
-			groupOnly: false,
+			edgercPath: defaultEdgercPath,
+			section:    defaultSection,
+			groupOnly:  false,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListUsersWithinGroup(i)
 				expectGetUserWithinGroup(i)
 				expectListRolesWithinGroup(i)
 				expectGetRole(i)
 				expectGetGroupWithinRole(i)
-				expectGroupByIDProcessTemplates(p, section)
+				expectGroupByIDProcessTemplates(p, defaultEdgercPath, defaultSection)
 			},
 		},
 		"fetch group only (without user and role details)": {
-			groupOnly: true,
+			edgercPath: defaultEdgercPath,
+			section:    defaultSection,
+			groupOnly:  true,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectGetGroupWithinRole(i)
-				expectGroupOnlyByIDProcessTemplates(p, section)
+				expectGroupOnlyByIDProcessTemplates(p, defaultEdgercPath, defaultSection)
+			},
+		},
+		"non default edgerc path and section": {
+			edgercPath: "/non/default/path/to/edgerc",
+			section:    "non_default_section",
+			groupOnly:  true,
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
+				expectGetGroupWithinRole(i)
+				expectGroupOnlyByIDProcessTemplates(p, "/non/default/path/to/edgerc", "non_default_section")
 			},
 		},
 	}
@@ -211,7 +229,7 @@ func TestCreateIAMGroupByID(t *testing.T) {
 			mp := new(templates.MockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createIAMGroupByID(ctx, groupID, section, mi, mp, test.groupOnly)
+			err := createIAMGroupByID(ctx, groupID, test.edgercPath, test.section, mi, mp, test.groupOnly)
 			require.NoError(t, err)
 			mi.AssertExpectations(t)
 			mp.AssertExpectations(t)
@@ -220,7 +238,8 @@ func TestCreateIAMGroupByID(t *testing.T) {
 }
 
 func TestProcessIAMGroupTemplates(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 
 	tests := map[string]struct {
 		givenData    TFData
@@ -252,7 +271,8 @@ func TestProcessIAMGroupTemplates(t *testing.T) {
 						GrantedRoles:    []int{992, 707, 452, 677, 726, 296, 457, 987},
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "group",
 			},
 			dir:          "iam_group_by_id",
@@ -267,11 +287,28 @@ func TestProcessIAMGroupTemplates(t *testing.T) {
 						GroupName:     "Custom group",
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "group",
 			},
 			dir:          "iam_group_only_by_id",
 			filesToCheck: []string{"variables.tf", "import.sh", "group.tf"},
+		},
+		"non default edgerc path and section": {
+			givenData: TFData{
+				TFGroups: []TFGroup{
+					{
+						GroupID:       56789,
+						ParentGroupID: 98765,
+						GroupName:     "Custom group",
+					},
+				},
+				EdgercPath: "/non/default/path/to/edgerc",
+				Section:    "non_default_section",
+				Subcommand: "group",
+			},
+			dir:          "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 

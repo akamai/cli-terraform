@@ -49,12 +49,29 @@ type Hostname struct {
 	CertProvisioningType     string
 	IsActive                 bool
 	CCMCertificates          *CCMCertificates
+	MTLS                     *MTLS
+	TLSConfiguration         *TLSConfiguration
 }
 
 // CCMCertificates holds CCM certificate IDs.
 type CCMCertificates struct {
 	RSACertID   string
 	ECDSACertID string
+}
+
+// MTLS holds MTLS configuration details.
+type MTLS struct {
+	CASetID         string
+	CheckClientOCSP bool
+	SendCASetClient bool
+}
+
+// TLSConfiguration holds CCM TLSConfiguration details.
+type TLSConfiguration struct {
+	CipherProfile            string
+	DisallowedTLSVersions    []string
+	StapleServerOcspResponse bool
+	FIPSMode                 bool
 }
 
 // WrappedRules is a wrapper around Rule which simplifies flattening rule tree into list and adjust names of the datasources
@@ -70,6 +87,7 @@ type WrappedRules struct {
 type TFData struct {
 	Includes      []TFIncludeData
 	Property      TFPropertyData
+	EdgercPath    string
 	Section       string
 	Rules         []*WrappedRules
 	RulesAsHCL    bool
@@ -190,13 +208,15 @@ type RuleTemplate struct {
 }
 
 type propertyOptions struct {
-	propertyName  string
-	section       string
-	tfWorkPath    string
-	version       string
-	rulesAsHCL    bool
-	withBootstrap bool
-	splitDepth    *int
+	propertyName              string
+	edgercPath                string
+	section                   string
+	tfWorkPath                string
+	version                   string
+	rulesAsHCL                bool
+	withBootstrap             bool
+	splitDepth                *int
+	ruleFormatVersionOverride string
 }
 
 type splitDepthRuleWrapper func([]*WrappedRules) TFData
@@ -291,7 +311,7 @@ func CmdCreateProperty(c *cli.Context) error {
 
 	err := tools.CheckFiles(propertyPath, variablesPath, importPath)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 	templateToFile := map[string]string{
 		"property.tmpl":  propertyPath,
@@ -314,6 +334,11 @@ func CmdCreateProperty(c *cli.Context) error {
 		isBootstrap = c.Bool("akamai-property-bootstrap")
 	}
 
+	var ruleFormatVersionOverride string
+	if c.IsSet("rule-format") {
+		ruleFormatVersionOverride = c.String("rule-format")
+	}
+
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
@@ -334,13 +359,15 @@ func CmdCreateProperty(c *cli.Context) error {
 	}
 
 	options := propertyOptions{
-		propertyName:  c.Args().First(),
-		section:       edgegrid.GetEdgercSection(c),
-		tfWorkPath:    tfWorkPath,
-		version:       version,
-		rulesAsHCL:    rulesAsHCL,
-		withBootstrap: isBootstrap,
-		splitDepth:    splitDepth,
+		propertyName:              c.Args().First(),
+		edgercPath:                edgegrid.GetEdgercPath(c),
+		section:                   edgegrid.GetEdgercSection(c),
+		tfWorkPath:                tfWorkPath,
+		version:                   version,
+		rulesAsHCL:                rulesAsHCL,
+		withBootstrap:             isBootstrap,
+		splitDepth:                splitDepth,
+		ruleFormatVersionOverride: ruleFormatVersionOverride,
 	}
 	if err = createProperty(ctx, options, "property-snippets", client, clientHapi, processor, multiTargetProcessor); err != nil {
 		return cli.Exit(color.RedString("Error exporting property \"%s\": %s", options.propertyName, err), 1)
@@ -372,6 +399,7 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 		Property: TFPropertyData{
 			EdgeHostnames: make(map[string]EdgeHostname),
 		},
+		EdgercPath:    options.edgercPath,
 		Section:       options.section,
 		RulesAsHCL:    options.rulesAsHCL,
 		UseBootstrap:  options.withBootstrap,
@@ -427,7 +455,7 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 
 	// Get Property Rules
 	term.Spinner().Start("Fetching property rules ")
-	rules, err := getPropertyRules(ctx, client, version)
+	rules, err := getPropertyRules(ctx, client, version, options.ruleFormatVersionOverride)
 	if err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", ErrPropertyRulesNotFound, err)
@@ -908,10 +936,30 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			certProvisioningType = hostname.CertProvisioningType
 		}
 		var ccmCertificates *CCMCertificates
-		if hostname.CertProvisioningType == string(papi.CertTypeCCM) && hostname.CCMCertificates != nil {
-			ccmCertificates = &CCMCertificates{
-				RSACertID:   hostname.CCMCertificates.RSACertID,
-				ECDSACertID: hostname.CCMCertificates.ECDSACertID,
+		var mtls *MTLS
+		var tlsConfiguration *TLSConfiguration
+
+		if hostname.CertProvisioningType == string(papi.CertTypeCCM) {
+			if hostname.CCMCertificates != nil {
+				ccmCertificates = &CCMCertificates{
+					RSACertID:   hostname.CCMCertificates.RSACertID,
+					ECDSACertID: hostname.CCMCertificates.ECDSACertID,
+				}
+			}
+			if hostname.MTLS != nil {
+				mtls = &MTLS{
+					CASetID:         hostname.MTLS.CASetID,
+					CheckClientOCSP: hostname.MTLS.CheckClientOCSP,
+					SendCASetClient: hostname.MTLS.SendCASetClient,
+				}
+			}
+			if hostname.TLSConfiguration != nil {
+				tlsConfiguration = &TLSConfiguration{
+					CipherProfile:            hostname.TLSConfiguration.CipherProfile,
+					DisallowedTLSVersions:    hostname.TLSConfiguration.DisallowedTLSVersions,
+					StapleServerOcspResponse: hostname.TLSConfiguration.StapleServerOcspResponse,
+					FIPSMode:                 hostname.TLSConfiguration.FIPSMode,
+				}
 			}
 		}
 		hostnamesMap[cnameFrom] = Hostname{
@@ -921,6 +969,8 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			CertProvisioningType:     certProvisioningType,
 			IsActive:                 len(hostname.EdgeHostnameID) > 0,
 			CCMCertificates:          ccmCertificates,
+			MTLS:                     mtls,
+			TLSConfiguration:         tlsConfiguration,
 		}
 	}
 
@@ -1068,14 +1118,18 @@ func findProperty(ctx context.Context, client papi.PAPI, name string) (*papi.Pro
 }
 
 // getPropertyRules fetches property rules for given property version
-func getPropertyRules(ctx context.Context, client papi.PAPI, version *papi.GetPropertyVersionsResponse) (*papi.GetRuleTreeResponse, error) {
+func getPropertyRules(ctx context.Context, client papi.PAPI, version *papi.GetPropertyVersionsResponse, ruleFormatVersionOverride string) (*papi.GetRuleTreeResponse, error) {
+	ruleFormatVersion := version.Version.RuleFormat
+	if ruleFormatVersionOverride != "" {
+		ruleFormatVersion = ruleFormatVersionOverride
+	}
 
 	return client.GetRuleTree(ctx, papi.GetRuleTreeRequest{
 		PropertyID:      version.PropertyID,
 		PropertyVersion: version.Version.PropertyVersion,
 		ContractID:      version.ContractID,
 		GroupID:         version.GroupID,
-		RuleFormat:      version.Version.RuleFormat,
+		RuleFormat:      ruleFormatVersion,
 		ValidateRules:   true,
 	})
 }

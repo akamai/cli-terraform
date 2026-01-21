@@ -1,4 +1,4 @@
 provider "akamai" {
-    edgerc         = "~/.edgerc"
+    edgerc         = "{{ getEdgercPath }}"
     config_section = "{{ getSection }}"
 }

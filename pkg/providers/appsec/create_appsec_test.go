@@ -296,6 +296,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"getWAFMode":                                 getWAFMode,
 		"getConfigDescription":                       getConfigDescription,
 		"getPrefixFromID":                            getPrefixFromID,
+		"getEdgercPath":                              getEdgercPath,
 		"getSection":                                 getSection,
 		"isStructuredRule":                           isStructuredRule,
 		"exportJSON":                                 exportJSON,
@@ -345,6 +346,9 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"modules-security-waf.tmpl":                    filepath.Join(security, "waf.tf"),
 		"modules-aap-selected-hostnames.tmpl":          filepath.Join(security, "aap-selected-hostnames.tf"),
 	}
+
+	edgercPath = "/non/default/path/to/edgerc"
+	section = "non-default-section"
 
 	// Let's run our tests
 	for _, config := range configs {
@@ -422,6 +426,7 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 		"getWAFMode":                                 getWAFMode,
 		"getConfigDescription":                       getConfigDescription,
 		"getPrefixFromID":                            getPrefixFromID,
+		"getEdgercPath":                              getEdgercPath,
 		"getSection":                                 getSection,
 		"isStructuredRule":                           isStructuredRule,
 		"exportJSON":                                 exportJSON,
@@ -439,6 +444,9 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 	// Template to path mappings
 	security := filepath.Join("modules", "security")
 	activateSecurity := filepath.Join("modules", "activate-security")
+
+	edgercPath = "/non/default/path/to/edgerc"
+	section = "non-default-section"
 
 	tests := map[string]string{
 		"appsec.tmpl":                         "appsec.tf",

@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/papi"
+	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/urfave/cli/v2"
 )
@@ -97,7 +100,7 @@ func getSubcommandsNames(ctx *cli.Context) []string {
 }
 
 func showHelpCommandWithErr(c *cli.Context, stringErr string) error {
-	_, err := fmt.Fprintf(c.App.ErrWriter, "%s\n\n", color.RedString(stringErr))
+	_, err := fmt.Fprintf(c.App.ErrWriter, "%s\n\n", color.RedString("%s", stringErr))
 	if err != nil {
 		return err
 	}
@@ -111,5 +114,38 @@ func validateVersion(ctx *cli.Context) error {
 	if ctx.Int64("version") <= 0 {
 		return cli.Exit(color.RedString("CA set version should be a positive integer"), 1)
 	}
+	return nil
+}
+
+func validateRuleFormat(isProperty bool) actionValidator {
+	return func(ctx *cli.Context) error {
+		if !ctx.IsSet("rule-format") {
+			return nil
+		}
+
+		sess := edgegrid.GetSession(ctx.Context)
+		client := papi.Client(sess)
+
+		return checkRuleFormat(ctx, client, isProperty)
+	}
+}
+
+func checkRuleFormat(ctx *cli.Context, client papi.PAPI, isProperty bool) error {
+	ruleFormats, err := client.GetRuleFormats(ctx.Context)
+	if err != nil {
+		return cli.Exit(color.RedString("Failed to fetch rule formats: %s", err), 1)
+	}
+
+	ruleFormat := ctx.String("rule-format")
+
+	// "latest" is only allowed for properties using json format for rules
+	latestAllowed := isProperty && !ctx.IsSet("rules-as-hcl")
+	if !slices.Contains(ruleFormats.RuleFormats.Items, ruleFormat) || (ruleFormat == "latest" && !latestAllowed) {
+		if isProperty {
+			return cli.Exit(color.RedString("Invalid rule format version: %s. Must be vYYYY-MM-DD (with a leading \"v\"). The 'latest' value is allowed only for properties using the JSON rule format.", ruleFormat), 1)
+		}
+		return cli.Exit(color.RedString("Invalid rule format version: %s. Must be vYYYY-MM-DD (with a leading \"v\").", ruleFormat), 1)
+	}
+
 	return nil
 }

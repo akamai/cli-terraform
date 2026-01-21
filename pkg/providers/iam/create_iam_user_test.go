@@ -107,7 +107,7 @@ var (
 
 	}
 
-	expectProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
+	expectProcessTemplates = func(p *templates.MockProcessor, edgercPath string, section string) *mock.Call {
 		tfData := TFData{
 			TFUsers: []*TFUser{
 				{
@@ -137,6 +137,7 @@ var (
 					GroupName:     "the subgroup",
 				},
 			},
+			EdgercPath: edgercPath,
 			Section:    section,
 			Subcommand: "user",
 		}
@@ -147,7 +148,7 @@ var (
 		return call.Return(nil)
 	}
 
-	expectUsersOnlyProcessTemplates = func(p *templates.MockProcessor, section string) *mock.Call {
+	expectUsersOnlyProcessTemplates = func(p *templates.MockProcessor, edgercPath string, section string) *mock.Call {
 		tfData := TFData{
 			TFUsers: []*TFUser{
 				{
@@ -157,6 +158,7 @@ var (
 					UserNotifications: getTFUserNotifications(),
 				},
 			},
+			EdgercPath: edgercPath,
 			Section:    section,
 			Subcommand: "user",
 		}
@@ -169,28 +171,45 @@ var (
 )
 
 func TestCreateIAMUserByEmail(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 
 	tests := map[string]struct {
-		userOnly bool
-		init     func(*iam.Mock, *templates.MockProcessor)
+		edgercPath string
+		section    string
+		userOnly   bool
+		init       func(*iam.Mock, *templates.MockProcessor)
 	}{
 		"fetch user": {
-			userOnly: false,
+			edgercPath: defaultEdgercPath,
+			section:    defaultSection,
+			userOnly:   false,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListUsers(i)
 				expectGetUser(i)
 				expectGetUserRole(i)
 				expectGetUserGroup(i)
-				expectProcessTemplates(p, section)
+				expectProcessTemplates(p, defaultEdgercPath, defaultSection)
 			},
 		},
 		"fetch user only (without role and group details)": {
-			userOnly: true,
+			edgercPath: defaultEdgercPath,
+			section:    defaultSection,
+			userOnly:   true,
 			init: func(i *iam.Mock, p *templates.MockProcessor) {
 				expectListUsers(i)
 				expectGetUser(i)
-				expectUsersOnlyProcessTemplates(p, section)
+				expectUsersOnlyProcessTemplates(p, defaultEdgercPath, defaultSection)
+			},
+		},
+		"non default edgerc path and section": {
+			edgercPath: "/non/default/path/to/edgerc",
+			section:    "non_default_section",
+			userOnly:   true,
+			init: func(i *iam.Mock, p *templates.MockProcessor) {
+				expectListUsers(i)
+				expectGetUser(i)
+				expectUsersOnlyProcessTemplates(p, "/non/default/path/to/edgerc", "non_default_section")
 			},
 		},
 	}
@@ -201,7 +220,7 @@ func TestCreateIAMUserByEmail(t *testing.T) {
 			mp := new(templates.MockProcessor)
 			test.init(mi, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createIAMUserByEmail(ctx, "terraform@akamai.com", section, mi, mp, test.userOnly)
+			err := createIAMUserByEmail(ctx, "terraform@akamai.com", test.edgercPath, test.section, mi, mp, test.userOnly)
 			require.NoError(t, err)
 			mi.AssertExpectations(t)
 			mp.AssertExpectations(t)
@@ -210,7 +229,8 @@ func TestCreateIAMUserByEmail(t *testing.T) {
 }
 
 func TestProcessIAMUserTemplates(t *testing.T) {
-	section := "test_section"
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 
 	tests := map[string]struct {
 		givenData    TFData
@@ -241,7 +261,8 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 						GroupName:     "Custom group",
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "user",
 			},
 			dir:          "iam_user_by_email_basic",
@@ -256,7 +277,8 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 						AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]",
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "user",
 			},
 			dir:          "iam_user_only_by_email",
@@ -287,7 +309,8 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 						GroupName:     "Custom group",
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "user",
 			},
 			dir:          "iam_user_by_email_basic_mfa_notifications",
@@ -317,7 +340,8 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 						GroupName:     "Custom group",
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "user",
 			},
 			dir:          "iam_user_by_email_newlines",
@@ -352,7 +376,8 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 						GroupName:     "Custom group",
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "user",
 			},
 			dir:          "iam_user_by_email_end_newline",
@@ -393,11 +418,28 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 						GroupName:     "Custom group 987",
 					},
 				},
-				Section:    section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 				Subcommand: "user",
 			},
 			dir:          "iam_user_by_email_multiple_auth_grants",
 			filesToCheck: []string{"groups.tf", "import.sh", "roles.tf", "user.tf", "variables.tf"},
+		},
+		"non default edgerc path and section": {
+			givenData: TFData{
+				TFUsers: []*TFUser{
+					{
+						TFUserBasicInfo: getTFUserBasicInfo(),
+						IsLocked:        false,
+						AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]",
+					},
+				},
+				EdgercPath: "/non/default/path/to/edgerc",
+				Section:    "non_default_section",
+				Subcommand: "user",
+			},
+			dir:          "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 

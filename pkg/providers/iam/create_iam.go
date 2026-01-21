@@ -25,6 +25,7 @@ type (
 		TFGroups    []TFGroup
 		TFAllowlist TFAllowlist
 		TFClient    TFClient
+		EdgercPath  string
 		Section     string
 		Subcommand  string
 	}
@@ -457,9 +458,9 @@ func buildGroupAccess(groups []iam.ClientGroup) []TFClientGroupRequestItem {
 }
 
 func cidrName(cidr string) string {
-	cidr = strings.Replace(cidr, ".", "_", -1)
-	cidr = strings.Replace(cidr, ":", "_", -1)
-	cidr = strings.Replace(cidr, "/", "-", -1)
+	cidr = strings.ReplaceAll(cidr, ".", "_")
+	cidr = strings.ReplaceAll(cidr, ":", "_")
+	cidr = strings.ReplaceAll(cidr, "/", "-")
 
 	return fmt.Sprintf("cidr_%s", cidr)
 }

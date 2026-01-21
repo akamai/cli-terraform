@@ -37,7 +37,8 @@ var (
 	// ErrSavingFiles is returned when an issue with processing templates occurs
 	ErrSavingFiles = errors.New("saving terraform project files")
 
-	section string
+	edgercPath string
+	section    string
 )
 
 // CmdCreateAppsec is an entrypoint to create-appsec command
@@ -62,7 +63,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 	for _, path := range paths {
 		err := os.MkdirAll(path, 0755)
 		if err != nil {
-			return cli.Exit(color.RedString(err.Error()), 1)
+			return cli.Exit(color.RedString("%s", err.Error()), 1)
 		}
 	}
 
@@ -71,10 +72,11 @@ func CmdCreateAppsec(c *cli.Context) error {
 
 	err := tools.CheckFiles(appsecPath)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
-	// Save our section for use later
+	// Save our edgerc path and section for use later
+	edgercPath = edgegrid.GetEdgercPath(c)
 	section = edgegrid.GetEdgercSection(c)
 
 	// Template to path mappings
@@ -134,6 +136,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"getRepNameByID":                             getRepNameByID,
 		"getRuleDescByID":                            getRuleDescByID,
 		"getRuleNameByID":                            getRuleNameByID,
+		"getEdgercPath":                              getEdgercPath,
 		"getSection":                                 getSection,
 		"getWAFMode":                                 getWAFMode,
 		"isStructuredRule":                           isStructuredRule,
@@ -327,6 +330,10 @@ func getSection() string {
 	return section
 }
 
+func getEdgercPath() string {
+	return edgercPath
+}
+
 // Get the reputation profile name by id
 func getRepNameByID(configuration *appsec.GetExportConfigurationResponse, id int) (string, error) {
 	for _, element := range configuration.ReputationProfiles {
@@ -335,7 +342,7 @@ func getRepNameByID(configuration *appsec.GetExportConfigurationResponse, id int
 		}
 	}
 
-	return "", errors.New("Can't find reputation profile name")
+	return "", errors.New("can't find reputation profile name")
 }
 
 // Get the security policy name by id
@@ -346,7 +353,7 @@ func getPolicyNameByID(configuration *appsec.GetExportConfigurationResponse, id 
 		}
 	}
 
-	return "", errors.New("Can't find security policy name")
+	return "", errors.New("can't find security policy name")
 }
 
 // Get the rate name by id
@@ -357,7 +364,7 @@ func getRateNameByID(configuration *appsec.GetExportConfigurationResponse, id in
 		}
 	}
 
-	return "", errors.New("Can't find rate control name")
+	return "", errors.New("can't find rate control name")
 }
 
 // Get the malware policy name by id
@@ -368,7 +375,7 @@ func getMalwareNameByID(configuration *appsec.GetExportConfigurationResponse, id
 		}
 	}
 
-	return "", errors.New("Can't find malware policy name")
+	return "", errors.New("can't find malware policy name")
 }
 
 // Get the custom rule name by id
@@ -379,7 +386,7 @@ func getCustomRuleNameByID(configuration *appsec.GetExportConfigurationResponse,
 		}
 	}
 
-	return "", errors.New("Can't find custom rule name")
+	return "", errors.New("can't find custom rule name")
 }
 
 // Get the rule name by id

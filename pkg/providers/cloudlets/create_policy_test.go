@@ -32,11 +32,14 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreatePolicy(t *testing.T) {
-	section := "test_section"
+	defaultSection := "test_section"
+	defaultEdgercPath := "~/.edgerc"
 	pageSize := 1000
 	tests := map[string]struct {
-		init      func(*cloudlets.Mock, *v3.Mock, *templates.MockProcessor)
-		withError error
+		edgercPath string
+		section    string
+		init       func(*cloudlets.Mock, *v3.Mock, *templates.MockProcessor)
+		withError  error
 	}{
 		"fetch latest version of policy v2 and produce output ALB": {
 			init: func(c *cloudlets.Mock, _ *v3.Mock, p *templates.MockProcessor) {
@@ -138,7 +141,8 @@ func TestCreatePolicy(t *testing.T) {
 				}
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:            "test_policy",
-					Section:         section,
+					EdgercPath:      defaultEdgercPath,
+					Section:         defaultSection,
 					CloudletCode:    "ALB",
 					Description:     "version 2 description",
 					GroupID:         234,
@@ -240,7 +244,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:            "test_policy",
-					Section:         section,
+					EdgercPath:      defaultEdgercPath,
+					Section:         defaultSection,
 					CloudletCode:    "ER",
 					Description:     "version 2 description",
 					GroupID:         234,
@@ -350,7 +355,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:            "test_policy",
-					Section:         section,
+					EdgercPath:      defaultEdgercPath,
+					Section:         defaultSection,
 					CloudletCode:    "CD",
 					Description:     "version 2 description",
 					GroupID:         234,
@@ -431,7 +437,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:              "test_policy",
-					Section:           section,
+					EdgercPath:        defaultEdgercPath,
+					Section:           defaultSection,
 					CloudletCode:      "ER",
 					Description:       "version 2 description",
 					GroupID:           234,
@@ -501,7 +508,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:              "test_policy",
-					Section:           section,
+					EdgercPath:        defaultEdgercPath,
+					Section:           defaultSection,
 					CloudletCode:      "ER",
 					Description:       "version 2 description",
 					GroupID:           234,
@@ -573,7 +581,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:              "test_policy",
-					Section:           section,
+					EdgercPath:        defaultEdgercPath,
+					Section:           defaultSection,
 					CloudletCode:      "AP",
 					Description:       "version 2 description",
 					GroupID:           234,
@@ -645,7 +654,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:              "test_policy",
-					Section:           section,
+					EdgercPath:        defaultEdgercPath,
+					Section:           defaultSection,
 					CloudletCode:      "AS",
 					Description:       "version 2 description",
 					GroupID:           22,
@@ -686,7 +696,8 @@ func TestCreatePolicy(t *testing.T) {
 				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2, PageSize: &pageSize, Offset: 0}).Return([]cloudlets.PolicyVersion{}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:              "test_policy",
-					Section:           section,
+					EdgercPath:        defaultEdgercPath,
+					Section:           defaultSection,
 					CloudletCode:      "ER",
 					Description:       "",
 					GroupID:           234,
@@ -746,7 +757,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:         "test_policy",
-					Section:      section,
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
 					CloudletCode: "ER",
 					Description:  "version 2 description",
 					GroupID:      234,
@@ -827,7 +839,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:         "test_policy",
-					Section:      section,
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
 					CloudletCode: "ER",
 					Description:  "version 2 description",
 					GroupID:      234,
@@ -917,7 +930,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:         "test_policy",
-					Section:      section,
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
 					CloudletCode: "FR",
 					Description:  "version 2 description",
 					GroupID:      234,
@@ -1007,7 +1021,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:         "test_policy",
-					Section:      section,
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
 					CloudletCode: "CD",
 					Description:  "version 2 description",
 					GroupID:      234,
@@ -1097,7 +1112,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:         "test_policy",
-					Section:      section,
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
 					CloudletCode: "AP",
 					Description:  "version 2 description",
 					GroupID:      234,
@@ -1187,7 +1203,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:         "test_policy",
-					Section:      section,
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
 					CloudletCode: "AS",
 					Description:  "version 2 description",
 					GroupID:      234,
@@ -1277,7 +1294,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:         "test_policy",
-					Section:      section,
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
 					CloudletCode: "IG",
 					Description:  "version 2 description",
 					GroupID:      234,
@@ -1359,7 +1377,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:         "test_policy",
-					Section:      section,
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
 					CloudletCode: "ER",
 					Description:  "version 2 description",
 					GroupID:      234,
@@ -1435,7 +1454,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:         "test_policy",
-					Section:      section,
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
 					CloudletCode: "ER",
 					Description:  "version 2 description",
 					GroupID:      234,
@@ -1476,7 +1496,8 @@ func TestCreatePolicy(t *testing.T) {
 					PolicyVersions: []v3.ListPolicyVersionsItem{}}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:              "test_policy",
-					Section:           section,
+					EdgercPath:        defaultEdgercPath,
+					Section:           defaultSection,
 					CloudletCode:      "ER",
 					Description:       "",
 					GroupID:           234,
@@ -1555,7 +1576,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:         "test_policy",
-					Section:      section,
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
 					CloudletCode: "ER",
 					Description:  "version 2 description",
 					GroupID:      234,
@@ -1847,7 +1869,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:              "test_policy",
-					Section:           section,
+					EdgercPath:        defaultEdgercPath,
+					Section:           defaultSection,
 					CloudletCode:      "ER",
 					Description:       "version 2 description",
 					GroupID:           234,
@@ -1926,7 +1949,8 @@ func TestCreatePolicy(t *testing.T) {
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
 					Name:         "test_policy",
-					Section:      section,
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
 					CloudletCode: "ER",
 					Description:  "version 2 description",
 					GroupID:      234,
@@ -1957,16 +1981,147 @@ func TestCreatePolicy(t *testing.T) {
 			},
 			withError: templates.ErrSavingFiles,
 		},
+		"non default edgerc path and section": {
+			edgercPath: "/non/default/path/to/edgerc",
+			section:    "non_default_section",
+			init: func(c *cloudlets.Mock, _ *v3.Mock, p *templates.MockProcessor) {
+				c.On("ListPolicies", mock.Anything, cloudlets.ListPoliciesRequest{PageSize: &pageSize, Offset: 0}).Return([]cloudlets.Policy{
+					{
+						PolicyID:     1,
+						GroupID:      123,
+						Name:         "some policy",
+						CloudletID:   0,
+						CloudletCode: "ALB",
+					},
+					{
+						PolicyID:     2,
+						GroupID:      234,
+						Name:         "test_policy",
+						Description:  "test_policy description",
+						CloudletID:   0,
+						CloudletCode: "ALB",
+					},
+				}, nil).Once()
+				c.On("ListPolicyVersions", mock.Anything, cloudlets.ListPolicyVersionsRequest{PolicyID: 2, PageSize: &pageSize, Offset: 0}).Return([]cloudlets.PolicyVersion{
+					{
+						PolicyID: 2,
+						Version:  1,
+					},
+					{
+						PolicyID:        2,
+						Version:         2,
+						Description:     "version 2 description",
+						MatchRuleFormat: "1.0",
+					},
+				}, nil).Once()
+				c.On("GetPolicyVersion", mock.Anything, cloudlets.GetPolicyVersionRequest{
+					PolicyID: 2,
+					Version:  2,
+				}).Return(&cloudlets.PolicyVersion{
+					PolicyID:    2,
+					Version:     2,
+					Description: "version 2 description",
+					MatchRules: cloudlets.MatchRules{
+						&cloudlets.MatchRuleALB{
+							Name:  "some rule",
+							Type:  "ALB",
+							Start: 1,
+							End:   2,
+							ID:    1234,
+							ForwardSettings: cloudlets.ForwardSettingsALB{
+								OriginID: "test_origin",
+							},
+						},
+					},
+					MatchRuleFormat: "1.0",
+				}, nil).Once()
+
+				origin := cloudlets.Origin{
+					OriginID:    "test_origin",
+					Description: "test description",
+					Type:        "APPLICATION_LOAD_BALANCER",
+				}
+
+				var versionList []cloudlets.LoadBalancerVersion
+				for i := 1; i <= 2; i++ {
+					versionList = append(versionList, cloudlets.LoadBalancerVersion{OriginID: origin.OriginID, Version: int64(i)})
+				}
+				c.On("ListLoadBalancerVersions", mock.Anything, cloudlets.ListLoadBalancerVersionsRequest{
+					OriginID: origin.OriginID,
+				}).Return(versionList, nil).Once()
+
+				c.On("GetOrigin", mock.Anything, cloudlets.GetOriginRequest{
+					OriginID: origin.OriginID,
+				}).Return(&origin, nil).Once()
+
+				activations := []cloudlets.LoadBalancerActivation{
+					{
+						ActivatedDate: "2021-10-29T00:00:10.000Z",
+						Network:       cloudlets.LoadBalancerActivationNetworkProduction,
+						OriginID:      origin.OriginID,
+						Status:        cloudlets.LoadBalancerActivationStatusActive,
+						Version:       2,
+					},
+					{
+						ActivatedDate: "2021-10-29T00:00:20.000Z",
+						Network:       cloudlets.LoadBalancerActivationNetworkStaging,
+						OriginID:      origin.OriginID,
+						Status:        cloudlets.LoadBalancerActivationStatusActive,
+						Version:       2,
+					},
+				}
+				c.On("ListLoadBalancerActivations", mock.Anything, cloudlets.ListLoadBalancerActivationsRequest{
+					OriginID: origin.OriginID,
+				}).Return(activations, nil).Twice()
+
+				loadBalancersList := make([]LoadBalancerVersion, len(versionList))
+				for i, v := range versionList {
+					loadBalancersList[i] = LoadBalancerVersion{
+						LoadBalancerVersion: v,
+						OriginDescription:   origin.Description,
+					}
+				}
+				p.On("ProcessTemplates", TFPolicyData{
+					Name:            "test_policy",
+					EdgercPath:      "/non/default/path/to/edgerc",
+					Section:         "non_default_section",
+					CloudletCode:    "ALB",
+					Description:     "version 2 description",
+					GroupID:         234,
+					MatchRuleFormat: "1.0",
+					MatchRules: cloudlets.MatchRules{
+						&cloudlets.MatchRuleALB{
+							Name:  "some rule",
+							Type:  "ALB",
+							Start: 1,
+							End:   2,
+							ID:    1234,
+							ForwardSettings: cloudlets.ForwardSettingsALB{
+								OriginID: "test_origin",
+							},
+						},
+					},
+					LoadBalancers:           loadBalancersList[1:],
+					LoadBalancerActivations: activations,
+				}).Return(nil).Once()
+			},
+		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			if test.edgercPath == "" {
+				test.edgercPath = "~/.edgerc"
+			}
+			if test.section == "" {
+				test.section = "test_section"
+			}
 			mcv2 := new(cloudlets.Mock)
 			mcv3 := new(v3.Mock)
 			mp := new(templates.MockProcessor)
 			test.init(mcv2, mcv3, mp)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createPolicy(ctx, "test_policy", section, mcv2, mcv3, mp)
+			err := createPolicy(ctx, "test_policy", test.edgercPath, test.section, mcv2, mcv3, mp)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -1979,6 +2134,8 @@ func TestCreatePolicy(t *testing.T) {
 }
 
 func TestProcessPolicyTemplates(t *testing.T) {
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 	tests := map[string]struct {
 		givenData    TFPolicyData
 		dir          string
@@ -1987,7 +2144,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with ER match rules and activations": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "ER",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -2077,7 +2235,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with ER match rules and single activation": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "ER",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -2162,7 +2321,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with ER match rules and two activations": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "ER",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -2252,7 +2412,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "ER",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -2304,7 +2465,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules and invalid escape er": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "ER",
 				Description:     `Testing\ exported policy`,
 				GroupID:         12345,
@@ -2342,7 +2504,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules and invalid escape alb": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "ALB",
 				Description:     `Testing\ exported policy`,
 				GroupID:         12345,
@@ -2416,7 +2579,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules and two alb": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "ALB",
 				Description:     `Testing exported policy`,
 				GroupID:         12345,
@@ -2524,7 +2688,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "ER",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -2536,7 +2701,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without version": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "ER",
 				Description:     "",
 				GroupID:         12345,
@@ -2548,7 +2714,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with matches always": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "ER",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -2560,7 +2727,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules alb": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "ALB",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -2670,7 +2838,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules alb and activations": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "ALB",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -2797,7 +2966,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules alb": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "ALB",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -2809,7 +2979,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules fr": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "FR",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -2821,7 +2992,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules CD": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "CD",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -2833,7 +3005,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules fr": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "FR",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -2899,7 +3072,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules CD": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "CD",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -2966,7 +3140,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules vp": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "VP",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -3030,7 +3205,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules vp": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "VP",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -3042,7 +3218,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules ap": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "AP",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -3105,7 +3282,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules ap": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "AP",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -3117,7 +3295,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules as": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "AS",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -3129,7 +3308,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules as": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "AS",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -3208,7 +3388,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy without match rules ig": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "IG",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -3220,7 +3401,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy with match rules ig": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
-				Section:         "test_section",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
 				CloudletCode:    "IG",
 				Description:     "Testing exported policy",
 				GroupID:         12345,
@@ -3275,7 +3457,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy V3 without match rules": {
 			givenData: TFPolicyData{
 				Name:              "test_policy_export",
-				Section:           "test_section",
+				EdgercPath:        defaultEdgercPath,
+				Section:           defaultSection,
 				CloudletCode:      "FR",
 				Description:       "Testing exported policy",
 				GroupID:           12345,
@@ -3288,7 +3471,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy v3 with AP match rules": {
 			givenData: TFPolicyData{
 				Name:         "test_policy_export",
-				Section:      "test_section",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
 				CloudletCode: "AP",
 				Description:  "Testing exported policy",
 				GroupID:      12345,
@@ -3352,7 +3536,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy v3 with AS match rules": {
 			givenData: TFPolicyData{
 				Name:         "test_policy_export",
-				Section:      "test_section",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
 				CloudletCode: "AS",
 				Description:  "Testing exported policy",
 				GroupID:      12345,
@@ -3432,7 +3617,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy v3 with CD match rules": {
 			givenData: TFPolicyData{
 				Name:         "test_policy_export",
-				Section:      "test_section",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
 				CloudletCode: "CD",
 				Description:  "Testing exported policy",
 				GroupID:      12345,
@@ -3500,7 +3686,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy V3 with ER match rules": {
 			givenData: TFPolicyData{
 				Name:         "test_policy_export",
-				Section:      "test_section",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
 				CloudletCode: "ER",
 				Description:  "Testing exported policy",
 				GroupID:      12345,
@@ -3553,7 +3740,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy v3 with FR match rules": {
 			givenData: TFPolicyData{
 				Name:         "test_policy_export",
-				Section:      "test_section",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
 				CloudletCode: "FR",
 				Description:  "Testing exported policy",
 				GroupID:      12345,
@@ -3620,7 +3808,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy v3 with IG match rules": {
 			givenData: TFPolicyData{
 				Name:         "test_policy_export",
-				Section:      "test_section",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
 				CloudletCode: "IG",
 				Description:  "Testing exported policy",
 				GroupID:      12345,
@@ -3676,7 +3865,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy v3 without version": {
 			givenData: TFPolicyData{
 				Name:              "test_policy_export",
-				Section:           "test_section",
+				EdgercPath:        defaultEdgercPath,
+				Section:           defaultSection,
 				CloudletCode:      "ER",
 				Description:       "",
 				GroupID:           234,
@@ -3690,7 +3880,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy V3 with staging activation": {
 			givenData: TFPolicyData{
 				Name:         "test_policy_export",
-				Section:      "test_section",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
 				CloudletCode: "ER",
 				Description:  "Testing exported policy",
 				GroupID:      12345,
@@ -3750,7 +3941,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy V3 with prod activation": {
 			givenData: TFPolicyData{
 				Name:         "test_policy_export",
-				Section:      "test_section",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
 				CloudletCode: "ER",
 				Description:  "Testing exported policy",
 				GroupID:      12345,
@@ -3810,7 +4002,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"policy V3 with both activations": {
 			givenData: TFPolicyData{
 				Name:         "test_policy_export",
-				Section:      "test_section",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
 				CloudletCode: "ER",
 				Description:  "Testing exported policy",
 				GroupID:      12345,
@@ -3871,6 +4064,21 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			},
 			dir:          "v3/v3_with_both_activations",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
+		},
+		"non default edgerc path and section": {
+			givenData: TFPolicyData{
+				Name:              "test_policy_export",
+				EdgercPath:        "non/default/path/to/edgerc",
+				Section:           "non_default_section",
+				CloudletCode:      "ER",
+				Description:       "",
+				GroupID:           234,
+				IsV3:              true,
+				MatchRules:        nil,
+				PolicyActivations: TFPolicyActivationsData{IsV3: true},
+			},
+			dir:          "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 

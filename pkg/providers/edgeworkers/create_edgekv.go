@@ -27,6 +27,7 @@ type (
 		GroupID     int
 		Retention   int
 		GeoLocation string
+		EdgercPath  string
 		Section     string
 		GroupItems  map[string]map[string]edgeworkers.Item
 	}
@@ -64,7 +65,7 @@ func CmdCreateEdgeKV(c *cli.Context) error {
 
 	err := tools.CheckFiles(edgeKVPath, variablesPath, importPath)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 	templateToFile := map[string]string{
 		"edgekv.tmpl":           edgeKVPath,
@@ -85,15 +86,16 @@ func CmdCreateEdgeKV(c *cli.Context) error {
 
 	namespace := c.Args().First()
 	network := edgeworkers.NamespaceNetwork(c.Args().Get(1))
+	edgercPath := edgegrid.GetEdgercPath(c)
 	section := edgegrid.GetEdgercSection(c)
 
-	if err = createEdgeKV(ctx, namespace, network, section, client, processor); err != nil {
+	if err = createEdgeKV(ctx, namespace, network, edgercPath, section, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting edgekv HCL: %s", err), 1)
 	}
 	return nil
 }
 
-func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.NamespaceNetwork, section string, client edgeworkers.Edgeworkers, templateProcessor templates.TemplateProcessor) error {
+func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.NamespaceNetwork, edgercPath, section string, client edgeworkers.Edgeworkers, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 	fmt.Println("Configuring EdgeKV")
 	term.Spinner().Start("Fetching EdgeKV %s", namespace)
@@ -137,6 +139,7 @@ func createEdgeKV(ctx context.Context, namespace string, network edgeworkers.Nam
 		Network:     network,
 		Retention:   *edgeKV.Retention,
 		GeoLocation: edgeKV.GeoLocation,
+		EdgercPath:  edgercPath,
 		Section:     section,
 		GroupItems:  groupItems,
 	}

@@ -37,6 +37,8 @@ type (
 		DomainName string
 		// ValidationScope indicates the scope of the validation, either HOST, DOMAIN, or WILDCARD.
 		ValidationScope string
+		// ValidationMethod indicates the method of validation, either DNS_CNAME, DNS_TXT or HTTP.
+		ValidationMethod string
 		// Validated indicates whether the domain has been validated (DomainStatus is VALIDATED).
 		Validated bool
 	}
@@ -88,7 +90,7 @@ func CmdCreateDomainOwnership(c *cli.Context) error {
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
 	if err := tools.CheckFiles(domainownershipPath, variablesPath, importPath); err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	params := createDomainOwnershipParams{
@@ -198,7 +200,12 @@ func createDomainOwnership(ctx context.Context, params createDomainOwnershipPara
 		}
 	}
 
-	tfData := populateTFData(params, domains, inputDomains[0].domain)
+	tfData, warnings := populateTFData(params, domains, inputDomains[0].domain)
+	if len(warnings) > 0 {
+		for _, warning := range warnings {
+			term.Printf(warning)
+		}
+	}
 	term.Spinner().OK()
 
 	term.Spinner().Start("Saving TF configurations ")
@@ -226,11 +233,10 @@ func parseInputDomains(domainsIn string) ([]parsedDomain, error) {
 			domain := parts[0]
 			if _, ok := seenDomains[domain+":"]; ok {
 				return nil, fmt.Errorf("domain '%s' specified multiple times without validation scope", domain)
-			} else {
-				for _, scope := range validationScopes {
-					if _, ok := seenDomains[domain+":"+string(scope)]; ok {
-						return nil, fmt.Errorf("domain '%s' specified multiple times with and without validation scope", domain)
-					}
+			}
+			for _, scope := range validationScopes {
+				if _, ok := seenDomains[domain+":"+string(scope)]; ok {
+					return nil, fmt.Errorf("domain '%s' specified multiple times with and without validation scope", domain)
 				}
 			}
 			seenDomains[domain+":"] = struct{}{}
@@ -260,15 +266,23 @@ func parseInputDomains(domainsIn string) ([]parsedDomain, error) {
 	return result, nil
 }
 
-func populateTFData(params createDomainOwnershipParams, foundDomains []domainownership.SearchDomainItem, firstDomainName string) TFData {
+func populateTFData(params createDomainOwnershipParams, foundDomains []domainownership.SearchDomainItem, firstDomainName string) (TFData, []string) {
 	domains := make([]TFDomain, 0)
 	importKeyForDomains := make([]string, 0)
 	importKeyForValidation := make([]string, 0)
+	warnings := make([]string, 0)
 	for _, domain := range foundDomains {
+		var validationMethod string
+		if domain.ValidationMethod != nil {
+			validationMethod = *domain.ValidationMethod
+		} else {
+			warnings = append(warnings, fmt.Sprintf("[WARN] ValidationMethod is nil for domain %s with scope %s. Please complete this field before import.\n", domain.DomainName, domain.ValidationScope))
+		}
 		domains = append(domains, TFDomain{
-			DomainName:      domain.DomainName,
-			ValidationScope: domain.ValidationScope,
-			Validated:       domain.DomainStatus == "VALIDATED",
+			DomainName:       domain.DomainName,
+			ValidationScope:  domain.ValidationScope,
+			ValidationMethod: validationMethod,
+			Validated:        domain.DomainStatus == "VALIDATED",
 		})
 		importKeyForDomains = append(importKeyForDomains, fmt.Sprintf("%s:%s", domain.DomainName, domain.ValidationScope))
 		if domain.DomainStatus == "VALIDATED" {
@@ -283,5 +297,5 @@ func populateTFData(params createDomainOwnershipParams, foundDomains []domainown
 		ImportKeyForDomains:    strings.Join(importKeyForDomains, ","),
 		ImportKeyForValidation: strings.Join(importKeyForValidation, ","),
 		Domains:                domains,
-	}
+	}, warnings
 }

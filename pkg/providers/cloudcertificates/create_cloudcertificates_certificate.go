@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v12/pkg/cloudcertificates"
 	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
@@ -86,7 +87,7 @@ func CmdCreateCloudCertificate(c *cli.Context) error {
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
 	if err := tools.CheckFiles(cloudCertificatePath, variablesPath, importPath); err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	name := c.Args().Get(0)
@@ -215,7 +216,7 @@ func sanitizeResourceName(name string) string {
 	name = strings.ReplaceAll(name, ".", "_")
 	name = strings.ReplaceAll(name, " ", "_")
 	// If a first character is not a letter or underscore, prepend an underscore.
-	if len(name) > 0 && !((name[0] >= 'A' && name[0] <= 'Z') || (name[0] >= 'a' && name[0] <= 'z') || name[0] == '_') {
+	if len(name) > 0 && !unicode.IsLetter(rune(name[0])) && name[0] != '_' {
 		name = "_" + name
 	}
 	return name

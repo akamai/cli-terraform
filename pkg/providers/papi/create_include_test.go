@@ -18,8 +18,9 @@ import (
 )
 
 var (
-	section    = "test_section"
-	contractID = "test_contract"
+	contractID        = "test_contract"
+	defaultEdgercPath = "~/.edgerc"
+	defaultSection    = "test_section"
 
 	expectListIncludes = func(client *papi.Mock) {
 		listIncludesReq := papi.ListIncludesRequest{
@@ -242,14 +243,17 @@ var (
 
 func TestCreateInclude(t *testing.T) {
 	tests := map[string]struct {
-		init                func(*papi.Mock, *templates.MockProcessor, *templates.MockMultiTargetProcessor, string)
-		includeName         string
-		dir                 string
-		snippetFilesToCheck []string
-		jsonDir             string
-		withError           error
-		rulesAsHCL          bool
-		splitDepth          *int
+		init                      func(*papi.Mock, *templates.MockProcessor, *templates.MockMultiTargetProcessor, string)
+		includeName               string
+		dir                       string
+		snippetFilesToCheck       []string
+		jsonDir                   string
+		withError                 error
+		rulesAsHCL                bool
+		splitDepth                *int
+		edgercPath                string
+		section                   string
+		ruleFormatVersionOverride string
 	}{
 		"include basic": {
 			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
@@ -412,6 +416,52 @@ func TestCreateInclude(t *testing.T) {
 			rulesAsHCL:  true,
 			splitDepth:  ptr.To(2),
 		},
+		"include with rule format override": {
+			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				expectListIncludes(c)
+				expectGetIncludeVersion(c, "v2020-11-02")
+
+				// Rule Tree
+				var ruleResponse papi.GetIncludeRuleTreeResponse
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				assert.NoError(t, err)
+				assert.NoError(t, json.Unmarshal(rules, &ruleResponse))
+				ruleResponse.RuleFormat = "v2024-02-12"
+				c.On("GetIncludeRuleTree", mock.Anything, papi.GetIncludeRuleTreeRequest{
+					ContractID:     "test_contract",
+					GroupID:        "test_group",
+					IncludeID:      "inc_123456",
+					IncludeVersion: 2,
+					RuleFormat:     "v2024-02-12",
+				}).Return(&ruleResponse, nil).Once()
+
+				expectListIncludeActivations(c)
+				expectAllProcessTemplates(p, getTestData("include with rule format override"))
+			},
+			includeName:               "test_include",
+			dir:                       "include_basic",
+			ruleFormatVersionOverride: "v2024-02-12",
+		},
+		"non default edgerc path and section": {
+			init: func(c *papi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				expectListIncludes(c)
+				expectGetIncludeVersion(c, "v2020-11-02")
+
+				// Rule Tree
+				var ruleResponse papi.GetIncludeRuleTreeResponse
+				rules, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", dir, "mock_rules.json"))
+				assert.NoError(t, err)
+				assert.NoError(t, json.Unmarshal(rules, &ruleResponse))
+				c.On("GetIncludeRuleTree", mock.Anything, getIncludeRuleTreeReq).Return(&ruleResponse, nil).Once()
+
+				expectListIncludeActivations(c)
+				expectAllProcessTemplates(p, getTestData("non default edgerc path and section"))
+			},
+			includeName: "test_include",
+			dir:         "include_basic",
+			edgercPath:  "/non/default/path/to/edgerc",
+			section:     "non_default_section",
+		},
 		"error include not found": {
 			init: func(c *papi.Mock, _ *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, _ string) {
 				c.On("ListIncludes", mock.Anything, papi.ListIncludesRequest{ContractID: "test_contract"}).
@@ -488,19 +538,27 @@ func TestCreateInclude(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			if test.edgercPath == "" {
+				test.edgercPath = defaultEdgercPath
+			}
+			if test.section == "" {
+				test.section = defaultSection
+			}
 			mc := new(papi.Mock)
 			mp := new(templates.MockProcessor)
 			mm := new(templates.MockMultiTargetProcessor)
 			test.init(mc, mp, mm, test.dir)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
 			options := includeOptions{
-				contractID:  contractID,
-				includeName: test.includeName,
-				section:     section,
-				jsonDir:     fmt.Sprintf("./testdata/res/%s", test.jsonDir),
-				tfWorkPath:  "./",
-				rulesAsHCL:  test.rulesAsHCL,
-				splitDepth:  test.splitDepth,
+				contractID:                contractID,
+				includeName:               test.includeName,
+				edgercPath:                test.edgercPath,
+				section:                   test.section,
+				jsonDir:                   fmt.Sprintf("./testdata/res/%s", test.jsonDir),
+				tfWorkPath:                "./",
+				rulesAsHCL:                test.rulesAsHCL,
+				splitDepth:                test.splitDepth,
+				ruleFormatVersionOverride: test.ruleFormatVersionOverride,
 			}
 			err := createInclude(ctx, options, mc, mp, mm)
 			if test.withError != nil {
@@ -563,6 +621,11 @@ func TestProcessIncludeTemplates(t *testing.T) {
 			givenData:    getTestData("include with multiline notes"),
 			dir:          "include_basic_multiline_notes",
 			filesToCheck: []string{"includes.tf", "variables.tf", "import.sh"},
+		},
+		"non default edgerc path and section": {
+			givenData:    getTestData("non default edgerc path and section"),
+			dir:          "include_non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 	for name, test := range tests {
@@ -818,7 +881,8 @@ func TestMultiTargetProcessIncludeTemplates(t *testing.T) {
 func getTestData(key string) TFData {
 	TFDataMap := map[string]TFData{
 		"include basic": {
-			Section: section,
+			EdgercPath: defaultEdgercPath,
+			Section:    defaultSection,
 			Includes: []TFIncludeData{
 				{
 					StagingInfo: NetworkInfo{
@@ -846,7 +910,8 @@ func getTestData(key string) TFData {
 			},
 		},
 		"include basic rules as hcl": {
-			Section: section,
+			EdgercPath: defaultEdgercPath,
+			Section:    defaultSection,
 			Includes: []TFIncludeData{
 				{
 					StagingInfo: NetworkInfo{
@@ -872,7 +937,8 @@ func getTestData(key string) TFData {
 			},
 		},
 		"include basic rules using split-depth": {
-			Section: section,
+			EdgercPath: defaultEdgercPath,
+			Section:    defaultSection,
 			Includes: []TFIncludeData{
 				{
 					StagingInfo: NetworkInfo{
@@ -901,7 +967,8 @@ func getTestData(key string) TFData {
 			RulesAsHCL:    true,
 		},
 		"include single network": {
-			Section: section,
+			EdgercPath: defaultEdgercPath,
+			Section:    defaultSection,
 			Includes: []TFIncludeData{
 				{
 					StagingInfo: NetworkInfo{
@@ -920,7 +987,8 @@ func getTestData(key string) TFData {
 			},
 		},
 		"include no network": {
-			Section: section,
+			EdgercPath: defaultEdgercPath,
+			Section:    defaultSection,
 			Includes: []TFIncludeData{
 				{
 					ContractID:  "test_contract",
@@ -934,7 +1002,8 @@ func getTestData(key string) TFData {
 			},
 		},
 		"include with multiline notes": {
-			Section: section,
+			EdgercPath: defaultEdgercPath,
+			Section:    defaultSection,
 			Includes: []TFIncludeData{
 				{
 					StagingInfo: NetworkInfo{
@@ -962,6 +1031,8 @@ func getTestData(key string) TFData {
 			},
 		},
 		"basic property with multiple children as hcl": {
+			EdgercPath: defaultEdgercPath,
+			Section:    defaultSection,
 			Property: TFPropertyData{
 				GroupName:            "test_group",
 				GroupID:              "grp_12345",
@@ -1002,7 +1073,64 @@ func getTestData(key string) TFData {
 				},
 				ReadVersion: "LATEST",
 			},
-			Section: "test_section",
+		},
+		"non default edgerc path and section": {
+			EdgercPath: "/non/default/path/to/edgerc",
+			Section:    "non_default_section",
+			Includes: []TFIncludeData{
+				{
+					StagingInfo: NetworkInfo{
+						ActivationNote:          "test staging activation",
+						Emails:                  []string{"test@example.com"},
+						Version:                 1,
+						HasActivation:           true,
+						IsActiveOnLatestVersion: false,
+					},
+					ProductionInfo: NetworkInfo{
+						ActivationNote:          "test production activation",
+						Emails:                  []string{"test@example.com", "test1@example.com"},
+						Version:                 1,
+						HasActivation:           true,
+						IsActiveOnLatestVersion: false,
+					},
+					ContractID:  "test_contract",
+					GroupID:     "test_group",
+					IncludeID:   "inc_123456",
+					IncludeName: "test_include",
+					IncludeType: string(papi.IncludeTypeMicroServices),
+					ProductID:   "test_product",
+					RuleFormat:  "v2020-11-02",
+				},
+			},
+		},
+		"include with rule format override": {
+			EdgercPath: defaultEdgercPath,
+			Section:    defaultSection,
+			Includes: []TFIncludeData{
+				{
+					StagingInfo: NetworkInfo{
+						ActivationNote:          "test staging activation",
+						Emails:                  []string{"test@example.com"},
+						Version:                 1,
+						HasActivation:           true,
+						IsActiveOnLatestVersion: false,
+					},
+					ProductionInfo: NetworkInfo{
+						ActivationNote:          "test production activation",
+						Emails:                  []string{"test@example.com", "test1@example.com"},
+						Version:                 1,
+						HasActivation:           true,
+						IsActiveOnLatestVersion: false,
+					},
+					ContractID:  "test_contract",
+					GroupID:     "test_group",
+					IncludeID:   "inc_123456",
+					IncludeName: "test_include",
+					IncludeType: string(papi.IncludeTypeMicroServices),
+					ProductID:   "test_product",
+					RuleFormat:  "v2024-02-12",
+				},
+			},
 		},
 	}
 

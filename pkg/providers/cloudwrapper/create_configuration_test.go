@@ -29,7 +29,6 @@ func TestMain(m *testing.M) {
 }
 
 var (
-	section                              = "test_section"
 	configID                             = 12345
 	getConfigurationReq                  = cloudwrapper.GetConfigurationRequest{ConfigID: int64(configID)}
 	getConfigurationActiveResponse       = generateCloudWrapperResponseMock(cloudwrapper.StatusActive, false)
@@ -50,9 +49,11 @@ var (
 
 func TestCreateCloudWrapper(t *testing.T) {
 	tests := map[string]struct {
-		init      func(*cloudwrapper.Mock, *templates.MockProcessor, string)
-		dir       string
-		withError error
+		edgercPath string
+		section    string
+		init       func(*cloudwrapper.Mock, *templates.MockProcessor, string)
+		dir        string
+		withError  error
 	}{
 		"configuration all fields": {
 			init: func(c *cloudwrapper.Mock, p *templates.MockProcessor, _ string) {
@@ -82,15 +83,30 @@ func TestCreateCloudWrapper(t *testing.T) {
 			dir:       "all_fields_config",
 			withError: ErrContainMultiCDNSettings,
 		},
+		"non default edgerc path and section": {
+			edgercPath: "/non/default/path/to/edgerc",
+			section:    "non_default_section",
+			init: func(c *cloudwrapper.Mock, p *templates.MockProcessor, _ string) {
+				mockGetConfiguration(c, getConfigurationReq, &getConfigurationActiveResponse, nil)
+				mockProcessTemplates(p, (&tfCloudWrapperDataBuilder{}).withNonDefaultEdgercPathAndSection().withStatus(cloudwrapper.StatusActive).build(), nil)
+			},
+			dir: "non_default_edgerc_path_and_section",
+		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			if test.edgercPath == "" {
+				test.edgercPath = "~/.edgerc"
+			}
+			if test.section == "" {
+				test.section = "test_section"
+			}
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
 			mock := new(cloudwrapper.Mock)
 			templateProcessor := new(templates.MockProcessor)
 			test.init(mock, templateProcessor, test.dir)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createCloudWrapper(ctx, int64(configID), section, mock, templateProcessor)
+			err := createCloudWrapper(ctx, int64(configID), test.edgercPath, test.section, mock, templateProcessor)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -103,6 +119,8 @@ func TestCreateCloudWrapper(t *testing.T) {
 }
 
 func TestProcessCloudWrapperTemplates(t *testing.T) {
+	defaultEdgercPath := "~/.edgerc"
+	defaultSection := "test_section"
 	tests := map[string]struct {
 		givenData    TFCloudWrapperData
 		dir          string
@@ -136,7 +154,8 @@ func TestProcessCloudWrapperTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section: section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 			},
 			dir:          "basic_req_fields",
 			filesToCheck: []string{"cloudwrapper.tf", "import.sh", "variables.tf"},
@@ -174,7 +193,8 @@ func TestProcessCloudWrapperTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section: section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 			},
 			dir:          "all_fields_config",
 			filesToCheck: []string{"cloudwrapper.tf", "import.sh", "variables.tf"},
@@ -207,7 +227,8 @@ func TestProcessCloudWrapperTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section: section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 			},
 			dir:          "multiline_comment",
 			filesToCheck: []string{"cloudwrapper.tf", "import.sh", "variables.tf"},
@@ -245,10 +266,45 @@ func TestProcessCloudWrapperTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section: section,
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
 			},
 			dir:          "not_active_configuration",
 			filesToCheck: []string{"cloudwrapper.tf", "import.sh", "variables.tf"},
+		},
+		"non default edgerc path and section": {
+			givenData: TFCloudWrapperData{
+				Configuration: TFCWConfiguration{
+					ID:                        int64(12345),
+					Comments:                  "test",
+					PropertyIDs:               []string{"123", "456"},
+					ContractID:                "1234",
+					ConfigurationResourceName: "test_configuration",
+					Name:                      "test_configuration",
+					Locations: []Location{
+						{
+							Comments:      "TestComments",
+							TrafficTypeID: 1,
+							Capacity: Capacity{
+								Unit:  "GB",
+								Value: 1,
+							},
+						},
+						{
+							Comments:      "TestComments",
+							TrafficTypeID: 2,
+							Capacity: Capacity{
+								Unit:  "TB",
+								Value: 2,
+							},
+						},
+					},
+				},
+				EdgercPath: "/non/default/path/to/edgerc",
+				Section:    "non_default_section",
+			},
+			dir:          "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 	for name, test := range tests {
@@ -310,7 +366,45 @@ func (t *tfCloudWrapperDataBuilder) withDefaults() *tfCloudWrapperDataBuilder {
 				},
 			},
 		},
-		Section: "test_section",
+		EdgercPath: "~/.edgerc",
+		Section:    "test_section",
+	}
+	return t
+}
+
+func (t *tfCloudWrapperDataBuilder) withNonDefaultEdgercPathAndSection() *tfCloudWrapperDataBuilder {
+	t.tfCloudWrapperData = TFCloudWrapperData{
+		Configuration: TFCWConfiguration{
+			ID:                        int64(12345),
+			Comments:                  "test",
+			PropertyIDs:               []string{"123", "456"},
+			ContractID:                "1234",
+			ConfigurationResourceName: "testName",
+			Name:                      "testName",
+			NotificationEmails:        []string{"testuser@akamai.com"},
+			RetainIdleObjects:         false,
+			CapacityAlertsThreshold:   tools.IntPtr(75),
+			Locations: []Location{
+				{
+					Comments:      "TestComments",
+					TrafficTypeID: 1,
+					Capacity: Capacity{
+						Unit:  "GB",
+						Value: 1,
+					},
+				},
+				{
+					Comments:      "TestComments",
+					TrafficTypeID: 2,
+					Capacity: Capacity{
+						Unit:  "TB",
+						Value: 2,
+					},
+				},
+			},
+		},
+		EdgercPath: "/non/default/path/to/edgerc",
+		Section:    "non_default_section",
 	}
 	return t
 }

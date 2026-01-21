@@ -1,5 +1,23 @@
 # RELEASE NOTES
 
+## 2.7.0 (Jan 21, 2026)
+
+### FEATURES/ENHANCEMENTS:
+
+* General
+  * Added support for building the `cli-terraform` for the `linux/arm64` architecture.
+  * Added support for generating configs with custom `edgerc` paths to all providers.
+  * Migrated to Go `1.24`.
+  * Migrated to Terraform `1.13.5` version.
+  * Updated various dependencies.
+
+* PAPI
+  * Added support for exporting `mtls` and `tls_configuration` attributes for hostnames with a `cert_provisioning_type` of `CCM` when running the `export-property` command.
+  * Added the `--rule-format` flag to the `export-property` and `export-property-include` commands. The flag allows exporting with a rule tree in a specific format version.
+
+* PAPI Domain Ownership Validation (Beta)
+  * Added the `validation_method` to the exported fields inside the `akamai_property_domainownership_validation` resource.
+
 ## 2.6.0 (Nov 13, 2025)
 
 #### FEATURES/ENHANCEMENTS:

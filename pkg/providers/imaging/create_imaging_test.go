@@ -675,8 +675,9 @@ var (
 )
 
 func TestCreateImaging(t *testing.T) {
-	section := "test_section"
 	tests := map[string]struct {
+		edgercPath   string
+		section      string
 		init         func(*imaging.Mock)
 		filesToCheck []string
 		dataDir      string
@@ -868,17 +869,35 @@ func TestCreateImaging(t *testing.T) {
 			},
 			withError: ErrFetchingPolicy,
 		},
+		"non default edgerc path and section": {
+			edgercPath: "/non/default/path/to/edgerc",
+			section:    "non_default_section",
+			init: func(i *imaging.Mock) {
+				expectGetPolicySet(i, "test_policyset_id", "ctr_123", "some policy set", "IMAGE", "EMEA", nil).Once()
+				// getPolicies returns zero policies
+				expectListPolicies(i, "test_policyset_id", "ctr_123", "POLICY", imaging.PolicyNetworkStaging,
+					nil, 0, nil).Once()
+			},
+			dataDir:      "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
+		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			if test.edgercPath == "" {
+				test.edgercPath = "~/.edgerc"
+			}
+			if test.section == "" {
+				test.section = "test_section"
+			}
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("testdata/res/%s/%s", test.dataDir, test.jsonDir), 0755))
 			tfWorkPath := fmt.Sprintf("testdata/res/%s", test.dataDir)
 			mi := new(imaging.Mock)
 			mp := processor(test.dataDir)
 			test.init(mi)
 			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
-			err := createImaging(ctx, "ctr_123", "test_policyset_id", tfWorkPath, test.jsonDir, section, mi, mp, test.policyAsHCL)
+			err := createImaging(ctx, "ctr_123", "test_policyset_id", tfWorkPath, test.jsonDir, test.edgercPath, test.section, mi, mp, test.policyAsHCL)
 			if test.withError != nil {
 				assert.True(t, errors.Is(err, test.withError), "expected: %s; got: %s", test.withError, err)
 				return
@@ -914,7 +933,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					Region:     "EMEA",
 					Type:       "IMAGE",
 				},
-				Section: "test_section",
 			},
 			dir:          "only_policy_set",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
@@ -929,7 +947,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					Type:       "IMAGE",
 				},
 				Policies: imagePoliciesData[:2],
-				Section:  "test_section",
 			},
 			dir:          "with_image_policies",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
@@ -950,7 +967,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						Policy:               &veryDeepPolicy,
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "with_image_policies_as_hcl",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
@@ -971,7 +987,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						Policy:               &imaging.PolicyInputImage{},
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "with_image_policies_as_hcl_empty",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
@@ -1041,7 +1056,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "with_image_policies_as_hcl_with_imagetype",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
@@ -1056,7 +1070,6 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					Type:       "VIDEO",
 				},
 				Policies: []TFPolicy{videoPoliciesData[0], videoPoliciesData[2]},
-				Section:  "test_section",
 			},
 			dir:          "with_video_policies",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
@@ -1128,15 +1141,35 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 				},
-				Section: "test_section",
 			},
 			dir:          "with_video_policies_as_hcl",
 			filesToCheck: []string{"imaging.tf", "variables.tf", "import.sh"},
+		},
+		"non default edgerc path and section": {
+			givenData: TFImagingData{
+				PolicySet: TFPolicySet{
+					ID:         "test_policyset_id",
+					ContractID: "ctr_123",
+					Name:       "some policy set",
+					Region:     "EMEA",
+					Type:       "IMAGE",
+				},
+				EdgercPath: "/non/default/path/to/edgerc",
+				Section:    "non_default_section",
+			},
+			dir:          "non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			if test.givenData.EdgercPath == "" {
+				test.givenData.EdgercPath = "~/.edgerc"
+			}
+			if test.givenData.Section == "" {
+				test.givenData.Section = "test_section"
+			}
 			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s", test.dir), 0755))
 			require.NoError(t, processor(test.dir).ProcessTemplates(test.givenData))
 

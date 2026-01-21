@@ -25,6 +25,7 @@ type (
 		Enrollment          cps.GetEnrollmentResponse
 		EnrollmentID        int
 		ContractID          string
+		EdgercPath          string
 		Section             string
 		CertificateECDSA    string
 		TrustChainECDSA     string
@@ -63,7 +64,7 @@ func CmdCreateCPS(c *cli.Context) error {
 
 	err := tools.CheckFiles(enrollmentPath, variablesPath, importPath)
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	templateToFile := map[string]string{
@@ -79,17 +80,18 @@ func CmdCreateCPS(c *cli.Context) error {
 
 	enrollmentID, err := strconv.Atoi(c.Args().Get(0))
 	if err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 	contractID := c.Args().Get(1)
+	edgercPath := edgegrid.GetEdgercPath(c)
 	section := edgegrid.GetEdgercSection(c)
-	if err = createCPS(ctx, contractID, enrollmentID, section, client, processor); err != nil {
+	if err = createCPS(ctx, contractID, enrollmentID, edgercPath, section, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting enrollment HCL: %s", err), 1)
 	}
 	return nil
 }
 
-func createCPS(ctx context.Context, contractID string, enrollmentID int,
+func createCPS(ctx context.Context, contractID string, enrollmentID int, edgercPath,
 	section string, client cps.CPS, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
@@ -115,6 +117,7 @@ func createCPS(ctx context.Context, contractID string, enrollmentID int,
 		Enrollment:   *enrollment,
 		EnrollmentID: enrollmentID,
 		ContractID:   contractID,
+		EdgercPath:   edgercPath,
 		Section:      section,
 	}
 

@@ -18,6 +18,28 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 		filesToCheck []string
 		filterFuncs  []func([]string) ([]string, error)
 	}{
+		"non default edgerc path and section": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "v2023-01-05",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+				},
+				EdgercPath: "/non/default/path/to/edgerc",
+				Section:    "non_default_section",
+			},
+			dir:          "ruleformats/non_default_edgerc_path_and_section",
+			filesToCheck: []string{"variables.tf"},
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2023-01-05")},
+		},
 		// property with rules as datasource - hcl rules version 1 and 2 is a pair of tests that confirms that hcl rules 1 does not use any hcl rules's 2 template definitions and vice versa
 		// the behaviour was chosen in a way, so it's easily identifiable which template inner definition was picked (e.g. there was change in field type)
 		"property with rules as datasource - hcl rules version v2023-01-05": {
@@ -35,7 +57,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2023_01_05/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -56,7 +77,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2023_05_30/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -77,7 +97,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2023_09_20/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -98,7 +117,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2023_10_30/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -119,7 +137,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2024_01_09/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -140,7 +157,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2024_02_12/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -161,7 +177,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2024_05_31/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -182,7 +197,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2024_08_13/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -203,7 +217,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2024_10_21/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -224,7 +237,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2025_01_13/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -245,7 +257,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2025_02_18/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -266,7 +277,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2025_03_24/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -287,7 +297,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2025_04_29/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -308,7 +317,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2025_05_30/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -329,7 +337,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2025_07_07/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -350,7 +357,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2025_09_09/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -371,7 +377,6 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 					IsSecure:             "false",
 					ReadVersion:          "LATEST",
 				},
-				Section: "test_section",
 			},
 			dir:          "ruleformats/v2025_10_16/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
@@ -381,6 +386,15 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+
+			if test.givenData.Section == "" {
+				test.givenData.Section = "test_section"
+			}
+
+			if test.givenData.EdgercPath == "" {
+				test.givenData.EdgercPath = "~/.edgerc"
+			}
+
 			ruleResponse := getRuleTreeResponse(test.dir, t)
 			test.givenData.Rules = flattenRules(wrapAndNameRules("test.edgesuite.net", ruleResponse.Rules))
 			test.givenData.RulesAsHCL = true

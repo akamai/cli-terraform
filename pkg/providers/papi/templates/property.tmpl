@@ -3,7 +3,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 9.2.0"
+      version = ">= 9.3.0"
     }
   }
   required_version = ">= 1.0"
@@ -89,6 +89,23 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
       {{- if .ECDSACertID}}
       ecdasa_cert_id = "{{.ECDSACertID}}"
       {{- end}}
+    }
+    {{- end}}
+    {{- with .MTLS}}
+    mtls {
+      ca_set_id          = "{{.CASetID}}"
+      check_client_ocsp  = {{.CheckClientOCSP}}
+      send_ca_set_client = {{.SendCASetClient}}
+    }
+    {{- end}}
+    {{- with .TLSConfiguration}}
+    tls_configuration {
+      cipher_profile              = "{{.CipherProfile}}"
+      {{- if .DisallowedTLSVersions}}
+      disallowed_tls_versions     = [{{range $index, $element := .DisallowedTLSVersions}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
+      {{- end}}
+      fips_mode                   = {{.FIPSMode}}
+      staple_server_ocsp_response = {{.StapleServerOcspResponse}}
     }
     {{- end}}
   }

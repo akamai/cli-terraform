@@ -82,7 +82,7 @@ func CmdCreateClientList(c *cli.Context) error {
 	jsonPath := filepath.Join(tfWorkPath, fmt.Sprintf("%s.json", listID))
 
 	if err := tools.CheckFiles(clientListPath, variablesPath, importPath, jsonPath); err != nil {
-		return cli.Exit(color.RedString(err.Error()), 1)
+		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	templateToFile := map[string]string{
