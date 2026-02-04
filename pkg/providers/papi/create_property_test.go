@@ -263,7 +263,7 @@ func TestCreateProperty(t *testing.T) {
 		PropertyVersion: 5,
 		Etag:            "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
 		Hostnames: papi.HostnameResponseItems{
-			Items: []papi.Hostname{
+			Items: []papi.HostnameResponseItem{
 				{
 					CnameType:            "EDGE_HOSTNAME",
 					EdgeHostnameID:       "ehn_2867480",
@@ -283,7 +283,7 @@ func TestCreateProperty(t *testing.T) {
 		PropertyVersion: 5,
 		Etag:            "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
 		Hostnames: papi.HostnameResponseItems{
-			Items: []papi.Hostname{
+			Items: []papi.HostnameResponseItem{
 				{
 					CnameType:            "EDGE_HOSTNAME",
 					EdgeHostnameID:       "ehn_2867480",
@@ -303,7 +303,7 @@ func TestCreateProperty(t *testing.T) {
 		PropertyVersion: 5,
 		Etag:            "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
 		Hostnames: papi.HostnameResponseItems{
-			Items: []papi.Hostname{
+			Items: []papi.HostnameResponseItem{
 				{
 					CnameType:            "EDGE_HOSTNAME",
 					EdgeHostnameID:       "ehn_2867480",
@@ -317,16 +317,20 @@ func TestCreateProperty(t *testing.T) {
 					CnameFrom:            "foo.com",
 					CnameTo:              "foo.com.edgekey.net",
 					CertProvisioningType: "CCM",
-					CCMCertificates: &papi.CCMCertificates{
-						RSACertID:     "2226",
+					CCMCertificates: &papi.CCMCertificatesResp{
+						CCMCertificates: papi.CCMCertificates{
+							RSACertID:   "2226",
+							ECDSACertID: "7890",
+						},
 						RSACertLink:   "/ccm/v1/certificates/2226",
-						ECDSACertID:   "7890",
 						ECDSACertLink: "/ccm/v1/certificates/7890",
 					},
-					MTLS: &papi.MTLS{
-						CASetID:         "cas_1234567890",
-						CheckClientOCSP: true,
-						SendCASetClient: true,
+					MTLS: &papi.MTLSResp{
+						MTLS: papi.MTLS{
+							CASetID:         "cas_1234567890",
+							CheckClientOCSP: true,
+							SendCASetClient: true,
+						},
 					},
 					TLSConfiguration: &papi.TLSConfiguration{
 						CipherProfile:            "ak-tls-1-3",
@@ -347,7 +351,7 @@ func TestCreateProperty(t *testing.T) {
 		PropertyVersion: 5,
 		Etag:            "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
 		Hostnames: papi.HostnameResponseItems{
-			Items: []papi.Hostname{
+			Items: []papi.HostnameResponseItem{
 				{
 					CnameType:            "EDGE_HOSTNAME",
 					EdgeHostnameID:       "ehn_2867480",
@@ -361,11 +365,13 @@ func TestCreateProperty(t *testing.T) {
 					CnameFrom:            "foo.com",
 					CnameTo:              "foo.com.edgekey.net",
 					CertProvisioningType: "CCM",
-					CCMCertificates: &papi.CCMCertificates{
-						RSACertID:     "2226",
+					CCMCertificates: &papi.CCMCertificatesResp{
 						RSACertLink:   "/ccm/v1/certificates/2226",
-						ECDSACertID:   "7890",
 						ECDSACertLink: "/ccm/v1/certificates/7890",
+						CCMCertificates: papi.CCMCertificates{
+							RSACertID:   "2226",
+							ECDSACertID: "7890",
+						},
 					},
 					TLSConfiguration: &papi.TLSConfiguration{
 						CipherProfile:            "ak-tls-1-3",
@@ -385,7 +391,7 @@ func TestCreateProperty(t *testing.T) {
 		PropertyVersion: 5,
 		Etag:            "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
 		Hostnames: papi.HostnameResponseItems{
-			Items: []papi.Hostname{
+			Items: []papi.HostnameResponseItem{
 				{
 					CnameType:            "EDGE_HOSTNAME",
 					EdgeHostnameID:       "ehn_2867480",
@@ -405,7 +411,7 @@ func TestCreateProperty(t *testing.T) {
 		PropertyVersion: 5,
 		Etag:            "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
 		Hostnames: papi.HostnameResponseItems{
-			Items: []papi.Hostname{
+			Items: []papi.HostnameResponseItem{
 				{
 					CnameType:            "EDGE_HOSTNAME",
 					EdgeHostnameID:       "",
@@ -425,7 +431,7 @@ func TestCreateProperty(t *testing.T) {
 		PropertyVersion: 1,
 		Etag:            "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
 		Hostnames: papi.HostnameResponseItems{
-			Items: []papi.Hostname{
+			Items: []papi.HostnameResponseItem{
 				{
 					CnameType:            "EDGE_HOSTNAME",
 					EdgeHostnameID:       "ehn_2867480",
@@ -445,7 +451,7 @@ func TestCreateProperty(t *testing.T) {
 		PropertyVersion: 5,
 		Etag:            "4607f363da8bc05b0c0f0f7524985d2fbc5d864d",
 		Hostnames: papi.HostnameResponseItems{
-			Items: []papi.Hostname{
+			Items: []papi.HostnameResponseItem{
 				{
 					CnameType:            "EDGE_HOSTNAME",
 					EdgeHostnameID:       "ehn_2867480",
