@@ -9,7 +9,8 @@
   * Added support for the new rule format `v2026-01-09`.
   * Removed the `secret_key` and `api_key` attributes and introduced support for the `api_key_cam_guid`, `additional_headers_mode`, and `additional_headers_list` attributes in the `akamai_property_rule_formats` data source for the rule formats `v2025-05-30`, `v2025-07-07`, `v2025-09-09` and `v2025-10-16`.
 
-
+* ClientLists
+  * Remove `version` in the `akamai_clientlist_activation` template because `version` attribute is marked in schema as `Computed` instead of `Required`.
 
 
 

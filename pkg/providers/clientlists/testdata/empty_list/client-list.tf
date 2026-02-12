@@ -25,7 +25,6 @@ resource "akamai_clientlist_list" "list_123_ABC" {
 
 # resource "akamai_clientlist_activation" "activation_123_ABC_STAGING" {
 #   list_id                 = akamai_clientlist_list.list_123_ABC.list_id
-#   version                 = akamai_clientlist_list.list_123_ABC.version
 #   network                 = "STAGING"
 #   comments                = ""
 #   notification_recipients = []
@@ -34,7 +33,6 @@ resource "akamai_clientlist_list" "list_123_ABC" {
 
 # resource "akamai_clientlist_activation" "activation_123_ABC_PRODUCTION" {
 #   list_id                 = akamai_clientlist_list.list_123_ABC.list_id
-#   version                 = akamai_clientlist_list.list_123_ABC.version
 #   network                 = "PRODUCTION"
 #   comments                = ""
 #   notification_recipients = []
