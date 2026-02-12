@@ -9156,11 +9156,14 @@ visitor_prioritization_queue_it {
 {{- if and (eq $k "customerId") (ne $v nil)}}
         customer_id = {{template "Text" $v}}
 {{- end}}
-{{- if and (eq $k "secretKey") (ne $v nil)}}
-        secret_key = {{template "Text" $v}}
+{{- if and (eq $k "apiKeyCamGuid") (ne $v nil)}}
+        api_key_cam_guid = {{template "Text" $v}}
 {{- end}}
-{{- if and (eq $k "apiKey") (ne $v nil)}}
-        api_key = {{template "Text" $v}}
+{{- if and (eq $k "additionalHeadersMode") (ne $v nil)}}
+        additional_headers_mode = {{template "Text" $v}}
+{{- end}}
+{{- if eq $k "additionalHeadersList"}}
+		additional_headers_list = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- end}}
 }

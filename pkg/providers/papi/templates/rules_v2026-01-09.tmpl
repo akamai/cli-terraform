@@ -162,7 +162,9 @@
 	{{- else if eq .Name "firstPartyMarketingPlus"}}{{- template "firstPartyMarketingPlus" .}}
 	{{- else if eq .Name "forwardRewrite"}}{{- template "forwardRewrite" .}}
 	{{- else if eq .Name "g2oheader"}}{{- template "g2oheader" .}}
+	{{- else if eq .Name "gRPC"}}{{- template "gRPC" .}}
 	{{- else if eq .Name "globalRequestNumber"}}{{- template "globalRequestNumber" .}}
+	{{- else if eq .Name "googleTagGateway"}}{{- template "googleTagGateway" .}}
 	{{- else if eq .Name "govCloud"}}{{- template "govCloud" .}}
 	{{- else if eq .Name "graphqlCaching"}}{{- template "graphqlCaching" .}}
 	{{- else if eq .Name "gzipResponse"}}{{- template "gzipResponse" .}}
@@ -183,6 +185,7 @@
 	{{- else if eq .Name "largeFileOptimization"}}{{- template "largeFileOptimization" .}}
 	{{- else if eq .Name "largeFileOptimizationAdvanced"}}{{- template "largeFileOptimizationAdvanced" .}}
 	{{- else if eq .Name "limitBitRate"}}{{- template "limitBitRate" .}}
+	{{- else if eq .Name "localhostLoopbackProtection"}}{{- template "localhostLoopbackProtection" .}}
 	{{- else if eq .Name "logCustom"}}{{- template "logCustom" .}}
 	{{- else if eq .Name "mPulse"}}{{- template "mPulse" .}}
 	{{- else if eq .Name "manifestPersonalization"}}{{- template "manifestPersonalization" .}}
@@ -201,6 +204,7 @@
 	{{- else if eq .Name "modifyOutgoingResponseHeader"}}{{- template "modifyOutgoingResponseHeader" .}}
 	{{- else if eq .Name "modifyViaHeader"}}{{- template "modifyViaHeader" .}}
 	{{- else if eq .Name "mtlsOriginKeystore"}}{{- template "mtlsOriginKeystore" .}}
+	{{- else if eq .Name "optimizeTextStreaming"}}{{- template "optimizeTextStreaming" .}}
 	{{- else if eq .Name "origin"}}{{- template "origin" .}}
 	{{- else if eq .Name "originCharacteristics"}}{{- template "originCharacteristics" .}}
 	{{- else if eq .Name "originCharacteristicsWsd"}}{{- template "originCharacteristicsWsd" .}}
@@ -212,6 +216,7 @@
 	{{- else if eq .Name "persistentConnection"}}{{- template "persistentConnection" .}}
 	{{- else if eq .Name "personallyIdentifiableInformation"}}{{- template "personallyIdentifiableInformation" .}}
 	{{- else if eq .Name "phasedRelease"}}{{- template "phasedRelease" .}}
+	{{- else if eq .Name "pqcClientToEdge"}}{{- template "pqcClientToEdge" .}}
 	{{- else if eq .Name "pqcOrigin"}}{{- template "pqcOrigin" .}}
 	{{- else if eq .Name "preconnect"}}{{- template "preconnect" .}}
 	{{- else if eq .Name "predictiveContentDelivery"}}{{- template "predictiveContentDelivery" .}}
@@ -272,6 +277,7 @@
 	{{- else if eq .Name "verifyJsonWebToken"}}{{- template "verifyJsonWebToken" .}}
 	{{- else if eq .Name "verifyJsonWebTokenForDcp"}}{{- template "verifyJsonWebTokenForDcp" .}}
 	{{- else if eq .Name "verifyTokenAuthorization"}}{{- template "verifyTokenAuthorization" .}}
+	{{- else if eq .Name "videoManagerCloudinary"}}{{- template "videoManagerCloudinary" .}}
 	{{- else if eq .Name "virtualWaitingRoom"}}{{- template "virtualWaitingRoom" .}}
 	{{- else if eq .Name "virtualWaitingRoomWithEdgeWorkers"}}{{- template "virtualWaitingRoomWithEdgeWorkers" .}}
 	{{- else if eq .Name "visitorPrioritization"}}{{- template "visitorPrioritization" .}}
@@ -2094,6 +2100,15 @@ content_targeting_protection {
 {{- if and (eq $k "referrerRedirectUrl") (ne $v nil)}}
         referrer_redirect_url = {{template "Text" $v}}
 {{- end}}
+{{- if and (eq $k "advancedSupportTitle") (ne $v nil)}}
+        advanced_support_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "geoProtectionXffMode") (ne $v nil)}}
+        geo_protection_xff_mode = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "ipProtectionXffMode") (ne $v nil)}}
+        ip_protection_xff_mode = {{template "Text" $v}}
+{{- end}}
 {{- end}}
 }
 {{- end}}
@@ -2153,6 +2168,9 @@ cp_code {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
+{{- if and (eq $k "enableDefaultContentProviderCode") (ne $v nil)}}
+		enable_default_content_provider_code = {{$v}}
+{{- end}}
 {{- if eq $k "value" }}
 		{{- if $v}}
 		value {
@@ -3227,6 +3245,18 @@ edge_worker {
 {{- if and (eq $k "resourceTier") (ne $v nil)}}
         resource_tier = {{template "Text" $v}}
 {{- end}}
+{{- if and (eq $k "failOpenTitle") (ne $v nil)}}
+        fail_open_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "continueOnError") (ne $v nil)}}
+		continue_on_error = {{$v}}
+{{- end}}
+{{- if and (eq $k "continueOnErrorDisclaimer") (ne $v nil)}}
+        continue_on_error_disclaimer = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "mPulseTitle") (ne $v nil)}}
+        m_pulse_title = {{template "Text" $v}}
+{{- end}}
 {{- if and (eq $k "mPulse") (ne $v nil)}}
 		m_pulse = {{$v}}
 {{- end}}
@@ -3846,6 +3876,28 @@ g2oheader {
 {{- end}}
 }
 {{- end}}
+{{- define "gRPC"}}
+g_rpc {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "enabled") (ne $v nil)}}
+		enabled = {{$v}}
+{{- end}}
+{{- if and (eq $k "enableBidirectionalStreaming") (ne $v nil)}}
+		enable_bidirectional_streaming = {{$v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
 {{- define "globalRequestNumber"}}
 global_request_number {
 {{- if .UUID}}
@@ -3867,6 +3919,43 @@ global_request_number {
 {{- end}}
 {{- if and (eq $k "variableName") (ne $v nil)}}
         variable_name = {{template "Text" $v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
+{{- define "googleTagGateway"}}
+google_tag_gateway {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "enabled") (ne $v nil)}}
+		enabled = {{$v}}
+{{- end}}
+{{- if and (eq $k "googleTagId") (ne $v nil)}}
+        google_tag_id = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "servingPath") (ne $v nil)}}
+        serving_path = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "advancedOption") (ne $v nil)}}
+		advanced_option = {{$v}}
+{{- end}}
+{{- if and (eq $k "trueClientIpHeader") (ne $v nil)}}
+		true_client_ip_header = {{$v}}
+{{- end}}
+{{- if and (eq $k "scriptInjection") (ne $v nil)}}
+		script_injection = {{$v}}
+{{- end}}
+{{- if and (eq $k "setupTag") (ne $v nil)}}
+		setup_tag = {{$v}}
 {{- end}}
 {{- end}}
 }
@@ -3986,6 +4075,12 @@ health_detection {
 {{- end}}
 {{- if and (eq $k "maximumReconnects") (ne $v nil)}}
 		maximum_reconnects = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "errorOnFirstByteTimeout") (ne $v nil)}}
+		error_on_first_byte_timeout = {{$v}}
+{{- end}}
+{{- if eq $k "httpErrorCodes"}}
+		http_error_codes = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- end}}
 }
@@ -4735,6 +4830,28 @@ limit_bit_rate {
 {{- end}}
 }
 {{- end}}
+{{- define "localhostLoopbackProtection"}}
+localhost_loopback_protection {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "loopbackCrossAccountPolicy") (ne $v nil)}}
+		loopback_cross_account_policy = {{$v}}
+{{- end}}
+{{- if eq $k "vcdIds"}}
+		vcd_ids = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- end}}
+}
+{{- end}}
 {{- define "logCustom"}}
 log_custom {
 {{- if .UUID}}
@@ -5413,6 +5530,25 @@ mtls_origin_keystore {
 {{- end}}
 }
 {{- end}}
+{{- define "optimizeTextStreaming"}}
+optimize_text_streaming {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "enabled") (ne $v nil)}}
+		enabled = {{$v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
 {{- define "origin"}}
 origin {
 {{- if .UUID}}
@@ -5428,6 +5564,9 @@ origin {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "originType") (ne $v nil)}}
         origin_type = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "aosHostname") (ne $v nil)}}
+        aos_hostname = {{template "Text" $v}}
 {{- end}}
 {{- if eq $k "netStorage" }}
 		{{- if $v}}
@@ -6242,6 +6381,15 @@ origin_characteristics {
 {{- if and (eq $k "endPointService") (ne $v nil)}}
         end_point_service = {{template "Text" $v}}
 {{- end}}
+{{- if and (eq $k "aosHmacKeyAccessId") (ne $v nil)}}
+        aos_hmac_key_access_id = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "aosHmacKeySecret") (ne $v nil)}}
+        aos_hmac_key_secret = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "aosAccessKeyVersionGuid") (ne $v nil)}}
+        aos_access_key_version_guid = {{template "Text" $v}}
+{{- end}}
 {{- if and (eq $k "sortQueryParams") (ne $v nil)}}
 		sort_query_params = {{$v}}
 {{- end}}
@@ -6589,6 +6737,25 @@ phased_release {
 {{- end}}
 }
 {{- end}}
+{{- define "pqcClientToEdge"}}
+pqc_client_to_edge {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "enabled") (ne $v nil)}}
+		enabled = {{$v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
 {{- define "pqcOrigin"}}
 pqc_origin {
 {{- if .UUID}}
@@ -6604,6 +6771,9 @@ pqc_origin {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
+{{- end}}
+{{- if and (eq $k "pqcClientHelloKeys") (ne $v nil)}}
+		pqc_client_hello_keys = {{$v}}
 {{- end}}
 {{- end}}
 }
@@ -8632,6 +8802,77 @@ verify_token_authorization {
 {{- end}}
 }
 {{- end}}
+{{- define "videoManagerCloudinary"}}
+video_manager_cloudinary {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "enabled") (ne $v nil)}}
+		enabled = {{$v}}
+{{- end}}
+{{- if and (eq $k "avmAccessKeyVersionGuid") (ne $v nil)}}
+        avm_access_key_version_guid = {{template "Text" $v}}
+{{- end}}
+{{- if eq $k "cpCodeCloudinary" }}
+		{{- if $v}}
+		cp_code_cloudinary {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "id") (ne $v nil)}}
+		id = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "name") (ne $v nil)}}
+        name = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "createdDate") (ne $v nil)}}
+		created_date = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "description") (ne $v nil)}}
+        description = {{template "Text" $v}}
+{{- end}}
+{{- if eq $k "products"}}
+		products = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "cpCodeLimits" }}
+		{{- if $v}}
+		cp_code_limits {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "currentCapacity") (ne $v nil)}}
+		current_capacity = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limit") (ne $v nil)}}
+		limit = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limitType") (ne $v nil)}}
+        limit_type = {{template "Text" $v}}
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
+{{- if and (eq $k "rewriteUrl") (ne $v nil)}}
+		rewrite_url = {{$v}}
+{{- end}}
+{{- if and (eq $k "cloudName") (ne $v nil)}}
+        cloud_name = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "transformations") (ne $v nil)}}
+        transformations = {{template "Text" $v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
 {{- define "virtualWaitingRoom"}}
 virtual_waiting_room {
 {{- if .UUID}}
@@ -10363,7 +10604,7 @@ data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
 	{{- $children := $r.Children}}
 	{{- $isRoot := $r.IsRoot}}
 	{{- with $r.Rule}}
-	rules_v2025_05_30 {
+	rules_v2026_01_09 {
         name = "{{.Name | Escape}}"
 		{{- if $isRoot}}
         is_secure = {{.Options.IsSecure}}
