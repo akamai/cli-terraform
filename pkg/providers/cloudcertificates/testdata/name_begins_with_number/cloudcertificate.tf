@@ -27,6 +27,10 @@ resource "akamai_cloudcertificates_certificate" "_123test-name_example_com123456
     state        = "CA"
     locality     = "Test City"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "akamai_cloudcertificates_upload_signed_certificate" "_123test-name_example_com1234567890" {

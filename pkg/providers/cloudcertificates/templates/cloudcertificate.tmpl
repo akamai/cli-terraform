@@ -40,6 +40,10 @@ resource "akamai_cloudcertificates_certificate" "{{ .Certificate.ResourceName }}
   {{- end}}
   }
   {{- end}}
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 {{- /* Conditional logic for signed certificate upload depending on certificate status */}}
