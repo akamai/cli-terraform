@@ -17,7 +17,7 @@ import (
 
 var (
 	// Version holds current version of cli-terraform
-	Version = "2.7.0"
+	Version = "2.8.0"
 )
 
 // Run initializes the cli and runs it

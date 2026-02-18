@@ -61,4 +61,4 @@ require (
 
 //replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v12 => ../akamaiopen-edgegrid-golang
 //replace github.com/akamai/cli/v2 => ../cli
-replace gopkg.in/yaml.v2 v2.2.2 => gopkg.in/yaml.v2 v2.4.0 // Fix security vulnerability
+replace github.com/stretchr/testify v1.4.0 => github.com/stretchr/testify v1.10.0 // Fix security vulnerability

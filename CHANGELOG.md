@@ -1,77 +1,19 @@
 # RELEASE NOTES
 
-## X.XX.X (Month XX, XXXX)
-
+## 2.8.0 (Feb 25, 2026)
 
 ### FEATURES/ENHANCEMENTS:
 
-* PAPI
-  * Added support for the new rule format `v2026-01-09`.
-  * Removed the `secret_key` and `api_key` attributes and introduced support for the `api_key_cam_guid`, `additional_headers_mode`, and `additional_headers_list` attributes in the `akamai_property_rule_formats` data source for the rule formats `v2025-05-30`, `v2025-07-07`, `v2025-09-09` and `v2025-10-16`.
+* ClientLists
+  * Removed `version` from the `akamai_clientlist_activation` template because the `version` attribute is marked now in the schema as `Computed` instead of `Required`.
 
 * Cloud Certificates (Beta)
-  * Added `lifecycle { create_before_destroy = true }` to the `akamai_cloudcertificates_certificate` resource template.
+  * Added the `lifecycle { create_before_destroy = true }` block to the `akamai_cloudcertificates_certificate` resource template.
 
-* ClientLists
-  * Remove `version` in the `akamai_clientlist_activation` template because `version` attribute is marked in schema as `Computed` instead of `Required`.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### BUG FIXES:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### DEPRECATIONS:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+* PAPI
+  * Added support for the new rule format `v2026-01-09`.
+  * Removed the `secret_key` and `api_key` attributes and introduced support for the `api_key_cam_guid`, `additional_headers_mode`, and `additional_headers_list` attributes 
+    in the `visitor_prioritization_queue_it` behavior when working with rules in JSON or the `akamai_property_rules_builder` data source using these rule formats: `v2025-05-30`, `v2025-07-07`, `v2025-09-09`, and `v2025-10-16`.
 
 ## 2.7.0 (Jan 21, 2026)
 
