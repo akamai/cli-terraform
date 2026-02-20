@@ -34,8 +34,8 @@ resource "akamai_property" "test-edgesuite-net" {
     cname_to               = "foo"
     cert_provisioning_type = "CCM"
     ccm_certificates {
-      rsa_cert_id    = "123456"
-      ecdasa_cert_id = "343434"
+      rsa_cert_id   = "123456"
+      ecdsa_cert_id = "343434"
     }
     mtls {
       ca_set_id          = "551438"

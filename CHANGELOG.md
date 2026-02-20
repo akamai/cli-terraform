@@ -2,6 +2,11 @@
 
 ## 2.8.0 (Feb 25, 2026)
 
+### BUG FIXES:
+
+* PAPI
+  * Fixed a typo in the exported `ccm_certificates` block for the `akamai_property` resource: renamed `ecdasa_cert_id` to `ecdsa_cert_id` to match the provider schema.
+
 ### FEATURES/ENHANCEMENTS:
 
 * ClientLists

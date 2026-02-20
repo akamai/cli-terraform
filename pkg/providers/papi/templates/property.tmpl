@@ -87,7 +87,7 @@ resource "akamai_property" "{{.Property.PropertyResourceName}}" {
       rsa_cert_id = "{{.RSACertID}}"
       {{- end}}
       {{- if .ECDSACertID}}
-      ecdasa_cert_id = "{{.ECDSACertID}}"
+      ecdsa_cert_id = "{{.ECDSACertID}}"
       {{- end}}
     }
     {{- end}}
