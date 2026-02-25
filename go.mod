@@ -3,7 +3,7 @@ module github.com/akamai/cli-terraform/v2
 go 1.24.11
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v12 v12.3.0
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v13 v13.0.0
 	github.com/akamai/cli/v2 v2.0.3
 	github.com/fatih/color v1.18.0
 	github.com/hashicorp/hcl/v2 v2.23.0
@@ -59,6 +59,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v12 => ../akamaiopen-edgegrid-golang
+//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v13 => ../akamaiopen-edgegrid-golang
 //replace github.com/akamai/cli/v2 => ../cli
-replace gopkg.in/yaml.v2 v2.2.2 => gopkg.in/yaml.v2 v2.4.0 // Fix security vulnerability
+replace github.com/stretchr/testify v1.4.0 => github.com/stretchr/testify v1.10.0 // Fix security vulnerability

@@ -1,5 +1,25 @@
 # RELEASE NOTES
 
+## 2.8.0 (Feb 25, 2026)
+
+### FEATURES/ENHANCEMENTS:
+
+* ClientLists
+  * Removed `version` from the `akamai_clientlist_activation` template because the `version` attribute is marked now in the schema as `Computed` instead of `Required`.
+
+* Cloud Certificates (Beta)
+  * Added the `lifecycle { create_before_destroy = true }` block to the `akamai_cloudcertificates_certificate` resource template.
+
+* PAPI
+  * Added support for the new rule format `v2026-01-09`.
+  * Removed the `secret_key` and `api_key` attributes and introduced support for the `api_key_cam_guid`, `additional_headers_mode`, and `additional_headers_list` attributes 
+    in the `visitor_prioritization_queue_it` behavior when working with rules in JSON or the `akamai_property_rules_builder` data source using these rule formats: `v2025-05-30`, `v2025-07-07`, `v2025-09-09`, and `v2025-10-16`.
+
+### BUG FIXES:
+
+* PAPI
+  * Fixed a typo in the exported `ccm_certificates` block for the `akamai_property` resource: renamed `ecdasa_cert_id` to `ecdsa_cert_id` to match the provider schema.
+
 ## 2.7.0 (Jan 21, 2026)
 
 ### FEATURES/ENHANCEMENTS:

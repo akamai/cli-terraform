@@ -2,7 +2,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 9.3.0"
+      version = ">= 10.0.0"
     }
   }
   required_version = ">= 1.0"
@@ -26,6 +26,10 @@ resource "akamai_cloudcertificates_certificate" "test-name_example_com1234567890
     country      = "US"
     state        = "CA"
     locality     = "Test City"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 

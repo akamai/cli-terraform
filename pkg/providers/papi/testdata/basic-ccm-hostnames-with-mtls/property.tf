@@ -2,7 +2,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 9.3.0"
+      version = ">= 10.0.0"
     }
   }
   required_version = ">= 1.0"
@@ -34,8 +34,8 @@ resource "akamai_property" "test-edgesuite-net" {
     cname_to               = "foo"
     cert_provisioning_type = "CCM"
     ccm_certificates {
-      rsa_cert_id    = "123456"
-      ecdasa_cert_id = "343434"
+      rsa_cert_id   = "123456"
+      ecdsa_cert_id = "343434"
     }
     mtls {
       ca_set_id          = "551438"
