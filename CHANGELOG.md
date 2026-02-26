@@ -1,5 +1,58 @@
 # RELEASE NOTES
 
+## X.X.X (Month XX, XXXX)
+
+### FEATURES/ENHANCEMENTS:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### BUG FIXES:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## 2.8.0 (Feb 25, 2026)
 
 ### FEATURES/ENHANCEMENTS:
