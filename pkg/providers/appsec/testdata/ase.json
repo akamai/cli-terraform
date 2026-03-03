@@ -3602,7 +3602,19 @@
             "requestBody": {
                 "requestBodyInspectionLimitInKB": "default",
                 "override": true
-            }
+            },
+            "urlProtectionPolicyActions": [
+                {
+                "action": "alert",
+                "loadSheddingAction": "deny",
+                "policyId": 50411
+                },
+                {
+                "action": "deny",
+                "loadSheddingAction": "none",
+                "policyId": 50412
+                }
+            ]
         }
     ],
     "malwarePolicies": [

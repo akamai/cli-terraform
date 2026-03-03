@@ -117,6 +117,11 @@ terraform import module.security.akamai_appsec_rate_policy_action.{{ $policyName
 terraform import module.security.akamai_appsec_malware_policy_action.{{ $policyName}}_{{ getMalwareNameByID $ .MalwarePolicyID }} {{ $configID }}:{{ $policyID }}:{{ .MalwarePolicyID }}
 {{ end -}}
 {{ end -}}
+{{ if .URLProtectionRulesActions -}}
+{{ range .URLProtectionRulesActions -}}
+terraform import module.security.akamai_appsec_url_protection_action.{{ $policyName}}_{{ .URLProtectionRuleID }} {{ $configID }}:{{ $policyID }}:{{ .URLProtectionRuleID }}
+{{ end -}}
+{{ end -}}
 {{ if .IPGeoFirewall -}}
 terraform import module.security.akamai_appsec_ip_geo.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 {{ end -}}
