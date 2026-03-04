@@ -1,0 +1,28 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/apidefinitions.TFAPIWrapperData*/ -}}
+
+import {
+  to = module.definition.akamai_apidefinitions_api.{{.ResourceName}}
+  id = "{{.ID}}:{{.Version}}"
+}
+
+{{if .IsActiveOnStaging}}
+import {
+  to = module.activation_staging.akamai_apidefinitions_activation.{{.ResourceName}}
+  id = "{{.ID}}:STAGING"
+}
+
+{{end}}
+{{if .IsActiveOnProduction}}
+import {
+  to = module.activation_production.akamai_apidefinitions_activation.{{.ResourceName}}
+  id = "{{.ID}}:PRODUCTION"
+}
+
+{{end}}
+{{if not .IsOperationsEmpty}}
+import {
+  to = module.definition.akamai_apidefinitions_resource_operations.{{.ResourceName}}
+  id = "{{.ID}}:{{.Version}}"
+}
+
+{{end}}
