@@ -83,6 +83,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 	templateToFile := map[string]string{
 		"appsec.tmpl":                         appsecPath,
 		"imports.tmpl":                        filepath.Join(tfWorkPath, "appsec-import.sh"),
+		"imports-tf.tmpl":                     filepath.Join(tfWorkPath, "appsec-import.tf"),
 		"main.tmpl":                           filepath.Join(tfWorkPath, "appsec-main.tf"),
 		"modules-activate-security-main.tmpl": filepath.Join(activateSecurityModulePath, "main.tf"),
 		"modules-activate-security-variables.tmpl":       filepath.Join(activateSecurityModulePath, "variables.tf"),

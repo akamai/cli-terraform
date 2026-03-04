@@ -1,0 +1,591 @@
+{{ $configID:= .ConfigID -}}
+{{ $version:= .Version -}}
+{{ $targetProduct:= .TargetProduct -}}
+{{ if ne $targetProduct "WAP" -}}
+import {
+  to = module.security.akamai_appsec_configuration.config
+  id = "{{ $configID }}"
+}
+
+{{ end -}}
+import {
+  to = module.security.akamai_appsec_advanced_settings_logging.logging
+  id = "{{ $configID }}"
+}
+
+{{ if .AdvancedOptions -}}
+{{ if .AdvancedOptions.AttackPayloadLogging -}}
+import {
+  to = module.security.akamai_appsec_advanced_settings_attack_payload_logging.attack_payload_logging
+  id = "{{ $configID }}"
+}
+
+{{ end -}}
+{{ if .AdvancedOptions.Prefetch -}}
+import {
+  to = module.security.akamai_appsec_advanced_settings_prefetch.prefetch
+  id = "{{ $configID }}"
+}
+
+{{ end -}}
+{{ if .AdvancedOptions.PragmaHeader -}}
+import {
+  to = module.security.akamai_appsec_advanced_settings_pragma_header.pragma_header
+  id = "{{ $configID }}"
+}
+
+{{ end -}}
+{{ if .AdvancedOptions.EvasivePathMatch -}}
+import {
+  to = module.security.akamai_appsec_advanced_settings_evasive_path_match.evasive_path_match
+  id = "{{ $configID }}"
+}
+
+{{ end -}}
+{{ if .AdvancedOptions.PIILearning -}}
+import {
+  to = module.security.akamai_appsec_advanced_settings_pii_learning.pii_learning
+  id = "{{ $configID }}"
+}
+
+{{ end -}}
+{{ if .AdvancedOptions.RequestBody -}}
+import {
+  to = module.security.akamai_appsec_advanced_settings_request_body.config_settings
+  id = "{{ $configID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .CustomRules  -}}
+{{ range .CustomRules  -}}
+{{ if .Tag -}}
+import {
+  to = module.security.akamai_appsec_custom_rule.{{escapeName .Name}}_{{ .ID }}
+  id = "{{ $configID }}:{{ .ID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .CustomDenyList  -}}
+{{ range .CustomDenyList  -}}
+import {
+  to = module.security.akamai_appsec_custom_deny.{{escapeName .Name}}_{{ .ID }}
+  id = "{{ $configID }}:{{ .ID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if ne $targetProduct "WAP" -}}
+{{ if .MatchTargets -}}
+{{ if .MatchTargets.WebsiteTargets -}}
+{{ range .MatchTargets.WebsiteTargets -}}
+import {
+  to = module.security.akamai_appsec_match_target.website_{{ .ID }}
+  id = "{{ $configID }}:{{ .ID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .MatchTargets.APITargets -}}
+{{ range .MatchTargets.APITargets -}}
+import {
+  to = module.security.akamai_appsec_match_target.api_{{ .ID }}
+  id = "{{ $configID }}:{{ .ID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ range .SecurityPolicies -}}
+{{ $policyName:= escapeName .Name -}}
+{{ $policyID:= .ID -}}
+{{ $wafMode:= getWAFMode $configID $version .ID -}}
+{{ if eq $targetProduct "WAP" -}}
+{{ $protectedHosts := getProtectedHostsByID $ .ID | toList -}}
+{{ $evaluatedHosts := getEvaluatedHostsByID $ .ID | toList -}}
+{{ if or (gt (len $protectedHosts) 0) (gt (len $evaluatedHosts) 0) -}}
+    import {
+      to = module.security.akamai_appsec_aap_selected_hostnames.{{$policyName}}
+      id = "{{ $configID }}:{{ $policyID }}"
+    }
+
+{{ end -}}
+{{ end -}}
+import {
+  to = module.security.akamai_appsec_security_policy.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+import {
+  to = module.security.akamai_appsec_waf_protection.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+import {
+  to = module.security.akamai_appsec_api_constraints_protection.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+import {
+  to = module.security.akamai_appsec_ip_geo_protection.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+import {
+  to = module.security.akamai_appsec_malware_protection.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+import {
+  to = module.security.akamai_appsec_rate_protection.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+import {
+  to = module.security.akamai_appsec_reputation_protection.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+import {
+  to = module.security.akamai_appsec_slowpost_protection.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+import {
+  to = module.security.akamai_appsec_waf_mode.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+{{ if .WebApplicationFirewall -}}
+{{ if .WebApplicationFirewall.RuleActions -}}
+{{ range .WebApplicationFirewall.RuleActions -}}
+import {
+  to = module.security.akamai_appsec_rule.{{ $policyName}}_{{ getRuleNameByID $ .ID }}_{{ .ID }}
+  id = "{{ $configID }}:{{ $policyID }}:{{ .ID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .CustomRuleActions -}}
+{{ range .CustomRuleActions -}}
+{{ if isStructuredRule $ .ID -}}
+import {
+  to = module.security.akamai_appsec_custom_rule_action.{{ $policyName}}_{{ .ID }}
+  id = "{{ $configID }}:{{ $policyID }}:{{ .ID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .WebApplicationFirewall -}}
+{{ if .WebApplicationFirewall.AttackGroupActions -}}
+{{ range .WebApplicationFirewall.AttackGroupActions -}}
+import {
+  to = module.security.akamai_appsec_attack_group.{{ $policyName}}_{{ .Group }}
+  id = "{{ $configID }}:{{ $policyID }}:{{ .Group }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .APIRequestConstraints -}}
+{{ if .APIRequestConstraints.APIEndpoints -}}
+{{ range .APIRequestConstraints.APIEndpoints -}}
+import {
+  to = module.security.akamai_appsec_api_request_constraints.{{ $policyName}}_{{ .ID }}
+  id = "{{ $configID }}:{{ $policyID }}:{{ .ID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .ClientReputation -}}
+{{ if .ClientReputation.ReputationProfileActions -}}
+{{ range .ClientReputation.ReputationProfileActions -}}
+import {
+  to = module.security.akamai_appsec_reputation_profile_action.{{ $policyName}}_{{ .ID }}
+  id = "{{ $configID }}:{{ $policyID }}:{{ .ID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .RatePolicyActions -}}
+{{ range .RatePolicyActions -}}
+import {
+  to = module.security.akamai_appsec_rate_policy_action.{{ $policyName}}_{{ getRateNameByID $ .ID }}
+  id = "{{ $configID }}:{{ $policyID }}:{{ .ID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .MalwarePolicyActions -}}
+{{ range .MalwarePolicyActions -}}
+import {
+  to = module.security.akamai_appsec_malware_policy_action.{{ $policyName}}_{{ getMalwareNameByID $ .MalwarePolicyID }}
+  id = "{{ $configID }}:{{ $policyID }}:{{ .MalwarePolicyID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .IPGeoFirewall -}}
+import {
+  to = module.security.akamai_appsec_ip_geo.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+{{ end -}}
+{{ if .PenaltyBox -}}
+import {
+  to = module.security.akamai_appsec_penalty_box.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+{{ end -}}
+{{ if .PenaltyBoxConditions -}}
+import {
+  to = module.security.akamai_appsec_penalty_box_conditions.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+{{ end -}}
+{{ if .EvaluationPenaltyBoxConditions -}}
+import {
+  to = module.security.akamai_appsec_eval_penalty_box_conditions.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+{{ end -}}
+{{ if .EvaluationPenaltyBox -}}
+import {
+  to = module.security.akamai_appsec_eval_penalty_box.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+{{ end -}}
+{{ if .SlowPost -}}
+import {
+  to = module.security.akamai_appsec_slow_post.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+{{ end -}}
+{{ if .LoggingOverrides -}}
+import {
+  to = module.security.akamai_appsec_advanced_settings_logging.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+{{ end -}}
+{{ if .PragmaHeader -}}
+{{ if .PragmaHeader.Action -}}
+import {
+  to = module.security.akamai_appsec_advanced_settings_pragma_header.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .EvasivePathMatch -}}
+import {
+  to = module.security.akamai_appsec_advanced_settings_evasive_path_match.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+{{ end -}}
+{{ if .AttackPayloadLoggingOverrides -}}
+import {
+  to = module.security.akamai_appsec_advanced_settings_attack_payload_logging.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+{{ end -}}
+{{ if .RequestBody -}}
+import {
+  to = module.security.akamai_appsec_advanced_settings_request_body.{{ $policyName}}
+  id = "{{ $configID }}:{{ $policyID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .RatePolicies -}}
+{{ range .RatePolicies -}}
+import {
+  to = module.security.akamai_appsec_rate_policy.{{ escapeName .Name}}
+  id = "{{ $configID }}:{{ .ID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .ReputationProfiles  -}}
+{{ range .ReputationProfiles  -}}
+import {
+  to = module.security.akamai_appsec_reputation_profile.{{ escapeName .Name}}
+  id = "{{ $configID }}:{{ .ID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .Siem -}}
+{{ if .Siem.EnableSiem -}}
+import {
+  to = module.security.akamai_appsec_siem_settings.siem
+  id = "{{ $configID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if eq .Staging.Status "Active" -}}
+import {
+  to = module.activate-security.akamai_appsec_activations.appsecactivation
+  id = "{{ $configID }}:{{ $version }}:STAGING"
+}
+
+{{ end -}}
+{{ if .MalwarePolicies -}}
+{{ range .MalwarePolicies -}}
+import {
+  to = module.security.akamai_appsec_malware_policy.{{ escapeName .Name}}
+  id = "{{ $configID }}:{{ .MalwarePolicyID }}"
+}
+
+{{ end -}}
+{{ end -}}
+
+{{ if .CustomBotCategories  -}}
+{{ range .CustomBotCategories  -}}
+import {
+  to = module.security.akamai_botman_custom_bot_category.{{escapeName (index . "categoryName")}}_{{index . "categoryId"}}
+  id = "{{ $configID }}:{{index . "categoryId"}}"
+}
+
+{{ if (index . "metadata" "akamaiDefinedBots") -}}
+{{ range (index . "metadata" "akamaiDefinedBots") -}}
+import {
+  to = module.security.akamai_botman_recategorized_akamai_defined_bot.{{ escapeName (index . "botName") }}_{{ index . "botId" }}
+  id = "{{ $configID }}:{{ index . "botId" }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .CustomBotCategorySequence  -}}
+import {
+  to = module.security.akamai_botman_custom_bot_category_sequence.custom_bot_category_sequence
+  id = "{{ $configID }}"
+}
+
+{{ end -}}
+{{ if .CustomDefinedBots  -}}
+{{ range .CustomDefinedBots  -}}
+import {
+  to = module.security.akamai_botman_custom_defined_bot.{{escapeName (index . "botName")}}_{{index . "botId"}}
+  id = "{{ $configID }}:{{index . "botId"}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .CustomClients  -}}
+{{ range .CustomClients  -}}
+import {
+  to = module.security.akamai_botman_custom_client.{{escapeName (index . "customClientName")}}_{{index . "customClientId"}}
+  id = "{{ $configID }}:{{index . "customClientId"}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .CustomClientSequence  -}}
+import {
+  to = module.security.akamai_botman_custom_client_sequence.sequence
+  id = "{{ $configID }}"
+}
+
+{{ end -}}
+{{ if .ResponseActions  -}}
+{{ if .ResponseActions.ServeAlternateActions  -}}
+{{ range .ResponseActions.ServeAlternateActions  -}}
+import {
+  to = module.security.akamai_botman_serve_alternate_action.{{escapeName (index . "actionName")}}_{{index . "actionId"}}
+  id = "{{ $configID }}:{{index . "actionId"}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .ResponseActions.ChallengeActions  -}}
+{{ range .ResponseActions.ChallengeActions  -}}
+import {
+  to = module.security.akamai_botman_challenge_action.{{escapeName (index . "actionName")}}_{{index . "actionId"}}
+  id = "{{ $configID }}:{{index . "actionId"}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .ResponseActions.ConditionalActions  -}}
+{{ range .ResponseActions.ConditionalActions  -}}
+import {
+  to = module.security.akamai_botman_conditional_action.{{escapeName (index . "actionName")}}_{{index . "actionId"}}
+  id = "{{ $configID }}:{{index . "actionId"}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .ResponseActions.ChallengeInjectionRules  -}}
+import {
+  to = module.security.akamai_botman_challenge_injection_rules.challenge_injection_rules
+  id = "{{ $configID }}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .AdvancedSettings -}}
+{{ if .AdvancedSettings.BotAnalyticsCookieSettings -}}
+import {
+  to = module.security.akamai_botman_bot_analytics_cookie.bot_analytics_cookie
+  id = "{{$configID}}"
+}
+
+{{ end -}}
+{{ if .AdvancedSettings.ClientSideSecuritySettings -}}
+import {
+  to = module.security.akamai_botman_client_side_security.client_side_security
+  id = "{{$configID}}"
+}
+
+{{ end -}}
+{{ if .AdvancedSettings.TransactionalEndpointProtectionSettings -}}
+import {
+  to = module.security.akamai_botman_transactional_endpoint_protection.transactional_endpoint_protection
+  id = "{{$configID}}"
+}
+
+{{ end -}}
+{{ if .AdvancedSettings.UserRiskResponseStrategySettings -}}
+import {
+  to = module.security.akamai_apr_user_risk_response_strategy.user_risk_response_strategy
+  id = "{{$configID}}"
+}
+
+{{ end -}}
+{{ if .AdvancedSettings.UserAllowListIdSettings -}}
+import {
+  to = module.security.akamai_apr_user_allow_list.user_allow_list
+  id = "{{$configID}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ range .SecurityPolicies -}}
+{{ $policyName:= escapeName .Name -}}
+{{ $policyID:= .ID -}}
+{{ if .BotManagement -}}
+{{ if .BotManagement.AkamaiBotCategoryActions -}}
+{{ range .BotManagement.AkamaiBotCategoryActions -}}
+import {
+  to = module.security.akamai_botman_akamai_bot_category_action.{{$policyName}}_{{ escapeName (index . "categoryName") }}_{{ index . "categoryId" }}
+  id = "{{$configID}}:{{$policyID}}:{{index . "categoryId"}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.CustomBotCategoryActions -}}
+{{ range .BotManagement.CustomBotCategoryActions -}}
+import {
+  to = module.security.akamai_botman_custom_bot_category_action.{{$policyName}}_{{ getCustomBotCategoryNameByID $.CustomBotCategories (index . "categoryId") }}_{{index . "categoryId"}}
+  id = "{{$configID}}:{{$policyID}}:{{index . "categoryId"}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.BotDetectionActions -}}
+{{ range .BotManagement.BotDetectionActions -}}
+import {
+  to = module.security.akamai_botman_bot_detection_action.{{$policyName}}_{{ escapeName (index . "detectionName") }}_{{index . "detectionId"}}
+  id = "{{$configID}}:{{$policyID}}:{{index . "detectionId"}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.BotManagementSettings -}}
+import {
+  to = module.security.akamai_botman_bot_management_settings.{{$policyName}}
+  id = "{{$configID}}:{{$policyID}}"
+}
+
+{{ end -}}
+{{ if .BotManagement.JavascriptInjectionRules -}}
+import {
+  to = module.security.akamai_botman_javascript_injection.{{$policyName}}
+  id = "{{$configID}}:{{$policyID}}"
+}
+
+{{ end -}}
+{{ if .BotManagement.TransactionalEndpoints -}}
+{{ if .BotManagement.TransactionalEndpoints.BotProtection -}}
+{{ range .BotManagement.TransactionalEndpoints.BotProtection -}}
+import {
+  to = module.security.akamai_botman_transactional_endpoint.{{$policyName}}_{{(index . "operationId")}}
+  id = "{{$configID}}:{{$policyID}}:{{index . "operationId"}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.TransactionalEndpoints -}}
+{{ if .BotManagement.TransactionalEndpoints.BotProtectionExceptions -}}
+import {
+  to = module.security.akamai_botman_bot_category_exception.{{$policyName}}
+  id = "{{$configID}}:{{$policyID}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.ContentProtectionRules -}}
+{{ range .BotManagement.ContentProtectionRules -}}
+import {
+  to = module.security.akamai_botman_content_protection_rule.{{$policyName}}_{{ escapeName (index . "contentProtectionRuleName") }}_{{ index . "contentProtectionRuleId" }}
+  id = "{{$configID}}:{{$policyID}}:{{index . "contentProtectionRuleId"}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .BotManagement.ContentProtectionRuleSequence -}}
+import {
+  to = module.security.akamai_botman_content_protection_rule_sequence.{{$policyName}}_sequence
+  id = "{{$configID}}:{{$policyID}}"
+}
+
+{{ end -}}
+{{ if .BotManagement.ContentProtectionJavaScriptInjectionRules -}}
+{{ range .BotManagement.ContentProtectionJavaScriptInjectionRules -}}
+import {
+  to = module.security.akamai_botman_content_protection_javascript_injection_rule.{{ $policyName }}_{{ escapeName (index . "contentProtectionJavaScriptInjectionRuleName") }}_{{  index . "contentProtectionJavaScriptInjectionRuleId" }}
+  id = "{{$configID}}:{{$policyID}}:{{index . "contentProtectionJavaScriptInjectionRuleId"}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ if .AccountProtection -}}
+{{ if .AccountProtection.TransactionalEndpoints -}}
+{{ range .AccountProtection.TransactionalEndpoints -}}
+import {
+  to = module.security.akamai_apr_protected_operations.{{$policyName}}_{{(index . "operationId")}}
+  id = "{{$configID}}:{{$policyID}}:{{index . "operationId"}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ if .AccountProtection.GeneralSettings -}}
+import {
+  to = module.security.akamai_apr_general_settings.{{$policyName}}
+  id = "{{$configID}}:{{$policyID}}"
+}
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
