@@ -1,0 +1,77 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/papi.TFData*/ -}}
+{{range .Property.EdgeHostnames}}
+import {
+  to = akamai_edge_hostname.{{.EdgeHostnameResourceName}}
+  id = "{{.EdgeHostnameID}},{{.ContractID}},{{.GroupID}}"
+}
+
+{{end}}
+{{- if .Property.PropertyID}}
+{{- if .UseBootstrap}}
+import {
+  to = akamai_property_bootstrap.{{.Property.PropertyResourceName}}
+  id = "{{.Property.PropertyID}},{{.Property.ContractID}},{{.Property.GroupID}}"
+}
+
+import {
+  to = akamai_property.{{.Property.PropertyResourceName}}
+  id = "{{.Property.PropertyID}},{{.Property.ContractID}},{{.Property.GroupID}},{{.Property.ReadVersion}},property-bootstrap"
+}
+
+{{- else}}
+import {
+  to = akamai_property.{{.Property.PropertyResourceName}}
+  id = "{{.Property.PropertyID}},{{.Property.ContractID}},{{.Property.GroupID}},{{.Property.ReadVersion}}"
+}
+
+{{- end}}
+{{- end}}
+{{- if and .Property.PropertyID .Property.StagingInfo.HasActivation}}
+import {
+  to = akamai_property_activation.{{.Property.PropertyResourceName}}-staging
+  id = "{{.Property.PropertyID}}:STAGING"
+}
+
+{{- end}}
+{{- if and .Property.PropertyID .Property.ProductionInfo.HasActivation}}
+import {
+  to = akamai_property_activation.{{.Property.PropertyResourceName}}-production
+  id = "{{.Property.PropertyID}}:PRODUCTION"
+}
+
+{{- end}}
+{{- range $include := .Includes}}
+import {
+  to = akamai_property_include.{{.IncludeName}}
+  id = "{{.ContractID}}:{{.GroupID}}:{{.IncludeID}}"
+}
+
+{{- if $include.StagingInfo.HasActivation}}
+import {
+  to = akamai_property_include_activation.{{$include.IncludeName}}_staging
+  id = "{{$include.ContractID}}:{{$include.GroupID}}:{{$include.IncludeID}}:STAGING"
+}
+
+{{- end}}
+{{- if $include.ProductionInfo.HasActivation}}
+import {
+  to = akamai_property_include_activation.{{$include.IncludeName}}_production
+  id = "{{$include.ContractID}}:{{$include.GroupID}}:{{$include.IncludeID}}:PRODUCTION"
+}
+
+{{- end}}
+{{- end}}
+{{- if and .Property.HostnameBucket .Property.HostnameBucket.HasStagingActivation}}
+import {
+  to = akamai_property_hostname_bucket.{{.Property.PropertyResourceName}}-hostname-bucket-staging
+  id = "{{.Property.PropertyID}}:STAGING:{{.Property.ContractID}}:{{.Property.GroupID}}"
+}
+
+{{- end}}
+{{- if and .Property.HostnameBucket .Property.HostnameBucket.HasProductionActivation}}
+import {
+  to = akamai_property_hostname_bucket.{{.Property.PropertyResourceName}}-hostname-bucket-production
+  id = "{{.Property.PropertyID}}:PRODUCTION:{{.Property.ContractID}}:{{.Property.GroupID}}"
+}
+
+{{- end}}

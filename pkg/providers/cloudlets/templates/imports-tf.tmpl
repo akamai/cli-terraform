@@ -1,0 +1,47 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/cloudlets.TFPolicyData*/ -}}
+{{- range .LoadBalancers}}
+import {
+  to = akamai_cloudlets_application_load_balancer.load_balancer_{{.OriginID}}
+  id = "{{.OriginID}}"
+}
+
+{{- end}}
+{{- range .LoadBalancerActivations}}
+import {
+  to = akamai_cloudlets_application_load_balancer_activation.load_balancer_activation_{{.OriginID}}
+  id = "{{.OriginID}},{{.Network}},{{.Version}}"
+}
+
+{{- end}}
+import {
+  to = akamai_cloudlets_policy.policy
+  id = "{{.Name}}"
+}
+
+{{- with .PolicyActivations -}}
+{{- if (and .Production .Staging) -}}
+{{/* PRODUCTION and STAGING*/}}
+{{- if (deepequal .Production.Properties .Staging.Properties) -}}
+{{/* PRODUCTION.prop == STAGING.prop => res block */}}
+import {
+  to = akamai_cloudlets_policy_activation.policy_activation
+  id = "{{.Production.PolicyID}}:prod"
+}
+
+{{- end}}
+{{- else if .Production -}}
+{{/* PRODUCTION and not STAGING => res block*/}}
+import {
+  to = akamai_cloudlets_policy_activation.policy_activation
+  id = "{{.Production.PolicyID}}:prod"
+}
+
+{{- else if .Staging  -}}
+{{/* STAGING and not PRODUCTION => res block*/}}
+import {
+  to = akamai_cloudlets_policy_activation.policy_activation
+  id = "{{.Staging.PolicyID}}:staging"
+}
+
+{{- end -}}
+{{- end}}

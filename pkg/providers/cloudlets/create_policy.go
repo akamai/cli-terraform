@@ -111,8 +111,9 @@ func CmdCreatePolicy(c *cli.Context) error {
 	loadBalancerPath := filepath.Join(tfWorkPath, "load-balancer.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
 
-	err := tools.CheckFiles(policyPath, matchRulesPath, loadBalancerPath, variablesPath, importPath)
+	err := tools.CheckFiles(policyPath, matchRulesPath, loadBalancerPath, variablesPath, importPath, importTFPath)
 	if err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
@@ -122,6 +123,7 @@ func CmdCreatePolicy(c *cli.Context) error {
 		"load-balancer.tmpl": loadBalancerPath,
 		"variables.tmpl":     variablesPath,
 		"imports.tmpl":       importPath,
+		"imports-tf.tmpl": importTFPath,
 	}
 
 	processor := templates.FSTemplateProcessor{
