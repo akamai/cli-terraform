@@ -1,0 +1,20 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/clientlists.TFData*/ -}}
+import {
+  to = akamai_clientlist_list.list_{{.ClientList.ListID}}
+  id = "{{.ClientList.ListID}}"
+}
+
+{{- if .ClientList.ProductionActivation.HasActivation}}
+import {
+  to = akamai_clientlist_activation.activation_{{.ClientList.ListID}}_PRODUCTION
+  id = "{{.ClientList.ListID}}:PRODUCTION"
+}
+
+{{- end}}
+{{- if .ClientList.StagingActivation.HasActivation}}
+import {
+  to = akamai_clientlist_activation.activation_{{.ClientList.ListID}}_STAGING
+  id = "{{.ClientList.ListID}}:STAGING"
+}
+
+{{- end}}

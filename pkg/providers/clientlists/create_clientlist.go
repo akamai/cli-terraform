@@ -79,9 +79,10 @@ func CmdCreateClientList(c *cli.Context) error {
 	clientListPath := filepath.Join(tfWorkPath, "client-list.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "imports.sh")
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
 	jsonPath := filepath.Join(tfWorkPath, fmt.Sprintf("%s.json", listID))
 
-	if err := tools.CheckFiles(clientListPath, variablesPath, importPath, jsonPath); err != nil {
+	if err := tools.CheckFiles(clientListPath, variablesPath, importPath, importTFPath, jsonPath); err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
@@ -89,6 +90,7 @@ func CmdCreateClientList(c *cli.Context) error {
 		"client-list.tmpl": clientListPath,
 		"variables.tmpl":   variablesPath,
 		"imports.tmpl":     importPath,
+		"imports-tf.tmpl": importTFPath,
 	}
 
 	processor := templates.FSTemplateProcessor{
