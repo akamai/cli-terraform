@@ -87,7 +87,8 @@ func CmdCreateCloudAccess(c *cli.Context) error {
 	cloudAccessPath := filepath.Join(tfWorkPath, "cloudaccess.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
-	if err := tools.CheckFiles(cloudAccessPath, variablesPath, importPath); err != nil {
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
+	if err := tools.CheckFiles(cloudAccessPath, variablesPath, importPath, importTFPath); err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
@@ -95,6 +96,7 @@ func CmdCreateCloudAccess(c *cli.Context) error {
 		"cloudaccess.tmpl": cloudAccessPath,
 		"variables.tmpl":   variablesPath,
 		"imports.tmpl":     importPath,
+		"imports-tf.tmpl": importTFPath,
 	}
 
 	processor := templates.FSTemplateProcessor{

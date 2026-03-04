@@ -1,0 +1,14 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/cloudwrapper.TFCloudAccessData*/ -}}
+{{- if .Flag}}
+import {
+  to = akamai_cloudaccess_key.{{.Key.KeyResourceName}}
+  id = "{{.Key.AccessKeyUID}},{{.Key.GroupID}},{{.Key.ContractID}}"
+}
+
+{{- else}}
+import {
+  to = akamai_cloudaccess_key.{{.Key.KeyResourceName}}
+  id = "{{.Key.AccessKeyUID}}"
+}
+
+{{- end}}
