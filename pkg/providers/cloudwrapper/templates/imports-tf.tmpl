@@ -1,0 +1,13 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/cloudwrapper.TFCloudWrapperData*/ -}}
+import {
+  to = akamai_cloudwrapper_configuration.{{.Configuration.ConfigurationResourceName}}
+  id = "{{.Configuration.ID}}"
+}
+
+{{ if .Configuration.IsActive -}}
+import {
+  to = akamai_cloudwrapper_activation.{{.Configuration.ConfigurationResourceName}}_activation
+  id = "{{.Configuration.ID}}"
+}
+
+{{ end }}

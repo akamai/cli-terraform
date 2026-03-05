@@ -87,7 +87,8 @@ func CmdCreateCloudWrapper(c *cli.Context) error {
 	cloudwrapperPath := filepath.Join(tfWorkPath, "cloudwrapper.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
-	if err := tools.CheckFiles(cloudwrapperPath, variablesPath, importPath); err != nil {
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
+	if err := tools.CheckFiles(cloudwrapperPath, variablesPath, importPath, importTFPath); err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
@@ -95,6 +96,7 @@ func CmdCreateCloudWrapper(c *cli.Context) error {
 		"cloudwrapper.tmpl": cloudwrapperPath,
 		"variables.tmpl":    variablesPath,
 		"imports.tmpl":      importPath,
+		"imports-tf.tmpl": importTFPath,
 	}
 
 	processor := templates.FSTemplateProcessor{
