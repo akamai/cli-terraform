@@ -86,7 +86,8 @@ func CmdCreateCloudCertificate(c *cli.Context) error {
 	cloudCertificatePath := filepath.Join(tfWorkPath, "cloudcertificate.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
-	if err := tools.CheckFiles(cloudCertificatePath, variablesPath, importPath); err != nil {
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
+	if err := tools.CheckFiles(cloudCertificatePath, variablesPath, importPath, importTFPath); err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
@@ -103,6 +104,7 @@ func CmdCreateCloudCertificate(c *cli.Context) error {
 				"cloudcertificate.tmpl": cloudCertificatePath,
 				"variables.tmpl":        variablesPath,
 				"import.tmpl":           importPath,
+				"import-tf.tmpl":        importTFPath,
 			},
 			AdditionalFuncs: additionalFunctions,
 		},

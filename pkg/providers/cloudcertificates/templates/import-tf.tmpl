@@ -1,0 +1,19 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/cloudcertificates.TFData*/ -}}
+import {
+  to = akamai_cloudcertificates_certificate.{{ .Certificate.ResourceName }}
+  id = "{{.Certificate.ID}}"
+}
+
+{{- if eq .Certificate.CertificateStatus "CSR_READY"}}
+#import {
+#  to = akamai_cloudcertificates_upload_signed_certificate.{{ .Certificate.ResourceName }}
+#  id = "{{.Certificate.ID}}"
+#}
+
+{{- else}}
+import {
+  to = akamai_cloudcertificates_upload_signed_certificate.{{ .Certificate.ResourceName }}
+  id = "{{.Certificate.ID}}"
+}
+
+{{- end}}
