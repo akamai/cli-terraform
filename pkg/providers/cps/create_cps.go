@@ -61,8 +61,9 @@ func CmdCreateCPS(c *cli.Context) error {
 	enrollmentPath := filepath.Join(tfWorkPath, "enrollment.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
 
-	err := tools.CheckFiles(enrollmentPath, variablesPath, importPath)
+	err := tools.CheckFiles(enrollmentPath, variablesPath, importPath, importTFPath)
 	if err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
@@ -71,6 +72,7 @@ func CmdCreateCPS(c *cli.Context) error {
 		"enrollment.tmpl": enrollmentPath,
 		"variables.tmpl":  variablesPath,
 		"imports.tmpl":    importPath,
+		"imports-tf.tmpl": importTFPath,
 	}
 
 	processor := templates.FSTemplateProcessor{

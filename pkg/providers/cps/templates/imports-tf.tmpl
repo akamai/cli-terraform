@@ -1,0 +1,21 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/cps.TFCPSData*/ -}}
+{{- if eq .Enrollment.ValidationType "dv" }}
+import {
+  to = akamai_cps_dv_enrollment.enrollment_id_{{.EnrollmentID}}
+  id = "{{.EnrollmentID}},{{.ContractID}}"
+}
+
+{{- else if eq .Enrollment.ValidationType "third-party" }}
+import {
+  to = akamai_cps_third_party_enrollment.enrollment_id_{{.EnrollmentID}}
+  id = "{{.EnrollmentID}},{{.ContractID}}"
+}
+
+{{- if ne .NoUploadCertificate true}}
+import {
+  to = akamai_cps_upload_certificate.enrollment_id_{{.EnrollmentID}}
+  id = "{{.EnrollmentID}}"
+}
+
+{{- end}}
+{{- end}}
