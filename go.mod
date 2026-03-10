@@ -1,6 +1,6 @@
 module github.com/akamai/cli-terraform/v2
 
-go 1.24.11
+go 1.25.7
 
 require (
 	github.com/akamai/AkamaiOPEN-edgegrid-golang/v13 v13.0.0
