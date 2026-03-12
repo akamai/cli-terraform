@@ -12,7 +12,8 @@
 
 
 
-
+* PAPI
+  * Added support for exporting the `https_service_binding` field in the `akamai_edge_hostname` resource using the `export-property` command. 
 
 
 * Cloud Access Manager

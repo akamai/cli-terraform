@@ -39,6 +39,9 @@ resource "akamai_edge_hostname" "{{.EdgeHostnameResourceName}}" {
 {{- if .UseCases}}
   use_cases = jsonencode({{.UseCases}})
 {{- end}}
+{{- if .HTTPSServiceBinding}}
+  https_service_binding = "{{.HTTPSServiceBinding}}"
+{{- end}}
 }
 {{end}}
 

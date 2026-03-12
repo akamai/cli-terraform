@@ -39,6 +39,7 @@ type EdgeHostname struct {
 	UseCases                 string
 	CertificateID            int64
 	TTL                      int
+	HTTPSServiceBinding      string
 }
 
 // Hostname represents edge hostname resource
@@ -917,6 +918,10 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			if !edgeHostname.UseDefaultTTL {
 				ttl = edgeHostname.TTL
 			}
+			httpsServiceBinding := ""
+			if edgeHostname.HTTPSServiceBinding != nil {
+				httpsServiceBinding = *edgeHostname.HTTPSServiceBinding
+			}
 			edgeHostnamesMap[cnameToResource] = EdgeHostname{
 				EdgeHostname:             cnameTo,
 				EdgeHostnameID:           hostname.EdgeHostnameID,
@@ -928,6 +933,7 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 				SecurityType:             edgeHostname.SecurityType,
 				UseCases:                 useCases,
 				CertificateID:            certificateID,
+				HTTPSServiceBinding:      httpsServiceBinding,
 			}
 		}
 
