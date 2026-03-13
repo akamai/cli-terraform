@@ -99,19 +99,21 @@ func CmdCreateDomain(c *cli.Context) error {
 	datacentersPath := filepath.Join(tfWorkPath, "datacenters.tf")
 	domainPath := filepath.Join(tfWorkPath, "domain.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
 	mapsPath := filepath.Join(tfWorkPath, "maps.tf")
 	propertiesPath := filepath.Join(tfWorkPath, "properties.tf")
 	resourcesPath := filepath.Join(tfWorkPath, "resources.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 
 	templateToFile := map[string]string{
-		"datacenters.tmpl": datacentersPath,
-		"domain.tmpl":      domainPath,
-		"imports.tmpl":     importPath,
-		"maps.tmpl":        mapsPath,
-		"properties.tmpl":  propertiesPath,
-		"resources.tmpl":   resourcesPath,
-		"variables.tmpl":   variablesPath,
+		"datacenters.tmpl":  datacentersPath,
+		"domain.tmpl":       domainPath,
+		"imports.tmpl":      importPath,
+		"imports-tf.tmpl":   importTFPath,
+		"maps.tmpl":         mapsPath,
+		"properties.tmpl":   propertiesPath,
+		"resources.tmpl":    resourcesPath,
+		"variables.tmpl":    variablesPath,
 	}
 
 	err := tools.CheckFiles(datacentersPath, domainPath, importPath, mapsPath, propertiesPath, resourcesPath, variablesPath)
