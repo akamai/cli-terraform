@@ -1,0 +1,13 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/mtlstruststore.TFData*/ -}}
+import {
+  to = akamai_mtlstruststore_ca_set.{{.CASet.ResourceName}}
+  id = "{{.CASet.ID}}"
+}
+
+{{- range .CASet.Networks}}
+{{if not .HasActivation}}#{{end}}import {
+{{if not .HasActivation}}#{{end}}  to = akamai_mtlstruststore_ca_set_activation.{{$.CASet.ResourceName}}-{{.NetworkName}}
+{{if not .HasActivation}}#{{end}}  id = "{{$.CASet.ID}}:{{.NetworkName | toUpper}}"
+{{if not .HasActivation}}#{{end}}}
+
+{{- end}}

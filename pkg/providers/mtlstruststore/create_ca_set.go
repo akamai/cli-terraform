@@ -84,7 +84,8 @@ func CmdCreateCASet(c *cli.Context) error {
 	mTLSTrustStorePath := filepath.Join(tfWorkPath, "mtlstruststore.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
-	if err := tools.CheckFiles(mTLSTrustStorePath, variablesPath, importPath); err != nil {
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
+	if err := tools.CheckFiles(mTLSTrustStorePath, variablesPath, importPath, importTFPath); err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
@@ -100,6 +101,7 @@ func CmdCreateCASet(c *cli.Context) error {
 				"mtlstruststore.tmpl": mTLSTrustStorePath,
 				"variables.tmpl":      variablesPath,
 				"imports.tmpl":        importPath,
+				"imports-tf.tmpl": importTFPath,
 			},
 			AdditionalFuncs: additionalFunctions,
 		},
