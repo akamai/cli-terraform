@@ -2,7 +2,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 9.3.0"
+      version = ">= 10.0.0"
     }
   }
   required_version = ">= 1.0"
@@ -20,6 +20,10 @@ resource "akamai_cloudcertificates_certificate" "test-name_example_com1234567890
   key_type       = "RSA"
   secure_network = "ENHANCED_TLS"
   sans           = ["test.example.com", "test.example2.com"]
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "akamai_cloudcertificates_upload_signed_certificate" "test-name_example_com1234567890" {
