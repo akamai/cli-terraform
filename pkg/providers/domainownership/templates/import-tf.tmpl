@@ -1,0 +1,15 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/domainownership.TFData*/ -}}
+{{- if .ImportKeyForValidation}}
+import {
+  to = akamai_property_domainownership_validation.{{.ResourceName}}
+  id = "{{.ImportKeyForValidation}}"
+}
+
+{{- end}}
+{{- if .ImportKeyForDomains}}
+import {
+  to = akamai_property_domainownership_domains.{{.ResourceName}}
+  id = "{{.ImportKeyForDomains}}"
+}
+
+{{end}}

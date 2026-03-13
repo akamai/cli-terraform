@@ -89,7 +89,8 @@ func CmdCreateDomainOwnership(c *cli.Context) error {
 	domainownershipPath := filepath.Join(tfWorkPath, "domainownership.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
-	if err := tools.CheckFiles(domainownershipPath, variablesPath, importPath); err != nil {
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
+	if err := tools.CheckFiles(domainownershipPath, variablesPath, importPath, importTFPath); err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
@@ -103,6 +104,7 @@ func CmdCreateDomainOwnership(c *cli.Context) error {
 				"domainownership.tmpl": domainownershipPath,
 				"variables.tmpl":       variablesPath,
 				"import.tmpl":          importPath,
+				"import-tf.tmpl":       importTFPath,
 			},
 			AdditionalFuncs: additionalFunctions,
 		},
