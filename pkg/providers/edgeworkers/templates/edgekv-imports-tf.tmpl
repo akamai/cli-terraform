@@ -1,0 +1,14 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/edgeworkers.TFEdgeKVData*/ -}}
+
+import {
+  to = akamai_edgekv.edgekv
+  id = "{{.Name}}:{{.Network}}"
+}
+
+{{range $group, $items := .GroupItems}}
+import {
+  to = akamai_edgekv_group_items.{{$group | Escape}}
+  id = "{{$.Name}}:{{$.Network}}:{{$group | Escape}}"
+}
+
+{{end}}

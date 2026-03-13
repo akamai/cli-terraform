@@ -62,15 +62,17 @@ func CmdCreateEdgeKV(c *cli.Context) error {
 	edgeKVPath := filepath.Join(tfWorkPath, "edgekv.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
 
-	err := tools.CheckFiles(edgeKVPath, variablesPath, importPath)
+	err := tools.CheckFiles(edgeKVPath, variablesPath, importPath, importTFPath)
 	if err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 	templateToFile := map[string]string{
-		"edgekv.tmpl":           edgeKVPath,
-		"edgekv-variables.tmpl": variablesPath,
-		"edgekv-imports.tmpl":   importPath,
+		"edgekv.tmpl":              edgeKVPath,
+		"edgekv-variables.tmpl":    variablesPath,
+		"edgekv-imports.tmpl":      importPath,
+		"edgekv-imports-tf.tmpl":   importTFPath,
 	}
 
 	processor := templates.FSTemplateProcessor{
