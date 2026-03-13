@@ -84,15 +84,30 @@ To set up and use multiple clients, clients that use an account switch key, or c
     akamai --edgerc "~/.edgerc" --section "default" --accountkey "A-CCT1234:A-CCT5432" terraform export-property --version 3 "my-property"
     ```
 
-	  The export adds a subdirectory containing declarative asset and variable configurations, supplemental files in JSON, and an import script in your active directory.
+	  The export adds a subdirectory containing declarative asset and variable configurations, supplemental files in JSON, and import files in your active directory.
 
-    If you're using the binary, you invoke the package command from your active directory as `./akamai-terraform` along with the credential details, the export command name, and other additional arguments.
+	   If you're using the binary, you invoke the package command from your active directory as `./akamai-terraform` along with the credential details, the export command name, and other additional arguments.
 
-    ```shell
-    ./akamai-terraform --edgerc "~/.edgerc" --section "default" --accountkey "A-CCT1234:A-CCT5432" export-property --version 3 "my-property"
-    ```
+	   ```shell
+	   ./akamai-terraform --edgerc "~/.edgerc" --section "default" --accountkey "A-CCT1234:A-CCT5432" export-property --version 3 "my-property"
+	   ```
 
-2. When the export is complete, run the import script to add your assets to your state.
+2. When the export is complete, import your assets to your Terraform state using either:
+	  - **import.tf** (Terraform 1.5+): Native Terraform import blocks that can be committed to version control
+	  - **import.sh**: Traditional shell script for backward compatibility
+
+	  **Using import.tf (recommended for Terraform 1.5+):**
+	  ```shell
+	  terraform init
+	  terraform plan
+	  terraform apply
+	  ```
+
+	  **Using import.sh (traditional method):**
+	  ```shell
+	  chmod +x import.sh
+	  ./import.sh
+	  ```
 
 > **Note:** Exported variable configuration files are entity-specific. When exporting multiple assets, merge the variable file content, removing any duplicates.
 
