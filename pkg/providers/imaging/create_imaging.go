@@ -83,8 +83,9 @@ func CmdCreateImaging(c *cli.Context) error {
 	imagingPath := filepath.Join(tfWorkPath, "imaging.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
 
-	err := tools.CheckFiles(imagingPath, variablesPath, importPath)
+	err := tools.CheckFiles(imagingPath, variablesPath, importPath, importTFPath)
 	if err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
@@ -105,6 +106,7 @@ func CmdCreateImaging(c *cli.Context) error {
 		"imaging.tmpl":   imagingPath,
 		"variables.tmpl": variablesPath,
 		"imports.tmpl":   importPath,
+		"imports-tf.tmpl": importTFPath,
 	}
 
 	processor := templates.FSTemplateProcessor{

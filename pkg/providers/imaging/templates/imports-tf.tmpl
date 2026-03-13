@@ -1,0 +1,13 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/imaging.TFImagingData*/ -}}
+import {
+  to = akamai_imaging_policy_set.policyset
+  id = "{{.PolicySet.ID}}:{{.PolicySet.ContractID}}"
+}
+
+{{- range .Policies}}
+import {
+  to = akamai_imaging_policy_{{$.PolicySet.Type | ToLower}}.policy_{{.PolicyID | RemoveSymbols}}
+  id = "{{.PolicyID}}:{{$.PolicySet.ID}}:{{$.PolicySet.ContractID}}"
+}
+
+{{- end}}
