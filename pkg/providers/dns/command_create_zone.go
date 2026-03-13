@@ -326,6 +326,30 @@ func createImportScript(resourceZoneName string, term terminal.Terminal, configu
 		return cli.Exit(color.RedString("Unable to write import script file"), 1)
 	}
 	err = f.Sync()
+	if err != nil {
+		return err
+	}
+
+	// Generate import.tf file
+	importTFFilename := filepath.Join(configuration.tfWorkPath, resourceZoneName+"_resource_import.tf")
+	scriptTFContent, err := buildZoneImportScriptTF(zoneName, fullZoneConfigMap, resourceZoneName, configuration.tfWorkPath)
+	if err != nil {
+		return cli.Exit(color.RedString("Import TF content generation failed"), 1)
+	}
+	fTF, err := os.Create(importTFFilename)
+	if err != nil {
+		return cli.Exit(color.RedString("Unable to create import TF file"), 1)
+	}
+	defer func(fTF *os.File) {
+		if e := fTF.Close(); e != nil {
+			err = e
+		}
+	}(fTF)
+	_, err = fTF.WriteString(scriptTFContent)
+	if err != nil {
+		return cli.Exit(color.RedString("Unable to write import TF file"), 1)
+	}
+	err = fTF.Sync()
 
 	return err
 }
@@ -435,6 +459,16 @@ func buildZoneImportScript(zone string, zoneConfigMap map[string]Types, resource
 		ResourceName:  resourceName,
 	}
 	return useTemplate(&data, "import-script.tmpl", true), nil
+}
+
+func buildZoneImportScriptTF(zone string, zoneConfigMap map[string]Types, resourceName string, tfWorkPath string) (string, error) {
+	data := ImportData{
+		Zone:          zone,
+		ZoneConfigMap: zoneConfigMap,
+		ResourceName:  resourceName,
+		TFWorkPath:    tfWorkPath,
+	}
+	return useTemplate(&data, "import-script-tf.tmpl", true), nil
 }
 
 // remove any resources already present in existing zone tf configuration
