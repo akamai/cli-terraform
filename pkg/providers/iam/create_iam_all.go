@@ -28,6 +28,7 @@ func CmdCreateIAMAll(c *cli.Context) error {
 
 	groupsPath := filepath.Join(tfWorkPath, "groups.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
 	rolesPath := filepath.Join(tfWorkPath, "roles.tf")
 	usersPath := filepath.Join(tfWorkPath, "users.tf")
 	allowlistPath := filepath.Join(tfWorkPath, "allowlist.tf")
@@ -42,6 +43,7 @@ func CmdCreateIAMAll(c *cli.Context) error {
 	templateToFile := map[string]string{
 		"groups.tmpl":    groupsPath,
 		"imports.tmpl":   importPath,
+		"imports-tf.tmpl": importTFPath,
 		"roles.tmpl":     rolesPath,
 		"users.tmpl":     usersPath,
 		"allowlist.tmpl": allowlistPath,

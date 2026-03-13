@@ -31,11 +31,12 @@ func CmdCreateIAMGroup(c *cli.Context) error {
 
 	groupPath := filepath.Join(tfWorkPath, "group.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
 	rolesPath := filepath.Join(tfWorkPath, "roles.tf")
 	usersPath := filepath.Join(tfWorkPath, "users.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 
-	err := tools.CheckFiles(groupPath, usersPath, rolesPath, variablesPath, importPath)
+	err := tools.CheckFiles(groupPath, usersPath, rolesPath, variablesPath, importPath, importTFPath)
 	if err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
@@ -43,6 +44,7 @@ func CmdCreateIAMGroup(c *cli.Context) error {
 	templateToFile := map[string]string{
 		"groups.tmpl":    groupPath,
 		"imports.tmpl":   importPath,
+		"imports-tf.tmpl": importTFPath,
 		"roles.tmpl":     rolesPath,
 		"users.tmpl":     usersPath,
 		"variables.tmpl": variablesPath,

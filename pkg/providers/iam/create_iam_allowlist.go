@@ -27,16 +27,18 @@ func CmdCreateIAMAllowlist(c *cli.Context) error {
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
 
 	importPath := filepath.Join(tfWorkPath, "import.sh")
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
 	allowlistPath := filepath.Join(tfWorkPath, "allowlist.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 
-	err := tools.CheckFiles(allowlistPath, variablesPath, importPath)
+	err := tools.CheckFiles(allowlistPath, variablesPath, importPath, importTFPath)
 	if err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
 	templateToFile := map[string]string{
 		"imports.tmpl":   importPath,
+		"imports-tf.tmpl": importTFPath,
 		"allowlist.tmpl": allowlistPath,
 		"variables.tmpl": variablesPath,
 	}

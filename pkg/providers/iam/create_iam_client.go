@@ -28,9 +28,10 @@ func CmdCreateIAMClient(c *cli.Context) error {
 
 	clientPath := filepath.Join(tfWorkPath, "client.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 
-	err := tools.CheckFiles(clientPath, variablesPath, importPath)
+	err := tools.CheckFiles(clientPath, variablesPath, importPath, importTFPath)
 	if err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
@@ -38,6 +39,7 @@ func CmdCreateIAMClient(c *cli.Context) error {
 	templateToFile := map[string]string{
 		"client.tmpl":    clientPath,
 		"imports.tmpl":   importPath,
+		"imports-tf.tmpl": importTFPath,
 		"variables.tmpl": variablesPath,
 	}
 

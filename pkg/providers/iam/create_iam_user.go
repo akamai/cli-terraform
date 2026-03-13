@@ -30,11 +30,12 @@ func CmdCreateIAMUser(c *cli.Context) error {
 
 	groupPath := filepath.Join(tfWorkPath, "groups.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
 	rolesPath := filepath.Join(tfWorkPath, "roles.tf")
 	userPath := filepath.Join(tfWorkPath, "user.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 
-	err := tools.CheckFiles(userPath, groupPath, rolesPath, variablesPath, importPath)
+	err := tools.CheckFiles(userPath, groupPath, rolesPath, variablesPath, importPath, importTFPath)
 	if err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
@@ -42,6 +43,7 @@ func CmdCreateIAMUser(c *cli.Context) error {
 	templateToFile := map[string]string{
 		"groups.tmpl":    groupPath,
 		"imports.tmpl":   importPath,
+		"imports-tf.tmpl": importTFPath,
 		"roles.tmpl":     rolesPath,
 		"users.tmpl":     userPath,
 		"variables.tmpl": variablesPath,

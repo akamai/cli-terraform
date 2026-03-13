@@ -1,0 +1,50 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/iam.TFUserData*/ -}}
+{{range .TFUsers -}}
+import {
+  to = akamai_iam_user.iam_user_{{.ID}}
+  id = "{{.ID}}"
+}
+
+{{end -}}
+{{range .TFRoles -}}
+import {
+  to = akamai_iam_role.role_id_{{.RoleID}}
+  id = "{{.RoleID}}"
+}
+
+{{end -}}
+{{range .TFGroups -}}
+import {
+  to = akamai_iam_group.group_id_{{.GroupID}}
+  id = "{{.GroupID}}"
+}
+
+{{end -}}
+{{ if or (eq .Subcommand "all") (eq .Subcommand "allowlist") -}}
+import {
+  to = akamai_iam_ip_allowlist.allowlist
+  id = ""
+}
+
+{{range .TFAllowlist.CIDRBlocks -}}
+import {
+  to = akamai_iam_cidr_block.{{ cidrName .CIDRBlock }}
+  id = "{{.CIDRBlockID}}"
+}
+
+{{end -}}
+{{end}}
+{{- if or (eq .Subcommand "all") (eq .Subcommand "client") -}}
+import {
+  to = akamai_iam_api_client.api_client_{{.TFClient.ClientID}}
+  id = "{{.TFClient.ClientID}}"
+}
+
+{{end -}}
+{{- if or (eq .Subcommand "all") (eq .Subcommand "client") -}}
+import {
+  to = akamai_iam_api_client.api_client_{{.TFClient.ClientID}}
+  id = "{{.TFClient.ClientID}}"
+}
+
+{{end -}}
