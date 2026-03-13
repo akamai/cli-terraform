@@ -60,6 +60,7 @@ func CmdCreateEdgeWorker(c *cli.Context) error {
 	edgeWorkerPath := filepath.Join(tfWorkPath, "edgeworker.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
+	importTFPath := filepath.Join(tfWorkPath, "import.tf")
 
 	bundleDir := tfWorkPath
 	if c.IsSet("bundlepath") {
@@ -70,14 +71,15 @@ func CmdCreateEdgeWorker(c *cli.Context) error {
 		return cli.Exit(color.RedString("Bundle path is not accessible"), 1)
 	}
 
-	err := tools.CheckFiles(edgeWorkerPath, variablesPath, importPath)
+	err := tools.CheckFiles(edgeWorkerPath, variablesPath, importPath, importTFPath)
 	if err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 	templateToFile := map[string]string{
-		"edgeworker.tmpl":           edgeWorkerPath,
-		"edgeworker-variables.tmpl": variablesPath,
-		"edgeworker-imports.tmpl":   importPath,
+		"edgeworker.tmpl":              edgeWorkerPath,
+		"edgeworker-variables.tmpl":    variablesPath,
+		"edgeworker-imports.tmpl":      importPath,
+		"edgeworker-imports-tf.tmpl":   importTFPath,
 	}
 
 	processor := templates.FSTemplateProcessor{
