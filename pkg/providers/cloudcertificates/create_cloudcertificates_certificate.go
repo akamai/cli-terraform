@@ -23,8 +23,8 @@ import (
 // The suffix added by CCM to the certificate name when a certificate is renewed.
 const renewedNameSuffix = ".renewed."
 
-// The date format used in the renewed certificate name in format <base_name>.renewed.YYYY-MM-DD.
-const renewedNameDateLayout = "2006-01-02"
+// The timestamp format used in the renewed certificate name suffix, e.g. "mycert.renewed.2026-03-11T16_50_39Z".
+const renewedNameDateLayout = "2006-01-02T15_04_05Z"
 
 // maxPageSize defines the maximum number of items to fetch per page when listing certificates.
 const maxPageSize = 100
@@ -205,7 +205,7 @@ func populateTFData(params createCloudCertificateParams, cert cloudcertificates.
 			Subject:              subject,
 			SignedCertificatePEM: cert.SignedCertificatePEM,
 			TrustChainPEM:        cert.TrustChainPEM,
-			ResourceName:         sanitizeResourceName(cert.CertificateName),
+			ResourceName:         sanitizeResourceName(extractBaseName(cert.CertificateName)),
 		},
 	}
 }
@@ -225,14 +225,14 @@ func sanitizeResourceName(name string) string {
 func extractBaseName(name string) string {
 	parts := strings.Split(name, renewedNameSuffix)
 	if len(parts) != 2 || parts[0] == "" {
-		// The name does not include the rotated suffix or starts with the suffix.
+		// The name does not include the renewed suffix or starts with the suffix.
 		return name
 	}
 	if _, err := time.Parse(renewedNameDateLayout, parts[1]); err == nil {
-		// Valid date part, return the base name.
+		// Valid datetime suffix, return the base name.
 		return parts[0]
 	}
-	// Invalid date part, return the original name.
+	// Invalid suffix, return the original name.
 	return name
 }
 

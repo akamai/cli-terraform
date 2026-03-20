@@ -38,6 +38,9 @@
 
 ### BUG FIXES:
 
+* Cloud Certificates (Beta)
+  * Fixed `export-cloudcertificate` incorrectly using the full renewed certificate name (e.g. `example.renewed.2026-03-11T16_50_39Z`) as both the `base_name` attribute and the Terraform resource instance name. The base name (`example`) is now correctly extracted by stripping the `.renewed.<timestamp>` suffix.
+
 
 
 
