@@ -19,8 +19,9 @@
 * Cloud Access Manager
   * Added support for empty `cloud_access_key_id` in the `akamai_cloudaccess_key` resource.
 
-* Appsec
+* Appsec (Beta)
   * Added resource `akamai_appsec_url_protection_action` to the `export-appsec` command.
+  * Added resource `akamai_appsec_url_protection_policy` to the `export-appsec` command.
 
 
 

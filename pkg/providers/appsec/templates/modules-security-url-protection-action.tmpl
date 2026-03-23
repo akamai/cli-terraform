@@ -2,13 +2,13 @@
 {{ range .SecurityPolicies -}}
 {{ $policyName := escapeName .Name -}}
 
-{{- if .URLProtectionRulesActions -}}
+{{- if .URLProtectionPoliciesActions -}}
 // URL Protection Actions for policy {{ $policyName }}
-{{ range .URLProtectionRulesActions -}}
-resource "akamai_appsec_url_protection_action" "{{ $policyName }}_{{ .URLProtectionRuleID }}" {
+{{ range .URLProtectionPoliciesActions -}}
+resource "akamai_appsec_url_protection_action" "{{ $policyName }}_{{ .URLProtectionPolicyID }}" {
     config_id                 = local.config_id
     security_policy_id        = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
-    url_protection_rule_id    = {{ .URLProtectionRuleID }}
+    url_protection_policy_id    = {{ .URLProtectionPolicyID }}
     max_rate_threshold_action = "{{ .MaxRateThresholdAction }}"
 {{- if .LoadSheddingAction }}
     load_shedding_action      = "{{ .LoadSheddingAction }}"

@@ -33,6 +33,11 @@ terraform import module.security.akamai_appsec_custom_rule.{{escapeName .Name}}_
 {{ end -}}
 {{ end -}}
 {{ end -}}
+{{ if .URLProtectionPolicies -}}
+{{ range .URLProtectionPolicies -}}
+terraform import module.security.akamai_appsec_url_protection_policy.{{ escapeName .Name}}_{{ .URLProtectionPolicyID }} {{ $configID }}:{{ .URLProtectionPolicyID }}
+{{ end -}}
+{{ end -}}
 {{ if .CustomDenyList  -}}
 {{ range .CustomDenyList  -}}
 terraform import module.security.akamai_appsec_custom_deny.{{escapeName .Name}}_{{ .ID }} {{ $configID }}:{{ .ID }}
@@ -117,9 +122,9 @@ terraform import module.security.akamai_appsec_rate_policy_action.{{ $policyName
 terraform import module.security.akamai_appsec_malware_policy_action.{{ $policyName}}_{{ getMalwareNameByID $ .MalwarePolicyID }} {{ $configID }}:{{ $policyID }}:{{ .MalwarePolicyID }}
 {{ end -}}
 {{ end -}}
-{{ if .URLProtectionRulesActions -}}
-{{ range .URLProtectionRulesActions -}}
-terraform import module.security.akamai_appsec_url_protection_action.{{ $policyName}}_{{ .URLProtectionRuleID }} {{ $configID }}:{{ $policyID }}:{{ .URLProtectionRuleID }}
+{{ if .URLProtectionPoliciesActions -}}
+{{ range .URLProtectionPoliciesActions -}}
+terraform import module.security.akamai_appsec_url_protection_action.{{ $policyName}}_{{ .URLProtectionPolicyID }} {{ $configID }}:{{ $policyID }}:{{ .URLProtectionPolicyID }}
 {{ end -}}
 {{ end -}}
 {{ if .IPGeoFirewall -}}
