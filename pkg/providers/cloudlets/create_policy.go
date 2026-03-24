@@ -7,9 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
-	"reflect"
 	"sort"
-	"text/template"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/cloudlets"
 	v3 "github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/cloudlets/v3"
@@ -33,7 +31,7 @@ type (
 		MatchRules              any
 		PolicyActivations       TFPolicyActivationsData
 		LoadBalancers           []LoadBalancerVersion
-		LoadBalancerActivations []cloudlets.LoadBalancerActivation
+		LoadBalancerActivations []TFLoadBalancerActivationsData
 		EdgercPath              string
 		Section                 string
 		IsV3                    bool
@@ -46,17 +44,30 @@ type (
 
 	// TFPolicyActivationsData represents data used in policy all activation resource templates
 	TFPolicyActivationsData struct {
-		Staging    *TFPolicyActivationData
-		Production *TFPolicyActivationData
-		IsV3       bool
+		IsV3        bool
+		Activations []TFPolicyActivationData
+	}
+
+	// TFLoadBalancerActivationsData represents data used in policy all activation resource templates
+	TFLoadBalancerActivationsData struct {
+		Activations []LBActivation
+	}
+
+	// LBActivation represents a single load balancer activation, used in load balancer activation resource templates
+	LBActivation struct {
+		OriginID  string
+		Network   string
+		Version   int64
+		Commented bool
 	}
 
 	// TFPolicyActivationData represents data used in policy activation resource templates
 	TFPolicyActivationData struct {
+		Network    string
 		PolicyID   int64
 		Version    int64
 		Properties []string
-		IsV3       bool
+		Commented  bool
 	}
 
 	activationStrategy interface {
@@ -127,9 +138,6 @@ func CmdCreatePolicy(c *cli.Context) error {
 	processor := templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
-		AdditionalFuncs: template.FuncMap{
-			"deepequal": reflect.DeepEqual,
-		},
 	}
 
 	policyName := c.Args().First()
@@ -198,18 +206,14 @@ func (strategy *v2ActivationStrategy) getTFPolicyData(ctx context.Context, edger
 	tfPolicyData.Description = strategy.policyVersion.Description
 	tfPolicyData.MatchRuleFormat = strategy.policyVersion.MatchRuleFormat
 	tfPolicyData.MatchRules = strategy.policyVersion.MatchRules
+	activationStaging := getActiveVersionAndProperties(strategy.policy, cloudlets.PolicyActivationNetworkStaging)
+	activationProd := getActiveVersionAndProperties(strategy.policy, cloudlets.PolicyActivationNetworkProduction)
 
-	if activationStaging := getActiveVersionAndProperties(strategy.policy, cloudlets.PolicyActivationNetworkStaging); activationStaging != nil {
-		tfPolicyData.PolicyActivations.Staging = activationStaging
-	}
-	if activationProd := getActiveVersionAndProperties(strategy.policy, cloudlets.PolicyActivationNetworkProduction); activationProd != nil {
-		tfPolicyData.PolicyActivations.Production = activationProd
-	}
+	tfPolicyData.PolicyActivations = buildPolicyActivations(activationProd, activationStaging, false)
 
 	if tfPolicyData.CloudletCode == "ALB" {
 		originIDs, err := getOriginIDs(strategy.policyVersion.MatchRules)
 		if err != nil {
-
 			return nil, fmt.Errorf("%w: %s", ErrFetchingVersion, err)
 		}
 		tfPolicyData.LoadBalancers, err = getLoadBalancers(ctx, strategy.client, originIDs)
@@ -239,26 +243,46 @@ func initializeStrategyForPolicy(ctx context.Context, policyName string, clientV
 	return nil, fmt.Errorf("could not find policy %s: neither as V2 (%s) nor as V3 (%s)", policyName, errV2, errV3)
 }
 
-func getLoadBalancerActivations(ctx context.Context, client cloudlets.Cloudlets, originIDs []string) ([]cloudlets.LoadBalancerActivation, error) {
-	activations := make([]cloudlets.LoadBalancerActivation, 0)
+func getLoadBalancerActivations(ctx context.Context, client cloudlets.Cloudlets, originIDs []string) ([]TFLoadBalancerActivationsData, error) {
+	var result []TFLoadBalancerActivationsData
+
 	for _, originID := range originIDs {
-		activation, err := getApplicationLoadBalancerActivation(ctx, client, originID, cloudlets.LoadBalancerActivationNetworkProduction)
+		acts, err := client.ListLoadBalancerActivations(ctx, cloudlets.ListLoadBalancerActivationsRequest{OriginID: originID})
 		if err != nil {
 			return nil, err
-		}
-		if activation != nil {
-			activations = append(activations, *activation)
 		}
 
-		activation, err = getApplicationLoadBalancerActivation(ctx, client, originID, cloudlets.LoadBalancerActivationNetworkStaging)
-		if err != nil {
-			return nil, err
+		var prod, stag *cloudlets.LoadBalancerActivation
+		for i, act := range acts {
+			switch act.Network {
+			case cloudlets.LoadBalancerActivationNetworkProduction:
+				if prod == nil || act.ActivatedDate > prod.ActivatedDate {
+					prod = &acts[i]
+				}
+			case cloudlets.LoadBalancerActivationNetworkStaging:
+				if stag == nil || act.ActivatedDate > stag.ActivatedDate {
+					stag = &acts[i]
+				}
+			}
 		}
-		if activation != nil {
-			activations = append(activations, *activation)
-		}
+
+		result = append(result, TFLoadBalancerActivationsData{
+			Activations: []LBActivation{
+				buildLBExport(originID, string(cloudlets.PolicyActivationNetworkStaging), stag),
+				buildLBExport(originID, string(cloudlets.PolicyActivationNetworkProduction), prod),
+			},
+		})
 	}
-	return activations, nil
+
+	return result, nil
+}
+
+// buildLBExport builds an LBActivation, commented-out if act is nil.
+func buildLBExport(originID, network string, act *cloudlets.LoadBalancerActivation) LBActivation {
+	if act == nil {
+		return LBActivation{OriginID: originID, Network: network, Commented: true}
+	}
+	return LBActivation{OriginID: originID, Network: network, Version: act.Version}
 }
 
 func getLoadBalancers(ctx context.Context, client cloudlets.Cloudlets, originIDs []string) ([]LoadBalancerVersion, error) {
@@ -313,33 +337,8 @@ func getOriginIDs(rules cloudlets.MatchRules) ([]string, error) {
 	for originID := range originIDs {
 		result = append(result, originID)
 	}
+	sort.Strings(result)
 	return result, nil
-}
-
-func getApplicationLoadBalancerActivation(ctx context.Context, client cloudlets.Cloudlets, originID string, network cloudlets.LoadBalancerActivationNetwork) (*cloudlets.LoadBalancerActivation, error) {
-	activations, err := client.ListLoadBalancerActivations(ctx, cloudlets.ListLoadBalancerActivationsRequest{OriginID: originID})
-	filteredActivations := make([]cloudlets.LoadBalancerActivation, 0)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, act := range activations {
-		if act.Network == network {
-			filteredActivations = append(filteredActivations, act)
-		}
-	}
-
-	// The API is not providing any id to match the status of the activation request within the list of the activation statuses.
-	// The recommended solution is to get the newest activation which is most likely the right one.
-	// So we sort by ActivatedDate to get the newest activation.
-	sort.Slice(filteredActivations, func(i, j int) bool {
-		return activations[i].ActivatedDate > activations[j].ActivatedDate
-	})
-
-	if len(filteredActivations) > 0 {
-		return &filteredActivations[0], nil
-	}
-	return nil, nil
 }
 
 func (strategy *v2ActivationStrategy) initializeWithPolicy(ctx context.Context, name string) error {
@@ -525,14 +524,39 @@ func (strategy *v3ActivationStrategy) getTFPolicyData(_ context.Context, edgercP
 		tfPolicyData.MatchRules = strategy.policyVersion.MatchRules
 	}
 
-	if activationStaging := strategy.getActivationDataForV3(v3.StagingNetwork); activationStaging != nil {
-		tfPolicyData.PolicyActivations.Staging = activationStaging
-	}
-	if activationProd := strategy.getActivationDataForV3(v3.ProductionNetwork); activationProd != nil {
-		tfPolicyData.PolicyActivations.Production = activationProd
-	}
+	activationStaging := strategy.getActivationDataForV3(v3.StagingNetwork)
+	activationProd := strategy.getActivationDataForV3(v3.ProductionNetwork)
+
+	// Use shared helper
+	tfPolicyData.PolicyActivations = buildPolicyActivations(activationProd, activationStaging, true)
 
 	return &tfPolicyData, nil
+}
+
+func buildPolicyActivations(prod, stag *TFPolicyActivationData, isV3 bool) TFPolicyActivationsData {
+	return TFPolicyActivationsData{
+		IsV3: isV3,
+		Activations: []TFPolicyActivationData{
+			buildPolicyExport(string(cloudlets.PolicyActivationNetworkStaging), stag),
+			buildPolicyExport(string(cloudlets.PolicyActivationNetworkProduction), prod),
+		},
+	}
+}
+
+// buildPolicyExport builds a PolicyActivation, commented-out if data is nil.
+func buildPolicyExport(network string, data *TFPolicyActivationData) TFPolicyActivationData {
+	if data == nil {
+		return TFPolicyActivationData{
+			Network:   network,
+			Commented: true,
+		}
+	}
+	return TFPolicyActivationData{
+		Network:    network,
+		PolicyID:   data.PolicyID,
+		Version:    data.Version,
+		Properties: data.Properties,
+	}
 }
 
 func (strategy *v3ActivationStrategy) getActivationDataForV3(network v3.Network) *TFPolicyActivationData {
@@ -549,6 +573,5 @@ func (strategy *v3ActivationStrategy) getActivationDataForV3(network v3.Network)
 	return &TFPolicyActivationData{
 		PolicyID: activationToCheck.PolicyID,
 		Version:  activationToCheck.PolicyVersion,
-		IsV3:     true,
 	}
 }

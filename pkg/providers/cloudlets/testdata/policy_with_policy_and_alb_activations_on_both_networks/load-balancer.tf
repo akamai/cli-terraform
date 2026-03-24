@@ -78,31 +78,15 @@ resource "akamai_cloudlets_application_load_balancer" "load_balancer_test_origin
   }
 }
 
-/*
 resource "akamai_cloudlets_application_load_balancer_activation" "load_balancer_activation_test_origin_staging" {
   origin_id = akamai_cloudlets_application_load_balancer.load_balancer_test_origin.origin_id
   network   = "staging"
   version   = akamai_cloudlets_application_load_balancer.load_balancer_test_origin.version
-}*/
+}
 
-/*
 resource "akamai_cloudlets_application_load_balancer_activation" "load_balancer_activation_test_origin_prod" {
   origin_id = akamai_cloudlets_application_load_balancer.load_balancer_test_origin.origin_id
   network   = "prod"
   version   = akamai_cloudlets_application_load_balancer.load_balancer_test_origin.version
-}*/
-
-/*
-resource "akamai_cloudlets_application_load_balancer_activation" "load_balancer_activation_test_origin_2_staging" {
-  origin_id = akamai_cloudlets_application_load_balancer.load_balancer_test_origin_2.origin_id
-  network   = "staging"
-  version   = akamai_cloudlets_application_load_balancer.load_balancer_test_origin_2.version
-}*/
-
-/*
-resource "akamai_cloudlets_application_load_balancer_activation" "load_balancer_activation_test_origin_2_prod" {
-  origin_id = akamai_cloudlets_application_load_balancer.load_balancer_test_origin_2.origin_id
-  network   = "prod"
-  version   = akamai_cloudlets_application_load_balancer.load_balancer_test_origin_2.version
-}*/
+}
 
