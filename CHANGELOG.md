@@ -22,6 +22,7 @@
 * Appsec (Beta)
   * Added resource `akamai_appsec_url_protection_action` to the `export-appsec` command.
   * Added resource `akamai_appsec_url_protection_policy` to the `export-appsec` command.
+  * Added resource `akamai_appsec_security_policy_protections` to the `export-appsec` command.
 
 
 

@@ -6,7 +6,7 @@
 {{ range .ClientReputation.ReputationProfileActions -}}
 resource "akamai_appsec_reputation_profile_action" "{{ $policyName}}_{{ .ID }}" {
     config_id             = local.config_id
-    security_policy_id    = akamai_appsec_reputation_protection.{{ $policyName}}.security_policy_id
+    security_policy_id    = akamai_appsec_security_policy.{{ $policyName}}.security_policy_id
     reputation_profile_id = akamai_appsec_reputation_profile.{{ getRepNameByID $ .ID }}.reputation_profile_id
     action                = "{{ .Action }}"
 }

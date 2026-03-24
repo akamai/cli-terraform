@@ -1,7 +1,7 @@
 // IP/GEO/ASN Firewall
 resource "akamai_appsec_ip_geo" "policy2" {
   config_id          = local.config_id
-  security_policy_id = akamai_appsec_ip_geo_protection.policy2.security_policy_id
+  security_policy_id = akamai_appsec_security_policy.policy2.security_policy_id
   mode               = "block"
   asn_controls {
     action            = "deny_custom_123456"
@@ -21,7 +21,7 @@ resource "akamai_appsec_ip_geo" "policy2" {
 // IP/GEO/ASN Firewall
 resource "akamai_appsec_ip_geo" "andrew" {
   config_id                  = local.config_id
-  security_policy_id         = akamai_appsec_ip_geo_protection.andrew.security_policy_id
+  security_policy_id         = akamai_appsec_security_policy.andrew.security_policy_id
   mode                       = "allow"
   block_action               = "deny"
   exception_ip_network_lists = ["118736_TFDEMOLISTATUL"]
@@ -30,7 +30,7 @@ resource "akamai_appsec_ip_geo" "andrew" {
 // IP/GEO/ASN Firewall
 resource "akamai_appsec_ip_geo" "policy1" {
   config_id          = local.config_id
-  security_policy_id = akamai_appsec_ip_geo_protection.policy1.security_policy_id
+  security_policy_id = akamai_appsec_security_policy.policy1.security_policy_id
   mode               = "block"
   geo_controls {
     action            = "deny"

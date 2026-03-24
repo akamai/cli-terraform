@@ -5,7 +5,7 @@
 // Slow Post Protection
 resource "akamai_appsec_slow_post" "{{ $policyName }}" {
     config_id                = local.config_id
-    security_policy_id       = akamai_appsec_slowpost_protection.{{ $policyName}}.security_policy_id
+    security_policy_id       = akamai_appsec_security_policy.{{ $policyName}}.security_policy_id
     slow_rate_action         = "{{ .SlowPost.Action }}"
     slow_rate_threshold_rate = {{ .SlowPost.SlowRateThreshold.Rate }}
     slow_rate_threshold_period = {{ .SlowPost.SlowRateThreshold.Period }}

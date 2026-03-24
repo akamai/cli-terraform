@@ -69,13 +69,7 @@ terraform import module.security.akamai_appsec_match_target.api_{{ .ID }} {{ $co
 {{ end -}}
 {{ end -}}
 terraform import module.security.akamai_appsec_security_policy.{{ $policyName}} {{ $configID }}:{{ $policyID }}
-terraform import module.security.akamai_appsec_waf_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
-terraform import module.security.akamai_appsec_api_constraints_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
-terraform import module.security.akamai_appsec_ip_geo_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
-terraform import module.security.akamai_appsec_malware_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
-terraform import module.security.akamai_appsec_rate_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
-terraform import module.security.akamai_appsec_reputation_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
-terraform import module.security.akamai_appsec_slowpost_protection.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+terraform import module.security.akamai_appsec_security_policy_protections.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 terraform import module.security.akamai_appsec_waf_mode.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 {{ if .WebApplicationFirewall -}}
 {{ if .WebApplicationFirewall.RuleActions -}}

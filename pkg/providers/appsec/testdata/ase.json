@@ -3003,6 +3003,7 @@
             "name": "Default Policy",
             "hasRatePolicyWithApiKey": false,
             "securityControls": {
+                "applyAccountProtectionControls": false,
                 "applyApiConstraints": false,
                 "applyApplicationLayerControls": true,
                 "applyBotmanControls": false,
@@ -3010,7 +3011,8 @@
                 "applyNetworkLayerControls": true,
                 "applyRateControls": true,
                 "applyReputationControls": false,
-                "applySlowPostControls": true
+                "applySlowPostControls": true,
+                "applyUrlProtectionControls": true
             },
             "webApplicationFirewall": {
                 "ruleActions": [

@@ -4,7 +4,7 @@
 // IP/GEO/ASN Firewall
 resource "akamai_appsec_ip_geo" "{{ $policyName }}" {
     config_id                  = local.config_id
-    security_policy_id         = akamai_appsec_ip_geo_protection.{{ $policyName}}.security_policy_id
+    security_policy_id         = akamai_appsec_security_policy.{{ $policyName}}.security_policy_id
     {{ if eq .IPGeoFirewall.Block "blockAllTrafficExceptAllowedIPs" -}}
     mode                       = "allow"
     {{ if .IPGeoFirewall.BlockAllAction -}}
