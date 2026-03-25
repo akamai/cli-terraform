@@ -23,7 +23,8 @@
 
 
 
-
+* PAPI
+  * Added support for the new rule format `v2026-02-16`.
 
 * GTM
   * Added support for the `state_change_notification_webhook` attribute object in the `akamai_gtm_property` resource.
