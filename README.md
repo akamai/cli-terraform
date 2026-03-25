@@ -307,6 +307,10 @@ akamai terraform export-cloudcertificate "my-cloudcertificate"
 
 Export a Terraform configuration for your cloudlet policy.
 
+> **Note:**
+>
+> - If the Cloudlets policy and load balancer you're exporting haven't been activated on any networks, staging or production, the `akamai_cloudlets_policy_activation` and `akamai_cloudlets_application_load_balancer_activation` resources will still be included in your configuration but commented out. This is to avoid accidental activation. To activate the policy or load balancer, uncomment the activation resources and run `terraform apply`.
+
 ### Syntax
 
 ```shell
@@ -374,6 +378,7 @@ akamai terraform export-domain "my-domain"
 Export a Terraform configuration for your domain ownership.
 
 > **Notes:**
+>
 > - Each domain with a validation scope must exist as an `FQDN` for the export to succeed.
 > - If a domain doesn't have a validation scope, it should match only one type: `HOST`, `DOMAIN`, or `WILDCARD`.
 > - Domains with a domain status other than `VALIDATED` are exported as commented out for the `akamai_property_domainownership_validation` resource.
