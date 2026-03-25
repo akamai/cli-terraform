@@ -166,6 +166,12 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
         {{- end}}
         akamai_gtm_domain.{{$.NormalizedName}}
     ]
+    {{- if .StateChangeNotificationWebhook}}
+    state_change_notification_webhook {
+        url    = "{{.StateChangeNotificationWebhook.URL}}"
+        format = "{{.StateChangeNotificationWebhook.Format}}"
+    }
+    {{- end}}
 }
 
 {{end}}

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/gtm"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/ptr"
 	"github.com/akamai/cli-terraform/v2/pkg/templates"
 	"github.com/akamai/cli-terraform/v2/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/terminal"
@@ -144,6 +145,10 @@ var (
 							},
 						},
 					},
+				},
+				StateChangeNotificationWebhook: &gtm.StateChangeNotificationWebhook{
+					URL:    ptr.To("https://example.com/gtm-webhook"),
+					Format: gtm.JSONCompact,
 				},
 			},
 		},
@@ -323,6 +328,10 @@ var (
 						},
 					},
 				},
+				StateChangeNotificationWebhook: &gtm.StateChangeNotificationWebhook{
+					URL:    ptr.To("https://example.com/gtm-webhook"),
+					Format: gtm.JSONCompact,
+				},
 			},
 		},
 	}
@@ -473,6 +482,10 @@ var (
 							},
 						},
 					},
+				},
+				StateChangeNotificationWebhook: &gtm.StateChangeNotificationWebhook{
+					URL:    ptr.To("https://example.com/gtm-webhook"),
+					Format: gtm.JSONCompact,
 				},
 			},
 		},
@@ -1570,6 +1583,95 @@ func TestProcessDomainTemplates(t *testing.T) {
 			},
 			dir:          "with_multiline2",
 			filesToCheck: []string{"domain.tf", "variables.tf", "import.sh", "resources.tf", "properties.tf"},
+		},
+		"simple domain with property with webhook": {
+			givenData: TFDomainData{
+				EdgercPath:              defaultEdgercPath,
+				Section:                 defaultSection,
+				Name:                    "test.name.akadns.net",
+				NormalizedName:          "test_name",
+				Type:                    "basic",
+				Comment:                 "test",
+				EmailNotificationList:   []string{"john@akamai.com", "jdoe@akamai.com"},
+				DefaultTimeoutPenalty:   10,
+				LoadImbalancePercentage: 50,
+				DefaultErrorPenalty:     90,
+				CNameCoalescingEnabled:  true,
+				LoadFeedback:            true,
+				DefaultDatacenters: []TFDatacenterData{
+					{
+						Nickname: "DEFAULT",
+						ID:       5400,
+					},
+				},
+				Datacenters: []TFDatacenterData{
+					{
+						Nickname:        "TEST1",
+						ID:              123,
+						City:            "New York",
+						StateOrProvince: "NY",
+						Country:         "US",
+						Latitude:        40.71305,
+						Longitude:       -74.00723,
+						DefaultLoadObject: &gtm.LoadObject{
+							LoadObject:     "test load object",
+							LoadObjectPort: 111,
+							LoadServers:    []string{"loadServer1", "loadServer2", "loadServer3"},
+						},
+					},
+					{
+						Nickname:        "TEST2",
+						ID:              124,
+						City:            "Chicago",
+						StateOrProvince: "IL",
+						Country:         "US",
+						Latitude:        41.88323,
+						Longitude:       -87.6324,
+					},
+				},
+				Properties: []gtm.Property{
+					{
+						Name:                 "test property1",
+						Type:                 "static",
+						ScoreAggregationType: "worst",
+						DynamicTTL:           60,
+						HandoutLimit:         8,
+						HandoutMode:          "normal",
+						Comments:             "some comment",
+						TrafficTargets: []gtm.TrafficTarget{
+							{
+								DatacenterID: 123,
+								Enabled:      true,
+								Weight:       1,
+								Servers:      []string{"1.2.3.4"},
+							},
+						},
+						LivenessTests: []gtm.LivenessTest{
+							{
+								Name:                    "HTTP",
+								TestInterval:            60,
+								TestObject:              "/",
+								HTTPError3xx:            true,
+								HTTPError4xx:            true,
+								HTTPError5xx:            true,
+								TestObjectProtocol:      "HTTP",
+								TestObjectPort:          80,
+								TestTimeout:             10,
+								HTTPMethod:              tools.StringPtr("GET"),
+								HTTPRequestBody:         tools.StringPtr("Body"),
+								AlternateCACertificates: []string{"test1"},
+								Pre2023SecurityPosture:  true,
+							},
+						},
+						StateChangeNotificationWebhook: &gtm.StateChangeNotificationWebhook{
+							URL:    ptr.To("https://example.com/gtm-webhook"),
+							Format: gtm.JSONCompact,
+						},
+					},
+				},
+			},
+			dir:          "with_property_with_webhook",
+			filesToCheck: []string{"domain.tf", "datacenters.tf", "properties.tf", "variables.tf", "import.sh"},
 		},
 		"non default edgerc path and section": {
 			givenData: TFDomainData{
