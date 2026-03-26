@@ -1,79 +1,34 @@
 # RELEASE NOTES
 
-## X.X.X (Month XX, XXXX)
+## 2.9.0 (Apr 1, 2026)
 
 ### FEATURES/ENHANCEMENTS:
 
 * General
-    * Migrated to Go `1.25`.
-
-
-
-
-
-
-* PAPI
-  * Added support for exporting the `https_service_binding` field in the `akamai_edge_hostname` resource using the `export-property` command. 
-
-
-* Cloud Access Manager
-  * Added support for empty `cloud_access_key_id` in the `akamai_cloudaccess_key` resource.
+  * Migrated to Go `1.25`.
 
 * Appsec (Beta)
-  * Added resource `akamai_appsec_url_protection_action` to the `export-appsec` command.
-  * Added resource `akamai_appsec_url_protection_policy` to the `export-appsec` command.
-  * Added resource `akamai_appsec_security_policy_protections` to the `export-appsec` command.
+  * Added the `akamai_appsec_url_protection_action` resource to the `export-appsec` command.
+  * Added the `akamai_appsec_url_protection_policy` resource to the `export-appsec` command.
+  * Added the `akamai_appsec_security_policy_protections` resource to the `export-appsec` command, which enables or disables all security controls under one resource. Additionally, removed all individual protection resources, such as `akamai_appsec_waf_protection`, `akamai_appsec_api_constraints_protection`, `akamai_appsec_ip_geo_protection`, and others to avoid redundant API calls.
 
-
-
-
-
-* PAPI
-  * Added support for the new rule format `v2026-02-16`.
+* Cloud Access Manager
+  * Added support for an empty `cloud_access_key_id` field in the `akamai_cloudaccess_key` resource.
 
 * GTM
   * Added support for the `state_change_notification_webhook` attribute object in the `akamai_gtm_property` resource.
 
-
-
-
-
-
-
-
-
-
+* PAPI
+  * Added support for exporting the `https_service_binding` field in the `akamai_edge_hostname` resource using the `export-property` command. 
+  * Added support for the new rule format `v2026-02-16`.
 
 ### BUG FIXES:
 
 * Cloudlets
-    * Resolved a bug where multiple `terraform import` commands were generated for the same `akamai_cloudlets_application_load_balancer_activation` resource when activations existed on both Staging and Production networks, causing "resource already exists" errors during state initialization.
+  * Resolved a bug where multiple `terraform import` commands were generated for the same `akamai_cloudlets_policy_activation` and `akamai_cloudlets_application_load_balancer_activation` resources when activations existed on both staging and production networks, causing "resource already exists" errors during state initialization.
+  
 * Cloud Certificates (Beta)
-  * Fixed `export-cloudcertificate` incorrectly using the full renewed certificate name (e.g. `example.renewed.2026-03-11T16_50_39Z`) as both the `base_name` attribute and the Terraform resource instance name. The base name (`example`) is now correctly extracted by stripping the `.renewed.<timestamp>` suffix.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  * Fixed a bug where the `export-cloudcertificate` command used the full renewed certificate name, for example, `example.renewed.2026-03-11T16_50_39Z`, as both the `base_name` and the Terraform resource instance name. The command now correctly extracts the base name (`example`) by removing the `.renewed.<timestamp>` suffix.
 
 ## 2.8.0 (Feb 25, 2026)
 
