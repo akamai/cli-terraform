@@ -1,0 +1,39 @@
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 6.2.0"
+    }
+  }
+  required_version = ">= 1.0"
+}
+
+provider "akamai" {
+  edgerc         = var.edgerc_path
+  config_section = var.config_section
+}
+
+resource "akamai_cloudlets_policy" "policy" {
+  name              = "test_policy_export"
+  cloudlet_code     = "ALB"
+  description       = "Testing exported policy"
+  group_id          = "12345"
+  match_rule_format = "1.0"
+  match_rules       = data.akamai_cloudlets_application_load_balancer_match_rule.match_rules_alb.json
+  is_shared         = false
+}
+
+resource "akamai_cloudlets_policy_activation" "policy_activation_prod" {
+  policy_id             = tonumber(akamai_cloudlets_policy.policy.id)
+  network               = "prod"
+  version               = akamai_cloudlets_policy.policy.version
+  associated_properties = ["prp_0"]
+}
+
+/*
+resource "akamai_cloudlets_policy_activation" "policy_activation_staging" {
+  policy_id             = tonumber(akamai_cloudlets_policy.policy.id)
+  network               = "staging"
+  version               = akamai_cloudlets_policy.policy.version
+  associated_properties = [ "UNKNOWN_CHANGE_ME" ]
+}*/

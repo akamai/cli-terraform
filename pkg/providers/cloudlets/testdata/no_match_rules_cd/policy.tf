@@ -23,10 +23,17 @@ resource "akamai_cloudlets_policy" "policy" {
 }
 
 /*
-resource "akamai_cloudlets_policy_activation" "policy_activation" {
-  policy_id = tonumber(akamai_cloudlets_policy.policy.id)
-  network = var.env
-  version = akamai_cloudlets_policy.policy.version
+resource "akamai_cloudlets_policy_activation" "policy_activation_prod" {
+  policy_id             = tonumber(akamai_cloudlets_policy.policy.id)
+  network               = "prod"
+  version               = akamai_cloudlets_policy.policy.version
   associated_properties = [ "UNKNOWN_CHANGE_ME" ]
-}
-*/
+}*/
+
+/*
+resource "akamai_cloudlets_policy_activation" "policy_activation_staging" {
+  policy_id             = tonumber(akamai_cloudlets_policy.policy.id)
+  network               = "staging"
+  version               = akamai_cloudlets_policy.policy.version
+  associated_properties = [ "UNKNOWN_CHANGE_ME" ]
+}*/

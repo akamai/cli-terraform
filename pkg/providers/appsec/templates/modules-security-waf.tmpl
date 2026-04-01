@@ -6,7 +6,7 @@
 {{ $wafMode := getWAFMode $configID $version .ID -}}
 resource "akamai_appsec_waf_mode" "{{ $policyName }}" {
     config_id          = local.config_id
-    security_policy_id = akamai_appsec_waf_protection.{{ $policyName }}.security_policy_id
+    security_policy_id = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
     mode               = "{{ $wafMode }}"
 }
 
@@ -16,7 +16,7 @@ resource "akamai_appsec_waf_mode" "{{ $policyName }}" {
 // {{ getRuleDescByID $ .ID }}
 resource "akamai_appsec_rule" "{{ $policyName }}_{{ getRuleNameByID $ .ID }}_{{ .ID }}" {
     config_id           = local.config_id
-    security_policy_id  = akamai_appsec_waf_protection.{{ $policyName }}.security_policy_id
+    security_policy_id  = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
     rule_id             = "{{ .ID }}"
     rule_action         = "{{ .Action }}"
     {{ if or .AdvancedExceptionsList .Exception .Conditions -}}
@@ -42,7 +42,7 @@ resource "akamai_appsec_rule" "{{ $policyName }}_{{ getRuleNameByID $ .ID }}_{{ 
 {{ if isStructuredRule $ .ID -}}
 resource "akamai_appsec_custom_rule_action" "{{ $policyName }}_{{ .ID }}" {
     config_id          = local.config_id
-    security_policy_id = akamai_appsec_waf_protection.{{ $policyName }}.security_policy_id
+    security_policy_id = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
     custom_rule_id     = akamai_appsec_custom_rule.{{ getCustomRuleNameByID $ .ID }}_{{ .ID }}.custom_rule_id
     custom_rule_action = "{{ .Action }}"
 }
@@ -56,7 +56,7 @@ resource "akamai_appsec_custom_rule_action" "{{ $policyName }}_{{ .ID }}" {
 {{ range .WebApplicationFirewall.AttackGroupActions -}}
 resource "akamai_appsec_attack_group" "{{ $policyName }}_{{ .Group }}" {
     config_id           = local.config_id
-    security_policy_id  = akamai_appsec_waf_protection.{{ $policyName }}.security_policy_id
+    security_policy_id  = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
     attack_group        = "{{ .Group }}"
     attack_group_action = "{{ .Action }}"
    {{ if or .AdvancedExceptionsList .Exception -}}

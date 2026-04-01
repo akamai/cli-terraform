@@ -45,7 +45,7 @@ type (
 
 	// Credential represents CLoudAccess credential
 	Credential struct {
-		CloudAccessKeyID string
+		CloudAccessKeyID *string
 	}
 
 	// NetworkConfiguration represents CLoudAccess network configuration
@@ -160,7 +160,9 @@ func createCloudAccess(ctx context.Context, accessKeyUID int64, groupID int64, c
 		return fmt.Errorf("%w: %s", ErrListingKeyVersions, err)
 	}
 	if len(versions.AccessKeyVersions) > 1 {
-		if *versions.AccessKeyVersions[0].CloudAccessKeyID == *versions.AccessKeyVersions[1].CloudAccessKeyID {
+		firstKeyID := versions.AccessKeyVersions[0].CloudAccessKeyID
+		secondKeyID := versions.AccessKeyVersions[1].CloudAccessKeyID
+		if firstKeyID != nil && secondKeyID != nil && *firstKeyID == *secondKeyID {
 			term.Spinner().Fail()
 			return fmt.Errorf("%w", ErrNonUniqueCloudAccessKeyID)
 		}
@@ -247,7 +249,7 @@ func populateCloudAccessData(edgercPath, section string, key *cloudaccess.GetAcc
 		return tfCloudAccessData, nil
 	case 1:
 		tfCloudAccessData.Key.CredentialA = &Credential{
-			CloudAccessKeyID: *versions[0].CloudAccessKeyID,
+			CloudAccessKeyID: versions[0].CloudAccessKeyID,
 		}
 	default:
 		slices.SortFunc(versions, func(a, b cloudaccess.AccessKeyVersion) int {
@@ -255,10 +257,10 @@ func populateCloudAccessData(edgercPath, section string, key *cloudaccess.GetAcc
 		})
 		// first version from the response from API is assigned to `credentials_b`, second version to `credentials_a`
 		tfCloudAccessData.Key.CredentialA = &Credential{
-			CloudAccessKeyID: *versions[0].CloudAccessKeyID,
+			CloudAccessKeyID: versions[0].CloudAccessKeyID,
 		}
 		tfCloudAccessData.Key.CredentialB = &Credential{
-			CloudAccessKeyID: *versions[1].CloudAccessKeyID,
+			CloudAccessKeyID: versions[1].CloudAccessKeyID,
 		}
 	}
 

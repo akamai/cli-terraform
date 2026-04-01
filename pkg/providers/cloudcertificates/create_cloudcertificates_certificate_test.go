@@ -64,7 +64,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 	}{
 		"certificate status is CSR_READY": {
 			dir:      "csr_ready",
-			mockData: getCertificateMockDataNoPEMs(),
+			mockData: getCertificateMockData("CSR_READY", "test-name.example.com1234567890", nil, nil),
 			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
@@ -81,7 +81,7 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 		},
 		"certificate status is READY_FOR_USE no trust_chain": {
 			dir:      "ready_for_use_no_trust_chain",
-			mockData: getCertificateMockDataNoTrustChain(),
+			mockData: getCertificateMockData("READY_FOR_USE", "test-name.example.com1234567890", &signedCertificatePEM, nil),
 			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
@@ -190,6 +190,14 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 		"empty certificate subject": {
 			dir:      "empty_subject",
 			mockData: getCertificateMockDataCustomSubject(&emptySubject),
+			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
+				d.mockListCertificates(m)
+				d.mockGetCertificate(m)
+			},
+		},
+		"renewed certificate with datetime suffix": {
+			dir:      "renewed_certificate",
+			mockData: getCertificateMockData("CSR_READY", "stokroteczka.renewed.2026-03-11T16_50_39Z", nil, nil),
 			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
@@ -304,13 +312,14 @@ func TestExtractBaseName(t *testing.T) {
 	}{
 		{"empty", "", ""},
 		{"casual name", "foo", "foo"},
-		{"renewed name", "foo.renewed.2025-05-01", "foo"},
-		{"bad suffix", "foo.rotated.2025-05-01", "foo.rotated.2025-05-01"},
-		{"non-existing date", "foo.renewed.2025-99-01", "foo.renewed.2025-99-01"},
-		{"no basename", ".renewed.2025-05-01", ".renewed.2025-05-01"},
-		{"no basename 2", "renewed.2025-05-01", "renewed.2025-05-01"},
+		{"renewed name with datetime", "foo.renewed.2025-05-01T16_50_39Z", "foo"},
+		{"bad suffix", "foo.rotated.2025-05-01T16_50_39Z", "foo.rotated.2025-05-01T16_50_39Z"},
+		{"non-existing date", "foo.renewed.2025-99-01T16_50_39Z", "foo.renewed.2025-99-01T16_50_39Z"},
+		{"no basename", ".renewed.2025-05-01T16_50_39Z", ".renewed.2025-05-01T16_50_39Z"},
+		{"no basename 2", "renewed.2025-05-01T16_50_39Z", "renewed.2025-05-01T16_50_39Z"},
 		{"no date", "foo.renewed.", "foo.renewed."},
 		{"no date 2", "foo.renewed", "foo.renewed"},
+		{"date only suffix not matched", "foo.renewed.2025-05-01", "foo.renewed.2025-05-01"},
 	}
 
 	for _, tc := range tests {
@@ -389,18 +398,5 @@ func getCertificateMockDataCustomSubject(subject *cloudcertificates.Subject) cer
 	cert := getCertificateMockData("ACTIVE", "test-name.example.com1234567890",
 		&signedCertificatePEM, &trustChainPEM)
 	cert.subject = subject
-	return cert
-}
-
-func getCertificateMockDataNoTrustChain() certificateMockData {
-	cert := getCertificateMockData("READY_FOR_USE", "test-name.example.com1234567890", &signedCertificatePEM, nil)
-	cert.trustChainPEM = nil
-	return cert
-}
-
-func getCertificateMockDataNoPEMs() certificateMockData {
-	cert := getCertificateMockData("CSR_READY", "test-name.example.com1234567890", nil, nil)
-	cert.trustChainPEM = nil
-	cert.signedCertificatePEM = nil
 	return cert
 }

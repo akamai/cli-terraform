@@ -130,7 +130,7 @@ func TestCreatePolicy(t *testing.T) {
 				}
 				c.On("ListLoadBalancerActivations", mock.Anything, cloudlets.ListLoadBalancerActivationsRequest{
 					OriginID: origin.OriginID,
-				}).Return(activations, nil).Twice()
+				}).Return(activations, nil).Once()
 
 				loadBalancersList := make([]LoadBalancerVersion, len(versionList))
 				for i, v := range versionList {
@@ -159,8 +159,38 @@ func TestCreatePolicy(t *testing.T) {
 							},
 						},
 					},
-					LoadBalancers:           loadBalancersList[1:],
-					LoadBalancerActivations: activations,
+					PolicyActivations: TFPolicyActivationsData{
+						IsV3: false,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
+					LoadBalancers: loadBalancersList[1:],
+					LoadBalancerActivations: []TFLoadBalancerActivationsData{
+						{
+							Activations: []LBActivation{
+								{
+									OriginID:  "test_origin",
+									Network:   "staging",
+									Version:   2,
+									Commented: false,
+								},
+								{
+									OriginID:  "test_origin",
+									Network:   "prod",
+									Version:   2,
+									Commented: false,
+								},
+							},
+						},
+					},
 				}).Return(nil).Once()
 			},
 		},
@@ -260,17 +290,23 @@ func TestCreatePolicy(t *testing.T) {
 						},
 					},
 					PolicyActivations: TFPolicyActivationsData{
-						Staging: &TFPolicyActivationData{
-							PolicyID:   2,
-							Version:    2,
-							Properties: []string{"test_prp_1", "test_prp_2"},
-						},
-						Production: &TFPolicyActivationData{
-							PolicyID:   2,
-							Version:    1,
-							Properties: []string{"test_prp_1"},
-						},
 						IsV3: false,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:    "staging",
+								PolicyID:   2,
+								Version:    2,
+								Properties: []string{"test_prp_1", "test_prp_2"},
+								Commented:  false,
+							},
+							{
+								Network:    "prod",
+								PolicyID:   2,
+								Version:    1,
+								Properties: []string{"test_prp_1"},
+								Commented:  false,
+							},
+						},
 					},
 				}).Return(nil).Once()
 			},
@@ -371,17 +407,23 @@ func TestCreatePolicy(t *testing.T) {
 						},
 					},
 					PolicyActivations: TFPolicyActivationsData{
-						Staging: &TFPolicyActivationData{
-							PolicyID:   2,
-							Version:    2,
-							Properties: []string{"test_prp_1", "test_prp_2"},
-						},
-						Production: &TFPolicyActivationData{
-							PolicyID:   2,
-							Version:    1,
-							Properties: []string{"test_prp_1"},
-						},
 						IsV3: false,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:    "staging",
+								PolicyID:   2,
+								Version:    2,
+								Properties: []string{"test_prp_1", "test_prp_2"},
+								Commented:  false,
+							},
+							{
+								Network:    "prod",
+								PolicyID:   2,
+								Version:    1,
+								Properties: []string{"test_prp_1"},
+								Commented:  false,
+							},
+						},
 					},
 				}).Return(nil).Once()
 			},
@@ -436,14 +478,26 @@ func TestCreatePolicy(t *testing.T) {
 					MatchRuleFormat: "1.0",
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
-					Name:              "test_policy",
-					EdgercPath:        defaultEdgercPath,
-					Section:           defaultSection,
-					CloudletCode:      "ER",
-					Description:       "version 2 description",
-					GroupID:           234,
-					PolicyActivations: TFPolicyActivationsData{IsV3: false},
-					MatchRuleFormat:   "1.0",
+					Name:         "test_policy",
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
+					CloudletCode: "ER",
+					Description:  "version 2 description",
+					GroupID:      234,
+					PolicyActivations: TFPolicyActivationsData{
+						IsV3: false,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
+					MatchRuleFormat: "1.0",
 					MatchRules: cloudlets.MatchRules{
 						&cloudlets.MatchRuleER{
 							Name:  "some rule",
@@ -507,14 +561,26 @@ func TestCreatePolicy(t *testing.T) {
 					MatchRuleFormat: "1.0",
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
-					Name:              "test_policy",
-					EdgercPath:        defaultEdgercPath,
-					Section:           defaultSection,
-					CloudletCode:      "ER",
-					Description:       "version 2 description",
-					GroupID:           234,
-					PolicyActivations: TFPolicyActivationsData{IsV3: false},
-					MatchRuleFormat:   "1.0",
+					Name:         "test_policy",
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
+					CloudletCode: "ER",
+					Description:  "version 2 description",
+					GroupID:      234,
+					PolicyActivations: TFPolicyActivationsData{
+						IsV3: false,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
+					MatchRuleFormat: "1.0",
 					MatchRules: cloudlets.MatchRules{
 						&cloudlets.MatchRuleER{
 							Name:          "some rule",
@@ -580,14 +646,26 @@ func TestCreatePolicy(t *testing.T) {
 					MatchRuleFormat: "1.0",
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
-					Name:              "test_policy",
-					EdgercPath:        defaultEdgercPath,
-					Section:           defaultSection,
-					CloudletCode:      "AP",
-					Description:       "version 2 description",
-					GroupID:           234,
-					PolicyActivations: TFPolicyActivationsData{IsV3: false},
-					MatchRuleFormat:   "1.0",
+					Name:         "test_policy",
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
+					CloudletCode: "AP",
+					Description:  "version 2 description",
+					GroupID:      234,
+					PolicyActivations: TFPolicyActivationsData{
+						IsV3: false,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
+					MatchRuleFormat: "1.0",
 					MatchRules: cloudlets.MatchRules{
 						&cloudlets.MatchRuleAP{
 							Name:               "some rule",
@@ -653,14 +731,26 @@ func TestCreatePolicy(t *testing.T) {
 					MatchRuleFormat: "1.0",
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
-					Name:              "test_policy",
-					EdgercPath:        defaultEdgercPath,
-					Section:           defaultSection,
-					CloudletCode:      "AS",
-					Description:       "version 2 description",
-					GroupID:           22,
-					PolicyActivations: TFPolicyActivationsData{IsV3: false},
-					MatchRuleFormat:   "1.0",
+					Name:         "test_policy",
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
+					CloudletCode: "AS",
+					Description:  "version 2 description",
+					GroupID:      22,
+					PolicyActivations: TFPolicyActivationsData{
+						IsV3: false,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
+					MatchRuleFormat: "1.0",
 					MatchRules: cloudlets.MatchRules{
 						&cloudlets.MatchRuleAS{
 							Name:     "a rule",
@@ -764,17 +854,23 @@ func TestCreatePolicy(t *testing.T) {
 					GroupID:      234,
 					IsV3:         true,
 					PolicyActivations: TFPolicyActivationsData{
-						Staging: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  2,
-							IsV3:     true,
-						},
-						Production: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  1,
-							IsV3:     true,
-						},
 						IsV3: true,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:    "staging",
+								PolicyID:   2,
+								Version:    2,
+								Properties: nil,
+								Commented:  false,
+							},
+							{
+								Network:    "prod",
+								PolicyID:   2,
+								Version:    1,
+								Properties: nil,
+								Commented:  false,
+							},
+						},
 					},
 				}).Return(nil).Once()
 			},
@@ -855,17 +951,23 @@ func TestCreatePolicy(t *testing.T) {
 						},
 					},
 					PolicyActivations: TFPolicyActivationsData{
-						Staging: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  2,
-							IsV3:     true,
-						},
-						Production: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  1,
-							IsV3:     true,
-						},
 						IsV3: true,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:    "staging",
+								PolicyID:   2,
+								Version:    2,
+								Properties: nil,
+								Commented:  false,
+							},
+							{
+								Network:    "prod",
+								PolicyID:   2,
+								Version:    1,
+								Properties: nil,
+								Commented:  false,
+							},
+						},
 					},
 				}).Return(nil).Once()
 			},
@@ -946,17 +1048,23 @@ func TestCreatePolicy(t *testing.T) {
 						},
 					},
 					PolicyActivations: TFPolicyActivationsData{
-						Staging: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  2,
-							IsV3:     true,
-						},
-						Production: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  1,
-							IsV3:     true,
-						},
 						IsV3: true,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:    "staging",
+								PolicyID:   2,
+								Version:    2,
+								Properties: nil,
+								Commented:  false,
+							},
+							{
+								Network:    "prod",
+								PolicyID:   2,
+								Version:    1,
+								Properties: nil,
+								Commented:  false,
+							},
+						},
 					},
 				}).Return(nil).Once()
 			},
@@ -1037,17 +1145,23 @@ func TestCreatePolicy(t *testing.T) {
 						},
 					},
 					PolicyActivations: TFPolicyActivationsData{
-						Staging: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  2,
-							IsV3:     true,
-						},
-						Production: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  1,
-							IsV3:     true,
-						},
 						IsV3: true,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:    "staging",
+								PolicyID:   2,
+								Version:    2,
+								Properties: nil,
+								Commented:  false,
+							},
+							{
+								Network:    "prod",
+								PolicyID:   2,
+								Version:    1,
+								Properties: nil,
+								Commented:  false,
+							},
+						},
 					},
 				}).Return(nil).Once()
 			},
@@ -1128,17 +1242,23 @@ func TestCreatePolicy(t *testing.T) {
 						},
 					},
 					PolicyActivations: TFPolicyActivationsData{
-						Staging: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  2,
-							IsV3:     true,
-						},
-						Production: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  1,
-							IsV3:     true,
-						},
 						IsV3: true,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:    "staging",
+								PolicyID:   2,
+								Version:    2,
+								Properties: nil,
+								Commented:  false,
+							},
+							{
+								Network:    "prod",
+								PolicyID:   2,
+								Version:    1,
+								Properties: nil,
+								Commented:  false,
+							},
+						},
 					},
 				}).Return(nil).Once()
 			},
@@ -1219,17 +1339,23 @@ func TestCreatePolicy(t *testing.T) {
 						},
 					},
 					PolicyActivations: TFPolicyActivationsData{
-						Staging: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  2,
-							IsV3:     true,
-						},
-						Production: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  1,
-							IsV3:     true,
-						},
 						IsV3: true,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:    "staging",
+								PolicyID:   2,
+								Version:    2,
+								Properties: nil,
+								Commented:  false,
+							},
+							{
+								Network:    "prod",
+								PolicyID:   2,
+								Version:    1,
+								Properties: nil,
+								Commented:  false,
+							},
+						},
 					},
 				}).Return(nil).Once()
 			},
@@ -1310,17 +1436,23 @@ func TestCreatePolicy(t *testing.T) {
 						},
 					},
 					PolicyActivations: TFPolicyActivationsData{
-						Staging: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  2,
-							IsV3:     true,
-						},
-						Production: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  1,
-							IsV3:     true,
-						},
 						IsV3: true,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:    "staging",
+								PolicyID:   2,
+								Version:    2,
+								Properties: nil,
+								Commented:  false,
+							},
+							{
+								Network:    "prod",
+								PolicyID:   2,
+								Version:    1,
+								Properties: nil,
+								Commented:  false,
+							},
+						},
 					},
 				}).Return(nil).Once()
 			},
@@ -1392,7 +1524,19 @@ func TestCreatePolicy(t *testing.T) {
 							ID:    1234,
 						},
 					},
-					PolicyActivations: TFPolicyActivationsData{IsV3: true},
+					PolicyActivations: TFPolicyActivationsData{
+						IsV3: true,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
 				}).Return(nil).Once()
 			},
 		},
@@ -1469,7 +1613,19 @@ func TestCreatePolicy(t *testing.T) {
 							ID:    1234,
 						},
 					},
-					PolicyActivations: TFPolicyActivationsData{IsV3: true},
+					PolicyActivations: TFPolicyActivationsData{
+						IsV3: true,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
 				}).Return(nil).Once()
 			},
 		},
@@ -1495,15 +1651,27 @@ func TestCreatePolicy(t *testing.T) {
 				cv3.On("ListPolicyVersions", mock.Anything, v3.ListPolicyVersionsRequest{PolicyID: 2, Page: 0, Size: 10}).Return(&v3.ListPolicyVersions{
 					PolicyVersions: []v3.ListPolicyVersionsItem{}}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
-					Name:              "test_policy",
-					EdgercPath:        defaultEdgercPath,
-					Section:           defaultSection,
-					CloudletCode:      "ER",
-					Description:       "",
-					GroupID:           234,
-					IsV3:              true,
-					MatchRules:        nil,
-					PolicyActivations: TFPolicyActivationsData{IsV3: true},
+					Name:         "test_policy",
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
+					CloudletCode: "ER",
+					Description:  "",
+					GroupID:      234,
+					IsV3:         true,
+					MatchRules:   nil,
+					PolicyActivations: TFPolicyActivationsData{
+						IsV3: true,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
 				}).Return(nil).Once()
 			},
 		},
@@ -1592,17 +1760,23 @@ func TestCreatePolicy(t *testing.T) {
 						},
 					},
 					PolicyActivations: TFPolicyActivationsData{
-						Staging: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  2,
-							IsV3:     true,
-						},
-						Production: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  1,
-							IsV3:     true,
-						},
 						IsV3: true,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:    "staging",
+								PolicyID:   2,
+								Version:    2,
+								Properties: nil,
+								Commented:  false,
+							},
+							{
+								Network:    "prod",
+								PolicyID:   2,
+								Version:    1,
+								Properties: nil,
+								Commented:  false,
+							},
+						},
 					},
 				}).Return(nil).Once()
 			},
@@ -1868,14 +2042,26 @@ func TestCreatePolicy(t *testing.T) {
 					MatchRuleFormat: "1.0",
 				}, nil).Once()
 				p.On("ProcessTemplates", TFPolicyData{
-					Name:              "test_policy",
-					EdgercPath:        defaultEdgercPath,
-					Section:           defaultSection,
-					CloudletCode:      "ER",
-					Description:       "version 2 description",
-					GroupID:           234,
-					PolicyActivations: TFPolicyActivationsData{IsV3: false},
-					MatchRuleFormat:   "1.0",
+					Name:         "test_policy",
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
+					CloudletCode: "ER",
+					Description:  "version 2 description",
+					GroupID:      234,
+					PolicyActivations: TFPolicyActivationsData{
+						IsV3: false,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
+					MatchRuleFormat: "1.0",
 					MatchRules: cloudlets.MatchRules{
 						&cloudlets.MatchRuleER{
 							Name:  "some rule",
@@ -1965,17 +2151,23 @@ func TestCreatePolicy(t *testing.T) {
 						},
 					},
 					PolicyActivations: TFPolicyActivationsData{
-						Staging: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  2,
-							IsV3:     true,
-						},
-						Production: &TFPolicyActivationData{
-							PolicyID: 2,
-							Version:  1,
-							IsV3:     true,
-						},
 						IsV3: true,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:    "staging",
+								PolicyID:   2,
+								Version:    2,
+								Properties: nil,
+								Commented:  false,
+							},
+							{
+								Network:    "prod",
+								PolicyID:   2,
+								Version:    1,
+								Properties: nil,
+								Commented:  false,
+							},
+						},
 					},
 				}).Return(templates.ErrSavingFiles).Once()
 			},
@@ -2072,7 +2264,7 @@ func TestCreatePolicy(t *testing.T) {
 				}
 				c.On("ListLoadBalancerActivations", mock.Anything, cloudlets.ListLoadBalancerActivationsRequest{
 					OriginID: origin.OriginID,
-				}).Return(activations, nil).Twice()
+				}).Return(activations, nil).Once()
 
 				loadBalancersList := make([]LoadBalancerVersion, len(versionList))
 				for i, v := range versionList {
@@ -2101,8 +2293,38 @@ func TestCreatePolicy(t *testing.T) {
 							},
 						},
 					},
-					LoadBalancers:           loadBalancersList[1:],
-					LoadBalancerActivations: activations,
+					LoadBalancers: loadBalancersList[1:],
+					PolicyActivations: TFPolicyActivationsData{
+						IsV3: false,
+						Activations: []TFPolicyActivationData{
+							{
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
+					LoadBalancerActivations: []TFLoadBalancerActivationsData{
+						{
+							Activations: []LBActivation{
+								{
+									OriginID:  "test_origin",
+									Network:   "staging",
+									Version:   2,
+									Commented: false,
+								},
+								{
+									OriginID:  "test_origin",
+									Network:   "prod",
+									Version:   2,
+									Commented: false,
+								},
+							},
+						},
+					},
 				}).Return(nil).Once()
 			},
 		},
@@ -2151,17 +2373,17 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
 				PolicyActivations: TFPolicyActivationsData{
-					Staging: &TFPolicyActivationData{
-						PolicyID:   2,
-						Version:    2,
-						Properties: []string{"prp_0", "prp_1"},
-					},
-					Production: &TFPolicyActivationData{
-						PolicyID:   2,
-						Version:    1,
-						Properties: []string{"prp_0"},
-					},
 					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+					},
 				},
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleER{
@@ -2232,7 +2454,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "with_activations_and_match_rules",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
 		},
-		"policy with ER match rules and single activation": {
+		"policy with ER match rules and single policy activation": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
 				EdgercPath:      defaultEdgercPath,
@@ -2242,12 +2464,20 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
 				PolicyActivations: TFPolicyActivationsData{
-					Production: &TFPolicyActivationData{
-						PolicyID:   2,
-						Version:    1,
-						Properties: []string{"prp_0"},
-					},
 					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:    "prod",
+							PolicyID:   2,
+							Version:    1,
+							Properties: []string{"prp_0"},
+							Commented:  false,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
 				},
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleER{
@@ -2318,7 +2548,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 			dir:          "with_single_activation",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
 		},
-		"policy with ER match rules and two activations": {
+		"policy with ER match rules and two policy activations": {
 			givenData: TFPolicyData{
 				Name:            "test_policy_export",
 				EdgercPath:      defaultEdgercPath,
@@ -2328,17 +2558,23 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
 				PolicyActivations: TFPolicyActivationsData{
-					Production: &TFPolicyActivationData{
-						PolicyID:   2,
-						Version:    1,
-						Properties: []string{"prp_0"},
-					},
-					Staging: &TFPolicyActivationData{
-						PolicyID:   2,
-						Version:    1,
-						Properties: []string{"prp_0"},
-					},
 					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:    "prod",
+							PolicyID:   2,
+							Version:    1,
+							Properties: []string{"prp_0"},
+							Commented:  false,
+						},
+						{
+							Network:    "staging",
+							PolicyID:   2,
+							Version:    2,
+							Properties: []string{"prp_0"},
+							Commented:  false,
+						},
+					},
 				},
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleER{
@@ -2418,6 +2654,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleER{
 						Name:  "r1",
@@ -2471,6 +2720,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     `Testing\ exported policy`,
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleER{
 						Name:                     `\r2`,
@@ -2510,6 +2772,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     `Testing\ exported policy`,
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleALB{
 						Name: `\r2`,
@@ -2570,6 +2845,22 @@ func TestProcessPolicyTemplates(t *testing.T) {
 							Version: 2,
 						},
 						OriginDescription: "",
+					},
+				},
+				LoadBalancerActivations: []TFLoadBalancerActivationsData{
+					{
+						Activations: []LBActivation{
+							{
+								OriginID:  "test_origin",
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								OriginID:  "test_origin",
+								Network:   "prod",
+								Commented: true,
+							},
+						},
 					},
 				},
 			},
@@ -2680,7 +2971,49 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 				},
-				PolicyActivations: TFPolicyActivationsData{IsV3: false},
+				LoadBalancerActivations: []TFLoadBalancerActivationsData{
+					{
+						Activations: []LBActivation{
+							{
+								OriginID:  "test_origin",
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								OriginID:  "test_origin",
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
+					{
+						Activations: []LBActivation{
+							{
+								OriginID:  "test_origin_2",
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								OriginID:  "test_origin_2",
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
+				},
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "no_activations_with_two_alb",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "load-balancer.tf", "variables.tf", "import.sh"},
@@ -2694,6 +3027,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "no_activations_no_match_rules",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
@@ -2707,6 +3053,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "",
 				GroupID:         12345,
 				MatchRuleFormat: "",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "no_version",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
@@ -2720,6 +3079,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "no_activations_with_matches_always",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
@@ -2733,6 +3105,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleALB{
 						Name: "r1",
@@ -2831,6 +3216,22 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 				},
+				LoadBalancerActivations: []TFLoadBalancerActivationsData{
+					{
+						Activations: []LBActivation{
+							{
+								OriginID:  "test_origin",
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								OriginID:  "test_origin",
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
+				},
 			},
 			dir:          "with_match_rules_alb",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "load-balancer.tf", "variables.tf", "import.sh"},
@@ -2844,6 +3245,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleALB{
 						Name: "r1",
@@ -2943,24 +3357,320 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						},
 					},
 				},
-				LoadBalancerActivations: []cloudlets.LoadBalancerActivation{
+				LoadBalancerActivations: []TFLoadBalancerActivationsData{
 					{
-						ActivatedDate: "2021-10-29T00:00:10.000Z",
-						Network:       cloudlets.LoadBalancerActivationNetworkProduction,
-						OriginID:      "test_origin",
-						Status:        cloudlets.LoadBalancerActivationStatusActive,
-						Version:       2,
-					},
-					{
-						ActivatedDate: "2021-10-29T00:00:20.000Z",
-						Network:       cloudlets.LoadBalancerActivationNetworkStaging,
-						OriginID:      "test_origin",
-						Status:        cloudlets.LoadBalancerActivationStatusActive,
-						Version:       2,
+						Activations: []LBActivation{
+							{
+								OriginID:  "test_origin",
+								Network:   "staging",
+								Version:   2,
+								Commented: false,
+							},
+							{
+								OriginID:  "test_origin",
+								Network:   "prod",
+								Version:   2,
+								Commented: false,
+							},
+						},
 					},
 				},
 			},
 			dir:          "with_activations_and_match_rules_alb",
+			filesToCheck: []string{"policy.tf", "match-rules.tf", "load-balancer.tf", "variables.tf", "import.sh"},
+		},
+		"policy with no activation, match rules and two alb and single alb activation": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
+				CloudletCode:    "ALB",
+				Description:     `Testing exported policy`,
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleALB{
+						Name: `r2`,
+						Matches: []cloudlets.MatchCriteriaALB{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								MatchValue:    `value`,
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
+									Type: "object",
+									Name: `ALB`,
+									Options: &cloudlets.Options{
+										Value:            []string{`y`},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
+						MatchURL:        `abc.com`,
+						MatchesAlways:   false,
+						ForwardSettings: cloudlets.ForwardSettingsALB{},
+						Disabled:        false,
+					},
+				},
+				LoadBalancers: []LoadBalancerVersion{
+					{
+						LoadBalancerVersion: cloudlets.LoadBalancerVersion{
+							OriginID:      "test_origin",
+							Description:   `test description`,
+							BalancingType: cloudlets.BalancingTypeWeighted,
+							DataCenters: []cloudlets.DataCenter{
+								{
+									City:            "Boston",
+									CloudService:    true,
+									Continent:       "NA",
+									Country:         "US",
+									Hostname:        "test-hostname",
+									Latitude:        tools.Float64Ptr(102.78108),
+									LivenessHosts:   []string{"tf1.test", "tf2.test"},
+									Longitude:       tools.Float64Ptr(-116.07064),
+									OriginID:        "test_origin",
+									Percent:         tools.Float64Ptr(10),
+									StateOrProvince: tools.StringPtr("MA"),
+								},
+							},
+							LivenessSettings: &cloudlets.LivenessSettings{
+								HostHeader:        "header",
+								AdditionalHeaders: map[string]string{"abc": "123"},
+								Interval:          10,
+								Path:              `status`,
+								Port:              1234,
+								Protocol:          "HTTP",
+								RequestString:     `test_request_string`,
+								ResponseString:    `test_response_string`,
+								Timeout:           60,
+							},
+							Version: 2,
+						},
+					},
+					{
+						LoadBalancerVersion: cloudlets.LoadBalancerVersion{
+							OriginID:      "test_origin_2",
+							Description:   `test description`,
+							BalancingType: cloudlets.BalancingTypeWeighted,
+							DataCenters: []cloudlets.DataCenter{
+								{
+									City:            "Boston",
+									CloudService:    true,
+									Continent:       "NA",
+									Country:         "US",
+									Hostname:        "test-hostname",
+									Latitude:        tools.Float64Ptr(102.78108),
+									LivenessHosts:   []string{"tf1.test", "tf2.test"},
+									Longitude:       tools.Float64Ptr(-116.07064),
+									OriginID:        "test_origin",
+									Percent:         tools.Float64Ptr(10),
+									StateOrProvince: tools.StringPtr("MA"),
+								},
+							},
+							LivenessSettings: &cloudlets.LivenessSettings{
+								HostHeader:        "header",
+								AdditionalHeaders: map[string]string{"abc": "123"},
+								Interval:          10,
+								Path:              `status`,
+								Port:              1234,
+								Protocol:          "HTTP",
+								RequestString:     `test_request_string`,
+								ResponseString:    `test_response_string`,
+								Timeout:           60,
+							},
+							Version: 2,
+						},
+					},
+				},
+				LoadBalancerActivations: []TFLoadBalancerActivationsData{
+					{
+						Activations: []LBActivation{
+							{
+								OriginID:  "test_origin",
+								Network:   "staging",
+								Commented: false,
+								Version:   2,
+							},
+							{
+								OriginID:  "test_origin",
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
+					{
+						Activations: []LBActivation{
+							{
+								OriginID:  "test_origin_2",
+								Network:   "staging",
+								Commented: true,
+							},
+							{
+								OriginID:  "test_origin_2",
+								Network:   "prod",
+								Commented: true,
+							},
+						},
+					},
+				},
+			},
+			dir:          "no_policy_activations_with_two_alb_and_single_lb_activation",
+			filesToCheck: []string{"policy.tf", "match-rules.tf", "load-balancer.tf", "variables.tf", "import.sh"},
+		},
+		"policy with policy and ALB activations on both networks": {
+			givenData: TFPolicyData{
+				Name:            "test_policy_export",
+				EdgercPath:      defaultEdgercPath,
+				Section:         defaultSection,
+				CloudletCode:    "ALB",
+				Description:     `Testing exported policy`,
+				GroupID:         12345,
+				MatchRuleFormat: "1.0",
+				MatchRules: cloudlets.MatchRules{
+					cloudlets.MatchRuleALB{
+						Name: `r2`,
+						Matches: []cloudlets.MatchCriteriaALB{
+							{
+								MatchOperator: "equals",
+								MatchType:     "header",
+								MatchValue:    `value`,
+								ObjectMatchValue: cloudlets.ObjectMatchValueObject{
+									Type: "object",
+									Name: `ALB`,
+									Options: &cloudlets.Options{
+										Value:            []string{`y`},
+										ValueHasWildcard: true,
+									},
+								},
+								Negate: false,
+							},
+						},
+						MatchURL:        `abc.com`,
+						MatchesAlways:   false,
+						ForwardSettings: cloudlets.ForwardSettingsALB{},
+						Disabled:        false,
+					},
+				},
+				LoadBalancers: []LoadBalancerVersion{
+					{
+						LoadBalancerVersion: cloudlets.LoadBalancerVersion{
+							OriginID:      "test_origin",
+							Description:   `test description`,
+							BalancingType: cloudlets.BalancingTypeWeighted,
+							DataCenters: []cloudlets.DataCenter{
+								{
+									City:            "Boston",
+									CloudService:    true,
+									Continent:       "NA",
+									Country:         "US",
+									Hostname:        "test-hostname",
+									Latitude:        tools.Float64Ptr(102.78108),
+									LivenessHosts:   []string{"tf1.test", "tf2.test"},
+									Longitude:       tools.Float64Ptr(-116.07064),
+									OriginID:        "test_origin",
+									Percent:         tools.Float64Ptr(10),
+									StateOrProvince: tools.StringPtr("MA"),
+								},
+							},
+							LivenessSettings: &cloudlets.LivenessSettings{
+								HostHeader:        "header",
+								AdditionalHeaders: map[string]string{"abc": "123"},
+								Interval:          10,
+								Path:              `status`,
+								Port:              1234,
+								Protocol:          "HTTP",
+								RequestString:     `test_request_string`,
+								ResponseString:    `test_response_string`,
+								Timeout:           60,
+							},
+							Version: 2,
+						},
+					},
+					{
+						LoadBalancerVersion: cloudlets.LoadBalancerVersion{
+							OriginID:      "test_origin_2",
+							Description:   `test description`,
+							BalancingType: cloudlets.BalancingTypeWeighted,
+							DataCenters: []cloudlets.DataCenter{
+								{
+									City:            "Boston",
+									CloudService:    true,
+									Continent:       "NA",
+									Country:         "US",
+									Hostname:        "test-hostname",
+									Latitude:        tools.Float64Ptr(102.78108),
+									LivenessHosts:   []string{"tf1.test", "tf2.test"},
+									Longitude:       tools.Float64Ptr(-116.07064),
+									OriginID:        "test_origin",
+									Percent:         tools.Float64Ptr(10),
+									StateOrProvince: tools.StringPtr("MA"),
+								},
+							},
+							LivenessSettings: &cloudlets.LivenessSettings{
+								HostHeader:        "header",
+								AdditionalHeaders: map[string]string{"abc": "123"},
+								Interval:          10,
+								Path:              `status`,
+								Port:              1234,
+								Protocol:          "HTTP",
+								RequestString:     `test_request_string`,
+								ResponseString:    `test_response_string`,
+								Timeout:           60,
+							},
+							Version: 2,
+						},
+					},
+				},
+				LoadBalancerActivations: []TFLoadBalancerActivationsData{
+					{
+						Activations: []LBActivation{
+							{
+								OriginID:  "test_origin",
+								Network:   "staging",
+								Version:   2,
+								Commented: false,
+							},
+							{
+								OriginID:  "test_origin",
+								Network:   "prod",
+								Version:   2,
+								Commented: false,
+							},
+						},
+					},
+				},
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:    "prod",
+							PolicyID:   2,
+							Version:    1,
+							Properties: []string{"prp_0"},
+							Commented:  false,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
+			},
+			dir:          "policy_with_policy_and_alb_activations_on_both_networks",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "load-balancer.tf", "variables.tf", "import.sh"},
 		},
 		"policy without match rules alb": {
@@ -2972,6 +3682,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "no_match_rules_alb",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
@@ -2985,6 +3708,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "no_match_rules_fr",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
@@ -2998,18 +3734,44 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "no_match_rules_cd",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
 		"policy with match rules fr": {
 			givenData: TFPolicyData{
-				Name:            "test_policy_export",
-				EdgercPath:      defaultEdgercPath,
-				Section:         defaultSection,
-				CloudletCode:    "FR",
-				Description:     "Testing exported policy",
-				GroupID:         12345,
+				Name:         "test_policy_export",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
+				CloudletCode: "FR",
+				Description:  "Testing exported policy",
+				GroupID:      12345,
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 				MatchRuleFormat: "1.0",
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleFR{
@@ -3071,12 +3833,25 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		},
 		"policy with match rules CD": {
 			givenData: TFPolicyData{
-				Name:            "test_policy_export",
-				EdgercPath:      defaultEdgercPath,
-				Section:         defaultSection,
-				CloudletCode:    "CD",
-				Description:     "Testing exported policy",
-				GroupID:         12345,
+				Name:         "test_policy_export",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
+				CloudletCode: "CD",
+				Description:  "Testing exported policy",
+				GroupID:      12345,
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 				MatchRuleFormat: "1.0",
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRulePR{
@@ -3139,12 +3914,25 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		},
 		"policy with match rules vp": {
 			givenData: TFPolicyData{
-				Name:            "test_policy_export",
-				EdgercPath:      defaultEdgercPath,
-				Section:         defaultSection,
-				CloudletCode:    "VP",
-				Description:     "Testing exported policy",
-				GroupID:         12345,
+				Name:         "test_policy_export",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
+				CloudletCode: "VP",
+				Description:  "Testing exported policy",
+				GroupID:      12345,
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 				MatchRuleFormat: "1.0",
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleVP{
@@ -3211,18 +3999,44 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "no_match_rules_vp",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
 		"policy with match rules ap": {
 			givenData: TFPolicyData{
-				Name:            "test_policy_export",
-				EdgercPath:      defaultEdgercPath,
-				Section:         defaultSection,
-				CloudletCode:    "AP",
-				Description:     "Testing exported policy",
-				GroupID:         12345,
+				Name:         "test_policy_export",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
+				CloudletCode: "AP",
+				Description:  "Testing exported policy",
+				GroupID:      12345,
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 				MatchRuleFormat: "1.0",
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleAP{
@@ -3288,6 +4102,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "no_match_rules_ap",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
@@ -3301,18 +4128,44 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "no_match_rules_as",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
 		"policy with match rules as": {
 			givenData: TFPolicyData{
-				Name:            "test_policy_export",
-				EdgercPath:      defaultEdgercPath,
-				Section:         defaultSection,
-				CloudletCode:    "AS",
-				Description:     "Testing exported policy",
-				GroupID:         12345,
+				Name:         "test_policy_export",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
+				CloudletCode: "AS",
+				Description:  "Testing exported policy",
+				GroupID:      12345,
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 				MatchRuleFormat: "1.0",
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleAS{
@@ -3394,18 +4247,44 @@ func TestProcessPolicyTemplates(t *testing.T) {
 				Description:     "Testing exported policy",
 				GroupID:         12345,
 				MatchRuleFormat: "1.0",
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "no_match_rules_ig",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
 		},
 		"policy with match rules ig": {
 			givenData: TFPolicyData{
-				Name:            "test_policy_export",
-				EdgercPath:      defaultEdgercPath,
-				Section:         defaultSection,
-				CloudletCode:    "IG",
-				Description:     "Testing exported policy",
-				GroupID:         12345,
+				Name:         "test_policy_export",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
+				CloudletCode: "IG",
+				Description:  "Testing exported policy",
+				GroupID:      12345,
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 				MatchRuleFormat: "1.0",
 				MatchRules: cloudlets.MatchRules{
 					cloudlets.MatchRuleRC{
@@ -3456,14 +4335,26 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		},
 		"policy V3 without match rules": {
 			givenData: TFPolicyData{
-				Name:              "test_policy_export",
-				EdgercPath:        defaultEdgercPath,
-				Section:           defaultSection,
-				CloudletCode:      "FR",
-				Description:       "Testing exported policy",
-				GroupID:           12345,
-				IsV3:              true,
-				PolicyActivations: TFPolicyActivationsData{IsV3: true},
+				Name:         "test_policy_export",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
+				CloudletCode: "FR",
+				Description:  "Testing exported policy",
+				GroupID:      12345,
+				IsV3:         true,
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: true,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "v3/v3_no_match_rules",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
@@ -3528,7 +4419,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						Disabled:           true,
 					},
 				},
-				PolicyActivations: TFPolicyActivationsData{IsV3: true},
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: true,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "v3/v3_with_ap_match_rules",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
@@ -3609,7 +4512,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						Disabled: true,
 					},
 				},
-				PolicyActivations: TFPolicyActivationsData{IsV3: true},
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: true,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "v3/v3_with_as_match_rules",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
@@ -3678,7 +4593,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						MatchesAlways: true,
 					},
 				},
-				PolicyActivations: TFPolicyActivationsData{IsV3: true},
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: true,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "v3/v3_with_cd_match_rules",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
@@ -3732,7 +4659,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						UseIncomingSchemeAndHost: true,
 					},
 				},
-				PolicyActivations: TFPolicyActivationsData{IsV3: true},
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: true,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "v3/v3_with_er_match_rules",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
@@ -3800,7 +4739,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						Disabled: true,
 					},
 				},
-				PolicyActivations: TFPolicyActivationsData{IsV3: true},
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: true,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "v3/v3_with_fr_match_rules",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
@@ -3857,22 +4808,46 @@ func TestProcessPolicyTemplates(t *testing.T) {
 						Disabled:      true,
 					},
 				},
-				PolicyActivations: TFPolicyActivationsData{IsV3: true},
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: true,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "v3/v3_with_ig_match_rules",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
 		},
 		"policy v3 without version": {
 			givenData: TFPolicyData{
-				Name:              "test_policy_export",
-				EdgercPath:        defaultEdgercPath,
-				Section:           defaultSection,
-				CloudletCode:      "ER",
-				Description:       "",
-				GroupID:           234,
-				IsV3:              true,
-				MatchRules:        nil,
-				PolicyActivations: TFPolicyActivationsData{IsV3: true},
+				Name:         "test_policy_export",
+				EdgercPath:   defaultEdgercPath,
+				Section:      defaultSection,
+				CloudletCode: "ER",
+				Description:  "",
+				GroupID:      234,
+				IsV3:         true,
+				MatchRules:   nil,
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: true,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "v3/v3_no_version",
 			filesToCheck: []string{"policy.tf", "variables.tf", "import.sh"},
@@ -3927,12 +4902,19 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 				},
 				PolicyActivations: TFPolicyActivationsData{
-					Staging: &TFPolicyActivationData{
-						PolicyID: 2,
-						Version:  2,
-						IsV3:     true,
-					},
 					IsV3: true,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							PolicyID:  2,
+							Version:   2,
+							Commented: false,
+						},
+					},
 				},
 			},
 			dir:          "v3/v3_with_staging_activation",
@@ -3988,18 +4970,25 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 				},
 				PolicyActivations: TFPolicyActivationsData{
-					Production: &TFPolicyActivationData{
-						PolicyID: 2,
-						Version:  2,
-						IsV3:     true,
-					},
 					IsV3: true,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+						{
+							Network:   "prod",
+							PolicyID:  2,
+							Version:   2,
+							Commented: false,
+						},
+					},
 				},
 			},
 			dir:          "v3/v3_with_prod_activation",
 			filesToCheck: []string{"policy.tf", "match-rules.tf", "variables.tf", "import.sh"},
 		},
-		"policy V3 with both activations": {
+		"same policy V3 with both activations": {
 			givenData: TFPolicyData{
 				Name:         "test_policy_export",
 				EdgercPath:   defaultEdgercPath,
@@ -4049,17 +5038,21 @@ func TestProcessPolicyTemplates(t *testing.T) {
 					},
 				},
 				PolicyActivations: TFPolicyActivationsData{
-					Staging: &TFPolicyActivationData{
-						PolicyID: 2,
-						Version:  2,
-						IsV3:     true,
-					},
-					Production: &TFPolicyActivationData{
-						PolicyID: 2,
-						Version:  2,
-						IsV3:     true,
-					},
 					IsV3: true,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							PolicyID:  2,
+							Version:   2,
+							Commented: false,
+						},
+						{
+							Network:   "staging",
+							PolicyID:  2,
+							Version:   2,
+							Commented: false,
+						},
+					},
 				},
 			},
 			dir:          "v3/v3_with_both_activations",
@@ -4067,15 +5060,27 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		},
 		"non default edgerc path and section": {
 			givenData: TFPolicyData{
-				Name:              "test_policy_export",
-				EdgercPath:        "non/default/path/to/edgerc",
-				Section:           "non_default_section",
-				CloudletCode:      "ER",
-				Description:       "",
-				GroupID:           234,
-				IsV3:              true,
-				MatchRules:        nil,
-				PolicyActivations: TFPolicyActivationsData{IsV3: true},
+				Name:         "test_policy_export",
+				EdgercPath:   "non/default/path/to/edgerc",
+				Section:      "non_default_section",
+				CloudletCode: "ER",
+				Description:  "",
+				GroupID:      234,
+				IsV3:         true,
+				MatchRules:   nil,
+				PolicyActivations: TFPolicyActivationsData{
+					IsV3: false,
+					Activations: []TFPolicyActivationData{
+						{
+							Network:   "prod",
+							Commented: true,
+						},
+						{
+							Network:   "staging",
+							Commented: true,
+						},
+					},
+				},
 			},
 			dir:          "non_default_edgerc_path_and_section",
 			filesToCheck: []string{"variables.tf"},

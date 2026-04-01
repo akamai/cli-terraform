@@ -269,6 +269,491 @@
             "threshold": 5
         }
     ],
+    "urlProtectionPolicies": [
+        {
+            "apiDefinitions": [
+                {
+                    "apiDefinitionId": 609153,
+                    "definedResources": true,
+                    "resourceIds": [],
+                    "undefinedResources": true
+                },
+                {
+                    "apiDefinitionId": 470134,
+                    "definedResources": false,
+                    "resourceIds": [
+                        108964,
+                        108965,
+                        108966,
+                        108967,
+                        108968,
+                        108969,
+                        108970,
+                        108971,
+                        108973,
+                        108974,
+                        108975,
+                        108976,
+                        108977
+                    ],
+                    "undefinedResources": false
+                },
+                {
+                    "apiDefinitionId": 518153,
+                    "definedResources": true,
+                    "resourceIds": [],
+                    "undefinedResources": false
+                }
+            ],
+            "bypassCondition": {
+                "atomicConditions": [
+                    {
+                        "checkIps": "connecting",
+                        "className": "NetworkListCondition",
+                        "index": 1,
+                        "positiveMatch": true,
+                        "value": [
+                            "106723_1CLICKTEST",
+                            "106793_1CLICKTEST12"
+                        ]
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 2,
+                        "name": [
+                            "Accept",
+                            "Accept-Datetime"
+                        ],
+                        "nameWildcard": true,
+                        "positiveMatch": true,
+                        "value": [],
+                        "valueCase": false,
+                        "valueWildcard": false
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 3,
+                        "name": [
+                            "Cache-Control",
+                            "Accept-Charset"
+                        ],
+                        "nameWildcard": false,
+                        "positiveMatch": true,
+                        "value": [],
+                        "valueCase": false,
+                        "valueWildcard": false
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 4,
+                        "name": [
+                            "Content-Type",
+                            "DNT"
+                        ],
+                        "nameWildcard": true,
+                        "positiveMatch": true,
+                        "value": [
+                            "test",
+                            "test2"
+                        ],
+                        "valueCase": true,
+                        "valueWildcard": true
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 5,
+                        "name": [
+                            "Connection"
+                        ],
+                        "nameWildcard": true,
+                        "positiveMatch": true,
+                        "value": [
+                            "secure"
+                        ],
+                        "valueCase": true,
+                        "valueWildcard": false
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 6,
+                        "name": [
+                            "DNT"
+                        ],
+                        "nameWildcard": true,
+                        "positiveMatch": true,
+                        "value": [
+                            "test"
+                        ],
+                        "valueCase": false,
+                        "valueWildcard": true
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 7,
+                        "name": [
+                            "Pragma",
+                            "Content-MD5"
+                        ],
+                        "nameWildcard": true,
+                        "positiveMatch": true,
+                        "value": [
+                            "value"
+                        ],
+                        "valueCase": false,
+                        "valueWildcard": false
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 8,
+                        "name": [
+                            "Referer",
+                            "X-Forwarded-For"
+                        ],
+                        "nameWildcard": false,
+                        "positiveMatch": true,
+                        "value": [
+                            "yug",
+                            "test"
+                        ],
+                        "valueCase": true,
+                        "valueWildcard": true
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 9,
+                        "name": [
+                            "Accept-Charset"
+                        ],
+                        "nameWildcard": false,
+                        "positiveMatch": true,
+                        "value": [
+                            "hello"
+                        ],
+                        "valueCase": true,
+                        "valueWildcard": false
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 10,
+                        "name": [
+                            "Content-Length"
+                        ],
+                        "nameWildcard": false,
+                        "positiveMatch": true,
+                        "value": [
+                            "test"
+                        ],
+                        "valueCase": true,
+                        "valueWildcard": false
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 11,
+                        "name": [
+                            "Content-Type"
+                        ],
+                        "nameWildcard": false,
+                        "positiveMatch": true,
+                        "value": [
+                            "test"
+                        ],
+                        "valueCase": false,
+                        "valueWildcard": false
+                    }
+                ],
+                "canDelete": false,
+                "configVersionId": 424567,
+                "id": 7214533,
+                "name": "Config65984v1 test",
+                "positiveMatch": true,
+                "uuid": "SEC_COND_7214533",
+                "version": 1773737001370
+            },
+            "categories": [
+                {
+                    "type": "BOTS"
+                },
+                {
+                    "listIds": [
+                        "99175_10KCL",
+                        "106791_1CLICKTEST10"
+                    ],
+                    "positiveMatch": true,
+                    "type": "CLIENT_LIST"
+                },
+                {
+                    "listIds": [
+                        "81381_123",
+                        "106857_1CLICKTEST15"
+                    ],
+                    "positiveMatch": false,
+                    "type": "CLIENT_LIST"
+                },
+                {
+                    "type": "CLIENT_REPUTATIONS"
+                },
+                {
+                    "type": "CLOUD_PROVIDERS"
+                },
+                {
+                    "type": "PLATFORM_DDOS_INTELLIGENCE"
+                },
+                {
+                    "type": "PROXIES"
+                },
+                {
+                    "type": "TOR_EXIT_NODES"
+                }
+            ],
+            "configId": 79947,
+            "configVersion": 1,
+            "counterId": "5-3-0000000820",
+            "createDate": "1753721236000",
+            "createdBy": "tf-user",
+            "intelligentLoadShedding": true,
+            "lockVersion": 3,
+            "name": "test",
+            "policyId": 50411,
+            "policyVersionId": 3886,
+            "rateThreshold": 10,
+            "sheddingThresholdHitsPerSec": 7,
+            "updateDate": "1773737001000",
+            "updatedBy": "tf-user",
+            "used": true
+        },
+        {
+            "bypassCondition": {
+                "atomicConditions": [
+                    {
+                        "checkIps": "connecting",
+                        "className": "NetworkListCondition",
+                        "index": 1,
+                        "positiveMatch": true,
+                        "value": [
+                            "106723_1CLICKTEST",
+                            "106793_1CLICKTEST12"
+                        ]
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 2,
+                        "name": [
+                            "Accept",
+                            "Accept-Datetime"
+                        ],
+                        "nameWildcard": true,
+                        "positiveMatch": true,
+                        "value": [],
+                        "valueCase": false,
+                        "valueWildcard": false
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 3,
+                        "name": [
+                            "Cache-Control",
+                            "Accept-Charset"
+                        ],
+                        "nameWildcard": false,
+                        "positiveMatch": true,
+                        "value": [],
+                        "valueCase": false,
+                        "valueWildcard": false
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 4,
+                        "name": [
+                            "Content-Type",
+                            "DNT"
+                        ],
+                        "nameWildcard": true,
+                        "positiveMatch": true,
+                        "value": [
+                            "test",
+                            "test2"
+                        ],
+                        "valueCase": true,
+                        "valueWildcard": true
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 5,
+                        "name": [
+                            "Connection"
+                        ],
+                        "nameWildcard": true,
+                        "positiveMatch": true,
+                        "value": [
+                            "secure"
+                        ],
+                        "valueCase": true,
+                        "valueWildcard": false
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 6,
+                        "name": [
+                            "DNT"
+                        ],
+                        "nameWildcard": true,
+                        "positiveMatch": true,
+                        "value": [
+                            "test"
+                        ],
+                        "valueCase": false,
+                        "valueWildcard": true
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 7,
+                        "name": [
+                            "Pragma",
+                            "Content-MD5"
+                        ],
+                        "nameWildcard": true,
+                        "positiveMatch": true,
+                        "value": [
+                            "value"
+                        ],
+                        "valueCase": false,
+                        "valueWildcard": false
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 8,
+                        "name": [
+                            "Referer",
+                            "X-Forwarded-For"
+                        ],
+                        "nameWildcard": false,
+                        "positiveMatch": true,
+                        "value": [
+                            "yug",
+                            "test"
+                        ],
+                        "valueCase": true,
+                        "valueWildcard": true
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 9,
+                        "name": [
+                            "Accept-Charset"
+                        ],
+                        "nameWildcard": false,
+                        "positiveMatch": true,
+                        "value": [
+                            "hello"
+                        ],
+                        "valueCase": true,
+                        "valueWildcard": false
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 10,
+                        "name": [
+                            "Content-Length"
+                        ],
+                        "nameWildcard": false,
+                        "positiveMatch": true,
+                        "value": [
+                            "test"
+                        ],
+                        "valueCase": true,
+                        "valueWildcard": false
+                    },
+                    {
+                        "className": "RequestHeaderCondition",
+                        "index": 11,
+                        "name": [
+                            "Content-Type"
+                        ],
+                        "nameWildcard": false,
+                        "positiveMatch": true,
+                        "value": [
+                            "test"
+                        ],
+                        "valueCase": false,
+                        "valueWildcard": false
+                    }
+                ],
+                "canDelete": false,
+                "configVersionId": 424567,
+                "id": 7214476,
+                "name": "Config65984v1 test1",
+                "positiveMatch": true,
+                "uuid": "SEC_COND_7214476",
+                "version": 1773676655815
+            },
+            "categories": [
+                {
+                    "type": "BOTS"
+                },
+                {
+                    "listIds": [
+                        "99175_10KCL",
+                        "106791_1CLICKTEST10"
+                    ],
+                    "positiveMatch": true,
+                    "type": "CLIENT_LIST"
+                },
+                {
+                    "listIds": [
+                        "81381_123",
+                        "106857_1CLICKTEST15"
+                    ],
+                    "positiveMatch": false,
+                    "type": "CLIENT_LIST"
+                },
+                {
+                    "type": "CLIENT_REPUTATIONS"
+                },
+                {
+                    "type": "CLOUD_PROVIDERS"
+                },
+                {
+                    "type": "PROXIES"
+                },
+                {
+                    "type": "TOR_EXIT_NODES"
+                }
+            ],
+            "configId": 79947,
+            "configVersion": 1,
+            "counterId": "5-3-00000008FE",
+            "createDate": "1773676655000",
+            "createdBy": "tf-user",
+            "hostnamePaths": [
+                {
+                    "hostname": "www.test1.com",
+                    "paths": [
+                        "/*",
+                        "//"
+                    ]
+                },
+                {
+                    "hostname": "www.test.com",
+                    "paths": [
+                        "/*",
+                        "//",
+                        "/o"
+                    ]
+                }
+            ],
+            "intelligentLoadShedding": true,
+            "lockVersion": 0,
+            "name": "test1",
+            "policyId": 50412,
+            "policyVersionId": 4350,
+            "protectionType": "MULTIPLE",
+            "rateThreshold": 10,
+            "sheddingThresholdHitsPerSec": 7,
+            "updateDate": "1773676655000",
+            "updatedBy": "tf-user",
+            "used": false
+        }
+    ],
     "customRules": [
         {
             "conditions": [
@@ -2518,6 +3003,7 @@
             "name": "Default Policy",
             "hasRatePolicyWithApiKey": false,
             "securityControls": {
+                "applyAccountProtectionControls": false,
                 "applyApiConstraints": false,
                 "applyApplicationLayerControls": true,
                 "applyBotmanControls": false,
@@ -2525,7 +3011,8 @@
                 "applyNetworkLayerControls": true,
                 "applyRateControls": true,
                 "applyReputationControls": false,
-                "applySlowPostControls": true
+                "applySlowPostControls": true,
+                "applyUrlProtectionControls": true
             },
             "webApplicationFirewall": {
                 "ruleActions": [
@@ -3602,7 +4089,19 @@
             "requestBody": {
                 "requestBodyInspectionLimitInKB": "default",
                 "override": true
-            }
+            },
+            "urlProtectionPolicyActions": [
+                {
+                "action": "alert",
+                "loadSheddingAction": "deny",
+                "policyId": 50411
+                },
+                {
+                "action": "deny",
+                "loadSheddingAction": "none",
+                "policyId": 50412
+                }
+            ]
         }
     ],
     "malwarePolicies": [

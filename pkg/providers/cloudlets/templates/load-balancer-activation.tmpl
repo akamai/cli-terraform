@@ -1,9 +1,19 @@
 {{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/cloudlets.TFPolicyData*/ -}}
-{{- range .LoadBalancers -}}
-resource "akamai_cloudlets_application_load_balancer_activation" "load_balancer_activation_{{.OriginID}}" {
+{{/* ---------------- RESOURCE BLOCK ---------------- */}}
+{{- define "lb_activation_block" -}}
+{{- if .Commented }}/*
+{{ end -}}
+resource "akamai_cloudlets_application_load_balancer_activation" "load_balancer_activation_{{.OriginID}}_{{.Network}}" {
   origin_id = akamai_cloudlets_application_load_balancer.load_balancer_{{.OriginID}}.origin_id
-  network = var.env
-  version = akamai_cloudlets_application_load_balancer.load_balancer_{{.OriginID}}.version
+  network   = "{{.Network}}"
+  version   = akamai_cloudlets_application_load_balancer.load_balancer_{{.OriginID}}.version
 }
+{{- if .Commented }}*/{{ end }}
 
-{{end}}
+{{ end -}}
+
+{{- range .LoadBalancerActivations }}
+  {{- range .Activations }}
+    {{- template "lb_activation_block" . }}
+  {{- end }}
+{{- end }}

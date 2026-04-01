@@ -86,6 +86,66 @@ func TestCreateCloudAccess(t *testing.T) {
 				},
 			},
 		},
+		"access key with one version no cloud access key id": {
+			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, _ string, data testDataForCloudAccess) {
+				mockGetAccessKey(c, data, nil)
+				mockListAccessKeyVersions(c, data, nil)
+				mockProcessTemplates(p, data)
+			},
+			testData: testDataForCloudAccess{
+				accessKeyUID:         1,
+				accessKeyName:        "name1",
+				authenticationMethod: "VP_QUEUE_IT",
+				networkConfiguration: &cloudaccess.SecureNetwork{
+					SecurityNetwork: "ENHANCED_TLS",
+				},
+				groups: []cloudaccess.Group{
+					{
+						ContractIDs: []string{"ctr_111"},
+						GroupID:     11,
+						GroupName:   tools.StringPtr("group11"),
+					},
+				},
+				accessKeyVersions: []cloudaccess.AccessKeyVersion{
+					{
+						AccessKeyUID:     1,
+						CloudAccessKeyID: nil,
+					},
+				},
+			},
+		},
+		"access key with two versions no cloud access key id": {
+			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, _ string, data testDataForCloudAccess) {
+				mockGetAccessKey(c, data, nil)
+				mockListAccessKeyVersions(c, data, nil)
+				mockProcessTemplates(p, data)
+			},
+			testData: testDataForCloudAccess{
+				accessKeyUID:         1,
+				accessKeyName:        "name1",
+				authenticationMethod: "VP_QUEUE_IT",
+				networkConfiguration: &cloudaccess.SecureNetwork{
+					SecurityNetwork: "ENHANCED_TLS",
+				},
+				groups: []cloudaccess.Group{
+					{
+						ContractIDs: []string{"ctr_111"},
+						GroupID:     11,
+						GroupName:   tools.StringPtr("group11"),
+					},
+				},
+				accessKeyVersions: []cloudaccess.AccessKeyVersion{
+					{
+						AccessKeyUID:     1,
+						CloudAccessKeyID: nil,
+					},
+					{
+						AccessKeyUID:     1,
+						CloudAccessKeyID: nil,
+					},
+				},
+			},
+		},
 		"access key with one version": {
 			init: func(c *cloudaccess.Mock, p *templates.MockProcessor, _ string, data testDataForCloudAccess) {
 				mockGetAccessKey(c, data, nil)
@@ -371,8 +431,8 @@ func TestProcessCloudAccessTemplates(t *testing.T) {
 					GroupID:              1234,
 					ContractID:           "C-Contract123",
 					AccessKeyUID:         1,
-					CredentialA:          &Credential{CloudAccessKeyID: "testAccessKey1"},
-					CredentialB:          &Credential{CloudAccessKeyID: "testAccessKey2"},
+					CredentialA:          &Credential{CloudAccessKeyID: tools.StringPtr("testAccessKey1")},
+					CredentialB:          &Credential{CloudAccessKeyID: tools.StringPtr("testAccessKey2")},
 					NetworkConfiguration: &NetworkConfiguration{
 						AdditionalCDN:   tools.StringPtr("CHINA_CDN"),
 						SecurityNetwork: "ENHANCED_TLS",
@@ -391,7 +451,7 @@ func TestProcessCloudAccessTemplates(t *testing.T) {
 					GroupID:              1234,
 					ContractID:           "C-Contract123",
 					AccessKeyUID:         1,
-					CredentialA:          &Credential{CloudAccessKeyID: "testAccessKey1"},
+					CredentialA:          &Credential{CloudAccessKeyID: tools.StringPtr("testAccessKey1")},
 					NetworkConfiguration: &NetworkConfiguration{
 						AdditionalCDN:   tools.StringPtr("CHINA_CDN"),
 						SecurityNetwork: "ENHANCED_TLS",
@@ -399,6 +459,43 @@ func TestProcessCloudAccessTemplates(t *testing.T) {
 				},
 			},
 			dir:          "one_version",
+			filesToCheck: []string{"cloudaccess.tf", "import.sh", "variables.tf"},
+		},
+		"access key with one version no cloud access key id": {
+			givenData: TFCloudAccessData{
+				Key: TFCloudAccessKey{
+					KeyResourceName:      "TestKeyName",
+					AccessKeyName:        "TestKeyName",
+					AuthenticationMethod: "VP_QUEUE_IT",
+					GroupID:              1234,
+					ContractID:           "C-Contract123",
+					AccessKeyUID:         1,
+					CredentialA:          &Credential{CloudAccessKeyID: nil},
+					NetworkConfiguration: &NetworkConfiguration{
+						SecurityNetwork: "ENHANCED_TLS",
+					},
+				},
+			},
+			dir:          "no_cloud_access_key_id_one_version",
+			filesToCheck: []string{"cloudaccess.tf", "import.sh", "variables.tf"},
+		},
+		"access key with two versions no cloud access key id": {
+			givenData: TFCloudAccessData{
+				Key: TFCloudAccessKey{
+					KeyResourceName:      "TestKeyName",
+					AccessKeyName:        "TestKeyName",
+					AuthenticationMethod: "VP_QUEUE_IT",
+					GroupID:              1234,
+					ContractID:           "C-Contract123",
+					AccessKeyUID:         1,
+					CredentialA:          &Credential{CloudAccessKeyID: nil},
+					CredentialB:          &Credential{CloudAccessKeyID: nil},
+					NetworkConfiguration: &NetworkConfiguration{
+						SecurityNetwork: "ENHANCED_TLS",
+					},
+				},
+			},
+			dir:          "no_cloud_access_key_id_two_versions",
 			filesToCheck: []string{"cloudaccess.tf", "import.sh", "variables.tf"},
 		},
 		"access key with no versions": {
@@ -520,11 +617,11 @@ func mockProcessTemplates(p *templates.MockProcessor, data testDataForCloudAcces
 	contractID := data.groups[0].ContractIDs[0]
 	var credA, credB *Credential
 	if len(data.accessKeyVersions) == 1 {
-		credA = &Credential{CloudAccessKeyID: *data.accessKeyVersions[0].CloudAccessKeyID}
+		credA = &Credential{CloudAccessKeyID: data.accessKeyVersions[0].CloudAccessKeyID}
 	}
 	if len(data.accessKeyVersions) == 2 {
-		credA = &Credential{CloudAccessKeyID: *data.accessKeyVersions[0].CloudAccessKeyID}
-		credB = &Credential{CloudAccessKeyID: *data.accessKeyVersions[1].CloudAccessKeyID}
+		credA = &Credential{CloudAccessKeyID: data.accessKeyVersions[0].CloudAccessKeyID}
+		credB = &Credential{CloudAccessKeyID: data.accessKeyVersions[1].CloudAccessKeyID}
 	}
 	var netConf *NetworkConfiguration
 	if data.networkConfiguration != nil {

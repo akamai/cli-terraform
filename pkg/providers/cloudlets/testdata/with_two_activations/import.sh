@@ -1,3 +1,4 @@
 terraform init
 terraform import akamai_cloudlets_policy.policy test_policy_export
-terraform import akamai_cloudlets_policy_activation.policy_activation 2:prod
+terraform import akamai_cloudlets_policy_activation.policy_activation_prod 2:prod
+terraform import akamai_cloudlets_policy_activation.policy_activation_staging 2:staging

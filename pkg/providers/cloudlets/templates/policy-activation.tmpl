@@ -1,43 +1,16 @@
 {{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/cloudlets.TFPolicyActivationsData*/ -}}
-{{define "resource_block" -}}
-resource "akamai_cloudlets_policy_activation" "policy_activation" {
-  policy_id = tonumber(akamai_cloudlets_policy.policy.id)
-  network = var.env
-  version = akamai_cloudlets_policy.policy.version
-{{- if not .IsV3}}
-  associated_properties = [ {{range $i, $v := .Properties}}{{if $i}}, {{end}}"{{$v}}"{{end}} ]
-{{- end}}
-}
-{{end -}}
-{{define "comment_block" -}}
-/*
-resource "akamai_cloudlets_policy_activation" "policy_activation" {
-  policy_id = tonumber(akamai_cloudlets_policy.policy.id)
-  network = var.env
-  version = akamai_cloudlets_policy.policy.version
-{{- if not .IsV3}}
-  associated_properties = [ "UNKNOWN_CHANGE_ME" ]
-{{- end}}
-}
-*/
-{{end -}}
 
-{{- if (and .Production .Staging) -}}
-{{/* PRODUCTION and STAGING*/}}
-{{- if (deepequal .Production.Properties .Staging.Properties) }}
-{{/* PRODUCTION.prop == STAGING.prop => res block */}}
-{{- template "resource_block" .Production}}
-{{- else }}
-{{/* PRODUCTION.prop != STAGING.prop => comment block*/}}
-{{- template "comment_block" .}}
-{{- end}}
-{{- else if .Production }}
-{{/* PRODUCTION and not STAGING => res block*/}}
-{{- template "resource_block" .Production}}
-{{- else if .Staging }}
-{{/* STAGING and not PRODUCTION => res block*/}}
-{{- template "resource_block" .Staging}}
-{{- else }}
-{{/* not PRODUCTION and not STAGING => comment block*/}}
-{{- template "comment_block" .}}
-{{- end}}
+{{- range .Activations }}
+{{ if .Commented }}/*
+{{ end -}}
+resource "akamai_cloudlets_policy_activation" "policy_activation_{{.Network}}" {
+  policy_id             = tonumber(akamai_cloudlets_policy.policy.id)
+  network               = "{{.Network}}"
+  version               = akamai_cloudlets_policy.policy.version
+  {{- if and (not $.IsV3) (not .Commented) .Properties }}
+  associated_properties = [ {{range $i, $v := .Properties}}{{if $i}}, {{end}}"{{$v}}"{{end}} ]
+  {{- else if and (not $.IsV3) .Commented }}
+  associated_properties = [ "UNKNOWN_CHANGE_ME" ]
+  {{- end}}
+}{{- if .Commented }}*/{{ end }}
+{{ end -}}

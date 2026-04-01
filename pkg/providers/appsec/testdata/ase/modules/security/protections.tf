@@ -1,43 +1,16 @@
 // Enable/Disable Protections for policy default_policy
-resource "akamai_appsec_waf_protection" "default_policy" {
-  config_id          = local.config_id
-  security_policy_id = akamai_appsec_security_policy.default_policy.security_policy_id
-  enabled            = true
-}
-
-resource "akamai_appsec_api_constraints_protection" "default_policy" {
-  config_id          = local.config_id
-  security_policy_id = akamai_appsec_waf_protection.default_policy.security_policy_id
-  enabled            = false
-}
-
-resource "akamai_appsec_ip_geo_protection" "default_policy" {
-  config_id          = local.config_id
-  security_policy_id = akamai_appsec_api_constraints_protection.default_policy.security_policy_id
-  enabled            = true
-}
-
-resource "akamai_appsec_malware_protection" "default_policy" {
-  config_id          = local.config_id
-  security_policy_id = akamai_appsec_ip_geo_protection.default_policy.security_policy_id
-  enabled            = true
-}
-
-resource "akamai_appsec_rate_protection" "default_policy" {
-  config_id          = local.config_id
-  security_policy_id = akamai_appsec_malware_protection.default_policy.security_policy_id
-  enabled            = true
-}
-
-resource "akamai_appsec_reputation_protection" "default_policy" {
-  config_id          = local.config_id
-  security_policy_id = akamai_appsec_rate_protection.default_policy.security_policy_id
-  enabled            = false
-}
-
-resource "akamai_appsec_slowpost_protection" "default_policy" {
-  config_id          = local.config_id
-  security_policy_id = akamai_appsec_reputation_protection.default_policy.security_policy_id
-  enabled            = true
+resource "akamai_appsec_security_policy_protections" "default_policy" {
+  config_id                         = local.config_id
+  security_policy_id                = akamai_appsec_security_policy.default_policy.security_policy_id
+  apply_account_protection_controls = false
+  apply_api_constraints             = false
+  apply_application_layer_controls  = true
+  apply_botman_controls             = false
+  apply_malware_controls            = true
+  apply_network_layer_controls      = true
+  apply_rate_controls               = true
+  apply_reputation_controls         = false
+  apply_slow_post_controls          = true
+  apply_url_protection_controls     = true
 }
 

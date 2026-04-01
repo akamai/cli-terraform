@@ -23,9 +23,16 @@ resource "akamai_cloudlets_policy" "policy" {
   is_shared         = false
 }
 
-resource "akamai_cloudlets_policy_activation" "policy_activation" {
+resource "akamai_cloudlets_policy_activation" "policy_activation_prod" {
   policy_id             = tonumber(akamai_cloudlets_policy.policy.id)
-  network               = var.env
+  network               = "prod"
+  version               = akamai_cloudlets_policy.policy.version
+  associated_properties = ["prp_0"]
+}
+
+resource "akamai_cloudlets_policy_activation" "policy_activation_staging" {
+  policy_id             = tonumber(akamai_cloudlets_policy.policy.id)
+  network               = "staging"
   version               = akamai_cloudlets_policy.policy.version
   associated_properties = ["prp_0"]
 }

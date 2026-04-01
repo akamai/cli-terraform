@@ -1,0 +1,24 @@
+// URL Protection Actions
+{{ range .SecurityPolicies -}}
+{{ $policyName := escapeName .Name -}}
+
+{{- if .URLProtectionPoliciesActions -}}
+// URL Protection Actions for policy {{ $policyName }}
+{{ range .URLProtectionPoliciesActions -}}
+resource "akamai_appsec_url_protection_action" "{{ $policyName }}_{{ .URLProtectionPolicyID }}" {
+    config_id                 = local.config_id
+    security_policy_id        = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
+    url_protection_policy_id    = {{ .URLProtectionPolicyID }}
+    max_rate_threshold_action = "{{ .MaxRateThresholdAction }}"
+{{- if .LoadSheddingAction }}
+    load_shedding_action      = "{{ .LoadSheddingAction }}"
+{{- end }}
+}
+
+{{ end -}}
+{{- else -}}
+// No URL Protection Rule Actions found for policy {{ $policyName }}
+{{ end -}}
+
+{{ end -}}
+

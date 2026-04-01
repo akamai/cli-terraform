@@ -1,24 +1,18 @@
 {{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/cloudlets.TFPolicyData*/ -}}
 terraform init
-{{- range .LoadBalancers}}
-terraform import akamai_cloudlets_application_load_balancer.load_balancer_{{.OriginID}} {{.OriginID}}
-{{- end}}
-{{- range .LoadBalancerActivations}}
-terraform import akamai_cloudlets_application_load_balancer_activation.load_balancer_activation_{{.OriginID}} {{.OriginID}},{{.Network}},{{.Version}}
-{{- end}}
+{{- range .LoadBalancers }}
+terraform import akamai_cloudlets_application_load_balancer.load_balancer_{{ .OriginID }} {{ .OriginID }}
+{{- end }}
+{{- range .LoadBalancerActivations }}
+  {{- range .Activations }}
+    {{- if not .Commented }}
+terraform import akamai_cloudlets_application_load_balancer_activation.load_balancer_activation_{{.OriginID}}_{{.Network}} {{.OriginID}},{{.Network}},{{.Version}}
+    {{- end }}
+  {{- end }}
+{{- end }}
 terraform import akamai_cloudlets_policy.policy {{.Name}}
-{{- with .PolicyActivations -}}
-{{- if (and .Production .Staging) -}}
-{{/* PRODUCTION and STAGING*/}}
-{{- if (deepequal .Production.Properties .Staging.Properties) -}}
-{{/* PRODUCTION.prop == STAGING.prop => res block */}}
-terraform import akamai_cloudlets_policy_activation.policy_activation {{.Production.PolicyID}}:prod
-{{- end}}
-{{- else if .Production -}}
-{{/* PRODUCTION and not STAGING => res block*/}}
-terraform import akamai_cloudlets_policy_activation.policy_activation {{.Production.PolicyID}}:prod
-{{- else if .Staging  -}}
-{{/* STAGING and not PRODUCTION => res block*/}}
-terraform import akamai_cloudlets_policy_activation.policy_activation {{.Staging.PolicyID}}:staging
-{{- end -}}
-{{- end}}
+{{- range .PolicyActivations.Activations }}
+  {{- if and (not .Commented) }}
+terraform import akamai_cloudlets_policy_activation.policy_activation_{{.Network}} {{ .PolicyID }}:{{ .Network }}
+  {{- end }}
+{{- end }}

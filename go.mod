@@ -1,9 +1,9 @@
 module github.com/akamai/cli-terraform/v2
 
-go 1.24.11
+go 1.25.7
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v13 v13.0.0
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v13 v13.1.0
 	github.com/akamai/cli/v2 v2.0.3
 	github.com/fatih/color v1.18.0
 	github.com/hashicorp/hcl/v2 v2.23.0
@@ -23,7 +23,7 @@ require (
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/briandowns/spinner v1.23.2 // indirect
-	github.com/buger/jsonparser v1.1.1 // indirect
+	github.com/buger/jsonparser v1.1.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
@@ -61,4 +61,8 @@ require (
 
 //replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v13 => ../akamaiopen-edgegrid-golang
 //replace github.com/akamai/cli/v2 => ../cli
-replace github.com/stretchr/testify v1.4.0 => github.com/stretchr/testify v1.10.0 // Fix security vulnerability
+replace (
+	github.com/cloudflare/circl v1.6.1 => github.com/cloudflare/circl v1.6.3 // Fix security vulnerability; can be removed once github.com/akamai/cli/v2 bumps this dependency
+	github.com/go-git/go-git/v5 v5.16.4 => github.com/go-git/go-git/v5 v5.16.5 // Fix security vulnerability; can be removed once github.com/akamai/cli/v2 bumps this dependency
+	github.com/stretchr/testify v1.4.0 => github.com/stretchr/testify v1.10.0 // Fix security vulnerability; can be removed once github.com/go-ozzo/ozzo-validation/v4 bumps this dependency
+)

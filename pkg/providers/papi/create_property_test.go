@@ -637,6 +637,34 @@ func TestCreateProperty(t *testing.T) {
 		},
 	}
 
+	hapiGetEdgeHostnameResponseWithHTTPSServiceBinding := hapi.GetEdgeHostnameResponse{
+		EdgeHostnameID:      2867480,
+		RecordName:          "test",
+		DNSZone:             "edgesuite.net",
+		SecurityType:        "STANDARD-TLS",
+		UseDefaultTTL:       true,
+		UseDefaultMap:       false,
+		IPVersionBehavior:   "IPV6_IPV4_DUALSTACK",
+		TTL:                 21600,
+		Map:                 "a;test.akamai.net",
+		SerialNumber:        1461,
+		HTTPSServiceBinding: ptr.To("H2"),
+	}
+
+	edgeHostnameWithHTTPSServiceBinding := map[string]EdgeHostname{
+		"test-edgesuite-net": {
+			EdgeHostname:             "test.edgesuite.net",
+			EdgeHostnameID:           "ehn_2867480",
+			ContractID:               "test_contract",
+			GroupID:                  "grp_12345",
+			ID:                       "",
+			IPv6:                     "IPV6_COMPLIANCE",
+			SecurityType:             "STANDARD-TLS",
+			EdgeHostnameResourceName: "test-edgesuite-net",
+			HTTPSServiceBinding:      "H2",
+		},
+	}
+
 	hapiGetEdgeHostnameResponseEnhancementTLS := hapi.GetEdgeHostnameResponse{
 		EdgeHostnameID:    2867480,
 		RecordName:        "test",
@@ -826,6 +854,33 @@ func TestCreateProperty(t *testing.T) {
 			},
 			dir:     "basic-non-default-ttl",
 			jsonDir: "basic-non-default-ttl/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+		},
+		"basic property with edgehostname with https_service_binding": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, getPropertyResponse())
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponseWithHTTPSServiceBinding, nil)
+				mockGetEdgeHostnames(c)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withEdgeHostname(edgeHostnameWithHTTPSServiceBinding).build(), noFilters, nil)
+			},
+			dir:     "basic-https-service-binding",
+			jsonDir: "basic/property-snippets",
 			snippetFilesToCheck: []string{
 				"main.json",
 				"Content_Compression.json",
@@ -2447,6 +2502,51 @@ func TestProcessPropertyTemplates(t *testing.T) {
 				},
 			},
 			dir:          "basic-non-default-ttl",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
+		"property with edgehostname with https_service_binding": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							HTTPSServiceBinding:      "H2",
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							CnameFrom:                "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
+						},
+					},
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+			},
+			dir:          "basic-https-service-binding",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
 		"property enhancement tls": {

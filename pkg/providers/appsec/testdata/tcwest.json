@@ -7046,6 +7046,7 @@
             "name": "policy2",
             "hasRatePolicyWithApiKey": false,
             "securityControls": {
+                "applyAccountProtectionControls": false,
                 "applyApiConstraints": true,
                 "applyApplicationLayerControls": true,
                 "applyBotmanControls": true,
@@ -7053,7 +7054,8 @@
                 "applyNetworkLayerControls": true,
                 "applyRateControls": true,
                 "applyReputationControls": true,
-                "applySlowPostControls": true
+                "applySlowPostControls": true,
+                "applyUrlProtectionControls": true
             },
             "webApplicationFirewall": {
                 "ruleActions": [
@@ -8647,6 +8649,7 @@
             "name": "andrew",
             "hasRatePolicyWithApiKey": false,
             "securityControls": {
+                "applyAccountProtectionControls": false,
                 "applyApiConstraints": true,
                 "applyApplicationLayerControls": true,
                 "applyBotmanControls": true,
@@ -8654,7 +8657,8 @@
                 "applyNetworkLayerControls": true,
                 "applyRateControls": true,
                 "applyReputationControls": true,
-                "applySlowPostControls": true
+                "applySlowPostControls": true,
+                "applyUrlProtectionControls": true
             },
             "webApplicationFirewall": {
                 "ruleActions": [
@@ -9615,6 +9619,7 @@
             "name": "policy1",
             "hasRatePolicyWithApiKey": false,
             "securityControls": {
+                "applyAccountProtectionControls": false,
                 "applyApiConstraints": true,
                 "applyApplicationLayerControls": true,
                 "applyBotmanControls": true,

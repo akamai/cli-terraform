@@ -1,0 +1,86 @@
+{{ range .URLProtectionPolicies  -}}
+ resource "akamai_appsec_url_protection_policy" "{{escapeName .Name}}_{{ .URLProtectionPolicyID }}" {
+     config_id          = local.config_id
+     name = "{{ .Name }}"
+     max_rate_threshold = {{ .MaxRateThreshold }}
+     {{- if .Description }}
+        description = {{template "Text" .Description}}
+     {{- end }}
+     {{- if .BypassCondition }}
+     {{- if .BypassCondition.AtomicConditions }}
+         bypass_conditions = [
+             {{- range .BypassCondition.AtomicConditions }}
+               {
+                 type = "{{ .Type }}"
+                 {{- if .Names }}
+                 names = [{{toList .Names}}]
+                 {{- end }}
+                 {{- if .NameWildcard }}
+                 name_wildcard = {{ .NameWildcard }}
+                 {{- end }}
+                 {{- if .Values }}
+                 values = [{{toList .Values}}]
+                 {{- end }}
+                 {{- if .ValueCase }}
+                 value_case_sensitive = {{ .ValueCase }}
+                 {{- end }}
+                 {{- if .ValueWildcard }}
+                 value_wildcard = {{ .ValueWildcard }}
+                 {{- end }}
+               },
+             {{- end }}
+         ]
+     {{- end }}
+     {{- end }}
+     {{- if .APIDefinitions }}
+         api_definitions = [
+             {{- range .APIDefinitions }}
+               {
+                 api_definition_id = {{ .APIDefinitionID }}
+                 defined_resources = {{ .DefinedResources }}
+                 resource_ids = [{{range $i, $v := .ResourceIDs}}{{if $i}}, {{end}}{{$v}}{{end}}]
+                 undefined_resources = {{ .UndefinedResources }}
+               },
+             {{- end }}
+         ]
+     {{- end }}
+     {{- if .HostnamePaths }}
+         hostname_paths = [
+              {{- range .HostnamePaths }}
+                {
+                  hostname = "{{ .Hostname }}"
+                  paths    = [{{toList .Paths}}]
+                },
+              {{- end }}
+         ]
+     {{- end }}
+     {{- if .IntelligentLoadShedding }}
+         intelligent_load_shedding = {
+              hits_per_sec = {{ .SheddingThresholdHitsPerSec }}
+              categories = [
+                    {{- range .Categories }}
+                      {{- if ne .Type "CLIENT_LIST" }}
+                      "{{ .Type }}",
+                      {{- end }}
+                    {{- end }}
+              ]
+              custom_criteria = [
+                    {{- range .Categories }}
+                      {{- if eq .Type "CLIENT_LIST" }}
+                      {
+                        type = "{{ .Type }}"
+                        list_ids = [{{ toList .ListIDs }}]
+                        positive_match = {{ .PositiveMatch }}
+                      },
+                      {{- end }}
+                    {{- end }}
+              ]
+         }
+     {{- end }}
+ }
+
+{{ end -}}
+
+
+
+
