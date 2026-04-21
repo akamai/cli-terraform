@@ -15,12 +15,10 @@
 
 
 
-
-
-
-
-
-
+* Appsec (Beta)
+  * Added resource `akamai_appsec_waf_ruleset` to the `export-appsec` command.
+  * Removed resource `akamai_appsec_rule` from the `export-appsec` command.
+  * Removed resource `akamai_appsec_attack_group` from the `export-appsec` command.
 
 
 
