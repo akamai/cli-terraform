@@ -1,0 +1,34 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/reportinggroups.TFData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 10.1.0"
+    }
+  }
+  required_version = ">= 1.0"
+}
+
+provider "akamai" {
+  edgerc         = var.edgerc_path
+  config_section = var.config_section
+}
+
+resource "akamai_reportinggroups_group" "{{.Group.ResourceName}}" {
+  reporting_group_name = "{{.Group.ReportingGroupName}}"
+
+  access_group = {
+    contract_id = "{{.Group.AccessContractID}}"
+  }
+
+  contract = {
+    contract_id = "{{.Group.ContractID}}"
+    cp_codes = [
+    {{- range .Group.CPCodes}}
+      {
+        cp_code_id = "{{.}}"
+      },
+    {{- end}}
+    ]
+  }
+}

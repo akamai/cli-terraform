@@ -10,6 +10,9 @@
 * General
   * Added the `product_id` in the `akamai_edge_hostname` if it exists ([#102](https://github.com/akamai/cli-terraform/issues/102)).
 
+* Reporting Groups
+  * Added `export-reportinggroup` command to export `akamai_reportinggroups_group` Terraform configuration.
+
 
 
 

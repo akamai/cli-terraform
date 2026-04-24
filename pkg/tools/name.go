@@ -3,6 +3,7 @@ package tools
 import (
 	"regexp"
 	"strings"
+	"unicode"
 )
 
 var matchFirstCap = regexp.MustCompile("([^ _])([A-Z][a-z]+)")
@@ -25,4 +26,16 @@ func ToSnakeCase(str string) string {
 func TerraformName(str string) string {
 	str = nameRegexp.ReplaceAllString(str, "-")
 	return ToSnakeCase(str)
+}
+
+// SanitizeResourceName replaces dots and spaces with underscores
+// and ensures the result starts with a letter or underscore,
+// making it a valid Terraform resource name.
+func SanitizeResourceName(name string) string {
+	name = strings.ReplaceAll(name, ".", "_")
+	name = strings.ReplaceAll(name, " ", "_")
+	if len(name) > 0 && !unicode.IsLetter(rune(name[0])) && name[0] != '_' {
+		name = "_" + name
+	}
+	return name
 }

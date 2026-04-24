@@ -1,0 +1,2 @@
+terraform init
+terraform import akamai_reportinggroups_group.test_reporting_group 42
