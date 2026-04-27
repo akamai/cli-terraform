@@ -1,0 +1,8 @@
+{
+  "Zone": "example.com",
+  "RecordSets": {
+    "abc.example.com": [
+      "TXT"
+    ]
+  }
+}

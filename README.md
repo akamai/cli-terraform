@@ -603,6 +603,7 @@ akamai terraform export-property-include "C-0N7RAC7" "my-property-include"
 ## export‑zone
 
 Export a Terraform configuration for your zone and its related resources.
+Exporting of configuration for zone of type `ALIAS` is currently not supported.
 
 ### Syntax
 

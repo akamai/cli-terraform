@@ -49,7 +49,8 @@
 
 
 
-
+* DNS
+  * Extended the validation and the documentation for the exporting of DNS zone of type `ALIAS`, as this operation is not supported. ([#94](https://github.com/akamai/cli-terraform/issues/94))
 
 
 

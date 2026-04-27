@@ -4,6 +4,7 @@ package dns
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -29,6 +30,7 @@ type zoneImportListStruct struct {
 }
 
 type configStruct struct {
+	zoneName               string
 	fetchConfig            fetchConfigStruct
 	tfWorkPath             string
 	shouldCreateImportList bool
@@ -42,6 +44,25 @@ type fetchConfigStruct struct {
 	ModSegment bool
 	NamesOnly  bool
 }
+
+var (
+	// ErrZoneRetrievalFailed is returned when zone retrieval fails
+	ErrZoneRetrievalFailed = errors.New("zone retrieval failed")
+	// ErrAliasZoneNotSupported is returned when attempting to export an ALIAS zone
+	ErrAliasZoneNotSupported = errors.New("exporting zone of type ALIAS is not supported")
+	// ErrFetchingZoneImportList is returned when reading zone resources file fails
+	ErrFetchingZoneImportList = errors.New("failed to read json zone resources file")
+	// ErrCreatingModulesFolder is returned when modules folder creation fails
+	ErrCreatingModulesFolder = errors.New("failed to create modules folder")
+	// ErrResourceListFileExists is returned when the resources list file already exists on disk
+	ErrResourceListFileExists = errors.New("resource list file exists, remove to continue")
+	// ErrZoneNamesRetrievalFailed is returned when zone names retrieval fails
+	ErrZoneNamesRetrievalFailed = errors.New("zone names retrieval failed")
+	// ErrZoneNameTypesRetrievalFailed is returned when zone name types retrieval fails
+	ErrZoneNameTypesRetrievalFailed = errors.New("zone name types retrieval failed")
+	// ErrRecordSetsRetrievalFailed is returned when record sets retrieval fails
+	ErrRecordSetsRetrievalFailed = errors.New("record sets retrieval failed")
+)
 
 var zoneName string
 var contractID string
@@ -67,21 +88,38 @@ func CmdCreateZone(c *cli.Context) error {
 	// uppercase characters cause issues with TF and the generated config
 	zoneName = strings.ToLower(c.Args().Get(0))
 
-	configuration := setConfiguration(c)
+	configuration := setConfiguration(c, zoneName)
 
+	edgercPath := edgegrid.GetEdgercPath(c)
+	edgercSection := edgegrid.GetEdgercSection(c)
+
+	if err := createZone(ctx, edgercPath, edgercSection, configDNS, configuration); err != nil {
+		if errors.Is(err, ErrAliasZoneNotSupported) {
+			return cli.Exit(color.RedString("%s", err.Error()), 2)
+		}
+		return cli.Exit(color.RedString("Error exporting zone \"%s\": %s", zoneName, err), 1)
+	}
+	return nil
+}
+
+func createZone(ctx context.Context, edgercPath, edgercSection string, configDNS dns.DNS, configuration configStruct) error {
 	term := terminal.Get(ctx)
+
 	fmt.Println("Configuring Zone")
 	zoneObject, err := configDNS.GetZone(ctx, dns.GetZoneRequest{
-		Zone: zoneName,
+		Zone: configuration.zoneName,
 	})
 	if err != nil {
 		term.Spinner().Fail()
-		fmt.Println("Error: " + err.Error())
-		return cli.Exit(color.RedString("Zone retrieval failed"), 1)
+		return fmt.Errorf("%w: %w", ErrZoneRetrievalFailed, err)
+	}
+	if zoneObject.Type == "ALIAS" {
+		term.Spinner().Fail()
+		return ErrAliasZoneNotSupported
 	}
 	contractID = zoneObject.ContractID // grab for use later
 	// normalize zone name for zone resource name
-	resourceZoneName := normalizeResourceName(zoneName)
+	resourceZoneName := normalizeResourceName(configuration.zoneName)
 	if configuration.shouldCreateImportList {
 		err := createImportList(ctx, term, configDNS, resourceZoneName, configuration)
 		if err != nil {
@@ -95,14 +133,14 @@ func CmdCreateZone(c *cli.Context) error {
 		zoneImportList, err := retrieveZoneImportList(resourceZoneName, configuration)
 		if err != nil {
 			term.Spinner().Fail()
-			return cli.Exit(color.RedString("Failed to read json zone resources file"), 1)
+			return fmt.Errorf("%w: %w", ErrFetchingZoneImportList, err)
 		}
 		// if segmenting record sets by name, make sure module folder exists
 		if configuration.fetchConfig.ModSegment {
 			modulePath := filepath.Join(configuration.tfWorkPath, moduleFolder)
 			if !createDirectory(modulePath) {
 				term.Spinner().Fail()
-				return cli.Exit(color.RedString("Failed to create modules folder."), 1)
+				return ErrCreatingModulesFolder
 			}
 		}
 		term.Spinner().Start("Creating zone configuration file ")
@@ -112,8 +150,6 @@ func CmdCreateZone(c *cli.Context) error {
 			return err
 		}
 
-		edgercPath := edgegrid.GetEdgercPath(c)
-		edgercSection := edgegrid.GetEdgercSection(c)
 		err = createDNSVarsConfig(term, configuration.tfWorkPath, edgercPath, edgercSection)
 		if err != nil {
 			return err
@@ -155,7 +191,7 @@ func createImportList(ctx context.Context, term terminal.Terminal, configDNS dns
 	return nil
 }
 
-func setConfiguration(c *cli.Context) configStruct {
+func setConfiguration(c *cli.Context, zoneName string) configStruct {
 	var executionConfig = configStruct{
 		tfWorkPath: "./",
 	}
@@ -185,6 +221,7 @@ func setConfiguration(c *cli.Context) configStruct {
 	if c.IsSet("importscript") {
 		executionConfig.importScript = true
 	}
+	executionConfig.zoneName = zoneName
 
 	return executionConfig
 }
@@ -220,7 +257,7 @@ func createZoneConfigFile(ctx context.Context, zoneImportList *zoneImportListStr
 	// process RecordSets.
 	fullZoneConfigMap, err = processRecordSets(ctx, configDNS, configImportList.Zone, resourceZoneName, zoneTypeMap, fileUtils, configuration)
 	if err != nil {
-		return cli.Exit(color.RedString("Failed to process recordsets."), 1)
+		return err
 	}
 	// Save config map for import script generation
 	resourceConfigFilename := createResourceConfigFilename(resourceZoneName, configuration.tfWorkPath)
@@ -333,7 +370,7 @@ func createImportScript(resourceZoneName string, term terminal.Terminal, configu
 func createZoneResourceListFile(resourceZoneName string, recordSets map[string]Types, tfWorkPath string) error {
 	importListFilename := createImportListFilename(resourceZoneName, tfWorkPath)
 	if _, err := os.Stat(importListFilename); err == nil {
-		return cli.Exit(color.RedString("Resource list file exists. Remove to continue."), 1)
+		return ErrResourceListFileExists
 	}
 	fullZoneImportList = &zoneImportListStruct{}
 	fullZoneImportList.Zone = zoneName
@@ -376,7 +413,7 @@ func inventorZone(ctx context.Context, configDNS dns.DNS, configuration configSt
 			Zone: zoneName,
 		})
 		if err != nil {
-			return nil, cli.Exit(color.RedString("Zone Name retrieval failed"), 1)
+			return nil, fmt.Errorf("%w: %w", ErrZoneNamesRetrievalFailed, err)
 		}
 		configuration.recordNames = recordsetNames.Names
 	}
@@ -389,7 +426,7 @@ func inventorZone(ctx context.Context, configDNS dns.DNS, configuration configSt
 				Zone:     zoneName,
 			})
 			if err != nil {
-				return nil, cli.Exit(color.RedString("Zone Name types retrieval failed"), 1)
+				return nil, fmt.Errorf("%w: %w", ErrZoneNameTypesRetrievalFailed, err)
 			}
 			recordSets[zName] = nameTypesResp.Types
 		}
