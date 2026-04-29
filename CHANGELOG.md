@@ -20,6 +20,17 @@
 
 
 
+* CCM
+  * Added support for exporting the `geo_class` field in the `akamai_cloudcertificates_certificate` resource
+
+
+
+
+
+
+
+
+
 
 
 
