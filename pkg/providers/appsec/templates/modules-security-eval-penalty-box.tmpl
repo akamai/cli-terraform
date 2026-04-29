@@ -6,7 +6,7 @@ resource "akamai_appsec_eval_penalty_box" "{{ $policyName }}" {
   config_id              = local.config_id
   security_policy_id     = akamai_appsec_security_policy.{{ $policyName}}.security_policy_id
   penalty_box_protection = {{ .EvaluationPenaltyBox.PenaltyBoxProtection }}
-  penalty_box_action = {{ .EvaluationPenaltyBox.Action }}
+  penalty_box_action = "{{ .EvaluationPenaltyBox.Action }}"
     }
 {{ end -}}
 

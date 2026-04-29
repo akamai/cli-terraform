@@ -44,7 +44,8 @@
 
 ### BUG FIXES:
 
-
+* Appsec
+  * Fixed a bug where the penalty box action attribute value was not exported as a quoted string for the `akamai_appsec_eval_penalty_box` resource.
 
 
 * DNS

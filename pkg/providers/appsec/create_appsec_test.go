@@ -333,6 +333,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"modules-security-main.tmpl":                   filepath.Join(security, "main.tf"),
 		"modules-security-malware-policies.tmpl":       filepath.Join(security, "malware-policies.tf"),
 		"modules-security-malware-policy-actions.tmpl": filepath.Join(security, "malware-policy-actions.tf"),
+		"modules-security-eval-penalty-box.tmpl":       filepath.Join(security, "eval-penalty-box.tf"),
 		"modules-security-penalty-box.tmpl":            filepath.Join(security, "penalty-box.tf"),
 		"modules-security-policies.tmpl":               filepath.Join(security, "policies.tf"),
 		"modules-security-protections.tmpl":            filepath.Join(security, "protections.tf"),
