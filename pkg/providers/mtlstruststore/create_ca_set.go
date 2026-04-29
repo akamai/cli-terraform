@@ -140,7 +140,7 @@ func createCASet(ctx context.Context, params createCASetParams) (e error) {
 		}
 	}()
 
-	id, err := findCASetID(ctx, params.client, params.name)
+	id, err := findNotDeletedCASetID(ctx, params.client, params.name)
 	if err != nil {
 		return fmt.Errorf("%w: %w", ErrFindingCASet, err)
 	}
@@ -184,27 +184,34 @@ func createCASet(ctx context.Context, params createCASetParams) (e error) {
 	return nil
 }
 
-func findCASetID(ctx context.Context, client mtlstruststore.MTLSTruststore, caSetName string) (string, error) {
+func findNotDeletedCASetID(ctx context.Context, client mtlstruststore.MTLSTruststore, caSetName string) (string, error) {
 	caSets, err := client.ListCASets(ctx, mtlstruststore.ListCASetsRequest{
 		CASetNamePrefix: caSetName,
+		CASetStatuses:   []string{mtlstruststore.CASetStatusNotDeleted},
 	})
 	if err != nil {
-		return "", fmt.Errorf("failed to list CA sets: %w", err)
+		return "", fmt.Errorf("could not find CA set with the name '%s' and status '%s'. API error: %w",
+			caSetName, mtlstruststore.CASetStatusNotDeleted, err)
 	}
 
-	var matchingSets []mtlstruststore.CASetResponse
+	var matchingIDs []string
 	for _, caSet := range caSets.CASets {
-		if caSet.CASetStatus == "NOT_DELETED" && caSet.CASetName == caSetName {
-			matchingSets = append(matchingSets, caSet)
+		if caSet.CASetName == caSetName {
+			matchingIDs = append(matchingIDs, caSet.CASetID)
 		}
 	}
-	if len(matchingSets) == 0 {
-		return "", fmt.Errorf("no CA set found with name '%s'", caSetName)
+
+	switch len(matchingIDs) {
+	case 0:
+		return "", fmt.Errorf("no CA set found with the name '%s' and status '%s'",
+			caSetName, mtlstruststore.CASetStatusNotDeleted)
+	case 1:
+		return matchingIDs[0], nil
+	default:
+		return "", fmt.Errorf("multiple CA sets found with the name '%s' and status '%s': %v. "+
+			"Use the ID to fetch a specific CA set",
+			caSetName, mtlstruststore.CASetStatusNotDeleted, matchingIDs)
 	}
-	if len(matchingSets) > 1 {
-		return "", fmt.Errorf("multiple CA sets found with name '%s'", caSetName)
-	}
-	return matchingSets[0].CASetID, nil
 }
 
 func versionEquals(a, b *int64) bool {
