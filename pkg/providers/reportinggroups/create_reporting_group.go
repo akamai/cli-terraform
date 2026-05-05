@@ -125,7 +125,7 @@ func createReportingGroup(ctx context.Context, params createReportingGroupParams
 	return nil
 }
 
-func findReportingGroup(ctx context.Context, client reportinggroups.ReportingGroups, name string) (*reportinggroups.ReportingGroupItem, error) {
+func findReportingGroup(ctx context.Context, client reportinggroups.ReportingGroups, name string) (*reportinggroups.ReportingGroup, error) {
 	list, err := client.ListReportingGroups(ctx, reportinggroups.ListReportingGroupsRequest{
 		ReportingGroupName: name,
 	})
@@ -133,7 +133,7 @@ func findReportingGroup(ctx context.Context, client reportinggroups.ReportingGro
 		return nil, fmt.Errorf("%w: %w", ErrFetchingReportingGroup, err)
 	}
 
-	var matches []reportinggroups.ReportingGroupItem
+	var matches []reportinggroups.ReportingGroup
 	for _, g := range list.Groups {
 		if g.ReportingGroupName == name {
 			matches = append(matches, g)
@@ -150,16 +150,16 @@ func findReportingGroup(ctx context.Context, client reportinggroups.ReportingGro
 	}
 }
 
-func buildTFData(edgercPath, configSection string, group *reportinggroups.ReportingGroupItem) (TFData, error) {
+func buildTFData(edgercPath, configSection string, group *reportinggroups.ReportingGroup) (TFData, error) {
 	if len(group.Contracts) != 1 {
 		return TFData{}, fmt.Errorf("%w: expected exactly one contract, got %d",
 			ErrInvalidReportingGroup, len(group.Contracts))
 	}
 
 	contract := group.Contracts[0]
-	cpCodes := make([]string, 0, len(contract.CpCodes))
-	for _, cp := range contract.CpCodes {
-		cpCodes = append(cpCodes, strconv.FormatInt(cp.CpCodeID, 10))
+	cpCodes := make([]string, 0, len(contract.CPCodes))
+	for _, cp := range contract.CPCodes {
+		cpCodes = append(cpCodes, strconv.FormatInt(cp.CPCodeID, 10))
 	}
 
 	return TFData{

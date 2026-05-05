@@ -19,8 +19,8 @@ type groupMockData struct {
 	name             string
 	accessContractID string
 	contractID       string
-	cpCodes          []reportinggroups.CpCodeModel
-	listResponse     []reportinggroups.ReportingGroupItem
+	cpCodes          []reportinggroups.CPCode
+	listResponse     []reportinggroups.ReportingGroup
 }
 
 func defaultGroupMockData() groupMockData {
@@ -29,27 +29,27 @@ func defaultGroupMockData() groupMockData {
 		name:             "test reporting group",
 		accessContractID: "1-ACCGRP",
 		contractID:       "1-CNTR",
-		cpCodes: []reportinggroups.CpCodeModel{
-			{CpCodeID: 12345, CpCodeName: "My CP Code"},
+		cpCodes: []reportinggroups.CPCode{
+			{CPCodeID: 12345, CPCodeName: "My CP Code"},
 		},
 	}
 }
 
-func (d *groupMockData) buildListResponse() []reportinggroups.ReportingGroupItem {
+func (d *groupMockData) buildListResponse() []reportinggroups.ReportingGroup {
 	if d.listResponse != nil {
 		return d.listResponse
 	}
-	return []reportinggroups.ReportingGroupItem{
+	return []reportinggroups.ReportingGroup{
 		{
 			ReportingGroupID:   d.id,
 			ReportingGroupName: d.name,
-			AccessGroup: reportinggroups.AccessGroupModel{
+			AccessGroup: reportinggroups.AccessGroup{
 				ContractID: d.accessContractID,
 			},
-			Contracts: []reportinggroups.ContractModel{
+			Contracts: []reportinggroups.Contract{
 				{
 					ContractID: d.contractID,
-					CpCodes:    d.cpCodes,
+					CPCodes:    d.cpCodes,
 				},
 			},
 		},
@@ -84,10 +84,10 @@ func TestProcessReportingGroupsTemplates(t *testing.T) {
 		"multiple cp codes": {
 			dir: "multiple_cp_codes",
 			init: func(d *groupMockData, m *reportinggroups.Mock) {
-				d.cpCodes = []reportinggroups.CpCodeModel{
-					{CpCodeID: 11111, CpCodeName: "CP Code One"},
-					{CpCodeID: 22222, CpCodeName: "CP Code Two"},
-					{CpCodeID: 33333, CpCodeName: "CP Code Three"},
+				d.cpCodes = []reportinggroups.CPCode{
+					{CPCodeID: 11111, CPCodeName: "CP Code One"},
+					{CPCodeID: 22222, CPCodeName: "CP Code Two"},
+					{CPCodeID: 33333, CPCodeName: "CP Code Three"},
 				}
 				d.mockListReportingGroups(m, nil)
 			},
@@ -115,19 +115,19 @@ func TestProcessReportingGroupsTemplates(t *testing.T) {
 		},
 		"error group not found": {
 			init: func(d *groupMockData, m *reportinggroups.Mock) {
-				d.listResponse = []reportinggroups.ReportingGroupItem{}
+				d.listResponse = []reportinggroups.ReportingGroup{}
 				d.mockListReportingGroups(m, nil)
 			},
 			withError: `error finding reporting group: no reporting group found with name "test reporting group"`,
 		},
 		"error no contracts in group": {
 			init: func(d *groupMockData, m *reportinggroups.Mock) {
-				d.listResponse = []reportinggroups.ReportingGroupItem{
+				d.listResponse = []reportinggroups.ReportingGroup{
 					{
 						ReportingGroupID:   d.id,
 						ReportingGroupName: d.name,
-						AccessGroup:        reportinggroups.AccessGroupModel{ContractID: d.accessContractID},
-						Contracts:          []reportinggroups.ContractModel{},
+						AccessGroup:        reportinggroups.AccessGroup{ContractID: d.accessContractID},
+						Contracts:          []reportinggroups.Contract{},
 					},
 				}
 				d.mockListReportingGroups(m, nil)
@@ -136,14 +136,14 @@ func TestProcessReportingGroupsTemplates(t *testing.T) {
 		},
 		"error multiple contracts in group": {
 			init: func(d *groupMockData, m *reportinggroups.Mock) {
-				d.listResponse = []reportinggroups.ReportingGroupItem{
+				d.listResponse = []reportinggroups.ReportingGroup{
 					{
 						ReportingGroupID:   d.id,
 						ReportingGroupName: d.name,
-						AccessGroup:        reportinggroups.AccessGroupModel{ContractID: d.accessContractID},
-						Contracts: []reportinggroups.ContractModel{
-							{ContractID: d.contractID, CpCodes: d.cpCodes},
-							{ContractID: "1-OTHER", CpCodes: d.cpCodes},
+						AccessGroup:        reportinggroups.AccessGroup{ContractID: d.accessContractID},
+						Contracts: []reportinggroups.Contract{
+							{ContractID: d.contractID, CPCodes: d.cpCodes},
+							{ContractID: "1-OTHER", CPCodes: d.cpCodes},
 						},
 					},
 				}
@@ -153,15 +153,15 @@ func TestProcessReportingGroupsTemplates(t *testing.T) {
 		},
 		"error multiple groups with same name": {
 			init: func(d *groupMockData, m *reportinggroups.Mock) {
-				item := reportinggroups.ReportingGroupItem{
+				item := reportinggroups.ReportingGroup{
 					ReportingGroupID:   d.id,
 					ReportingGroupName: d.name,
-					AccessGroup:        reportinggroups.AccessGroupModel{ContractID: d.accessContractID},
-					Contracts: []reportinggroups.ContractModel{
-						{ContractID: d.contractID, CpCodes: d.cpCodes},
+					AccessGroup:        reportinggroups.AccessGroup{ContractID: d.accessContractID},
+					Contracts: []reportinggroups.Contract{
+						{ContractID: d.contractID, CPCodes: d.cpCodes},
 					},
 				}
-				d.listResponse = []reportinggroups.ReportingGroupItem{item, item}
+				d.listResponse = []reportinggroups.ReportingGroup{item, item}
 				d.mockListReportingGroups(m, nil)
 			},
 			withError: `error finding reporting group: multiple reporting groups found with name "test reporting group"`,
