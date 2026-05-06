@@ -145,24 +145,25 @@ Global Flags:
 
 <ul>
   <li><a href="#export-apidefinitions">export-apidefinitions</a></li>
-  <li><a href="#exportappsec">export-appsec</a></li>
-  <li><a href="#exportclientlist">export-clientlist</a></li>
+  <li><a href="#export-appsec">export-appsec</a></li>
+  <li><a href="#export-clientlist">export-clientlist</a></li>
   <li><a href="#export-cloudaccess">export-cloudaccess</a></li>
   <li><a href="#export-cloudcertificate">export-cloudcertificate</a></li>
-  <li><a href="#exportcloudlets-policy">export-cloudlets-policy</a></li>
-  <li><a href="#exportcloudwrapper">export-cloudwrapper</a></li>
-  <li><a href="#exportcps">export-cps</a></li>
-  <li><a href="#exportdomain">export-domain</a></li>
-  <li><a href="#exportdomainownership">export-domainownership</a></li>
-  <li><a href="#exportedgekv">export-edgekv</a></li>
-  <li><a href="#exportedgeworker">export-edgeworker</a></li>
-  <li><a href="#exportiam">export-iam</a></li>
-  <li><a href="#exportimaging">export-imaging</a></li>
-  <li><a href="#exportmtls-keystore">export-mtls-keystore</a></li>
+  <li><a href="#export-cloudlets-policy">export-cloudlets-policy</a></li>
+  <li><a href="#export-cloudwrapper">export-cloudwrapper</a></li>
+  <li><a href="#export-cps">export-cps</a></li>
+  <li><a href="#export-domain">export-domain</a></li>
+  <li><a href="#export-domainownership">export-domainownership</a></li>
+  <li><a href="#export-edgekv">export-edgekv</a></li>
+  <li><a href="#export-edgeworker">export-edgeworker</a></li>
+  <li><a href="#export-iam">export-iam</a></li>
+  <li><a href="#export-imaging">export-imaging</a></li>
+  <li><a href="#export-mtls-keystore">export-mtls-keystore</a></li>
   <li><a href="#export-mtls-truststore">export-mtls-truststore</a></li>
-  <li><a href="#exportproperty">export-property</a></li>
-  <li><a href="#exportproperty-include">export-property-include</a></li>
-  <li><a href="#exportzone">export-zone</a></li>
+  <li><a href="#export-property">export-property</a></li>
+  <li><a href="#export-property-include">export-property-include</a></li>
+  <li><a href="#export-reportinggroup">export-reportinggroup</a></li>
+  <li><a href="#export-zone">export-zone</a></li>
 </ul>
 
 ## Common flags
@@ -195,7 +196,7 @@ Export a Terraform configuration for your API definitions.
 ### Syntax
 
 ```shell
-akamai terraform [global flags] export-apidefinitions [flags] <api_id>
+akamai [global flags] terraform export-apidefinitions [command flags] <api_id>
 ```
 
 ### Basic usage
@@ -211,7 +212,7 @@ akamai terraform export-apidefinitions 12345
 | `--version` (integer) | The API's version number. If not specified, it exports the API's `latest` version by default. | `akamai terraform export-apidefinitions --version 1 12345` |
 | `--format` (string) | The format of the API file, either `openapi` or `json`. Defaults to `openapi` if not specified. | `akamai terraform export-apidefinitions --format "openapi" 12345` |
 
-## export‑appsec
+## export-appsec
 
 Export a Terraform declarative security configuration and its targets and policies in JSON.
 
@@ -224,10 +225,10 @@ akamai [global flags] terraform export-appsec [command flags] <security configur
 ### Basic usage
 
 ```shell
-akamai terraform export‑appsec "my-security-config"
+akamai terraform export-appsec "my-security-config"
 ```
 
-## export‑clientlist
+## export-clientlist
 
 Export a Terraform configuration for your client list.
 
@@ -303,7 +304,7 @@ akamai [global flags] terraform export-cloudcertificate [command flags] <cloud_c
 akamai terraform export-cloudcertificate "my-cloudcertificate"
 ```
 
-## export‑cloudlets-policy
+## export-cloudlets-policy
 
 Export a Terraform configuration for your cloudlet policy.
 
@@ -323,7 +324,7 @@ akamai [global flags] terraform export-cloudlets-policy [command flags] <policy_
 akamai terraform export-cloudlets-policy "my-policy"
 ```
 
-## export‑cloudwrapper
+## export-cloudwrapper
 
 Export a Terraform configuration for your cloud wrapper.
 
@@ -339,7 +340,7 @@ akamai [global flags] terraform export-cloudwrapper [command flags] <config_id>
 akamai terraform export-cloudwrapper 12345
 ```
 
-## export‑cps
+## export-cps
 
 Export a Terraform configuration for your certificate.
 
@@ -355,7 +356,7 @@ akamai [global flags] terraform export-cps [command flags] <enrollment_id> <cont
 akamai terraform export-cps "12345" "C-0N7RAC7"
 ```
 
-## export‑domain
+## export-domain
 
 Export a Terraform configuration for your domain.
 
@@ -373,7 +374,7 @@ akamai [global flags] terraform export-domain [command flags] <domain>
 akamai terraform export-domain "my-domain"
 ```
 
-## export‑domainownership
+## export-domainownership
 
 Export a Terraform configuration for your domain ownership.
 
@@ -397,7 +398,7 @@ akamai [global flags] terraform export-domainownership [command flags] <domain_n
 akamai terraform export-domainownership "my-domain:HOST,another-domain"
 ```
 
-## export‑edgekv
+## export-edgekv
 
 Export a Terraform configuration for your namespace and network's EdgeKV.
 
@@ -413,7 +414,7 @@ akamai [global flags] terraform export-edgekv [command flags] <namespace_name> <
 akamai terraform export-edgekv "my-edgekv" "staging"
 ```
 
-## export‑edgeworker
+## export-edgeworker
 
 Export a Terraform configuration for your edgeworker's code bundle in `.tgz` format.
 
@@ -435,7 +436,7 @@ akamai terraform export-edgeworker 12345
 | ------- | --------- | --------- |
 | `--bundlepath` (string) | Sets the path to a directory in which you want to store the EdgeWorkers `.tgz` code bundle. The default is your active directory. | `akamai terraform export-edgeworker --bundlepath "path/to/your/directory" 12345` |
 
-## export‑iam
+## export-iam
 
 Export a Terraform configuration for users, groups, roles, IP allowlist, and CIDR block resources. Use additional options to narrow down your results to specific resources.
 
@@ -468,7 +469,7 @@ akamai terraform export-iam all
 | ------- | --------- | --------- |
 | `--only` (boolean) | An advanced option for the `group`, `role`, and `user` subcommands. Exports only specific information. | `akamai terraform export-iam user --only "jsmith@email.com"` |
 
-## export‑imaging
+## export-imaging
 
 Export a Terraform configuration for your imaging policy in JSON.
 
@@ -491,7 +492,7 @@ akamai terraform export-imaging "C-0N7RAC7" "my-policy-set_1234"
 | `--policy-as-hcl` (boolean) | Exports your imaging policy with rules in HCL format. | `akamai terraform export-imaging --policy-as-hcl "C-0N7RAC7" "my-policy-set_12345"` |
 | `--policy-json-dir` (string) | Sets the path to a directory in which you want to store your policy in JSON format. The default is your active directory.| `akamai terraform export-imaging --policy-json-dir "path/to/your/directory" "C-0N7RAC7" "my-policy-set_12345"` |
 
-## export‑mtls-keystore
+## export-mtls-keystore
 
 Export a Terraform configuration for your mTLS client certificate.
 
@@ -539,7 +540,7 @@ akamai terraform export-mtls-truststore "my-ca-set-name"
 | ------- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
 | `--version` (string) | Exports your declarative CA set configuration with possible activations for a specific CA set version. If provided, must be a positive integer. <br /><br /> <blockquote><b>Notes:</b> <ul><li>If you don't provide the <code>--version</code> flag, by default, it exports the <code>latest</code> CA set version whether it is active or not.</li><li>Since the `akamai_mtlstruststore_ca_set` resource always represents the latest version of a CA set, generating configuration for an older version will result in a non-empty Terraform plan.</li></ul></blockquote> | `akamai terraform export-mtls-truststore --version "1" "my-ca-set-name"` |
 
-## export‑property
+## export-property
 
 Export a Terraform configuration for your property along with its JSON-formatted rules, but without the includes. Use the [`export-property-include`](#exportproperty-include) command to export your includes.
 
@@ -571,7 +572,7 @@ akamai terraform export-property "my-property"
 | `--split-depth` (integer)| Exports rules into a dedicated module. Each rule will be placed in a separate file up to a specified nesting level. For example, `--split-depth=1` means that the default/root rule and all its direct children will be placed in dedicated files. Rules with higher nesting levels will be placed in a file of their closest ancestor. <br /><br /> <blockquote><b>Note:</b> You can use this flag only along with the <code>--rules-as-hcl</code> flag.</blockquote> | `akamai terraform export-property --split-depth=1 --rules-as-hcl "my-property-name"` |
 | `--rule-format` (string) | Exports your property configuration using the specified rule format version. This only affects the exported configuration and doesn't modify the property on the server. <br /><br /> <blockquote><b>Notes:</b><ul><li>Must be a valid dated rule format, for example, <code>v2024-02-12</code>. The <code>latest</code> value is allowed only for properties that use the JSON rule format.</li><li>To protect your settings for behaviors and criteria that aren't backwards compatible, updating your rule format after import only works with versions greater than the one you're on.</li></ul></blockquote> | `akamai terraform export-property --rule-format "v2024-02-12" "my-property-name"` |
 
-## export‑property-include
+## export-property-include
 
 Export a Terraform configuration for your property's include and its JSON-formatted rules.
 
@@ -600,10 +601,27 @@ akamai terraform export-property-include "C-0N7RAC7" "my-property-include"
 | `--split-depth` (integer)| Exports rules into a dedicated module. Each rule will be placed in a separate file up to a specified nesting level. For example, `--split-depth=1` means that the default/root rule and all its direct children will be placed in dedicated files. Rules with higher nesting levels will be placed in a file of their closest ancestor. <br /><br /> <blockquote><b>Note:</b> You can use this flag only along with the <code>--rules-as-hcl</code> flag.</blockquote> | `akamai terraform export-property-include --split-depth=1 --rules-as-hcl "C-0N7RAC7" "my-property-include"` |
 | `--rule-format` (string) | Exports your property include configuration using the specified rule format version. This affects only the exported configuration and doesn't modify the include on the server. <br /><br /> <blockquote><b>Notes:</b><ul><li> Must be a valid dated rule format, for example, <code>v2024-02-12</code>. Cannot use <code>latest</code>.</li><li>To protect your settings for behaviors and criteria that aren't backwards compatible, updating your rule format after import only works with versions greater than the one you're on.</li></ul></blockquote> | `akamai terraform export-property-include --rule-format "v2024-02-12" "C-0N7RAC7" "my-property-include"` |
 
-## export‑zone
+## export-reportinggroup
+
+Export a Terraform configuration for your reporting group.
+
+### Syntax
+
+```shell
+akamai [global flags] terraform export-reportinggroup [command flags] <reporting_group_name>
+```
+
+### Basic usage
+
+```shell
+akamai terraform export-reportinggroup "my-reporting-group"
+```
+
+## export-zone
 
 Export a Terraform configuration for your zone and its related resources.
-Exporting of configuration for zone of type `ALIAS` is currently not supported.
+
+> **Note:** Exporting a configuration for an `ALIAS` zone isn't currently supported.
 
 ### Syntax
 
@@ -621,8 +639,8 @@ akamai terraform export-zone --resources "my-dns-zone.com"
 
 | Flag | Description | Example |
 | ------- | --------- | --------- |
-| `--resources` (boolean) | Generates a JSON-formatted resource file. `‑‑createconfig` uses this file as input. | `akamai terraform export-zone --resources "my-dns-zone.com"` |
-| `--createconfig` (boolean) | Generates configurations based on the values in the output files from `‑‑resources`. | `akamai terraform export-zone --createconfig "my-dns-zone.com"` |
+| `--resources` (boolean) | Generates a JSON-formatted resource file. `--createconfig` uses this file as input. | `akamai terraform export-zone --resources "my-dns-zone.com"` |
+| `--createconfig` (boolean) | Generates configurations based on the values in the output files from `--resources`. | `akamai terraform export-zone --createconfig "my-dns-zone.com"` |
 | `--importscript` (boolean) | Generates an import script for the generated zone configuration. | `akamai terraform export-zone --importscript "my-dns-zone.com"`  |
 
 ### Command flags to use with `--resources` and `--createconfig` only
