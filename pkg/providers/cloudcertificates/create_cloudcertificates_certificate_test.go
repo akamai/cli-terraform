@@ -24,7 +24,6 @@ type (
 		keyType              string
 		keySize              string
 		secureNetwork        string
-		geoClass             string
 		sans                 []string
 		certificateStatus    string
 		subject              *cloudcertificates.Subject
@@ -92,32 +91,6 @@ func TestProcessCloudCertificateTemplates(t *testing.T) {
 			dir: "active",
 			mockData: getCertificateMockData("ACTIVE", "test-name.example.com1234567890",
 				&signedCertificatePEM, &trustChainPEM),
-			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
-				d.mockListCertificates(m)
-				d.mockGetCertificate(m)
-			},
-		},
-		"certificate with default geo class": {
-			dir: "active",
-			mockData: func() certificateMockData {
-				d := getCertificateMockData("ACTIVE", "test-name.example.com1234567890",
-					&signedCertificatePEM, &trustChainPEM)
-				d.geoClass = "STANDARD_WORLDWIDE"
-				return d
-			}(),
-			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
-				d.mockListCertificates(m)
-				d.mockGetCertificate(m)
-			},
-		},
-		"certificate with non default geo class": {
-			dir: "non_default_geo_class",
-			mockData: func() certificateMockData {
-				d := getCertificateMockData("ACTIVE", "test-name.example.com1234567890",
-					&signedCertificatePEM, &trustChainPEM)
-				d.geoClass = "CONTIGUOUS_US"
-				return d
-			}(),
 			init: func(d *certificateMockData, m *cloudcertificates.Mock) {
 				d.mockListCertificates(m)
 				d.mockGetCertificate(m)
@@ -366,7 +339,6 @@ func getCertificateMockData(certStat, name string, signedCertificate, trustChain
 		keyType:           "RSA",
 		keySize:           "2048",
 		secureNetwork:     "ENHANCED_TLS",
-		geoClass:          "STANDARD_WORLDWIDE",
 		sans:              []string{"test.example.com", "test.example2.com"},
 		certificateStatus: certStat,
 		subject: &cloudcertificates.Subject{
@@ -394,7 +366,6 @@ func (d *certificateMockData) mockListCertificates(m *cloudcertificates.Mock) {
 				KeyType:           cloudcertificates.CryptographicAlgorithm(d.keyType),
 				KeySize:           cloudcertificates.KeySize(d.keySize),
 				SecureNetwork:     d.secureNetwork,
-				GeoClass:          cloudcertificates.GeoClass(d.geoClass),
 				SANs:              d.sans,
 				CertificateStatus: d.certificateStatus,
 				Subject:           d.subject,
@@ -414,7 +385,6 @@ func (d *certificateMockData) mockGetCertificate(m *cloudcertificates.Mock) {
 			KeyType:              cloudcertificates.CryptographicAlgorithm(d.keyType),
 			KeySize:              cloudcertificates.KeySize(d.keySize),
 			SecureNetwork:        d.secureNetwork,
-			GeoClass:             cloudcertificates.GeoClass(d.geoClass),
 			SANs:                 d.sans,
 			CertificateStatus:    d.certificateStatus,
 			Subject:              d.subject,

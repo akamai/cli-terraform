@@ -45,7 +45,6 @@ type (
 		KeyType              string
 		KeySize              string
 		SecureNetwork        string
-		GeoClass             string
 		SANs                 []string
 		CertificateStatus    string
 		Subject              *cloudcertificates.Subject
@@ -201,7 +200,6 @@ func populateTFData(params createCloudCertificateParams, cert cloudcertificates.
 			KeyType:              string(cert.KeyType),
 			KeySize:              string(cert.KeySize),
 			SecureNetwork:        cert.SecureNetwork,
-			GeoClass:             string(cert.GeoClass),
 			SANs:                 cert.SANs,
 			CertificateStatus:    cert.CertificateStatus,
 			Subject:              subject,

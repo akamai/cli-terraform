@@ -20,9 +20,6 @@ resource "akamai_cloudcertificates_certificate" "{{ .Certificate.ResourceName }}
   key_size       = "{{.Certificate.KeySize}}"
   key_type       = "{{.Certificate.KeyType}}"
   secure_network = "{{.Certificate.SecureNetwork}}"
-  {{- if and .Certificate.GeoClass (ne .Certificate.GeoClass "STANDARD_WORLDWIDE")}}
-  geo_class      = "{{.Certificate.GeoClass}}"
-  {{- end}}
   sans = [{{range $index, $element := .Certificate.SANs}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
   {{- with .Certificate.Subject}}
   subject = {
