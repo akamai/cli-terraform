@@ -48,13 +48,13 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zclconf/go-cty v1.15.1 // indirect
 	go.uber.org/ratelimit v0.3.1 // indirect
-	golang.org/x/mod v0.31.0 // indirect
-	golang.org/x/net v0.49.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/term v0.39.0 // indirect
-	golang.org/x/text v0.33.0 // indirect
-	golang.org/x/tools v0.40.0 // indirect
+	golang.org/x/mod v0.35.0 // indirect
+	golang.org/x/net v0.53.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/term v0.42.0 // indirect
+	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/tools v0.44.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
@@ -63,6 +63,7 @@ require (
 //replace github.com/akamai/cli/v2 => ../cli
 replace (
 	github.com/cloudflare/circl v1.6.1 => github.com/cloudflare/circl v1.6.3 // Fix security vulnerability; can be removed once github.com/akamai/cli/v2 bumps this dependency
-	github.com/go-git/go-git/v5 v5.16.4 => github.com/go-git/go-git/v5 v5.16.5 // Fix security vulnerability; can be removed once github.com/akamai/cli/v2 bumps this dependency
+	github.com/go-git/go-git/v5 v5.16.4 => github.com/go-git/go-git/v5 v5.18.0 // Fix security vulnerability; can be removed once github.com/akamai/cli/v2 bumps this dependency
 	github.com/stretchr/testify v1.4.0 => github.com/stretchr/testify v1.10.0 // Fix security vulnerability; can be removed once github.com/go-ozzo/ozzo-validation/v4 bumps this dependency
+	github.com/yuin/goldmark v1.4.13 => github.com/yuin/goldmark v1.8.2 // Fix security vulnerability; can be removed once golang.org/x/tools/v0.44.0 bumps this dependency
 )

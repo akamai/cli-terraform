@@ -1,101 +1,31 @@
 # RELEASE NOTES
 
-## X.XX.X (Month XX, XXXX)
+## 2.10.0 (May 13, 2026)
 
 ### FEATURES/ENHANCEMENTS:
 
-
-
-
 * General
+  * Updated various dependencies.
+
+* Appsec 
+  * WAF Ruleset (Beta)
+    * Added the `akamai_appsec_waf_ruleset` resource to the `export-appsec` command.
+    * Removed the `akamai_appsec_rule` resource from the `export-appsec` command.
+    * Removed the `akamai_appsec_attack_group` resource from the `export-appsec` command.
+
+* PAPI
   * Added the `product_id` to the `akamai_edge_hostname` resource if it exists ([#102](https://github.com/akamai/cli-terraform/issues/102)).
 
-* Reporting Groups
-  * Added `export-reportinggroup` command to export `akamai_reportinggroups_group` Terraform configuration.
-
-
-
-
-
-
-* Appsec (Beta)
-  * Added resource `akamai_appsec_waf_ruleset` to the `export-appsec` command.
-  * Removed resource `akamai_appsec_rule` from the `export-appsec` command.
-  * Removed resource `akamai_appsec_attack_group` from the `export-appsec` command.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+* Reporting Groups (Beta)
+  * Added the `export-reportinggroup` command to export the `akamai_reportinggroups_group` Terraform configuration.
 
 ### BUG FIXES:
 
 * Appsec
   * Fixed a bug where the penalty box action attribute value was not exported as a quoted string for the `akamai_appsec_eval_penalty_box` resource.
 
-
 * DNS
   * Extended the validation and documentation for exporting a DNS zone of the `ALIAS` type, as this operation is not supported ([#94](https://github.com/akamai/cli-terraform/issues/94)).
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## 2.9.0 (Apr 1, 2026)
 
