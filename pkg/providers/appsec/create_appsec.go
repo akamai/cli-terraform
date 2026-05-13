@@ -109,6 +109,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"modules-security-variables.tmpl":                filepath.Join(securityModulePath, "variables.tf"),
 		"modules-security-versions.tmpl":                 filepath.Join(securityModulePath, "versions.tf"),
 		"modules-security-waf.tmpl":                      filepath.Join(securityModulePath, "waf.tf"),
+		"modules-security-waf-ruleset.tmpl":              filepath.Join(securityModulePath, "waf-ruleset.tf"),
 		"modules-security-bot-directory.tmpl":            filepath.Join(securityModulePath, "bot-directory.tf"),
 		"modules-security-bot-directory-actions.tmpl":    filepath.Join(securityModulePath, "bot-directory-actions.tf"),
 		"modules-security-custom-client.tmpl":            filepath.Join(securityModulePath, "custom-client.tf"),

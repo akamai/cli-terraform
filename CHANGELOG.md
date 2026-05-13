@@ -1,5 +1,32 @@
 # RELEASE NOTES
 
+## 2.10.0 (May 13, 2026)
+
+### FEATURES/ENHANCEMENTS:
+
+* General
+  * Updated various dependencies.
+
+* Appsec 
+  * WAF Ruleset (Beta)
+    * Added the `akamai_appsec_waf_ruleset` resource to the `export-appsec` command.
+    * Removed the `akamai_appsec_rule` resource from the `export-appsec` command.
+    * Removed the `akamai_appsec_attack_group` resource from the `export-appsec` command.
+
+* PAPI
+  * Added the `product_id` to the `akamai_edge_hostname` resource if it exists ([#102](https://github.com/akamai/cli-terraform/issues/102)).
+
+* Reporting Groups (Beta)
+  * Added the `export-reportinggroup` command to export the `akamai_reportinggroups_group` Terraform configuration.
+
+### BUG FIXES:
+
+* Appsec
+  * Fixed a bug where the penalty box action attribute value was not exported as a quoted string for the `akamai_appsec_eval_penalty_box` resource.
+
+* DNS
+  * Extended the validation and documentation for exporting a DNS zone of the `ALIAS` type, as this operation is not supported ([#94](https://github.com/akamai/cli-terraform/issues/94)).
+
 ## 2.9.0 (Apr 1, 2026)
 
 ### FEATURES/ENHANCEMENTS:
@@ -19,14 +46,14 @@
   * Added support for the `state_change_notification_webhook` attribute object in the `akamai_gtm_property` resource.
 
 * PAPI
-  * Added support for exporting the `https_service_binding` field in the `akamai_edge_hostname` resource using the `export-property` command. 
+  * Added support for exporting the `https_service_binding` field in the `akamai_edge_hostname` resource using the `export-property` command.
   * Added support for the new rule format `v2026-02-16`.
 
 ### BUG FIXES:
 
 * Cloudlets
   * Resolved a bug where multiple `terraform import` commands were generated for the same `akamai_cloudlets_policy_activation` and `akamai_cloudlets_application_load_balancer_activation` resources when activations existed on both staging and production networks, causing "resource already exists" errors during state initialization.
-  
+
 * Cloud Certificates (Beta)
   * Fixed a bug where the `export-cloudcertificate` command used the full renewed certificate name, for example, `example.renewed.2026-03-11T16_50_39Z`, as both the `base_name` and the Terraform resource instance name. The command now correctly extracts the base name (`example`) by removing the `.renewed.<timestamp>` suffix.
 
@@ -218,10 +245,10 @@
   * Fixed a problem with invisible output in the light background by converting all colors to the monochromatic representation.
 
 * AppSec
-  *  Fixed issues with AAP/WAP terraform export
-    * Removed `hostnames` block from `variables.tf` file
-    * Modified `imports.tmpl` to import correct resources for AAP/WAP accounts
-    * Renamed all references from `akamai_appsec_configuration.config` to `data.akamai_appsec_configuration.config` for WAP/AAP accounts
+  *  Fixed issues with AAP/WAP terraform export.
+    * Removed `hostnames` block from `variables.tf` file.
+    * Modified `imports.tmpl` to import correct resources for AAP/WAP accounts.
+    * Renamed all references from `akamai_appsec_configuration.config` to `data.akamai_appsec_configuration.config` for WAP/AAP accounts.
 
 ##  1.19.0 (Nov 21, 2024)
 
@@ -260,7 +287,7 @@
 
 
 * Cloud Access Manager
-  *  Marked the `cloud_secret_access_key` field as sensitive in a template for the `akamai_cloudaccess_key` resource and moved its definition to the `variables.tf` file. ([I#580](https://github.com/akamai/terraform-provider-akamai/issues/580))
+  *  Marked the `cloud_secret_access_key` field as sensitive in a template for the `akamai_cloudaccess_key` resource and moved its definition to the `variables.tf` file ([I#580](https://github.com/akamai/terraform-provider-akamai/issues/580)).
 
 * PAPI
   * Fixed a missing child file when using uppercase letters for a second rule with lowercase letters ([#78](https://github.com/akamai/cli-terraform/issues/78)).
@@ -326,7 +353,7 @@
   * Added import support for the `akamai_cloudlets_application_load_balancer_activation` resource.
 
 * PAPI
-  * Added export of the `certificate` for the `akamai_edge_hostname` resource ([I#338](https://github.com/akamai/terraform-provider-akamai/issues/338))
+  * Added export of the `certificate` for the `akamai_edge_hostname` resource ([I#338](https://github.com/akamai/terraform-provider-akamai/issues/338)).
 
 ## 1.14.0 (Apr 23, 2024)
 

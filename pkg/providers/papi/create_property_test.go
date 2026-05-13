@@ -708,7 +708,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionWithDigitsAndSpacesInHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaultsHavingDigitsAndSpacesInHostnameDetails().build(), noFilters, nil)
@@ -735,7 +735,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionWithCCMHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				hostnames := map[string]Hostname{
@@ -794,7 +794,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionResponseWithoutDisallowedTLSVersionsInTLSConfiguration, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				hostnames := map[string]Hostname{
@@ -847,7 +847,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponseNonDefaultTTL, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withEdgeHostname(edgeHostnameWithTTL).build(), noFilters, nil)
@@ -874,7 +874,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponseWithHTTPSServiceBinding, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withEdgeHostname(edgeHostnameWithHTTPSServiceBinding).build(), noFilters, nil)
@@ -905,7 +905,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesEnhancementTLSResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponseEnhancementTLS, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				cert := hapi.GetCertificateResponse{
 
 					AvailableDomains: []string{"*.dev-exp-terraform-automation-test.com"},
@@ -995,7 +995,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesEnhancementTLSResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponseEnhancementTLS, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				resp := hapi.Error{
 					Type:            "CERTIFICATE_NOT_FOUND",
 					Title:           "Certificate Not Found",
@@ -1080,7 +1080,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivations1Response, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withStagingVersion(1, false).build(), noFilters, nil)
@@ -1387,7 +1387,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockAddTemplateTargetRules(p)
@@ -1411,7 +1411,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockAddTemplateTargetRules(p)
@@ -1436,7 +1436,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockAddTemplateTargetRules(p)
@@ -1462,7 +1462,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 
@@ -1504,7 +1504,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 
@@ -1551,7 +1551,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersion2HostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withCertProvisioningType("DEFAULT").build(), noFilters, nil)
@@ -1578,7 +1578,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withBootstrap(true).build(), noFilters, nil)
@@ -1641,7 +1641,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().build(), noFilters, nil)
@@ -1669,7 +1669,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 1, &getPropertyVersion1HostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivations1Response, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withVersion("1").withStagingVersion(1, false).build(), noFilters, nil)
@@ -1697,7 +1697,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponseWithNote, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withActivationNote("example staging note").
@@ -1717,7 +1717,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockGetActivations(c, &getProductionActivationsResponse, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withOnlyProductionActivation([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}, "example production note", 5).build(), noFilters, nil)
@@ -1736,7 +1736,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponseWithNote, nil)
 				mockGetActivations(c, &getProductionActivationsResponse, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withOnlyProductionActivation([]string{"jsmith@akamai.com", "rjohnson@akamai.com"}, "example production note", 5).withActivationNote("example staging note").
@@ -1757,7 +1757,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponseWithEmptyEmails, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withActivationNote("example note").
@@ -1779,13 +1779,51 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withRuleFormat("v2024-02-12").build(), noFilters, nil)
 			},
 			dir:                       "basic",
 			ruleFormatVersionOverride: "v2024-02-12",
+		},
+		"basic property (with hostname with productID)": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, getPropertyResponse())
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c, "prd_HTTP_Content_Del")
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withEdgeHostname(map[string]EdgeHostname{
+					"test-edgesuite-net": {
+						EdgeHostname:             "test.edgesuite.net",
+						EdgeHostnameID:           "ehn_2867480",
+						ContractID:               "test_contract",
+						GroupID:                  "grp_12345",
+						ProductID:                "prd_HTTP_Content_Del",
+						ID:                       "",
+						IPv6:                     "IPV6_COMPLIANCE",
+						SecurityType:             "STANDARD-TLS",
+						EdgeHostnameResourceName: "test-edgesuite-net",
+					}}).build(), noFilters, nil)
+			},
+			dir:     "basic_with_product_id",
+			jsonDir: "basic/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
 		},
 		"non default edgerc path and section": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
@@ -1800,7 +1838,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponseNonDefaultTTL, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
 				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withEdgeHostname(edgeHostnameWithTTL).withEdgercPathAndSection("/non/default/path/to/edgerc", "non_default_section").build(), noFilters, nil)
@@ -1860,7 +1898,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, nil, fmt.Errorf("oops"))
 			},
 			withError: ErrFetchingActivationDetails,
@@ -1919,7 +1957,7 @@ func TestCreateProperty(t *testing.T) {
 				mockGetProducts(c, &getProductsResponse, nil)
 				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesResponse, nil)
 				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
-				mockGetEdgeHostnames(c)
+				mockGetEdgeHostnames(c, "")
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockGetActivations(c, &getActivationsResponse, nil)
 				mockAddTemplateTargetRules(p)
@@ -2143,7 +2181,7 @@ func mockGetCertificate(h *hapi.Mock, dnsZone, recordName string, getCertificate
 	}).Return(getCertificateResponse, err).Once()
 }
 
-func mockGetEdgeHostnames(p *papi.Mock) *mock.Call {
+func mockGetEdgeHostnames(p *papi.Mock, productID string) *mock.Call {
 	return p.On("GetEdgeHostnames", mock.Anything, papi.GetEdgeHostnamesRequest{
 		ContractID: "test_contract",
 		GroupID:    "grp_12345",
@@ -2153,7 +2191,7 @@ func mockGetEdgeHostnames(p *papi.Mock) *mock.Call {
 				{
 					ID:                "ehn_2867480",
 					Domain:            "test.edgesuite.net",
-					ProductID:         "",
+					ProductID:         productID,
 					DomainPrefix:      "test",
 					DomainSuffix:      "edgesuite.net",
 					Status:            "CREATED",
@@ -2334,6 +2372,51 @@ func TestProcessPropertyTemplates(t *testing.T) {
 				},
 			},
 			dir:          "basic",
+			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
+		},
+		"property with edge hostname product id": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "latest",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+					EdgeHostnames: map[string]EdgeHostname{
+						"test-edgesuite-net": {
+							EdgeHostname:             "test.edgesuite.net",
+							EdgeHostnameID:           "ehn_2867480",
+							ContractID:               "test_contract",
+							GroupID:                  "grp_12345",
+							ProductID:                "prd_HTTP_Content_Del",
+							ID:                       "",
+							IPv6:                     "IPV6_COMPLIANCE",
+							SecurityType:             "STANDARD-TLS",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+						},
+					},
+					Hostnames: map[string]Hostname{
+						"test.edgesuite.net": {
+							CnameFrom:                "test.edgesuite.net",
+							EdgeHostnameResourceName: "test-edgesuite-net",
+							CertProvisioningType:     "CPS_MANAGED",
+							IsActive:                 true,
+						},
+					},
+					StagingInfo: NetworkInfo{
+						HasActivation:           true,
+						Emails:                  []string{"jsmith@akamai.com"},
+						IsActiveOnLatestVersion: true,
+					},
+				},
+			},
+			dir:          "basic_with_product_id",
 			filesToCheck: []string{"property.tf", "variables.tf", "import.sh"},
 		},
 		"property with CCM hostnames": {

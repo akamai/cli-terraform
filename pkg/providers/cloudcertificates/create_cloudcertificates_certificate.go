@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/cloudcertificates"
 	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
@@ -205,21 +204,9 @@ func populateTFData(params createCloudCertificateParams, cert cloudcertificates.
 			Subject:              subject,
 			SignedCertificatePEM: cert.SignedCertificatePEM,
 			TrustChainPEM:        cert.TrustChainPEM,
-			ResourceName:         sanitizeResourceName(extractBaseName(cert.CertificateName)),
+			ResourceName:         tools.SanitizeResourceName(extractBaseName(cert.CertificateName)),
 		},
 	}
-}
-
-// sanitizeResourceName replaces dots and spaces with underscores
-// and ensures the resource name starts with a letter or underscore.
-func sanitizeResourceName(name string) string {
-	name = strings.ReplaceAll(name, ".", "_")
-	name = strings.ReplaceAll(name, " ", "_")
-	// If a first character is not a letter or underscore, prepend an underscore.
-	if len(name) > 0 && !unicode.IsLetter(rune(name[0])) && name[0] != '_' {
-		name = "_" + name
-	}
-	return name
 }
 
 func extractBaseName(name string) string {

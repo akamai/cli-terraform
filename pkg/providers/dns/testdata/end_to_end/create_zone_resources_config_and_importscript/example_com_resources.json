@@ -1,0 +1,12 @@
+{
+  "Zone": "example.com",
+  "RecordSets": {
+    "example.com": [
+      "NS",
+      "SOA"
+    ],
+    "www.example.com": [
+      "A"
+    ]
+  }
+}

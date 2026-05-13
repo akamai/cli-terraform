@@ -10,33 +10,6 @@ resource "akamai_appsec_waf_mode" "{{ $policyName }}" {
     mode               = "{{ $wafMode }}"
 }
 
-{{ if .WebApplicationFirewall.RuleActions -}}
-// WAF Rule Actions
-{{ range .WebApplicationFirewall.RuleActions -}}
-// {{ getRuleDescByID $ .ID }}
-resource "akamai_appsec_rule" "{{ $policyName }}_{{ getRuleNameByID $ .ID }}_{{ .ID }}" {
-    config_id           = local.config_id
-    security_policy_id  = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
-    rule_id             = "{{ .ID }}"
-    rule_action         = "{{ .Action }}"
-    {{ if or .AdvancedExceptionsList .Exception .Conditions -}}
-     condition_exception = jsonencode(
-     {{ if .AdvancedExceptionsList -}}
-          { "advancedExceptions": {{ toJSON .AdvancedExceptionsList }} } {{- if and .Exception .Conditions -}},{{- end }}
-     {{ end -}}
-     {{ if .Exception -}}
-          { "exception": {{ toJSON .Exception }} } {{- if and .Exception .Conditions -}},{{- end }}
-     {{ end -}}
-     {{ if .Conditions -}}
-           { "conditions": {{ toJSON .Conditions }} }
-     {{ end -}}
-  )
-   {{ end -}}
-}
-
-{{ end -}}
-{{ end -}}
-
 {{ if .CustomRuleActions }}
 {{ range .CustomRuleActions -}}
 {{ if isStructuredRule $ .ID -}}
@@ -47,29 +20,6 @@ resource "akamai_appsec_custom_rule_action" "{{ $policyName }}_{{ .ID }}" {
     custom_rule_action = "{{ .Action }}"
 }
 {{ end -}}
-
-{{ end -}}
-{{ end -}}
-
-{{ if .WebApplicationFirewall.AttackGroupActions }}
-// WAF Attack Group Actions
-{{ range .WebApplicationFirewall.AttackGroupActions -}}
-resource "akamai_appsec_attack_group" "{{ $policyName }}_{{ .Group }}" {
-    config_id           = local.config_id
-    security_policy_id  = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
-    attack_group        = "{{ .Group }}"
-    attack_group_action = "{{ .Action }}"
-   {{ if or .AdvancedExceptionsList .Exception -}}
-         condition_exception = jsonencode(
-       {{ if .AdvancedExceptionsList -}}
-          { "advancedExceptions": {{ toJSON .AdvancedExceptionsList }} }
-       {{ end -}}
-       {{ if .Exception -}}
-          { "exception": {{ toJSON .Exception }} }
-       {{ end -}}
-     )
-     {{ end -}}
-}
 
 {{ end -}}
 {{ end -}}

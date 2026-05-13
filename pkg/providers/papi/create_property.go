@@ -32,6 +32,7 @@ type EdgeHostname struct {
 	EdgeHostnameID           string
 	ContractID               string
 	GroupID                  string
+	ProductID                string
 	ID                       string
 	IPv6                     string
 	EdgeHostnameResourceName string
@@ -922,19 +923,23 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			if edgeHostname.HTTPSServiceBinding != nil {
 				httpsServiceBinding = *edgeHostname.HTTPSServiceBinding
 			}
-			edgeHostnamesMap[cnameToResource] = EdgeHostname{
+			eHostname := EdgeHostname{
 				EdgeHostname:             cnameTo,
 				EdgeHostnameID:           hostname.EdgeHostnameID,
 				ContractID:               property.ContractID,
 				GroupID:                  property.GroupID,
 				TTL:                      ttl,
-				IPv6:                     getIPv6(papiEdgeHostnames, hostname.EdgeHostnameID),
 				EdgeHostnameResourceName: cnameToResource,
 				SecurityType:             edgeHostname.SecurityType,
 				UseCases:                 useCases,
 				CertificateID:            certificateID,
 				HTTPSServiceBinding:      httpsServiceBinding,
 			}
+			if val := getEdgeHostname(papiEdgeHostnames, hostname.EdgeHostnameID); val != nil {
+				eHostname.ProductID = val.ProductID
+				eHostname.IPv6 = val.IPVersionBehavior
+			}
+			edgeHostnamesMap[cnameToResource] = eHostname
 		}
 
 		certProvisioningType := "CPS_MANAGED"
@@ -1087,14 +1092,14 @@ func getUseCases(edgeHostnames *papi.GetEdgeHostnamesResponse, edgeHostnameID st
 	return "", nil
 }
 
-// getIPv6 find IPVersionBehavior for given edgeHostnameID
-func getIPv6(edgeHostnames *papi.GetEdgeHostnamesResponse, edgeHostnameID string) string {
+// getEdgeHostname finds EdgeHostnameGetItem for given edgeHostnameID
+func getEdgeHostname(edgeHostnames *papi.GetEdgeHostnamesResponse, edgeHostnameID string) *papi.EdgeHostnameGetItem {
 	for _, edgeHostname := range edgeHostnames.EdgeHostnames.Items {
 		if edgeHostname.ID == edgeHostnameID {
-			return edgeHostname.IPVersionBehavior
+			return &edgeHostname
 		}
 	}
-	return ""
+	return nil
 }
 
 // findProperty searches for a property with a given name

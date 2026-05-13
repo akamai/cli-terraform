@@ -1,0 +1,57 @@
+{{ range .SecurityPolicies -}}
+{{ $policyName := escapeName .Name -}}
+{{ if or .WebApplicationFirewall.RuleActions .WebApplicationFirewall.AttackGroupActions -}}
+resource "akamai_appsec_waf_ruleset" "{{ $policyName }}" {
+   config_id          = local.config_id
+   security_policy_id = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
+   {{ if .WebApplicationFirewall.RuleActions -}}
+   rules = [
+   {{ range .WebApplicationFirewall.RuleActions -}}
+   {
+      rule_id     = "{{ .ID }}"
+      rule_action = "{{ .Action }}"
+      {{ if or .AdvancedExceptionsList .Exception .Conditions -}}
+      condition_exception = jsonencode(merge(
+      {{ if .AdvancedExceptionsList -}}
+         { "advancedExceptions": {{ toJSON .AdvancedExceptionsList }} } {{- if or .Exception .Conditions -}},{{- end }}
+      {{ end -}}
+      {{ if .Exception -}}
+         { "exception": {{ toJSON .Exception }} } {{- if .Conditions -}},{{- end }}
+      {{ end -}}
+      {{ if .Conditions -}}
+         { "conditions": {{ toJSON .Conditions }} }
+      {{ end -}}
+      ))
+      {{ end -}}
+   },
+   {{ end -}}
+   ]
+   {{ else -}}
+   rules = []
+   {{ end -}}
+   {{ if .WebApplicationFirewall.AttackGroupActions -}}
+   attack_groups = [
+   {{ range .WebApplicationFirewall.AttackGroupActions -}}
+   {
+      attack_group        = "{{ .Group }}"
+      attack_group_action = "{{ .Action }}"
+      {{ if or .AdvancedExceptionsList .Exception -}}
+      condition_exception = jsonencode(merge(
+      {{ if .AdvancedExceptionsList -}}
+         { "advancedExceptions": {{ toJSON .AdvancedExceptionsList }} } {{- if .Exception -}},{{- end }}
+      {{ end -}}
+      {{ if .Exception -}}
+         { "exception": {{ toJSON .Exception }} }
+      {{ end -}}
+      ))
+      {{ end -}}
+   },
+   {{ end -}}
+   ]
+   {{ else -}}
+   attack_groups = []
+   {{ end -}}
+}
+
+{{ end -}}
+{{ end -}}

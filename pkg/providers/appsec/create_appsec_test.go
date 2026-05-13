@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	"path/filepath"
 	"testing"
@@ -332,6 +333,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"modules-security-main.tmpl":                   filepath.Join(security, "main.tf"),
 		"modules-security-malware-policies.tmpl":       filepath.Join(security, "malware-policies.tf"),
 		"modules-security-malware-policy-actions.tmpl": filepath.Join(security, "malware-policy-actions.tf"),
+		"modules-security-eval-penalty-box.tmpl":       filepath.Join(security, "eval-penalty-box.tf"),
 		"modules-security-penalty-box.tmpl":            filepath.Join(security, "penalty-box.tf"),
 		"modules-security-policies.tmpl":               filepath.Join(security, "policies.tf"),
 		"modules-security-protections.tmpl":            filepath.Join(security, "protections.tf"),
@@ -344,6 +346,7 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"modules-security-variables.tmpl":              filepath.Join(security, "variables.tf"),
 		"modules-security-versions.tmpl":               filepath.Join(security, "versions.tf"),
 		"modules-security-waf.tmpl":                    filepath.Join(security, "waf.tf"),
+		"modules-security-waf-ruleset.tmpl":            filepath.Join(security, "waf-ruleset.tf"),
 		"modules-aap-selected-hostnames.tmpl":          filepath.Join(security, "aap-selected-hostnames.tf"),
 	}
 
@@ -478,6 +481,7 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 		"modules-security-variables.tmpl":               filepath.Join(security, "variables.tf"),
 		"modules-security-versions.tmpl":                filepath.Join(security, "versions.tf"),
 		"modules-security-waf.tmpl":                     filepath.Join(security, "waf.tf"),
+		"modules-security-waf-ruleset.tmpl":             filepath.Join(security, "waf-ruleset.tf"),
 		"modules-security-bot-directory.tmpl":           filepath.Join(security, "bot-directory.tf"),
 		"modules-security-bot-directory-actions.tmpl":   filepath.Join(security, "bot-directory-actions.tf"),
 		"modules-security-custom-client.tmpl":           filepath.Join(security, "custom-client.tf"),
@@ -719,4 +723,177 @@ func TestExportUrlProtectionPolicy(t *testing.T) {
 		})
 	}
 	require.NoError(t, os.RemoveAll("./testdata/res"))
+}
+
+// wafRulesetAdditionalFuncs returns the template function map shared by all
+func wafRulesetAdditionalFuncs() map[string]any {
+	return tools.DecorateWithMultilineHandlingFunctions(map[string]any{
+		"getCustomRuleNameByID":                      getCustomRuleNameByID,
+		"getRepNameByID":                             getRepNameByID,
+		"getRuleNameByID":                            getRuleNameByID,
+		"getRuleDescByID":                            getRuleDescByID,
+		"getRateNameByID":                            getRateNameByID,
+		"getMalwareNameByID":                         getMalwareNameByID,
+		"getPolicyNameByID":                          getPolicyNameByID,
+		"getWAFMode":                                 getWAFMode,
+		"getConfigDescription":                       getConfigDescription,
+		"getPrefixFromID":                            getPrefixFromID,
+		"getEdgercPath":                              getEdgercPath,
+		"getSection":                                 getSection,
+		"isStructuredRule":                           isStructuredRule,
+		"exportJSON":                                 exportJSON,
+		"exportJSONWithoutKeys":                      exportJSONWithoutKeys,
+		"getCustomBotCategoryNameByID":               getCustomBotCategoryNameByID,
+		"getCustomBotCategoryResourceNamesByIDs":     getCustomBotCategoryResourceNamesByIDs,
+		"getCustomClientResourceNamesByIDs":          getCustomClientResourceNamesByIDs,
+		"getContentProtectionRuleResourceNamesByIDs": getContentProtectionRuleResourceNamesByIDs,
+		"getProtectedHostsByID":                      getProtectedHostsByID,
+		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
+		"exportJSONForCustomDefBotsWithoutKeys":      exportJSONForCustomDefBotsWithoutKeys,
+		"buildCategoryMap":                           buildCategoryMap,
+	})
+}
+
+// setupWAFRulesetMocks registers the API mock expectations shared by all
+func setupWAFRulesetMocks(c *appsec.Mock, _ *templates.MockProcessor) {
+	c.On("GetWAFMode", mock.Anything, mock.Anything).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)
+	c.On("GetConfiguration", mock.Anything, mock.Anything).Return(&appsec.GetConfigurationResponse{Description: "A security config for demo"}, nil)
+}
+
+func TestWAFRulesetTemplate(t *testing.T) {
+	// This test validates the waf-ruleset template mapping and output
+	configs := []string{"ase", "tcwest", "ase-botman", "ase-apr"}
+	security := filepath.Join("modules", "security")
+	templateName := "modules-security-waf-ruleset.tmpl"
+	outputFile := filepath.Join(security, "waf-ruleset.tf")
+
+	edgercPath = "/non/default/path/to/edgerc"
+	section = "non-default-section"
+
+	for _, config := range configs {
+		t.Run(templateName+"-"+config, func(t *testing.T) {
+			ma := new(appsec.Mock)
+			mp := new(templates.MockProcessor)
+			setupWAFRulesetMocks(ma, mp)
+			client = ma
+
+			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s/modules/security", config), 0755))
+
+			processor := templates.FSTemplateProcessor{
+				TemplatesFS: templateFiles,
+				TemplateTargets: map[string]string{
+					templateName: fmt.Sprintf("./testdata/res/%s/%s", config, outputFile),
+				},
+				AdditionalFuncs: wafRulesetAdditionalFuncs(),
+			}
+
+			resp := getExportConfigurationResponse(config)
+			require.NoError(t, processor.ProcessTemplates(resp))
+
+			expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", config, outputFile))
+			require.NoError(t, err)
+			result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", config, outputFile))
+			require.NoError(t, err)
+			assert.Equal(t, string(expected), string(result))
+		})
+	}
+	require.NoError(t, os.RemoveAll("./testdata/res"))
+}
+
+func TestWAFRulesetTemplateWithEmptyRulesAndAttackGroups(t *testing.T) {
+	// This test validates the waf-ruleset template is NOT generated when both rules and attack_groups are empty
+	security := filepath.Join("modules", "security")
+	templateName := "modules-security-waf-ruleset.tmpl"
+	outFile := filepath.Join(t.TempDir(), "ase", security, "waf-ruleset.tf")
+
+	edgercPath = "/non/default/path/to/edgerc"
+	section = "non-default-section"
+
+	ma := new(appsec.Mock)
+	mp := new(templates.MockProcessor)
+	setupWAFRulesetMocks(ma, mp)
+	client = ma
+
+	require.NoError(t, os.MkdirAll(filepath.Dir(outFile), 0755))
+
+	processor := templates.FSTemplateProcessor{
+		TemplatesFS: templateFiles,
+		TemplateTargets: map[string]string{
+			templateName: outFile,
+		},
+		AdditionalFuncs: wafRulesetAdditionalFuncs(),
+	}
+
+	config := getExportConfigurationResponse("ase")
+	require.NotEmpty(t, config.SecurityPolicies)
+
+	// Force template fallback branches - set both RuleActions and AttackGroupActions to empty
+	for i := range config.SecurityPolicies {
+		require.NotNil(t, config.SecurityPolicies[i].WebApplicationFirewall)
+		config.SecurityPolicies[i].WebApplicationFirewall.RuleActions = nil
+		config.SecurityPolicies[i].WebApplicationFirewall.AttackGroupActions = nil
+	}
+
+	require.NoError(t, processor.ProcessTemplates(config))
+
+	// When both RuleActions and AttackGroupActions are empty, the resource should not be generated
+	// The file may be empty or may not exist depending on the processor behavior
+	result, err := os.ReadFile(outFile)
+	if err != nil {
+		// File doesn't exist or can't be read - that's acceptable for empty templates
+		return
+	}
+
+	out := string(result)
+	// When both RuleActions and AttackGroupActions are empty, the resource should not be generated at all
+	assert.NotContains(t, out, "akamai_appsec_waf_ruleset")
+	assert.NotContains(t, out, "rules")
+	assert.NotContains(t, out, "attack_groups")
+	// Output should be empty or only contain whitespace
+	assert.True(t, strings.TrimSpace(out) == "", "expected empty output when both RuleActions and AttackGroupActions are empty")
+}
+
+func TestWAFRulesetTemplateWithEmptyRulesOrAttackGroups(t *testing.T) {
+	// This test validates the waf-ruleset template output when rules or attack_groups are empty
+	security := filepath.Join("modules", "security")
+	templateName := "modules-security-waf-ruleset.tmpl"
+	outFile := filepath.Join(t.TempDir(), "ase", security, "waf-ruleset.tf")
+
+	edgercPath = "/non/default/path/to/edgerc"
+	section = "non-default-section"
+
+	ma := new(appsec.Mock)
+	mp := new(templates.MockProcessor)
+	setupWAFRulesetMocks(ma, mp)
+	client = ma
+
+	require.NoError(t, os.MkdirAll(filepath.Dir(outFile), 0755))
+
+	processor := templates.FSTemplateProcessor{
+		TemplatesFS: templateFiles,
+		TemplateTargets: map[string]string{
+			templateName: outFile,
+		},
+		AdditionalFuncs: wafRulesetAdditionalFuncs(),
+	}
+
+	config := getExportConfigurationResponse("ase")
+	require.NotEmpty(t, config.SecurityPolicies)
+
+	// Force template fallback branches that should render empty Terraform lists.
+	for i := range config.SecurityPolicies {
+		require.NotNil(t, config.SecurityPolicies[i].WebApplicationFirewall)
+		config.SecurityPolicies[i].WebApplicationFirewall.AttackGroupActions = nil
+	}
+
+	require.NoError(t, processor.ProcessTemplates(config))
+
+	result, err := os.ReadFile(outFile)
+	require.NoError(t, err)
+
+	out := string(result)
+	// When only AttackGroupActions is empty, rules should be populated but attack_groups should be empty
+	assert.Contains(t, out, "rules = [")
+	assert.Regexp(t, `(?m)^\s*attack_groups\s*=\s*\[\]$`, out)
+	assert.NotContains(t, out, "attack_groups = [{")
 }

@@ -192,21 +192,21 @@ func TestProcessMtlsTruststoreTemplates(t *testing.T) {
 			init: func(d *caSetMockData, m *mtlstruststore.Mock) {
 				d.mockListCASets(m, fmt.Errorf("listing error"))
 			},
-			withError: "error finding CA set: failed to list CA sets: listing error",
+			withError: "error finding CA set: could not find CA set with the name 'test-ca-set-name'",
 		},
 		"error no such CA set": {
 			init: func(d *caSetMockData, m *mtlstruststore.Mock) {
 				d.name = "non-existing-ca-set"
 				d.mockListCASets(m, nil)
 			},
-			withError: "error finding CA set: no CA set found with name 'non-existing-ca-set'",
+			withError: "error finding CA set: no CA set found with the name 'non-existing-ca-set'",
 		},
 		"error multiple CA sets": {
 			init: func(d *caSetMockData, m *mtlstruststore.Mock) {
 				d.caSets = []string{"test-ca-set-name", "test-ca-set-name"}
 				d.mockListCASets(m, nil)
 			},
-			withError: "error finding CA set: multiple CA sets found with name 'test-ca-set-name'",
+			withError: "error finding CA set: multiple CA sets found with the name 'test-ca-set-name'",
 		},
 		"error fetching single CA set": {
 			init: func(d *caSetMockData, m *mtlstruststore.Mock) {
@@ -320,6 +320,7 @@ func (d *caSetMockData) noUserVersion() {
 func (d *caSetMockData) mockListCASets(m *mtlstruststore.Mock, err error) {
 	req := mtlstruststore.ListCASetsRequest{
 		CASetNamePrefix: d.name,
+		CASetStatuses:   []string{mtlstruststore.CASetStatusNotDeleted},
 	}
 
 	res := &mtlstruststore.ListCASetsResponse{}

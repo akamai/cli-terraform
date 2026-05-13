@@ -57,7 +57,7 @@ func processRecordSets(ctx context.Context, client dns.DNS, zone, resourceZoneNa
 		QueryArgs: &queryArgs,
 	})
 	if err != nil {
-		return importScriptConfig, fmt.Errorf("failed to read record set %s", err.Error())
+		return importScriptConfig, fmt.Errorf("%w: %w", ErrRecordSetsRetrievalFailed, err)
 	}
 	for {
 		if config.fetchConfig.ConfigOnly {
@@ -100,7 +100,7 @@ func processRecordSets(ctx context.Context, client dns.DNS, zone, resourceZoneNa
 			QueryArgs: &queryArgs,
 		})
 		if err != nil {
-			return importScriptConfig, fmt.Errorf("failed to read record set %s", err.Error())
+			return importScriptConfig, fmt.Errorf("%w: %w", ErrRecordSetsRetrievalFailed, err)
 		}
 	}
 

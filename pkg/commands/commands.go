@@ -19,6 +19,7 @@ import (
 	"github.com/akamai/cli-terraform/v2/pkg/providers/mtlskeystore"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/mtlstruststore"
 	"github.com/akamai/cli-terraform/v2/pkg/providers/papi"
+	"github.com/akamai/cli-terraform/v2/pkg/providers/reportinggroups"
 	"github.com/akamai/cli-terraform/v2/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/apphelp"
 	"github.com/akamai/cli/v2/pkg/autocomplete"
@@ -420,6 +421,21 @@ func CommandLocator() []*cli.Command {
 				&cli.StringFlag{
 					Name:  "rule-format",
 					Usage: "Rule format version to use for export.",
+				},
+			},
+			BashComplete: autocomplete.Default,
+		},
+		{
+			Name:        "export-reportinggroup",
+			Description: "Generates Terraform configuration for Reporting Groups resources.",
+			Usage:       "export-reportinggroup",
+			ArgsUsage:   "<reporting_group_name>",
+			Action:      validatedAction(reportinggroups.CmdCreateReportingGroup, requireValidWorkpath, requireNArguments(1)),
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:        "tfworkpath",
+					Usage:       "Directory used to store files created when running commands.",
+					DefaultText: "current directory",
 				},
 			},
 			BashComplete: autocomplete.Default,

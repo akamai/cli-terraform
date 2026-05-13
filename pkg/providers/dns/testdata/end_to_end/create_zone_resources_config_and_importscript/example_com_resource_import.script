@@ -1,0 +1,4 @@
+terraform init
+terraform import akamai_dns_zone.example_com example.com
+terraform import akamai_dns_record.example_com_example_com_NS example.com#example.com#NS
+terraform import akamai_dns_record.example_com_example_com_SOA example.com#example.com#SOA
