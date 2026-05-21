@@ -288,6 +288,17 @@
 	{{- else if eq .Name "webApplicationFirewall"}}{{- template "webApplicationFirewall" .}}
 	{{- else if eq .Name "webSockets"}}{{- template "webSockets" .}}
 	{{- else if eq .Name "webdav"}}{{- template "webdav" .}}
+	{{- else if eq .Name "allowMethodsTemplate"}}{{- template "allowMethodsTemplate" .}}
+	{{- else if eq .Name "cachingTemplate"}}{{- template "cachingTemplate" .}}
+	{{- else if eq .Name "deploymentNetworkTemplate"}}{{- template "deploymentNetworkTemplate" .}}
+	{{- else if eq .Name "downstreamCacheTemplate"}}{{- template "downstreamCacheTemplate" .}}
+	{{- else if eq .Name "edgeScapeTemplate"}}{{- template "edgeScapeTemplate" .}}
+	{{- else if eq .Name "failoverTemplate"}}{{- template "failoverTemplate" .}}
+	{{- else if eq .Name "gzipResponseTemplate"}}{{- template "gzipResponseTemplate" .}}
+	{{- else if eq .Name "httpsRedirectTemplate"}}{{- template "httpsRedirectTemplate" .}}
+	{{- else if eq .Name "obfuscateBackendTemplate"}}{{- template "obfuscateBackendTemplate" .}}
+	{{- else if eq .Name "originTemplate"}}{{- template "originTemplate" .}}
+	{{- else if eq .Name "setOriginTemplate"}}{{- template "setOriginTemplate" .}}
     {{- else}}{{ReportError "Unknown behavior '%s'" .Name}}{{- end}}
 {{- end}}
 
@@ -3236,32 +3247,14 @@ edge_worker {
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
 {{- end}}
-{{- if and (eq $k "createEdgeWorker") (ne $v nil)}}
-        create_edge_worker = {{template "Text" $v}}
-{{- end}}
 {{- if and (eq $k "edgeWorkerId") (ne $v nil)}}
         edge_worker_id = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "resourceTier") (ne $v nil)}}
-        resource_tier = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "failOpenTitle") (ne $v nil)}}
-        fail_open_title = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "continueOnError") (ne $v nil)}}
 		continue_on_error = {{$v}}
 {{- end}}
-{{- if and (eq $k "continueOnErrorDisclaimer") (ne $v nil)}}
-        continue_on_error_disclaimer = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "mPulseTitle") (ne $v nil)}}
-        m_pulse_title = {{template "Text" $v}}
-{{- end}}
 {{- if and (eq $k "mPulse") (ne $v nil)}}
 		m_pulse = {{$v}}
-{{- end}}
-{{- if and (eq $k "mPulseInformation") (ne $v nil)}}
-        m_pulse_information = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3282,6 +3275,9 @@ enforce_mtls_settings {
 {{- if and (eq $k "enableAuthSet") (ne $v nil)}}
 		enable_auth_set = {{$v}}
 {{- end}}
+{{- if and (eq $k "edgeChecksTitle") (ne $v nil)}}
+        edge_checks_title = {{template "Text" $v}}
+{{- end}}
 {{- if eq $k "certificateAuthoritySet"}}
 		certificate_authority_set = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
@@ -3290,6 +3286,15 @@ enforce_mtls_settings {
 {{- end}}
 {{- if and (eq $k "enableDenyRequest") (ne $v nil)}}
 		enable_deny_request = {{$v}}
+{{- end}}
+{{- if and (eq $k "originChecksTitle") (ne $v nil)}}
+        origin_checks_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "enableCompleteClientCertificate") (ne $v nil)}}
+		enable_complete_client_certificate = {{$v}}
+{{- end}}
+{{- if eq $k "clientCertificateAttributes"}}
+		client_certificate_attributes = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- end}}
 }
@@ -6315,20 +6320,17 @@ origin_characteristics {
 {{- if and (eq $k "authenticationMethod") (ne $v nil)}}
         authentication_method = {{template "Text" $v}}
 {{- end}}
+{{- if and (eq $k "accessKeyEncryptedStorage") (ne $v nil)}}
+		access_key_encrypted_storage = {{$v}}
+{{- end}}
 {{- if and (eq $k "encodingVersion") (ne $v nil)}}
 		encoding_version = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "useCustomSignString") (ne $v nil)}}
-		use_custom_sign_string = {{$v}}
-{{- end}}
-{{- if eq $k "customSignString"}}
-		custom_sign_string = [{{range $v}}"{{. | Escape}}", {{end}}]
 {{- end}}
 {{- if and (eq $k "secretKey") (ne $v nil)}}
         secret_key = {{template "Text" $v}}
 {{- end}}
-{{- if and (eq $k "nonce") (ne $v nil)}}
-        nonce = {{template "Text" $v}}
+{{- if and (eq $k "accessKeyId") (ne $v nil)}}
+        access_key_id = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "mslkey") (ne $v nil)}}
         mslkey = {{template "Text" $v}}
@@ -6336,11 +6338,11 @@ origin_characteristics {
 {{- if and (eq $k "mslname") (ne $v nil)}}
         mslname = {{template "Text" $v}}
 {{- end}}
-{{- if and (eq $k "accessKeyEncryptedStorage") (ne $v nil)}}
-		access_key_encrypted_storage = {{$v}}
-{{- end}}
 {{- if and (eq $k "gcsAccessKeyVersionGuid") (ne $v nil)}}
         gcs_access_key_version_guid = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "g2oAccessKeyVersionGuid") (ne $v nil)}}
+        g2o_access_key_version_guid = {{template "Text" $v}}
 {{- end}}
 {{- if and (eq $k "gcsHmacKeyAccessId") (ne $v nil)}}
         gcs_hmac_key_access_id = {{template "Text" $v}}
@@ -9361,6 +9363,632 @@ webdav {
 {{- end}}
 }
 {{- end}}
+{{- define "allowMethodsTemplate"}}
+allow_methods_template {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "allowAllHttpInCacheHierarchy") (ne $v nil)}}
+		allow_all_http_in_cache_hierarchy = {{$v}}
+{{- end}}
+{{- if and (eq $k "allowPost") (ne $v nil)}}
+		allow_post = {{$v}}
+{{- end}}
+{{- if and (eq $k "allowPostWithoutContentLength") (ne $v nil)}}
+		allow_post_without_content_length = {{$v}}
+{{- end}}
+{{- if and (eq $k "allowOptions") (ne $v nil)}}
+		allow_options = {{$v}}
+{{- end}}
+{{- if and (eq $k "allowPut") (ne $v nil)}}
+		allow_put = {{$v}}
+{{- end}}
+{{- if and (eq $k "allowPatch") (ne $v nil)}}
+		allow_patch = {{$v}}
+{{- end}}
+{{- if and (eq $k "allowDelete") (ne $v nil)}}
+		allow_delete = {{$v}}
+{{- end}}
+{{- if and (eq $k "allowDeleteWithBody") (ne $v nil)}}
+		allow_delete_with_body = {{$v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
+{{- define "cachingTemplate"}}
+caching_template {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "cachingOption") (ne $v nil)}}
+        caching_option = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheForceRevalidate") (ne $v nil)}}
+		cache_force_revalidate = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheTtl") (ne $v nil)}}
+        cache_ttl = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "tieredDistribution") (ne $v nil)}}
+		tiered_distribution = {{$v}}
+{{- end}}
+{{- if and (eq $k "validateEntityTag") (ne $v nil)}}
+		validate_entity_tag = {{$v}}
+{{- end}}
+{{- if and (eq $k "removeVaryHeader") (ne $v nil)}}
+		remove_vary_header = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheKeyQueryParams") (ne $v nil)}}
+        cache_key_query_params = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheHttpTemporaryRedirects") (ne $v nil)}}
+		cache_http_temporary_redirects = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheHttpErrorResponseTitle") (ne $v nil)}}
+        cache_http_error_response_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheHttpErrorResponse") (ne $v nil)}}
+		cache_http_error_response = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheHttpErrorTtl") (ne $v nil)}}
+        cache_http_error_ttl = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheHttpErrorPreserveStale") (ne $v nil)}}
+		cache_http_error_preserve_stale = {{$v}}
+{{- end}}
+{{- if and (eq $k "prefreshCacheTitle") (ne $v nil)}}
+        prefresh_cache_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "prefreshCache") (ne $v nil)}}
+		prefresh_cache = {{$v}}
+{{- end}}
+{{- if and (eq $k "prefreshCacheTtlPercentage") (ne $v nil)}}
+		prefresh_cache_ttl_percentage = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "cacheCssJsTitle") (ne $v nil)}}
+        cache_css_js_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "applyCssJsCaching") (ne $v nil)}}
+		apply_css_js_caching = {{$v}}
+{{- end}}
+{{- if eq $k "cacheCssJsExtensions"}}
+		cache_css_js_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "cacheCssJsPolicy") (ne $v nil)}}
+        cache_css_js_policy = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheCssJsForceRevalidate") (ne $v nil)}}
+		cache_css_js_force_revalidate = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheCssJsTtl") (ne $v nil)}}
+        cache_css_js_ttl = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheFontsTitle") (ne $v nil)}}
+        cache_fonts_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "applyFontsCaching") (ne $v nil)}}
+		apply_fonts_caching = {{$v}}
+{{- end}}
+{{- if eq $k "cacheFontsExtensions"}}
+		cache_fonts_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "cacheFontsPolicy") (ne $v nil)}}
+        cache_fonts_policy = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheFontsForceRevalidate") (ne $v nil)}}
+		cache_fonts_force_revalidate = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheFontsTtl") (ne $v nil)}}
+        cache_fonts_ttl = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheImagesTitle") (ne $v nil)}}
+        cache_images_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "applyImagesCaching") (ne $v nil)}}
+		apply_images_caching = {{$v}}
+{{- end}}
+{{- if eq $k "cacheImagesExtensions"}}
+		cache_images_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "cacheImagesPolicy") (ne $v nil)}}
+        cache_images_policy = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheImagesForceRevalidate") (ne $v nil)}}
+		cache_images_force_revalidate = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheImagesTtl") (ne $v nil)}}
+        cache_images_ttl = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheFilesTitle") (ne $v nil)}}
+        cache_files_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "applyFilesCaching") (ne $v nil)}}
+		apply_files_caching = {{$v}}
+{{- end}}
+{{- if eq $k "cacheFilesExtensions"}}
+		cache_files_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "cacheFilesPolicy") (ne $v nil)}}
+        cache_files_policy = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheFilesForceRevalidate") (ne $v nil)}}
+		cache_files_force_revalidate = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheFilesTtl") (ne $v nil)}}
+        cache_files_ttl = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheHtmlTitle") (ne $v nil)}}
+        cache_html_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "applyHtmlCaching") (ne $v nil)}}
+		apply_html_caching = {{$v}}
+{{- end}}
+{{- if eq $k "cacheHtmlExtensions"}}
+		cache_html_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "cacheHtmlPolicy") (ne $v nil)}}
+        cache_html_policy = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheHtmlForceRevalidate") (ne $v nil)}}
+		cache_html_force_revalidate = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheHtmlTtl") (ne $v nil)}}
+        cache_html_ttl = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "htmlCacheKeyQueryParametersBehavior") (ne $v nil)}}
+        html_cache_key_query_parameters_behavior = {{template "Text" $v}}
+{{- end}}
+{{- if eq $k "htmlCacheKeyQueryParametersList"}}
+		html_cache_key_query_parameters_list = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "htmlExactMatch") (ne $v nil)}}
+		html_exact_match = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheOthersTitle") (ne $v nil)}}
+        cache_others_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "applyOthersCaching") (ne $v nil)}}
+		apply_others_caching = {{$v}}
+{{- end}}
+{{- if eq $k "cacheOthersExtensions"}}
+		cache_others_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "cacheOthersPolicy") (ne $v nil)}}
+        cache_others_policy = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheOthersForceRevalidate") (ne $v nil)}}
+		cache_others_force_revalidate = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheOthersTtl") (ne $v nil)}}
+        cache_others_ttl = {{template "Text" $v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
+{{- define "deploymentNetworkTemplate"}}
+deployment_network_template {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "secureDeploymentNetwork") (ne $v nil)}}
+		secure_deployment_network = {{$v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
+{{- define "downstreamCacheTemplate"}}
+downstream_cache_template {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "cacheOption") (ne $v nil)}}
+        cache_option = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheLifetime") (ne $v nil)}}
+        cache_lifetime = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "ttl") (ne $v nil)}}
+        ttl = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "sendHeaders") (ne $v nil)}}
+        send_headers = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "sendPrivate") (ne $v nil)}}
+		send_private = {{$v}}
+{{- end}}
+{{- if and (eq $k "bustUncacheable") (ne $v nil)}}
+		bust_uncacheable = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheHtmlTitle") (ne $v nil)}}
+        cache_html_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "applyHtmlCaching") (ne $v nil)}}
+		apply_html_caching = {{$v}}
+{{- end}}
+{{- if eq $k "cacheHtmlExtensions"}}
+		cache_html_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "cacheHtmlOption") (ne $v nil)}}
+        cache_html_option = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheHtmlLifetime") (ne $v nil)}}
+        cache_html_lifetime = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheHtmlTtl") (ne $v nil)}}
+        cache_html_ttl = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheHtmlSendHeaders") (ne $v nil)}}
+        cache_html_send_headers = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "cacheHtmlSendPrivate") (ne $v nil)}}
+		cache_html_send_private = {{$v}}
+{{- end}}
+{{- if and (eq $k "cacheHtmlBustUncacheable") (ne $v nil)}}
+		cache_html_bust_uncacheable = {{$v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
+{{- define "edgeScapeTemplate"}}
+edge_scape_template {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "requestType") (ne $v nil)}}
+        request_type = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "enabled") (ne $v nil)}}
+		enabled = {{$v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
+{{- define "failoverTemplate"}}
+failover_template {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "originHealthDetectionTitle") (ne $v nil)}}
+        origin_health_detection_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "originRetryCount") (ne $v nil)}}
+		origin_retry_count = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "originRetryInterval") (ne $v nil)}}
+        origin_retry_interval = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "originMaximumReconnects") (ne $v nil)}}
+		origin_maximum_reconnects = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "simulateFailoverTitle") (ne $v nil)}}
+        simulate_failover_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "simulateFailover") (ne $v nil)}}
+		simulate_failover = {{$v}}
+{{- end}}
+{{- if and (eq $k "headerName") (ne $v nil)}}
+        header_name = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "headerValue") (ne $v nil)}}
+        header_value = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "isStagingOnly") (ne $v nil)}}
+		is_staging_only = {{$v}}
+{{- end}}
+{{- if and (eq $k "failoverTitle") (ne $v nil)}}
+        failover_title = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "failoverActionType") (ne $v nil)}}
+        failover_action_type = {{template "Text" $v}}
+{{- end}}
+{{- if eq $k "failoverResponseCodes"}}
+		failover_response_codes = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "redirectHostnameType") (ne $v nil)}}
+        redirect_hostname_type = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "redirectHostname") (ne $v nil)}}
+        redirect_hostname = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "redirectCustomPath") (ne $v nil)}}
+		redirect_custom_path = {{$v}}
+{{- end}}
+{{- if and (eq $k "redirectPath") (ne $v nil)}}
+        redirect_path = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "redirectMethod") (ne $v nil)}}
+		redirect_method = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "alternateHostname") (ne $v nil)}}
+        alternate_hostname = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "alternateHostnameCustomPath") (ne $v nil)}}
+		alternate_hostname_custom_path = {{$v}}
+{{- end}}
+{{- if and (eq $k "alternateHostnamePath") (ne $v nil)}}
+        alternate_hostname_path = {{template "Text" $v}}
+{{- end}}
+{{- if eq $k "netStorageHostname" }}
+		{{- if $v}}
+		net_storage_hostname {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "cpCode") (ne $v nil)}}
+		cp_code = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "downloadDomainName") (ne $v nil)}}
+        download_domain_name = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "g2oToken") (ne $v nil)}}
+        g2o_token = {{template "Text" $v}}
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
+{{- if and (eq $k "netStoragePath") (ne $v nil)}}
+        net_storage_path = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "alternateHostnameProvider") (ne $v nil)}}
+        alternate_hostname_provider = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "alternateHostnameProviderCustomPath") (ne $v nil)}}
+		alternate_hostname_provider_custom_path = {{$v}}
+{{- end}}
+{{- if and (eq $k "alternateHostnameProviderPath") (ne $v nil)}}
+        alternate_hostname_provider_path = {{template "Text" $v}}
+{{- end}}
+{{- if eq $k "failoverCpCode" }}
+		{{- if $v}}
+		failover_cp_code {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "id") (ne $v nil)}}
+		id = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "name") (ne $v nil)}}
+        name = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "createdDate") (ne $v nil)}}
+		created_date = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "description") (ne $v nil)}}
+        description = {{template "Text" $v}}
+{{- end}}
+{{- if eq $k "products"}}
+		products = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if eq $k "cpCodeLimits" }}
+		{{- if $v}}
+		cp_code_limits {
+{{- range $k, $v := $v}}
+{{- if and (eq $k "currentCapacity") (ne $v nil)}}
+		current_capacity = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limit") (ne $v nil)}}
+		limit = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "limitType") (ne $v nil)}}
+        limit_type = {{template "Text" $v}}
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
+{{- end}}
+		}
+		{{- end}}
+{{- end}}
+{{- if and (eq $k "netStoragePathStatusCode") (ne $v nil)}}
+		net_storage_path_status_code = {{$v | AsInt}}
+{{- end}}
+{{- if and (eq $k "preserveQueryString") (ne $v nil)}}
+		preserve_query_string = {{$v}}
+{{- end}}
+{{- if and (eq $k "modifyProtocol") (ne $v nil)}}
+		modify_protocol = {{$v}}
+{{- end}}
+{{- if and (eq $k "protocol") (ne $v nil)}}
+        protocol = {{template "Text" $v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
+{{- define "gzipResponseTemplate"}}
+gzip_response_template {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if eq $k "contentType"}}
+		content_type = [{{range $v}}"{{. | Escape}}", {{end}}]
+{{- end}}
+{{- if and (eq $k "gzipCompression") (ne $v nil)}}
+        gzip_compression = {{template "Text" $v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
+{{- define "httpsRedirectTemplate"}}
+https_redirect_template {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "destinationHostname") (ne $v nil)}}
+        destination_hostname = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "destinationHostnameSubdomain") (ne $v nil)}}
+        destination_hostname_subdomain = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "destinationHostnameSibling") (ne $v nil)}}
+        destination_hostname_sibling = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "destinationHostnameOther") (ne $v nil)}}
+        destination_hostname_other = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "destinationPath") (ne $v nil)}}
+        destination_path = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "destinationPathPrefix") (ne $v nil)}}
+        destination_path_prefix = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "destinationPathSuffixMode") (ne $v nil)}}
+        destination_path_suffix_mode = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "destinationPathSuffixValue") (ne $v nil)}}
+        destination_path_suffix_value = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "destinationPathOther") (ne $v nil)}}
+        destination_path_other = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "queryString") (ne $v nil)}}
+        query_string = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "responseCode") (ne $v nil)}}
+		response_code = {{$v | AsInt}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
+{{- define "obfuscateBackendTemplate"}}
+obfuscate_backend_template {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "debugHeader") (ne $v nil)}}
+        debug_header = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "removeXPoweredByHeader") (ne $v nil)}}
+		remove_x_powered_by_header = {{$v}}
+{{- end}}
+{{- if and (eq $k "removeServerHeader") (ne $v nil)}}
+		remove_server_header = {{$v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
+{{- define "originTemplate"}}
+origin_template {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "originType") (ne $v nil)}}
+        origin_type = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "hostname") (ne $v nil)}}
+        hostname = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "aosHostname") (ne $v nil)}}
+        aos_hostname = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "basePath") (ne $v nil)}}
+        base_path = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "removeViaHeader") (ne $v nil)}}
+		remove_via_header = {{$v}}
+{{- end}}
+{{- if and (eq $k "removeAgeHeaderOrigin") (ne $v nil)}}
+		remove_age_header_origin = {{$v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
+{{- define "setOriginTemplate"}}
+set_origin_template {
+{{- if .UUID}}
+	uuid = "{{.UUID}}"
+{{- end}}
+{{- if .TemplateUuid}}
+	template_uuid = "{{.TemplateUuid}}"
+{{- end}}
+{{- if .Locked}}
+	locked = {{.Locked}}
+{{- end}}
+{{- $v := .Options}}
+{{- range $k, $v := $v}}
+{{- if and (eq $k "originName") (ne $v nil)}}
+        origin_name = {{template "Text" $v}}
+{{- end}}
+{{- end}}
+}
+{{- end}}
 
 
 {{- define "advancedImMatch"}}
@@ -9458,14 +10086,11 @@ client_certificate {
 	locked = {{.Locked}}
 {{- end}}
 {{- range $k, $v := $v}}
-{{- if and (eq $k "isCertificatePresent") (ne $v nil)}}
-		is_certificate_present = {{$v}}
-{{- end}}
-{{- if and (eq $k "isCertificateValid") (ne $v nil)}}
-        is_certificate_valid = {{template "Text" $v}}
-{{- end}}
 {{- if and (eq $k "enforceMtls") (ne $v nil)}}
-		enforce_mtls = {{$v}}
+        enforce_mtls = {{template "Text" $v}}
+{{- end}}
+{{- if and (eq $k "certificateState") (ne $v nil)}}
+        certificate_state = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -10604,7 +11229,7 @@ data "akamai_property_rules_builder" "{{$r.TerraformName}}" {
 	{{- $children := $r.Children}}
 	{{- $isRoot := $r.IsRoot}}
 	{{- with $r.Rule}}
-	rules_v2026_01_09 {
+	rules_v2026_05_05 {
         name = "{{.Name | Escape}}"
 		{{- if $isRoot}}
         is_secure = {{.Options.IsSecure}}
