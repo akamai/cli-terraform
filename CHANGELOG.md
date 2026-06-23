@@ -12,7 +12,9 @@
 
 
 
-
+* General
+  * Updated various dependencies.
+  * Migrated Terraform to version `1.15.5`.
 
 
 
