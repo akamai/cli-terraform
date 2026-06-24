@@ -14,10 +14,6 @@
 	{{- else if eq .Name "contentType"}}{{- template "contentType" .}}
 	{{- else if eq .Name "debugMode"}}{{- template "debugMode" .}}
 	{{- else if eq .Name "deviceCharacteristic"}}{{- template "deviceCharacteristic" .}}
-	{{- else if eq .Name "ecmdAuthGroups"}}{{- template "ecmdAuthGroups" .}}
-	{{- else if eq .Name "ecmdAuthScheme"}}{{- template "ecmdAuthScheme" .}}
-	{{- else if eq .Name "ecmdIsAuthenticated"}}{{- template "ecmdIsAuthenticated" .}}
-	{{- else if eq .Name "ecmdUsername"}}{{- template "ecmdUsername" .}}
 	{{- else if eq .Name "edgeWorkersFailure"}}{{- template "edgeWorkersFailure" .}}
 	{{- else if eq .Name "fileExtension"}}{{- template "fileExtension" .}}
 	{{- else if eq .Name "filename"}}{{- template "filename" .}}
@@ -46,8 +42,6 @@
 	{{- else if eq .Name "userLocation"}}{{- template "userLocation" .}}
 	{{- else if eq .Name "userNetwork"}}{{- template "userNetwork" .}}
 	{{- else if eq .Name "variableError"}}{{- template "variableError" .}}
-	{{- else if eq .Name "virtualWaitingRoomRequest"}}{{- template "virtualWaitingRoomRequest" .}}
-	{{- else if eq .Name "visitorPrioritizationRequest"}}{{- template "visitorPrioritizationRequest" .}}
 	{{- else}}{{ReportError "Unknown criterion '%s'" .Name}}{{- end}}
 {{- end}}
 
@@ -97,28 +91,16 @@
 	{{- else if eq .Name "cloudWrapper"}}{{- template "cloudWrapper" .}}
 	{{- else if eq .Name "cloudWrapperAdvanced"}}{{- template "cloudWrapperAdvanced" .}}
 	{{- else if eq .Name "commonMediaClientData"}}{{- template "commonMediaClientData" .}}
-	{{- else if eq .Name "conditionalOrigin"}}{{- template "conditionalOrigin" .}}
 	{{- else if eq .Name "constructResponse"}}{{- template "constructResponse" .}}
 	{{- else if eq .Name "contentCharacteristics"}}{{- template "contentCharacteristics" .}}
 	{{- else if eq .Name "contentCharacteristicsAMD"}}{{- template "contentCharacteristicsAMD" .}}
 	{{- else if eq .Name "contentCharacteristicsDD"}}{{- template "contentCharacteristicsDD" .}}
-	{{- else if eq .Name "contentCharacteristicsWsdLargeFile"}}{{- template "contentCharacteristicsWsdLargeFile" .}}
 	{{- else if eq .Name "contentCharacteristicsWsdLive"}}{{- template "contentCharacteristicsWsdLive" .}}
-	{{- else if eq .Name "contentCharacteristicsWsdVod"}}{{- template "contentCharacteristicsWsdVod" .}}
-	{{- else if eq .Name "contentPrePosition"}}{{- template "contentPrePosition" .}}
 	{{- else if eq .Name "contentTargetingProtection"}}{{- template "contentTargetingProtection" .}}
 	{{- else if eq .Name "corsSupport"}}{{- template "corsSupport" .}}
 	{{- else if eq .Name "cpCode"}}{{- template "cpCode" .}}
 	{{- else if eq .Name "customBehavior"}}{{- template "customBehavior" .}}
 	{{- else if eq .Name "datastream"}}{{- template "datastream" .}}
-	{{- else if eq .Name "dcp"}}{{- template "dcp" .}}
-	{{- else if eq .Name "dcpAuthHMACTransformation"}}{{- template "dcpAuthHMACTransformation" .}}
-	{{- else if eq .Name "dcpAuthRegexTransformation"}}{{- template "dcpAuthRegexTransformation" .}}
-	{{- else if eq .Name "dcpAuthSubstringTransformation"}}{{- template "dcpAuthSubstringTransformation" .}}
-	{{- else if eq .Name "dcpAuthVariableExtractor"}}{{- template "dcpAuthVariableExtractor" .}}
-	{{- else if eq .Name "dcpDefaultAuthzGroups"}}{{- template "dcpDefaultAuthzGroups" .}}
-	{{- else if eq .Name "dcpDevRelations"}}{{- template "dcpDevRelations" .}}
-	{{- else if eq .Name "dcpRealTimeAuth"}}{{- template "dcpRealTimeAuth" .}}
 	{{- else if eq .Name "deliveryReceipt"}}{{- template "deliveryReceipt" .}}
 	{{- else if eq .Name "denyAccess"}}{{- template "denyAccess" .}}
 	{{- else if eq .Name "denyDirectFailoverAccess"}}{{- template "denyDirectFailoverAccess" .}}
@@ -132,14 +114,9 @@
 	{{- else if eq .Name "downstreamCache"}}{{- template "downstreamCache" .}}
 	{{- else if eq .Name "dynamicThroughtputOptimization"}}{{- template "dynamicThroughtputOptimization" .}}
 	{{- else if eq .Name "dynamicThroughtputOptimizationOverride"}}{{- template "dynamicThroughtputOptimizationOverride" .}}
-	{{- else if eq .Name "dynamicWebContent"}}{{- template "dynamicWebContent" .}}
 	{{- else if eq .Name "earlyData"}}{{- template "earlyData" .}}
 	{{- else if eq .Name "earlyDataAdvanced"}}{{- template "earlyDataAdvanced" .}}
 	{{- else if eq .Name "earlyHints"}}{{- template "earlyHints" .}}
-	{{- else if eq .Name "ecmsBulkUpload"}}{{- template "ecmsBulkUpload" .}}
-	{{- else if eq .Name "ecmsDatabase"}}{{- template "ecmsDatabase" .}}
-	{{- else if eq .Name "ecmsDataset"}}{{- template "ecmsDataset" .}}
-	{{- else if eq .Name "ecmsObjectKey"}}{{- template "ecmsObjectKey" .}}
 	{{- else if eq .Name "edgeConnect"}}{{- template "edgeConnect" .}}
 	{{- else if eq .Name "edgeLoadBalancingAdvanced"}}{{- template "edgeLoadBalancingAdvanced" .}}
 	{{- else if eq .Name "edgeLoadBalancingDataCenter"}}{{- template "edgeLoadBalancingDataCenter" .}}
@@ -165,7 +142,6 @@
 	{{- else if eq .Name "gRPC"}}{{- template "gRPC" .}}
 	{{- else if eq .Name "globalRequestNumber"}}{{- template "globalRequestNumber" .}}
 	{{- else if eq .Name "googleTagGateway"}}{{- template "googleTagGateway" .}}
-	{{- else if eq .Name "govCloud"}}{{- template "govCloud" .}}
 	{{- else if eq .Name "graphqlCaching"}}{{- template "graphqlCaching" .}}
 	{{- else if eq .Name "gzipResponse"}}{{- template "gzipResponse" .}}
 	{{- else if eq .Name "hdDataAdvanced"}}{{- template "hdDataAdvanced" .}}
@@ -176,7 +152,6 @@
 	{{- else if eq .Name "httpStrictTransportSecurity"}}{{- template "httpStrictTransportSecurity" .}}
 	{{- else if eq .Name "httpToHttpsUpgrade"}}{{- template "httpToHttpsUpgrade" .}}
 	{{- else if eq .Name "imOverride"}}{{- template "imOverride" .}}
-	{{- else if eq .Name "imageAndVideoManager"}}{{- template "imageAndVideoManager" .}}
 	{{- else if eq .Name "imageManager"}}{{- template "imageManager" .}}
 	{{- else if eq .Name "imageManagerVideo"}}{{- template "imageManagerVideo" .}}
 	{{- else if eq .Name "include"}}{{- template "include" .}}
@@ -224,12 +199,10 @@
 	{{- else if eq .Name "prefetch"}}{{- template "prefetch" .}}
 	{{- else if eq .Name "prefetchable"}}{{- template "prefetchable" .}}
 	{{- else if eq .Name "prefreshCache"}}{{- template "prefreshCache" .}}
-	{{- else if eq .Name "quality"}}{{- template "quality" .}}
 	{{- else if eq .Name "quicBeta"}}{{- template "quicBeta" .}}
 	{{- else if eq .Name "randomSeek"}}{{- template "randomSeek" .}}
 	{{- else if eq .Name "rapid"}}{{- template "rapid" .}}
 	{{- else if eq .Name "readTimeout"}}{{- template "readTimeout" .}}
-	{{- else if eq .Name "realTimeReporting"}}{{- template "realTimeReporting" .}}
 	{{- else if eq .Name "realUserMonitoring"}}{{- template "realUserMonitoring" .}}
 	{{- else if eq .Name "redirect"}}{{- template "redirect" .}}
 	{{- else if eq .Name "redirectplus"}}{{- template "redirectplus" .}}
@@ -264,7 +237,6 @@
 	{{- else if eq .Name "standardTLSMigration"}}{{- template "standardTLSMigration" .}}
 	{{- else if eq .Name "standardTLSMigrationOverride"}}{{- template "standardTLSMigrationOverride" .}}
 	{{- else if eq .Name "strictHeaderParsing"}}{{- template "strictHeaderParsing" .}}
-	{{- else if eq .Name "subCustomer"}}{{- template "subCustomer" .}}
 	{{- else if eq .Name "sureRoute"}}{{- template "sureRoute" .}}
 	{{- else if eq .Name "tcpOptimization"}}{{- template "tcpOptimization" .}}
 	{{- else if eq .Name "teaLeaf"}}{{- template "teaLeaf" .}}
@@ -274,31 +246,14 @@
 	{{- else if eq .Name "timeout"}}{{- template "timeout" .}}
 	{{- else if eq .Name "uidConfiguration"}}{{- template "uidConfiguration" .}}
 	{{- else if eq .Name "validateEntityTag"}}{{- template "validateEntityTag" .}}
-	{{- else if eq .Name "verifyJsonWebToken"}}{{- template "verifyJsonWebToken" .}}
-	{{- else if eq .Name "verifyJsonWebTokenForDcp"}}{{- template "verifyJsonWebTokenForDcp" .}}
 	{{- else if eq .Name "verifyTokenAuthorization"}}{{- template "verifyTokenAuthorization" .}}
 	{{- else if eq .Name "videoManagerCloudinary"}}{{- template "videoManagerCloudinary" .}}
-	{{- else if eq .Name "virtualWaitingRoom"}}{{- template "virtualWaitingRoom" .}}
-	{{- else if eq .Name "virtualWaitingRoomWithEdgeWorkers"}}{{- template "virtualWaitingRoomWithEdgeWorkers" .}}
 	{{- else if eq .Name "visitorPrioritization"}}{{- template "visitorPrioritization" .}}
-	{{- else if eq .Name "visitorPrioritizationFifo"}}{{- template "visitorPrioritizationFifo" .}}
-	{{- else if eq .Name "visitorPrioritizationFifoStandalone"}}{{- template "visitorPrioritizationFifoStandalone" .}}
 	{{- else if eq .Name "visitorPrioritizationQueueIt"}}{{- template "visitorPrioritizationQueueIt" .}}
 	{{- else if eq .Name "watermarking"}}{{- template "watermarking" .}}
 	{{- else if eq .Name "webApplicationFirewall"}}{{- template "webApplicationFirewall" .}}
 	{{- else if eq .Name "webSockets"}}{{- template "webSockets" .}}
 	{{- else if eq .Name "webdav"}}{{- template "webdav" .}}
-	{{- else if eq .Name "allowMethodsTemplate"}}{{- template "allowMethodsTemplate" .}}
-	{{- else if eq .Name "cachingTemplate"}}{{- template "cachingTemplate" .}}
-	{{- else if eq .Name "deploymentNetworkTemplate"}}{{- template "deploymentNetworkTemplate" .}}
-	{{- else if eq .Name "downstreamCacheTemplate"}}{{- template "downstreamCacheTemplate" .}}
-	{{- else if eq .Name "edgeScapeTemplate"}}{{- template "edgeScapeTemplate" .}}
-	{{- else if eq .Name "failoverTemplate"}}{{- template "failoverTemplate" .}}
-	{{- else if eq .Name "gzipResponseTemplate"}}{{- template "gzipResponseTemplate" .}}
-	{{- else if eq .Name "httpsRedirectTemplate"}}{{- template "httpsRedirectTemplate" .}}
-	{{- else if eq .Name "obfuscateBackendTemplate"}}{{- template "obfuscateBackendTemplate" .}}
-	{{- else if eq .Name "originTemplate"}}{{- template "originTemplate" .}}
-	{{- else if eq .Name "setOriginTemplate"}}{{- template "setOriginTemplate" .}}
     {{- else}}{{ReportError "Unknown behavior '%s'" .Name}}{{- end}}
 {{- end}}
 
@@ -1669,25 +1624,6 @@ common_media_client_data {
 {{- end}}
 }
 {{- end}}
-{{- define "conditionalOrigin"}}
-conditional_origin {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "originId") (ne $v nil)}}
-        origin_id = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
 {{- define "constructResponse"}}
 construct_response {
 {{- if .UUID}}
@@ -1851,34 +1787,6 @@ content_characteristics_dd {
 {{- end}}
 }
 {{- end}}
-{{- define "contentCharacteristicsWsdLargeFile"}}
-content_characteristics_wsd_large_file {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "objectSize") (ne $v nil)}}
-        object_size = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "popularityDistribution") (ne $v nil)}}
-        popularity_distribution = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "catalogSize") (ne $v nil)}}
-        catalog_size = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "contentType") (ne $v nil)}}
-        content_type = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
 {{- define "contentCharacteristicsWsdLive"}}
 content_characteristics_wsd_live {
 {{- if .UUID}}
@@ -1936,98 +1844,6 @@ content_characteristics_wsd_live {
 {{- end}}
 {{- if and (eq $k "segmentSizeSmooth") (ne $v nil)}}
         segment_size_smooth = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "contentCharacteristicsWsdVod"}}
-content_characteristics_wsd_vod {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "catalogSize") (ne $v nil)}}
-        catalog_size = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "contentType") (ne $v nil)}}
-        content_type = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "popularityDistribution") (ne $v nil)}}
-        popularity_distribution = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "hls") (ne $v nil)}}
-		hls = {{$v}}
-{{- end}}
-{{- if and (eq $k "segmentDurationHLS") (ne $v nil)}}
-        segment_duration_hls = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "segmentSizeHLS") (ne $v nil)}}
-        segment_size_hls = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "hds") (ne $v nil)}}
-		hds = {{$v}}
-{{- end}}
-{{- if and (eq $k "segmentDurationHDS") (ne $v nil)}}
-        segment_duration_hds = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "segmentSizeHDS") (ne $v nil)}}
-        segment_size_hds = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "dash") (ne $v nil)}}
-		dash = {{$v}}
-{{- end}}
-{{- if and (eq $k "segmentDurationDASH") (ne $v nil)}}
-        segment_duration_dash = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "segmentSizeDASH") (ne $v nil)}}
-        segment_size_dash = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "smooth") (ne $v nil)}}
-		smooth = {{$v}}
-{{- end}}
-{{- if and (eq $k "segmentDurationSmooth") (ne $v nil)}}
-        segment_duration_smooth = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "segmentSizeSmooth") (ne $v nil)}}
-        segment_size_smooth = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "contentPrePosition"}}
-content_pre_position {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = {{$v}}
-{{- end}}
-{{- if and (eq $k "sourceType") (ne $v nil)}}
-        source_type = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "targets") (ne $v nil)}}
-        targets = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "firstLocation") (ne $v nil)}}
-        first_location = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "secondLocation") (ne $v nil)}}
-        second_location = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2283,206 +2099,6 @@ datastream {
 {{- end}}
 {{- if and (eq $k "collectMidgressTraffic") (ne $v nil)}}
 		collect_midgress_traffic = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "dcp"}}
-dcp {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = {{$v}}
-{{- end}}
-{{- if and (eq $k "namespaceId") (ne $v nil)}}
-        namespace_id = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "tlsenabled") (ne $v nil)}}
-		tlsenabled = {{$v}}
-{{- end}}
-{{- if and (eq $k "wsenabled") (ne $v nil)}}
-		wsenabled = {{$v}}
-{{- end}}
-{{- if and (eq $k "gwenabled") (ne $v nil)}}
-		gwenabled = {{$v}}
-{{- end}}
-{{- if and (eq $k "anonymous") (ne $v nil)}}
-		anonymous = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "dcpAuthHMACTransformation"}}
-dcp_auth_hmac_transformation {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "hashConversionAlgorithm") (ne $v nil)}}
-        hash_conversion_algorithm = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "hashConversionKey") (ne $v nil)}}
-        hash_conversion_key = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "dcpAuthRegexTransformation"}}
-dcp_auth_regex_transformation {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "regexPattern") (ne $v nil)}}
-        regex_pattern = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "dcpAuthSubstringTransformation"}}
-dcp_auth_substring_transformation {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "substringStart") (ne $v nil)}}
-        substring_start = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "substringEnd") (ne $v nil)}}
-        substring_end = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "dcpAuthVariableExtractor"}}
-dcp_auth_variable_extractor {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "certificateField") (ne $v nil)}}
-        certificate_field = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "dcpMutualAuthProcessingVariableId") (ne $v nil)}}
-        dcp_mutual_auth_processing_variable_id = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "dcpDefaultAuthzGroups"}}
-dcp_default_authz_groups {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if eq $k "groupNames"}}
-		group_names = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "dcpDevRelations"}}
-dcp_dev_relations {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = {{$v}}
-{{- end}}
-{{- if and (eq $k "customValues") (ne $v nil)}}
-		custom_values = {{$v}}
-{{- end}}
-{{- if and (eq $k "hostname") (ne $v nil)}}
-        hostname = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "path") (ne $v nil)}}
-        path = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "dcpRealTimeAuth"}}
-dcp_real_time_auth {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "extractNamespace") (ne $v nil)}}
-		extract_namespace = {{$v}}
-{{- end}}
-{{- if and (eq $k "namespaceClaim") (ne $v nil)}}
-        namespace_claim = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "extractJurisdiction") (ne $v nil)}}
-		extract_jurisdiction = {{$v}}
-{{- end}}
-{{- if and (eq $k "jurisdictionClaim") (ne $v nil)}}
-        jurisdiction_claim = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "extractHostname") (ne $v nil)}}
-		extract_hostname = {{$v}}
-{{- end}}
-{{- if and (eq $k "hostnameClaim") (ne $v nil)}}
-        hostname_claim = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -2758,34 +2374,6 @@ dynamic_throughtput_optimization_override {
 {{- end}}
 }
 {{- end}}
-{{- define "dynamicWebContent"}}
-dynamic_web_content {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "sureRoute") (ne $v nil)}}
-		sure_route = {{$v}}
-{{- end}}
-{{- if and (eq $k "prefetch") (ne $v nil)}}
-		prefetch = {{$v}}
-{{- end}}
-{{- if and (eq $k "realUserMonitoring") (ne $v nil)}}
-		real_user_monitoring = {{$v}}
-{{- end}}
-{{- if and (eq $k "imageCompression") (ne $v nil)}}
-		image_compression = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
 {{- define "earlyData"}}
 early_data {
 {{- if .UUID}}
@@ -2845,106 +2433,6 @@ early_hints {
 {{- end}}
 {{- if and (eq $k "resourceUrl") (ne $v nil)}}
         resource_url = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "ecmsBulkUpload"}}
-ecms_bulk_upload {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "ecmsDatabase"}}
-ecms_database {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "database") (ne $v nil)}}
-        database = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "extractLocation") (ne $v nil)}}
-        extract_location = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "headerName") (ne $v nil)}}
-        header_name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "queryParameterName") (ne $v nil)}}
-        query_parameter_name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "regexPattern") (ne $v nil)}}
-        regex_pattern = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "ecmsDataset"}}
-ecms_dataset {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "dataset") (ne $v nil)}}
-        dataset = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "extractLocation") (ne $v nil)}}
-        extract_location = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "headerName") (ne $v nil)}}
-        header_name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "queryParameterName") (ne $v nil)}}
-        query_parameter_name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "regexPattern") (ne $v nil)}}
-        regex_pattern = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "ecmsObjectKey"}}
-ecms_object_key {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "regex") (ne $v nil)}}
-        regex = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -3965,25 +3453,6 @@ google_tag_gateway {
 {{- end}}
 }
 {{- end}}
-{{- define "govCloud"}}
-gov_cloud {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "govCloudTitle") (ne $v nil)}}
-        gov_cloud_title = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
 {{- define "graphqlCaching"}}
 graphql_caching {
 {{- if .UUID}}
@@ -4266,120 +3735,6 @@ im_override {
 {{- end}}
 {{- if eq $k "excludedQueryParameters"}}
 		excluded_query_parameters = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "imageAndVideoManager"}}
-image_and_video_manager {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "policySetType") (ne $v nil)}}
-        policy_set_type = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = {{$v}}
-{{- end}}
-{{- if and (eq $k "resize") (ne $v nil)}}
-		resize = {{$v}}
-{{- end}}
-{{- if and (eq $k "applyBestFileType") (ne $v nil)}}
-		apply_best_file_type = {{$v}}
-{{- end}}
-{{- if eq $k "cpCodeOriginal" }}
-		{{- if $v}}
-		cp_code_original {
-{{- range $k, $v := $v}}
-{{- if and (eq $k "id") (ne $v nil)}}
-		id = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "name") (ne $v nil)}}
-        name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "createdDate") (ne $v nil)}}
-		created_date = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "description") (ne $v nil)}}
-        description = {{template "Text" $v}}
-{{- end}}
-{{- if eq $k "products"}}
-		products = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if eq $k "cpCodeLimits" }}
-		{{- if $v}}
-		cp_code_limits {
-{{- range $k, $v := $v}}
-{{- if and (eq $k "currentCapacity") (ne $v nil)}}
-		current_capacity = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "limit") (ne $v nil)}}
-		limit = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "limitType") (ne $v nil)}}
-        limit_type = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-		}
-		{{- end}}
-{{- end}}
-{{- end}}
-		}
-		{{- end}}
-{{- end}}
-{{- if eq $k "cpCodeTransformed" }}
-		{{- if $v}}
-		cp_code_transformed {
-{{- range $k, $v := $v}}
-{{- if and (eq $k "id") (ne $v nil)}}
-		id = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "name") (ne $v nil)}}
-        name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "createdDate") (ne $v nil)}}
-		created_date = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "description") (ne $v nil)}}
-        description = {{template "Text" $v}}
-{{- end}}
-{{- if eq $k "products"}}
-		products = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if eq $k "cpCodeLimits" }}
-		{{- if $v}}
-		cp_code_limits {
-{{- range $k, $v := $v}}
-{{- if and (eq $k "currentCapacity") (ne $v nil)}}
-		current_capacity = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "limit") (ne $v nil)}}
-		limit = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "limitType") (ne $v nil)}}
-        limit_type = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-		}
-		{{- end}}
-{{- end}}
-{{- end}}
-		}
-		{{- end}}
-{{- end}}
-{{- if and (eq $k "imageSet") (ne $v nil)}}
-        image_set = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "videoSet") (ne $v nil)}}
-        video_set = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -6900,70 +6255,6 @@ prefresh_cache {
 {{- end}}
 }
 {{- end}}
-{{- define "quality"}}
-quality {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "origin_settings") (ne $v nil)}}
-        origin_settings = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "country") (ne $v nil)}}
-        country = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "audienceSettings") (ne $v nil)}}
-        audience_settings = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "endUserLocation") (ne $v nil)}}
-        end_user_location = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "maximumConcurrentUsers") (ne $v nil)}}
-        maximum_concurrent_users = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "contentSettings") (ne $v nil)}}
-        content_settings = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "contentType") (ne $v nil)}}
-        content_type = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "objectSize") (ne $v nil)}}
-        object_size = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "downloadType") (ne $v nil)}}
-        download_type = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "popularityDistribution") (ne $v nil)}}
-        popularity_distribution = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "deliveryType") (ne $v nil)}}
-        delivery_type = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "deliveryFormat") (ne $v nil)}}
-        delivery_format = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "segmentDuration") (ne $v nil)}}
-		segment_duration = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "catalogSize") (ne $v nil)}}
-        catalog_size = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "refreshRate") (ne $v nil)}}
-        refresh_rate = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "optimizeFor") (ne $v nil)}}
-        optimize_for = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
 {{- define "quicBeta"}}
 quic_beta {
 {{- if .UUID}}
@@ -7048,31 +6339,6 @@ read_timeout {
 {{- end}}
 {{- if and (eq $k "firstByteTimeout") (ne $v nil)}}
         first_byte_timeout = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "realTimeReporting"}}
-real_time_reporting {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = {{$v}}
-{{- end}}
-{{- if and (eq $k "advanced") (ne $v nil)}}
-		advanced = {{$v}}
-{{- end}}
-{{- if and (eq $k "beaconSamplingPercentage") (ne $v nil)}}
-		beacon_sampling_percentage = {{$v}}
 {{- end}}
 {{- end}}
 }
@@ -8314,79 +7580,6 @@ strict_header_parsing {
 {{- end}}
 }
 {{- end}}
-{{- define "subCustomer"}}
-sub_customer {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = {{$v}}
-{{- end}}
-{{- if and (eq $k "origin") (ne $v nil)}}
-		origin = {{$v}}
-{{- end}}
-{{- if and (eq $k "partnerDomainSuffix") (ne $v nil)}}
-        partner_domain_suffix = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "caching") (ne $v nil)}}
-		caching = {{$v}}
-{{- end}}
-{{- if and (eq $k "referrer") (ne $v nil)}}
-		referrer = {{$v}}
-{{- end}}
-{{- if and (eq $k "ip") (ne $v nil)}}
-		ip = {{$v}}
-{{- end}}
-{{- if and (eq $k "geoLocation") (ne $v nil)}}
-		geo_location = {{$v}}
-{{- end}}
-{{- if and (eq $k "refreshContent") (ne $v nil)}}
-		refresh_content = {{$v}}
-{{- end}}
-{{- if and (eq $k "modifyPath") (ne $v nil)}}
-		modify_path = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheKey") (ne $v nil)}}
-		cache_key = {{$v}}
-{{- end}}
-{{- if and (eq $k "tokenAuthorization") (ne $v nil)}}
-		token_authorization = {{$v}}
-{{- end}}
-{{- if and (eq $k "siteFailover") (ne $v nil)}}
-		site_failover = {{$v}}
-{{- end}}
-{{- if and (eq $k "contentCompressor") (ne $v nil)}}
-		content_compressor = {{$v}}
-{{- end}}
-{{- if and (eq $k "accessControl") (ne $v nil)}}
-		access_control = {{$v}}
-{{- end}}
-{{- if and (eq $k "dynamicWebContent") (ne $v nil)}}
-		dynamic_web_content = {{$v}}
-{{- end}}
-{{- if and (eq $k "onDemandVideoDelivery") (ne $v nil)}}
-		on_demand_video_delivery = {{$v}}
-{{- end}}
-{{- if and (eq $k "largeFileDelivery") (ne $v nil)}}
-		large_file_delivery = {{$v}}
-{{- end}}
-{{- if and (eq $k "liveVideoDelivery") (ne $v nil)}}
-		live_video_delivery = {{$v}}
-{{- end}}
-{{- if and (eq $k "webApplicationFirewall") (ne $v nil)}}
-		web_application_firewall = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
 {{- define "sureRoute"}}
 sure_route {
 {{- if .UUID}}
@@ -8666,98 +7859,6 @@ validate_entity_tag {
 {{- end}}
 }
 {{- end}}
-{{- define "verifyJsonWebToken"}}
-verify_json_web_token {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "extractLocation") (ne $v nil)}}
-        extract_location = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "headerName") (ne $v nil)}}
-        header_name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "queryParameterName") (ne $v nil)}}
-        query_parameter_name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "jwt") (ne $v nil)}}
-        jwt = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "enableRS256") (ne $v nil)}}
-		enable_rs256 = {{$v}}
-{{- end}}
-{{- if and (eq $k "enableES256") (ne $v nil)}}
-		enable_es256 = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "verifyJsonWebTokenForDcp"}}
-verify_json_web_token_for_dcp {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "extractLocation") (ne $v nil)}}
-        extract_location = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "primaryLocation") (ne $v nil)}}
-        primary_location = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "customHeader") (ne $v nil)}}
-		custom_header = {{$v}}
-{{- end}}
-{{- if and (eq $k "headerName") (ne $v nil)}}
-        header_name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "queryParameterName") (ne $v nil)}}
-        query_parameter_name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "jwt") (ne $v nil)}}
-        jwt = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "extractClientId") (ne $v nil)}}
-		extract_client_id = {{$v}}
-{{- end}}
-{{- if and (eq $k "clientId") (ne $v nil)}}
-        client_id = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "extractAuthorizations") (ne $v nil)}}
-		extract_authorizations = {{$v}}
-{{- end}}
-{{- if and (eq $k "authorizations") (ne $v nil)}}
-        authorizations = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "extractUserName") (ne $v nil)}}
-		extract_user_name = {{$v}}
-{{- end}}
-{{- if and (eq $k "userName") (ne $v nil)}}
-        user_name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "enableRS256") (ne $v nil)}}
-		enable_rs256 = {{$v}}
-{{- end}}
-{{- if and (eq $k "enableES256") (ne $v nil)}}
-		enable_es256 = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
 {{- define "verifyTokenAuthorization"}}
 verify_token_authorization {
 {{- if .UUID}}
@@ -8872,65 +7973,6 @@ video_manager_cloudinary {
 {{- if and (eq $k "transformations") (ne $v nil)}}
         transformations = {{template "Text" $v}}
 {{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "virtualWaitingRoom"}}
-virtual_waiting_room {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "cloudletSharedPolicy") (ne $v nil)}}
-		cloudlet_shared_policy = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "domainConfig") (ne $v nil)}}
-        domain_config = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "customCookieDomain") (ne $v nil)}}
-        custom_cookie_domain = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "waitingRoomTitle") (ne $v nil)}}
-        waiting_room_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "waitingRoomPath") (ne $v nil)}}
-        waiting_room_path = {{template "Text" $v}}
-{{- end}}
-{{- if eq $k "waitingRoomAssetsPaths"}}
-		waiting_room_assets_paths = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if and (eq $k "accessTitle") (ne $v nil)}}
-        access_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "sessionDuration") (ne $v nil)}}
-		session_duration = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "sessionAutoProlong") (ne $v nil)}}
-		session_auto_prolong = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "virtualWaitingRoomWithEdgeWorkers"}}
-virtual_waiting_room_with_edge_workers {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
 {{- end}}
 }
 {{- end}}
@@ -9129,65 +8171,6 @@ visitor_prioritization {
 {{- end}}
 }
 {{- end}}
-{{- define "visitorPrioritizationFifo"}}
-visitor_prioritization_fifo {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "cloudletSharedPolicy") (ne $v nil)}}
-		cloudlet_shared_policy = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "domainConfig") (ne $v nil)}}
-        domain_config = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "customCookieDomain") (ne $v nil)}}
-        custom_cookie_domain = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "waitingRoomTitle") (ne $v nil)}}
-        waiting_room_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "waitingRoomPath") (ne $v nil)}}
-        waiting_room_path = {{template "Text" $v}}
-{{- end}}
-{{- if eq $k "waitingRoomAssetsPaths"}}
-		waiting_room_assets_paths = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if and (eq $k "accessTitle") (ne $v nil)}}
-        access_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "sessionDuration") (ne $v nil)}}
-		session_duration = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "sessionAutoProlong") (ne $v nil)}}
-		session_auto_prolong = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "visitorPrioritizationFifoStandalone"}}
-visitor_prioritization_fifo_standalone {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- end}}
-}
-{{- end}}
 {{- define "visitorPrioritizationQueueIt"}}
 visitor_prioritization_queue_it {
 {{- if .UUID}}
@@ -9359,632 +8342,6 @@ webdav {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "allowMethodsTemplate"}}
-allow_methods_template {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "allowAllHttpInCacheHierarchy") (ne $v nil)}}
-		allow_all_http_in_cache_hierarchy = {{$v}}
-{{- end}}
-{{- if and (eq $k "allowPost") (ne $v nil)}}
-		allow_post = {{$v}}
-{{- end}}
-{{- if and (eq $k "allowPostWithoutContentLength") (ne $v nil)}}
-		allow_post_without_content_length = {{$v}}
-{{- end}}
-{{- if and (eq $k "allowOptions") (ne $v nil)}}
-		allow_options = {{$v}}
-{{- end}}
-{{- if and (eq $k "allowPut") (ne $v nil)}}
-		allow_put = {{$v}}
-{{- end}}
-{{- if and (eq $k "allowPatch") (ne $v nil)}}
-		allow_patch = {{$v}}
-{{- end}}
-{{- if and (eq $k "allowDelete") (ne $v nil)}}
-		allow_delete = {{$v}}
-{{- end}}
-{{- if and (eq $k "allowDeleteWithBody") (ne $v nil)}}
-		allow_delete_with_body = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "cachingTemplate"}}
-caching_template {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "cachingOption") (ne $v nil)}}
-        caching_option = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheForceRevalidate") (ne $v nil)}}
-		cache_force_revalidate = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheTtl") (ne $v nil)}}
-        cache_ttl = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "tieredDistribution") (ne $v nil)}}
-		tiered_distribution = {{$v}}
-{{- end}}
-{{- if and (eq $k "validateEntityTag") (ne $v nil)}}
-		validate_entity_tag = {{$v}}
-{{- end}}
-{{- if and (eq $k "removeVaryHeader") (ne $v nil)}}
-		remove_vary_header = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheKeyQueryParams") (ne $v nil)}}
-        cache_key_query_params = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheHttpTemporaryRedirects") (ne $v nil)}}
-		cache_http_temporary_redirects = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheHttpErrorResponseTitle") (ne $v nil)}}
-        cache_http_error_response_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheHttpErrorResponse") (ne $v nil)}}
-		cache_http_error_response = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheHttpErrorTtl") (ne $v nil)}}
-        cache_http_error_ttl = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheHttpErrorPreserveStale") (ne $v nil)}}
-		cache_http_error_preserve_stale = {{$v}}
-{{- end}}
-{{- if and (eq $k "prefreshCacheTitle") (ne $v nil)}}
-        prefresh_cache_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "prefreshCache") (ne $v nil)}}
-		prefresh_cache = {{$v}}
-{{- end}}
-{{- if and (eq $k "prefreshCacheTtlPercentage") (ne $v nil)}}
-		prefresh_cache_ttl_percentage = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "cacheCssJsTitle") (ne $v nil)}}
-        cache_css_js_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "applyCssJsCaching") (ne $v nil)}}
-		apply_css_js_caching = {{$v}}
-{{- end}}
-{{- if eq $k "cacheCssJsExtensions"}}
-		cache_css_js_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if and (eq $k "cacheCssJsPolicy") (ne $v nil)}}
-        cache_css_js_policy = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheCssJsForceRevalidate") (ne $v nil)}}
-		cache_css_js_force_revalidate = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheCssJsTtl") (ne $v nil)}}
-        cache_css_js_ttl = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheFontsTitle") (ne $v nil)}}
-        cache_fonts_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "applyFontsCaching") (ne $v nil)}}
-		apply_fonts_caching = {{$v}}
-{{- end}}
-{{- if eq $k "cacheFontsExtensions"}}
-		cache_fonts_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if and (eq $k "cacheFontsPolicy") (ne $v nil)}}
-        cache_fonts_policy = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheFontsForceRevalidate") (ne $v nil)}}
-		cache_fonts_force_revalidate = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheFontsTtl") (ne $v nil)}}
-        cache_fonts_ttl = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheImagesTitle") (ne $v nil)}}
-        cache_images_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "applyImagesCaching") (ne $v nil)}}
-		apply_images_caching = {{$v}}
-{{- end}}
-{{- if eq $k "cacheImagesExtensions"}}
-		cache_images_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if and (eq $k "cacheImagesPolicy") (ne $v nil)}}
-        cache_images_policy = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheImagesForceRevalidate") (ne $v nil)}}
-		cache_images_force_revalidate = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheImagesTtl") (ne $v nil)}}
-        cache_images_ttl = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheFilesTitle") (ne $v nil)}}
-        cache_files_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "applyFilesCaching") (ne $v nil)}}
-		apply_files_caching = {{$v}}
-{{- end}}
-{{- if eq $k "cacheFilesExtensions"}}
-		cache_files_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if and (eq $k "cacheFilesPolicy") (ne $v nil)}}
-        cache_files_policy = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheFilesForceRevalidate") (ne $v nil)}}
-		cache_files_force_revalidate = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheFilesTtl") (ne $v nil)}}
-        cache_files_ttl = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheHtmlTitle") (ne $v nil)}}
-        cache_html_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "applyHtmlCaching") (ne $v nil)}}
-		apply_html_caching = {{$v}}
-{{- end}}
-{{- if eq $k "cacheHtmlExtensions"}}
-		cache_html_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if and (eq $k "cacheHtmlPolicy") (ne $v nil)}}
-        cache_html_policy = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheHtmlForceRevalidate") (ne $v nil)}}
-		cache_html_force_revalidate = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheHtmlTtl") (ne $v nil)}}
-        cache_html_ttl = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "htmlCacheKeyQueryParametersBehavior") (ne $v nil)}}
-        html_cache_key_query_parameters_behavior = {{template "Text" $v}}
-{{- end}}
-{{- if eq $k "htmlCacheKeyQueryParametersList"}}
-		html_cache_key_query_parameters_list = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if and (eq $k "htmlExactMatch") (ne $v nil)}}
-		html_exact_match = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheOthersTitle") (ne $v nil)}}
-        cache_others_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "applyOthersCaching") (ne $v nil)}}
-		apply_others_caching = {{$v}}
-{{- end}}
-{{- if eq $k "cacheOthersExtensions"}}
-		cache_others_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if and (eq $k "cacheOthersPolicy") (ne $v nil)}}
-        cache_others_policy = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheOthersForceRevalidate") (ne $v nil)}}
-		cache_others_force_revalidate = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheOthersTtl") (ne $v nil)}}
-        cache_others_ttl = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "deploymentNetworkTemplate"}}
-deployment_network_template {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "secureDeploymentNetwork") (ne $v nil)}}
-		secure_deployment_network = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "downstreamCacheTemplate"}}
-downstream_cache_template {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "cacheOption") (ne $v nil)}}
-        cache_option = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheLifetime") (ne $v nil)}}
-        cache_lifetime = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "ttl") (ne $v nil)}}
-        ttl = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "sendHeaders") (ne $v nil)}}
-        send_headers = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "sendPrivate") (ne $v nil)}}
-		send_private = {{$v}}
-{{- end}}
-{{- if and (eq $k "bustUncacheable") (ne $v nil)}}
-		bust_uncacheable = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheHtmlTitle") (ne $v nil)}}
-        cache_html_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "applyHtmlCaching") (ne $v nil)}}
-		apply_html_caching = {{$v}}
-{{- end}}
-{{- if eq $k "cacheHtmlExtensions"}}
-		cache_html_extensions = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if and (eq $k "cacheHtmlOption") (ne $v nil)}}
-        cache_html_option = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheHtmlLifetime") (ne $v nil)}}
-        cache_html_lifetime = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheHtmlTtl") (ne $v nil)}}
-        cache_html_ttl = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheHtmlSendHeaders") (ne $v nil)}}
-        cache_html_send_headers = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "cacheHtmlSendPrivate") (ne $v nil)}}
-		cache_html_send_private = {{$v}}
-{{- end}}
-{{- if and (eq $k "cacheHtmlBustUncacheable") (ne $v nil)}}
-		cache_html_bust_uncacheable = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "edgeScapeTemplate"}}
-edge_scape_template {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "requestType") (ne $v nil)}}
-        request_type = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "failoverTemplate"}}
-failover_template {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "originHealthDetectionTitle") (ne $v nil)}}
-        origin_health_detection_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "originRetryCount") (ne $v nil)}}
-		origin_retry_count = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "originRetryInterval") (ne $v nil)}}
-        origin_retry_interval = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "originMaximumReconnects") (ne $v nil)}}
-		origin_maximum_reconnects = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "simulateFailoverTitle") (ne $v nil)}}
-        simulate_failover_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "simulateFailover") (ne $v nil)}}
-		simulate_failover = {{$v}}
-{{- end}}
-{{- if and (eq $k "headerName") (ne $v nil)}}
-        header_name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "headerValue") (ne $v nil)}}
-        header_value = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "isStagingOnly") (ne $v nil)}}
-		is_staging_only = {{$v}}
-{{- end}}
-{{- if and (eq $k "failoverTitle") (ne $v nil)}}
-        failover_title = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "failoverActionType") (ne $v nil)}}
-        failover_action_type = {{template "Text" $v}}
-{{- end}}
-{{- if eq $k "failoverResponseCodes"}}
-		failover_response_codes = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if and (eq $k "redirectHostnameType") (ne $v nil)}}
-        redirect_hostname_type = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "redirectHostname") (ne $v nil)}}
-        redirect_hostname = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "redirectCustomPath") (ne $v nil)}}
-		redirect_custom_path = {{$v}}
-{{- end}}
-{{- if and (eq $k "redirectPath") (ne $v nil)}}
-        redirect_path = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "redirectMethod") (ne $v nil)}}
-		redirect_method = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "alternateHostname") (ne $v nil)}}
-        alternate_hostname = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "alternateHostnameCustomPath") (ne $v nil)}}
-		alternate_hostname_custom_path = {{$v}}
-{{- end}}
-{{- if and (eq $k "alternateHostnamePath") (ne $v nil)}}
-        alternate_hostname_path = {{template "Text" $v}}
-{{- end}}
-{{- if eq $k "netStorageHostname" }}
-		{{- if $v}}
-		net_storage_hostname {
-{{- range $k, $v := $v}}
-{{- if and (eq $k "cpCode") (ne $v nil)}}
-		cp_code = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "downloadDomainName") (ne $v nil)}}
-        download_domain_name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "g2oToken") (ne $v nil)}}
-        g2o_token = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-		}
-		{{- end}}
-{{- end}}
-{{- if and (eq $k "netStoragePath") (ne $v nil)}}
-        net_storage_path = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "alternateHostnameProvider") (ne $v nil)}}
-        alternate_hostname_provider = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "alternateHostnameProviderCustomPath") (ne $v nil)}}
-		alternate_hostname_provider_custom_path = {{$v}}
-{{- end}}
-{{- if and (eq $k "alternateHostnameProviderPath") (ne $v nil)}}
-        alternate_hostname_provider_path = {{template "Text" $v}}
-{{- end}}
-{{- if eq $k "failoverCpCode" }}
-		{{- if $v}}
-		failover_cp_code {
-{{- range $k, $v := $v}}
-{{- if and (eq $k "id") (ne $v nil)}}
-		id = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "name") (ne $v nil)}}
-        name = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "createdDate") (ne $v nil)}}
-		created_date = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "description") (ne $v nil)}}
-        description = {{template "Text" $v}}
-{{- end}}
-{{- if eq $k "products"}}
-		products = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if eq $k "cpCodeLimits" }}
-		{{- if $v}}
-		cp_code_limits {
-{{- range $k, $v := $v}}
-{{- if and (eq $k "currentCapacity") (ne $v nil)}}
-		current_capacity = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "limit") (ne $v nil)}}
-		limit = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "limitType") (ne $v nil)}}
-        limit_type = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-		}
-		{{- end}}
-{{- end}}
-{{- end}}
-		}
-		{{- end}}
-{{- end}}
-{{- if and (eq $k "netStoragePathStatusCode") (ne $v nil)}}
-		net_storage_path_status_code = {{$v | AsInt}}
-{{- end}}
-{{- if and (eq $k "preserveQueryString") (ne $v nil)}}
-		preserve_query_string = {{$v}}
-{{- end}}
-{{- if and (eq $k "modifyProtocol") (ne $v nil)}}
-		modify_protocol = {{$v}}
-{{- end}}
-{{- if and (eq $k "protocol") (ne $v nil)}}
-        protocol = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "gzipResponseTemplate"}}
-gzip_response_template {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if eq $k "contentType"}}
-		content_type = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- if and (eq $k "gzipCompression") (ne $v nil)}}
-        gzip_compression = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "httpsRedirectTemplate"}}
-https_redirect_template {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "destinationHostname") (ne $v nil)}}
-        destination_hostname = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "destinationHostnameSubdomain") (ne $v nil)}}
-        destination_hostname_subdomain = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "destinationHostnameSibling") (ne $v nil)}}
-        destination_hostname_sibling = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "destinationHostnameOther") (ne $v nil)}}
-        destination_hostname_other = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "destinationPath") (ne $v nil)}}
-        destination_path = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "destinationPathPrefix") (ne $v nil)}}
-        destination_path_prefix = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "destinationPathSuffixMode") (ne $v nil)}}
-        destination_path_suffix_mode = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "destinationPathSuffixValue") (ne $v nil)}}
-        destination_path_suffix_value = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "destinationPathOther") (ne $v nil)}}
-        destination_path_other = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "queryString") (ne $v nil)}}
-        query_string = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "responseCode") (ne $v nil)}}
-		response_code = {{$v | AsInt}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "obfuscateBackendTemplate"}}
-obfuscate_backend_template {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "debugHeader") (ne $v nil)}}
-        debug_header = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "removeXPoweredByHeader") (ne $v nil)}}
-		remove_x_powered_by_header = {{$v}}
-{{- end}}
-{{- if and (eq $k "removeServerHeader") (ne $v nil)}}
-		remove_server_header = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "originTemplate"}}
-origin_template {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "originType") (ne $v nil)}}
-        origin_type = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "hostname") (ne $v nil)}}
-        hostname = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "aosHostname") (ne $v nil)}}
-        aos_hostname = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "basePath") (ne $v nil)}}
-        base_path = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "removeViaHeader") (ne $v nil)}}
-		remove_via_header = {{$v}}
-{{- end}}
-{{- if and (eq $k "removeAgeHeaderOrigin") (ne $v nil)}}
-		remove_age_header_origin = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "setOriginTemplate"}}
-set_origin_template {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "originName") (ne $v nil)}}
-        origin_name = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -10272,91 +8629,6 @@ device_characteristic {
 {{- end}}
 {{- if and (eq $k "matchWildcard") (ne $v nil)}}
 		match_wildcard = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "ecmdAuthGroups"}}
-{{- $v := .Options}}
-ecmd_auth_groups {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "matchOperator") (ne $v nil)}}
-        match_operator = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "value") (ne $v nil)}}
-        value = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "ecmdAuthScheme"}}
-{{- $v := .Options}}
-ecmd_auth_scheme {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "authScheme") (ne $v nil)}}
-        auth_scheme = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "ecmdIsAuthenticated"}}
-{{- $v := .Options}}
-ecmd_is_authenticated {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "matchOperator") (ne $v nil)}}
-        match_operator = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "ecmdUsername"}}
-{{- $v := .Options}}
-ecmd_username {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "matchOperator") (ne $v nil)}}
-        match_operator = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "value") (ne $v nil)}}
-        value = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "length") (ne $v nil)}}
-        length = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
@@ -11175,50 +9447,6 @@ variable_error {
 {{- end}}
 {{- if eq $k "variableNames"}}
 		variable_names = [{{range $v}}"{{. | Escape}}", {{end}}]
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "virtualWaitingRoomRequest"}}
-{{- $v := .Options}}
-virtual_waiting_room_request {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "matchOperator") (ne $v nil)}}
-        match_operator = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "matchOn") (ne $v nil)}}
-        match_on = {{template "Text" $v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "visitorPrioritizationRequest"}}
-{{- $v := .Options}}
-visitor_prioritization_request {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "matchOperator") (ne $v nil)}}
-        match_operator = {{template "Text" $v}}
-{{- end}}
-{{- if and (eq $k "matchOn") (ne $v nil)}}
-        match_on = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }
