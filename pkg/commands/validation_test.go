@@ -165,7 +165,8 @@ func TestRequireNArguments(t *testing.T) {
 		assert.NoError(t, err)
 
 		ctx := cli.NewContext(app, flagSet, nil)
-		ctx.Command.ArgsUsage = "<example usage>"
+		ctx.Command = &cli.Command{Name: "test-command", ArgsUsage: "<example usage>"}
+		app.Commands = []*cli.Command{ctx.Command}
 
 		exitOsCalled := false
 		// patch osExiter
@@ -237,7 +238,8 @@ func TestRequireNOptionalArguments(t *testing.T) {
 		assert.NoError(t, err)
 
 		ctx := cli.NewContext(app, flagSet, nil)
-		ctx.Command.ArgsUsage = "<example usage>"
+		ctx.Command = &cli.Command{Name: "test-command", ArgsUsage: "<example usage>"}
+		app.Commands = []*cli.Command{ctx.Command}
 
 		exitOsCalled := false
 		// patch osExiter
@@ -267,7 +269,8 @@ func TestRequireNOptionalArguments(t *testing.T) {
 		assert.NoError(t, err)
 
 		ctx := cli.NewContext(app, flagSet, nil)
-		ctx.Command.ArgsUsage = "<arg1> <arg2> <arg3>"
+		ctx.Command = &cli.Command{Name: "test-command", ArgsUsage: "<arg1> <arg2> <arg3>"}
+		app.Commands = []*cli.Command{ctx.Command}
 
 		exitOsCalled := false
 		// patch osExiter

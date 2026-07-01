@@ -95,7 +95,7 @@ terraform-fmt: ; $(info $(M) Running terraform fmt check...) @ ## Check formatti
 
 .PHONY: terraform-lint
 terraform-lint: | $(TFLINT) ; $(info $(M) Checking source code against tflint...) @ ## Run tflint on all HCL files in the project
-	@find ./pkg -type f -name "*.tf" | xargs -I % dirname % | sort -u | xargs -I @ sh -c "echo @ && $(TFLINT) --filter @"
+	@find ./pkg -type f -name "*.tf" | xargs -I % dirname % | sort -u | while read dir; do echo "$$dir" && $(TFLINT) --filter "$$dir"; done
 
 .PHONY: validate-testdata
 validate-testdata: ; $(info $(M) Validating testdata agains terraform-provider-akamai...) @ ## terraform init & terraform validate on all .tf files

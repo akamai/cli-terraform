@@ -5543,8 +5543,8 @@ optimize_text_streaming {
 {{- end}}
 {{- $v := .Options}}
 {{- range $k, $v := $v}}
-{{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = {{$v}}
+{{- if and (eq $k "enable") (ne $v nil)}}
+		enable = {{$v}}
 {{- end}}
 {{- end}}
 }

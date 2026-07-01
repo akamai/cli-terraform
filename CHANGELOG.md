@@ -1,5 +1,21 @@
 # RELEASE NOTES
 
+## 2.11.0 (Jul 1, 2026)
+
+### FEATURES/ENHANCEMENTS:
+
+* General
+  * Updated various dependencies.
+  * Migrated Terraform to version `1.15.5`.
+
+* ClientLists
+  * Added support for the `REQUEST_HEADER_NAME_VALUE` client list type.
+
+* PAPI
+  * Changed the `enabled` option name to `enable` in the `optimize_text_streaming` behavior within the `v2026-01-09` and `v2026-02-16` rule formats. This is not a breaking change, since the `optimize_text_streaming` behavior was not publicly available prior to the Property Manager Catalog 26.3.
+  * Added support for the new rule format [`v2026-05-05`](https://techdocs.akamai.com/terraform/docs/rule-format-changes#v2026-05-05).
+  * Added support for the new rule format [`v2026-06-09`](https://techdocs.akamai.com/terraform/docs/rule-format-changes#v2026-06-09).
+
 ## 2.10.0 (May 13, 2026)
 
 ### FEATURES/ENHANCEMENTS:

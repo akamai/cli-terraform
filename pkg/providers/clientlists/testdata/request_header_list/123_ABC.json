@@ -1,0 +1,36 @@
+[
+  {
+    "key": "root key",
+    "values": [
+      "dadada",
+      "sasasa",
+      "value"
+    ],
+    "tags": [],
+    "description": "123n",
+    "expirationDate": ""
+  },
+  {
+    "key": "key1",
+    "values": [
+      "value1",
+      "value2",
+      "value3"
+    ],
+    "tags": [],
+    "description": "va",
+    "expirationDate": ""
+  },
+  {
+    "key": "key2",
+    "values": [
+      "qwerty1",
+      "qwerty2",
+      "qwerty3",
+      "qwerty4"
+    ],
+    "tags": [],
+    "description": "",
+    "expirationDate": ""
+  }
+]

@@ -4,7 +4,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 10.0.0"
+      version = ">= 10.3.0"
     }
   }
   required_version = ">= 1.0"
@@ -29,7 +29,12 @@ resource "akamai_clientlist_list" "list_{{.ClientList.ListID}}" {
       for_each = jsondecode(file("./{{.ClientList.ListID}}.json"))
 
       content {
+        {{- if .ClientList.IsKeyValuesList}}
+        key             = items.value.key
+        values          = items.value.values
+        {{- else}}
         value           = items.value.value
+        {{- end}}
         description     = items.value.description
         tags            = items.value.tags
         expiration_date = items.value.expirationDate

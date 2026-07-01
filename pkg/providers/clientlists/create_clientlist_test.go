@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/clientlists"
@@ -94,6 +95,46 @@ func TestTemplateProcessing(t *testing.T) {
 		GroupID:    12,
 	}
 
+	requestHeaderItems := []clientlists.ListItemContent{
+		{
+			Key:            "root key",
+			Values:         []string{"dadada", "sasasa", "value"},
+			Description:    "123n",
+			Tags:           []string{},
+			ExpirationDate: "",
+		},
+		{
+			Key:            "key1",
+			Values:         []string{"value1", "value2", "value3"},
+			Description:    "va",
+			Tags:           []string{},
+			ExpirationDate: "",
+		},
+		{
+			Key:            "key2",
+			Values:         []string{"qwerty1", "qwerty2", "qwerty3", "qwerty4"},
+			Description:    "",
+			Tags:           []string{},
+			ExpirationDate: "",
+		},
+	}
+
+	clientListRequestHeader := clientlists.GetClientListResponse{
+		ListContent: clientlists.ListContent{
+			Version:                    1,
+			Type:                       "REQUEST_HEADER_NAME_VALUE",
+			Tags:                       []string{"ListTag3"},
+			Name:                       "Test Request Header Client List",
+			Notes:                      "Request header notes",
+			ItemsCount:                 int64(len(requestHeaderItems)),
+			StagingActivationStatus:    "INACTIVE",
+			ProductionActivationStatus: "INACTIVE",
+		},
+		ContractID: "M-2CF0QMT",
+		GroupID:    112521,
+		Items:      requestHeaderItems,
+	}
+
 	tests := map[string]struct {
 		init       func(*clientlists.Mock, string)
 		dir        string
@@ -130,6 +171,13 @@ func TestTemplateProcessing(t *testing.T) {
 				}, clientlists.Production, 1)
 			},
 			dir: "active_list",
+		},
+		"request header client list with key and values": {
+			init: func(m *clientlists.Mock, listID string) {
+				mockGetClientList(m, &clientListRequestHeader, listID, 1)
+			},
+			dir:        "request_header_list",
+			checkItems: true,
 		},
 	}
 
@@ -252,5 +300,109 @@ func buildTemplateProcessor(dir string) *templates.FSTemplateProcessor {
 	return &templates.FSTemplateProcessor{
 		TemplatesFS:     templateFiles,
 		TemplateTargets: templateToFile,
+	}
+}
+
+func TestSaveListItemsJSON(t *testing.T) {
+	tests := map[string]struct {
+		listID       string
+		clientList   *clientlists.GetClientListResponse
+		expectedJSON string
+	}{
+		"IP type uses value field": {
+			listID: "test_ip_list",
+			clientList: &clientlists.GetClientListResponse{
+				ListContent: clientlists.ListContent{
+					Type: "IP",
+				},
+				Items: []clientlists.ListItemContent{
+					{
+						Value:          "192.168.1.1",
+						Description:    "Test IP",
+						Tags:           []string{"tag1"},
+						ExpirationDate: "2026-12-31T00:00:00+00:00",
+					},
+				},
+			},
+			expectedJSON: `[
+  {
+    "value": "192.168.1.1",
+    "tags": [
+      "tag1"
+    ],
+    "description": "Test IP",
+    "expirationDate": "2026-12-31T00:00:00+00:00"
+  }
+]`,
+		},
+		"REQUEST_HEADER_NAME_VALUE type uses key and values fields": {
+			listID: "test_header_list",
+			clientList: &clientlists.GetClientListResponse{
+				ListContent: clientlists.ListContent{
+					Type: "REQUEST_HEADER_NAME_VALUE",
+				},
+				Items: []clientlists.ListItemContent{
+					{
+						Key:            "header-key",
+						Values:         []string{"value1", "value2"},
+						Description:    "Test Header",
+						Tags:           []string{"tag1"},
+						ExpirationDate: "",
+					},
+				},
+			},
+			expectedJSON: `[
+  {
+    "key": "header-key",
+    "values": [
+      "value1",
+      "value2"
+    ],
+    "tags": [
+      "tag1"
+    ],
+    "description": "Test Header",
+    "expirationDate": ""
+  }
+]`,
+		},
+		"GEO type uses value field": {
+			listID: "test_geo_list",
+			clientList: &clientlists.GetClientListResponse{
+				ListContent: clientlists.ListContent{
+					Type: "GEO",
+				},
+				Items: []clientlists.ListItemContent{
+					{
+						Value:       "US",
+						Description: "United States",
+						Tags:        []string{},
+					},
+				},
+			},
+			expectedJSON: `[
+  {
+    "value": "US",
+    "tags": [],
+    "description": "United States",
+    "expirationDate": ""
+  }
+]`,
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			test.clientList.ListID = test.listID
+			tmpDir := t.TempDir()
+			err := saveListItemsJSON(test.clientList, tmpDir)
+			require.NoError(t, err)
+
+			jsonPath := filepath.Join(tmpDir, fmt.Sprintf("%s.json", test.clientList.ListID))
+			result, err := os.ReadFile(jsonPath)
+			require.NoError(t, err)
+
+			assert.Equal(t, test.expectedJSON, string(result))
+		})
 	}
 }

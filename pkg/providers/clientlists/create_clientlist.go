@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/clientlists"
 	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
@@ -21,6 +22,10 @@ import (
 
 //go:embed templates/*
 var templateFiles embed.FS
+
+const (
+	errWrapFormat = "%w: %s"
+)
 
 var (
 	// ErrClientListNotFound list not found
@@ -58,6 +63,7 @@ type TFListData struct {
 	GroupID              int64
 	ItemsCount           int64
 	Tags                 []string
+	IsKeyValuesList      bool
 	StagingActivation    TFActivationData
 	ProductionActivation TFActivationData
 }
@@ -116,14 +122,14 @@ func createClientList(ctx context.Context, listID, edgercPath, section, tfWorkPa
 	})
 	if err != nil {
 		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrClientListNotFound, err)
+		return fmt.Errorf(errWrapFormat, ErrClientListNotFound, err)
 	}
 
 	stagingActivation, errStaging := getActivationDataByNetwork(ctx, client, clientList, clientlists.Staging)
 	productionActivation, errProd := getActivationDataByNetwork(ctx, client, clientList, clientlists.Production)
 	if errStaging != nil || errProd != nil {
 		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrActivationDetails, err)
+		return fmt.Errorf(errWrapFormat, ErrActivationDetails, errors.Join(errStaging, errProd))
 	}
 	term.Spinner().OK()
 
@@ -137,6 +143,7 @@ func createClientList(ctx context.Context, listID, edgercPath, section, tfWorkPa
 			ContractID:           clientList.ContractID,
 			GroupID:              clientList.GroupID,
 			ItemsCount:           clientList.ItemsCount,
+			IsKeyValuesList:      isKeyValuesItem(clientList.Type),
 			StagingActivation:    stagingActivation,
 			ProductionActivation: productionActivation,
 		},
@@ -147,12 +154,12 @@ func createClientList(ctx context.Context, listID, edgercPath, section, tfWorkPa
 	term.Spinner().Start("Saving TF configurations ")
 	if err = processor.ProcessTemplates(tfData); err != nil {
 		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrSavingFiles, err)
+		return fmt.Errorf(errWrapFormat, ErrSavingFiles, err)
 	}
 
 	if err := saveListItemsJSON(clientList, tfWorkPath); err != nil {
 		term.Spinner().Fail()
-		return fmt.Errorf("%w: %s", ErrSavingListItems, err)
+		return fmt.Errorf(errWrapFormat, ErrSavingListItems, err)
 	}
 
 	term.Spinner().OK()
@@ -168,12 +175,20 @@ func saveListItemsJSON(clientList *clientlists.GetClientListResponse, tfWorkPath
 		tags := []string{}
 		tags = append(tags, v.Tags...)
 
-		listItems = append(listItems, clientlists.ListItemPayload{
-			Value:          v.Value,
+		item := clientlists.ListItemPayload{
 			Description:    v.Description,
 			Tags:           tags,
 			ExpirationDate: v.ExpirationDate,
-		})
+		}
+
+		if isKeyValuesItem(clientList.Type) {
+			item.Key = v.Key
+			item.Values = slices.Clone(v.Values)
+		} else {
+			item.Value = v.Value
+		}
+
+		listItems = append(listItems, item)
 	}
 
 	jsonBody, err := json.MarshalIndent(listItems, "", "  ")
@@ -187,6 +202,10 @@ func saveListItemsJSON(clientList *clientlists.GetClientListResponse, tfWorkPath
 		return fmt.Errorf("can't write list items json: %s", err)
 	}
 	return nil
+}
+
+func isKeyValuesItem(listType clientlists.ClientListType) bool {
+	return listType == clientlists.RequestHeaderNameValue
 }
 
 func getActivationDataByNetwork(ctx context.Context, client clientlists.ClientLists, cl *clientlists.GetClientListResponse, network clientlists.ActivationNetwork) (TFActivationData, error) {
