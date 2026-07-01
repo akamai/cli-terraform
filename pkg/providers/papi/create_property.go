@@ -909,9 +909,13 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 					}
 					certificateID = 0
 				} else {
-					certificateID, err = strconv.ParseInt(certificate.CertificateID, 10, 64)
-					if err != nil {
-						return nil, nil, fmt.Errorf("invalid certificate details: %s", err)
+					if certificate.CertificateID != "" {
+						certificateID, err = strconv.ParseInt(certificate.CertificateID, 10, 64)
+						if err != nil {
+							return nil, nil, fmt.Errorf("invalid certificate details: %s", err)
+						}
+					} else {
+						certificateID = 0
 					}
 				}
 			}

@@ -1067,6 +1067,93 @@ func TestCreateProperty(t *testing.T) {
 				"Dynamic_Content.json",
 			},
 		},
+		"property with enhancement tls but certificate has no certificateID": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, &getPropertyEnhancementTLSResponse)
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				getPropertyVersionsResponse := getPropertyVersionsResponse
+				getPropertyVersionsResponse.PropertyName = "test.edgekey.net"
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				getLatestVersionResponse := getLatestVersionResponse
+				getLatestVersionResponse.PropertyName = "test.edgekey.net"
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				mockGetPropertyVersionHostnames(c, 5, &getPropertyVersionHostnamesEnhancementTLSResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponseEnhancementTLS, nil)
+				mockGetEdgeHostnames(c, "")
+				cert := hapi.GetCertificateResponse{
+					AvailableDomains: []string{"*.dev-exp-terraform-automation-test.com"},
+					CommonName:       "*.dev-exp-terraform-automation-test.com",
+					ExpirationDate:   *newTimeFromString(t, "2025-05-21T12:24:21.000+00:00"),
+					SerialNumber:     "fa:ke:76:82:a9:3f:14:ba:6b:93:01:57:43:10:0c:34",
+					SlotNumber:       30278,
+					Status:           "DEPLOYED",
+					ValidationType:   "DOMAIN_VALIDATION",
+				}
+				mockGetCertificate(h, "edgekey.net", "test", &cert, nil)
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				data := TFData{
+					Property: TFPropertyData{
+						GroupName:            "test_group",
+						GroupID:              "grp_12345",
+						ContractID:           "test_contract",
+						PropertyResourceName: "test-edgekey-net",
+						PropertyName:         "test.edgekey.net",
+						PropertyID:           "prp_12345",
+						ProductID:            "prd_HTTP_Content_Del",
+						ProductName:          "HTTP_Content_Del",
+						RuleFormat:           "latest",
+						IsSecure:             "false",
+						EdgeHostnames: map[string]EdgeHostname{
+							"test-edgekey-net": {
+								EdgeHostname:             "test.edgekey.net",
+								EdgeHostnameID:           "ehn_2867480",
+								ContractID:               "test_contract",
+								GroupID:                  "grp_12345",
+								ID:                       "",
+								IPv6:                     "IPV6_COMPLIANCE",
+								SecurityType:             "ENHANCED-TLS",
+								EdgeHostnameResourceName: "test-edgekey-net",
+								CertificateID:            0,
+							},
+						},
+						Hostnames: map[string]Hostname{
+							"test.edgekey.net": {
+								CnameFrom:                "test.edgekey.net",
+								CnameTo:                  "test.edgekey.net",
+								EdgeHostnameResourceName: "test-edgekey-net",
+								CertProvisioningType:     "CPS_MANAGED",
+								IsActive:                 true,
+							},
+						},
+						StagingInfo: NetworkInfo{
+							Emails:                  []string{"jsmith@akamai.com"},
+							HasActivation:           true,
+							Version:                 5,
+							IsActiveOnLatestVersion: true,
+						},
+						ReadVersion: "LATEST",
+					},
+					EdgercPath: defaultEdgercPath,
+					Section:    defaultSection,
+				}
+
+				mockProcessTemplates(p, (&tfDataBuilder{}).withData(data).build(), noFilters, nil)
+			},
+			dir:     "enhancement-tls",
+			jsonDir: "enhancement-tls/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+		},
 		"basic property not active the latest": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
