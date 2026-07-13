@@ -86,6 +86,8 @@
 * PAPI
   * Fixed issue that exporting a property which Enhanced-TLS edge hostname has missing `certificateID` field (e.g. in Secure by Default flow), would fail processing ([#107](https://github.com/akamai/cli-terraform/issues/107)).
 
+* GTM
+  * Fixed a typo in the `liveness_test` block for the `akamai_gtm_property` resource which was preventing export of `error_penalty` values.
 
 
 
