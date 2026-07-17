@@ -60,6 +60,8 @@
 
 
 
+* Appsec
+  * Fixed the drift issue of field `request_body_inspection_limit_override` for the `akamai_appsec_advanced_settings_request_body` resource.
 
 
 
