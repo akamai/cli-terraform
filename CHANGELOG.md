@@ -1,5 +1,12 @@
 # RELEASE NOTES
 
+## Unreleased
+
+### FEATURES/ENHANCEMENTS:
+
+* DNS
+  * Added `multi_provider_dnssec` to the generated `akamai_dns_zone` resource when exporting a zone, to match the same field added to the Terraform provider.
+
 ## 2.11.0 (Jul 1, 2026)
 
 ### FEATURES/ENHANCEMENTS:
