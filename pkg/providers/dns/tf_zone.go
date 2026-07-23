@@ -8,6 +8,10 @@ import (
 
 // process zone
 func processZone(ctx context.Context, zone *dns.GetZoneResponse, resourceZoneName string, modSegment bool, fileUtils fileUtils, tfWorkPath string) (string, error) {
+	multiProviderDNSSEC := false
+	if zone.MultiProviderDNSSEC != nil {
+		multiProviderDNSSEC = zone.MultiProviderDNSSEC.Enabled
+	}
 	data := ZoneData{
 		BlockName:             resourceZoneName,
 		Zone:                  zone.Zone,
@@ -16,6 +20,7 @@ func processZone(ctx context.Context, zone *dns.GetZoneResponse, resourceZoneNam
 		Comment:               zone.Comment,
 		SignAndServe:          zone.SignAndServe,
 		SignAndServeAlgorithm: zone.SignAndServeAlgorithm,
+		MultiProviderDNSSEC:   multiProviderDNSSEC,
 		OutboundZoneTransfer:  zone.OutboundZoneTransfer,
 		TSIGKey:               zone.TSIGKey,
 		Target:                zone.Target,

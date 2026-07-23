@@ -1,5 +1,12 @@
 # RELEASE NOTES
 
+## Unreleased
+
+### FEATURES/ENHANCEMENTS:
+
+* DNS
+  * Added export of the field `multi_provider_dnssec` to the `akamai_dns_zone`.
+
 ## 2.11.0 (Jul 1, 2026)
 
 ### FEATURES/ENHANCEMENTS:

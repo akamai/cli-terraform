@@ -30,6 +30,7 @@ resource "akamai_dns_zone" "example_com" {
   comment                  = ""
   sign_and_serve           = false
   sign_and_serve_algorithm = ""
+  multi_provider_dnssec    = false
   target                   = ""
   end_customer_id          = ""
 }
