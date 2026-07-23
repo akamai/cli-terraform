@@ -4,7 +4,7 @@ go 1.25.7
 
 require (
 	github.com/akamai/AkamaiOPEN-edgegrid-golang/v13 v13.3.0
-	github.com/akamai/cli/v2 v2.0.4
+	github.com/akamai/cli/v2 v2.0.5
 	github.com/fatih/color v1.19.0
 	github.com/hashicorp/hcl/v2 v2.24.0
 	github.com/jinzhu/copier v0.4.0
@@ -50,11 +50,11 @@ require (
 	go.uber.org/ratelimit v0.3.1 // indirect
 	golang.org/x/mod v0.37.0 // indirect
 	golang.org/x/net v0.56.0 // indirect
-	golang.org/x/sync v0.21.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/term v0.44.0 // indirect
-	golang.org/x/text v0.38.0 // indirect
-	golang.org/x/tools v0.46.0 // indirect
+	golang.org/x/sync v0.22.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/term v0.45.0 // indirect
+	golang.org/x/text v0.40.0 // indirect
+	golang.org/x/tools v0.47.0 // indirect
 	gopkg.in/ini.v1 v1.67.3 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
@@ -64,4 +64,5 @@ require (
 replace (
 	github.com/stretchr/testify v1.4.0 => github.com/stretchr/testify v1.10.0 // Fix security vulnerability; can be removed once github.com/go-ozzo/ozzo-validation/v4 bumps this dependency
 	github.com/yuin/goldmark v1.4.13 => github.com/yuin/goldmark v1.8.2 // Fix security vulnerability; can be removed once golang.org/x/tools/v0.44.0 bumps this dependency
+	golang.org/x/crypto => golang.org/x/crypto v0.52.0 // Downgrade to avoid BDSA-2026-22155 in v0.53.0 - to be deleted after fix is released
 )
