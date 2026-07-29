@@ -1,5 +1,23 @@
 # RELEASE NOTES
 
+## 2.12.0 (Jul 29, 2026)
+
+### FEATURES/ENHANCEMENTS:
+
+* Cloud Certificates (Beta)
+  * Added support for exporting the `geo_class` field in the `akamai_cloudcertificates_certificate` resource.
+
+### BUG FIXES:
+
+* Appsec
+  * Fixed the drift issue of field `request_body_inspection_limit_override` for the `akamai_appsec_advanced_settings_request_body` resource.
+
+* GTM
+  * Fixed a typo in the `liveness_test` block for the `akamai_gtm_property` resource which was preventing export of `error_penalty` values.
+
+* PAPI
+  * Fixed issue that exporting a property which Enhanced-TLS edge hostname has missing `certificateID` field (e.g. in Secure by Default flow), would fail processing ([#107](https://github.com/akamai/cli-terraform/issues/107)).
+
 ## 2.11.0 (Jul 1, 2026)
 
 ### FEATURES/ENHANCEMENTS:
