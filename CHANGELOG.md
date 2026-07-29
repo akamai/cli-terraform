@@ -1,5 +1,63 @@
 # RELEASE NOTES
 
+## X.XX.X (Month XX, XXXX)
+
+### FEATURES/ENHANCEMENTS:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### BUG FIXES:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## 2.12.0 (Jul 29, 2026)
 
 ### FEATURES/ENHANCEMENTS:
