@@ -55,8 +55,9 @@ resource "akamai_appsec_advanced_settings_attack_payload_logging" "attack_payloa
 }
 
 resource "akamai_appsec_advanced_settings_request_body" "config_settings" {
-  config_id                     = local.config_id
-  request_body_inspection_limit = "default"
+  config_id                              = local.config_id
+  request_body_inspection_limit          = "default"
+  request_body_inspection_limit_override = false
 }
 
 // RequestBody Overrides

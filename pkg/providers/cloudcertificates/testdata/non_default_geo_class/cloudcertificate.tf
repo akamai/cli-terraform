@@ -19,6 +19,7 @@ resource "akamai_cloudcertificates_certificate" "test-name_example_com1234567890
   key_size       = "2048"
   key_type       = "RSA"
   secure_network = "ENHANCED_TLS"
+  geo_class      = "CONTIGUOUS_US"
   sans           = ["test.example.com", "test.example2.com"]
   subject = {
     common_name  = "test.example.com"
@@ -38,6 +39,15 @@ resource "akamai_cloudcertificates_upload_signed_certificate" "test-name_example
   signed_certificate_pem = trimsuffix(<<EOT
 -----BEGIN CERTIFICATE-----
 testsignedcertificate
+-----END CERTIFICATE-----
+EOT
+  , "\n")
+  trust_chain_pem = trimsuffix(<<EOT
+-----BEGIN CERTIFICATE-----
+testtrustchaincertificate1
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+testtrustchaincertificate2
 -----END CERTIFICATE-----
 EOT
   , "\n")

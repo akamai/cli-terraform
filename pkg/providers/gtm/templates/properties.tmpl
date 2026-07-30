@@ -92,7 +92,7 @@ resource "akamai_gtm_property" "{{normalize .Name}}" {
     liveness_test {
         name = "{{.Name}}"
         {{- if .ErrorPenalty}}
-        error_penalty = {{.ErrrorPenalty}}
+        error_penalty = {{.ErrorPenalty}}
         {{- end}}
         peer_certificate_verification = {{.PeerCertificateVerification}}
         test_interval = {{.TestInterval}}
