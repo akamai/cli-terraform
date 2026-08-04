@@ -19,7 +19,8 @@
 
 ### FEATURES/ENHANCEMENTS:
 
-
+* Appsec (Beta)
+  * Added the `akamai_appsec_advanced_settings_url_evasion_defense` resource to the `export-appsec` command.
 
 
 

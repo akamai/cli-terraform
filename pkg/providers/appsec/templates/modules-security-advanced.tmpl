@@ -29,6 +29,103 @@ resource "akamai_appsec_advanced_settings_evasive_path_match" "evasive_path_matc
   enable_path_match = {{ .AdvancedOptions.EvasivePathMatch.EnablePathMatch }}
 }
 {{ end -}}
+{{ with .AdvancedOptions.URLEvasionDefense }}
+resource "akamai_appsec_advanced_settings_url_evasion_defense" "url_evasion_defense" {
+  {{ if $.AdvancedOptions.EvasivePathMatch -}}
+  depends_on = [akamai_appsec_advanced_settings_evasive_path_match.evasive_path_match]
+  {{ end -}}
+  config_id = local.config_id
+  status    = "{{ .Status }}"
+  {{ if .BypassLists -}}
+  bypass_lists = [{{toList .BypassLists }}]
+  {{ end -}}
+  {{ $hasActionableRule := false -}}
+  {{ range .Rules -}}
+    {{ if .Action -}}
+      {{ $hasActionableRule = true -}}
+    {{ end -}}
+  {{ end -}}
+  {{ if $hasActionableRule -}}
+  rules = [
+    {{ range .Rules -}}
+    {{ if .Action -}}
+    {
+      rule_id = {{ .RuleID }}
+      action  = "{{ .Action }}"
+      {{ if .ConditionOperator -}}
+      condition_operator = "{{ .ConditionOperator }}"
+      {{ end -}}
+      {{ if .Conditions -}}
+      conditions = [
+        {{ range .Conditions -}}
+        {
+          type              = "{{ .Type }}"
+          {{ if .Extensions -}}
+          extensions = [{{toList .Extensions }}]
+          {{ end -}}
+          {{ if .Filenames -}}
+          filenames = [{{toList .Filenames }}]
+          {{ end -}}
+          {{ if .Hosts -}}
+          hosts = [{{toList .Hosts }}]
+          {{ end -}}
+          {{ if .IPs -}}
+          ips = [{{toList .IPs }}]
+          {{ end -}}
+          {{ if .Methods -}}
+          methods = [{{toList .Methods }}]
+          {{ end -}}
+          {{ if .Paths -}}
+          paths = [{{toList .Paths }}]
+          {{ end -}}
+          {{ if .ClientLists -}}
+          client_lists = [{{toList .ClientLists }}]
+          {{ end -}}
+          {{ if .Header -}}
+          header = "{{ .Header }}"
+          {{ end -}}
+          {{ if .Name -}}
+          name = "{{ .Name }}"
+          {{ end -}}
+          {{ if .Value -}}
+          value = "{{ .Value }}"
+          {{ end -}}
+          {{ if .PositiveMatch -}}
+          positive_match = true
+          {{ end -}}
+          {{ if .UseHeaders -}}
+          use_headers = true
+          {{ end -}}
+          {{ if eq .Type "requestHeaderMatch" -}}
+          {{ if .ValueCase -}}
+          value_case_sensitive = true
+          {{ end -}}
+          {{ if .ValueWildcard -}}
+          value_wildcard = true
+          {{ end -}}
+          {{ end -}}
+          {{ if eq .Type "uriQueryMatch" -}}
+          {{ if .NameCase -}}
+          name_case_sensitive = true
+          {{ end -}}
+          {{ if .CaseSensitive -}}
+          value_case_sensitive = true
+          {{ end -}}
+          {{ if .Wildcard -}}
+          value_wildcard = true
+          {{ end -}}
+          {{ end -}}
+        },
+        {{ end -}}
+      ]
+      {{ end -}}
+    },
+    {{ end -}}
+    {{ end -}}
+  ]
+  {{ end -}}
+}
+{{ end -}}
 {{ if .AdvancedOptions.PIILearning }}
 resource "akamai_appsec_advanced_settings_pii_learning" "pii_learning" {
     config_id = local.config_id

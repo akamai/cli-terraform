@@ -49,6 +49,11 @@ resource "akamai_appsec_advanced_settings_pragma_header" "pragma_header" {
   )
 }
 
+resource "akamai_appsec_advanced_settings_url_evasion_defense" "url_evasion_defense" {
+  config_id = local.config_id
+  status    = "disabled"
+}
+
 resource "akamai_appsec_advanced_settings_pii_learning" "pii_learning" {
   config_id           = local.config_id
   enable_pii_learning = true
