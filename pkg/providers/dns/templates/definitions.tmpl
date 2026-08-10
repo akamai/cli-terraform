@@ -31,6 +31,7 @@ resource "akamai_dns_zone" "{{.BlockName}}" {
     comment = {{template "Text" .Comment}}
     sign_and_serve = {{.SignAndServe}}
     sign_and_serve_algorithm = "{{.SignAndServeAlgorithm}}"
+    multi_provider_dnssec = {{.MultiProviderDNSSEC}}
     {{- with .OutboundZoneTransfer}}
     outbound_zone_transfer {
         acl = [{{range $i, $v := .ACL}}{{if $i}}, {{end}}"{{$v}}"{{end}}]

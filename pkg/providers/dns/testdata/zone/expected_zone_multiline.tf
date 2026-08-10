@@ -29,6 +29,7 @@ EOT
   , "\n")
   end_customer_id          = ""
   masters                  = []
+  multi_provider_dnssec    = false
   sign_and_serve           = false
   sign_and_serve_algorithm = ""
   target                   = ""
