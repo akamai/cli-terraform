@@ -12,7 +12,8 @@
 
 
 
-
+* PAPI
+  * Added support for the new rule format [`v2026-07-21`](https://techdocs.akamai.com/terraform/docs/rule-format-changes#v2026-07-21).
 
 
 
