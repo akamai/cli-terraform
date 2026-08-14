@@ -20,8 +20,7 @@
 
 
 * DNS
-  * Added export of the field `multi_provider_dnssec` to the `akamai_dns_zone`.
-
+  * Added export of `multi_provider_dnssec` field in `akamai_dns_zone` resource with `enabled` and `webhook` fields, matching the resource schema.
 
 
 

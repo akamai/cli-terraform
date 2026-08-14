@@ -18,12 +18,14 @@ locals {
 }
 
 resource "akamai_dns_zone" "_0007770b-08a8-4b5f-a46b-081b772ba605-test_com" {
-  contract                 = var.contractid
-  group                    = var.groupid
-  comment                  = ""
-  end_customer_id          = ""
-  masters                  = []
-  multi_provider_dnssec    = true
+  contract        = var.contractid
+  group           = var.groupid
+  comment         = ""
+  end_customer_id = ""
+  masters         = []
+  multi_provider_dnssec {
+    enabled = true
+  }
   sign_and_serve           = true
   sign_and_serve_algorithm = ""
   target                   = ""

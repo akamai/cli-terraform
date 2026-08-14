@@ -31,7 +31,7 @@ type (
 		Comment               string
 		SignAndServe          bool
 		SignAndServeAlgorithm string
-		MultiProviderDNSSEC   bool
+		MultiProviderDNSSEC   *dns.MultiProviderDNSSEC
 		OutboundZoneTransfer  *dns.OutboundZoneTransfer
 		TSIGKey               *dns.TSIGKey
 		Target                string

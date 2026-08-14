@@ -26,7 +26,6 @@ second
 EOT
   end_customer_id          = ""
   masters                  = ["1.1.1.1"]
-  multi_provider_dnssec    = false
   sign_and_serve           = false
   sign_and_serve_algorithm = ""
   outbound_zone_transfer {
