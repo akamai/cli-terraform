@@ -27,6 +27,16 @@
 
 
 
+
+* ClientLists
+  * Added export of the `version` attribute in the `akamai_clientlist_activation` resource after change in schema.
+
+
+
+
+
+
+
 * PAPI
   * Added support for the new rule format [`v2026-07-21`](https://techdocs.akamai.com/terraform/docs/rule-format-changes#v2026-07-21).
 
