@@ -19,6 +19,10 @@
 
 ### FEATURES/ENHANCEMENTS:
 
+
+* AppSec
+  * Replaced `akamai_botman_bot_analytics_cookie` with `akamai_botman_bot_analytics_settings` resource to the `export-appsec` command.
+
 * Appsec (Beta)
   * Added the `akamai_appsec_advanced_settings_url_evasion_defense` resource to the `export-appsec` command.
   * Added the `akamai_appsec_waf_ai_rules` resource to the `appsec-export` command.
