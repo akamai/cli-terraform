@@ -115,6 +115,14 @@ terraform import module.security.akamai_appsec_malware_policy_action.{{ $policyN
 terraform import module.security.akamai_appsec_url_protection_action.{{ $policyName}}_{{ .URLProtectionPolicyID }} {{ $configID }}:{{ $policyID }}:{{ .URLProtectionPolicyID }}
 {{ end -}}
 {{ end -}}
+{{ if .AIRules -}}
+{{ if ne .AIRules.AIRuleStatus "NOT_ENROLLED" -}}
+terraform import module.security.akamai_appsec_waf_ai_rules.{{ $policyName }}_status {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ range .AIRules.AIRules -}}
+terraform import module.security.akamai_appsec_waf_ai_rules.{{ $policyName }}_{{ .RuleID }} {{ $configID }}:{{ $policyID }}:{{ .RuleID }}
+{{ end -}}
+{{ end -}}
 {{ if .IPGeoFirewall -}}
 terraform import module.security.akamai_appsec_ip_geo.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 {{ end -}}

@@ -21,6 +21,7 @@
 
 * Appsec (Beta)
   * Added the `akamai_appsec_advanced_settings_url_evasion_defense` resource to the `export-appsec` command.
+  * Added the `akamai_appsec_waf_ai_rules` resource to the `appsec-export` command.
 
 
 

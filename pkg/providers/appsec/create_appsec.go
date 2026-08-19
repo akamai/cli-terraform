@@ -122,6 +122,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"modules-security-content-protection.tmpl":       filepath.Join(securityModulePath, "content-protection.tf"),
 		"modules-security-url-protection-policy.tmpl":    filepath.Join(securityModulePath, "url-protection-policy.tf"),
 		"modules-security-url-protection-action.tmpl":    filepath.Join(securityModulePath, "url-protection-action.tf"),
+		"modules-security-waf-ai-rules.tmpl":             filepath.Join(securityModulePath, "waf-ai-rules.tf"),
 		"modules-aap-selected-hostnames.tmpl":            filepath.Join(securityModulePath, "aap-selected-hostnames.tf"),
 		"variables.tmpl":                                 filepath.Join(tfWorkPath, "appsec-variables.tf"),
 		"versions.tmpl":                                  filepath.Join(tfWorkPath, "appsec-versions.tf"),
