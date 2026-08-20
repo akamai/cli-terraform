@@ -2,6 +2,21 @@
 
 ## X.XX.X (Month XX, XXXX)
 
+### BREAKING CHANGES:
+
+
+
+
+
+
+
+
+* DNS
+  * Replaced error variables `ErrZoneNamesRetrievalFailed` and `ErrZoneNameTypesRetrievalFailed` with `ErrRecordSetNamesRetrievalFailed` and `ErrRecordSetTypesRetrievalFailed`.
+
+
+
+
 ### FEATURES/ENHANCEMENTS:
 
 

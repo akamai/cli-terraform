@@ -56,10 +56,10 @@ var (
 	ErrCreatingModulesFolder = errors.New("failed to create modules folder")
 	// ErrResourceListFileExists is returned when the resources list file already exists on disk
 	ErrResourceListFileExists = errors.New("resource list file exists, remove to continue")
-	// ErrZoneNamesRetrievalFailed is returned when zone names retrieval fails
-	ErrZoneNamesRetrievalFailed = errors.New("zone names retrieval failed")
-	// ErrZoneNameTypesRetrievalFailed is returned when zone name types retrieval fails
-	ErrZoneNameTypesRetrievalFailed = errors.New("zone name types retrieval failed")
+	// ErrRecordSetNamesRetrievalFailed is returned when record set names retrieval fails
+	ErrRecordSetNamesRetrievalFailed = errors.New("record set names retrieval failed")
+	// ErrRecordSetTypesRetrievalFailed is returned when record set types retrieval fails
+	ErrRecordSetTypesRetrievalFailed = errors.New("record set types retrieval failed")
 	// ErrRecordSetsRetrievalFailed is returned when record sets retrieval fails
 	ErrRecordSetsRetrievalFailed = errors.New("record sets retrieval failed")
 )
@@ -407,28 +407,28 @@ func saveImportListToFile(importListFilename string) (err error) {
 
 func inventorZone(ctx context.Context, configDNS dns.DNS, configuration configStruct) (map[string]Types, error) {
 	recordSets := make(map[string]Types)
-	// Retrieve all zone names
+	// Retrieve all record set names
 	if len(configuration.recordNames) == 0 {
-		recordsetNames, err := configDNS.GetZoneNames(ctx, dns.GetZoneNamesRequest{
+		recordsetNames, err := configDNS.ListRecordSetNames(ctx, dns.ListRecordSetNamesRequest{
 			Zone: zoneName,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("%w: %w", ErrZoneNamesRetrievalFailed, err)
+			return nil, fmt.Errorf("%w: %w", ErrRecordSetNamesRetrievalFailed, err)
 		}
 		configuration.recordNames = recordsetNames.Names
 	}
-	for _, zName := range configuration.recordNames {
+	for _, recordName := range configuration.recordNames {
 		if configuration.fetchConfig.NamesOnly {
-			recordSets[zName] = make([]string, 0)
+			recordSets[recordName] = make([]string, 0)
 		} else {
-			nameTypesResp, err := configDNS.GetZoneNameTypes(ctx, dns.GetZoneNameTypesRequest{
-				ZoneName: zName,
-				Zone:     zoneName,
+			nameTypesResp, err := configDNS.ListRecordSetTypes(ctx, dns.ListRecordSetTypesRequest{
+				RecordName: recordName,
+				Zone:       zoneName,
 			})
 			if err != nil {
-				return nil, fmt.Errorf("%w: %w", ErrZoneNameTypesRetrievalFailed, err)
+				return nil, fmt.Errorf("%w: %w", ErrRecordSetTypesRetrievalFailed, err)
 			}
-			recordSets[zName] = nameTypesResp.Types
+			recordSets[recordName] = nameTypesResp.Types
 		}
 	}
 	return recordSets, nil
@@ -481,11 +481,11 @@ func reconcileZoneResourceTargets(zoneImportList *zoneImportListStruct, zoneName
 	// populate zoneTypeMap
 
 	// need walk through each resource type
-	for zName, typeList := range zoneImportList.RecordSets {
+	for recordName, typeList := range zoneImportList.RecordSets {
 		typeMap := make(map[string]bool)
 		revisedTypeList := make([]string, 0, len(typeList))
 		for _, ntype := range typeList {
-			normalName := createUniqueRecordsetName(zoneName, zName, ntype)
+			normalName := createUniqueRecordsetName(zoneName, recordName, ntype)
 			if !strings.Contains(tfConfig, `"`+normalName+`"`) {
 				typeMap[ntype] = true
 				revisedTypeList = append(revisedTypeList, ntype)
@@ -493,8 +493,8 @@ func reconcileZoneResourceTargets(zoneImportList *zoneImportListStruct, zoneName
 				fmt.Println("Recordset resource " + normalName + " found in existing tf file")
 			}
 		}
-		zoneImportList.RecordSets[zName] = revisedTypeList
-		zoneTypeMap[zName] = typeMap
+		zoneImportList.RecordSets[recordName] = revisedTypeList
+		zoneTypeMap[recordName] = typeMap
 	}
 
 	return zoneImportList, zoneTypeMap
