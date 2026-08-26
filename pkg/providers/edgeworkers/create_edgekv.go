@@ -24,7 +24,7 @@ type (
 	TFEdgeKVData struct {
 		Name        string
 		Network     edgeworkers.NamespaceNetwork
-		GroupID     int
+		GroupID     int64
 		Retention   int
 		GeoLocation string
 		EdgercPath  string
