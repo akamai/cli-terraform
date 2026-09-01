@@ -50,12 +50,16 @@ resource "akamai_cps_third_party_enrollment" "enrollment_id_1" {
       set_id                 = "2"
     }
     disallowed_tls_versions = ["TLSv1", "TLSv1_1", ]
-    enable_for_all_sans     = true
-    geography               = "core"
-    must_have_ciphers       = "ak-akamai-default"
-    ocsp_stapling           = "on"
-    preferred_ciphers       = "ak-akamai-default"
-    quic_enabled            = true
+    enable_for_all_sans     = false
+    dns_names = [
+      "test.akamai.com",
+      "san.test.akamai.com",
+    ]
+    geography         = "core"
+    must_have_ciphers = "ak-akamai-default"
+    ocsp_stapling     = "on"
+    preferred_ciphers = "ak-akamai-default"
+    quic_enabled      = true
   }
   signature_algorithm = "SHA-256"
   tech_contact {
@@ -93,7 +97,9 @@ data "akamai_cps_csr" "enrollment_id_1" {
 
 resource "akamai_cps_upload_certificate" "enrollment_id_1" {
   enrollment_id                          = 1
+  certificate_ecdsa_pem                  = "-----BEGIN CERTIFICATE ECDSA REQUEST-----\n...\n-----END CERTIFICATE ECDSA REQUEST-----"
   certificate_rsa_pem                    = "-----BEGIN CERTIFICATE RSA REQUEST-----\n...\n-----END CERTIFICATE RSA REQUEST-----"
+  trust_chain_ecdsa_pem                  = "-----BEGIN CERTIFICATE TRUST-CHAIN ECDSA REQUEST-----\n...\n-----END CERTIFICATE TRUST-CHAIN ECDSA REQUEST-----"
   trust_chain_rsa_pem                    = "-----BEGIN CERTIFICATE TRUST-CHAIN RSA REQUEST-----\n...\n-----END CERTIFICATE TRUST-CHAIN RSA REQUEST-----"
   acknowledge_post_verification_warnings = false
   auto_approve_warnings                  = []

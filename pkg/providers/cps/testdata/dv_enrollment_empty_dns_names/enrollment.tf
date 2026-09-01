@@ -41,7 +41,6 @@ resource "akamai_cps_dv_enrollment" "enrollment_id_1" {
   network_configuration {
     enable_for_all_sans = false
     dns_names = [
-      "san.test.akamai.com",
     ]
     geography = "core"
   }

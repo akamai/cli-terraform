@@ -67,6 +67,14 @@
 
 
 
+* CPS
+  * Updated `akamai_cps_dv_enrollment` and `akamai_cps_third_party_enrollment` exports: 
+    replaced `network_configuration.clone_dns_names` with `network_configuration.enable_for_all_sans` and `network_configuration.dns_names`.
+
+
+
+
+
 
 
 

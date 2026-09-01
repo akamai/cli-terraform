@@ -43,10 +43,14 @@ resource "akamai_cps_dv_enrollment" "enrollment_id_1" {
   }
   network_configuration {
     disallowed_tls_versions = ["TLSv1", "TLSv1_1", ]
-    geography               = "core"
-    must_have_ciphers       = "ak-akamai-default"
-    ocsp_stapling           = "on"
-    preferred_ciphers       = "ak-akamai-default"
+    enable_for_all_sans     = false
+    dns_names = [
+      "test.akamai.com",
+    ]
+    geography         = "core"
+    must_have_ciphers = "ak-akamai-default"
+    ocsp_stapling     = "on"
+    preferred_ciphers = "ak-akamai-default"
   }
   signature_algorithm = "SHA-256"
   tech_contact {
