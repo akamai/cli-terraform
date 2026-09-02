@@ -1,24 +1,13 @@
 # RELEASE NOTES
 
-## X.XX.X (Month XX, XXXX)
+## 3.0.0 (Sep 9, 2026)
 
 ### BREAKING CHANGES:
-
-
-
-
-
-
-
 
 * DNS
   * Replaced error variables `ErrZoneNamesRetrievalFailed` and `ErrZoneNameTypesRetrievalFailed` with `ErrRecordSetNamesRetrievalFailed` and `ErrRecordSetTypesRetrievalFailed`.
 
-
-
-
 ### FEATURES/ENHANCEMENTS:
-
 
 * AppSec
   * Replaced `akamai_botman_bot_analytics_cookie` with `akamai_botman_bot_analytics_settings` resource to the `export-appsec` command.
@@ -27,76 +16,20 @@
   * Added the `akamai_appsec_advanced_settings_url_evasion_defense` resource to the `export-appsec` command.
   * Added the `akamai_appsec_waf_ai_rules` resource to the `appsec-export` command.
 
-
-
-
-
-
-
-
 * ClientLists
   * Added export of the `version` attribute in the `akamai_clientlist_activation` resource after change in schema.
 
-
-
-
-
-
+* DNS
+  * Added export of the `multi_provider_dnssec` field in the `akamai_dns_zone` resource with `enabled` and `webhook` fields, matching the resource schema.
 
 * PAPI
   * Added support for the new rule format [`v2026-07-21`](https://techdocs.akamai.com/terraform/docs/rule-format-changes#v2026-07-21).
 
-
-
-
-
-* DNS
-  * Added export of `multi_provider_dnssec` field in `akamai_dns_zone` resource with `enabled` and `webhook` fields, matching the resource schema.
-
-
-
-
-
-
-
 ### BUG FIXES:
-
-
-
-
-
-
 
 * CPS
   * Updated `akamai_cps_dv_enrollment` and `akamai_cps_third_party_enrollment` exports: 
     replaced `network_configuration.clone_dns_names` with `network_configuration.enable_for_all_sans` and `network_configuration.dns_names`.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## 2.12.0 (Jul 29, 2026)
 

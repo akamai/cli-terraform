@@ -5,11 +5,11 @@
   "commands": [
     {
       "name": "terraform",
-      "version": "2.12.0",
+      "version": "3.0.0",
       "description": "Export selected resources for faster adoption in Terraform",
       "bin": "https://github.com/akamai/cli-terraform/releases/download/v{{.Version}}/akamai-{{.Name}}-{{.Version}}-{{.OS}}{{.Arch}}{{.BinSuffix}}",
       "auto-complete": true,
-      "ldflags": "-X 'github.com/akamai/cli-terraform/v2/cli.Version=%s'"
+      "ldflags": "-X 'github.com/akamai/cli-terraform/v3/cli.Version=%s'"
     }
   ]
 }

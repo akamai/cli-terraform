@@ -5,10 +5,10 @@ import (
 	"context"
 	"os"
 
-	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/log"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/session"
-	"github.com/akamai/cli-terraform/v2/pkg/commands"
-	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
+	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/log"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/session"
+	"github.com/akamai/cli-terraform/v3/pkg/commands"
+	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
 	akacli "github.com/akamai/cli/v2/pkg/app"
 	"github.com/akamai/cli/v2/pkg/log"
 	"github.com/akamai/cli/v2/pkg/terminal"
@@ -17,7 +17,7 @@ import (
 
 var (
 	// Version holds current version of cli-terraform
-	Version = "2.12.0"
+	Version = "3.0.0"
 )
 
 // Run initializes the cli and runs it

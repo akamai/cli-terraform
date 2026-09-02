@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/clientlists"
-	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/clientlists"
+	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

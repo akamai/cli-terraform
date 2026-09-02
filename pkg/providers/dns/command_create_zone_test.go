@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/dns"
-	"github.com/akamai/cli-terraform/v2/pkg/tools/tests"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/dns"
+	"github.com/akamai/cli-terraform/v3/pkg/tools/tests"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/stretchr/testify/assert"

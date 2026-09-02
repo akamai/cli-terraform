@@ -1,10 +1,10 @@
-{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/papi.TFData*/ -}}
+{{- /*gotype: github.com/akamai/cli-terraform/v3/pkg/providers/papi.TFData*/ -}}
 {{- if not .Property.PropertyID -}}
 terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 10.3.0"
+      version = ">= 11.0.0"
     }
   }
   required_version = ">= 1.0"
