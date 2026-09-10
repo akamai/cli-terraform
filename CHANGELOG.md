@@ -1,6 +1,6 @@
 # RELEASE NOTES
 
-## 3.0.0 (Sep 9, 2026)
+## 3.0.0 (Sep 10, 2026)
 
 ### BREAKING CHANGES:
 
