@@ -3865,7 +3865,7 @@
         }
     ],
     "advancedSettings": {
-        "botAnalyticsCookieSettings": {
+        "botAnalyticsSettings": {
             "primitiveKey": "primitiveValueA",
             "arrayKey": [
                 "arrayValueA1",

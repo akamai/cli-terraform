@@ -1,6 +1,6 @@
-resource "akamai_botman_bot_analytics_cookie" "bot_analytics_cookie" {
+resource "akamai_botman_bot_analytics_settings" "bot_analytics_settings" {
   config_id = local.config_id
-  bot_analytics_cookie = jsonencode(
+  bot_analytics_settings = jsonencode(
     {
       "arrayKey" : [
         "arrayValueA1",

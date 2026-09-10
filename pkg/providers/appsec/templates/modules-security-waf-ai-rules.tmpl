@@ -1,0 +1,28 @@
+// WAF AI Rules
+{{ range .SecurityPolicies -}}
+{{ $policyName := escapeName .Name -}}
+
+{{- if .AIRules -}}
+// WAF AI Rules for policy {{ $policyName }}
+{{ if ne .AIRules.AIRuleStatus "NOT_ENROLLED" -}}
+resource "akamai_appsec_waf_ai_rules" "{{ $policyName }}_status" {
+    config_id          = local.config_id
+    security_policy_id = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
+    ai_rule_status     = "{{ .AIRules.AIRuleStatus }}"
+}
+
+{{ end -}}
+{{ range .AIRules.AIRules -}}
+resource "akamai_appsec_waf_ai_rules" "{{ $policyName }}_{{ .RuleID }}" {
+    config_id          = local.config_id
+    security_policy_id = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
+    rule_id            = {{ .RuleID }}
+    action             = "{{ .Action }}"
+}
+
+{{ end -}}
+{{- else -}}
+// No WAF AI Rules found for policy {{ $policyName }}
+{{ end -}}
+
+{{ end -}}

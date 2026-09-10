@@ -3,7 +3,7 @@ package dns
 import (
 	"context"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/dns"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/dns"
 )
 
 // process zone
@@ -16,6 +16,7 @@ func processZone(ctx context.Context, zone *dns.GetZoneResponse, resourceZoneNam
 		Comment:               zone.Comment,
 		SignAndServe:          zone.SignAndServe,
 		SignAndServeAlgorithm: zone.SignAndServeAlgorithm,
+		MultiProviderDNSSEC:   zone.MultiProviderDNSSEC,
 		OutboundZoneTransfer:  zone.OutboundZoneTransfer,
 		TSIGKey:               zone.TSIGKey,
 		Target:                zone.Target,

@@ -10,10 +10,10 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/edgeworkers"
-	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
-	"github.com/akamai/cli-terraform/v2/pkg/templates"
-	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/edgeworkers"
+	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/v3/pkg/templates"
+	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
@@ -24,7 +24,7 @@ type (
 	TFEdgeKVData struct {
 		Name        string
 		Network     edgeworkers.NamespaceNetwork
-		GroupID     int
+		GroupID     int64
 		Retention   int
 		GeoLocation string
 		EdgercPath  string

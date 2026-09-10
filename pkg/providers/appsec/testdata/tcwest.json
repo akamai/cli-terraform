@@ -11359,6 +11359,9 @@
         },
         "piiLearning": {
           "enabled": true
+        },
+        "urlEvasion": {
+          "status": "disabled"
         }
     },
     "customDenyList": [

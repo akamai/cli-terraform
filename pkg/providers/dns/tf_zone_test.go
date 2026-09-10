@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/dns"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/dns"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -78,6 +78,45 @@ func TestProcessZone(t *testing.T) {
 						Algorithm: "hmac-sha1",
 						Secret:    "fakeSecretajVka5cHPEJQIXfLyx5V3PSkFBROAzOn21JumDq6nIpoj6H8rfj5Uo+Ok55ZWQ0Wgrf302fDscHLw==",
 					},
+				},
+				TSIGKey: &dns.TSIGKey{Name: "some-name", Algorithm: "some-algorithm", Secret: "some-secret"},
+			},
+		},
+		"modSegment=false, multi-signer DNSSEC enabled": {
+			filePath:   "./testdata/zone/expected_zone_multi_provider_dnssec.tf",
+			modSegment: false,
+			zoneResponse: dns.GetZoneResponse{
+				Zone:               "0007770b-08a8-4b5f-a46b-081b772ba605-test.com",
+				Type:               "PRIMARY",
+				Masters:            []string{},
+				ContractID:         "test_contract",
+				ActivationState:    "NEW",
+				LastModifiedBy:     "jreed",
+				LastActivationDate: "2021-03-16T17:16:59.208264Z",
+				VersionID:          "fd858f59-6014-4ce4-8372-c08389d809e8",
+				SignAndServe:       true,
+				MultiProviderDNSSEC: &dns.MultiProviderDNSSEC{
+					Enabled: true,
+				},
+				TSIGKey: &dns.TSIGKey{Name: "some-name", Algorithm: "some-algorithm", Secret: "some-secret"},
+			},
+		},
+		"modSegment=false, multi-signer DNSSEC enabled with webhook": {
+			filePath:   "./testdata/zone/expected_zone_multi_provider_dnssec_webhook.tf",
+			modSegment: false,
+			zoneResponse: dns.GetZoneResponse{
+				Zone:               "0007770b-08a8-4b5f-a46b-081b772ba605-test.com",
+				Type:               "PRIMARY",
+				Masters:            []string{},
+				ContractID:         "test_contract",
+				ActivationState:    "NEW",
+				LastModifiedBy:     "jreed",
+				LastActivationDate: "2021-03-16T17:16:59.208264Z",
+				VersionID:          "fd858f59-6014-4ce4-8372-c08389d809e8",
+				SignAndServe:       true,
+				MultiProviderDNSSEC: &dns.MultiProviderDNSSEC{
+					Enabled: true,
+					Webhook: "https://example.com/webhook",
 				},
 				TSIGKey: &dns.TSIGKey{Name: "some-name", Algorithm: "some-algorithm", Secret: "some-secret"},
 			},

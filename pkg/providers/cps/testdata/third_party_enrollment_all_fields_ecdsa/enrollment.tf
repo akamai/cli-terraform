@@ -2,7 +2,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 3.1.0"
+      version = ">= 11.0.0"
     }
   }
   required_version = ">= 1.0"
@@ -50,7 +50,7 @@ resource "akamai_cps_third_party_enrollment" "enrollment_id_1" {
       set_id                 = "2"
     }
     disallowed_tls_versions = ["TLSv1", "TLSv1_1", ]
-    clone_dns_names         = true
+    enable_for_all_sans     = true
     geography               = "core"
     must_have_ciphers       = "ak-akamai-default"
     ocsp_stapling           = "on"

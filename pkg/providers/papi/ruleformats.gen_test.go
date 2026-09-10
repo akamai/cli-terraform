@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -461,6 +461,26 @@ func TestProcessPolicyTemplatesGenerated(t *testing.T) {
 			dir:          "ruleformats/v2026_06_09/rules_datasource",
 			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
 			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2026-06-09")},
+		},
+		"property with rules as datasource - hcl rules version v2026-07-21": {
+			givenData: TFData{
+				Property: TFPropertyData{
+					GroupName:            "test_group",
+					GroupID:              "grp_12345",
+					ContractID:           "test_contract",
+					PropertyResourceName: "test-edgesuite-net",
+					PropertyName:         "test.edgesuite.net",
+					PropertyID:           "prp_12345",
+					ProductID:            "prd_HTTP_Content_Del",
+					ProductName:          "HTTP_Content_Del",
+					RuleFormat:           "v2026-07-21",
+					IsSecure:             "false",
+					ReadVersion:          "LATEST",
+				},
+			},
+			dir:          "ruleformats/v2026_07_21/rules_datasource",
+			filesToCheck: []string{"property.tf", "rules.tf", "variables.tf", "import.sh"},
+			filterFuncs:  []func([]string) ([]string, error){useThisOnlyRuleFormat("v2026-07-21")},
 		},
 	}
 

@@ -1,9 +1,9 @@
-{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/cps.TFCPSData*/ -}}
+{{- /*gotype: github.com/akamai/cli-terraform/v3/pkg/providers/cps.TFCPSData*/ -}}
 terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 3.1.0"
+      version = ">= 11.0.0"
     }
   }
   required_version = ">= 1.0"
@@ -94,8 +94,15 @@ provider "akamai" {
         {{- if .DisallowedTLSVersions}}
             disallowed_tls_versions = [{{range .DisallowedTLSVersions}}"{{.}}",{{end}}]
         {{- end}}
-        {{- if and .DNSNameSettings .DNSNameSettings.CloneDNSNames}}
-            clone_dns_names         = {{.DNSNameSettings.CloneDNSNames}}
+        {{- if .DNSNameSettings}}
+            enable_for_all_sans = {{ .DNSNameSettings.CloneDNSNames }}
+{{- if not .DNSNameSettings.CloneDNSNames }}
+            dns_names = [
+{{- range .DNSNameSettings.DNSNames }}
+              "{{ . }}",
+{{- end }}
+            ]
+{{- end }}
         {{- end}}
         geography               = "{{.Geography}}"
         {{- if .MustHaveCiphers}}

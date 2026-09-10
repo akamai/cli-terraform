@@ -2,7 +2,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 10.3.0"
+      version = ">= 11.0.0"
     }
   }
   required_version = ">= 1.0"
@@ -25,6 +25,7 @@ resource "akamai_clientlist_list" "list_123_ABC" {
 
 resource "akamai_clientlist_activation" "activation_123_ABC_STAGING" {
   list_id                 = akamai_clientlist_list.list_123_ABC.list_id
+  version                 = akamai_clientlist_list.list_123_ABC.version
   network                 = "STAGING"
   comments                = "Staging Activation"
   notification_recipients = ["a@b.com", "c@d.com"]
@@ -33,6 +34,7 @@ resource "akamai_clientlist_activation" "activation_123_ABC_STAGING" {
 
 resource "akamai_clientlist_activation" "activation_123_ABC_PRODUCTION" {
   list_id                 = akamai_clientlist_list.list_123_ABC.list_id
+  version                 = akamai_clientlist_list.list_123_ABC.version
   network                 = "PRODUCTION"
   comments                = "Production Activation"
   notification_recipients = ["1@2.com", "3@4.com"]

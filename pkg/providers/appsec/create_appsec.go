@@ -12,11 +12,11 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/appsec"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/botman"
-	"github.com/akamai/cli-terraform/v2/pkg/edgegrid"
-	"github.com/akamai/cli-terraform/v2/pkg/templates"
-	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/appsec"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/botman"
+	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
+	"github.com/akamai/cli-terraform/v3/pkg/templates"
+	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/urfave/cli/v2"
@@ -122,6 +122,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"modules-security-content-protection.tmpl":       filepath.Join(securityModulePath, "content-protection.tf"),
 		"modules-security-url-protection-policy.tmpl":    filepath.Join(securityModulePath, "url-protection-policy.tf"),
 		"modules-security-url-protection-action.tmpl":    filepath.Join(securityModulePath, "url-protection-action.tf"),
+		"modules-security-waf-ai-rules.tmpl":             filepath.Join(securityModulePath, "waf-ai-rules.tf"),
 		"modules-aap-selected-hostnames.tmpl":            filepath.Join(securityModulePath, "aap-selected-hostnames.tf"),
 		"variables.tmpl":                                 filepath.Join(tfWorkPath, "appsec-variables.tf"),
 		"versions.tmpl":                                  filepath.Join(tfWorkPath, "appsec-versions.tf"),

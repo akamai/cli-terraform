@@ -2,7 +2,7 @@ terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 3.1.0"
+      version = ">= 11.0.0"
     }
   }
   required_version = ">= 1.0"
@@ -39,6 +39,10 @@ resource "akamai_cps_dv_enrollment" "enrollment_id_1" {
     state               = "MA"
   }
   network_configuration {
+    enable_for_all_sans = false
+    dns_names = [
+      "san.test.akamai.com",
+    ]
     geography = "core"
   }
   signature_algorithm = "SHA-256"

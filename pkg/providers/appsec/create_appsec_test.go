@@ -12,10 +12,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/appsec"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/botman"
-	"github.com/akamai/cli-terraform/v2/pkg/templates"
-	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/appsec"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/botman"
+	"github.com/akamai/cli-terraform/v3/pkg/templates"
+	"github.com/akamai/cli-terraform/v3/pkg/tools"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -660,6 +660,76 @@ func TestExportUrlProtectionPolicy(t *testing.T) {
 	security := filepath.Join("modules", "security")
 	templateName := "modules-security-url-protection-policy.tmpl"
 	outputFile := filepath.Join(security, "url-protection-policy.tf")
+
+	mocks := func(c *appsec.Mock, _ *templates.MockProcessor) {
+		c.On("GetWAFMode", mock.Anything, mock.Anything).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)
+		c.On("GetConfiguration", mock.Anything, mock.Anything).Return(&appsec.GetConfigurationResponse{Description: "A security config for demo"}, nil)
+	}
+
+	additionalFuncs := tools.DecorateWithMultilineHandlingFunctions(map[string]any{
+		"getCustomRuleNameByID":                      getCustomRuleNameByID,
+		"getRepNameByID":                             getRepNameByID,
+		"getRuleNameByID":                            getRuleNameByID,
+		"getRuleDescByID":                            getRuleDescByID,
+		"getRateNameByID":                            getRateNameByID,
+		"getMalwareNameByID":                         getMalwareNameByID,
+		"getPolicyNameByID":                          getPolicyNameByID,
+		"getWAFMode":                                 getWAFMode,
+		"getConfigDescription":                       getConfigDescription,
+		"getPrefixFromID":                            getPrefixFromID,
+		"getEdgercPath":                              getEdgercPath,
+		"getSection":                                 getSection,
+		"isStructuredRule":                           isStructuredRule,
+		"exportJSON":                                 exportJSON,
+		"exportJSONWithoutKeys":                      exportJSONWithoutKeys,
+		"getCustomBotCategoryNameByID":               getCustomBotCategoryNameByID,
+		"getCustomBotCategoryResourceNamesByIDs":     getCustomBotCategoryResourceNamesByIDs,
+		"getCustomClientResourceNamesByIDs":          getCustomClientResourceNamesByIDs,
+		"getContentProtectionRuleResourceNamesByIDs": getContentProtectionRuleResourceNamesByIDs,
+		"getProtectedHostsByID":                      getProtectedHostsByID,
+		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
+		"exportJSONForCustomDefBotsWithoutKeys":      exportJSONForCustomDefBotsWithoutKeys,
+		"buildCategoryMap":                           buildCategoryMap,
+	})
+
+	edgercPath = "/non/default/path/to/edgerc"
+	section = "non-default-section"
+
+	for _, config := range configs {
+		t.Run(templateName, func(t *testing.T) {
+			ma := new(appsec.Mock)
+			mp := new(templates.MockProcessor)
+			mocks(ma, mp)
+			client = ma
+
+			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s/modules/security", config), 0755))
+
+			processor := templates.FSTemplateProcessor{
+				TemplatesFS: templateFiles,
+				TemplateTargets: map[string]string{
+					templateName: fmt.Sprintf("./testdata/res/%s/%s", config, outputFile),
+				},
+				AdditionalFuncs: additionalFuncs,
+			}
+
+			getExportConfigurationResponse := getExportConfigurationResponse(config)
+			require.NoError(t, processor.ProcessTemplates(getExportConfigurationResponse))
+
+			expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", config, outputFile))
+			require.NoError(t, err)
+			result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", config, outputFile))
+			require.NoError(t, err)
+			assert.Equal(t, string(expected), string(result))
+		})
+	}
+	require.NoError(t, os.RemoveAll("./testdata/res"))
+}
+
+func TestExportWAFAIRules(t *testing.T) {
+	configs := []string{"ase"}
+	security := filepath.Join("modules", "security")
+	templateName := "modules-security-waf-ai-rules.tmpl"
+	outputFile := filepath.Join(security, "waf-ai-rules.tf")
 
 	mocks := func(c *appsec.Mock, _ *templates.MockProcessor) {
 		c.On("GetWAFMode", mock.Anything, mock.Anything).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)

@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/dns"
-	"github.com/akamai/cli-terraform/v2/pkg/tools/tests"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/dns"
+	"github.com/akamai/cli-terraform/v3/pkg/tools/tests"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/stretchr/testify/assert"
@@ -107,9 +107,9 @@ func TestCreateZone(t *testing.T) {
 		"successful export with --resources flag": {
 			init: func(m *dns.Mock) {
 				mockGetZone(m, "example.com", "PRIMARY", "test_contract")
-				mockGetZoneNames(m, "example.com", []string{"www.example.com", "example.com"})
-				mockGetZoneNameTypes(m, "example.com", "www.example.com", []string{"A"})
-				mockGetZoneNameTypes(m, "example.com", "example.com", []string{"NS", "SOA"})
+				mockListRecordSetNames(m, "example.com", []string{"www.example.com", "example.com"})
+				mockListRecordSetTypes(m, "example.com", "www.example.com", []string{"A"})
+				mockListRecordSetTypes(m, "example.com", "example.com", []string{"NS", "SOA"})
 			},
 			config: configStruct{
 				zoneName:               "example.com",
@@ -154,7 +154,7 @@ func TestCreateZone(t *testing.T) {
 		"successful export with --resources, --namesonly and --createconfig flags": {
 			init: func(m *dns.Mock) {
 				mockGetZone(m, "example.com", "PRIMARY", "test_contract")
-				mockGetZoneNames(m, "example.com", []string{"www.example.com", "example.com"})
+				mockListRecordSetNames(m, "example.com", []string{"www.example.com", "example.com"})
 				mockGetRecordSets(m, "example.com", []dns.RecordSet{
 					{Name: "example.com", Type: "NS", TTL: 3600, Rdata: []string{"ns1.example.com."}},
 					{Name: "example.com", Type: "SOA", TTL: 3600, Rdata: []string{"ns1.example.com. admin.example.com. 2024010101 3600 600 604800 300"}},
@@ -173,7 +173,7 @@ func TestCreateZone(t *testing.T) {
 		"successful export with --resources and --namesonly flags": {
 			init: func(m *dns.Mock) {
 				mockGetZone(m, "example.com", "PRIMARY", "test_contract")
-				mockGetZoneNames(m, "example.com", []string{"www.example.com", "example.com"})
+				mockListRecordSetNames(m, "example.com", []string{"www.example.com", "example.com"})
 			},
 			config: configStruct{
 				zoneName:               "example.com",
@@ -185,9 +185,9 @@ func TestCreateZone(t *testing.T) {
 		"successful export with --resources and --createconfig flags": {
 			init: func(m *dns.Mock) {
 				mockGetZone(m, "example.com", "PRIMARY", "test_contract")
-				mockGetZoneNames(m, "example.com", []string{"www.example.com", "example.com"})
-				mockGetZoneNameTypes(m, "example.com", "www.example.com", []string{"A"})
-				mockGetZoneNameTypes(m, "example.com", "example.com", []string{"NS", "SOA"})
+				mockListRecordSetNames(m, "example.com", []string{"www.example.com", "example.com"})
+				mockListRecordSetTypes(m, "example.com", "www.example.com", []string{"A"})
+				mockListRecordSetTypes(m, "example.com", "example.com", []string{"NS", "SOA"})
 				mockGetRecordSets(m, "example.com", []dns.RecordSet{
 					{Name: "example.com", Type: "NS", TTL: 3600, Rdata: []string{"ns1.example.com."}},
 					{Name: "example.com", Type: "SOA", TTL: 3600, Rdata: []string{"ns1.example.com. admin.example.com. 2024010101 3600 600 604800 300"}},
@@ -239,9 +239,9 @@ func TestCreateZone(t *testing.T) {
 		"successful export with --resources, --createconfig and --importscript flags": {
 			init: func(m *dns.Mock) {
 				mockGetZone(m, "example.com", "PRIMARY", "test_contract")
-				mockGetZoneNames(m, "example.com", []string{"www.example.com", "example.com"})
-				mockGetZoneNameTypes(m, "example.com", "www.example.com", []string{"A"})
-				mockGetZoneNameTypes(m, "example.com", "example.com", []string{"NS", "SOA"})
+				mockListRecordSetNames(m, "example.com", []string{"www.example.com", "example.com"})
+				mockListRecordSetTypes(m, "example.com", "www.example.com", []string{"A"})
+				mockListRecordSetTypes(m, "example.com", "example.com", []string{"NS", "SOA"})
 				mockGetRecordSets(m, "example.com", []dns.RecordSet{
 					{Name: "example.com", Type: "NS", TTL: 3600, Rdata: []string{"ns1.example.com."}},
 					{Name: "example.com", Type: "SOA", TTL: 3600, Rdata: []string{"ns1.example.com. admin.example.com. 2024010101 3600 600 604800 300"}},
@@ -260,9 +260,9 @@ func TestCreateZone(t *testing.T) {
 		"successful export with --resources, --createconfig, --importscript and --segmentconfig flags": {
 			init: func(m *dns.Mock) {
 				mockGetZone(m, "example.com", "PRIMARY", "test_contract")
-				mockGetZoneNames(m, "example.com", []string{"www.example.com", "example.com"})
-				mockGetZoneNameTypes(m, "example.com", "www.example.com", []string{"A"})
-				mockGetZoneNameTypes(m, "example.com", "example.com", []string{"NS", "SOA"})
+				mockListRecordSetNames(m, "example.com", []string{"www.example.com", "example.com"})
+				mockListRecordSetTypes(m, "example.com", "www.example.com", []string{"A"})
+				mockListRecordSetTypes(m, "example.com", "example.com", []string{"NS", "SOA"})
 				mockGetRecordSets(m, "example.com", []dns.RecordSet{
 					{Name: "example.com", Type: "NS", TTL: 3600, Rdata: []string{"ns1.example.com."}},
 					{Name: "example.com", Type: "SOA", TTL: 3600, Rdata: []string{"ns1.example.com. admin.example.com. 2024010101 3600 600 604800 300"}},
@@ -282,7 +282,7 @@ func TestCreateZone(t *testing.T) {
 		"successful export with --recordname and --segmentconfig flags": {
 			init: func(m *dns.Mock) {
 				mockGetZone(m, "example.com", "PRIMARY", "test_contract")
-				mockGetZoneNameTypes(m, "example.com", "abc.example.com", []string{"TXT"})
+				mockListRecordSetTypes(m, "example.com", "abc.example.com", []string{"TXT"})
 				mockGetRecordSets(m, "example.com", []dns.RecordSet{
 					{Name: "abc.example.com", Type: "TXT", TTL: 300, Rdata: []string{"\"dummy text abc\""}},
 				})
@@ -300,7 +300,7 @@ func TestCreateZone(t *testing.T) {
 		"successful export with single --recordname flag": {
 			init: func(m *dns.Mock) {
 				mockGetZone(m, "example.com", "PRIMARY", "test_contract")
-				mockGetZoneNameTypes(m, "example.com", "abc.example.com", []string{"TXT"})
+				mockListRecordSetTypes(m, "example.com", "abc.example.com", []string{"TXT"})
 				mockGetRecordSets(m, "example.com", []dns.RecordSet{
 					{Name: "abc.example.com", Type: "TXT", TTL: 300, Rdata: []string{"\"dummy text abc\""}},
 				})
@@ -317,8 +317,8 @@ func TestCreateZone(t *testing.T) {
 		"successful export with multiple --recordname flags": {
 			init: func(m *dns.Mock) {
 				mockGetZone(m, "example.com", "PRIMARY", "test_contract")
-				mockGetZoneNameTypes(m, "example.com", "abc.example.com", []string{"TXT"})
-				mockGetZoneNameTypes(m, "example.com", "def.example.com", []string{"TXT"})
+				mockListRecordSetTypes(m, "example.com", "abc.example.com", []string{"TXT"})
+				mockListRecordSetTypes(m, "example.com", "def.example.com", []string{"TXT"})
 				mockGetRecordSets(m, "example.com", []dns.RecordSet{
 					{Name: "abc.example.com", Type: "TXT", TTL: 300, Rdata: []string{"\"dummy text abc\""}},
 					{Name: "def.example.com", Type: "TXT", TTL: 300, Rdata: []string{"\"dummy text def\""}},
@@ -371,8 +371,8 @@ func TestCreateZone(t *testing.T) {
 		"resources file already exists on disk": {
 			init: func(m *dns.Mock) {
 				mockGetZone(m, "example.com", "PRIMARY", "test_contract")
-				mockGetZoneNames(m, "example.com", []string{"example.com"})
-				mockGetZoneNameTypes(m, "example.com", "example.com", []string{"NS", "SOA"})
+				mockListRecordSetNames(m, "example.com", []string{"example.com"})
+				mockListRecordSetTypes(m, "example.com", "example.com", []string{"NS", "SOA"})
 			},
 			setup: func(t *testing.T, resDir string) {
 				require.NoError(t, os.WriteFile(filepath.Join(resDir, "example_com_resources.json"), []byte("{}"), 0644))
@@ -384,30 +384,30 @@ func TestCreateZone(t *testing.T) {
 			dir:         "create_zone_resources_file_exists",
 			expectedErr: ErrResourceListFileExists,
 		},
-		"GetZoneNames API error": {
+		"ListRecordSetNames API error": {
 			init: func(m *dns.Mock) {
 				mockGetZone(m, "example.com", "PRIMARY", "test_contract")
-				m.On("GetZoneNames", mock.Anything, dns.GetZoneNamesRequest{Zone: "example.com"}).
+				m.On("ListRecordSetNames", mock.Anything, dns.ListRecordSetNamesRequest{Zone: "example.com"}).
 					Return(nil, errors.New("API failure")).Once()
 			},
 			config: configStruct{
 				zoneName:               "example.com",
 				shouldCreateImportList: true,
 			},
-			expectedErr: ErrZoneNamesRetrievalFailed,
+			expectedErr: ErrRecordSetNamesRetrievalFailed,
 		},
-		"GetZoneNameTypes API error": {
+		"ListRecordSetTypes API error": {
 			init: func(m *dns.Mock) {
 				mockGetZone(m, "example.com", "PRIMARY", "test_contract")
-				mockGetZoneNames(m, "example.com", []string{"example.com"})
-				m.On("GetZoneNameTypes", mock.Anything, dns.GetZoneNameTypesRequest{Zone: "example.com", ZoneName: "example.com"}).
+				mockListRecordSetNames(m, "example.com", []string{"example.com"})
+				m.On("ListRecordSetTypes", mock.Anything, dns.ListRecordSetTypesRequest{Zone: "example.com", RecordName: "example.com"}).
 					Return(nil, errors.New("API failure")).Once()
 			},
 			config: configStruct{
 				zoneName:               "example.com",
 				shouldCreateImportList: true,
 			},
-			expectedErr: ErrZoneNameTypesRetrievalFailed,
+			expectedErr: ErrRecordSetTypesRetrievalFailed,
 		},
 		"GetRecordSets API error": {
 			init: func(m *dns.Mock) {
@@ -519,16 +519,16 @@ func mockGetZone(m *dns.Mock, zone, zoneType, contractID string) {
 		}, nil).Once()
 }
 
-// mockGetZoneNameTypes sets up a GetZoneNameTypes mock expectation returning the provided types for the given zone and record name.
-func mockGetZoneNameTypes(m *dns.Mock, zone, zoneName string, types []string) {
-	m.On("GetZoneNameTypes", mock.Anything, dns.GetZoneNameTypesRequest{Zone: zone, ZoneName: zoneName}).
-		Return(&dns.GetZoneNameTypesResponse{Types: types}, nil).Once()
+// mockListRecordSetTypes sets up a ListRecordSetTypes mock expectation returning the provided types for the given zone and record name.
+func mockListRecordSetTypes(m *dns.Mock, zone, recordName string, types []string) {
+	m.On("ListRecordSetTypes", mock.Anything, dns.ListRecordSetTypesRequest{Zone: zone, RecordName: recordName}).
+		Return(&dns.ListRecordSetTypesResponse{Types: types}, nil).Once()
 }
 
-// mockGetZoneNames sets up a GetZoneNames mock expectation returning the provided names for the given zone.
-func mockGetZoneNames(m *dns.Mock, zone string, names []string) {
-	m.On("GetZoneNames", mock.Anything, dns.GetZoneNamesRequest{Zone: zone}).
-		Return(&dns.GetZoneNamesResponse{Names: names}, nil).Once()
+// mockListRecordSetNames sets up a ListRecordSetNames mock expectation returning the provided names for the given zone.
+func mockListRecordSetNames(m *dns.Mock, zone string, names []string) {
+	m.On("ListRecordSetNames", mock.Anything, dns.ListRecordSetNamesRequest{Zone: zone}).
+		Return(&dns.ListRecordSetNamesResponse{Names: names}, nil).Once()
 }
 
 // mockGetRecordSets sets up a GetRecordSets mock expectation returning the provided record sets for the given zone.

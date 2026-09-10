@@ -6,8 +6,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/dns"
-	"github.com/akamai/cli-terraform/v2/pkg/tools"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/dns"
+	"github.com/akamai/cli-terraform/v3/pkg/tools"
 )
 
 //go:embed templates/*
@@ -31,6 +31,7 @@ type (
 		Comment               string
 		SignAndServe          bool
 		SignAndServeAlgorithm string
+		MultiProviderDNSSEC   *dns.MultiProviderDNSSEC
 		OutboundZoneTransfer  *dns.OutboundZoneTransfer
 		TSIGKey               *dns.TSIGKey
 		Target                string

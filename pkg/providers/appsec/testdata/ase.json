@@ -4101,7 +4101,30 @@
                 "loadSheddingAction": "none",
                 "policyId": 50412
                 }
-            ]
+            ],
+            "aiRules": {
+                "aiRuleStatus": "ENABLED",
+                "aiRules": [
+                    {
+                        "ruleId": 3001000,
+                        "ruleVersion": 1,
+                        "title": "Sample AI Rule",
+                        "riskScoreGroup": "HIGH",
+                        "ruleDescription": "Detects malicious request patterns using AI.",
+                        "action": "alert",
+                        "conditionExceptions": []
+                    },
+                    {
+                        "ruleId": 3001001,
+                        "ruleVersion": 2,
+                        "title": "Sample AI Rule 2",
+                        "riskScoreGroup": "LOW",
+                        "ruleDescription": "Another AI rule.",
+                        "action": "deny",
+                        "conditionExceptions": []
+                    }
+                ]
+            }
         }
     ],
     "malwarePolicies": [
@@ -4236,43 +4259,74 @@
         },
         "piiLearning": {
           "enabled": false
+        },
+        "evasivePathMatch": {
+          "enabled": false
+        },
+        "urlEvasion": {
+          "status": "enabled",
+          "lockVersion": 2,
+          "bypassLists": ["123456_BYPASSLIST"],
+          "rules": [
+            {
+              "ruleId": 3002500,
+              "action": "deny",
+              "defaultAction": "alert",
+              "name": "General Path Traversal",
+              "description": "Detect attempts to traverse directory structures",
+              "conditionOperator": "AND",
+              "conditions": [
+                {"type": "hostMatch", "hosts": ["host.name"], "positiveMatch": true},
+                {"type": "extensionMatch", "extensions": ["extension"], "positiveMatch": true},
+                {"type": "filenameMatch", "filenames": ["filename"], "positiveMatch": false},
+                {"type": "ipMatch", "ips": ["192.168.0.1"], "positiveMatch": true, "useHeaders": false},
+                {"type": "uriQueryMatch", "caseSensitive": true, "name": "query", "nameCase": true, "positiveMatch": true, "value": "queryValue", "wildcard": true},
+                {"type": "requestHeaderMatch", "header": "Accept", "positiveMatch": true, "value": "XML", "valueCase": true, "valueWildcard": true},
+                {"type": "requestMethodMatch", "methods": ["DELETE"], "positiveMatch": true},
+                {"type": "pathMatch", "paths": ["/path"], "positiveMatch": true},
+                {"type": "clientListMatch", "clientLists": ["1234567_LIST"], "positiveMatch": true, "useHeaders": true}
+              ]
+            },
+            {"ruleId": 3002501, "action": "none", "defaultAction": "alert", "name": "Percent-Encoded Evasions", "description": "Detect percent-encoded path traversal attempts"},
+            {"ruleId": 3002502, "defaultAction": "alert", "name": "Double+ Percent-Encoded Evasions", "description": "Detect double percent-encoded path traversal attempts"}
+          ]
         }
     },
-    "Siem": {
-        "EnableForAllPolicies": false,
-        "EnableSiem": true,
-        "EnableBotmanSiemEvents": false,
-        "FirewallPolicyIds": [
-            "ASE1_156138"
-        ],
-        "SiemDefinitionID": 1
-    },
-    "customDenyList": [
+  "Siem": {
+    "EnableForAllPolicies": false,
+    "EnableSiem": true,
+    "EnableBotmanSiemEvents": false,
+    "FirewallPolicyIds": [
+      "ASE1_156138"
+    ],
+    "SiemDefinitionID": 1
+  },
+  "customDenyList": [
+    {
+      "id": "deny_custom_78842",
+      "name": "Deny Message",
+      "parameters": [
         {
-            "id": "deny_custom_78842",
-            "name": "Deny Message",
-            "parameters": [
-                {
-                    "displayName": "Prevent browser caching",
-                    "name": "prevent_browser_cache",
-                    "value": "true"
-                },
-                {
-                    "displayName": "Response body content",
-                    "name": "response_body_content",
-                    "value": "You were denied, bad actor!"
-                },
-                {
-                    "displayName": "Response content type",
-                    "name": "response_content_type",
-                    "value": "text/html"
-                },
-                {
-                    "displayName": "Response status code",
-                    "name": "response_status_code",
-                    "value": "433"
-                }
-            ]
+          "displayName": "Prevent browser caching",
+          "name": "prevent_browser_cache",
+          "value": "true"
+        },
+        {
+          "displayName": "Response body content",
+          "name": "response_body_content",
+          "value": "You were denied, bad actor!"
+        },
+        {
+          "displayName": "Response content type",
+          "name": "response_content_type",
+          "value": "text/html"
+        },
+        {
+          "displayName": "Response status code",
+          "name": "response_status_code",
+          "value": "433"
         }
-    ]
+      ]
+    }
+  ]
 }

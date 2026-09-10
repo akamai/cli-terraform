@@ -1,10 +1,10 @@
-{{- /*gotype: github.com/akamai/cli-terraform/v2/pkg/providers/clientlists.TFData*/ -}}
+{{- /*gotype: github.com/akamai/cli-terraform/v3/pkg/providers/clientlists.TFData*/ -}}
 
 terraform {
   required_providers {
     akamai = {
       source  = "akamai/akamai"
-      version = ">= 10.3.0"
+      version = ">= 11.0.0"
     }
   }
   required_version = ">= 1.0"
@@ -45,6 +45,7 @@ resource "akamai_clientlist_list" "list_{{.ClientList.ListID}}" {
 {{if .ClientList.StagingActivation.HasActivation}}
 resource "akamai_clientlist_activation" "activation_{{.ClientList.ListID}}_STAGING" {
   list_id                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.list_id
+  version                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.version
   network                 = "STAGING"
   comments                = "{{.ClientList.StagingActivation.Comments}}"
   notification_recipients = [{{range $index, $element := .ClientList.StagingActivation.NotificationRecipients}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
@@ -53,6 +54,7 @@ resource "akamai_clientlist_activation" "activation_{{.ClientList.ListID}}_STAGI
 {{- else}}
 # resource "akamai_clientlist_activation" "activation_{{.ClientList.ListID}}_STAGING" {
 #   list_id                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.list_id
+#   version                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.version
 #   network                 = "STAGING"
 #   comments                = ""
 #   notification_recipients = []
@@ -62,6 +64,7 @@ resource "akamai_clientlist_activation" "activation_{{.ClientList.ListID}}_STAGI
 {{if .ClientList.ProductionActivation.HasActivation}}
 resource "akamai_clientlist_activation" "activation_{{.ClientList.ListID}}_PRODUCTION" {
   list_id                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.list_id
+  version                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.version
   network                 = "PRODUCTION"
   comments                = "{{.ClientList.ProductionActivation.Comments}}"
   notification_recipients = [{{range $index, $element := .ClientList.ProductionActivation.NotificationRecipients}}{{if $index}}, {{end}}"{{$element}}"{{end}}]
@@ -70,6 +73,7 @@ resource "akamai_clientlist_activation" "activation_{{.ClientList.ListID}}_PRODU
 {{- else }}
 # resource "akamai_clientlist_activation" "activation_{{.ClientList.ListID}}_PRODUCTION" {
 #   list_id                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.list_id
+#   version                 = akamai_clientlist_list.list_{{.ClientList.ListID}}.version
 #   network                 = "PRODUCTION"
 #   comments                = ""
 #   notification_recipients = []

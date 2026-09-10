@@ -10,9 +10,9 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/cps"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v13/pkg/ptr"
-	"github.com/akamai/cli-terraform/v2/pkg/templates"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/cps"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/ptr"
+	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/jinzhu/copier"
 	"github.com/stretchr/testify/assert"
@@ -86,7 +86,7 @@ var (
 			DisallowedTLSVersions: []string{"TLSv1", "TLSv1_1"},
 			DNSNameSettings: &cps.DNSNameSettings{
 				CloneDNSNames: false,
-				DNSNames:      []string{},
+				DNSNames:      []string{"test.akamai.com"},
 			},
 			Geography:        "core",
 			MustHaveCiphers:  "ak-akamai-default",
@@ -376,6 +376,15 @@ var (
 
 	enrollmentThirdPartyAllNoSANs = enrollmentThirdParty([]string{"test.akamai.com"})
 
+	enrollmentThirdPartyExplicitDNSNames = func() cps.GetEnrollmentResponse {
+		enrollment := enrollmentThirdParty([]string{"test.akamai.com", "san.test.akamai.com"})
+		enrollment.NetworkConfiguration.DNSNameSettings = &cps.DNSNameSettings{
+			CloneDNSNames: false,
+			DNSNames:      []string{"test.akamai.com", "san.test.akamai.com"},
+		}
+		return enrollment
+	}()
+
 	enrollmentOV = cps.GetEnrollmentResponse{
 		AdminContact: &cps.Contact{
 			AddressLineOne:   "150 Broadway",
@@ -501,7 +510,7 @@ func TestCreateCPS(t *testing.T) {
 			},
 			enrollmentID: 1,
 			contractID:   "ctr_1",
-			dataDir:      "dv_enrollment_min",
+			dataDir:      "dv_enrollment_without_dns_name_settings",
 			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
 		"export DV enrollment": {
@@ -592,6 +601,35 @@ func TestCreateCPS(t *testing.T) {
 			enrollmentID: 1,
 			contractID:   "ctr_1",
 			dataDir:      "third_party_enrollment_all_fields_ecdsa_rsa",
+			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
+		},
+		"export third party enrollment with explicit DNS names": {
+			init: func(m *cps.Mock) {
+				expectGetEnrollment(m, 1, enrollmentThirdPartyExplicitDNSNames, nil).Once()
+				response := cps.GetChangeHistoryResponse{
+					Changes: []cps.ChangeHistory{
+						{
+							PrimaryCertificate: cps.CertificateChangeHistory{
+								Certificate:  certECDSAForTests,
+								KeyAlgorithm: ECDSA,
+								TrustChain:   trustChainECDSAForTests,
+							},
+							MultiStackedCertificates: []cps.CertificateChangeHistory{
+								{
+									Certificate:  certRSAForTests,
+									KeyAlgorithm: RSA,
+									TrustChain:   trustChainRSAForTests,
+								},
+							},
+							Status: "active",
+						},
+					},
+				}
+				expectGetChangeHistory(m, 1, response, nil).Once()
+			},
+			enrollmentID: 1,
+			contractID:   "ctr_1",
+			dataDir:      "third_party_enrollment_explicit_dns_names",
 			filesToCheck: []string{"enrollment.tf", "import.sh", "variables.tf"},
 		},
 		"export third party enrollment renewal": {
@@ -771,6 +809,26 @@ func TestProcessEnrollmentTemplates(t *testing.T) {
 			dir:          "dv_enrollment_min",
 			filesToCheck: []string{"enrollment.tf", "variables.tf", "import.sh"},
 		},
+		"dv enrollment with empty DNS names": {
+			givenData: func() TFCPSData {
+				enrollment := enrollmentDVMin
+				networkConfiguration := *enrollment.NetworkConfiguration
+				dnsNameSettings := *networkConfiguration.DNSNameSettings
+				dnsNameSettings.DNSNames = nil
+				networkConfiguration.DNSNameSettings = &dnsNameSettings
+				enrollment.NetworkConfiguration = &networkConfiguration
+
+				return TFCPSData{
+					Enrollment:   enrollment,
+					EnrollmentID: 1,
+					ContractID:   "ctr_1",
+					EdgercPath:   defaultEdgercPath,
+					Section:      defaultSection,
+				}
+			}(),
+			dir:          "dv_enrollment_empty_dns_names",
+			filesToCheck: []string{"enrollment.tf", "variables.tf", "import.sh"},
+		},
 		"third party enrollment with all fields set": {
 			givenData: TFCPSData{
 				Enrollment:       enrollmentThirdPartyAll,
@@ -784,6 +842,21 @@ func TestProcessEnrollmentTemplates(t *testing.T) {
 				TrustChainRSA:    "-----BEGIN CERTIFICATE TRUST-CHAIN RSA REQUEST-----\\n...\\n-----END CERTIFICATE TRUST-CHAIN RSA REQUEST-----",
 			},
 			dir:          "third_party_enrollment_all_fields_ecdsa_rsa",
+			filesToCheck: []string{"enrollment.tf", "variables.tf", "import.sh"},
+		},
+		"third party enrollment with explicit DNS names": {
+			givenData: TFCPSData{
+				Enrollment:       enrollmentThirdPartyExplicitDNSNames,
+				EnrollmentID:     1,
+				ContractID:       "ctr_1",
+				EdgercPath:       defaultEdgercPath,
+				Section:          defaultSection,
+				CertificateECDSA: "-----BEGIN CERTIFICATE ECDSA REQUEST-----\\n...\\n-----END CERTIFICATE ECDSA REQUEST-----",
+				CertificateRSA:   "-----BEGIN CERTIFICATE RSA REQUEST-----\\n...\\n-----END CERTIFICATE RSA REQUEST-----",
+				TrustChainECDSA:  "-----BEGIN CERTIFICATE TRUST-CHAIN ECDSA REQUEST-----\\n...\\n-----END CERTIFICATE TRUST-CHAIN ECDSA REQUEST-----",
+				TrustChainRSA:    "-----BEGIN CERTIFICATE TRUST-CHAIN RSA REQUEST-----\\n...\\n-----END CERTIFICATE TRUST-CHAIN RSA REQUEST-----",
+			},
+			dir:          "third_party_enrollment_explicit_dns_names",
 			filesToCheck: []string{"enrollment.tf", "variables.tf", "import.sh"},
 		},
 		"non default edgerc path and section": {
