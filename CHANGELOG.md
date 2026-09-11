@@ -60,6 +60,8 @@
 
 
 
+* PAPI
+  * Removed the `zero_trust` behavior from the `v2026-06-09` and `v2026-07-21` rule formats.
 
 
 
