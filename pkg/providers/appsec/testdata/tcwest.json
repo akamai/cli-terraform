@@ -8642,6 +8642,11 @@
             },
             "requestBody": {
                 "requestBodyInspectionLimitInKB": "32"
+            },
+            "rapidRules": {
+                "defaultAction": "alert",
+                "enabled": false,
+                "threatIntel": "off"
             }
         },
         {

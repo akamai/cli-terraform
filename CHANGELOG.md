@@ -38,6 +38,8 @@
 
 
 
+* AppSec
+  * Added the `akamai_appsec_rapid_rules` resource to the `export-appsec` command.
 
 
 

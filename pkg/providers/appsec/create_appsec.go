@@ -106,6 +106,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"modules-security-reputation.tmpl":               filepath.Join(securityModulePath, "reputation.tf"),
 		"modules-security-siem.tmpl":                     filepath.Join(securityModulePath, "siem.tf"),
 		"modules-security-slow-post.tmpl":                filepath.Join(securityModulePath, "slow-post.tf"),
+		"modules-security-rapid-rules.tmpl":              filepath.Join(securityModulePath, "rapid-rules.tf"),
 		"modules-security-variables.tmpl":                filepath.Join(securityModulePath, "variables.tf"),
 		"modules-security-versions.tmpl":                 filepath.Join(securityModulePath, "versions.tf"),
 		"modules-security-waf.tmpl":                      filepath.Join(securityModulePath, "waf.tf"),
@@ -153,6 +154,8 @@ func CmdCreateAppsec(c *cli.Context) error {
 		"getProtectedHostsByID":                      getProtectedHostsByID,
 		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
 		"buildCategoryMap":                           buildCategoryMap,
+		"getRapidRulesByPolicyID":                    getRapidRulesByPolicyID,
+		"exportRapidRulesJSON":                       exportRapidRulesJSON,
 	})
 
 	// The template processor
@@ -195,6 +198,11 @@ func createAppsec(ctx context.Context, configName string, client appsec.APPSEC, 
 	if err := addBotmanCommonResources(ctx, configuration); err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("error fetching botman common values: %s", err)
+	}
+
+	if err := addRapidRulesResources(ctx, configuration); err != nil {
+		term.Spinner().Fail()
+		return fmt.Errorf("error fetching rapid rules values: %s", err)
 	}
 
 	term.Spinner().OK()
@@ -520,6 +528,108 @@ func addBotmanCommonResources(ctx context.Context, configuration *appsec.GetExpo
 	}
 
 	return nil
+}
+
+// rapidRulesResourceData holds the enriched rapid rules data for a single security policy,
+// built from the rapid rules and default action API calls. It is rendered by the
+// modules-security-rapid-rules.tmpl template.
+type rapidRulesResourceData struct {
+	DefaultAction   string
+	RuleDefinitions []appsec.RuleDefinition
+}
+
+// rapidRulesByPolicyID is a side map, keyed by security policy id, holding the enriched rapid
+// rules data for policies that have rapid rules enabled. It is populated by addRapidRulesResources
+// and consumed by the getRapidRulesByPolicyID template helper.
+var rapidRulesByPolicyID map[string]*rapidRulesResourceData
+
+// addRapidRulesResources makes api calls to get, for each security policy that has rapid rules
+// enabled, the rapid rules and their default action. The security config export's per-policy
+// RapidRules field is used as the detector for which policies have rapid rules enabled, mirroring
+// the addBotmanCommonResources pattern of enriching data that is not present in the export config.
+//
+// The rule definitions are transformed into the format the akamai_appsec_rapid_rules resource
+// accepts for its rule_definitions attribute, namely []appsec.RuleDefinition (id, action, lock and
+// an optional conditionException). This matches the resource's own toRuleDefinitions logic; the
+// resource deserializes rule_definitions with DisallowUnknownFields, so any additional fields
+// (name, attack_group, attack_group_exception) would be rejected on apply.
+func addRapidRulesResources(ctx context.Context, configuration *appsec.GetExportConfigurationResponse) error {
+	rapidRulesByPolicyID = make(map[string]*rapidRulesResourceData)
+
+	configID := int64(configuration.ConfigID)
+	version := configuration.Version
+
+	for _, policy := range configuration.SecurityPolicies {
+		// Use the export config RapidRules field as the detector for enabled rapid rules.
+		if policy.RapidRules == nil || !policy.RapidRules.Enabled {
+			continue
+		}
+		policyID := policy.ID
+
+		rules, err := client.GetRapidRules(ctx, appsec.GetRapidRulesRequest{
+			ConfigID: configID,
+			Version:  version,
+			PolicyID: policyID,
+		})
+		if err != nil {
+			return err
+		}
+
+		defaultAction, err := client.GetRapidRulesDefaultAction(ctx, appsec.GetRapidRulesDefaultActionRequest{
+			ConfigID: configID,
+			Version:  version,
+			PolicyID: policyID,
+		})
+		if err != nil {
+			return err
+		}
+
+		rapidRulesByPolicyID[policyID] = &rapidRulesResourceData{
+			DefaultAction:   defaultAction.Action,
+			RuleDefinitions: convertRapidRulesToRuleDefinitions(rules),
+		}
+	}
+
+	return nil
+}
+
+// convertRapidRulesToRuleDefinitions transforms a GetRapidRulesResponse into the rule definition
+// format expected by the akamai_appsec_rapid_rules resource's rule_definitions attribute. This
+// mirrors toRuleDefinitions in the akamai_appsec_rapid_rules resource: only id, action, lock and a
+// non-empty conditionException are emitted.
+func convertRapidRulesToRuleDefinitions(input *appsec.GetRapidRulesResponse) []appsec.RuleDefinition {
+	definitions := make([]appsec.RuleDefinition, 0, len(input.Rules))
+	for _, rule := range input.Rules {
+		id := rule.ID
+		action := rule.Action
+		lock := rule.Lock
+		outputRule := appsec.RuleDefinition{
+			ID:     &id,
+			Action: &action,
+			Lock:   &lock,
+		}
+		if rule.ConditionException != nil && (rule.ConditionException.Exception != nil || rule.ConditionException.AdvancedExceptionsList != nil) {
+			outputRule.ConditionException = rule.ConditionException
+		}
+		definitions = append(definitions, outputRule)
+	}
+	return definitions
+}
+
+// getRapidRulesByPolicyID is a template helper returning the enriched rapid rules data for the
+// given security policy id, or nil if the policy does not have rapid rules enabled.
+func getRapidRulesByPolicyID(_ *appsec.GetExportConfigurationResponse, id string) (*rapidRulesResourceData, error) {
+	return rapidRulesByPolicyID[id], nil
+}
+
+// exportRapidRulesJSON marshals the rapid rule definitions into indented JSON, preserving the id
+// fields (unlike exportJSON, which strips them).
+func exportRapidRulesJSON(source interface{}) (string, error) {
+	js, err := json.MarshalIndent(source, "", "    ")
+	if err != nil {
+		return "", err
+	}
+	return string(js), nil
 }
 
 // exportJSONWithoutKeys returns json string without specified keys

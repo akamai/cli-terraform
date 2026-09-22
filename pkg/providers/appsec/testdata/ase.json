@@ -4124,6 +4124,70 @@
                         "conditionExceptions": []
                     }
                 ]
+            },
+            "rapidRules": {
+                "defaultAction": "alert",
+                "enabled": true,
+                "threatIntel": "on",
+                "policyRules": [
+                    {
+                        "action": "deny",
+                        "lock": false,
+                        "ruleId": 3000101,
+                        "ruleVersion": 1,
+                        "group": "SQL",
+                        "rulesetVersionId": 7392
+                    },
+                    {
+                        "action": "alert",
+                        "lock": true,
+                        "ruleId": 3000102,
+                        "ruleVersion": 2,
+                        "group": "XSS",
+                        "rulesetVersionId": 7392,
+                        "conditionException": {
+                            "exception": {
+                                "headerCookieOrParamValues": [
+                                    "exception-value"
+                                ],
+                                "specificHeaderCookieOrParamPrefix": {
+                                    "prefix": "exception-prefix",
+                                    "selector": "REQUEST_HEADERS"
+                                },
+                                "specificHeaderCookieParamXmlOrJsonNames": [
+                                    {
+                                        "names": [
+                                            "Auth"
+                                        ],
+                                        "selector": "REQUEST_HEADERS",
+                                        "wildcard": true
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "action": "deny",
+                        "lock": false,
+                        "ruleId": 3000103,
+                        "ruleVersion": 1,
+                        "group": "CMD",
+                        "rulesetVersionId": 7392,
+                        "conditionException": {
+                            "advancedExceptions": {
+                                "conditionOperator": "AND",
+                                "specificHeaderCookieParamXmlOrJsonNames": [
+                                    {
+                                        "names": [
+                                            "X-Trace-Id"
+                                        ],
+                                        "selector": "REQUEST_HEADERS"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
             }
         }
     ],

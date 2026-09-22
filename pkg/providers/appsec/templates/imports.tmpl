@@ -141,6 +141,11 @@ terraform import module.security.akamai_appsec_eval_penalty_box.{{ $policyName}}
 {{ if .SlowPost -}}
 terraform import module.security.akamai_appsec_slow_post.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 {{ end -}}
+{{ if .RapidRules -}}
+{{ if .RapidRules.Enabled -}}
+terraform import module.security.akamai_appsec_rapid_rules.{{ $policyName}} {{ $configID }}:{{ $policyID }}
+{{ end -}}
+{{ end -}}
 {{ if .LoggingOverrides -}}
 terraform import module.security.akamai_appsec_advanced_settings_logging.{{ $policyName}} {{ $configID }}:{{ $policyID }}
 {{ end -}}

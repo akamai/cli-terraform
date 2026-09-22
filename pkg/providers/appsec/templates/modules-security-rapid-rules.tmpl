@@ -1,0 +1,16 @@
+{{ range .SecurityPolicies -}}
+{{ $policyName := escapeName .Name -}}
+{{ $rapidRules := getRapidRulesByPolicyID $ .ID -}}
+{{ if $rapidRules -}}
+// Rapid Rules
+resource "akamai_appsec_rapid_rules" "{{ $policyName }}" {
+    config_id          = local.config_id
+    security_policy_id = akamai_appsec_security_policy.{{ $policyName }}.security_policy_id
+    default_action     = "{{ $rapidRules.DefaultAction }}"
+    rule_definitions   = jsonencode(
+        {{ exportRapidRulesJSON $rapidRules.RuleDefinitions }}
+    )
+}
+
+{{ end -}}
+{{ end -}}
