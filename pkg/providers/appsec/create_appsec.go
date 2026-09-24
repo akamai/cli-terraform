@@ -177,7 +177,7 @@ func createAppsec(ctx context.Context, configName string, client appsec.APPSEC, 
 	term := terminal.Get(ctx)
 
 	fmt.Println("Configuring Appsec")
-	term.Spinner().Start("Finding appsec configuration " + configName)
+	term.Spinner().Start("Finding appsec configuration %s", configName)
 
 	id, version, err := findConfigurationIDByName(ctx, configName, client)
 	if err != nil {
@@ -187,7 +187,7 @@ func createAppsec(ctx context.Context, configName string, client appsec.APPSEC, 
 
 	term.Spinner().OK()
 
-	term.Spinner().Start("Fetching appsec configuration " + configName)
+	term.Spinner().Start("Fetching appsec configuration %s", configName)
 
 	configuration, err := exportConfiguration(ctx, id, version, client)
 	if err != nil {

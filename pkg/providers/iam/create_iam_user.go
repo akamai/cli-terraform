@@ -74,7 +74,7 @@ func createIAMUserByEmail(ctx context.Context, userEmail, edgercPath, section st
 		return err
 	}
 
-	term.Spinner().Start("Fetching user by email " + userEmail)
+	term.Spinner().Start("Fetching user by email %s", userEmail)
 
 	user, err := getUserByEmail(ctx, client, userEmail)
 	if err != nil {
@@ -101,7 +101,7 @@ func createIAMUserByEmail(ctx context.Context, userEmail, edgercPath, section st
 	}
 
 	if !userOnly && len(authGrantsList) > 0 {
-		term.Spinner().Start("Fetching roles for user " + userEmail)
+		term.Spinner().Start("Fetching roles for user %s", userEmail)
 		tfData.TFRoles, err = getTFUserRoles(ctx, client, authGrantsList)
 		if err != nil {
 			term.Spinner().Fail()
@@ -109,7 +109,7 @@ func createIAMUserByEmail(ctx context.Context, userEmail, edgercPath, section st
 		}
 		term.Spinner().OK()
 
-		term.Spinner().Start("Fetching groups for user " + userEmail)
+		term.Spinner().Start("Fetching groups for user %s", userEmail)
 		tfData.TFGroups, err = getTFUserGroups(ctx, client, authGrantsList)
 		if err != nil {
 			term.Spinner().Fail()

@@ -153,7 +153,7 @@ func createPolicy(ctx context.Context, policyName, edgercPath, section string, c
 	term := terminal.Get(ctx)
 
 	fmt.Println("Configuring Policy")
-	term.Spinner().Start("Fetching policy " + policyName)
+	term.Spinner().Start("Fetching policy %s", policyName)
 
 	strategy, err := initializeStrategyForPolicy(ctx, policyName, clientV2, clientV3)
 	if err != nil {

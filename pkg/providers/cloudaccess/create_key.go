@@ -139,7 +139,7 @@ func CmdCreateCloudAccess(c *cli.Context) error {
 
 func createCloudAccess(ctx context.Context, accessKeyUID int64, groupID int64, contractID, edgercPath, section string, client cloudaccess.CloudAccess, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
-	term.Spinner().Start("Fetching cloudaccess key " + strconv.Itoa(int(accessKeyUID)))
+	term.Spinner().Start("Fetching cloudaccess key %d", accessKeyUID)
 	key, err := client.GetAccessKey(ctx, cloudaccess.AccessKeyRequest{
 		AccessKeyUID: accessKeyUID,
 	})

@@ -116,7 +116,7 @@ func CmdCreateCloudWrapper(c *cli.Context) error {
 
 func createCloudWrapper(ctx context.Context, configID int64, edgercPath, section string, client cloudwrapper.CloudWrapper, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
-	term.Spinner().Start("Fetching configuration " + strconv.Itoa(int(configID)))
+	term.Spinner().Start("Fetching configuration %d", configID)
 	configuration, err := client.GetConfiguration(ctx, cloudwrapper.GetConfigurationRequest{
 		ConfigID: configID,
 	})

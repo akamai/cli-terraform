@@ -78,7 +78,7 @@ func createIAMGroupByID(ctx context.Context, groupID int64, edgercPath, section 
 		return err
 	}
 
-	term.Spinner().Start("Fetching group by id " + strconv.FormatInt(groupID, 10))
+	term.Spinner().Start("Fetching group by id %d", groupID)
 	group, err := client.GetGroup(ctx, iam.GetGroupRequest{
 		GroupID: groupID,
 	})
@@ -100,7 +100,7 @@ func createIAMGroupByID(ctx context.Context, groupID int64, edgercPath, section 
 	}
 
 	if !groupOnly {
-		term.Spinner().Start("Fetching users within group with id " + strconv.FormatInt(groupID, 10))
+		term.Spinner().Start("Fetching users within group with id %d", groupID)
 		tfData.TFUsers, err = getUsersWithinGroup(ctx, client, groupID, term)
 		if err != nil {
 			term.Spinner().Fail()
@@ -108,7 +108,7 @@ func createIAMGroupByID(ctx context.Context, groupID int64, edgercPath, section 
 		}
 		term.Spinner().OK()
 
-		term.Spinner().Start("Fetching user's relative roles within group " + strconv.FormatInt(groupID, 10))
+		term.Spinner().Start("Fetching user's relative roles within group %d", groupID)
 		tfData.TFRoles, err = getRolesWithinGroup(ctx, client, groupID)
 		if err != nil {
 			term.Spinner().Fail()

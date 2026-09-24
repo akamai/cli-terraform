@@ -79,7 +79,7 @@ func createIAMRoleByID(ctx context.Context, roleID int64, edgercPath, section st
 		return err
 	}
 
-	term.Spinner().Start(fmt.Sprintf("Fetching role by role_id %d", roleID))
+	term.Spinner().Start("Fetching role by role_id %d", roleID)
 
 	role, err := client.GetRole(ctx, iam.GetRoleRequest{
 		ID:           roleID,
@@ -109,7 +109,7 @@ func createIAMRoleByID(ctx context.Context, roleID int64, edgercPath, section st
 	}
 
 	if !roleOnly {
-		term.Spinner().Start(fmt.Sprintf("Fetching users with the given role %d", roleID))
+		term.Spinner().Start("Fetching users with the given role %d", roleID)
 		users, err := getUsersByRole(ctx, term, role.Users, client)
 		if err != nil {
 			term.Spinner().Fail()
@@ -120,7 +120,7 @@ func createIAMRoleByID(ctx context.Context, roleID int64, edgercPath, section st
 		tfUsers := make([]*TFUser, 0)
 		tfGroups := make([]TFGroup, 0)
 
-		term.Spinner().Start(fmt.Sprintf("Fetching groups for users related within role %d", roleID))
+		term.Spinner().Start("Fetching groups for users related within role %d", roleID)
 		for _, user := range users {
 			userData, err := getTFUser(user)
 			if err != nil {

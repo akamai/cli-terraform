@@ -32,6 +32,10 @@
 ### FEATURES/ENHANCEMENTS:
 
 
+* General
+  * Migrated to Go `1.26`.
+  * Adopted toolchain Go `1.26.8`.
+  * Updated various dependencies.
 
 
 

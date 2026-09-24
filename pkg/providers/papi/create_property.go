@@ -409,7 +409,7 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 	}
 
 	// Get Property
-	term.Spinner().Start("Fetching property " + options.propertyName)
+	term.Spinner().Start("Fetching property %s", options.propertyName)
 	property, err := findProperty(ctx, client, options.propertyName)
 	if err != nil {
 		term.Spinner().Fail()

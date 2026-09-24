@@ -96,7 +96,7 @@ type createReportingGroupParams struct {
 
 func createReportingGroup(ctx context.Context, params createReportingGroupParams) (e error) {
 	term := terminal.Get(ctx)
-	term.Spinner().Start("Fetching reporting group '" + params.name + "'")
+	term.Spinner().Start("Fetching reporting group '%s'", params.name)
 	defer func() {
 		if e != nil {
 			term.Spinner().Fail()

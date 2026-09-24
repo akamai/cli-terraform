@@ -141,7 +141,7 @@ func createDomain(ctx context.Context, client gtm.GTM, domainName, edgercPath, s
 		return err
 	}
 
-	term.Spinner().Start(fmt.Sprintf("Fetching domain %s", domainName))
+	term.Spinner().Start("Fetching domain %s", domainName)
 	domain, err := client.GetDomain(ctx, gtm.GetDomainRequest{
 		DomainName: domainName,
 	})

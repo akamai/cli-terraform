@@ -107,7 +107,7 @@ func CmdCreateEdgeWorker(c *cli.Context) error {
 func createEdgeWorker(ctx context.Context, edgeWorkerID int, bundleDir, edgercPath, section string, client edgeworkers.Edgeworkers, templateProcessor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 	fmt.Println("Configuring EdgeWorker")
-	term.Spinner().Start(fmt.Sprintf("Fetching EdgeWorker %d", edgeWorkerID), "")
+	term.Spinner().Start("Fetching EdgeWorker %d", edgeWorkerID)
 
 	edgeWorker, err := client.GetEdgeWorkerID(ctx, edgeworkers.GetEdgeWorkerIDRequest{
 		EdgeWorkerID: edgeWorkerID,
@@ -167,7 +167,7 @@ func createEdgeWorker(ctx context.Context, edgeWorkerID int, bundleDir, edgercPa
 	}
 
 	term.Spinner().OK()
-	term.Spinner().Start("Saving TF configurations ", "")
+	term.Spinner().Start("Saving TF configurations ")
 	if err := templateProcessor.ProcessTemplates(tfEdgeWorkerData); err != nil {
 		term.Spinner().Fail()
 		return fmt.Errorf("%w: %s", templates.ErrSavingFiles, err)

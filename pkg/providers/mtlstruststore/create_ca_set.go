@@ -133,7 +133,7 @@ func createCASet(ctx context.Context, params createCASetParams) (e error) {
 	if params.userVersion != 0 {
 		msg += fmt.Sprintf(" and version %d", params.userVersion)
 	}
-	term.Spinner().Start(msg)
+	term.Spinner().Start("%s", msg)
 	defer func() {
 		if e != nil {
 			term.Spinner().Fail()
