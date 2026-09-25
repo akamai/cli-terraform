@@ -1,123 +1,22 @@
 # RELEASE NOTES
 
-## X.XX.X (Month XX, XXXX)
-
-### BREAKING CHANGES:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## 3.1.0 (Sep 30, 2026)
 
 ### FEATURES/ENHANCEMENTS:
-
 
 * General
   * Migrated to Go `1.26`.
   * Adopted toolchain Go `1.26.8`.
   * Updated various dependencies.
 
-
-
-
-
-
 * AppSec
   * Added the `akamai_appsec_rapid_rules` resource to the `export-appsec` command.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-* PAPI
-  * Removed the `zero_trust` behavior from the `v2026-06-09` and `v2026-07-21` rule formats.
-
 
 * Cloud Certificates
   * Removed support for the legacy Cloud Certificates API. The `export-cloudcertificate` command and related resources have been removed. Support for the current Cloud Certificates API will be added in a future release.
 
-
-
-
-
-
-
-
-
-### BUG FIXES:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+* PAPI
+  * Removed the `zero_trust` behavior from the `v2026-06-09` and `v2026-07-21` rule formats.
 
 ## 3.0.0 (Sep 10, 2026)
 
