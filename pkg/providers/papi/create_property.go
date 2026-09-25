@@ -955,10 +955,10 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 		var tlsConfiguration *TLSConfiguration
 
 		if hostname.CertProvisioningType == string(papi.CertTypeCCM) {
-			if hostname.CCMCertificates != nil {
+			if hostname.CCMCertificates != nil { //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
 				ccmCertificates = &CCMCertificates{
-					RSACertID:   hostname.CCMCertificates.RSACertID,
-					ECDSACertID: hostname.CCMCertificates.ECDSACertID,
+					RSACertID:   hostname.CCMCertificates.RSACertID,   //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
+					ECDSACertID: hostname.CCMCertificates.ECDSACertID, //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
 				}
 			}
 			if hostname.MTLS != nil {

@@ -70,7 +70,8 @@
   * Removed the `zero_trust` behavior from the `v2026-06-09` and `v2026-07-21` rule formats.
 
 
-
+* Cloud Certificates
+  * Removed support for the legacy Cloud Certificates API. The `export-cloudcertificate` command and related resources have been removed. Support for the current Cloud Certificates API will be added in a future release.
 
 
 
@@ -81,6 +82,8 @@
 
 
 ### BUG FIXES:
+
+
 
 
 
