@@ -12,7 +12,7 @@
 * AppSec
   * Added the `akamai_appsec_rapid_rules` resource to the `export-appsec` command.
 
-* Cloud Certificates
+* Cloud Certificates (Beta)
   * Removed support for the legacy Cloud Certificates API. The `export-cloudcertificate` command and related resources have been removed. Support for the current Cloud Certificates API will be added in a future release.
 
 * PAPI
