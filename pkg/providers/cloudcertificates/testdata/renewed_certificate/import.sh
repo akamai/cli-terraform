@@ -1,3 +1,0 @@
-terraform init
-terraform import akamai_cloudcertificates_certificate.stokroteczka 12345
-#terraform import akamai_cloudcertificates_upload_signed_certificate.stokroteczka 12345

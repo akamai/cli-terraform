@@ -310,6 +310,8 @@ func TestProcessPolicyTemplates(t *testing.T) {
 		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
 		"exportJSONForCustomDefBotsWithoutKeys":      exportJSONForCustomDefBotsWithoutKeys,
 		"buildCategoryMap":                           buildCategoryMap,
+		"getRapidRulesByPolicyID":                    getRapidRulesByPolicyID,
+		"exportRapidRulesJSON":                       exportRapidRulesJSON,
 	})
 
 	// Template to path mappings
@@ -442,6 +444,8 @@ func TestProcessPolicyTemplatesWithBotman(t *testing.T) {
 		"getProtectedHostsByID":                      getProtectedHostsByID,
 		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
 		"buildCategoryMap":                           buildCategoryMap,
+		"getRapidRulesByPolicyID":                    getRapidRulesByPolicyID,
+		"exportRapidRulesJSON":                       exportRapidRulesJSON,
 	})
 
 	// Template to path mappings
@@ -618,6 +622,8 @@ func TestExportUrlProtectionAction(t *testing.T) {
 		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
 		"exportJSONForCustomDefBotsWithoutKeys":      exportJSONForCustomDefBotsWithoutKeys,
 		"buildCategoryMap":                           buildCategoryMap,
+		"getRapidRulesByPolicyID":                    getRapidRulesByPolicyID,
+		"exportRapidRulesJSON":                       exportRapidRulesJSON,
 	})
 
 	edgercPath = "/non/default/path/to/edgerc"
@@ -690,6 +696,8 @@ func TestExportUrlProtectionPolicy(t *testing.T) {
 		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
 		"exportJSONForCustomDefBotsWithoutKeys":      exportJSONForCustomDefBotsWithoutKeys,
 		"buildCategoryMap":                           buildCategoryMap,
+		"getRapidRulesByPolicyID":                    getRapidRulesByPolicyID,
+		"exportRapidRulesJSON":                       exportRapidRulesJSON,
 	})
 
 	edgercPath = "/non/default/path/to/edgerc"
@@ -760,6 +768,8 @@ func TestExportWAFAIRules(t *testing.T) {
 		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
 		"exportJSONForCustomDefBotsWithoutKeys":      exportJSONForCustomDefBotsWithoutKeys,
 		"buildCategoryMap":                           buildCategoryMap,
+		"getRapidRulesByPolicyID":                    getRapidRulesByPolicyID,
+		"exportRapidRulesJSON":                       exportRapidRulesJSON,
 	})
 
 	edgercPath = "/non/default/path/to/edgerc"
@@ -821,6 +831,8 @@ func wafRulesetAdditionalFuncs() map[string]any {
 		"getEvaluatedHostsByID":                      getEvaluatedHostsByID,
 		"exportJSONForCustomDefBotsWithoutKeys":      exportJSONForCustomDefBotsWithoutKeys,
 		"buildCategoryMap":                           buildCategoryMap,
+		"getRapidRulesByPolicyID":                    getRapidRulesByPolicyID,
+		"exportRapidRulesJSON":                       exportRapidRulesJSON,
 	})
 }
 
@@ -966,4 +978,360 @@ func TestWAFRulesetTemplateWithEmptyRulesOrAttackGroups(t *testing.T) {
 	assert.Contains(t, out, "rules = [")
 	assert.Regexp(t, `(?m)^\s*attack_groups\s*=\s*\[\]$`, out)
 	assert.NotContains(t, out, "attack_groups = [{")
+}
+
+// rapidRulesConditionException is the condition exception attached to the second mocked rapid rule.
+// It exercises the branch in convertRapidRulesToRuleDefinitions which copies a non-empty
+// conditionException through to the emitted rule definition.
+func rapidRulesConditionException() *appsec.RuleConditionException {
+	return &appsec.RuleConditionException{
+		Exception: &appsec.RuleException{
+			HeaderCookieOrParamValues: []string{"exception-value"},
+			SpecificHeaderCookieOrParamPrefix: &appsec.SpecificHeaderCookieOrParamPrefixPtr{
+				Prefix:   "exception-prefix",
+				Selector: "REQUEST_HEADERS",
+			},
+			SpecificHeaderCookieParamXMLOrJSONNames: &appsec.SpecificHeaderCookieParamXMLOrJSONNames{
+				{
+					Names:    []string{"Auth"},
+					Selector: "REQUEST_HEADERS",
+					Wildcard: true,
+				},
+			},
+		},
+	}
+}
+
+func rapidRulesAdvancedConditionException() *appsec.RuleConditionException {
+	return &appsec.RuleConditionException{
+		AdvancedExceptionsList: &appsec.AdvancedExceptions{
+			ConditionOperator: "AND",
+			SpecificHeaderCookieParamXMLOrJSONNames: &appsec.AttackGroupSpecificHeaderCookieParamXMLOrJSONNamesAdvanced{
+				{
+					Names:    []string{"X-Trace-Id"},
+					Selector: "REQUEST_HEADERS",
+					Wildcard: false,
+				},
+			},
+		},
+	}
+}
+
+// setupRapidRulesMocks registers the API mock expectations needed to render the rapid rules
+// template for the ase config, whose single policy (ASE1_156138) has rapid rules enabled.
+func setupRapidRulesMocks(c *appsec.Mock) {
+	c.On("GetWAFMode", mock.Anything, mock.Anything).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)
+	c.On("GetConfiguration", mock.Anything, mock.Anything).Return(&appsec.GetConfigurationResponse{Description: "A security config for demo"}, nil)
+	c.On("GetRapidRules", mock.Anything, appsec.GetRapidRulesRequest{
+		ConfigID: 79947,
+		Version:  1,
+		PolicyID: "ASE1_156138",
+	}).Return(&appsec.GetRapidRulesResponse{
+		Rules: []appsec.PolicyRapidRule{
+			{
+				ID:              3000101,
+				Action:          "deny",
+				Lock:            false,
+				Name:            "Rapid Rule One",
+				Version:         1,
+				RiskScoreGroups: []string{"SQL"},
+			},
+			{
+				ID:                 3000102,
+				Action:             "alert",
+				Lock:               true,
+				Name:               "Rapid Rule Two",
+				Version:            2,
+				RiskScoreGroups:    []string{"XSS"},
+				ConditionException: rapidRulesConditionException(),
+			},
+			{
+				ID:                 3000103,
+				Action:             "deny",
+				Lock:               false,
+				Name:               "Rapid Rule Three",
+				Version:            1,
+				RiskScoreGroups:    []string{"CMD"},
+				ConditionException: rapidRulesAdvancedConditionException(),
+			},
+		},
+	}, nil)
+	c.On("GetRapidRulesDefaultAction", mock.Anything, appsec.GetRapidRulesDefaultActionRequest{
+		ConfigID: 79947,
+		Version:  1,
+		PolicyID: "ASE1_156138",
+	}).Return(&appsec.GetRapidRulesDefaultActionResponse{Action: "alert"}, nil)
+}
+
+func TestExportRapidRules(t *testing.T) {
+	// This test validates the rapid-rules template mapping and output for a policy which has
+	// rapid rules enabled in the exported security configuration.
+	configs := []string{"ase"}
+	security := filepath.Join("modules", "security")
+	templateName := "modules-security-rapid-rules.tmpl"
+	outputFile := filepath.Join(security, "rapid-rules.tf")
+
+	edgercPath = "/non/default/path/to/edgerc"
+	section = "non-default-section"
+
+	for _, config := range configs {
+		t.Run(templateName+"-"+config, func(t *testing.T) {
+			ma := new(appsec.Mock)
+			setupRapidRulesMocks(ma)
+			client = ma
+
+			require.NoError(t, os.MkdirAll(fmt.Sprintf("./testdata/res/%s/modules/security", config), 0755))
+
+			processor := templates.FSTemplateProcessor{
+				TemplatesFS: templateFiles,
+				TemplateTargets: map[string]string{
+					templateName: fmt.Sprintf("./testdata/res/%s/%s", config, outputFile),
+				},
+				AdditionalFuncs: wafRulesetAdditionalFuncs(),
+			}
+
+			getExportConfigurationResponse := getExportConfigurationResponse(config)
+			require.NoError(t, addRapidRulesResources(context.Background(), getExportConfigurationResponse))
+			require.NoError(t, processor.ProcessTemplates(getExportConfigurationResponse))
+
+			expected, err := os.ReadFile(fmt.Sprintf("./testdata/%s/%s", config, outputFile))
+			require.NoError(t, err)
+			result, err := os.ReadFile(fmt.Sprintf("./testdata/res/%s/%s", config, outputFile))
+			require.NoError(t, err)
+			assert.Equal(t, string(expected), string(result))
+
+			ma.AssertCalled(t, "GetRapidRules", mock.Anything, appsec.GetRapidRulesRequest{
+				ConfigID: 79947,
+				Version:  1,
+				PolicyID: "ASE1_156138",
+			})
+			ma.AssertCalled(t, "GetRapidRulesDefaultAction", mock.Anything, appsec.GetRapidRulesDefaultActionRequest{
+				ConfigID: 79947,
+				Version:  1,
+				PolicyID: "ASE1_156138",
+			})
+		})
+	}
+	require.NoError(t, os.RemoveAll("./testdata/res"))
+}
+
+func TestAddRapidRulesResources(t *testing.T) {
+	// This test validates the enriched side map built by addRapidRulesResources, and in particular
+	// the exact json shape of the rule definitions which end up in the rule_definitions attribute.
+	// The akamai_appsec_rapid_rules resource deserializes rule_definitions with
+	// DisallowUnknownFields, so only id, action, lock and conditionException may be emitted.
+	ma := new(appsec.Mock)
+	setupRapidRulesMocks(ma)
+	client = ma
+
+	config := getExportConfigurationResponse("ase")
+	require.NoError(t, addRapidRulesResources(context.Background(), config))
+
+	require.Len(t, rapidRulesByPolicyID, 1)
+	data := rapidRulesByPolicyID["ASE1_156138"]
+	require.NotNil(t, data)
+	assert.Equal(t, "alert", data.DefaultAction)
+	require.Len(t, data.RuleDefinitions, 3)
+
+	// First rule: no condition exception on the source rapid rule, so none must be emitted.
+	assert.Equal(t, int64(3000101), *data.RuleDefinitions[0].ID)
+	assert.Equal(t, "deny", *data.RuleDefinitions[0].Action)
+	assert.False(t, *data.RuleDefinitions[0].Lock)
+	assert.Nil(t, data.RuleDefinitions[0].ConditionException)
+
+	// Second rule: non-empty condition exception must be carried through unchanged.
+	assert.Equal(t, int64(3000102), *data.RuleDefinitions[1].ID)
+	assert.Equal(t, "alert", *data.RuleDefinitions[1].Action)
+	assert.True(t, *data.RuleDefinitions[1].Lock)
+	assert.Equal(t, rapidRulesConditionException(), data.RuleDefinitions[1].ConditionException)
+
+	assert.Equal(t, int64(3000103), *data.RuleDefinitions[2].ID)
+	assert.Equal(t, "deny", *data.RuleDefinitions[2].Action)
+	assert.False(t, *data.RuleDefinitions[2].Lock)
+	require.NotNil(t, data.RuleDefinitions[2].ConditionException)
+	assert.Nil(t, data.RuleDefinitions[2].ConditionException.Exception)
+	assert.Equal(t, rapidRulesAdvancedConditionException(), data.RuleDefinitions[2].ConditionException)
+
+	// The serialized shape must contain exactly the keys the resource accepts.
+	serialized, err := exportRapidRulesJSON(data.RuleDefinitions)
+	require.NoError(t, err)
+
+	var definitions []map[string]interface{}
+	require.NoError(t, json.Unmarshal([]byte(serialized), &definitions))
+	require.Len(t, definitions, 3)
+
+	assert.ElementsMatch(t, []string{"id", "action", "lock"}, keysOf(definitions[0]))
+	assert.ElementsMatch(t, []string{"id", "action", "lock", "conditionException"}, keysOf(definitions[1]))
+	assert.ElementsMatch(t, []string{"id", "action", "lock", "conditionException"}, keysOf(definitions[2]))
+
+	assert.Equal(t, float64(3000101), definitions[0]["id"])
+	assert.Equal(t, "deny", definitions[0]["action"])
+	assert.Equal(t, false, definitions[0]["lock"])
+	assert.Equal(t, float64(3000102), definitions[1]["id"])
+	assert.Equal(t, "alert", definitions[1]["action"])
+	assert.Equal(t, true, definitions[1]["lock"])
+	assert.Equal(t, float64(3000103), definitions[2]["id"])
+	assert.Equal(t, "deny", definitions[2]["action"])
+	assert.Equal(t, false, definitions[2]["lock"])
+
+	thirdCE, ok := definitions[2]["conditionException"].(map[string]interface{})
+	require.True(t, ok)
+	assert.ElementsMatch(t, []string{"advancedExceptions"}, keysOf(thirdCE))
+
+	ma.AssertNumberOfCalls(t, "GetRapidRules", 1)
+	ma.AssertNumberOfCalls(t, "GetRapidRulesDefaultAction", 1)
+}
+
+// keysOf returns the sorted keys of a json object, used to assert the exact serialized shape.
+func keysOf(m map[string]interface{}) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+func TestAddRapidRulesResourcesWithConditionExceptionEmpty(t *testing.T) {
+	// An all-nil condition exception object must not be emitted; the resource would otherwise
+	// receive a conditionException with no content.
+	ma := new(appsec.Mock)
+	ma.On("GetRapidRules", mock.Anything, mock.Anything).Return(&appsec.GetRapidRulesResponse{
+		Rules: []appsec.PolicyRapidRule{
+			{
+				ID:                 3000101,
+				Action:             "deny",
+				ConditionException: &appsec.RuleConditionException{},
+			},
+		},
+	}, nil)
+	ma.On("GetRapidRulesDefaultAction", mock.Anything, mock.Anything).Return(&appsec.GetRapidRulesDefaultActionResponse{Action: "deny"}, nil)
+	client = ma
+
+	config := getExportConfigurationResponse("ase")
+	require.NoError(t, addRapidRulesResources(context.Background(), config))
+
+	data := rapidRulesByPolicyID["ASE1_156138"]
+	require.NotNil(t, data)
+	require.Len(t, data.RuleDefinitions, 1)
+	assert.Nil(t, data.RuleDefinitions[0].ConditionException)
+
+	serialized, err := exportRapidRulesJSON(data.RuleDefinitions)
+	require.NoError(t, err)
+	assert.NotContains(t, serialized, "conditionException")
+}
+
+func TestExportRapidRulesJSONPreservesID(t *testing.T) {
+	// exportRapidRulesJSON must preserve the id field. The generic exportJSON helper calls
+	// removeID, which strips it; the akamai_appsec_rapid_rules resource requires the id of every
+	// rule definition, so swapping exportRapidRulesJSON back to exportJSON must fail this test.
+	ruleID := int64(3000101)
+	action := "deny"
+	lock := true
+	definitions := []appsec.RuleDefinition{
+		{
+			ID:     &ruleID,
+			Action: &action,
+			Lock:   &lock,
+		},
+	}
+
+	expected := `[
+    {
+        "id": 3000101,
+        "action": "deny",
+        "lock": true
+    }
+]`
+
+	actual, err := exportRapidRulesJSON(definitions)
+	require.NoError(t, err)
+	assert.Equal(t, expected, actual)
+	assert.Contains(t, actual, `"id": 3000101`)
+
+	// Guard rail: demonstrate that the generic helper drops the id, which is why this helper exists.
+	stripped, err := exportJSON(definitions[0])
+	require.NoError(t, err)
+	assert.NotContains(t, stripped, `"id"`)
+	assert.Contains(t, stripped, `"action": "deny"`)
+}
+
+func TestExportRapidRulesDisabledPolicy(t *testing.T) {
+	// Negative case: neither the akamai_appsec_rapid_rules resource nor the import line may be
+	// emitted for policies where rapidRules.enabled is false, or where rapidRules is absent.
+	tests := map[string]struct {
+		config string
+		mutate func(*appsec.GetExportConfigurationResponse)
+	}{
+		// The tcwest fixture has one policy with rapidRules present and disabled, and two policies
+		// with no rapidRules block at all.
+		"rapid rules present but disabled": {
+			config: "tcwest",
+			mutate: func(c *appsec.GetExportConfigurationResponse) {
+				require.NotNil(t, c.SecurityPolicies[0].RapidRules)
+				require.False(t, c.SecurityPolicies[0].RapidRules.Enabled)
+			},
+		},
+		"rapid rules absent entirely": {
+			config: "tcwest",
+			mutate: func(c *appsec.GetExportConfigurationResponse) {
+				for i := range c.SecurityPolicies {
+					c.SecurityPolicies[i].RapidRules = nil
+				}
+			},
+		},
+	}
+
+	security := filepath.Join("modules", "security")
+	templateName := "modules-security-rapid-rules.tmpl"
+	outputFile := filepath.Join(security, "rapid-rules.tf")
+
+	edgercPath = "/non/default/path/to/edgerc"
+	section = "non-default-section"
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			ma := new(appsec.Mock)
+			ma.On("GetWAFMode", mock.Anything, mock.Anything).Return(&appsec.GetWAFModeResponse{Mode: "KRS"}, nil)
+			ma.On("GetConfiguration", mock.Anything, mock.Anything).Return(&appsec.GetConfigurationResponse{Description: "A security config for demo"}, nil)
+			client = ma
+
+			baseDir := t.TempDir()
+			require.NoError(t, os.MkdirAll(filepath.Join(baseDir, security), 0755))
+
+			resourcePath := filepath.Join(baseDir, outputFile)
+			importPath := filepath.Join(baseDir, "appsec-import.sh")
+
+			processor := templates.FSTemplateProcessor{
+				TemplatesFS: templateFiles,
+				TemplateTargets: map[string]string{
+					templateName:   resourcePath,
+					"imports.tmpl": importPath,
+				},
+				AdditionalFuncs: wafRulesetAdditionalFuncs(),
+			}
+
+			config := getExportConfigurationResponse(test.config)
+			test.mutate(config)
+			require.NoError(t, addRapidRulesResources(context.Background(), config))
+
+			// No rapid rules api calls may be made for policies without rapid rules enabled.
+			assert.Empty(t, rapidRulesByPolicyID)
+			ma.AssertNotCalled(t, "GetRapidRules", mock.Anything, mock.Anything)
+			ma.AssertNotCalled(t, "GetRapidRulesDefaultAction", mock.Anything, mock.Anything)
+
+			require.NoError(t, processor.ProcessTemplates(config))
+
+			// The template produces empty output, so no rapid-rules.tf is written at all.
+			if resource, err := os.ReadFile(resourcePath); err == nil {
+				assert.NotContains(t, string(resource), "akamai_appsec_rapid_rules")
+				assert.Empty(t, strings.TrimSpace(string(resource)))
+			}
+
+			// The import script must not contain a rapid rules import line.
+			importScript, err := os.ReadFile(importPath)
+			require.NoError(t, err)
+			assert.NotEmpty(t, strings.TrimSpace(string(importScript)))
+			assert.NotContains(t, string(importScript), "akamai_appsec_rapid_rules")
+		})
+	}
 }

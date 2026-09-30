@@ -317,8 +317,8 @@ func TestCreateProperty(t *testing.T) {
 					CnameFrom:            "foo.com",
 					CnameTo:              "foo.com.edgekey.net",
 					CertProvisioningType: "CCM",
-					CCMCertificates: &papi.CCMCertificatesResp{
-						CCMCertificates: papi.CCMCertificates{
+					CCMCertificates: &papi.CCMCertificatesResp{ //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
+						CCMCertificates: papi.CCMCertificates{ //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
 							RSACertID:   "2226",
 							ECDSACertID: "7890",
 						},
@@ -365,10 +365,10 @@ func TestCreateProperty(t *testing.T) {
 					CnameFrom:            "foo.com",
 					CnameTo:              "foo.com.edgekey.net",
 					CertProvisioningType: "CCM",
-					CCMCertificates: &papi.CCMCertificatesResp{
+					CCMCertificates: &papi.CCMCertificatesResp{ //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
 						RSACertLink:   "/ccm/v1/certificates/2226",
 						ECDSACertLink: "/ccm/v1/certificates/7890",
-						CCMCertificates: papi.CCMCertificates{
+						CCMCertificates: papi.CCMCertificates{ //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
 							RSACertID:   "2226",
 							ECDSACertID: "7890",
 						},

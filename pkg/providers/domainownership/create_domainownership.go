@@ -117,7 +117,7 @@ func CmdCreateDomainOwnership(c *cli.Context) error {
 func createDomainOwnership(ctx context.Context, params createDomainOwnershipParams, client domainownership.DomainOwnership) (e error) {
 	term := terminal.Get(ctx)
 	msg := "Fetching domains\n"
-	term.Spinner().Start(msg)
+	term.Spinner().Start("%s", msg)
 	defer func() {
 		if e != nil {
 			term.Spinner().Fail()

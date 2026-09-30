@@ -115,7 +115,7 @@ func CmdCreateClientList(c *cli.Context) error {
 func createClientList(ctx context.Context, listID, edgercPath, section, tfWorkPath string, client clientlists.ClientLists, processor templates.TemplateProcessor) error {
 	term := terminal.Get(ctx)
 
-	term.Spinner().Start("Fetching client list " + listID)
+	term.Spinner().Start("Fetching client list %s", listID)
 	clientList, err := client.GetClientList(ctx, clientlists.GetClientListRequest{
 		ListID:       listID,
 		IncludeItems: true,

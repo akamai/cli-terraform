@@ -254,7 +254,6 @@
 	{{- else if eq .Name "webApplicationFirewall"}}{{- template "webApplicationFirewall" .}}
 	{{- else if eq .Name "webSockets"}}{{- template "webSockets" .}}
 	{{- else if eq .Name "webdav"}}{{- template "webdav" .}}
-	{{- else if eq .Name "zeroTrust"}}{{- template "zeroTrust" .}}
     {{- else}}{{ReportError "Unknown behavior '%s'" .Name}}{{- end}}
 {{- end}}
 
@@ -8343,28 +8342,6 @@ webdav {
 {{- range $k, $v := $v}}
 {{- if and (eq $k "enabled") (ne $v nil)}}
 		enabled = {{$v}}
-{{- end}}
-{{- end}}
-}
-{{- end}}
-{{- define "zeroTrust"}}
-zero_trust {
-{{- if .UUID}}
-	uuid = "{{.UUID}}"
-{{- end}}
-{{- if .TemplateUuid}}
-	template_uuid = "{{.TemplateUuid}}"
-{{- end}}
-{{- if .Locked}}
-	locked = {{.Locked}}
-{{- end}}
-{{- $v := .Options}}
-{{- range $k, $v := $v}}
-{{- if and (eq $k "enabled") (ne $v nil)}}
-		enabled = {{$v}}
-{{- end}}
-{{- if and (eq $k "originProtocol") (ne $v nil)}}
-        origin_protocol = {{template "Text" $v}}
 {{- end}}
 {{- end}}
 }

@@ -133,7 +133,7 @@ func createImaging(ctx context.Context, contractID, policySetID, tfWorkPath, jso
 	term := terminal.Get(ctx)
 
 	fmt.Println("Exporting Image and Video Manager configuration")
-	term.Spinner().Start("Fetching policy set " + policySetID)
+	term.Spinner().Start("Fetching policy set %s", policySetID)
 
 	policySet, err := client.GetPolicySet(ctx, imaging.GetPolicySetRequest{
 		PolicySetID: policySetID,
@@ -145,7 +145,7 @@ func createImaging(ctx context.Context, contractID, policySetID, tfWorkPath, jso
 	}
 	term.Spinner().OK()
 
-	term.Spinner().Start("Fetching policies for the given policy set " + policySetID)
+	term.Spinner().Start("Fetching policies for the given policy set %s", policySetID)
 	policies, err := getPolicies(ctx, policySetID, contractID, client)
 	if err != nil {
 		term.Spinner().Fail()
@@ -443,7 +443,7 @@ func getDepth(policy interface{}, depth int) int {
 		return 0
 	}
 	v := reflect.ValueOf(policy)
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		vp := v.Elem().Interface()
 		v = reflect.ValueOf(vp)
 	}

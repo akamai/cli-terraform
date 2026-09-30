@@ -97,7 +97,7 @@ func createCPS(ctx context.Context, contractID string, enrollmentID int, edgercP
 
 	fmt.Println("Exporting CPS configuration")
 
-	term.Spinner().Start(fmt.Sprintf("Fetching enrollment for the given id %d", enrollmentID))
+	term.Spinner().Start("Fetching enrollment for the given id %d", enrollmentID)
 	enrollment, err := client.GetEnrollment(ctx, cps.GetEnrollmentRequest{
 		EnrollmentID: enrollmentID,
 	})

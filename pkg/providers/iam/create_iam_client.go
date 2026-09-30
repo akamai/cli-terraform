@@ -69,7 +69,7 @@ func createIAMAPIClient(ctx context.Context, clientID, edgercPath, section strin
 	if clientID == "" {
 		term.Spinner().Start("Fetching your API client")
 	} else {
-		term.Spinner().Start("Fetching client by id " + clientID)
+		term.Spinner().Start("Fetching client by id %s", clientID)
 	}
 	apiClient, err := client.GetAPIClient(ctx, iam.GetAPIClientRequest{
 		ClientID:    clientID,

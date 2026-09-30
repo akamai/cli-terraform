@@ -8,7 +8,7 @@
 
 This library provides a command-line interface to export Akamai configuration assets that you can import later into your Terraform state.
 
-Requires Go 1.25 or later.
+Requires Go 1.26 or later.
 
 ## Install
 
@@ -148,7 +148,6 @@ Global Flags:
   <li><a href="#export-appsec">export-appsec</a></li>
   <li><a href="#export-clientlist">export-clientlist</a></li>
   <li><a href="#export-cloudaccess">export-cloudaccess</a></li>
-  <li><a href="#export-cloudcertificate">export-cloudcertificate</a></li>
   <li><a href="#export-cloudlets-policy">export-cloudlets-policy</a></li>
   <li><a href="#export-cloudwrapper">export-cloudwrapper</a></li>
   <li><a href="#export-cps">export-cps</a></li>
@@ -282,27 +281,6 @@ akamai terraform export-cloudaccess 98765
         </tr>
     </tbody>
 </table>
-
-## export-cloudcertificate
-
-Export a Terraform configuration for your cloud certificate.
-
-> **Note:**
->
-> If the certificate is in the `READY_FOR_USE` or `ACTIVE` status, the `akamai_cloudcertificates_upload_signed_certificate` resource will also be included in your configuration.
-> If the certificate is in the `CSR_READY` status, the `akamai_cloudcertificates_upload_signed_certificate` resource will be generated but commented out.
-
-### Syntax
-
-```shell
-akamai [global flags] terraform export-cloudcertificate [command flags] <cloud_certificate_name>
-```
-
-### Basic usage
-
-```shell
-akamai terraform export-cloudcertificate "my-cloudcertificate"
-```
 
 ## export-cloudlets-policy
 

@@ -36,6 +36,7 @@ terraform import module.security.akamai_appsec_penalty_box_conditions.default_po
 terraform import module.security.akamai_appsec_eval_penalty_box_conditions.default_policy 79947:ASE1_156138
 terraform import module.security.akamai_appsec_eval_penalty_box.default_policy 79947:ASE1_156138
 terraform import module.security.akamai_appsec_slow_post.default_policy 79947:ASE1_156138
+terraform import module.security.akamai_appsec_rapid_rules.default_policy 79947:ASE1_156138
 terraform import module.security.akamai_appsec_advanced_settings_request_body.default_policy 79947:ASE1_156138
 terraform import module.security.akamai_appsec_rate_policy.page_view_requests 79947:177906
 terraform import module.security.akamai_appsec_rate_policy.origin_error 79947:177907

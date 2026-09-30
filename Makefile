@@ -1,16 +1,15 @@
-GOIMPORTS_VERSION = v0.24.0
-GOCOV_VERSION = v1.1.0
+GOIMPORTS_VERSION = v0.50.0
 GO_JUNIT_REPORT_VERSION = v2.1.0
-GOCOVXML_VERSION = v1.1.0
-GOLANGCI_LINT_VERSION = v2.6.1
+GOCOVER_COBERTURA_VERSION = v1.5.0
+GOLANGCI_LINT_VERSION = v2.13.2
 
 BIN = $(CURDIR)/bin
 GOCMD = go
 GOTEST = $(GOCMD) test
 GOBUILD = $(GOCMD) build
+GOMODTIDY = $(GOCMD) mod tidy
 M = $(shell echo ">")
 
-# Until v0.25.0 is not fixed, we have to use previous version. To install it, we must enable module aware mode.
 GOIMPORTS = $(BIN)/goimports
 # Rule to install goimports with version pinning
 $(GOIMPORTS): | $(BIN) ; $(info $(M) Installing goimports $(GOIMPORTS_VERSION)...)
@@ -21,23 +20,19 @@ $(BIN):
 $(BIN)/%: | $(BIN) ; $(info $(M) Installing $(PACKAGE)...)
 	env GOBIN=$(BIN) $(GOCMD) install $(PACKAGE)
 
-GOCOV = $(BIN)/gocov
-$(BIN)/gocov: PACKAGE=github.com/axw/gocov/gocov@$(GOCOV_VERSION)
-
-GOCOVXML = $(BIN)/gocov-xml
-$(BIN)/gocov-xml: PACKAGE=github.com/AlekSi/gocov-xml@$(GOCOVXML_VERSION)
+GOCOVER_COBERTURA = $(BIN)/gocover-cobertura
+$(GOCOVER_COBERTURA): PACKAGE=github.com/boumenot/gocover-cobertura@$(GOCOVER_COBERTURA_VERSION)
 
 GOJUNITREPORT = $(BIN)/go-junit-report
 $(BIN)/go-junit-report: PACKAGE=github.com/jstemmer/go-junit-report/v2@$(GO_JUNIT_REPORT_VERSION)
 
 TFLINT = $(BIN)/tflint
-$(BIN)/tflint: $(BIN) ; $(info $(M) Installing tflint...)
-	@export TFLINT_INSTALL_PATH=$(BIN); \
-	curl -sSfL https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh  | bash
+$(TFLINT): | $(BIN) ; $(info $(M) Installing tflint...)
+	@env GOBIN=$(BIN) $(GOCMD) install github.com/terraform-linters/tflint@v0.64.0
 
 GOLANGCILINT = $(BIN)/golangci-lint
 $(BIN)/golangci-lint: ; $(info $(M) Installing golangci-lint...)
-	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(BIN) $(GOLANGCI_LINT_VERSION)
+	@curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(BIN) $(GOLANGCI_LINT_VERSION)
 
 COVERAGE_MODE = atomic
 COVERAGE_DIR = $(CURDIR)/test/coverage
@@ -64,9 +59,9 @@ create-junit-report: | $(GOJUNITREPORT) ; $(info $(M) Creating juint xml report)
 	@sed -i -e 's/skip=/skipped=/g' $(CURDIR)/test/tests.xml
 
 .PHONY: create-coverage-files
-create-coverage-files: | $(GOCOV) $(GOCOVXML); $(info $(M) Creating coverage files...) @ ## Generate coverage report files
+create-coverage-files: | $(GOCOVER_COBERTURA); $(info $(M) Creating coverage files...) @ ## Generate coverage report files
 	@$(GOCMD) tool cover -html=$(COVERAGE_PROFILE) -o $(COVERAGE_HTML)
-	@$(GOCOV) convert $(COVERAGE_PROFILE) | $(GOCOVXML) > $(COVERAGE_XML)
+	@$(GOCOVER_COBERTURA) -strict < $(COVERAGE_PROFILE) > $(COVERAGE_XML)
 
 .PHONY: tidy
 tidy: ; $(info $(M) Running go mod tidy...) @

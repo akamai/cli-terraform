@@ -124,7 +124,7 @@ func createInclude(ctx context.Context, options includeOptions, client papi.PAPI
 	}
 
 	// Get Include
-	term.Spinner().Start("Fetching include " + options.includeName)
+	term.Spinner().Start("Fetching include %s", options.includeName)
 	include, err := findIncludeByName(ctx, client, options.contractID, options.includeName)
 	if err != nil {
 		term.Spinner().Fail()

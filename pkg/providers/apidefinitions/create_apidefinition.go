@@ -104,7 +104,7 @@ func CmdCreateAPIDefinition(c *cli.Context) error {
 
 func createAPIDefinition(ctx context.Context, edgercPath, section string, format outputFormat, id int64, versionNumber *int64, client apidefinitions.APIDefinitions, clientV0 v0.APIDefinitions, templateProcessor templates.TemplateProcessor) (*TFAPIWrapperData, error) {
 	term := terminal.Get(ctx)
-	term.Spinner().Start("Fetching API Definition details for API ID: " + strconv.Itoa(int(id)))
+	term.Spinner().Start("Fetching API Definition details for API ID: %d", id)
 
 	API, err := client.GetEndpoint(ctx, apidefinitions.GetEndpointRequest{APIEndpointID: id})
 	if err != nil {
