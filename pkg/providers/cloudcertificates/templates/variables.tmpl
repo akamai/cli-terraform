@@ -1,0 +1,36 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v3/pkg/providers/cloudcertificates.tfData*/ -}}
+variable "edgerc_path" {
+  type    = string
+  default = "{{ .EdgercPath }}"
+}
+
+variable "config_section" {
+  type    = string
+  default = "{{ .Section }}"
+}
+{{ with .Activation }}
+{{- if .StagingActivationID }}
+variable "ccm_activate_latest_on_staging" {
+  type    = bool
+  default = {{ .StagingActivationIsLatest }}
+}
+{{- else }}
+#variable "ccm_activate_latest_on_staging" {
+#  type    = bool
+#  default = true
+#}
+{{- end }}
+
+{{- if and (not .StagingActivationID) (not .ProductionActivationID) }}{{ "\n" }}{{- end }}
+{{- if .ProductionActivationID }}
+variable "ccm_activate_latest_on_production" {
+  type    = bool
+  default = {{ .ProductionActivationIsLatest }}
+}
+{{- else }}
+#variable "ccm_activate_latest_on_production" {
+#  type    = bool
+#  default = false
+#}
+{{- end }}
+{{- end }}

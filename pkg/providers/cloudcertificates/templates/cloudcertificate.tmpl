@@ -1,0 +1,138 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v3/pkg/providers/cloudcertificates.tfData*/ -}}
+terraform {
+  required_providers {
+    akamai = {
+      source  = "akamai/akamai"
+      version = ">= 11.1.0"
+    }
+  }
+  required_version = ">= 1.0"
+}
+
+provider "akamai" {
+  edgerc         = var.edgerc_path
+  config_section = var.config_section
+}
+
+resource "akamai_cloudcertificates_lineage" "{{ .ResourceName }}" {
+  contract_id    = "{{ .Lineage.ContractID }}"
+  group_id       = {{ .Lineage.GroupID }}
+  geo_class      = "{{ .Lineage.GeoClass }}"
+  lineage_name   = "{{ .Lineage.LineageName }}"
+  lineage_type   = "{{ .Lineage.LineageType }}"
+  secure_network = "{{ .Lineage.SecureNetwork }}"
+  key_specs = {
+    {{- range .Lineage.KeySpecs }}
+    "{{ .KeyType }}" = "{{ .KeySize }}"
+    {{- end }}
+  }
+  sans = [
+    {{- range .Lineage.SANs }}
+    "{{ . }}",
+    {{- end }}
+  ]
+  {{- with .Lineage.Subject }}
+  subject = {
+    {{- if .CommonName }}
+    common_name         = "{{ .CommonName }}"
+    {{- end }}
+    {{- if .Organization }}
+    organization        = "{{ .Organization }}"
+    {{- end }}
+    {{- if .OrganizationalUnit }}
+    organizational_unit = "{{ .OrganizationalUnit }}"
+    {{- end }}
+    {{- if .Country }}
+    country             = "{{ .Country }}"
+    {{- end }}
+    {{- if .State }}
+    state               = "{{ .State }}"
+    {{- end }}
+    {{- if .Locality }}
+    locality            = "{{ .Locality }}"
+    {{- end }}
+  }
+  {{- end }}
+}
+
+{{- if .Upload.IsCommented }}{{ "\n/*\n\n" }}{{ else }}{{ "\n\n" }}{{ end }}resource "akamai_cloudcertificates_upload" "{{ .ResourceName }}" {
+  lineage_id = akamai_cloudcertificates_lineage.{{ .ResourceName }}.lineage_id
+  {{- if .AcknowledgeWarnings }}
+  acknowledge_warnings = true
+  {{- end }}
+  algorithms = {
+    {{- range .Upload.Algorithms }}
+    {{- if $.Upload.IsCommented }}
+    {{ template "uploadPlaceholderAlgorithm" . }}
+    {{- else if .IsCommented }}
+    /*
+    {{ template "uploadPlaceholderAlgorithm" . }}
+    */
+    {{- else }}
+    "{{ .KeyType }}" = {
+      signed_certificate_pem = {{ template "Text" .SignedCertificatePEM }}
+      {{- if .TrustChainPEM }}
+      trust_chain_pem        = {{ template "Text" .TrustChainPEM }}
+      {{- end }}
+    }
+    {{- end }}
+    {{- end }}
+  }
+}
+{{- if .Upload.IsCommented }}
+*/
+{{- end }}
+
+{{- if not .Activation.HasAnyActivation }}
+/*
+{{- end }}
+resource "akamai_cloudcertificates_activation" "{{ .ResourceName }}" {
+  lineage_id = akamai_cloudcertificates_upload.{{ .ResourceName }}.lineage_id
+  {{- if or .Activation.StagingActivationID (not .Activation.HasAnyActivation) }}
+  staging_generation_id = (
+    var.ccm_activate_latest_on_staging
+    ? akamai_cloudcertificates_upload.{{ $.ResourceName }}.generation_id
+    : akamai_cloudcertificates_lineage.{{ $.ResourceName }}.current_staging.generation_id
+  )
+  {{- else }}
+  # staging_generation_id = (
+  #   var.ccm_activate_latest_on_staging
+  #   ? akamai_cloudcertificates_upload.{{ $.ResourceName }}.generation_id
+  #   : akamai_cloudcertificates_lineage.{{ $.ResourceName }}.current_staging.generation_id
+  # )
+  {{- end }}
+  {{- if or .Activation.ProductionActivationID (not .Activation.HasAnyActivation) }}
+  production_generation_id = (
+    var.ccm_activate_latest_on_production
+    ? akamai_cloudcertificates_upload.{{ $.ResourceName }}.generation_id
+    : akamai_cloudcertificates_lineage.{{ $.ResourceName }}.current_production.generation_id
+  )
+  {{- else }}
+  # production_generation_id = (
+  #   var.ccm_activate_latest_on_production
+  #   ? akamai_cloudcertificates_upload.{{ $.ResourceName }}.generation_id
+  #   : akamai_cloudcertificates_lineage.{{ $.ResourceName }}.current_production.generation_id
+  # )
+  {{- end }}
+}
+{{- if not .Activation.HasAnyActivation }}
+*/
+{{- end }}
+
+{{- define "uploadPlaceholderAlgorithm" -}}
+# Paste the PEM-encoded signed certificate issued by your CA (exactly one certificate)
+    # in the signed_certificate_pem attribute.
+    # Keep the BEGIN CERTIFICATE/END CERTIFICATE lines; replace only the body.
+    "{{ .KeyType }}" = {
+      signed_certificate_pem = <<-EOT
+-----BEGIN CERTIFICATE-----
+Please place your signed certificate here
+-----END CERTIFICATE-----
+EOT
+      trust_chain_pem = <<-EOT
+-----BEGIN CERTIFICATE-----
+Please place your trust chain here (optional)
+-----END CERTIFICATE-----
+EOT
+    }
+{{- end }}

@@ -50,15 +50,9 @@ type Hostname struct {
 	EdgeHostnameResourceName string
 	CertProvisioningType     string
 	IsActive                 bool
-	CCMCertificates          *CCMCertificates
+	CCMCertID                string
 	MTLS                     *MTLS
 	TLSConfiguration         *TLSConfiguration
-}
-
-// CCMCertificates holds CCM certificate IDs.
-type CCMCertificates struct {
-	RSACertID   string
-	ECDSACertID string
 }
 
 // MTLS holds MTLS configuration details.
@@ -524,7 +518,8 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 			return fmt.Errorf("%w: %s", ErrHostnamesNotFound, err)
 		}
 
-		tfData.Property.Hostnames, tfData.Property.EdgeHostnames, err =
+		var warnings []string
+		tfData.Property.Hostnames, tfData.Property.EdgeHostnames, warnings, err =
 			getEdgeHostnameDetail(ctx, client, clientHapi, hostnames, property)
 		if err != nil {
 			term.Spinner().Fail()
@@ -532,6 +527,9 @@ func createProperty(ctx context.Context, options propertyOptions, jsonDir string
 		}
 
 		term.Spinner().OK()
+		for _, warning := range warnings {
+			term.Printf("%s", warning)
+		}
 	}
 
 	term.Spinner().Start("Fetching activation details ")
@@ -859,10 +857,11 @@ func getPropertyVersionHostnames(ctx context.Context, client papi.PAPI, property
 	return &response.Hostnames, nil
 }
 
-func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI hapi.HAPI, hostnames *papi.HostnameResponseItems, property *papi.Property) (map[string]Hostname, map[string]EdgeHostname, error) {
+func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI hapi.HAPI, hostnames *papi.HostnameResponseItems, property *papi.Property) (map[string]Hostname, map[string]EdgeHostname, []string, error) {
 
 	edgeHostnamesMap := map[string]EdgeHostname{}
 	hostnamesMap := map[string]Hostname{}
+	warnings := make([]string, 0)
 
 	for _, hostname := range hostnames.Items {
 		cnameTo := hostname.CnameTo
@@ -875,24 +874,24 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			// Get slot details
 			edgeHostnameID, err := strconv.ParseInt(strings.Replace(hostname.EdgeHostnameID, "ehn_", "", 1), 10, 64)
 			if err != nil {
-				return nil, nil, fmt.Errorf("invalid Hostname id: %s", err)
+				return nil, nil, nil, fmt.Errorf("invalid Hostname id: %s", err)
 			}
 
 			edgeHostname, err := clientHAPI.GetEdgeHostname(ctx, hapi.GetEdgeHostnameRequest{EdgeHostnameID: edgeHostnameID})
 			if err != nil {
-				return nil, nil, fmt.Errorf("edge hostname \"%d\" not found: %s", edgeHostnameID, err)
+				return nil, nil, nil, fmt.Errorf("edge hostname \"%d\" not found: %s", edgeHostnameID, err)
 			}
 			papiEdgeHostnames, err := clientPAPI.GetEdgeHostnames(ctx, papi.GetEdgeHostnamesRequest{
 				ContractID: property.ContractID,
 				GroupID:    property.GroupID,
 			})
 			if err != nil {
-				return nil, nil, fmt.Errorf("cannot list edge hostnames: %s", err)
+				return nil, nil, nil, fmt.Errorf("cannot list edge hostnames: %s", err)
 			}
 
 			useCases, err := getUseCases(papiEdgeHostnames, hostname.EdgeHostnameID)
 			if err != nil {
-				return nil, nil, fmt.Errorf("cannot get use cases: %s", err)
+				return nil, nil, nil, fmt.Errorf("cannot get use cases: %s", err)
 			}
 
 			var certificateID int64
@@ -903,14 +902,14 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 				})
 				if err != nil {
 					if !errors.Is(err, hapi.ErrNotFound) {
-						return nil, nil, fmt.Errorf("cannot get certificate details: %s", err)
+						return nil, nil, nil, fmt.Errorf("cannot get certificate details: %s", err)
 					}
 					certificateID = 0
 				} else {
 					if certificate.CertificateID != "" {
 						certificateID, err = strconv.ParseInt(certificate.CertificateID, 10, 64)
 						if err != nil {
-							return nil, nil, fmt.Errorf("invalid certificate details: %s", err)
+							return nil, nil, nil, fmt.Errorf("invalid certificate details: %s", err)
 						}
 					} else {
 						certificateID = 0
@@ -948,16 +947,20 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 		if hostname.CertProvisioningType != "" {
 			certProvisioningType = hostname.CertProvisioningType
 		}
-		var ccmCertificates *CCMCertificates
+		ccmCertID := ""
+		if hostname.CCMCertID != nil {
+			ccmCertID = *hostname.CCMCertID
+		}
 		var mtls *MTLS
 		var tlsConfiguration *TLSConfiguration
 
 		if hostname.CertProvisioningType == string(papi.CertTypeCCM) {
-			if hostname.CCMCertificates != nil { //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
-				ccmCertificates = &CCMCertificates{
-					RSACertID:   hostname.CCMCertificates.RSACertID,   //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
-					ECDSACertID: hostname.CCMCertificates.ECDSACertID, //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
-				}
+			if hostname.CCMCertificates != nil { //nolint:staticcheck // for initial period, the export should warn about legacy binding
+				warnings = append(warnings, fmt.Sprintf(
+					"[WARN] Property %q uses a legacy CCM binding for hostname %q. Migrate legacy CCM certificate to CCMv3 lineage.\n",
+					property.PropertyName,
+					cnameFrom,
+				))
 			}
 			if hostname.MTLS != nil {
 				mtls = &MTLS{
@@ -981,13 +984,13 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			EdgeHostnameResourceName: cnameToResource,
 			CertProvisioningType:     certProvisioningType,
 			IsActive:                 len(hostname.EdgeHostnameID) > 0,
-			CCMCertificates:          ccmCertificates,
+			CCMCertID:                ccmCertID,
 			MTLS:                     mtls,
 			TLSConfiguration:         tlsConfiguration,
 		}
 	}
 
-	return hostnamesMap, edgeHostnamesMap, nil
+	return hostnamesMap, edgeHostnamesMap, warnings, nil
 }
 
 func fetchActiveActivationForNetwork(ctx context.Context, client papi.PAPI, property *papi.Property, network papi.ActivationNetwork) (*papi.Activation, error) {

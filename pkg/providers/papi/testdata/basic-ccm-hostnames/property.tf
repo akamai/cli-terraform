@@ -33,10 +33,7 @@ resource "akamai_property" "test-edgesuite-net" {
     cname_from             = "foo.edgesuite.net"
     cname_to               = "foo"
     cert_provisioning_type = "CCM"
-    ccm_certificates {
-      rsa_cert_id   = "123456"
-      ecdsa_cert_id = "343434"
-    }
+    ccm_cert_id            = "123456"
   }
   hostnames {
     cname_from             = "test.edgesuite.net"

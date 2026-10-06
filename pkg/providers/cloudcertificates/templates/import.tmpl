@@ -1,0 +1,7 @@
+{{- /*gotype: github.com/akamai/cli-terraform/v3/pkg/providers/cloudcertificates.tfData*/ -}}
+terraform init
+terraform import akamai_cloudcertificates_lineage.{{ .ResourceName }} {{ .Lineage.LineageID }}
+{{ if .Upload.IsCommented }}#{{ end }}terraform import akamai_cloudcertificates_upload.{{ .ResourceName }} {{ .Lineage.LineageID }},{{ .UploadGenerationID }}{{ with .AcknowledgeWarnings }},{{ . }}{{ end }}
+{{ if .Activation.HasAnyActivation }}terraform import akamai_cloudcertificates_activation.{{ .ResourceName }} {{ .Activation.ImportID }}
+{{- else }}#terraform import akamai_cloudcertificates_activation.{{ .ResourceName }} {{ .Lineage.LineageID }},<activation_id>[,<activation_id>]
+{{- end }}

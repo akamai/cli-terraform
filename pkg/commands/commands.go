@@ -6,6 +6,7 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/providers/appsec"
 	"github.com/akamai/cli-terraform/v3/pkg/providers/clientlists"
 	"github.com/akamai/cli-terraform/v3/pkg/providers/cloudaccess"
+	"github.com/akamai/cli-terraform/v3/pkg/providers/cloudcertificates"
 	"github.com/akamai/cli-terraform/v3/pkg/providers/cloudlets"
 	"github.com/akamai/cli-terraform/v3/pkg/providers/cloudwrapper"
 	"github.com/akamai/cli-terraform/v3/pkg/providers/cps"
@@ -106,7 +107,25 @@ func CommandLocator() []*cli.Command {
 			},
 			ShellComplete: autocomplete.Default,
 		},
-
+		{
+			Name:        "export-cloudcertificate",
+			Description: "Generates Terraform configuration for Cloud Certificates lineage resources.",
+			Usage:       "export-cloudcertificate",
+			ArgsUsage:   "<lineage_name>",
+			Action:      validatedAction(cloudcertificates.CmdCreateCloudCertificate, requireValidWorkpath, requireNArguments(1)),
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:        "tfworkpath",
+					Usage:       "Directory used to store files created when running commands.",
+					DefaultText: "current directory",
+				},
+				&cli.BoolFlag{
+					Name:  "acknowledge-warnings",
+					Usage: "Sets acknowledge_warnings on the exported Cloud Certificates upload resource.",
+				},
+			},
+			ShellComplete: autocomplete.Default,
+		},
 		{
 			Name:        "export-cloudlets-policy",
 			Description: "Generates Terraform configuration for Cloudlets Policy resources.",

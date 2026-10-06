@@ -4,6 +4,12 @@
 
 ### FEATURES/ENHANCEMENTS:
 
+* Cloud Certificates (Beta)
+  * Added the `export-cloudcertificate` command to export `akamai_cloudcertificates_lineage` resources and, optionally, `akamai_cloudcertificates_upload`, and `akamai_cloudcertificates_activation` resources for a provided lineage name.
+
+* PAPI
+  * Updated CCM hostname exports to use the current `ccm_cert_id` attribute instead of the legacy RSA/ECDSA `ccm_certificates` block. Added a warning when attempting to export a property with a legacy CCM certificate.
+
 
 
 
