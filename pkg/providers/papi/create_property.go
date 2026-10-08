@@ -39,7 +39,7 @@ type EdgeHostname struct {
 	SecurityType             string
 	UseCases                 string
 	CertificateID            int64
-	TTL                      int
+	TTL                      int64
 	HTTPSServiceBinding      string
 }
 
@@ -874,12 +874,12 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 		}
 		if hostname.EdgeHostnameID != "" && hostname.CertProvisioningType != string(papi.CertTypeCCM) {
 			// Get slot details
-			edgeHostnameID, err := strconv.Atoi(strings.Replace(hostname.EdgeHostnameID, "ehn_", "", 1))
+			edgeHostnameID, err := strconv.ParseInt(strings.Replace(hostname.EdgeHostnameID, "ehn_", "", 1), 10, 64)
 			if err != nil {
 				return nil, nil, fmt.Errorf("invalid Hostname id: %s", err)
 			}
 
-			edgeHostname, err := clientHAPI.GetEdgeHostname(ctx, edgeHostnameID)
+			edgeHostname, err := clientHAPI.GetEdgeHostname(ctx, hapi.GetEdgeHostnameRequest{EdgeHostnameID: edgeHostnameID})
 			if err != nil {
 				return nil, nil, fmt.Errorf("edge hostname \"%d\" not found: %s", edgeHostnameID, err)
 			}
@@ -918,7 +918,7 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 					}
 				}
 			}
-			ttl := 0
+			var ttl int64
 			if !edgeHostname.UseDefaultTTL {
 				ttl = edgeHostname.TTL
 			}

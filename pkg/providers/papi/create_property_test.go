@@ -1004,7 +1004,7 @@ func TestCreateProperty(t *testing.T) {
 					Instance:        "/hapi/error-instances/a30f67cc-df20-4e02-bbc3-cf7c204a4aab",
 					RequestInstance: "http://origin.pulsar.akamai.com/hapi/open/v1/dns-zones/edgekey.net/edge-hostnames/example.com/certificate?depth=ALL&accountSwitchKey=F-AC-1937217#d7aa7348",
 					Method:          "GET",
-					RequestTime:     "2022-11-30T18:51:43.482982Z",
+					RequestTime:     *newTimeFromString(t, "2022-11-30T18:51:43.482982Z"),
 				}
 				err := fmt.Errorf("%s: %s: %w", hapi.ErrGetCertificate, hapi.ErrNotFound, &resp)
 				mockGetCertificate(h, "edgekey.net", "test", nil, err)
@@ -2292,7 +2292,7 @@ func mockGetEdgeHostnames(p *papi.Mock, productID string) *mock.Call {
 }
 
 func mockGetEdgeHostname(h *hapi.Mock, hapiGetEdgeHostnameResponse *hapi.GetEdgeHostnameResponse, err error) {
-	h.On("GetEdgeHostname", mock.Anything, 2867480).
+	h.On("GetEdgeHostname", mock.Anything, hapi.GetEdgeHostnameRequest{EdgeHostnameID: 2867480}).
 		Return(hapiGetEdgeHostnameResponse, err).Once()
 }
 
