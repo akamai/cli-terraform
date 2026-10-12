@@ -886,7 +886,6 @@ func getEdgeHostnameDetail(ctx context.Context, clientPAPI papi.PAPI, clientHAPI
 			papiEdgeHostnames, err := clientPAPI.GetEdgeHostnames(ctx, papi.GetEdgeHostnamesRequest{
 				ContractID: property.ContractID,
 				GroupID:    property.GroupID,
-				Options:    nil,
 			})
 			if err != nil {
 				return nil, nil, fmt.Errorf("cannot list edge hostnames: %s", err)
