@@ -40,7 +40,6 @@ resource "akamai_iam_user" "iam_user_321" {
   contact_type       = "Technical Decision Maker"
   job_title          = "job title "
   time_zone          = "GMT"
-  secondary_email    = "secondary-email-a@akamai.net"
   mobile_phone       = "(617) 444-4649"
   address            = "123 A Street"
   city               = "A-Town"

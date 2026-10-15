@@ -243,6 +243,12 @@ func getTFUser(user *iam.User) (*TFUser, error) {
 		return nil, fmt.Errorf("%w: %s for user with email %s", ErrMarshalUserAuthGrants, err, user.Email)
 	}
 
+	// the API omits secondaryEmail (or returns it empty) for users who never set one; either way, skip it in the exported config
+	var secondaryEmail string
+	if user.SecondaryEmail != nil {
+		secondaryEmail = *user.SecondaryEmail
+	}
+
 	return &TFUser{
 		TFUserBasicInfo: TFUserBasicInfo{
 			ID:                       user.IdentityID,
@@ -255,7 +261,7 @@ func getTFUser(user *iam.User) (*TFUser, error) {
 			ContactType:              user.ContactType,
 			JobTitle:                 user.JobTitle,
 			TimeZone:                 user.TimeZone,
-			SecondaryEmail:           user.SecondaryEmail,
+			SecondaryEmail:           secondaryEmail,
 			MobilePhone:              user.MobilePhone,
 			Address:                  user.Address,
 			City:                     user.City,

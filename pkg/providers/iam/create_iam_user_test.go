@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/ptr"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/terminal"
@@ -268,6 +269,22 @@ func TestProcessIAMUserTemplates(t *testing.T) {
 			dir:          "iam_user_by_email_basic",
 			filesToCheck: []string{"user.tf", "variables.tf", "import.sh", "roles.tf", "groups.tf"},
 		},
+		"user without secondary_email": {
+			givenData: TFData{
+				TFUsers: []*TFUser{
+					{
+						TFUserBasicInfo: getTFUserBasicInfoWithoutSecondaryEmail(),
+						IsLocked:        false,
+						AuthGrants:      "[{\"groupId\":56789,\"groupName\":\"Custom group\",\"isBlocked\":false,\"roleId\":12345}]",
+					},
+				},
+				EdgercPath: defaultEdgercPath,
+				Section:    defaultSection,
+				Subcommand: "user",
+			},
+			dir:          "iam_user_without_secondary_email",
+			filesToCheck: []string{"user.tf", "variables.tf", "import.sh"},
+		},
 		"user only": {
 			givenData: TFData{
 				TFUsers: []*TFUser{
@@ -481,7 +498,7 @@ func getUserBasicInfo() iam.UserBasicInfo {
 		ContactType:       "Technical Decision Maker",
 		JobTitle:          "job title ",
 		TimeZone:          "GMT",
-		SecondaryEmail:    "secondary-email-a@akamai.net",
+		SecondaryEmail:    ptr.To("secondary-email-a@akamai.net"),
 		MobilePhone:       "(617) 444-4649",
 		Address:           "123 A Street",
 		City:              "A-Town",
@@ -525,6 +542,13 @@ func getTFUserBasicInfoWithMFA() TFUserBasicInfo {
 	return info
 }
 
+func getTFUserBasicInfoWithoutSecondaryEmail() TFUserBasicInfo {
+	info := tfUserBasicInfo
+	info.TFAEnabled = true
+	info.SecondaryEmail = ""
+	return info
+}
+
 func getTFUserNotifications() TFUserNotifications {
 	return TFUserNotifications{
 		EnableEmailNotifications:              true,
@@ -556,6 +580,50 @@ func getTFUserBasicInfoWithNewlines() TFUserBasicInfo {
 		ZipCode:           "34567",
 		PreferredLanguage: "English",
 		SessionTimeOut:    tools.IntPtr(900),
+	}
+}
+
+func TestGetTFUser(t *testing.T) {
+	tests := map[string]struct {
+		user                   iam.User
+		expectedSecondaryEmail string
+	}{
+		"secondary email set": {
+			user: iam.User{
+				UserBasicInfo: getUserBasicInfo(),
+				IdentityID:    "123",
+			},
+			expectedSecondaryEmail: "secondary-email-a@akamai.net",
+		},
+		"secondary email omitted by the API": {
+			user: iam.User{
+				UserBasicInfo: func() iam.UserBasicInfo {
+					info := getUserBasicInfo()
+					info.SecondaryEmail = nil
+					return info
+				}(),
+				IdentityID: "123",
+			},
+			expectedSecondaryEmail: "",
+		},
+		"secondary email returned as an empty string by the API": {
+			user: iam.User{
+				UserBasicInfo: func() iam.UserBasicInfo {
+					info := getUserBasicInfo()
+					info.SecondaryEmail = ptr.To("")
+					return info
+				}(),
+				IdentityID: "123",
+			},
+			expectedSecondaryEmail: "",
+		},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			tfUser, err := getTFUser(&test.user)
+			require.NoError(t, err)
+			assert.Equal(t, test.expectedSecondaryEmail, tfUser.SecondaryEmail)
+		})
 	}
 }
 

@@ -29,6 +29,9 @@
 
 ### BUG FIXES:
 
+* IAM
+  * Fixed `export-iam` to omit the `secondary_email` attribute from the generated `akamai_iam_user` resource when the API doesn't return a secondary email, instead of exporting an empty string.
+
 
 
 
