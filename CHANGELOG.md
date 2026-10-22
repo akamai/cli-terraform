@@ -18,6 +18,8 @@
 
 
 
+* PAPI
+  * Added support for the new rule format [`v2026-09-30`](https://techdocs.akamai.com/terraform/docs/rule-format-changes#v2026-09-30). Compared to the previous rule format, the `downloadNotification` behavior is no longer supported.
 
 
 
