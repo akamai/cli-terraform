@@ -175,11 +175,11 @@ func createCloudCertificate(ctx context.Context, params createCloudCertificatePa
 	term.Spinner().OK()
 
 	lineageData := edgegridcloudcertificates.Lineage(*lineage)
-	var activationData []edgegridcloudcertificates.GetActivationStatusResponse
+	var stagingActivation, productionActivation *edgegridcloudcertificates.GetActivationStatusResponse
 	if lineageData.CurrentStaging != nil || lineageData.CurrentProduction != nil {
 		term.Spinner().Start("Fetching certificate activations for lineage '%s'", params.lineageName)
 		var fetchErr error
-		activationData, fetchErr = fetchActivationData(ctx, params.client, lineageData.LineageID)
+		stagingActivation, productionActivation, fetchErr = fetchActivationData(ctx, params.client, lineageData)
 		if fetchErr != nil {
 			return fetchErr
 		}
@@ -187,13 +187,7 @@ func createCloudCertificate(ctx context.Context, params createCloudCertificatePa
 	}
 
 	term.Spinner().Start("Extracting data for lineage '%s'", params.lineageName)
-	var warnings []string
-
-	data, warnings, err := populateTFData(params, lineageData, activationData)
-	if err != nil {
-		return err
-	}
-	warnings = append(warnings, warnings...)
+	data, warnings := populateTFData(params, lineageData, stagingActivation, productionActivation)
 	term.Spinner().OK()
 	for _, warning := range warnings {
 		term.Printf("%s", warning)
@@ -235,17 +229,7 @@ func lineageIDByName(ctx context.Context, client edgegridcloudcertificates.Cloud
 	}
 }
 
-func populateTFData(params createCloudCertificateParams, lineage edgegridcloudcertificates.Lineage, activationData []edgegridcloudcertificates.GetActivationStatusResponse) (tfData, []string, error) {
-	var warnings []string
-	var err error
-	var activation tfActivation
-	if lineage.CurrentStaging != nil || lineage.CurrentProduction != nil {
-		activation, warnings, err = buildLineageActivation(lineage, activationData)
-		if err != nil {
-			return tfData{}, warnings, err
-		}
-	}
-
+func populateTFData(params createCloudCertificateParams, lineage edgegridcloudcertificates.Lineage, stagingActivation, productionActivation *edgegridcloudcertificates.GetActivationStatusResponse) (tfData, []string) {
 	keySpecs := make([]keySpec, 0, len(lineage.KeySpecs))
 	for _, spec := range lineage.KeySpecs {
 		keySpecs = append(keySpecs, keySpec{
@@ -261,6 +245,8 @@ func populateTFData(params createCloudCertificateParams, lineage edgegridcloudce
 	sort.Strings(sans)
 
 	upload, warnings := buildLineageUpload(params, lineage)
+	activation, activationWarnings := buildLineageActivation(lineage, upload.GenerationID, stagingActivation, productionActivation)
+	warnings = append(warnings, activationWarnings...)
 	return tfData{
 		ResourceName: tools.SanitizeResourceName(lineage.LineageName),
 		EdgercPath:   params.edgercPath,
@@ -281,97 +267,94 @@ func populateTFData(params createCloudCertificateParams, lineage edgegridcloudce
 		UploadGenerationID:  upload.GenerationID,
 		Activation:          activation,
 		AcknowledgeWarnings: params.acknowledgeWarnings,
-	}, warnings, nil
+	}, warnings
 }
 
-func fetchActivationData(ctx context.Context, client edgegridcloudcertificates.CloudCertificates, lineageID int64) ([]edgegridcloudcertificates.GetActivationStatusResponse, error) {
-	var activations []edgegridcloudcertificates.GetActivationStatusResponse
+func fetchActivationData(ctx context.Context, client edgegridcloudcertificates.CloudCertificates, lineage edgegridcloudcertificates.Lineage) (*edgegridcloudcertificates.GetActivationStatusResponse, *edgegridcloudcertificates.GetActivationStatusResponse, error) {
+	hasStaging := lineage.CurrentStaging != nil
+	hasProduction := lineage.CurrentProduction != nil
+
+	var stagingActivation, productionActivation *edgegridcloudcertificates.GetActivationStatusResponse
 	cursor := ""
 	for {
 		response, err := client.ListActivations(ctx, edgegridcloudcertificates.ListActivationsRequest{
-			LineageID: lineageID,
+			LineageID: lineage.LineageID,
 			Cursor:    cursor,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("%w: %w", ErrFetchingActivations, err)
+			return nil, nil, fmt.Errorf("%w: %w", ErrFetchingActivations, err)
 		}
 		if response == nil {
-			return nil, fmt.Errorf("%w: empty response", ErrFetchingActivations)
+			return nil, nil, fmt.Errorf("%w: empty response", ErrFetchingActivations)
 		}
-		activations = append(activations, response.Items...)
+
+		for i, current := range response.Items {
+			switch {
+			case hasStaging && stagingActivation == nil &&
+				current.TargetEnvironment == string(edgegridcloudcertificates.TargetNetworkStaging) &&
+				current.GenerationID == lineage.CurrentStaging.ID():
+
+				stagingActivation = &response.Items[i]
+			case hasProduction && productionActivation == nil &&
+				current.TargetEnvironment == string(edgegridcloudcertificates.TargetNetworkProduction) &&
+				current.GenerationID == lineage.CurrentProduction.ID():
+
+				productionActivation = &response.Items[i]
+			}
+		}
+
+		foundAllRequiredActivations := (!hasStaging || stagingActivation != nil) && (!hasProduction || productionActivation != nil)
+		if foundAllRequiredActivations {
+			return stagingActivation, productionActivation, nil
+		}
 		if response.NextCursor == nil {
-			return activations, nil
+			var missingNetworks []string
+			if hasStaging && stagingActivation == nil {
+				missingNetworks = append(missingNetworks, string(edgegridcloudcertificates.TargetNetworkStaging))
+			}
+			if hasProduction && productionActivation == nil {
+				missingNetworks = append(missingNetworks, string(edgegridcloudcertificates.TargetNetworkProduction))
+			}
+			return nil, nil, fmt.Errorf(
+				"%w: no activation found for a current network generation on %s",
+				ErrFetchingActivations,
+				strings.Join(missingNetworks, " and "),
+			)
 		}
 		cursor = *response.NextCursor
 	}
 }
 
-func buildLineageActivation(lineage edgegridcloudcertificates.Lineage, activations []edgegridcloudcertificates.GetActivationStatusResponse) (tfActivation, []string, error) {
-	hasStaging := lineage.CurrentStaging != nil
-	hasProduction := lineage.CurrentProduction != nil
-	if !hasStaging && !hasProduction {
-		return tfActivation{}, nil, nil
-	}
-
+func buildLineageActivation(lineage edgegridcloudcertificates.Lineage, uploadGenerationID int64, stagingActivation, productionActivation *edgegridcloudcertificates.GetActivationStatusResponse) (tfActivation, []string) {
 	activation := tfActivation{}
 	var warnings []string
-	var foundStagingActivation, foundProductionActivation bool
-	for _, current := range activations {
-		switch {
-		case hasStaging &&
-			!foundStagingActivation && // Newest activations are first
-			current.TargetEnvironment == string(edgegridcloudcertificates.TargetNetworkStaging) &&
-			current.GenerationID == lineage.CurrentStaging.ID():
 
-			foundStagingActivation = true
-			if isActivationSuccessful(current) {
-				activation.StagingActivationID = current.ActivationID
-			} else {
-				warnings = append(warnings, incompleteActivationWarning(lineage.LineageName, current, edgegridcloudcertificates.TargetNetworkStaging))
-			}
-		case hasProduction &&
-			!foundProductionActivation && // Newest activations are first
-			current.TargetEnvironment == string(edgegridcloudcertificates.TargetNetworkProduction) &&
-			current.GenerationID == lineage.CurrentProduction.ID():
-
-			foundProductionActivation = true
-			if isActivationSuccessful(current) {
-				activation.ProductionActivationID = current.ActivationID
-			} else {
-				warnings = append(warnings, incompleteActivationWarning(lineage.LineageName, current, edgegridcloudcertificates.TargetNetworkProduction))
-			}
+	if stagingActivation != nil {
+		if isActivationSuccessful(*stagingActivation) {
+			activation.StagingActivationID = stagingActivation.ActivationID
+		} else {
+			warnings = append(warnings, incompleteActivationWarning(
+				lineage.LineageName, *stagingActivation, edgegridcloudcertificates.TargetNetworkStaging,
+			))
+		}
+	}
+	if productionActivation != nil {
+		if isActivationSuccessful(*productionActivation) {
+			activation.ProductionActivationID = productionActivation.ActivationID
+		} else {
+			warnings = append(warnings, incompleteActivationWarning(
+				lineage.LineageName, *productionActivation, edgegridcloudcertificates.TargetNetworkProduction,
+			))
 		}
 	}
 
-	var missingNetworks []string
-	if hasStaging && !foundStagingActivation {
-		missingNetworks = append(missingNetworks, string(edgegridcloudcertificates.TargetNetworkStaging))
-	}
-	if hasProduction && !foundProductionActivation {
-		missingNetworks = append(missingNetworks, string(edgegridcloudcertificates.TargetNetworkProduction))
-	}
-	if len(missingNetworks) > 0 {
-		return tfActivation{}, nil, fmt.Errorf(
-			"%w: no activation found for a current network generation on %s",
-			ErrFetchingActivations,
-			strings.Join(missingNetworks, " and "),
-		)
-	}
-
 	activation.HasAnyActivation = activation.StagingActivationID != 0 || activation.ProductionActivationID != 0
-	activation.StagingActivationIsLatest, activation.ProductionActivationIsLatest = calculateIsLatest(lineage)
-	activation.ImportID = calculateActivationImportID(lineage, &activation)
-	return activation, warnings, nil
-}
-
-func calculateIsLatest(lineage edgegridcloudcertificates.Lineage) (bool, bool) {
-	generation := calculateUploadGeneration(lineage)
-	if generation == nil {
-		return false, false
-	}
-	uploadGenerationID := generation.ID()
-	return lineage.CurrentStaging != nil && lineage.CurrentStaging.ID() == uploadGenerationID,
+	activation.StagingActivationIsLatest = uploadGenerationID != 0 &&
+		lineage.CurrentStaging != nil && lineage.CurrentStaging.ID() == uploadGenerationID
+	activation.ProductionActivationIsLatest = uploadGenerationID != 0 &&
 		lineage.CurrentProduction != nil && lineage.CurrentProduction.ID() == uploadGenerationID
+	activation.ImportID = calculateActivationImportID(lineage, &activation)
+	return activation, warnings
 }
 
 func calculateActivationImportID(lineage edgegridcloudcertificates.Lineage, activation *tfActivation) string {
