@@ -13,6 +13,8 @@
 
 
 
+* General
+  * Migrated the CLI framework from `urfave/cli` v2 to v3.
 
 
 

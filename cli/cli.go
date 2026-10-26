@@ -12,7 +12,7 @@ import (
 	akacli "github.com/akamai/cli/v2/pkg/app"
 	"github.com/akamai/cli/v2/pkg/log"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var (
@@ -37,23 +37,26 @@ func Run() error {
 	}
 
 	app.Before = ensureBefore(putLoggerInContext, putSessionInContext)
-	return app.RunContext(ctx, os.Args)
+	return app.Run(ctx, os.Args)
 }
 
 func ensureBefore(bfs ...cli.BeforeFunc) cli.BeforeFunc {
-	return func(c *cli.Context) error {
+	return func(ctx context.Context, cmd *cli.Command) (context.Context, error) {
 		for _, bf := range bfs {
-			err := bf(c)
+			nextCtx, err := bf(ctx, cmd)
 			if err != nil {
-				return err
+				return ctx, err
+			}
+			if nextCtx != nil {
+				ctx = nextCtx
 			}
 		}
-		return nil
+		return ctx, nil
 	}
 }
 
-func sessionRequired(c *cli.Context) bool {
-	command := c.Args().First()
+func sessionRequired(cmd *cli.Command) bool {
+	command := cmd.Args().First()
 
 	for _, cmd := range []string{"help", "list", ""} {
 		if cmd == command {
@@ -61,13 +64,13 @@ func sessionRequired(c *cli.Context) bool {
 		}
 	}
 
-	tail := c.Args().Tail()
+	tail := cmd.Args().Tail()
 	if len(tail) > 0 && tail[len(tail)-1] == "--help" {
 		return false
 	}
 
-	for _, cmd := range c.App.Commands {
-		if cmd.Name == command || sliceContains(cmd.Aliases, command) {
+	for _, c := range cmd.Commands {
+		if c.Name == command || sliceContains(c.Aliases, command) {
 			return true
 		}
 	}
@@ -84,26 +87,24 @@ func sliceContains(slc []string, c string) bool {
 	return false
 }
 
-func putSessionInContext(c *cli.Context) error {
-	if !sessionRequired(c) {
-		return nil
+func putSessionInContext(ctx context.Context, cmd *cli.Command) (context.Context, error) {
+	if !sessionRequired(cmd) {
+		return ctx, nil
 	}
-	s, err := edgegrid.InitializeSession(c)
+	s, err := edgegrid.InitializeSession(ctx, cmd)
 	if err != nil {
-		return err
+		return ctx, err
 	}
-	c.Context = edgegrid.WithSession(c.Context, s)
 
-	return nil
+	return edgegrid.WithSession(ctx, s), nil
 }
 
-func putLoggerInContext(c *cli.Context) error {
-	c.Context = log.SetupContext(c.Context, c.App.Writer)
+func putLoggerInContext(ctx context.Context, cmd *cli.Command) (context.Context, error) {
+	ctx = log.SetupContext(ctx, cmd.Writer)
 
-	handler := log.FromContext(c.Context).Handler()
+	handler := log.FromContext(ctx).Handler()
 	sessionLogger := sesslog.NewSlogAdapter(handler)
 
-	c.Context = session.ContextWithOptions(c.Context, session.WithContextLog(sessionLogger))
-
-	return nil
+	ctx = session.ContextWithOptions(ctx, session.WithContextLog(sessionLogger))
+	return ctx, nil
 }

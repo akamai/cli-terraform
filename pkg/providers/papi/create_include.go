@@ -14,7 +14,7 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var (
@@ -41,15 +41,14 @@ type includeOptions struct {
 }
 
 // CmdCreateInclude is an entrypoint to export-include include sub-command
-func CmdCreateInclude(c *cli.Context) error {
-	ctx := c.Context
-	sess := edgegrid.GetSession(c.Context)
+func CmdCreateInclude(ctx context.Context, cmd *cli.Command) error {
+	sess := edgegrid.GetSession(ctx)
 	client := papi.Client(sess)
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 
 	includePath := filepath.Join(tfWorkPath, "includes.tf")
@@ -67,23 +66,23 @@ func CmdCreateInclude(c *cli.Context) error {
 	}
 
 	options := includeOptions{
-		contractID:  c.Args().First(),
-		includeName: c.Args().Get(1),
-		section:     edgegrid.GetEdgercSection(c),
+		contractID:  cmd.Args().First(),
+		includeName: cmd.Args().Get(1),
+		section:     edgegrid.GetEdgercSection(cmd),
 		jsonDir:     "property-snippets",
 		tfWorkPath:  tfWorkPath,
 	}
 
-	if c.IsSet("rules-as-hcl") {
-		options.rulesAsHCL = c.Bool("rules-as-hcl")
+	if cmd.IsSet("rules-as-hcl") {
+		options.rulesAsHCL = cmd.Bool("rules-as-hcl")
 	}
 
-	if c.IsSet("split-depth") {
-		options.splitDepth = ptr.To(c.Int("split-depth"))
+	if cmd.IsSet("split-depth") {
+		options.splitDepth = ptr.To(cmd.Int("split-depth"))
 	}
 
-	if c.IsSet("rule-format") {
-		options.ruleFormatVersionOverride = c.String("rule-format")
+	if cmd.IsSet("rule-format") {
+		options.ruleFormatVersionOverride = cmd.String("rule-format")
 	}
 
 	processor := templates.FSTemplateProcessor{

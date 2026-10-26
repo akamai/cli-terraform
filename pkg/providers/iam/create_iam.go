@@ -14,7 +14,7 @@ import (
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/iam"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -207,7 +207,7 @@ var (
 )
 
 // CmdCreateIAM is an entrypoint to create-iam command. This is only for action validation purpose
-func CmdCreateIAM(_ *cli.Context) error {
+func CmdCreateIAM(_ context.Context, _ *cli.Command) error {
 	return nil
 }
 

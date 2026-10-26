@@ -11,22 +11,21 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // CmdCreateIAMUser is an entrypoint to create-iam user command
-func CmdCreateIAMUser(c *cli.Context) error {
-	ctx := c.Context
+func CmdCreateIAMUser(ctx context.Context, cmd *cli.Command) error {
 	sess := edgegrid.GetSession(ctx)
 	client := iam.Client(sess)
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
 
-	userOnly := c.Bool("only")
+	userOnly := cmd.Bool("only")
 
 	groupPath := filepath.Join(tfWorkPath, "groups.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
@@ -53,9 +52,9 @@ func CmdCreateIAMUser(c *cli.Context) error {
 		AdditionalFuncs: additionalFunctions,
 	}
 
-	edgercPath := edgegrid.GetEdgercPath(c)
-	section := edgegrid.GetEdgercSection(c)
-	email := c.Args().First()
+	edgercPath := edgegrid.GetEdgercPath(cmd)
+	section := edgegrid.GetEdgercSection(cmd)
+	email := cmd.Args().First()
 	if err = createIAMUserByEmail(ctx, email, edgercPath, section, client, processor, userOnly); err != nil {
 		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}

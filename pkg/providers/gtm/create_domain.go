@@ -16,7 +16,7 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -85,15 +85,14 @@ var (
 )
 
 // CmdCreateDomain is an entrypoint to create-domain command
-func CmdCreateDomain(c *cli.Context) error {
-	ctx := c.Context
+func CmdCreateDomain(ctx context.Context, cmd *cli.Command) error {
 	sess := edgegrid.GetSession(ctx)
 	client := gtm.Client(sess)
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 
 	datacentersPath := filepath.Join(tfWorkPath, "datacenters.tf")
@@ -125,9 +124,9 @@ func CmdCreateDomain(c *cli.Context) error {
 		AdditionalFuncs: additionalFunctions,
 	}
 
-	domainName := c.Args().First()
-	edgercPath := edgegrid.GetEdgercPath(c)
-	section := edgegrid.GetEdgercSection(c)
+	domainName := cmd.Args().First()
+	edgercPath := edgegrid.GetEdgercPath(cmd)
+	section := edgegrid.GetEdgercSection(cmd)
 	if err := createDomain(ctx, client, domainName, edgercPath, section, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting domain HCL: %s", err), 1)
 	}

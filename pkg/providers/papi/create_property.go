@@ -23,7 +23,7 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // EdgeHostname represents EdgeHostname resource
@@ -291,20 +291,19 @@ var includeRuleWrapper splitDepthRuleWrapper = func(rules []*WrappedRules) TFDat
 }
 
 // CmdCreateProperty is an entrypoint to create-property command
-func CmdCreateProperty(c *cli.Context) error {
-	ctx := c.Context
-	sess := edgegrid.GetSession(c.Context)
+func CmdCreateProperty(ctx context.Context, cmd *cli.Command) error {
+	sess := edgegrid.GetSession(ctx)
 	client := papi.Client(sess)
 	clientHapi := hapi.Client(sess)
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 	var version string
-	if c.IsSet("version") {
-		version = c.String("version")
+	if cmd.IsSet("version") {
+		version = cmd.String("version")
 	}
 
 	propertyPath := filepath.Join(tfWorkPath, "property.tf")
@@ -322,23 +321,23 @@ func CmdCreateProperty(c *cli.Context) error {
 	}
 
 	var rulesAsHCL bool
-	if c.IsSet("rules-as-hcl") {
-		rulesAsHCL = c.Bool("rules-as-hcl")
+	if cmd.IsSet("rules-as-hcl") {
+		rulesAsHCL = cmd.Bool("rules-as-hcl")
 	}
 
 	var splitDepth *int
-	if c.IsSet("split-depth") {
-		splitDepth = ptr.To(c.Int("split-depth"))
+	if cmd.IsSet("split-depth") {
+		splitDepth = ptr.To(cmd.Int("split-depth"))
 	}
 
 	var isBootstrap bool
-	if c.IsSet("akamai-property-bootstrap") {
-		isBootstrap = c.Bool("akamai-property-bootstrap")
+	if cmd.IsSet("akamai-property-bootstrap") {
+		isBootstrap = cmd.Bool("akamai-property-bootstrap")
 	}
 
 	var ruleFormatVersionOverride string
-	if c.IsSet("rule-format") {
-		ruleFormatVersionOverride = c.String("rule-format")
+	if cmd.IsSet("rule-format") {
+		ruleFormatVersionOverride = cmd.String("rule-format")
 	}
 
 	processor := templates.FSTemplateProcessor{
@@ -361,9 +360,9 @@ func CmdCreateProperty(c *cli.Context) error {
 	}
 
 	options := propertyOptions{
-		propertyName:              c.Args().First(),
-		edgercPath:                edgegrid.GetEdgercPath(c),
-		section:                   edgegrid.GetEdgercSection(c),
+		propertyName:              cmd.Args().First(),
+		edgercPath:                edgegrid.GetEdgercPath(cmd),
+		section:                   edgegrid.GetEdgercSection(cmd),
 		tfWorkPath:                tfWorkPath,
 		version:                   version,
 		rulesAsHCL:                rulesAsHCL,

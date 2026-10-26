@@ -18,7 +18,7 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -74,15 +74,14 @@ var (
 )
 
 // CmdCreateCloudAccess is an entrypoint to export-cloudaccess command
-func CmdCreateCloudAccess(c *cli.Context) error {
-	ctx := c.Context
+func CmdCreateCloudAccess(ctx context.Context, cmd *cli.Command) error {
 	sess := edgegrid.GetSession(ctx)
 	client := cloudaccess.Client(sess)
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 	cloudAccessPath := filepath.Join(tfWorkPath, "cloudaccess.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
@@ -103,19 +102,19 @@ func CmdCreateCloudAccess(c *cli.Context) error {
 		AdditionalFuncs: additionalFunctions,
 	}
 
-	keyUID, err := strconv.ParseInt(c.Args().Get(0), 10, 64)
+	keyUID, err := strconv.ParseInt(cmd.Args().Get(0), 10, 64)
 	if err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
-	section := edgegrid.GetEdgercSection(c)
-	edgercPath := edgegrid.GetEdgercPath(c)
+	section := edgegrid.GetEdgercSection(cmd)
+	edgercPath := edgegrid.GetEdgercPath(cmd)
 
 	// Get groupID and contractId from flags
 	var groupID int64
 	var contractID string
 
-	if c.IsSet("group_id") {
-		groupID, err = strconv.ParseInt(c.String("group_id"), 10, 64)
+	if cmd.IsSet("group_id") {
+		groupID, err = strconv.ParseInt(cmd.String("group_id"), 10, 64)
 		if err != nil {
 			return cli.Exit(color.RedString("Invalid group_id: %s", err.Error()), 1)
 		}
@@ -123,11 +122,11 @@ func CmdCreateCloudAccess(c *cli.Context) error {
 			// Check if group ID is less than or equal to 0
 			return errors.New("invalid group ID: group ID must be greater than 0")
 		}
-		if !c.IsSet("contract_id") {
+		if !cmd.IsSet("contract_id") {
 			return cli.Exit(color.RedString("contract_id is mandatory when group_id is provided"), 1)
 		}
-		contractID = c.String("contract_id")
-	} else if c.IsSet("contract_id") {
+		contractID = cmd.String("contract_id")
+	} else if cmd.IsSet("contract_id") {
 		return cli.Exit(color.RedString("contract_id cannot be set without group_id"), 1)
 	}
 

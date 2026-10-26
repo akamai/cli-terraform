@@ -17,7 +17,7 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 //go:embed templates/*
@@ -69,18 +69,17 @@ type TFListData struct {
 }
 
 // CmdCreateClientList is an entrypoint to create-clientlist command
-func CmdCreateClientList(c *cli.Context) error {
-	ctx := c.Context
-	sess := edgegrid.GetSession(c.Context)
+func CmdCreateClientList(ctx context.Context, cmd *cli.Command) error {
+	sess := edgegrid.GetSession(ctx)
 	client := clientlists.Client(sess)
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 
-	listID := c.Args().First()
+	listID := cmd.Args().First()
 
 	clientListPath := filepath.Join(tfWorkPath, "client-list.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
@@ -102,8 +101,8 @@ func CmdCreateClientList(c *cli.Context) error {
 		TemplateTargets: templateToFile,
 	}
 
-	section := edgegrid.GetEdgercSection(c)
-	edgercPath := edgegrid.GetEdgercPath(c)
+	section := edgegrid.GetEdgercSection(cmd)
+	edgercPath := edgegrid.GetEdgercPath(cmd)
 
 	if err := createClientList(ctx, listID, edgercPath, section, tfWorkPath, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting client list: %s", err), 1)

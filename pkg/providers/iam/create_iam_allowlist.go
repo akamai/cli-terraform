@@ -11,18 +11,17 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // CmdCreateIAMAllowlist is an entrypoint to create-iam allowlist command
-func CmdCreateIAMAllowlist(c *cli.Context) error {
-	ctx := c.Context
+func CmdCreateIAMAllowlist(ctx context.Context, cmd *cli.Command) error {
 	sess := edgegrid.GetSession(ctx)
 	client := iam.Client(sess)
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
 
@@ -47,8 +46,8 @@ func CmdCreateIAMAllowlist(c *cli.Context) error {
 		AdditionalFuncs: additionalFunctions,
 	}
 
-	edgercPath := edgegrid.GetEdgercPath(c)
-	section := edgegrid.GetEdgercSection(c)
+	edgercPath := edgegrid.GetEdgercPath(cmd)
+	section := edgegrid.GetEdgercSection(cmd)
 	if err = createIAMAllowlist(ctx, edgercPath, section, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting HCL for IAM: %s", err), 1)
 	}

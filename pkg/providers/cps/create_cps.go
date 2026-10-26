@@ -16,7 +16,7 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -48,15 +48,14 @@ var (
 )
 
 // CmdCreateCPS is an entrypoint to create-cps command
-func CmdCreateCPS(c *cli.Context) error {
-	ctx := c.Context
+func CmdCreateCPS(ctx context.Context, cmd *cli.Command) error {
 	sess := edgegrid.GetSession(ctx)
 	client := cps.Client(sess)
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 	enrollmentPath := filepath.Join(tfWorkPath, "enrollment.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
@@ -78,13 +77,13 @@ func CmdCreateCPS(c *cli.Context) error {
 		TemplateTargets: templateToFile,
 	}
 
-	enrollmentID, err := strconv.Atoi(c.Args().Get(0))
+	enrollmentID, err := strconv.Atoi(cmd.Args().Get(0))
 	if err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
-	contractID := c.Args().Get(1)
-	edgercPath := edgegrid.GetEdgercPath(c)
-	section := edgegrid.GetEdgercSection(c)
+	contractID := cmd.Args().Get(1)
+	edgercPath := edgegrid.GetEdgercPath(cmd)
+	section := edgegrid.GetEdgercSection(cmd)
 	if err = createCPS(ctx, contractID, enrollmentID, edgercPath, section, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting enrollment HCL: %s", err), 1)
 	}

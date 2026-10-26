@@ -12,22 +12,21 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // CmdCreateIAMRole is an entrypoint to create-iam role command
-func CmdCreateIAMRole(c *cli.Context) error {
-	ctx := c.Context
+func CmdCreateIAMRole(ctx context.Context, cmd *cli.Command) error {
 	sess := edgegrid.GetSession(ctx)
 	client := iam.Client(sess)
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
 
-	roleOnly := c.Bool("only")
+	roleOnly := cmd.Bool("only")
 
 	groupPath := filepath.Join(tfWorkPath, "groups.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
@@ -54,9 +53,9 @@ func CmdCreateIAMRole(c *cli.Context) error {
 		AdditionalFuncs: additionalFunctions,
 	}
 
-	edgercPath := edgegrid.GetEdgercPath(c)
-	section := edgegrid.GetEdgercSection(c)
-	roleID, err := strconv.ParseInt(c.Args().First(), 10, 64)
+	edgercPath := edgegrid.GetEdgercPath(cmd)
+	section := edgegrid.GetEdgercSection(cmd)
+	roleID, err := strconv.ParseInt(cmd.Args().First(), 10, 64)
 	if err != nil {
 		return cli.Exit(color.RedString("Wrong format of role id %v must be a number: %s", roleID, err), 1)
 	}

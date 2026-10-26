@@ -2,13 +2,11 @@ package edgegrid
 
 import (
 	"context"
-	"flag"
 	"testing"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/session"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/urfave/cli/v2"
 )
 
 func TestInitializeSession(t *testing.T) {
@@ -36,15 +34,14 @@ func TestInitializeSession(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			app := cli.NewApp()
-			set := flag.NewFlagSet("test", 0)
-			set.String("edgerc", test.edgercFile, "")
-			set.String("section", test.section, "")
-			cliCtx := cli.NewContext(app, set, nil)
+			cmd := setupTestCommand(t, map[string]string{
+				"edgerc":  test.edgercFile,
+				"section": test.section,
+			})
 			if test.invalidRetryConfig {
 				t.Setenv("AKAMAI_RETRY_DISABLED", "invalid")
 			}
-			s, err := InitializeSession(cliCtx)
+			s, err := InitializeSession(context.Background(), cmd)
 			if len(test.expectedErr) > 0 {
 				assert.ErrorContains(t, err, test.expectedErr)
 				assert.Error(t, err)

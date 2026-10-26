@@ -18,7 +18,7 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -80,12 +80,12 @@ var (
 )
 
 // CmdCreateCertificate is an entrypoint to export-mtls-keystore command.
-func CmdCreateCertificate(c *cli.Context) error {
+func CmdCreateCertificate(ctx context.Context, cmd *cli.Command) error {
 
 	// tfWorkPath is a target directory for generated terraform resources.
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 	mTLSKeyStorePath := filepath.Join(tfWorkPath, "mtlskeystore.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
@@ -94,22 +94,22 @@ func CmdCreateCertificate(c *cli.Context) error {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
 
-	idString := c.Args().Get(0)
+	idString := cmd.Args().Get(0)
 	id, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
 		return cli.Exit(color.RedString("Invalid client certificate ID: %s", idString), 1)
 	}
 
-	groupID := c.Args().Get(1)
-	contractID := c.Args().Get(2)
+	groupID := cmd.Args().Get(1)
+	contractID := cmd.Args().Get(2)
 
 	params := createCertificateParams{
 		id:            id,
 		groupID:       groupID,
 		contractID:    contractID,
-		edgercPath:    edgegrid.GetEdgercPath(c),
-		configSection: edgegrid.GetEdgercSection(c),
-		client:        mtlskeystore.Client(edgegrid.GetSession(c.Context)),
+		edgercPath:    edgegrid.GetEdgercPath(cmd),
+		configSection: edgegrid.GetEdgercSection(cmd),
+		client:        mtlskeystore.Client(edgegrid.GetSession(ctx)),
 		templateProcessor: templates.FSTemplateProcessor{
 			TemplatesFS: templateFiles,
 			TemplateTargets: map[string]string{
@@ -121,7 +121,7 @@ func CmdCreateCertificate(c *cli.Context) error {
 		},
 	}
 
-	if err := createCertificate(c.Context, params); err != nil {
+	if err := createCertificate(ctx, params); err != nil {
 		return cli.Exit(color.RedString("Error exporting mtls keystore certificate: %s", err), 1)
 	}
 	return nil

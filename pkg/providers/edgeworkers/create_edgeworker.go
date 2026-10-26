@@ -19,7 +19,7 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -46,15 +46,14 @@ const (
 )
 
 // CmdCreateEdgeWorker is an entrypoint to create-edgeworker command
-func CmdCreateEdgeWorker(c *cli.Context) error {
-	ctx := c.Context
-	sess := edgegrid.GetSession(c.Context)
+func CmdCreateEdgeWorker(ctx context.Context, cmd *cli.Command) error {
+	sess := edgegrid.GetSession(ctx)
 	client := edgeworkers.Client(sess)
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 
 	edgeWorkerPath := filepath.Join(tfWorkPath, "edgeworker.tf")
@@ -62,8 +61,8 @@ func CmdCreateEdgeWorker(c *cli.Context) error {
 	importPath := filepath.Join(tfWorkPath, "import.sh")
 
 	bundleDir := tfWorkPath
-	if c.IsSet("bundlepath") {
-		bundleDir = c.String("bundlepath")
+	if cmd.IsSet("bundlepath") {
+		bundleDir = cmd.String("bundlepath")
 	}
 	bundleDir = filepath.FromSlash(bundleDir)
 	if stat, err := os.Stat(bundleDir); err != nil || !stat.IsDir() {
@@ -91,12 +90,12 @@ func CmdCreateEdgeWorker(c *cli.Context) error {
 		},
 	}
 
-	edgeWorkerID, err := strconv.Atoi(c.Args().First())
+	edgeWorkerID, err := strconv.Atoi(cmd.Args().First())
 	if err != nil {
 		return cli.Exit(color.RedString("edgeworker_id is not a valid integer"), 1)
 	}
-	edgercPath := edgegrid.GetEdgercPath(c)
-	section := edgegrid.GetEdgercSection(c)
+	edgercPath := edgegrid.GetEdgercPath(cmd)
+	section := edgegrid.GetEdgercSection(cmd)
 
 	if err = createEdgeWorker(ctx, edgeWorkerID, bundleDir, edgercPath, section, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting edgeworker HCL: %s", err), 1)

@@ -17,7 +17,7 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Types contains list of Name Types to organize types by name
@@ -78,20 +78,19 @@ var zoneTFFileHandle *os.File
 var zoneTFConfig = ""
 
 // CmdCreateZone is an entrypoint to create-zone command
-func CmdCreateZone(c *cli.Context) error {
-	ctx := c.Context
+func CmdCreateZone(ctx context.Context, cmd *cli.Command) error {
 	log.SetOutput(io.Discard)
 
 	sess := edgegrid.GetSession(ctx)
 	configDNS := dns.Client(sess)
 
 	// uppercase characters cause issues with TF and the generated config
-	zoneName = strings.ToLower(c.Args().Get(0))
+	zoneName = strings.ToLower(cmd.Args().Get(0))
 
-	configuration := setConfiguration(c, zoneName)
+	configuration := setConfiguration(cmd, zoneName)
 
-	edgercPath := edgegrid.GetEdgercPath(c)
-	edgercSection := edgegrid.GetEdgercSection(c)
+	edgercPath := edgegrid.GetEdgercPath(cmd)
+	edgercSection := edgegrid.GetEdgercSection(cmd)
 
 	if err := createZone(ctx, edgercPath, edgercSection, configDNS, configuration); err != nil {
 		if errors.Is(err, ErrAliasZoneNotSupported) {
@@ -191,34 +190,34 @@ func createImportList(ctx context.Context, term terminal.Terminal, configDNS dns
 	return nil
 }
 
-func setConfiguration(c *cli.Context, zoneName string) configStruct {
+func setConfiguration(cmd *cli.Command, zoneName string) configStruct {
 	var executionConfig = configStruct{
 		tfWorkPath: "./",
 	}
 
-	if c.IsSet("tfworkpath") {
-		executionConfig.tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		executionConfig.tfWorkPath = cmd.String("tfworkpath")
 	}
 	executionConfig.tfWorkPath = filepath.FromSlash(executionConfig.tfWorkPath)
-	if c.IsSet("resources") {
+	if cmd.IsSet("resources") {
 		executionConfig.shouldCreateImportList = true
 	}
-	if c.IsSet("createconfig") {
+	if cmd.IsSet("createconfig") {
 		executionConfig.createConfig = true
 	}
-	if c.IsSet("configonly") {
+	if cmd.IsSet("configonly") {
 		executionConfig.fetchConfig.ConfigOnly = true
 	}
-	if c.IsSet("namesonly") {
+	if cmd.IsSet("namesonly") {
 		executionConfig.fetchConfig.NamesOnly = true
 	}
-	if c.IsSet("recordname") {
-		executionConfig.recordNames = c.StringSlice("recordname")
+	if cmd.IsSet("recordname") {
+		executionConfig.recordNames = cmd.StringSlice("recordname")
 	}
-	if c.IsSet("segmentconfig") {
+	if cmd.IsSet("segmentconfig") {
 		executionConfig.fetchConfig.ModSegment = true
 	}
-	if c.IsSet("importscript") {
+	if cmd.IsSet("importscript") {
 		executionConfig.importScript = true
 	}
 	executionConfig.zoneName = zoneName

@@ -2,10 +2,9 @@ package commands
 
 import (
 	"bytes"
-	"flag"
+	"context"
 	"fmt"
 	"io"
-	"os"
 	"testing"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/papi"
@@ -13,60 +12,68 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
+
+func runValidationAction(cmd *cli.Command, args []string, validator actionValidator) error {
+	cmd.CommandNotFound = func(context.Context, *cli.Command, string) {}
+	cmd.Action = func(ctx context.Context, cmd *cli.Command) error {
+		return validator(ctx, cmd)
+	}
+	return cmd.Run(context.Background(), append([]string{cmd.Name}, args...))
+}
 
 func TestValidatedAction(t *testing.T) {
 	t.Run("empty validation list", func(t *testing.T) {
-		action := func(_ *cli.Context) error {
+		action := func(_ context.Context, _ *cli.Command) error {
 			return nil
 		}
 		actionFunc := validatedAction(action)
 
-		err := actionFunc(&cli.Context{})
+		err := actionFunc(context.Background(), &cli.Command{})
 		assert.NoError(t, err)
 	})
 
 	t.Run("action error", func(t *testing.T) {
-		action := func(_ *cli.Context) error {
+		action := func(_ context.Context, _ *cli.Command) error {
 			return fmt.Errorf("action error")
 		}
 		actionFunc := validatedAction(action)
 
-		err := actionFunc(&cli.Context{})
+		err := actionFunc(context.Background(), &cli.Command{})
 		assert.ErrorContains(t, err, "action error")
 	})
 
 	t.Run("action with validation", func(t *testing.T) {
-		action := func(_ *cli.Context) error {
+		action := func(_ context.Context, _ *cli.Command) error {
 			return nil
 		}
-		validation := func(_ *cli.Context) error {
+		validation := func(_ context.Context, _ *cli.Command) error {
 			return nil
 		}
 		actionFunc := validatedAction(action, validation)
 
-		err := actionFunc(&cli.Context{})
+		err := actionFunc(context.Background(), &cli.Command{})
 		assert.NoError(t, err)
 	})
 
 	t.Run("assert function call order", func(t *testing.T) {
 		var callOrder []string
-		action := func(_ *cli.Context) error {
+		action := func(_ context.Context, _ *cli.Command) error {
 			callOrder = append(callOrder, "action")
 			return nil
 		}
-		firstValidation := func(_ *cli.Context) error {
+		firstValidation := func(_ context.Context, _ *cli.Command) error {
 			callOrder = append(callOrder, "first_validation")
 			return nil
 		}
-		secondValidation := func(_ *cli.Context) error {
+		secondValidation := func(_ context.Context, _ *cli.Command) error {
 			callOrder = append(callOrder, "second_validation")
 			return nil
 		}
 		actionFunc := validatedAction(action, firstValidation, secondValidation)
 
-		err := actionFunc(&cli.Context{})
+		err := actionFunc(context.Background(), &cli.Command{})
 		assert.NoError(t, err)
 
 		expectedCallOrder := []string{"first_validation", "second_validation", "action"}
@@ -74,99 +81,66 @@ func TestValidatedAction(t *testing.T) {
 	})
 
 	t.Run("validation error", func(t *testing.T) {
-		action := func(_ *cli.Context) error {
+		action := func(_ context.Context, _ *cli.Command) error {
 			return fmt.Errorf("action error")
 		}
-		validation := func(_ *cli.Context) error {
+		validation := func(_ context.Context, _ *cli.Command) error {
 			return fmt.Errorf("validation error")
 		}
 		actionFunc := validatedAction(action, validation)
 
-		err := actionFunc(&cli.Context{})
+		err := actionFunc(context.Background(), &cli.Command{})
 		assert.ErrorContains(t, err, "validation error")
 	})
 }
 
 func TestRequireValidWorkpath(t *testing.T) {
-
 	t.Run("tfworkpath not set", func(t *testing.T) {
-		app := cli.NewApp()
-		flagset := flag.NewFlagSet("test", flag.PanicOnError)
-		flagset.String("tfworkpath", "", "") // flag definition
-
-		ctx := cli.NewContext(app, flagset, nil)
-
-		err := requireValidWorkpath(ctx)
+		cmd := &cli.Command{
+			Flags: []cli.Flag{
+				&cli.StringFlag{Name: "tfworkpath"},
+			},
+		}
+		err := requireValidWorkpath(context.Background(), cmd)
 		assert.NoError(t, err)
 	})
 
 	t.Run("tfworkpath is set to unknown path", func(t *testing.T) {
-		app := cli.NewApp()
-		flagset := flag.NewFlagSet("test", flag.PanicOnError)
-		flagset.String("tfworkpath", "", "") // flag definition
-		err := flagset.Set("tfworkpath", "some/not/existing/path")
-		assert.NoError(t, err)
-
-		ctx := cli.NewContext(app, flagset, nil)
-
-		err = requireValidWorkpath(ctx)
+		cmd := &cli.Command{Flags: []cli.Flag{&cli.StringFlag{Name: "tfworkpath"}}}
+		require.NoError(t, cmd.Set("tfworkpath", "some/not/existing/path"))
+		err := requireValidWorkpath(context.Background(), cmd)
 		assert.ErrorContains(t, err, "Destination work path is not accessible")
 	})
 
 	t.Run("tfworkpath is set to known path", func(t *testing.T) {
-		app := cli.NewApp()
-		flagset := flag.NewFlagSet("test", flag.PanicOnError)
-		flagset.String("tfworkpath", "", "") // flag definition
-		err := flagset.Set("tfworkpath", "./")
-		assert.NoError(t, err)
-
-		ctx := cli.NewContext(app, flagset, nil)
-
-		err = requireValidWorkpath(ctx)
+		cmd := &cli.Command{Flags: []cli.Flag{&cli.StringFlag{Name: "tfworkpath"}}}
+		require.NoError(t, cmd.Set("tfworkpath", "./"))
+		err := requireValidWorkpath(context.Background(), cmd)
 		assert.NoError(t, err)
 	})
 }
 
 func TestRequireNArguments(t *testing.T) {
 	t.Run("require no arguments", func(t *testing.T) {
-		app := cli.NewApp()
-		flagset := flag.NewFlagSet("test", flag.PanicOnError)
-
-		ctx := cli.NewContext(app, flagset, nil)
-
-		validateNArgsFunc := requireNArguments(0)
-
-		err := validateNArgsFunc(ctx)
+		cmd := &cli.Command{Name: "test-command"}
+		err := runValidationAction(cmd, nil, requireNArguments(0))
 		assert.NoError(t, err)
 	})
 
 	t.Run("require 3 arguments", func(t *testing.T) {
-		app := cli.NewApp()
-		flagset := flag.NewFlagSet("test", flag.PanicOnError)
-		err := flagset.Parse([]string{"arg1", "arg2", "arg3"})
-		assert.NoError(t, err)
-
-		ctx := cli.NewContext(app, flagset, nil)
-
-		validateNArgsFunc := requireNArguments(3)
-
-		err = validateNArgsFunc(ctx)
+		cmd := &cli.Command{Name: "test-command"}
+		err := runValidationAction(cmd, []string{"arg1", "arg2", "arg3"}, requireNArguments(3))
 		assert.NoError(t, err)
 	})
 
 	t.Run("error not enough arguments", func(t *testing.T) {
-		app := cli.NewApp()
-		app.Writer = io.Discard
 		errBuffer := &bytes.Buffer{}
-		app.ErrWriter = errBuffer
-
-		flagSet := flag.NewFlagSet("test", flag.PanicOnError)
-		err := flagSet.Parse([]string{"arg1"}) // passing one argument
-		assert.NoError(t, err)
-
-		ctx := cli.NewContext(app, flagSet, nil)
-		ctx.Command = &cli.Command{Name: "test-command", ArgsUsage: "<example usage>"}
-		app.Commands = []*cli.Command{ctx.Command}
+		cmd := &cli.Command{
+			Name:      "test-command",
+			ArgsUsage: "<example usage>",
+			Writer:    io.Discard,
+			ErrWriter: errBuffer,
+		}
 
 		exitOsCalled := false
 		// patch osExiter
@@ -177,9 +151,7 @@ func TestRequireNArguments(t *testing.T) {
 			exitOsCalled = true
 		}
 
-		validateNArgsFunc := requireNArguments(3) // expecting 3 arguments
-
-		err = validateNArgsFunc(ctx)
+		err := runValidationAction(cmd, []string{"arg1"}, requireNArguments(3))
 		assert.NoError(t, err)
 		assert.True(t, exitOsCalled)
 		assert.Contains(t, errBuffer.String(), "Invalid arguments usage, next arguments are required: <example usage>")
@@ -188,58 +160,31 @@ func TestRequireNArguments(t *testing.T) {
 
 func TestRequireNOptionalArguments(t *testing.T) {
 	t.Run("require no arguments", func(t *testing.T) {
-		app := cli.NewApp()
-		flagset := flag.NewFlagSet("test", flag.PanicOnError)
-
-		ctx := cli.NewContext(app, flagset, nil)
-
-		validateNArgsFunc := requiredAndOptionalArguments(0, 0)
-
-		err := validateNArgsFunc(ctx)
+		cmd := &cli.Command{Name: "test-command"}
+		err := runValidationAction(cmd, nil, requiredAndOptionalArguments(0, 0))
 		assert.NoError(t, err)
 	})
 
 	t.Run("require 1 arguments + 2 optional", func(t *testing.T) {
-		app := cli.NewApp()
-		flagset := flag.NewFlagSet("test", flag.PanicOnError)
-		err := flagset.Parse([]string{"arg1", "arg2", "arg3"})
-		assert.NoError(t, err)
-
-		ctx := cli.NewContext(app, flagset, nil)
-
-		validateNArgsFunc := requiredAndOptionalArguments(1, 2)
-
-		err = validateNArgsFunc(ctx)
+		cmd := &cli.Command{Name: "test-command"}
+		err := runValidationAction(cmd, []string{"arg1", "arg2", "arg3"}, requiredAndOptionalArguments(1, 2))
 		assert.NoError(t, err)
 	})
 
 	t.Run("require 3 arguments", func(t *testing.T) {
-		app := cli.NewApp()
-		flagset := flag.NewFlagSet("test", flag.PanicOnError)
-		err := flagset.Parse([]string{"arg1", "arg2", "arg3"})
-		assert.NoError(t, err)
-
-		ctx := cli.NewContext(app, flagset, nil)
-
-		validateNArgsFunc := requiredAndOptionalArguments(3, 0)
-
-		err = validateNArgsFunc(ctx)
+		cmd := &cli.Command{Name: "test-command"}
+		err := runValidationAction(cmd, []string{"arg1", "arg2", "arg3"}, requiredAndOptionalArguments(3, 0))
 		assert.NoError(t, err)
 	})
 
 	t.Run("error not enough arguments", func(t *testing.T) {
-		app := cli.NewApp()
-		app.Writer = io.Discard
 		errBuffer := &bytes.Buffer{}
-		app.ErrWriter = errBuffer
-
-		flagSet := flag.NewFlagSet("test", flag.PanicOnError)
-		err := flagSet.Parse([]string{"arg1"}) // passing one argument
-		assert.NoError(t, err)
-
-		ctx := cli.NewContext(app, flagSet, nil)
-		ctx.Command = &cli.Command{Name: "test-command", ArgsUsage: "<example usage>"}
-		app.Commands = []*cli.Command{ctx.Command}
+		cmd := &cli.Command{
+			Name:      "test-command",
+			ArgsUsage: "<example usage>",
+			Writer:    io.Discard,
+			ErrWriter: errBuffer,
+		}
 
 		exitOsCalled := false
 		// patch osExiter
@@ -250,27 +195,20 @@ func TestRequireNOptionalArguments(t *testing.T) {
 			exitOsCalled = true
 		}
 
-		validateNArgsFunc := requiredAndOptionalArguments(3, 0) // expecting 3 arguments
-
-		err = validateNArgsFunc(ctx)
+		err := runValidationAction(cmd, []string{"arg1"}, requiredAndOptionalArguments(3, 0))
 		assert.NoError(t, err)
 		assert.True(t, exitOsCalled)
 		assert.Contains(t, errBuffer.String(), "Invalid arguments usage, next arguments are required: <example usage>")
 	})
 
 	t.Run("error not enough arguments", func(t *testing.T) {
-		app := cli.NewApp()
-		app.Writer = io.Discard
 		errBuffer := &bytes.Buffer{}
-		app.ErrWriter = errBuffer
-
-		flagSet := flag.NewFlagSet("test", flag.PanicOnError)
-		err := flagSet.Parse([]string{"arg1", "arg2"}) // passing two argument
-		assert.NoError(t, err)
-
-		ctx := cli.NewContext(app, flagSet, nil)
-		ctx.Command = &cli.Command{Name: "test-command", ArgsUsage: "<arg1> <arg2> <arg3>"}
-		app.Commands = []*cli.Command{ctx.Command}
+		cmd := &cli.Command{
+			Name:      "test-command",
+			ArgsUsage: "<arg1> <arg2> <arg3>",
+			Writer:    io.Discard,
+			ErrWriter: errBuffer,
+		}
 
 		exitOsCalled := false
 		// patch osExiter
@@ -281,9 +219,7 @@ func TestRequireNOptionalArguments(t *testing.T) {
 			exitOsCalled = true
 		}
 
-		validateNArgsFunc := requiredAndOptionalArguments(1, 2) // expecting 3 arguments
-
-		err = validateNArgsFunc(ctx)
+		err := runValidationAction(cmd, []string{"arg1", "arg2"}, requiredAndOptionalArguments(1, 2))
 		assert.NoError(t, err)
 		assert.True(t, exitOsCalled)
 		assert.Contains(t, errBuffer.String(), "Invalid arguments usage, next arguments are required: <arg1> <arg2> <arg3>")
@@ -292,181 +228,155 @@ func TestRequireNOptionalArguments(t *testing.T) {
 
 func TestShowHelpCommandWithErr(t *testing.T) {
 	cmdName := "create-command"
-
 	t.Run("no error", func(t *testing.T) {
-		customErr := fmt.Errorf("custom error for test")
-		ctx := cli.Context{
-			Command: &cli.Command{
-				Name: cmdName,
-			},
-			App: &cli.App{
-				CommandNotFound: func(_ *cli.Context, _ string) {},
-				ErrWriter:       os.Stderr,
-			},
+		cmd := &cli.Command{
+			Name:            cmdName,
+			Writer:          io.Discard,
+			ErrWriter:       io.Discard,
+			CommandNotFound: func(context.Context, *cli.Command, string) {},
 		}
-		err := showHelpCommandWithErr(&ctx, customErr.Error())
+		err := showHelpCommandWithErr(context.Background(), cmd, "custom error for test")
 		require.NoError(t, err)
 	})
-
 	t.Run("help command is not found", func(t *testing.T) {
-		customErr := fmt.Errorf("custom error for test")
-		ctx := cli.Context{
-			Command: &cli.Command{
-				Name: cmdName,
-			},
-			App: &cli.App{
-				CommandNotFound: nil,
-				ErrWriter:       os.Stderr,
-			},
-		}
-		err := showHelpCommandWithErr(&ctx, customErr.Error())
+		cmd := &cli.Command{Name: cmdName, Writer: io.Discard, ErrWriter: io.Discard}
+		err := showHelpCommandWithErr(context.Background(), cmd, "custom error for test")
 		assert.Equal(t, cli.Exit(color.RedString("No help topic for '%s'", cmdName), 3), err)
 	})
 }
 
+func TestRequireNArgumentsShowsCommandHelp(t *testing.T) {
+	previousOSExiter := osExiter
+	t.Cleanup(func() {
+		osExiter = previousOSExiter
+	})
+
+	tests := []struct {
+		name        string
+		commandPath []string
+		argsUsage   string
+	}{
+		{
+			name:        "top-level command",
+			commandPath: []string{"export-property"},
+			argsUsage:   "<property name>",
+		},
+		{
+			name:        "nested command",
+			commandPath: []string{"export-iam", "group"},
+			argsUsage:   "<group_id>",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var output bytes.Buffer
+			var errOutput bytes.Buffer
+			exitCode := 0
+			osExiter = func(code int) {
+				exitCode = code
+			}
+
+			app := &cli.Command{
+				Name:      "akamai-terraform",
+				Writer:    &output,
+				ErrWriter: &errOutput,
+			}
+			parent := app
+			for _, name := range test.commandPath {
+				command := &cli.Command{
+					Name:      name,
+					Writer:    &output,
+					ErrWriter: &errOutput,
+				}
+				parent.Commands = append(parent.Commands, command)
+				parent = command
+			}
+			parent.ArgsUsage = test.argsUsage
+			parent.Action = func(ctx context.Context, cmd *cli.Command) error {
+				return requireNArguments(1)(ctx, cmd)
+			}
+
+			args := append([]string{app.Name}, test.commandPath...)
+			err := app.Run(context.Background(), args)
+
+			require.NoError(t, err)
+			assert.Equal(t, 1, exitCode)
+			assert.Contains(t, errOutput.String(), "Invalid arguments usage, next arguments are required: "+test.argsUsage)
+			assert.Contains(t, output.String(), "USAGE:")
+			assert.NotContains(t, errOutput.String(), "No help topic")
+		})
+	}
+}
+
 func TestGetSubcommandsNames(t *testing.T) {
 	tests := map[string]struct {
-		ctx                *cli.Context
-		expectedSubcommand []string
+		cmd      *cli.Command
+		expected []string
 	}{
 		"subcommands exist": {
-			ctx: &cli.Context{
-				App: &cli.App{
-					Commands: []*cli.Command{
-						{
-							Name: "user",
-						},
-						{
-							Name: "group",
-						},
-						{
-							Name: "role",
-						},
-					},
-				},
-			},
-			expectedSubcommand: []string{"user", "group", "role"},
+			cmd: &cli.Command{Commands: []*cli.Command{
+				{Name: "user"},
+				{Name: "group"},
+				{Name: "role"},
+			}},
+			expected: []string{"user", "group", "role"},
 		},
 		"subcommands don't exist": {
-			ctx: &cli.Context{
-				App: &cli.App{
-					Commands: []*cli.Command{},
-				},
-			},
-			expectedSubcommand: nil,
+			cmd: &cli.Command{},
 		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			subcommands := getSubcommandsNames(test.ctx)
-			assert.Equal(t, test.expectedSubcommand, subcommands)
+			assert.Equal(t, test.expected, getSubcommandsNames(test.cmd))
 		})
 	}
 }
 
 func TestValidateSubCommands(t *testing.T) {
-	t.Run("missed sub-command", func(t *testing.T) {
-		app := cli.NewApp()
-		app.Writer = io.Discard
-		errBuffer := &bytes.Buffer{}
-		app.ErrWriter = errBuffer
-
-		flagSet := flag.NewFlagSet("test", flag.PanicOnError)
-		err := flagSet.Parse([]string{}) // missed sub-command
-		assert.NoError(t, err)
-
-		ctx := cli.NewContext(app, flagSet, nil)
-		ctx.Command.Name = "create-command"
-		ctx.App.Commands = []*cli.Command{
-			{Name: "user"},
-			{Name: "group"},
-			{Name: "role"},
+	runValidation := func(args []string, subcommands []*cli.Command, errWriter io.Writer) error {
+		cmd := &cli.Command{
+			Name:      "create-command",
+			ArgsUsage: "<subcommand>",
+			Writer:    io.Discard,
+			ErrWriter: errWriter,
 		}
+		validator := func(ctx context.Context, cmd *cli.Command) error {
+			cmd.Commands = subcommands
+			return validateSubCommands(ctx, cmd)
+		}
+		return runValidationAction(cmd, args, validator)
+	}
 
-		_ = validateSubCommands(ctx)
+	t.Run("missed sub-command", func(t *testing.T) {
+		errBuffer := &bytes.Buffer{}
+		subcommands := []*cli.Command{{Name: "user"}, {Name: "group"}, {Name: "role"}}
+		_ = runValidation(nil, subcommands, errBuffer)
 		assert.Contains(t, errBuffer.String(), "One of the subcommands is required : [user group role]")
 	})
-
 	t.Run("invalid sub-command", func(t *testing.T) {
-		invalidSubcommand := "invalid_subcommand"
-		app := cli.NewApp()
-		app.Writer = io.Discard
 		errBuffer := &bytes.Buffer{}
-		app.ErrWriter = errBuffer
-
-		flagSet := flag.NewFlagSet("test", flag.PanicOnError)
-		err := flagSet.Parse([]string{invalidSubcommand}) // invalid sub-command
-		assert.NoError(t, err)
-
-		ctx := cli.NewContext(app, flagSet, nil)
-		ctx.Command.Name = "create-command"
-		ctx.App.Commands = []*cli.Command{
-			{Name: "user"},
-			{Name: "group"},
-			{Name: "role"},
-		}
-
-		_ = validateSubCommands(ctx)
-		assert.Contains(t, errBuffer.String(), fmt.Sprintf("Subcommand '%s' is invalid. Use one of valid subcommands: [user group role]", invalidSubcommand))
+		_ = runValidation([]string{"invalid_subcommand"}, []*cli.Command{{Name: "user"}, {Name: "group"}, {Name: "role"}}, errBuffer)
+		assert.Contains(t, errBuffer.String(), "Subcommand 'invalid_subcommand' is invalid. Use one of valid subcommands: [user group role]")
 	})
-
 	t.Run("valid sub-command", func(t *testing.T) {
-		validSubcommand := "user"
-		app := cli.NewApp()
-
-		app.Writer = io.Discard
-		errBuffer := &bytes.Buffer{}
-		app.ErrWriter = errBuffer
-
-		flagSet := flag.NewFlagSet("test", flag.PanicOnError)
-		err := flagSet.Parse([]string{validSubcommand}) // valid sub-command
-		assert.NoError(t, err)
-
-		ctx := cli.NewContext(app, flagSet, nil)
-		ctx.Command.Name = "create-command"
-		ctx.App.Commands = []*cli.Command{
-			{Name: validSubcommand},
-			{Name: "group"},
-			{Name: "role"},
-		}
-
-		err = validateSubCommands(ctx)
+		err := runValidation([]string{"user"}, []*cli.Command{{Name: "user"}, {Name: "group"}, {Name: "role"}}, io.Discard)
 		require.NoError(t, err)
-		assert.Contains(t, errBuffer.String(), "")
 	})
-
 	t.Run("sub-commands must not be there", func(t *testing.T) {
-		app := cli.NewApp()
-		app.Writer = io.Discard
 		errBuffer := &bytes.Buffer{}
-		app.ErrWriter = errBuffer
-
-		flagSet := flag.NewFlagSet("test", flag.PanicOnError)
-		err := flagSet.Parse([]string{"some_subcommand"})
-		assert.NoError(t, err)
-
-		ctx := cli.NewContext(app, flagSet, nil)
-		ctx.Command.Name = "create-command"
-		ctx.App.Commands = []*cli.Command{} // expect no sub-commands for given command
-
-		_ = validateSubCommands(ctx)
-		assert.Contains(t, errBuffer.String(), fmt.Sprintf("Subcommands are not expected for '%s' command", ctx.Command.Name))
+		_ = runValidation([]string{"some_subcommand"}, nil, errBuffer)
+		assert.Contains(t, errBuffer.String(), "Subcommands are not expected for 'create-command' command")
 	})
 }
 
 func TestValidateRuleFormat(t *testing.T) {
 	t.Run("rule-format flag not set - should skip validation", func(t *testing.T) {
-		app := cli.NewApp()
-		app.Writer = io.Discard
-		app.ErrWriter = io.Discard
-
-		flagSet := flag.NewFlagSet("test", flag.PanicOnError)
-		flagSet.String("rule-format", "", "")
-
-		cliCtx := cli.NewContext(app, flagSet, nil)
-
+		cmd := &cli.Command{
+			Flags: []cli.Flag{&cli.StringFlag{Name: "rule-format"}},
+		}
 		validateFunc := validateRuleFormat(false)
-		err := validateFunc(cliCtx)
+		err := validateFunc(context.Background(), cmd)
 		assert.NoError(t, err)
 	})
 }
@@ -536,22 +446,16 @@ func TestValidateRuleFormatWithPAPIClient(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			app := cli.NewApp()
-			app.Writer = io.Discard
-			errBuffer := &bytes.Buffer{}
-			app.ErrWriter = errBuffer
-
-			flagSet := flag.NewFlagSet("test", flag.PanicOnError)
-			flagSet.String("rule-format", "", "")
-			flagSet.Bool("rules-as-hcl", false, "")
-			err := flagSet.Set("rule-format", test.ruleFormatFlagValue)
-			require.NoError(t, err)
-			if test.rulesAsHclSet {
-				err = flagSet.Set("rules-as-hcl", "true")
-				require.NoError(t, err)
+			cmd := &cli.Command{
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "rule-format"},
+					&cli.BoolFlag{Name: "rules-as-hcl"},
+				},
 			}
-
-			cliCtx := cli.NewContext(app, flagSet, nil)
+			require.NoError(t, cmd.Set("rule-format", test.ruleFormatFlagValue))
+			if test.rulesAsHclSet {
+				require.NoError(t, cmd.Set("rules-as-hcl", "true"))
+			}
 
 			mockClient := new(papi.Mock)
 			if test.mockAPIError != nil {
@@ -565,7 +469,7 @@ func TestValidateRuleFormatWithPAPIClient(t *testing.T) {
 				mockClient.On("GetRuleFormats", mock.Anything).Return(response, nil).Once()
 			}
 
-			err = checkRuleFormat(cliCtx, mockClient, test.isProperty)
+			err := checkRuleFormat(context.Background(), cmd, mockClient, test.isProperty)
 
 			if test.expectedError != "" {
 				assert.ErrorContains(t, err, test.expectedError)

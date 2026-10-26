@@ -19,7 +19,7 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 //go:embed templates/*
@@ -42,16 +42,15 @@ var (
 )
 
 // CmdCreateAppsec is an entrypoint to create-appsec command
-func CmdCreateAppsec(c *cli.Context) error {
-	ctx := c.Context
+func CmdCreateAppsec(ctx context.Context, cmd *cli.Command) error {
 	sess := edgegrid.GetSession(ctx)
 	client = appsec.Client(sess)
 	botmanClient = botman.Client(sess)
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 
 	// Directory Paths
@@ -76,8 +75,8 @@ func CmdCreateAppsec(c *cli.Context) error {
 	}
 
 	// Save our edgerc path and section for use later
-	edgercPath = edgegrid.GetEdgercPath(c)
-	section = edgegrid.GetEdgercSection(c)
+	edgercPath = edgegrid.GetEdgercPath(cmd)
+	section = edgegrid.GetEdgercSection(cmd)
 
 	// Template to path mappings
 	templateToFile := map[string]string{
@@ -165,7 +164,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		AdditionalFuncs: additionalFuncs,
 	}
 
-	appsecName := c.Args().First()
+	appsecName := cmd.Args().First()
 	if err = createAppsec(ctx, appsecName, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting appsec config HCL: %s", err), 1)
 	}
