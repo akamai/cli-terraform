@@ -219,7 +219,7 @@ func createAppsec(ctx context.Context, configName string, client appsec.APPSEC, 
 }
 
 // Find the id of a security configuration if we know its name
-func findConfigurationIDByName(ctx context.Context, name string, client appsec.APPSEC) (int, int, error) {
+func findConfigurationIDByName(ctx context.Context, name string, client appsec.APPSEC) (int64, int64, error) {
 	getConfigurationsResponse, err := client.GetConfigurations(ctx, appsec.GetConfigurationsRequest{
 		ConfigID: 0,
 	})
@@ -237,7 +237,7 @@ func findConfigurationIDByName(ctx context.Context, name string, client appsec.A
 }
 
 // Export the security config
-func exportConfiguration(ctx context.Context, id int, version int, client appsec.APPSEC) (*appsec.GetExportConfigurationResponse, error) {
+func exportConfiguration(ctx context.Context, id int64, version int64, client appsec.APPSEC) (*appsec.GetExportConfigurationResponse, error) {
 	getExportConfigurationResponse, err := client.GetExportConfiguration(ctx, appsec.GetExportConfigurationRequest{
 		ConfigID: id,
 		Version:  version,
@@ -251,7 +251,7 @@ func exportConfiguration(ctx context.Context, id int, version int, client appsec
 }
 
 // Get the description for the given security configuration id
-func getConfigDescription(configid int) (string, error) {
+func getConfigDescription(configid int64) (string, error) {
 
 	getConfigurationResponse, err := client.GetConfiguration(context.Background(), appsec.GetConfigurationRequest{
 		ConfigID: configid,
@@ -313,7 +313,7 @@ func exportJSON(source interface{}) (string, error) {
 }
 
 // Get the WAF mode for the given security policy
-func getWAFMode(configID int, version int, policyID string) (string, error) {
+func getWAFMode(configID int64, version int64, policyID string) (string, error) {
 
 	getWAFModeResponse, err := client.GetWAFMode(context.Background(), appsec.GetWAFModeRequest{
 		ConfigID: configID,
