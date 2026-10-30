@@ -12,8 +12,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/appsec"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/botman"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/appsec"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/botman"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 

@@ -3,8 +3,8 @@ module github.com/akamai/cli-terraform/v3
 go 1.26.8
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v14 v14.1.0
-	github.com/akamai/cli/v2 v2.0.5
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v15 v15.0.0
+	github.com/akamai/cli/v2 v2.0.6
 	github.com/fatih/color v1.19.0
 	github.com/hashicorp/hcl/v2 v2.25.0
 	github.com/jinzhu/copier v0.4.0
@@ -60,10 +60,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v14 => ../akamaiopen-edgegrid-golang
+//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v15 => ../akamaiopen-edgegrid-golang
 //replace github.com/akamai/cli/v2 => ../cli
 replace (
-	github.com/go-git/go-git/v5 => github.com/go-git/go-git/v5 v5.19.2
+	github.com/go-git/go-git/v5 => github.com/go-git/go-git/v5 v5.19.3
 	github.com/stretchr/testify v1.4.0 => github.com/stretchr/testify v1.10.0 // Fix security vulnerability; can be removed once github.com/go-ozzo/ozzo-validation/v4 bumps this dependency
 	github.com/yuin/goldmark v1.4.13 => github.com/yuin/goldmark v1.8.2 // Fix security vulnerability; can be removed once golang.org/x/tools/v0.44.0 bumps this dependency
 	golang.org/x/crypto => golang.org/x/crypto v0.55.0

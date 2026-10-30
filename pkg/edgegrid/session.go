@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/log"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/session"
+	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/log"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/session"
 	"github.com/akamai/cli/v2/pkg/log"
 	"github.com/urfave/cli/v3"
 )

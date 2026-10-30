@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/edgegrid"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/edgegrid"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/session"
 	"github.com/urfave/cli/v3"
 )
 

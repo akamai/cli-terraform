@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/cloudaccess"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/cloudaccess"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/terminal"

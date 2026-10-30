@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/clientlists"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/clientlists"
 	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"

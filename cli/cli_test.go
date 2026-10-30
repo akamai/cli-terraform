@@ -6,7 +6,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/session"
 	akacli "github.com/akamai/cli/v2/pkg/app"
 	"github.com/akamai/cli/v2/pkg/log"
 	"github.com/akamai/cli/v2/pkg/terminal"

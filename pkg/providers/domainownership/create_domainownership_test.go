@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/domainownership"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/ptr"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/domainownership"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/ptr"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"

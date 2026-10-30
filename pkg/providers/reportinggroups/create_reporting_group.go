@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/reportinggroups"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/reportinggroups"
 	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"

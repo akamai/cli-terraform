@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/papi"
 	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/urfave/cli/v3"

@@ -1,67 +1,23 @@
 # RELEASE NOTES
 
-## X.XX.X (Month XX, XXXX)
+## 3.2.0 (Nov 4, 2026)
 
 ### FEATURES/ENHANCEMENTS:
+
+* General
+  * Migrated the CLI framework from `urfave/cli` v2 to v3.
 
 * Cloud Certificates (Beta)
   * Added the `export-cloudcertificate` command to export `akamai_cloudcertificates_lineage` resources and, optionally, `akamai_cloudcertificates_upload`, and `akamai_cloudcertificates_activation` resources for a provided lineage name.
 
 * PAPI
   * Updated CCM hostname exports to use the current `ccm_cert_id` attribute instead of the legacy RSA/ECDSA `ccm_certificates` block. Added a warning when attempting to export a property with a legacy CCM certificate.
-
-
-
-
-
-
-
-
-
-
-* General
-  * Migrated the CLI framework from `urfave/cli` v2 to v3.
-
-
-
-
-
-* PAPI
   * Added support for the new rule format [`v2026-09-30`](https://techdocs.akamai.com/terraform/docs/rule-format-changes#v2026-09-30). Compared to the previous rule format, the `downloadNotification` behavior is no longer supported.
-
-
-
-
-
-
-
-
 
 ### BUG FIXES:
 
 * IAM
-  * Fixed `export-iam` to omit the `secondary_email` attribute from the generated `akamai_iam_user` resource when the API doesn't return a secondary email, instead of exporting an empty string.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  * Fixed `export-iam` to omit the `secondary_email` attribute from the generated `akamai_iam_user` resource when the API doesn't return a secondary email, instead of exporting an empty string ([I#699](https://github.com/akamai/terraform-provider-akamai/issues/699)).
 
 ## 3.1.0 (Sep 30, 2026)
 

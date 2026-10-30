@@ -7,7 +7,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/papi"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
