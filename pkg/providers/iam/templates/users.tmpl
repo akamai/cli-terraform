@@ -19,7 +19,9 @@
       contact_type       = "{{.ContactType}}"
       job_title          = "{{escape .JobTitle}}"
       time_zone          = "{{.TimeZone}}"
+      {{- if .SecondaryEmail}}
       secondary_email    = "{{.SecondaryEmail}}"
+      {{- end}}
       mobile_phone       = "{{.MobilePhone}}"
       address            =  {{template "Text" .Address}}
       city               = "{{.City}}"

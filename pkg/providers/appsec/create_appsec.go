@@ -12,14 +12,14 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/appsec"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/botman"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/appsec"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/botman"
 	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 //go:embed templates/*
@@ -42,16 +42,15 @@ var (
 )
 
 // CmdCreateAppsec is an entrypoint to create-appsec command
-func CmdCreateAppsec(c *cli.Context) error {
-	ctx := c.Context
+func CmdCreateAppsec(ctx context.Context, cmd *cli.Command) error {
 	sess := edgegrid.GetSession(ctx)
 	client = appsec.Client(sess)
 	botmanClient = botman.Client(sess)
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 
 	// Directory Paths
@@ -76,8 +75,8 @@ func CmdCreateAppsec(c *cli.Context) error {
 	}
 
 	// Save our edgerc path and section for use later
-	edgercPath = edgegrid.GetEdgercPath(c)
-	section = edgegrid.GetEdgercSection(c)
+	edgercPath = edgegrid.GetEdgercPath(cmd)
+	section = edgegrid.GetEdgercSection(cmd)
 
 	// Template to path mappings
 	templateToFile := map[string]string{
@@ -165,7 +164,7 @@ func CmdCreateAppsec(c *cli.Context) error {
 		AdditionalFuncs: additionalFuncs,
 	}
 
-	appsecName := c.Args().First()
+	appsecName := cmd.Args().First()
 	if err = createAppsec(ctx, appsecName, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting appsec config HCL: %s", err), 1)
 	}
@@ -220,7 +219,7 @@ func createAppsec(ctx context.Context, configName string, client appsec.APPSEC, 
 }
 
 // Find the id of a security configuration if we know its name
-func findConfigurationIDByName(ctx context.Context, name string, client appsec.APPSEC) (int, int, error) {
+func findConfigurationIDByName(ctx context.Context, name string, client appsec.APPSEC) (int64, int64, error) {
 	getConfigurationsResponse, err := client.GetConfigurations(ctx, appsec.GetConfigurationsRequest{
 		ConfigID: 0,
 	})
@@ -238,7 +237,7 @@ func findConfigurationIDByName(ctx context.Context, name string, client appsec.A
 }
 
 // Export the security config
-func exportConfiguration(ctx context.Context, id int, version int, client appsec.APPSEC) (*appsec.GetExportConfigurationResponse, error) {
+func exportConfiguration(ctx context.Context, id int64, version int64, client appsec.APPSEC) (*appsec.GetExportConfigurationResponse, error) {
 	getExportConfigurationResponse, err := client.GetExportConfiguration(ctx, appsec.GetExportConfigurationRequest{
 		ConfigID: id,
 		Version:  version,
@@ -252,7 +251,7 @@ func exportConfiguration(ctx context.Context, id int, version int, client appsec
 }
 
 // Get the description for the given security configuration id
-func getConfigDescription(configid int) (string, error) {
+func getConfigDescription(configid int64) (string, error) {
 
 	getConfigurationResponse, err := client.GetConfiguration(context.Background(), appsec.GetConfigurationRequest{
 		ConfigID: configid,
@@ -314,7 +313,7 @@ func exportJSON(source interface{}) (string, error) {
 }
 
 // Get the WAF mode for the given security policy
-func getWAFMode(configID int, version int, policyID string) (string, error) {
+func getWAFMode(configID int64, version int64, policyID string) (string, error) {
 
 	getWAFModeResponse, err := client.GetWAFMode(context.Background(), appsec.GetWAFModeRequest{
 		ConfigID: configID,

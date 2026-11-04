@@ -9,13 +9,13 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/reportinggroups"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/reportinggroups"
 	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -52,11 +52,11 @@ var (
 )
 
 // CmdCreateReportingGroup is an entrypoint to the export-reportinggroup command.
-func CmdCreateReportingGroup(c *cli.Context) error {
+func CmdCreateReportingGroup(ctx context.Context, cmd *cli.Command) error {
 	// tfWorkPath is a target directory for generated terraform resources.
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 	reportingGroupPath := filepath.Join(tfWorkPath, "reportinggroups.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
@@ -66,10 +66,10 @@ func CmdCreateReportingGroup(c *cli.Context) error {
 	}
 
 	params := createReportingGroupParams{
-		name:          c.Args().Get(0),
-		edgercPath:    edgegrid.GetEdgercPath(c),
-		configSection: edgegrid.GetEdgercSection(c),
-		client:        reportinggroups.Client(edgegrid.GetSession(c.Context)),
+		name:          cmd.Args().Get(0),
+		edgercPath:    edgegrid.GetEdgercPath(cmd),
+		configSection: edgegrid.GetEdgercSection(cmd),
+		client:        reportinggroups.Client(edgegrid.GetSession(ctx)),
 		templateProcessor: templates.FSTemplateProcessor{
 			TemplatesFS: templateFiles,
 			TemplateTargets: map[string]string{
@@ -80,7 +80,7 @@ func CmdCreateReportingGroup(c *cli.Context) error {
 		},
 	}
 
-	if err := createReportingGroup(c.Context, params); err != nil {
+	if err := createReportingGroup(ctx, params); err != nil {
 		return cli.Exit(color.RedString("Error exporting reporting group: %s", err), 1)
 	}
 	return nil

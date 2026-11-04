@@ -3,14 +3,14 @@ module github.com/akamai/cli-terraform/v3
 go 1.26.8
 
 require (
-	github.com/akamai/AkamaiOPEN-edgegrid-golang/v14 v14.1.0
-	github.com/akamai/cli/v2 v2.0.5
+	github.com/akamai/AkamaiOPEN-edgegrid-golang/v15 v15.0.0
+	github.com/akamai/cli/v2 v2.0.6
 	github.com/fatih/color v1.19.0
 	github.com/hashicorp/hcl/v2 v2.25.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/stretchr/testify v1.12.1
-	github.com/urfave/cli/v2 v2.19.3
+	github.com/urfave/cli/v3 v3.14.0
 	github.com/wk8/go-ordered-map/v2 v2.1.8
 )
 
@@ -25,7 +25,6 @@ require (
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/briandowns/spinner v1.23.2 // indirect
 	github.com/buger/jsonparser v1.6.1 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
@@ -38,31 +37,28 @@ require (
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
-	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
-	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zclconf/go-cty v1.19.0 // indirect
 	go.uber.org/ratelimit v0.3.1 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/mod v0.41.0 // indirect
-	golang.org/x/net v0.59.0 // indirect
-	golang.org/x/sync v0.23.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/term v0.46.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
-	golang.org/x/tools v0.50.0 // indirect
+	golang.org/x/net v0.62.0 // indirect
+	golang.org/x/sync v0.24.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/term v0.47.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
+	golang.org/x/tools v0.51.0 // indirect
 	gopkg.in/ini.v1 v1.67.3 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v14 => ../akamaiopen-edgegrid-golang
+//replace github.com/akamai/AkamaiOPEN-edgegrid-golang/v15 => ../akamaiopen-edgegrid-golang
 //replace github.com/akamai/cli/v2 => ../cli
 replace (
-	github.com/go-git/go-git/v5 => github.com/go-git/go-git/v5 v5.19.2
+	github.com/go-git/go-git/v5 => github.com/go-git/go-git/v5 v5.19.3
 	github.com/stretchr/testify v1.4.0 => github.com/stretchr/testify v1.10.0 // Fix security vulnerability; can be removed once github.com/go-ozzo/ozzo-validation/v4 bumps this dependency
 	github.com/yuin/goldmark v1.4.13 => github.com/yuin/goldmark v1.8.2 // Fix security vulnerability; can be removed once golang.org/x/tools/v0.44.0 bumps this dependency
 	golang.org/x/crypto => golang.org/x/crypto v0.55.0

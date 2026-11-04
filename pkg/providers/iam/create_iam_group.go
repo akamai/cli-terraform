@@ -6,28 +6,27 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/iam"
 	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // CmdCreateIAMGroup is an entrypoint to create-iam group command
-func CmdCreateIAMGroup(c *cli.Context) error {
-	ctx := c.Context
+func CmdCreateIAMGroup(ctx context.Context, cmd *cli.Command) error {
 	sess := edgegrid.GetSession(ctx)
 	client := iam.Client(sess)
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 	tfWorkPath = filepath.FromSlash(tfWorkPath)
 
-	groupOnly := c.Bool("only")
+	groupOnly := cmd.Bool("only")
 
 	groupPath := filepath.Join(tfWorkPath, "group.tf")
 	importPath := filepath.Join(tfWorkPath, "import.sh")
@@ -54,9 +53,9 @@ func CmdCreateIAMGroup(c *cli.Context) error {
 		AdditionalFuncs: additionalFunctions,
 	}
 
-	section := edgegrid.GetEdgercSection(c)
-	edgercPath := edgegrid.GetEdgercPath(c)
-	groupID, err := strconv.ParseInt(c.Args().First(), 10, 64)
+	section := edgegrid.GetEdgercSection(cmd)
+	edgercPath := edgegrid.GetEdgercPath(cmd)
+	groupID, err := strconv.ParseInt(cmd.Args().First(), 10, 64)
 	if err != nil {
 		return cli.Exit(color.RedString("Wrong format of group id %v must be a number: %s", groupID, err), 1)
 	}

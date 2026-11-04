@@ -9,14 +9,14 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/cloudlets"
-	v3 "github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/cloudlets/v3"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/cloudlets"
+	v3 "github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/cloudlets/v3"
 	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -105,16 +105,15 @@ var (
 )
 
 // CmdCreatePolicy is an entrypoint to create-policy command
-func CmdCreatePolicy(c *cli.Context) error {
-	ctx := c.Context
-	sess := edgegrid.GetSession(c.Context)
+func CmdCreatePolicy(ctx context.Context, cmd *cli.Command) error {
+	sess := edgegrid.GetSession(ctx)
 	clientV2 := cloudlets.Client(sess)
 	clientV3 := v3.Client(sess)
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 
 	policyPath := filepath.Join(tfWorkPath, "policy.tf")
@@ -140,9 +139,9 @@ func CmdCreatePolicy(c *cli.Context) error {
 		TemplateTargets: templateToFile,
 	}
 
-	policyName := c.Args().First()
-	section := edgegrid.GetEdgercSection(c)
-	edgercPath := edgegrid.GetEdgercPath(c)
+	policyName := cmd.Args().First()
+	section := edgegrid.GetEdgercSection(cmd)
+	edgercPath := edgegrid.GetEdgercPath(cmd)
 	if err = createPolicy(ctx, policyName, edgercPath, section, clientV2, clientV3, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting policy HCL: %s", err), 1)
 	}

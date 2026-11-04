@@ -10,8 +10,8 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/cloudlets"
-	v3 "github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/cloudlets/v3"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/cloudlets"
+	v3 "github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/cloudlets/v3"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/terminal"

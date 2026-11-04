@@ -3,125 +3,196 @@ package cli
 import (
 	"bytes"
 	"context"
-	"flag"
+	"io"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/session"
+	akacli "github.com/akamai/cli/v2/pkg/app"
 	"github.com/akamai/cli/v2/pkg/log"
+	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/stretchr/testify/assert"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
-func newContextFromStringSlice(ss []string, app *cli.App) *cli.Context {
-	set := flag.NewFlagSet("test", 0)
-	_ = set.Parse(ss)
-	return cli.NewContext(app, set, nil)
+type beforeContextKey struct{}
+
+func newTemplateApp() *cli.Command {
+	noop := func(context.Context, *cli.Command) error { return nil }
+	return &cli.Command{
+		Name:      "akamai-terraform",
+		Writer:    io.Discard,
+		ErrWriter: io.Discard,
+		Commands: []*cli.Command{
+			{
+				Name:    "some-command",
+				Aliases: []string{"other-command"},
+				Action:  noop,
+				Commands: []*cli.Command{
+					{Name: "subcommand", Action: noop},
+				},
+			},
+			{Name: "help", Action: noop},
+			{Name: "list", Action: noop},
+		},
+	}
 }
 
-func newTemplateApp() *cli.App {
-	app := cli.NewApp()
-	app.Commands = []*cli.Command{{Name: "some-command", Aliases: []string{"other-command"}}, {Name: "help"}, {Name: "list"}}
-	return app
+func runSessionRequired(cmd *cli.Command, args []string) (bool, error) {
+	var required bool
+	cmd.Before = func(ctx context.Context, cmd *cli.Command) (context.Context, error) {
+		required = sessionRequired(cmd)
+		return ctx, nil
+	}
+	cmd.Action = func(context.Context, *cli.Command) error { return nil }
+	cmd.CommandNotFound = func(context.Context, *cli.Command, string) {}
+	err := cmd.Run(context.Background(), append([]string{cmd.Name}, args...))
+	return required, err
 }
 
 func Test_sessionRequired(t *testing.T) {
 	tests := map[string]struct {
-		c        func() *cli.Context
+		args     []string
 		expected bool
 	}{
 		"no command": {
-			c: func() *cli.Context {
-				return newContextFromStringSlice([]string{""}, cli.NewApp())
-			},
+			args:     nil,
 			expected: false,
 		},
 		"help": {
-			c: func() *cli.Context {
-				return newContextFromStringSlice([]string{"help"}, newTemplateApp())
-			},
+			args:     []string{"help"},
 			expected: false,
 		},
 		"help for command": {
-			c: func() *cli.Context {
-				return newContextFromStringSlice([]string{"help", "create-something"}, newTemplateApp())
-			},
+			args:     []string{"help", "create-something"},
 			expected: false,
 		},
 		"help for subcommand": {
-			c: func() *cli.Context {
-				return newContextFromStringSlice([]string{"help", "create-something", "subcommand"}, newTemplateApp())
-			},
+			args:     []string{"help", "create-something", "subcommand"},
 			expected: false,
 		},
 		"--help for command": {
-			c: func() *cli.Context {
-				return newContextFromStringSlice([]string{"create-something", "--help"}, newTemplateApp())
-			},
+			args:     []string{"some-command", "--help"},
 			expected: false,
 		},
 		"--help for subcommand": {
-			c: func() *cli.Context {
-				return newContextFromStringSlice([]string{"create-something", "subcommand", "--help"}, newTemplateApp())
-			},
+			args:     []string{"some-command", "subcommand", "--help"},
 			expected: false,
 		},
 		"list": {
-			c: func() *cli.Context {
-				return newContextFromStringSlice([]string{"list"}, newTemplateApp())
-			},
+			args:     []string{"list"},
 			expected: false,
 		},
 		"unknown command": {
-			c: func() *cli.Context {
-				return newContextFromStringSlice([]string{"unknown"}, newTemplateApp())
-			},
+			args:     []string{"unknown"},
 			expected: false,
 		},
 		"some command which requires auth": {
-			c: func() *cli.Context {
-				return newContextFromStringSlice([]string{"some-command"}, newTemplateApp())
-			},
+			args:     []string{"some-command"},
 			expected: true,
 		},
 		"use alias": {
-			c: func() *cli.Context {
-				return newContextFromStringSlice([]string{"other-command"}, newTemplateApp())
-			},
+			args:     []string{"other-command"},
 			expected: true,
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, test.expected, sessionRequired(test.c()))
+			app := newTemplateApp()
+			actual, err := runSessionRequired(app, test.args)
+			assert.NoError(t, err)
+			assert.Equal(t, test.expected, actual)
 		})
 	}
 }
 
+func TestEnsureBeforePassesUpdatedContext(t *testing.T) {
+	first := func(ctx context.Context, _ *cli.Command) (context.Context, error) {
+		return context.WithValue(ctx, beforeContextKey{}, "first"), nil
+	}
+	second := func(ctx context.Context, _ *cli.Command) (context.Context, error) {
+		assert.Equal(t, "first", ctx.Value(beforeContextKey{}))
+		return context.WithValue(ctx, beforeContextKey{}, "second"), nil
+	}
+
+	ctx, err := ensureBefore(first, second)(context.Background(), &cli.Command{})
+	assert.NoError(t, err)
+	assert.Equal(t, "second", ctx.Value(beforeContextKey{}))
+}
+
 func TestPutLoggerInContext(t *testing.T) {
 	t.Setenv("AKAMAI_LOG", "debug")
-	app := cli.NewApp()
 	buffer := &bytes.Buffer{}
-	app.Writer = buffer
-
 	ctx := context.Background()
 
-	cliCtx := &cli.Context{
-		Context: ctx,
-		App:     app,
+	cmd := &cli.Command{
+		Writer: buffer,
 	}
-	err := putLoggerInContext(cliCtx)
+	ctx, err := putLoggerInContext(ctx, cmd)
 	assert.NoError(t, err)
 
-	ctxLogger := log.FromContext(cliCtx.Context)
+	ctxLogger := log.FromContext(ctx)
 	buffer.Reset()
 	ctxLogger.Info("oops")
 	assert.Contains(t, buffer.String(), "oops")
 
 	sess, err := session.New()
 	assert.NoError(t, err)
-	sessLogger := sess.Log(cliCtx.Context)
+	sessLogger := sess.Log(ctx)
 	buffer.Reset()
 	sessLogger.Info("oops")
 	assert.Contains(t, buffer.String(), "oops")
+}
+
+func TestHelpForLeafCommands(t *testing.T) {
+	tests := map[string]struct {
+		commandName         string
+		expectedDescription string
+	}{
+		"simple leaf command": {
+			commandName:         "leaf",
+			expectedDescription: "Test leaf command.",
+		},
+		"hyphenated leaf command": {
+			commandName:         "test-leaf",
+			expectedDescription: "Test hyphenated leaf command.",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			ctx := terminal.Context(context.Background(), terminal.New(terminal.DiscardWriter(), nil, terminal.DiscardWriter()))
+
+			app := akacli.CreateAppTemplate(
+				ctx,
+				"terraform",
+				"A CLI Plugin for Akamai Terraform Provider",
+				"Export selected resources for faster adoption in Terraform.",
+				Version,
+			)
+
+			output := &bytes.Buffer{}
+			app.Writer = output
+
+			actionCalled := false
+			command := &cli.Command{
+				Name:        test.commandName,
+				Description: test.expectedDescription,
+				Action: func(context.Context, *cli.Command) error {
+					actionCalled = true
+					return nil
+				},
+			}
+			app.Commands = append([]*cli.Command{command}, app.Commands...)
+
+			err := app.Run(ctx, []string{"akamai-terraform", "help", test.commandName})
+			outputText := output.String()
+
+			assert.NoError(t, err)
+			assert.Contains(t, outputText, "Name:\n  akamai-terraform "+test.commandName+"\n")
+			assert.Contains(t, outputText, "Description:\n  "+test.expectedDescription+"\n")
+			assert.NotContains(t, outputText, "No help topic")
+			assert.False(t, actionCalled, "help should not execute the command action")
+		})
+	}
 }

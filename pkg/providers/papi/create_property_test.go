@@ -7,12 +7,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"testing"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/hapi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/papi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/ptr"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/hapi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/ptr"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/terminal"
@@ -317,14 +318,7 @@ func TestCreateProperty(t *testing.T) {
 					CnameFrom:            "foo.com",
 					CnameTo:              "foo.com.edgekey.net",
 					CertProvisioningType: "CCM",
-					CCMCertificates: &papi.CCMCertificatesResp{ //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
-						CCMCertificates: papi.CCMCertificates{ //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
-							RSACertID:   "2226",
-							ECDSACertID: "7890",
-						},
-						RSACertLink:   "/ccm/v1/certificates/2226",
-						ECDSACertLink: "/ccm/v1/certificates/7890",
-					},
+					CCMCertID:            ptr.To("2226"),
 					MTLS: &papi.MTLSResp{
 						MTLS: papi.MTLS{
 							CASetID:         "cas_1234567890",
@@ -365,14 +359,7 @@ func TestCreateProperty(t *testing.T) {
 					CnameFrom:            "foo.com",
 					CnameTo:              "foo.com.edgekey.net",
 					CertProvisioningType: "CCM",
-					CCMCertificates: &papi.CCMCertificatesResp{ //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
-						RSACertLink:   "/ccm/v1/certificates/2226",
-						ECDSACertLink: "/ccm/v1/certificates/7890",
-						CCMCertificates: papi.CCMCertificates{ //nolint:staticcheck // legacy CCM flow still needs to be exported for existing properties
-							RSACertID:   "2226",
-							ECDSACertID: "7890",
-						},
-					},
+					CCMCertID:            ptr.To("2226"),
 					TLSConfiguration: &papi.TLSConfiguration{
 						CipherProfile:            "ak-tls-1-3",
 						FIPSMode:                 true,
@@ -722,6 +709,69 @@ func TestCreateProperty(t *testing.T) {
 				"Dynamic_Content.json",
 			},
 		},
+		"legacy CCM binding does not block property export": {
+			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
+				mockSearchProperties(c, &searchPropertiesResponse, nil)
+				mockGetProperty(c, getPropertyResponse())
+
+				ruleResponse := getRuleTreeResponse(dir, t)
+				mockGetRuleTree(c, 5, &ruleResponse, nil)
+				mockGetGroups(c, &getGroupsResponse, nil)
+				mockGetPropertyVersions(c, &getPropertyVersionsResponse, nil)
+				mockGetLatestVersion(c, &getLatestVersionResponse)
+				mockGetProducts(c, &getProductsResponse, nil)
+				legacyHostnamesResponse := getPropertyVersionWithCCMHostnamesResponse
+				legacyHostnamesResponse.Hostnames.Items = slices.Clone(legacyHostnamesResponse.Hostnames.Items)
+				legacyHostnamesResponse.Hostnames.Items[1].CCMCertID = nil
+				legacyHostnamesResponse.Hostnames.Items[1].CCMCertificates = &papi.CCMCertificatesResp{ //nolint:staticcheck // legacy CCM flow is the behavior under test
+					CCMCertificates: papi.CCMCertificates{ //nolint:staticcheck // legacy CCM flow is the behavior under test
+						RSACertID:   "2226",
+						ECDSACertID: "7890",
+					},
+					RSACertLink:   "/ccm/v1/certificates/2226",
+					ECDSACertLink: "/ccm/v1/certificates/7890",
+				}
+				mockGetPropertyVersionHostnames(c, 5, &legacyHostnamesResponse, nil)
+				mockGetEdgeHostname(h, &hapiGetEdgeHostnameResponse, nil)
+				mockGetEdgeHostnames(c, "")
+				mockGetActivations(c, &getActivationsResponse, nil)
+				mockGetActivations(c, &papi.GetActivationsResponse{}, nil)
+				mockProcessTemplates(p, (&tfDataBuilder{}).withDefaults().withHostnames(map[string]Hostname{
+					"test.edgesuite.net": {
+						CnameFrom:                "test.edgesuite.net",
+						CnameTo:                  "test.edgesuite.net",
+						EdgeHostnameResourceName: "test-edgesuite-net",
+						CertProvisioningType:     "CPS_MANAGED",
+						IsActive:                 true,
+					},
+					"foo.com": {
+						CnameFrom:            "foo.com",
+						CnameTo:              "foo.com.edgekey.net",
+						CertProvisioningType: "CCM",
+						IsActive:             true,
+						MTLS: &MTLS{
+							CASetID:         "cas_1234567890",
+							CheckClientOCSP: true,
+							SendCASetClient: true,
+						},
+						TLSConfiguration: &TLSConfiguration{
+							CipherProfile:            "ak-tls-1-3",
+							DisallowedTLSVersions:    []string{"1.0", "1.1"},
+							FIPSMode:                 true,
+							StapleServerOcspResponse: true,
+						},
+					},
+				}).build(), noFilters, nil)
+			},
+			dir:     "basic",
+			jsonDir: "basic/property-snippets",
+			snippetFilesToCheck: []string{
+				"main.json",
+				"Content_Compression.json",
+				"Static_Content.json",
+				"Dynamic_Content.json",
+			},
+		},
 		"basic ccm property (with mtls and tls_configuration details)": {
 			init: func(c *papi.Mock, h *hapi.Mock, p *templates.MockProcessor, _ *templates.MockMultiTargetProcessor, dir string) {
 				mockSearchProperties(c, &searchPropertiesResponse, nil)
@@ -752,10 +802,7 @@ func TestCreateProperty(t *testing.T) {
 						EdgeHostnameResourceName: "",
 						CertProvisioningType:     "CCM",
 						IsActive:                 true,
-						CCMCertificates: &CCMCertificates{
-							RSACertID:   "2226",
-							ECDSACertID: "7890",
-						},
+						CCMCertID:                "2226",
 						MTLS: &MTLS{
 							CASetID:         "cas_1234567890",
 							CheckClientOCSP: true,
@@ -811,10 +858,7 @@ func TestCreateProperty(t *testing.T) {
 						EdgeHostnameResourceName: "",
 						CertProvisioningType:     "CCM",
 						IsActive:                 true,
-						CCMCertificates: &CCMCertificates{
-							RSACertID:   "2226",
-							ECDSACertID: "7890",
-						},
+						CCMCertID:                "2226",
 						TLSConfiguration: &TLSConfiguration{
 							CipherProfile:            "ak-tls-1-3",
 							FIPSMode:                 true,
@@ -1004,7 +1048,7 @@ func TestCreateProperty(t *testing.T) {
 					Instance:        "/hapi/error-instances/a30f67cc-df20-4e02-bbc3-cf7c204a4aab",
 					RequestInstance: "http://origin.pulsar.akamai.com/hapi/open/v1/dns-zones/edgekey.net/edge-hostnames/example.com/certificate?depth=ALL&accountSwitchKey=F-AC-1937217#d7aa7348",
 					Method:          "GET",
-					RequestTime:     "2022-11-30T18:51:43.482982Z",
+					RequestTime:     *newTimeFromString(t, "2022-11-30T18:51:43.482982Z"),
 				}
 				err := fmt.Errorf("%s: %s: %w", hapi.ErrGetCertificate, hapi.ErrNotFound, &resp)
 				mockGetCertificate(h, "edgekey.net", "test", nil, err)
@@ -2292,7 +2336,7 @@ func mockGetEdgeHostnames(p *papi.Mock, productID string) *mock.Call {
 }
 
 func mockGetEdgeHostname(h *hapi.Mock, hapiGetEdgeHostnameResponse *hapi.GetEdgeHostnameResponse, err error) {
-	h.On("GetEdgeHostname", mock.Anything, 2867480).
+	h.On("GetEdgeHostname", mock.Anything, hapi.GetEdgeHostnameRequest{EdgeHostnameID: 2867480}).
 		Return(hapiGetEdgeHostnameResponse, err).Once()
 }
 
@@ -2545,10 +2589,7 @@ func TestProcessPropertyTemplates(t *testing.T) {
 							EdgeHostnameResourceName: "",
 							CertProvisioningType:     "CCM",
 							IsActive:                 true,
-							CCMCertificates: &CCMCertificates{
-								RSACertID:   "123456",
-								ECDSACertID: "343434",
-							},
+							CCMCertID:                "123456",
 						},
 					},
 					StagingInfo: NetworkInfo{
@@ -2601,10 +2642,7 @@ func TestProcessPropertyTemplates(t *testing.T) {
 							EdgeHostnameResourceName: "",
 							CertProvisioningType:     "CCM",
 							IsActive:                 true,
-							CCMCertificates: &CCMCertificates{
-								RSACertID:   "123456",
-								ECDSACertID: "343434",
-							},
+							CCMCertID:                "123456",
 							MTLS: &MTLS{
 								CASetID:         "551438",
 								CheckClientOCSP: true,

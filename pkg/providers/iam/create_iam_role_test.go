@@ -7,7 +7,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/iam"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/ptr"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/terminal"
@@ -40,7 +41,7 @@ var (
 			ContactType:       "Technical Decision Maker",
 			JobTitle:          "job title ",
 			TimeZone:          "GMT",
-			SecondaryEmail:    "secondary-email-a@akamai.net",
+			SecondaryEmail:    ptr.To("secondary-email-a@akamai.net"),
 			MobilePhone:       "(617) 444-4649",
 			Address:           "123 A Street",
 			City:              "A-Town",
@@ -83,7 +84,6 @@ var (
 			ContactType:       "Technical Decision Maker",
 			JobTitle:          "job title ",
 			TimeZone:          "GMT",
-			SecondaryEmail:    "secondary-email-a@akamai.net",
 			MobilePhone:       "(617) 444-4649",
 			Address:           "123 A Street",
 			City:              "A-Town",
@@ -233,7 +233,6 @@ var (
 						ContactType:       "Technical Decision Maker",
 						JobTitle:          "job title ",
 						TimeZone:          "GMT",
-						SecondaryEmail:    "secondary-email-a@akamai.net",
 						MobilePhone:       "(617) 444-4649",
 						Address:           "123 A Street",
 						City:              "A-Town",
@@ -579,7 +578,6 @@ func TestProcessIAMRoleTemplates(t *testing.T) {
 							ContactType:       "Technical Decision Maker",
 							JobTitle:          "job title ",
 							TimeZone:          "GMT",
-							SecondaryEmail:    "secondary-email-a@akamai.net",
 							MobilePhone:       "(617) 444-4649",
 							Address:           "123 A Street",
 							City:              "A-Town",

@@ -93,12 +93,15 @@ Each rule has a stable `id` so review tools can reference it.
   This allows callers/scripts to distinguish user errors from unsupported
   scenarios.
 - **CLI-05**: Export commands MUST follow the standard structure:
-    1. The CLI entry point is a function `CmdCreateXxx(c *cli.Context) error`.
+    1. The CLI entry point is a function
+      `CmdCreateXxx(ctx context.Context, cmd *cli.Command) error` using
+      `urfave/cli/v3`.
     2. The core logic lives in a separate unexported function
        `createXxx(ctx, params)`.
     3. All dependencies of the core function are bundled in a struct named
        `createXxxParams`.
-  This keeps the logic independently testable without a CLI context.
+  This keeps the core logic independently testable without depending on
+  `urfave/cli`.
 - **CLI-06**: When exporting resources that have per-network state (e.g.
   Staging and Production activations), generate ONE separate entry per network
   — never a single combined entry.

@@ -10,13 +10,13 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/domainownership"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/domainownership"
 	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -79,12 +79,12 @@ var (
 )
 
 // CmdCreateDomainOwnership is an entrypoint to the export-domainownership.
-func CmdCreateDomainOwnership(c *cli.Context) error {
+func CmdCreateDomainOwnership(ctx context.Context, cmd *cli.Command) error {
 
 	// tfWorkPath is a target directory for generated terraform resources.
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 	domainownershipPath := filepath.Join(tfWorkPath, "domainownership.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
@@ -94,9 +94,9 @@ func CmdCreateDomainOwnership(c *cli.Context) error {
 	}
 
 	params := createDomainOwnershipParams{
-		domains:       c.Args().Get(0),
-		configSection: edgegrid.GetEdgercSection(c),
-		edgercPath:    edgegrid.GetEdgercPath(c),
+		domains:       cmd.Args().Get(0),
+		configSection: edgegrid.GetEdgercSection(cmd),
+		edgercPath:    edgegrid.GetEdgercPath(cmd),
 		templateProcessor: templates.FSTemplateProcessor{
 			TemplatesFS: templateFiles,
 			TemplateTargets: map[string]string{
@@ -108,7 +108,7 @@ func CmdCreateDomainOwnership(c *cli.Context) error {
 		},
 	}
 
-	if err := createDomainOwnership(c.Context, params, domainownership.Client(edgegrid.GetSession(c.Context))); err != nil {
+	if err := createDomainOwnership(ctx, params, domainownership.Client(edgegrid.GetSession(ctx))); err != nil {
 		return cli.Exit(color.RedString("Error exporting domain ownership: %s", err), 1)
 	}
 	return nil

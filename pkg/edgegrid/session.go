@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/log"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/session"
+	sesslog "github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/log"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/session"
 	"github.com/akamai/cli/v2/pkg/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type ctxType string
@@ -16,8 +16,8 @@ type ctxType string
 var sessionCtx ctxType = "session"
 
 // InitializeSession prepares a session.Session interface based on edgerc config
-func InitializeSession(c *cli.Context) (session.Session, error) {
-	edgerc, err := GetEdgegridConfig(c)
+func InitializeSession(ctx context.Context, cmd *cli.Command) (session.Session, error) {
+	edgerc, err := GetEdgegridConfig(ctx, cmd)
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve edgegrid configuration: %s", err)
 	}
@@ -30,7 +30,7 @@ func InitializeSession(c *cli.Context) (session.Session, error) {
 	options := []session.Option{
 		session.WithSigner(edgerc),
 		session.WithHTTPTracing(os.Getenv("AKAMAI_HTTP_TRACE_ENABLED") == "true"),
-		session.WithLog(sesslog.SlogAdapter{Logger: log.FromContext(c.Context)}),
+		session.WithLog(sesslog.SlogAdapter{Logger: log.FromContext(ctx)}),
 	}
 	if retryConfig != nil {
 		options = append(options, session.WithRetries(*retryConfig))

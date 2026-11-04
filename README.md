@@ -148,6 +148,7 @@ Global Flags:
   <li><a href="#export-appsec">export-appsec</a></li>
   <li><a href="#export-clientlist">export-clientlist</a></li>
   <li><a href="#export-cloudaccess">export-cloudaccess</a></li>
+  <li><a href="#export-cloudcertificate">export-cloudcertificate</a></li>
   <li><a href="#export-cloudlets-policy">export-cloudlets-policy</a></li>
   <li><a href="#export-cloudwrapper">export-cloudwrapper</a></li>
   <li><a href="#export-cps">export-cps</a></li>
@@ -281,6 +282,31 @@ akamai terraform export-cloudaccess 98765
         </tr>
     </tbody>
 </table>
+
+## export-cloudcertificate
+
+Export a Terraform configuration for your Cloud Certificates lineage along with upload and activation resources.
+
+
+> **Note:** If a certificate isn't ready, the affected upload algorithm or the complete upload resource is commented out with a placeholder. Before enabling it, replace the signed-certificate placeholder with the CA-issued PEM certificate and either supply the trust chain or remove its optional attribute. Review `terraform plan` before running `terraform apply`.
+
+### Syntax
+
+```shell
+akamai [global flags] terraform export-cloudcertificate [command flags] <lineage_name>
+```
+
+### Basic usage
+
+```shell
+akamai terraform export-cloudcertificate "my-lineage"
+```
+
+### Command flags
+
+| Flag | Description | Example |
+| ------- | --------- | --------- |
+| `--acknowledge-warnings` (boolean) | Sets `acknowledge_warnings = true` on the generated Cloud Certificates upload resource. If omitted or set to false, the attribute is not generated. | `akamai terraform export-cloudcertificate --acknowledge-warnings=true "my-lineage"` |
 
 ## export-cloudlets-policy
 

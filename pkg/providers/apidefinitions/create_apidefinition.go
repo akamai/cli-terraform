@@ -13,15 +13,15 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/apidefinitions"
-	v0 "github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/apidefinitions/v0"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/ptr"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/apidefinitions"
+	v0 "github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/apidefinitions/v0"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/ptr"
 	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/terminal"
 	"github.com/fatih/color"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -58,32 +58,31 @@ var (
 )
 
 // CmdCreateAPIDefinition is an entrypoint to export-apidefinition command
-func CmdCreateAPIDefinition(c *cli.Context) error {
-	ctx := c.Context
+func CmdCreateAPIDefinition(ctx context.Context, cmd *cli.Command) error {
 	sess := edgegrid.GetSession(ctx)
 	client := apidefinitions.Client(sess)
 	clientV0 := v0.Client(sess)
 
-	id, err := strconv.ParseInt(trimPrefixAPI(c.Args().Get(0)), 10, 64)
+	id, err := strconv.ParseInt(trimPrefixAPI(cmd.Args().Get(0)), 10, 64)
 	if err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
-	section := edgegrid.GetEdgercSection(c)
-	edgercPath := edgegrid.GetEdgercPath(c)
+	section := edgegrid.GetEdgercSection(cmd)
+	edgercPath := edgegrid.GetEdgercPath(cmd)
 
 	var rootPath = "./"
-	if c.IsSet("tfworkpath") {
-		rootPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		rootPath = cmd.String("tfworkpath")
 	}
 
 	var versionNumber *int64
-	if c.IsSet("version") {
-		versionNumber = ptr.To(c.Int64("version"))
+	if cmd.IsSet("version") {
+		versionNumber = ptr.To(cmd.Int64("version"))
 	}
 
 	var format = openAPIFormat
-	if c.IsSet("format") {
-		format = outputFormat(c.String("format"))
+	if cmd.IsSet("format") {
+		format = outputFormat(cmd.String("format"))
 	}
 
 	processor, err := createTemplateProcessor(rootPath, format)

@@ -16,13 +16,13 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/imaging"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/imaging"
 	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -70,15 +70,14 @@ var (
 const maxDepth = 7
 
 // CmdCreateImaging is an entrypoint to create-imaging command
-func CmdCreateImaging(c *cli.Context) error {
-	ctx := c.Context
+func CmdCreateImaging(ctx context.Context, cmd *cli.Command) error {
 	sess := edgegrid.GetSession(ctx)
 	client := imaging.Client(sess)
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 	imagingPath := filepath.Join(tfWorkPath, "imaging.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
@@ -90,10 +89,10 @@ func CmdCreateImaging(c *cli.Context) error {
 	}
 
 	jsonDir := "."
-	if c.IsSet("policy-json-dir") {
-		jsonDir = c.String("policy-json-dir")
+	if cmd.IsSet("policy-json-dir") {
+		jsonDir = cmd.String("policy-json-dir")
 	}
-	if !c.IsSet("policies-as-hcl") {
+	if !cmd.IsSet("policies-as-hcl") {
 		jsonDirPath := path.Join(tfWorkPath, jsonDir)
 		err = ensureDirExists(jsonDirPath)
 		if err != nil {
@@ -120,9 +119,9 @@ func CmdCreateImaging(c *cli.Context) error {
 		},
 	}
 
-	contractID, policySetID := c.Args().Get(0), c.Args().Get(1)
-	edgercPath := edgegrid.GetEdgercPath(c)
-	section := edgegrid.GetEdgercSection(c)
+	contractID, policySetID := cmd.Args().Get(0), cmd.Args().Get(1)
+	edgercPath := edgegrid.GetEdgercPath(cmd)
+	section := edgegrid.GetEdgercSection(cmd)
 	if err = createImaging(ctx, contractID, policySetID, tfWorkPath, jsonDir, edgercPath, section, client, processor, tools.PolicyAsHCL); err != nil {
 		return cli.Exit(color.RedString("Error exporting policy HCL: %s", err), 1)
 	}

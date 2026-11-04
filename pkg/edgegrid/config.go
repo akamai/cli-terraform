@@ -2,37 +2,38 @@
 package edgegrid
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/edgegrid"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/session"
-	"github.com/urfave/cli/v2"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/edgegrid"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/session"
+	"github.com/urfave/cli/v3"
 )
 
 // GetEdgegridConfig gets configuration from .edgerc file
-func GetEdgegridConfig(c *cli.Context) (*edgegrid.Config, error) {
+func GetEdgegridConfig(_ context.Context, cmd *cli.Command) (*edgegrid.Config, error) {
 	edgercOps := []edgegrid.Option{
 		edgegrid.WithEnv(true),
-		edgegrid.WithFile(GetEdgercPath(c)),
-		edgegrid.WithSection(GetEdgercSection(c)),
+		edgegrid.WithFile(GetEdgercPath(cmd)),
+		edgegrid.WithSection(GetEdgercSection(cmd)),
 	}
 	config, err := edgegrid.New(edgercOps...)
 	if err != nil {
 		return nil, err
 	}
-	if c.IsSet("accountkey") {
-		config.AccountKey = c.String("accountkey")
+	if cmd.IsSet("accountkey") {
+		config.AccountKey = cmd.String("accountkey")
 	}
 	return config, nil
 }
 
 // GetEdgercPath returns the location of edgerc credential file or "~/.edgerc" if not found
-func GetEdgercPath(c *cli.Context) string {
-	edgercPath := c.String("edgerc")
+func GetEdgercPath(cmd *cli.Command) string {
+	edgercPath := cmd.String("edgerc")
 	if edgercPath == "" {
 		return edgegrid.DefaultConfigFile
 	}
@@ -40,8 +41,8 @@ func GetEdgercPath(c *cli.Context) string {
 }
 
 // GetEdgercSection returns the section in edgerc credential file or "default" if not found
-func GetEdgercSection(c *cli.Context) string {
-	edgercSection := c.String("section")
+func GetEdgercSection(cmd *cli.Command) string {
+	edgercSection := cmd.String("section")
 	if edgercSection == "" {
 		return edgegrid.DefaultSection
 	}

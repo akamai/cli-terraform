@@ -6,6 +6,7 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/providers/appsec"
 	"github.com/akamai/cli-terraform/v3/pkg/providers/clientlists"
 	"github.com/akamai/cli-terraform/v3/pkg/providers/cloudaccess"
+	"github.com/akamai/cli-terraform/v3/pkg/providers/cloudcertificates"
 	"github.com/akamai/cli-terraform/v3/pkg/providers/cloudlets"
 	"github.com/akamai/cli-terraform/v3/pkg/providers/cloudwrapper"
 	"github.com/akamai/cli-terraform/v3/pkg/providers/cps"
@@ -22,7 +23,7 @@ import (
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/apphelp"
 	"github.com/akamai/cli/v2/pkg/autocomplete"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // CommandLocator creates and returns a list of subcommands.
@@ -51,7 +52,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "openapi",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-appsec",
@@ -66,7 +67,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-clientlist",
@@ -81,7 +82,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-cloudaccess",
@@ -104,9 +105,27 @@ func CommandLocator() []*cli.Command {
 					Usage: "The unique identifier for the group (without the 'grp_' prefix) assigned to the access key.",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
-
+		{
+			Name:        "export-cloudcertificate",
+			Description: "Generates Terraform configuration for Cloud Certificates lineage resources.",
+			Usage:       "export-cloudcertificate",
+			ArgsUsage:   "<lineage_name>",
+			Action:      validatedAction(cloudcertificates.CmdCreateCloudCertificate, requireValidWorkpath, requireNArguments(1)),
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:        "tfworkpath",
+					Usage:       "Directory used to store files created when running commands.",
+					DefaultText: "current directory",
+				},
+				&cli.BoolFlag{
+					Name:  "acknowledge-warnings",
+					Usage: "Sets acknowledge_warnings on the exported Cloud Certificates upload resource.",
+				},
+			},
+			ShellComplete: autocomplete.Default,
+		},
 		{
 			Name:        "export-cloudlets-policy",
 			Description: "Generates Terraform configuration for Cloudlets Policy resources.",
@@ -120,7 +139,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-cloudwrapper",
@@ -135,7 +154,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-cps",
@@ -150,7 +169,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-domain",
@@ -165,7 +184,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-domainownership",
@@ -181,7 +200,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-edgekv",
@@ -196,7 +215,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-edgeworker",
@@ -215,7 +234,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:            "export-iam",
@@ -223,7 +242,7 @@ func CommandLocator() []*cli.Command {
 			Usage:           "export-iam",
 			HideHelpCommand: true,
 			Action:          validatedAction(iam.CmdCreateIAM, requireValidWorkpath, validateSubCommands),
-			Subcommands: []*cli.Command{
+			Commands: []*cli.Command{
 				{
 					Name:        "all",
 					Description: "Exports all available Terraform users, groups, roles, client and allowlist details.",
@@ -284,7 +303,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-imaging",
@@ -308,7 +327,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-mtls-keystore",
@@ -323,7 +342,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name: "export-mtls-truststore",
@@ -339,13 +358,13 @@ func CommandLocator() []*cli.Command {
 					Usage:       "Directory used to store files created when running commands.",
 					DefaultText: "current directory",
 				},
-				&cli.IntFlag{
+				&cli.Int64Flag{
 					Name:        "version",
 					Usage:       "CA set version to import. If provided, must be a positive integer.",
 					DefaultText: "LATEST",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-property",
@@ -381,7 +400,7 @@ func CommandLocator() []*cli.Command {
 					Usage: "Rule format version to use for export.",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-property-include",
@@ -408,7 +427,7 @@ func CommandLocator() []*cli.Command {
 					Usage: "Rule format version to use for export.",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-reportinggroup",
@@ -423,7 +442,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:        "export-zone",
@@ -466,7 +485,7 @@ func CommandLocator() []*cli.Command {
 					DefaultText: "current directory",
 				},
 			},
-			BashComplete: autocomplete.Default,
+			ShellComplete: autocomplete.Default,
 		},
 		{
 			Name:               "list",

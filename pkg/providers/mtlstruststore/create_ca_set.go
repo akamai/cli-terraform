@@ -9,13 +9,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/mtlstruststore"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/mtlstruststore"
 	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -74,12 +74,12 @@ var (
 )
 
 // CmdCreateCASet is an entrypoint to the export-mtls-truststore command
-func CmdCreateCASet(c *cli.Context) error {
+func CmdCreateCASet(ctx context.Context, cmd *cli.Command) error {
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 	mTLSTrustStorePath := filepath.Join(tfWorkPath, "mtlstruststore.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
@@ -89,11 +89,11 @@ func CmdCreateCASet(c *cli.Context) error {
 	}
 
 	params := createCASetParams{
-		name:          c.Args().Get(0),
-		userVersion:   c.Int64("version"),
-		edgercPath:    edgegrid.GetEdgercPath(c),
-		configSection: edgegrid.GetEdgercSection(c),
-		client:        mtlstruststore.Client(edgegrid.GetSession(c.Context)),
+		name:          cmd.Args().Get(0),
+		userVersion:   cmd.Int64("version"),
+		edgercPath:    edgegrid.GetEdgercPath(cmd),
+		configSection: edgegrid.GetEdgercSection(cmd),
+		client:        mtlstruststore.Client(edgegrid.GetSession(ctx)),
 		templateProcessor: templates.FSTemplateProcessor{
 			TemplatesFS: templateFiles,
 			TemplateTargets: map[string]string{
@@ -105,7 +105,7 @@ func CmdCreateCASet(c *cli.Context) error {
 		},
 	}
 
-	if err := createCASet(c.Context, params); err != nil {
+	if err := createCASet(ctx, params); err != nil {
 		return cli.Exit(color.RedString("Error exporting mtls truststore: %s", err), 1)
 	}
 	return nil

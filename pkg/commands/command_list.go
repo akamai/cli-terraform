@@ -1,16 +1,20 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/akamai/cli/v2/pkg/color"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
-func cmdList(c *cli.Context) error {
+func cmdList(_ context.Context, cmd *cli.Command) error {
 	fmt.Print(color.YellowString("\nCommands:\n\n"))
-
-	for _, command := range c.App.Commands {
+	root := cmd.Root()
+	for _, command := range root.Commands {
+		if command.Hidden {
+			continue
+		}
 		fmt.Print(color.BoldString("  %s", command.Name))
 		if len(command.Aliases) > 0 {
 			var aliases string
@@ -38,6 +42,6 @@ func cmdList(c *cli.Context) error {
 		}
 	}
 
-	fmt.Printf("\nSee \"%s\" for details.\n", color.BlueString("%s help [command]", c.App.Name))
+	fmt.Printf("\nSee \"%s\" for details.\n", color.BlueString("%s help [command]", root.Name))
 	return nil
 }

@@ -10,13 +10,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/cloudwrapper"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/cloudwrapper"
 	"github.com/akamai/cli-terraform/v3/pkg/edgegrid"
 	"github.com/akamai/cli-terraform/v3/pkg/templates"
 	"github.com/akamai/cli-terraform/v3/pkg/tools"
 	"github.com/akamai/cli/v2/pkg/color"
 	"github.com/akamai/cli/v2/pkg/terminal"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -74,15 +74,14 @@ var (
 )
 
 // CmdCreateCloudWrapper is an entrypoint to export-cloudwrapper command
-func CmdCreateCloudWrapper(c *cli.Context) error {
-	ctx := c.Context
+func CmdCreateCloudWrapper(ctx context.Context, cmd *cli.Command) error {
 	sess := edgegrid.GetSession(ctx)
 	client := cloudwrapper.Client(sess)
 
 	// tfWorkPath is a target directory for generated terraform resources
 	var tfWorkPath = "./"
-	if c.IsSet("tfworkpath") {
-		tfWorkPath = c.String("tfworkpath")
+	if cmd.IsSet("tfworkpath") {
+		tfWorkPath = cmd.String("tfworkpath")
 	}
 	cloudwrapperPath := filepath.Join(tfWorkPath, "cloudwrapper.tf")
 	variablesPath := filepath.Join(tfWorkPath, "variables.tf")
@@ -102,12 +101,12 @@ func CmdCreateCloudWrapper(c *cli.Context) error {
 		TemplateTargets: templateToFile,
 		AdditionalFuncs: additionalFunctions,
 	}
-	configID, err := strconv.ParseInt(c.Args().Get(0), 10, 64)
+	configID, err := strconv.ParseInt(cmd.Args().Get(0), 10, 64)
 	if err != nil {
 		return cli.Exit(color.RedString("%s", err.Error()), 1)
 	}
-	edgercPath := edgegrid.GetEdgercPath(c)
-	section := edgegrid.GetEdgercSection(c)
+	edgercPath := edgegrid.GetEdgercPath(cmd)
+	section := edgegrid.GetEdgercSection(cmd)
 	if err = createCloudWrapper(ctx, configID, edgercPath, section, client, processor); err != nil {
 		return cli.Exit(color.RedString("Error exporting cloudwraper: %s", err), 1)
 	}

@@ -1,18 +1,17 @@
 package edgegrid
 
 import (
-	"flag"
+	"context"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/edgegrid"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/ptr"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v14/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/edgegrid"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/ptr"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v15/pkg/session"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/urfave/cli/v2"
 )
 
 func TestGetEdgegridConfig(t *testing.T) {
@@ -109,18 +108,14 @@ func TestGetEdgegridConfig(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			app := cli.NewApp()
-			set := flag.NewFlagSet("test", 0)
-			set.String("edgerc", "~/.egderc", "")
-			set.String("section", "default", "")
-			flags := []string{"--edgerc", test.configFile, "--section", test.configSection}
-			if test.flagAccountKey != "" {
-				set.String("accountkey", "", "")
-				flags = append(flags, "--accountkey", test.flagAccountKey)
+			flags := map[string]string{
+				"edgerc":  test.configFile,
+				"section": test.configSection,
 			}
-			err := set.Parse(flags)
-			assert.NoError(t, err)
-			cliCtx := cli.NewContext(app, set, nil)
+			if test.flagAccountKey != "" {
+				flags["accountkey"] = test.flagAccountKey
+			}
+			cmd := setupTestCommand(t, flags)
 			for k, v := range test.configEnvs {
 				require.NoError(t, os.Setenv(k, v))
 			}
@@ -129,7 +124,7 @@ func TestGetEdgegridConfig(t *testing.T) {
 					require.NoError(t, os.Unsetenv(k))
 				}
 			}()
-			res, err := GetEdgegridConfig(cliCtx)
+			res, err := GetEdgegridConfig(context.Background(), cmd)
 			if test.withError {
 				assert.Error(t, err)
 				return
@@ -161,11 +156,8 @@ func TestGetEdgercPath(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			app := cli.NewApp()
-			set := flag.NewFlagSet("test", 0)
-			set.String("edgerc", test.edgercPath, "")
-			cliCtx := cli.NewContext(app, set, nil)
-			res := GetEdgercPath(cliCtx)
+			cmd := setupTestCommand(t, map[string]string{"edgerc": test.edgercPath})
+			res := GetEdgercPath(cmd)
 			assert.Equal(t, test.expected, res)
 		})
 	}
@@ -187,11 +179,8 @@ func TestGetEdgercSection(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			app := cli.NewApp()
-			set := flag.NewFlagSet("test", 0)
-			set.String("section", test.section, "")
-			cliCtx := cli.NewContext(app, set, nil)
-			res := GetEdgercSection(cliCtx)
+			cmd := setupTestCommand(t, map[string]string{"section": test.section})
+			res := GetEdgercSection(cmd)
 			assert.Equal(t, test.expected, res)
 		})
 	}
